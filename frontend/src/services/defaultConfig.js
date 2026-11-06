@@ -54,5 +54,10 @@ export function defaultParamsFromConfig(config) {
     growingArea: p.growingArea.default,
     simulationDays: p.simulationDays.default,
     earthComparisonMode: 'matched',
+    lightIntensity: p.lightIntensity?.default ?? 300,
+    temperature: p.temperature?.default ?? 22,
+    humidity: p.humidity?.default ?? 60,
+    waterRecyclingEfficiency: p.waterRecyclingEfficiency?.default ?? 90,
+    lightSpectrum: 'balanced',
   }
 }

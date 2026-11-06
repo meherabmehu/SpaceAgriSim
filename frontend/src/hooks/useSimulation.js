@@ -42,7 +42,10 @@ export function useSimulation(params) {
         })
     }, DEBOUNCE_MS)
 
-    return () => clearTimeout(timer)
+    return () => {
+      clearTimeout(timer)
+      abortRef.current?.abort()
+    }
   }, [params, attempt])
 
   // abort anything still running when the component unmounts
