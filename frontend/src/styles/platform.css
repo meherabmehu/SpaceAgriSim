@@ -10,7 +10,7 @@
   font: 11px/1.7 monospace;
 }
 .module-grid + .mission-card,
-.mission-card + .mission-card {
+.simulation-content > .mission-card + .mission-card {
   margin-top: 20px;
 }
 .platform {
@@ -1243,12 +1243,9 @@
 .platform .recharts-wrapper:focus {
   outline: none;
 }
-.world-mars .planet {
-  filter: hue-rotate(150deg) saturate(0.7);
-}
-.world-moon .planet {
-  filter: saturate(0.1);
-}
+.planet{background-image:url('/assets/earth-nasa.jpg');background-size:104%;background-position:center}
+.hero-grid::after{content:'';position:absolute;inset:-20%;background:radial-gradient(ellipse at 70% 50%,#367eaf44,transparent 50%);animation:nebulaDrift 35s ease-in-out infinite alternate}
+@keyframes nebulaDrift{to{transform:translate(5%,3%)}}
 @media (min-width: 1600px) {
   .mission-content {
     padding-top: 38px;

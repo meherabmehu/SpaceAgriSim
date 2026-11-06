@@ -1,0 +1,617 @@
+import { useEffect, useState } from "react";
+import {
+  Activity,
+  ArrowDownToLine,
+  ArrowRight,
+  Atom,
+  BookOpen,
+  Box,
+  ChevronRight,
+  CircleHelp,
+  Database,
+  Droplets,
+  FlaskConical,
+  Globe2,
+  Layers3,
+  Leaf,
+  Menu,
+  Orbit,
+  Radio,
+  Rocket,
+  ShieldCheck,
+  Sparkles,
+  Sprout,
+  Sun,
+  Wind,
+  X,
+} from "lucide-react";
+import { useSimulationConfig } from "../hooks/useSimulationConfig.js";
+import { useSimulationParams } from "../hooks/useSimulationParams.js";
+import { useSimulation } from "../hooks/useSimulation.js";
+import { api, downloadReport } from "../services/platformApi.ts";
+import PlatformModules from "./PlatformModules.jsx";
+import { Card, GrowthPlot, number } from "./missionUI.jsx";
+import DigitalTwin3D from "../components/DigitalTwin3D.jsx";
+
+const NAV = [
+  ["dashboard", "Mission control", Orbit],
+  ["laboratory", "Simulation lab", FlaskConical],
+  ["predictions", "AI prediction center", Atom],
+  ["greenhouse", "3D greenhouse", Box],
+  ["comparison", "World comparison", Globe2],
+  ["crops", "Crop intelligence", Sprout],
+  ["datasets", "NASA data explorer", Database],
+  ["analytics", "Mission analytics", Activity],
+  ["advisor", "Mission advisor", Sparkles],
+  ["methodology", "Methodology", BookOpen],
+];
+const WORLDS = {
+  Earth: { gravity: 1, radiation: 0.01 },
+  Moon: { gravity: 0.16, radiation: 0.5 },
+  Mars: { gravity: 0.38, radiation: 0.2 },
+  Orbit: { gravity: 0, radiation: 0.3 },
+};
+
+export default function MissionPlatform() {
+  const { config, source } = useSimulationConfig();
+  const { params, setParam, resetParams } = useSimulationParams(config);
+  const { result, error, isLoading, retry } = useSimulation(params);
+  const [page, setPage] = useState(() => location.hash.slice(1) || "dashboard");
+  const [mobile, setMobile] = useState(false);
+  const world = Object.keys(WORLDS).find(name => WORLDS[name].gravity === params.gravity && WORLDS[name].radiation === params.radiation) || 'Custom';
+  const [notice, setNotice] = useState("");
+  const [registry, setRegistry] = useState(null);
+  const [models, setModels] = useState(null);
+  const [registryError, setRegistryError] = useState("");
+  useEffect(() => {
+    const change = () => setPage(location.hash.slice(1) || "dashboard");
+    window.addEventListener("hashchange", change);
+    return () => window.removeEventListener("hashchange", change);
+  }, []);
+  useEffect(() => {
+    const controller = new AbortController();
+    Promise.all([
+      api("/datasets", undefined, controller.signal),
+      api("/models", undefined, controller.signal),
+    ])
+      .then(([data, modelData]) => {
+        setRegistry(data);
+        setModels(modelData);
+      })
+      .catch((err) => {
+        if (err.name !== "AbortError") setRegistryError(err.message);
+      });
+    return () => controller.abort();
+  }, []);
+  const navigate = (next) => {
+    location.hash = next;
+    setPage(next);
+    setMobile(false);
+    window.scrollTo({ top: 0, behavior: "instant" });
+  };
+  const selectWorld = (name) => {
+    Object.entries(WORLDS[name]).forEach(([key, value]) =>
+      setParam(key, value),
+    );
+  };
+  const exportReport = async (format) => {
+    try {
+      await downloadReport(format, params);
+      setNotice(`${format.toUpperCase()} report downloaded.`);
+    } catch (err) {
+      setNotice(err.message);
+    }
+  };
+  const saveScenario = async () => {
+    try {
+      await api("/scenarios", {
+        name: `${world} · ${params.crop} · ${params.simulationDays}d`,
+        configuration: params,
+      });
+      setNotice("Scenario saved to mission history.");
+    } catch (err) {
+      setNotice(err.message);
+    }
+  };
+  const title = NAV.find((n) => n[0] === page)?.[1] || "Mission control";
+  const shared = {
+    params,
+    setParam,
+    config,
+    result,
+    registry,
+    models,
+    registryError,
+    navigate,
+    exportReport,
+    resetParams,
+    setNotice,
+  };
+  return (
+    <div className={`platform world-${world.toLowerCase()}`}>
+      <a className="skip-link" href="#mission-content">
+        Skip to mission content
+      </a>
+      {mobile && (
+        <button
+          className="nav-scrim"
+          aria-label="Close navigation"
+          onClick={() => setMobile(false)}
+        />
+      )}
+      <aside className={`mission-sidebar ${mobile ? "open" : ""}`}>
+        <a
+          href="#dashboard"
+          className="brand"
+          onClick={() => navigate("dashboard")}
+        >
+          <span className="brand-symbol">
+            <Orbit size={27} />
+          </span>
+          <span>
+            SpaceAgri<span className="brand-light">Sim</span>
+            <small>GROW BEYOND EARTH</small>
+          </span>
+        </a>
+        <div className="workspace">
+          <span className="workspace-icon">
+            <Rocket size={18} />
+          </span>
+          <div>
+            Research workspace<small>EXPLORATION PROGRAM</small>
+          </div>
+          <ChevronRight size={14} />
+        </div>
+        <span className="nav-label">MISSION WORKSPACE</span>
+        <nav aria-label="Main navigation">
+          {NAV.map(([id, label, Icon]) => (
+            <a
+              key={id}
+              href={`#${id}`}
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(id);
+              }}
+              aria-current={page === id ? "page" : undefined}
+            >
+              <Icon size={18} />
+              <span>{label}</span>
+              {id === "predictions" && <small>ML</small>}
+            </a>
+          ))}
+        </nav>
+        <div className="sidebar-bottom">
+          <div className="source-note">
+            <ShieldCheck size={19} />
+            <div>
+              Science, with context.
+              <p>
+                Every estimate has a method.
+                <br />
+                Every dataset has a source.
+              </p>
+            </div>
+          </div>
+          <div className="sidebar-footer">
+            <span className="avatar">SA</span>
+            <div>
+              SpaceAgriSim<small>RESEARCH EDITION · V0.2</small>
+            </div>
+            <CircleHelp size={17} />
+          </div>
+        </div>
+      </aside>
+      <div className="mission-workspace">
+        <header className="mission-topbar">
+          <div className="breadcrumb">
+            <button
+              className="icon-button mobile-menu"
+              aria-label="Open navigation"
+              onClick={() => setMobile(true)}
+            >
+              <Menu size={20} />
+            </button>
+            <span>Workspace</span>
+            <ChevronRight size={13} />
+            <strong>{title}</strong>
+          </div>
+          <div className="topbar-right">
+            <span className={`connection ${error ? "offline" : ""}`}>
+              <i />
+              {error
+                ? "API unavailable"
+                : isLoading
+                  ? "Computing"
+                  : "API connected"}
+            </span>
+            <span className="research-tag">RESEARCH PREVIEW</span>
+            <span className="avatar small">SA</span>
+          </div>
+        </header>
+        <main id="mission-content" className="mission-content">
+          <div className="page-title">
+            <div>
+              <div className="eyebrow">
+                <span className="tiny-line" />
+                SPACE AGRICULTURE & LIFE SUPPORT
+              </div>
+              <h1>
+                {title}
+                <span className="title-dot">.</span>
+              </h1>
+              <p>
+                {page === "dashboard"
+                  ? "A new frontier for growing. Explore your habitat, understand the trade-offs."
+                  : "Explore the evidence. Configure your mission. Understand every estimate."}
+              </p>
+            </div>
+            <button
+              className="secondary-button"
+              onClick={() => exportReport("json")}
+              disabled={!result || isLoading || !!error}
+            >
+              <ArrowDownToLine size={16} />
+              Export mission
+            </button>
+          </div>
+          {notice && (
+            <div className="notice" role="status">
+              {notice}
+              <button
+                className="icon-button"
+                onClick={() => setNotice("")}
+                aria-label="Dismiss notification"
+              >
+                <X size={15} />
+              </button>
+            </div>
+          )}
+          {error && (
+            <div className="error-banner" role="alert">
+              <Radio size={18} />
+              <span>
+                {error.message}{" "}
+                {result
+                  ? "Results shown are from the last successful run."
+                  : ""}
+              </span>
+              <button onClick={retry}>Retry connection</button>
+            </div>
+          )}
+          {source === "fallback" && (
+            <p className="fallback-note">
+              Loading API configuration; bundled control ranges shown until
+              connected.
+            </p>
+          )}
+          <div
+            className={`simulation-content ${isLoading ? "updating" : ""}`}
+            aria-busy={isLoading}
+          >
+            {page === "dashboard" ? (
+              <>
+                <section className="mission-hero">
+                  <div className="hero-grid" />
+                  <div className="orbital-path" />
+                  <div className="planet" aria-hidden="true">
+                    <div className="planet-shadow" />
+                  </div>
+                  <div className="hero-copy">
+                    <span className="hero-tag">
+                      <i />
+                      YOUR NEXT HARVEST STARTS HERE
+                    </span>
+                    <h2>
+                      Small seeds.
+                      <br />
+                      Extraordinary possibilities.
+                    </h2>
+                    <p>
+                      Design a thriving habitat beyond Earth.
+                      <br />
+                      Simulate crop growth, resources, and the systems that
+                      sustain them.
+                    </p>
+                    <button
+                      className="primary-button"
+                      onClick={() => navigate("laboratory")}
+                    >
+                      Open simulation lab
+                      <ArrowRight size={16} />
+                    </button>
+                    <div className="hero-caption">
+                      <ShieldCheck size={14} />
+                      NASA data informed · Assumptions made visible
+                    </div>
+                  </div>
+                  <div className="orbit-caption">
+                    <span className="orbit-cross">+</span>EXPLORING WHAT GROWS
+                    NEXT<small><a href="https://www.nasa.gov/image-article/blue-marble-2012/" target="_blank" rel="noreferrer">EARTH IMAGE · NASA/NOAA/GSFC/SUOMI NPP/VIIRS/NORMAN KURING</a></small>
+                  </div>
+                </section>
+                <div className="environment-strip">
+                  <span className="eyebrow">YOUR ENVIRONMENT</span>
+                  <div className="world-options">
+                    {Object.keys(WORLDS).map((name) => (
+                      <button
+                        key={name}
+                        className={world === name ? "selected" : ""}
+                        onClick={() => selectWorld(name)}
+                      >
+                        <span className={`world-orb ${name.toLowerCase()}`} />
+                        {name}
+                        {world === name && (
+                          <span className="selected-check">✓</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                  <span className="strip-caption">
+                    Pressurized habitat · Illustrative exposure presets
+                  </span>
+                </div>
+                <div className="metric-grid">
+                  <Metric
+                    icon={Sprout}
+                    label="Predicted biomass"
+                    value={number(result?.cropYield / 1000)}
+                    unit="kg"
+                    caption="Cumulative edible fresh mass"
+                    color="green"
+                    hasResult={!!result}
+                  />
+                  <Metric
+                    icon={Droplets}
+                    label="Water supplied"
+                    value={number(result?.waterUsed)}
+                    unit="L"
+                    caption={
+                      result
+                        ? `${number(result.lifeSupport?.water?.netConsumed)} L net make-up water`
+                        : "Awaiting simulation"
+                    }
+                    color="blue"
+                    hasResult={!!result}
+                  />
+                  <Metric
+                    icon={Wind}
+                    label="Oxygen estimate"
+                    value={number(result?.estimatedOxygenProduced)}
+                    unit="g"
+                    caption="Biomass-derived fixation proxy"
+                    color="violet"
+                    hasResult={!!result}
+                  />
+                  <Metric
+                    icon={Leaf}
+                    label="Harvested yield"
+                    value={number(result?.harvest?.harvestedYield / 1000)}
+                    unit="kg"
+                    caption={
+                      result
+                        ? `Next harvest · mission day ${result.harvest.nextHarvestDay}`
+                        : "Awaiting simulation"
+                    }
+                    color="amber"
+                    hasResult={!!result}
+                  />
+                </div>
+                <div className="dashboard-grid">
+                  <Card
+                    title="Growth trajectory"
+                    label="BIOMASS FORECAST"
+                    action={
+                      <span className="pill green">
+                        <i />
+                        Mechanistic estimate
+                      </span>
+                    }
+                  >
+                    <div className="chart-summary">
+                      <strong>
+                        {result ? number(result.cropYield / 1000) : "—"}{" "}
+                        <small>kg</small>
+                      </strong>
+                      <span>
+                        total fresh biomass by day {params.simulationDays}
+                      </span>
+                      <div className="chart-legend">
+                        <span>
+                          <i />
+                          Selected habitat
+                        </span>
+                        <span>
+                          <i />
+                          Earth reference
+                        </span>
+                      </div>
+                    </div>
+                    <GrowthPlot result={result} />
+                    <div className="chart-footer">
+                      <ShieldCheck size={14} />
+                      Scenario output · No calibrated confidence interval
+                    </div>
+                  </Card>
+                  <Card
+                    title="Mission configuration"
+                    label="ACTIVE EXPERIMENT"
+                    action={<FlaskConical size={18} className="muted" />}
+                  >
+                    <label className="crop-field">
+                      Growing crop
+                      <select
+                        value={params.crop}
+                        onChange={(e) => setParam("crop", e.target.value)}
+                      >
+                        {config.crops.map((c) => (
+                          <option key={c.key} value={c.key}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <div className="config-summary">
+                      <div>
+                        <Globe2 size={16} />
+                        <span>Environment</span>
+                        <strong>{world}</strong>
+                      </div>
+                      <div>
+                        <Sun size={16} />
+                        <span>Photoperiod</span>
+                        <strong>{params.lightHours} h/day</strong>
+                      </div>
+                      <div>
+                        <Layers3 size={16} />
+                        <span>Growing area</span>
+                        <strong>{params.growingArea} m²</strong>
+                      </div>
+                      <div>
+                        <Activity size={16} />
+                        <span>Mission window</span>
+                        <strong>{params.simulationDays} days</strong>
+                      </div>
+                    </div>
+                    <button
+                      className="wide-link"
+                      onClick={() => navigate("laboratory")}
+                    >
+                      Adjust mission parameters
+                      <ArrowRight size={15} />
+                    </button>
+                  </Card>
+                </div>
+                <div className="dashboard-grid lower-grid">
+                  <Card
+                    title="Your mission, at a glance"
+                    label="HARVEST TIMELINE"
+                  >
+                    <div className="timeline">
+                      <span className="timeline-node active" />
+                      <div className="timeline-track">
+                        <i
+                          style={{
+                            width: result
+                              ? `${Math.min(100, (params.simulationDays / result.crop.growthDurationDays) * 100)}%`
+                              : "0%",
+                          }}
+                        />
+                      </div>
+                      <span className="timeline-node" />
+                      <div className="timeline-labels">
+                        <div>
+                          <strong>Planting</strong>
+                          <small>DAY 0</small>
+                        </div>
+                        <div>
+                          <strong>Current window</strong>
+                          <small>DAY {params.simulationDays}</small>
+                        </div>
+                        <div>
+                          <strong>First harvest</strong>
+                          <small>
+                            DAY {result?.crop.growthDurationDays || "—"}
+                          </small>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="muted fine">
+                      Cycle timing is fixed by the crop profile. Stress reduces
+                      yield; delayed maturity is not modeled.
+                    </p>
+                  </Card>
+                  <Card
+                    title="Scientific signal"
+                    label="MISSION ADVISOR"
+                    action={<Sparkles size={18} className="accent" />}
+                  >
+                    <p className="insight-copy">
+                      {result?.lifeSupport?.water?.deficitPercent > 0
+                        ? `${number(result.lifeSupport.water.deficitPercent)}% of modeled water demand is unmet. Explore water availability before interpreting biomass estimates.`
+                        : "Start with the evidence. Habitat predictions are mathematical scenarios; NASA study data is available separately for inspection."}
+                    </p>
+                    <button
+                      className="wide-link"
+                      onClick={() => navigate("advisor")}
+                    >
+                      Explore mission insights
+                      <ArrowRight size={15} />
+                    </button>
+                  </Card>
+                </div>
+                <div className="evidence-bar">
+                  <Database size={18} />
+                  <div>
+                    <strong>
+                      {registry
+                        ? `${registry.datasets?.length || 0} registered NASA studies`
+                        : "NASA registry connecting"}
+                    </strong>
+                    <span>
+                      Traceable sources. Separate measurements and estimates.
+                    </span>
+                  </div>
+                  <button onClick={() => navigate("datasets")}>
+                    Explore datasets
+                    <ArrowRight size={15} />
+                  </button>
+                </div>
+              </>
+            ) : page === "greenhouse" ? (
+              <>
+                <div className="module-intro">
+                  <span className="pill green">SIMULATION SYNCHRONIZED</span>
+                  <p>
+                    Plant scale follows simulated standing biomass. Flow
+                    indicators illustrate settings; they are not measured fluid
+                    dynamics.
+                  </p>
+                </div>
+                <DigitalTwin3D result={result} />
+              </>
+            ) : (
+              <PlatformModules page={page} {...shared} />
+            )}
+          </div>
+          <footer className="platform-footer">
+            <span>
+              <Orbit size={14} />
+              GROWING THE FUTURE, RESPONSIBLY.
+            </span>
+            <span>
+              Research simulation · Not validated for spacecraft operations
+            </span>
+            <button
+              onClick={saveScenario}
+              disabled={!result || isLoading || !!error || config.capabilities?.historyWritesEnabled === false}
+              title={config.capabilities?.historyWritesEnabled === false ? 'Hosted history is read only. Configure a durable database and enable history writes to save scenarios.' : 'Save current configuration to shared history'}
+            >
+              {config.capabilities?.historyWritesEnabled === false ? 'History read only' : 'Save scenario'}
+              <ChevronRight size={13} />
+            </button>
+          </footer>
+        </main>
+      </div>
+    </div>
+  );
+}
+function Metric({ icon: Icon, label, value, unit, caption, color, hasResult }) {
+  return (
+    <section className={`metric-tile ${color}`}>
+      <div className="metric-top">
+        <span>{label}</span>
+        <span className="metric-icon">
+          <Icon size={18} />
+        </span>
+      </div>
+      <div className="metric-value">
+        {hasResult ? value : "—"}
+        <small>{unit}</small>
+      </div>
+      <p>
+        <span className="metric-dot" />
+        {caption}
+      </p>
+    </section>
+  );
+}
