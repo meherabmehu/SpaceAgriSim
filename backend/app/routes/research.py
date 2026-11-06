@@ -62,7 +62,13 @@ def artifact(model_id):
 @router.get("/datasets")
 def datasets(q: str = ""):
     registered = research.manifest()
-    rows = [{k:v for k,v in d.items() if k != "files"} | {"downloadedFileCount": sum(f["downloaded"] for f in d["files"])} for d in registered["datasets"] if q.lower() in (d["id"] + " " + d["title"] + " " + " ".join(d["organisms"])).lower()]
+    rows = []
+    for d in registered["datasets"]:
+        searchable = d["id"] + " " + d["title"] + " " + " ".join(d.get("organisms", []))
+        if q.lower() in searchable.lower():
+            row = {k:v for k,v in d.items() if k != "files"}
+            row["downloadedFileCount"] = sum(f.get("downloaded", False) for f in d.get("files", [])) + int("file" in d)
+            rows.append(row)
     return {"datasets": rows, "source": registered.get("source"), "generatedAt": registered.get("generatedAt"), "coverage": research.coverage()}
 
 

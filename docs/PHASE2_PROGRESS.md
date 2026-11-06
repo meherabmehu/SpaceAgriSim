@@ -3,7 +3,7 @@
 | Phase | Status | Evidence |
 | --- | --- | --- |
 | 0. Repository and baseline verification | In progress | `PHASE2_VERIFICATION.md` |
-| 1. NASA data-gap research | Completed initial audit | `PHASE2_NASA_DATA_GAP_AUDIT.md`; OSD-895 selected for cautious acquisition review |
+| 1. NASA data-gap research | Completed initial audit and OSD-895 acquisition | Official 72,795-byte archive checked, hashed and normalized to a 19-row summary table; not used for ML |
 | 2. External scientific data inventory | Completed initial inventory/policy | WUR remains the only external inference source; candidates await license and schema review |
 | 3–5. Model reassessment and uncertainty | Completed initial reassessment | Mizuna marked baseline-only; tomato/lettuce remain experimental; calibrated intervals unsupported by group counts |
 | 6. Simulation science audit | Completed initial invariant audit | Water bookkeeping, bounded outputs and VPD sanity tests added; no unsupported calibration performed |

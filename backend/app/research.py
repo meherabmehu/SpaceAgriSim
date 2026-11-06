@@ -21,7 +21,12 @@ def read_json(path):
 
 def manifest():
     path = DATA / "metadata" / "dataset_manifest.json"
-    return read_json(path) if path.is_file() else {"datasets": [], "status": "not-acquired"}
+    base = read_json(path) if path.is_file() else {"datasets": [], "status": "not-acquired"}
+    candidates = DATA / "metadata" / "phase2_nasa_candidates.json"
+    if candidates.is_file():
+        base = dict(base)
+        base["datasets"] = [*base["datasets"], *read_json(candidates).get("datasets", [])]
+    return base
 
 
 def coverage():
@@ -146,6 +151,8 @@ def preview(study_id):
     elif study_id == "OSD-745":
         files = sorted((DATA / "raw" / study_id).glob("*TRANSFORMED.csv"))
         targets = [(p, "NASA-transformed nutritional assay; column headers state units. Not a yield table.", {}) for p in files]
+    elif study_id == "OSD-895":
+        targets = [("eden_iss_2018_biomass_summary.csv", "EDEN ISS terrestrial-analogue crop/cycle summaries. Values are not independent plant-level replicates and are not a general yield-training table.", {"harvestAgeDays": "days", "meanEdibleFreshweightKgM2": "kg/m2", "edibleFreshweightRangeGm2": "g/m2", "abovegroundDryBiomassGm2": "g/m2", "belowgroundDryBiomassGm2": "g/m2"})]
     else:
         targets = []
     for name, note, units in targets:
