@@ -1,0 +1,23 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      SPACEAGRISIM_DATABASE_URL: sqlite:////app/.spaceagrisim/scenarios.db
+      SPACEAGRISIM_CORS_ORIGINS: '["http://localhost:8080"]'
+    volumes:
+      - scenarios:/app/.spaceagrisim
+    restart: unless-stopped
+  web:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - '8080:80'
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+volumes:
+  scenarios:
