@@ -29,6 +29,18 @@ MODEL_STATUS = {
 def describe_assumptions() -> list[dict]:
     """One entry per model component: formula, constants and a plain-language note."""
     return [
+        {"key": "intensity", "title": "PPFD response (assumed)",
+         "formula": "factor = [I/(I+200)] / [300/(300+200)]",
+         "note": "Uncalibrated saturating response. Spectrum is annotation only; DLI = I * hours * 0.0036 mol/m?/day.",
+         "constants": {"referencePPFD": 300.0, "halfSaturationPPFD": 200.0}},
+        {"key": "temperature", "title": "Temperature response (assumed)",
+         "formula": "factor = exp(-((T-22)/12)^2)",
+         "note": "Generic assumed Gaussian response, not crop-specific measured physiology.",
+         "constants": {"referenceCelsius": 22.0, "widthCelsius": 12.0}},
+        {"key": "humidity", "title": "Humidity response and water scaling (assumed)",
+         "formula": "factor = exp(-((RH-60)/50)^2); demand *= VPD(T,RH)/VPD(22,60)",
+         "note": "VPD uses the FAO saturation vapor pressure relationship. Proportional water scaling is uncalibrated; not full Penman-Monteith.",
+         "constants": {"referenceRH": 60.0, "widthRH": 50.0}},
         {
             "key": "growth",
             "title": "Growth curve",
@@ -78,7 +90,7 @@ def describe_assumptions() -> list[dict]:
         {
             "key": "light",
             "title": "Light response",
-            "formula": "factor = [h / (h + K)] / [opt / (opt + K)] − excessPenalty × max(h − opt, 0)",
+            "formula": "factor = [h/(h+K)] / [opt/(opt+K)] * (1 - excessPenalty * max(h-opt,0))",
             "note": (
                 "Saturating photoperiod response normalised to the crop's optimal light hours, with a "
                 "mild penalty for every hour beyond it (plants need a dark period)."

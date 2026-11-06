@@ -6,6 +6,7 @@ Values can be overridden through environment variables, e.g.
     SPACEAGRISIM_CORS_ORIGINS='["http://localhost:5173"]'
 """
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,6 +16,9 @@ class Settings(BaseSettings):
     app_name: str = "SpaceAgriSim API"
     app_version: str = "0.1.0"
     api_prefix: str = "/api"
+    database_url: str = "sqlite:///.spaceagrisim/scenarios.db"
+    history_writes_enabled: bool = True
+    max_history: int = Field(default=200, ge=1, le=10000)
 
     # Origins allowed to call the API from a browser. The Vite dev server
     # proxies /api so this mostly matters when the frontend is served elsewhere.
