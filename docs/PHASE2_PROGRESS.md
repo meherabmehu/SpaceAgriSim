@@ -8,6 +8,9 @@
 | 3–5. Model reassessment and uncertainty | Completed initial reassessment | Mizuna marked baseline-only; tomato/lettuce remain experimental; calibrated intervals unsupported by group counts |
 | 6. Simulation science audit | Completed initial invariant audit | Water bookkeeping, bounded outputs and VPD sanity tests added; no unsupported calibration performed |
 | 7. Telemetry | Not started | Must verify source/API availability |
-| 8–13. Registry, optimization, persistence, polish, testing, deployment | Not started | Sequenced after scientific audit |
+| 8. Model registry | Completed initial transparency enhancement | API now exposes artifact hash, domains, baseline comparison and evidence status |
+| 9–10. Optimization and persistence | Existing implementation retained | Scientific bounds/persistence review remains for a later Phase 2 increment |
+| 11. Frontend polish | Completed initial performance pass | Mission submodules lazy-load; main bundle reduced from 672.65 kB to 606.11 kB minified; 3D chunk remains 922.21 kB |
+| 12–13. Expanded E2E and production deployment | Partially complete | Backend suite now 97 passed; local lint/typecheck/build pass; uninterrupted full browser/deployment rerun remains required |
 
 This log records observed work only. It is updated with the commit hash and test evidence after each completed Phase 2 feature.
