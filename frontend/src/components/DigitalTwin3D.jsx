@@ -51,6 +51,7 @@ export default function DigitalTwin3D({ result }) {
   const [reducedMotion, setReducedMotion] = useState(false)
   const [renderError, setRenderError] = useState(null)
   const [inView, setInView] = useState(true)
+  const [selected, setSelected] = useState('crops')
   const viewportRef = useRef(null)
   const state = useMemo(() => deriveTwinState(result), [result])
 
@@ -128,7 +129,7 @@ export default function DigitalTwin3D({ result }) {
             <div className="absolute inset-0">
               <SceneErrorBoundary onError={setRenderError}>
                 <Suspense fallback={<Placeholder text="Loading 3D chamber…" />}>
-                  <GrowthChamberScene state={state} reduced={reducedMotion} paused={!inView} />
+                  <GrowthChamberScene state={state} reduced={reducedMotion} paused={!inView} onInspect={setSelected} />
                 </Suspense>
               </SceneErrorBoundary>
               <div className="pointer-events-none absolute left-3 top-3 rounded border border-line bg-space-950/70 px-2 py-1 font-mono text-[10px] tracking-wider text-slate-300">
@@ -146,6 +147,16 @@ export default function DigitalTwin3D({ result }) {
 
         <aside className="border-t border-line px-4 py-3 lg:border-l lg:border-t-0" aria-label="Growth chamber legend">
           <p className="label-tech">Legend</p>
+          <p className="mt-2 text-xs text-slate-300">Drag to rotate · Scroll or pinch to zoom.</p>
+          <div className="mt-3 flex flex-wrap gap-2" aria-label="Inspect greenhouse components">
+            {['crops','lighting','water','sensors'].map(key=><button key={key} type="button" aria-pressed={selected===key} onClick={()=>setSelected(key)} className="rounded border border-line-strong px-2 py-1 text-xs text-accent">{key}</button>)}
+          </div>
+          {result && <p className="mt-3 text-xs leading-relaxed text-slate-300" role="status">{
+            selected==='crops'?`Standing biomass ${formatMass(result.harvest.standingBiomass)}. Plant shapes are illustrative.`:
+            selected==='lighting'?`PPFD ${result.inputs.lightIntensity} µmol/m²/s, ${result.inputs.lightHours} h/day. Spectrum: ${result.inputs.lightSpectrum}.`:
+            selected==='water'?`Supplied ${formatNumber(result.waterUsed)} L; recovered ${formatNumber(result.waterRecovered)} L. Animated flow is illustrative.`:
+            `Temperature ${result.inputs.temperature} °C; humidity ${result.inputs.humidity}%; CO₂ ${result.inputs.co2Level} ppm. These are configured setpoints, not sensor measurements.`
+          }</p>}
           <ul className="mt-2 space-y-2">
             {LEGEND.map((item) => (
               <li key={item.key} className="flex items-start gap-2 text-[11px]">

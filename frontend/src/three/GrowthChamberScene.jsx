@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 /**
  * SPACE GROWTH CHAMBER - a lightweight procedural 3D scene.
@@ -483,33 +484,35 @@ function IndicatorStrip({ position, color, level, segments = 6, warning = false 
 const CAMERA_HOME = { x: 0, y: 0.9, z: 6.9 }
 const LOOK_AT = { x: 0, y: -0.45, z: 0 }
 
-function CameraRig({ reduced, orbit }) {
-  const invalidate = useThree((s) => s.invalidate)
-  const size = useThree((s) => s.size)
+function CameraRig() {
+  const { camera, gl, invalidate, size } = useThree()
   // narrow viewports (tablet / phone) get a longer shot so the whole chamber stays in frame
   const distance = CAMERA_HOME.z * Math.max(1, 2.1 / Math.max(size.width / size.height, 0.5))
-  // very slow drift around the chamber; with reduced motion the camera stays put
-  useFrame(({ camera, clock }) => {
-    const t = reduced || !orbit ? 0 : clock.elapsedTime * 0.06
-    camera.position.set(Math.sin(t) * 1.4, CAMERA_HOME.y, distance - Math.abs(Math.sin(t)) * 0.3)
-    camera.lookAt(LOOK_AT.x, LOOK_AT.y, LOOK_AT.z)
-  })
   useEffect(() => {
+    camera.position.set(0, CAMERA_HOME.y, distance)
+    const controls = new OrbitControls(camera, gl.domElement)
+    controls.target.set(LOOK_AT.x, LOOK_AT.y, LOOK_AT.z)
+    controls.enablePan = false
+    controls.minDistance = 4
+    controls.maxDistance = 18
+    controls.maxPolarAngle = Math.PI * 0.8
+    controls.update()
+    controls.addEventListener('change', invalidate)
     invalidate()
-  }, [invalidate])
+    return () => {controls.removeEventListener('change', invalidate); controls.dispose()}
+  }, [camera, gl, invalidate, distance])
   return null
 }
 
-function Chamber({ state, reduced }) {
+function Chamber({ state, reduced, onInspect }) {
   return (
     <group position={[0, -0.05, 0]}>
       <Enclosure />
       <Frame />
-      <Trays rows={Math.max(state.rows, 1)} />
-      <Plants state={state} reduced={reduced} />
-      <GrowLights light={state.light} />
-      <WaterManifold supply={state.waterSupply} deficit={state.waterDeficit} rows={Math.max(state.rows, 1)} reduced={reduced} />
-      <Sensors reduced={reduced} />
+      <group onClick={e=>{e.stopPropagation();onInspect?.('crops')}}><Trays rows={Math.max(state.rows, 1)} /><Plants state={state} reduced={reduced} /></group>
+      <group onClick={e=>{e.stopPropagation();onInspect?.('lighting')}}><GrowLights light={state.light} /></group>
+      <group onClick={e=>{e.stopPropagation();onInspect?.('water')}}><WaterManifold supply={state.waterSupply} deficit={state.waterDeficit} rows={Math.max(state.rows, 1)} reduced={reduced} /></group>
+      <group onClick={e=>{e.stopPropagation();onInspect?.('sensors')}}><Sensors reduced={reduced} /></group>
       {/* indicator strips on the back wall: radiation (left), CO2 and O2 (right) */}
       <IndicatorStrip position={[-CHAMBER.w / 2 + 0.45, 0.35, -CHAMBER.d / 2 + 0.12]} color="#f87171" level={state.radiation} warning={state.radiationWarning} />
       <IndicatorStrip position={[CHAMBER.w / 2 - 0.85, 0.35, -CHAMBER.d / 2 + 0.12]} color="#c084fc" level={state.co2Level} />
@@ -518,7 +521,7 @@ function Chamber({ state, reduced }) {
   )
 }
 
-export default function GrowthChamberScene({ state, reduced = false, paused = false, orbit = true }) {
+export default function GrowthChamberScene({ state, reduced = false, paused = false, onInspect }) {
   // 'demand' renders only when props change: used for reduced motion and
   // while the panel is scrolled out of view, so the twin never costs frames
   // when nobody is looking at it
@@ -536,8 +539,8 @@ export default function GrowthChamberScene({ state, reduced = false, paused = fa
       <ambientLight intensity={0.55} />
       <hemisphereLight args={['#8fb2ff', '#0a0f1c', 0.5]} />
       <directionalLight position={[5, 6, 5]} intensity={0.6} />
-      <CameraRig reduced={reduced} orbit={orbit} />
-      <Chamber state={state} reduced={reduced} />
+      <CameraRig />
+      <Chamber state={state} reduced={reduced} onInspect={onInspect} />
     </Canvas>
   )
 }
