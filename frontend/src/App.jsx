@@ -1,5 +1,5 @@
 import ErrorBoundary from './components/ErrorBoundary.jsx'
-import DashboardPage from './pages/DashboardPage.jsx'
+import DashboardPage from './pages/MissionPlatform.jsx'
 
 export default function App() {
   return (

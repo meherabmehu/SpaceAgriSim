@@ -78,7 +78,9 @@ def decompose_impact(space_factors: dict[str, float], earth_factors: dict[str, f
     running = 100.0
     steps: list[ImpactStep] = []
 
-    for key in FACTOR_ORDER:
+    extra = [key for key in ("intensity", "temperature", "humidity")
+             if space_factors.get(key, 1.0) != 1.0 or earth_factors.get(key, 1.0) != 1.0]
+    for key in FACTOR_ORDER + extra:
         space_factor = space_factors[key]
         earth_factor = earth_factors[key]
         ratio = _ratio(space_factor, earth_factor)
@@ -87,7 +89,7 @@ def decompose_impact(space_factors: dict[str, float], earth_factors: dict[str, f
         steps.append(
             ImpactStep(
                 key=key,
-                label=FACTOR_LABELS[key],
+                label=FACTOR_LABELS.get(key, key.title()),
                 space_factor=space_factor,
                 earth_factor=earth_factor,
                 ratio=ratio if ratio != float("inf") else 1.0,

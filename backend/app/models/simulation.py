@@ -34,6 +34,8 @@ def _range_field(name: str, description: str, **extra):
 # ---------------------------------------------------------------------------
 class SimulationRequest(BaseModel):
     model_config = ConfigDict(
+        extra="forbid",
+        allow_inf_nan=False,
         json_schema_extra={
             "example": {
                 "crop": "lettuce",
@@ -49,6 +51,11 @@ class SimulationRequest(BaseModel):
         }
     )
 
+    lightIntensity: float = _range_field("lightIntensity", "Photosynthetic photon flux density")
+    temperature: float = _range_field("temperature", "Chamber air temperature")
+    humidity: float = _range_field("humidity", "Relative humidity")
+    waterRecyclingEfficiency: float = _range_field("waterRecyclingEfficiency", "Captured fraction of supplied water")
+    lightSpectrum: Literal["balanced", "red-blue", "white"] = "balanced"
     crop: str = Field(default=constants.DEFAULT_CROP, description="Crop key: lettuce, tomato or radish")
     gravity: float = _range_field("gravity", "Gravity level, Earth = 1.0")
     radiation: float = _range_field("radiation", "Absorbed radiation dose rate")
@@ -78,6 +85,9 @@ class SimulationRequest(BaseModel):
 # Response
 # ---------------------------------------------------------------------------
 class GrowthFactors(BaseModel):
+    intensity: float = 1.0
+    temperature: float = 1.0
+    humidity: float = 1.0
     light: float
     water: float
     gravity: float
@@ -226,6 +236,10 @@ class LifeSupportContext(BaseModel):
 
 
 class SimulationResponse(BaseModel):
+    provenance: dict = Field(default_factory=dict)
+    warnings: list[str] = Field(default_factory=list)
+    stress: dict = Field(default_factory=dict)
+    environment: dict = Field(default_factory=dict)
     # headline numbers for the space scenario (what the metric cards show)
     cropYield: float
     growthRate: float
@@ -295,3 +309,4 @@ class SimulationConfigResponse(BaseModel):
     disclaimer: str
     assumptions: list[ModelAssumption] = []
     modelStatus: ModelStatus | None = None
+    capabilities: dict = Field(default_factory=dict)

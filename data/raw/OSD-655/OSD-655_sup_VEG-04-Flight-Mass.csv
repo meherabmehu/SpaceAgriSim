@@ -1,0 +1,13 @@
+Batch,SN,BarCode,Weight (g),Pillow Weight (g),# Established,Establishment Notes,"# Leaves, unsan.","# Leaves, Prosan","# Leaves, Total",MMD Masses (g),,,Consumption Avg. (g),Return Samples (g),Harvested (g),Broken Leaves (g),Total (g),Trt. Sum (g),Trt Avg. (g),g/leaf,Sample SD,SE
+Flight,Veg04A_1,00252274K,202.07,194.371,2,good,,,,30.12,30.18,30.19,30.16,20.8,,,50.96,241.95,48.39,,11.05,4.94
+Flight,Veg04A_2,00252275K,203.37,195.671,2,good,,,,38.01,37.96,37.91,37.96,24.1,,,62.06,,,,,
+Flight,Veg04A_3,00252276K,200.81,193.111,2,good,,,,23.14,23.13,23.15,23.14,8.7,,,31.84,,,,,
+Flight,Veg04A_4,00252277K,200.26,192.561,2,good,,,,27.98,27.93,27.89,27.93,17.4,,,45.33,,,,,
+Flight,Veg04A_5,00252278K,203.55,195.851,0,detached; 2nd seed split,,,,,,,,,,,,,,,,
+Flight,Veg04A_6,00252279K,204.00,196.301,1,good,,,,35.06,35.05,35.05,35.05,16.7,,,51.75,,,,,
+Flight,Veg04A_7,00252280K,205.85,198.151,2,good,,,,35.98,35.95,35.96,35.96,19.9,,,55.86,120.46,40.15,,13.67,7.89
+Flight,Veg04A_8,00252281K,202.16,194.461,0,"bleached; 2nd seed germinated but not established, possible",,,,,,,,,,,,,,,,
+Flight,Veg04A_9,00252282K,205.62,197.921,2,okay; cotyledons lightly chlorotic,,,,,,,,,,,,,,,,
+Flight,Veg04A_10,00252283K,202.66,194.961,0,upside down; root only; no sign of 2nd plant germinated,,,,,,,,,,,,,,,,
+Flight,Veg04A_11,00252284K,203.26,195.561,1,good,,,,20.00,20.00,19.96,19.99,13.6,,,33.59,,,,,
+Flight,Veg04A_12,00252285K,202.75,195.051,1,good,,,,18.56,18.47,18.19,18.41,12.6,,,31.01,,,,,

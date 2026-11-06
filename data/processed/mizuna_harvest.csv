@@ -1,0 +1,15 @@
+studyId,experiment,crop,environment,pillow,group,spectrum,waterSuppliedL,establishedPlants,harvestFreshMassG
+OSD-655,VEG04A,mizuna,flight,1,pillow-1,red,1.515,2,50.96
+OSD-655,VEG04A,mizuna,flight,2,pillow-2,red,1.515,2,62.06
+OSD-655,VEG04A,mizuna,flight,3,pillow-3,red,1.545,2,31.84
+OSD-655,VEG04A,mizuna,flight,4,pillow-4,red,1.57,2,45.33
+OSD-655,VEG04A,mizuna,flight,6,pillow-6,red,1.42,1,51.75
+OSD-655,VEG04A,mizuna,flight,7,pillow-7,blue,1.75,2,55.86
+OSD-655,VEG04A,mizuna,flight,11,pillow-11,blue,1.28,1,33.59
+OSD-655,VEG04A,mizuna,flight,12,pillow-12,blue,1.245,1,31.01
+OSD-655,VEG04A,mizuna,ground,3,pillow-3,red,1.848,2,36.6
+OSD-655,VEG04A,mizuna,ground,5,pillow-5,red,1.483,2,21.9
+OSD-655,VEG04A,mizuna,ground,6,pillow-6,red,1.673,2,82.58
+OSD-655,VEG04A,mizuna,ground,7,pillow-7,blue,1.936,2,44.5
+OSD-655,VEG04A,mizuna,ground,8,pillow-8,blue,1.934,2,56.3
+OSD-655,VEG04A,mizuna,ground,12,pillow-12,blue,2.01,2,20.5

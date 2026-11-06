@@ -65,10 +65,12 @@ def simulate_water(
     water_availability_percent: float,
     light_scale: float,
     growing_area_m2: float,
+    recovery_efficiency: float = constants.WATER_RECOVERY_EFFICIENCY,
+    demand_scale: float = 1.0,
 ) -> list[DailyWaterPoint]:
     """One point per day, aligned with `growth_points` (day 0 uses no water)."""
     availability = min(max(water_availability_percent, 0.0), 100.0) / 100.0
-    efficiency = constants.WATER_RECOVERY_EFFICIENCY
+    efficiency = min(max(recovery_efficiency, 0.0), 1.0)
 
     points: list[DailyWaterPoint] = []
     demand_total = 0.0
@@ -80,7 +82,7 @@ def simulate_water(
         if point.day == 0:
             demand = 0.0
         else:
-            demand = daily_water_demand_l(crop, point.growth_fraction, growing_area_m2, light_scale)
+            demand = daily_water_demand_l(crop, point.growth_fraction, growing_area_m2, light_scale) * max(demand_scale, 0.0)
         supplied = demand * availability
         deficit = max(demand - supplied, 0.0)
         recovered = supplied * efficiency

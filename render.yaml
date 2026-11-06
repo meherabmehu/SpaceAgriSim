@@ -1,0 +1,21 @@
+# Reviewed against https://render.com/docs/blueprint-spec on 2026-11-06.
+# API only. Configure Vercel's VITE_API_BASE_URL with this service's public URL.
+# Supply a PostgreSQL URL and exact frontend origins during Blueprint setup.
+services:
+  - type: web
+    name: spaceagrisim-api
+    runtime: python
+    plan: free
+    repo: https://github.com/meherabmehu/SpaceAgriSim
+    branch: feat/scientific-mission-platform
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port $PORT --workers 1 --timeout-graceful-shutdown 25
+    healthCheckPath: /api/ready
+    autoDeployTrigger: 'off'
+    envVars:
+      - key: SPACEAGRISIM_DATABASE_URL
+        sync: false
+      - key: SPACEAGRISIM_CORS_ORIGINS
+        sync: false
+      - key: SPACEAGRISIM_HISTORY_WRITES_ENABLED
+        value: 'false'

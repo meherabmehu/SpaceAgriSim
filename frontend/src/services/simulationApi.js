@@ -6,7 +6,7 @@
  * frontend is expected to be served behind the same origin as the API.
  */
 
-const API_BASE = '/api'
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api'
 
 export class ApiError extends Error {
   constructor(message, { status, details } = {}) {

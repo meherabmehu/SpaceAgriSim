@@ -1,0 +1,16 @@
+.git
+.venv
+venv
+**/node_modules
+**/__pycache__
+**/.pytest_cache
+**/dist
+**/.env
+**/.env.*
+**/*.log
+.spaceagrisim
+data/raw
+data/interim
+docs/screenshots
+frontend/test-results
+frontend/playwright-report

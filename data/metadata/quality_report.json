@@ -1,0 +1,44 @@
+{
+  "generatedAt": "2026-11-06T09:00:49.994868+00:00",
+  "source": "NASA OSDR OSD-655 and OSD-767",
+  "pipelineVersion": 1,
+  "mizunaHarvest": {
+    "rows": 14,
+    "missingOutcomePillows": [
+      "flight-5",
+      "flight-8",
+      "flight-9",
+      "flight-10",
+      "ground-1",
+      "ground-2",
+      "ground-4",
+      "ground-9",
+      "ground-10",
+      "ground-11"
+    ],
+    "droppedMissingOutcomes": 10,
+    "experiments": 1,
+    "independentCohorts": 2,
+    "targetUnit": "g fresh mass/pillow",
+    "waterUnit": "L supplied over recorded irrigation events",
+    "assumptions": [
+      "Pillows 1-6 red-rich; 7-12 blue-rich, confirmed by official sample metadata.",
+      "Mass supplements use VEG04A only; VEG04B chemistry is not joined.",
+      "Missing harvests are excluded, never coded as zero.",
+      "Irrigation is a management measurement, not measured transpiration or demand."
+    ]
+  },
+  "mizunaIrrigation": {
+    "rows": 512,
+    "missingPolicy": "--- and blank excluded; numeric zero retained; irregular event dates are not daily demand",
+    "unit": "mL supplied/event"
+  },
+  "tomatoRna": {
+    "samples": 36,
+    "genes": 33562,
+    "plants": 21,
+    "normalization": "log1p(count / sample library sum * 1e6)",
+    "label": "recorded flight vs ground experimental context, not stress severity",
+    "geneMissingValues": 0
+  }
+}

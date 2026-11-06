@@ -1,0 +1,6 @@
+# Full NASA API responses and gene-count matrices are reproducible cache artifacts.
+metadata/OSD-*_meta.json
+metadata/OSD-*_files.json
+raw/OSD-767/
+interim/
+processed/*.parquet

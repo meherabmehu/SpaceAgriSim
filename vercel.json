@@ -7,9 +7,11 @@
     },
     "api": {
       "root": "backend/",
+      "installCommand": "python ../scripts/package_runtime_data.py && pip install -r requirements.txt",
       "entrypoint": "app.main:app",
       "functions": {
         "app/main.py": {
+          "includeFiles": "scientific_data/**",
           "excludeFiles": "{tests/**,**/__pycache__/**,.venv/**}"
         }
       }

@@ -1,0 +1,4 @@
+# Preserve NASA byte-level provenance on Windows and Unix checkouts.
+raw/** -text whitespace=cr-at-eol
+metadata/** -text whitespace=cr-at-eol
+processed/** -text whitespace=cr-at-eol

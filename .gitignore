@@ -36,3 +36,7 @@ npm-debug.log*
 .npm/
 .cache/
 .sudo_as_admin_successful
+.spaceagrisim/
+frontend/playwright-report/
+frontend/test-results/
+backend/scientific_data/

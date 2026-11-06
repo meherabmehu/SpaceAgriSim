@@ -1,0 +1,74 @@
+[
+  {
+    "fold": 0,
+    "trainGroups": [
+      "pillow-1",
+      "pillow-12",
+      "pillow-2",
+      "pillow-3",
+      "pillow-4",
+      "pillow-5",
+      "pillow-6"
+    ],
+    "testGroups": [
+      "pillow-11",
+      "pillow-7",
+      "pillow-8"
+    ],
+    "alpha": 100.0
+  },
+  {
+    "fold": 1,
+    "trainGroups": [
+      "pillow-11",
+      "pillow-12",
+      "pillow-2",
+      "pillow-3",
+      "pillow-4",
+      "pillow-7",
+      "pillow-8"
+    ],
+    "testGroups": [
+      "pillow-1",
+      "pillow-5",
+      "pillow-6"
+    ],
+    "alpha": 100.0
+  },
+  {
+    "fold": 2,
+    "trainGroups": [
+      "pillow-1",
+      "pillow-11",
+      "pillow-12",
+      "pillow-2",
+      "pillow-5",
+      "pillow-6",
+      "pillow-7",
+      "pillow-8"
+    ],
+    "testGroups": [
+      "pillow-3",
+      "pillow-4"
+    ],
+    "alpha": 100.0
+  },
+  {
+    "fold": 3,
+    "trainGroups": [
+      "pillow-1",
+      "pillow-11",
+      "pillow-3",
+      "pillow-4",
+      "pillow-5",
+      "pillow-6",
+      "pillow-7",
+      "pillow-8"
+    ],
+    "testGroups": [
+      "pillow-12",
+      "pillow-2"
+    ],
+    "alpha": 100.0
+  }
+]

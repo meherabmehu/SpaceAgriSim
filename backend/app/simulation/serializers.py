@@ -137,7 +137,7 @@ def _daily_water(scenario: ScenarioResult) -> list[DailyWaterEntry]:
     ]
 
 
-def _water_balance(scenario: ScenarioResult) -> WaterBalance:
+def _water_balance(scenario: ScenarioResult, efficiency: float = 0.9) -> WaterBalance:
     demand = scenario.water_demand_l
     return WaterBalance(
         demand=_r(demand, 2),
@@ -145,7 +145,7 @@ def _water_balance(scenario: ScenarioResult) -> WaterBalance:
         deficit=_r(scenario.water_deficit_l, 2),
         recovered=_r(scenario.water_recovered_l, 2),
         netConsumed=_r(scenario.water_used_l - scenario.water_recovered_l, 2),
-        recoveryEfficiency=constants.WATER_RECOVERY_EFFICIENCY,
+        recoveryEfficiency=efficiency,
         deficitPercent=_r(100.0 * scenario.water_deficit_l / demand if demand > 0 else 0.0, 1),
     )
 
@@ -175,7 +175,24 @@ def _daily_life_support(scenario: ScenarioResult) -> list[DailyLifeSupportEntry]
 
 def to_response(result: SimulationResult, request: SimulationRequest) -> SimulationResponse:
     space = result.space
+    from app.simulation.factors import vapor_pressure_deficit
+    warnings = ["Growth, water and gas outputs are uncalibrated mathematical estimates; no empirical confidence interval is available."]
+    if request.gravity < 1:
+        warnings.append("Reduced-gravity response is an assumed penalty, not a lunar or Martian crop measurement.")
+    if request.lightSpectrum != "balanced":
+        warnings.append("Spectrum is recorded as a scenario annotation; no validated spectrum response is available.")
     return SimulationResponse(
+        provenance={"mode": "physics-based estimate", "modelVersion": "assumptions-2.0",
+                    "nasaValidated": False, "confidenceInterval": None,
+                    "uncertainty": "Not quantified; parameter sensitivity is not a confidence interval.",
+                    "sources": ["Documented simulator assumptions", "Biomass carbon stoichiometry"]},
+        warnings=warnings,
+        stress={"limitingFactor": min((k for k in space.factors if k != "combined"), key=lambda k: space.factors[k]),
+                "factors": {k: round(max(0, 1-v),4) for k,v in space.factors.items() if k != "combined"},
+                "method": "assumed response-factor deficits, not a trained health classifier"},
+        environment={"vaporPressureDeficitKpa": round(vapor_pressure_deficit(request.temperature, request.humidity), 3),
+                     "dailyLightIntegralMolM2": round(request.lightIntensity * request.lightHours * 0.0036, 3),
+                     "spectrumMode": "annotation only"},
         cropYield=_r(space.crop_yield_g, 1),
         growthRate=_r(space.growth_rate_g_per_day, 2),
         waterUsed=_r(space.water_used_l, 2),
@@ -210,8 +227,8 @@ def to_response(result: SimulationResult, request: SimulationRequest) -> Simulat
         lifeSupport=LifeSupportContext(
             crewO2DaysSupported=_r(gas_exchange.crew_o2_days_supported(space.o2_produced_g), 2),
             crewCo2DaysRemoved=_r(gas_exchange.crew_co2_days_removed(space.co2_removed_g), 2),
-            waterRecoveryEfficiency=constants.WATER_RECOVERY_EFFICIENCY,
-            water=_water_balance(space),
+            waterRecoveryEfficiency=request.waterRecyclingEfficiency / 100.0,
+            water=_water_balance(space, request.waterRecyclingEfficiency / 100.0),
         ),
         dailyGrowthData=_daily_growth(result),
         dailyWaterData=_daily_water(space),

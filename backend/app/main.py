@@ -9,16 +9,17 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config.settings import settings
-from app.routes import health, simulation
+from app.routes import health, simulation, workspace, research
 from app.routes.errors import register_error_handlers
+from app.middleware import RequestGuard
 
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
     description=(
         "Backend for the Space Agriculture & Life Support Simulator. "
-        "Phase 1 is a mathematical simulation prototype; the numbers are based on "
-        "documented assumptions, not validated NASA predictions."
+        "Transparent mathematical habitat scenarios and separate artifact-backed "
+        "NASA and external-data learning experiments. Not validated for spacecraft operations."
     ),
     # Docs live under the API prefix so they stay reachable when only /api/*
     # is routed to this app (e.g. behind the Vercel rewrite in vercel.json).
@@ -26,6 +27,8 @@ app = FastAPI(
     redoc_url=f"{settings.api_prefix}/redoc",
     openapi_url=f"{settings.api_prefix}/openapi.json",
 )
+
+app.add_middleware(RequestGuard)
 
 app.add_middleware(
     CORSMiddleware,
@@ -39,6 +42,8 @@ register_error_handlers(app)
 
 app.include_router(health.router, prefix=settings.api_prefix)
 app.include_router(simulation.router, prefix=settings.api_prefix)
+app.include_router(workspace.router, prefix=settings.api_prefix)
+app.include_router(research.router, prefix=settings.api_prefix)
 
 
 @app.get("/", include_in_schema=False)

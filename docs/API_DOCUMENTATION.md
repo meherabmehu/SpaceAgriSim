@@ -1,0 +1,38 @@
+# API documentation
+
+Run from `backend`: `python -m uvicorn app.main:app --reload --port 8000`. Interactive OpenAPI: `/api/docs`; machine schema `/api/openapi.json`.
+
+## Scientific inputs
+
+All scientific POST operations below accept the same `SimulationRequest`: crop (`lettuce`, `tomato`, `radish`), gravity, radiation, waterAvailability, lightHours, co2Level, simulationDays, growingArea, earthComparisonMode (`matched` or `baseline`), lightIntensity, temperature, humidity, waterRecyclingEfficiency and lightSpectrum (`balanced`, `red-blue`, `white`). `GET /api/config` is the authoritative numeric range/default/unit contract. Unknown fields, non-finite numbers, invalid crops and bounds are rejected with HTTP 422 and a per-field error map. Spectrum is an annotation, not a calibrated response.
+
+| Endpoint | Actual behavior |
+| --- | --- |
+| GET `/api/health` | Process liveness |
+| GET `/api/ready` | Database connectivity and simulator availability; HTTP 503 on database failure |
+| GET `/api/config` | Parameter bounds, defaults, crops, assumptions and model status |
+| GET `/api/crops` | Assumed crop baselines |
+| GET `/api/assumptions` | Original formula descriptions and constants |
+| POST `/api/simulate` | Full daily growth, water, gas data; standing/harvested distinction, Earth comparison, provenance and warnings |
+| POST `/api/compare` | `scenarios: [{name,result}]` for Earth, Moon, Mars and custom habitat, plus limitations |
+| POST `/api/advisor` | `insights: [{title,severity,text,source}]`, underlying result and limitations; deterministic numerical explanations |
+| POST `/api/optimize` | 81-candidate Pareto frontier, baseline, recommendation, sensitivity, explicit constraints and limitations |
+| GET `/api/scenarios` | Newest shared saved configurations, bounded by `SPACEAGRISIM_MAX_HISTORY` |
+| POST `/api/scenarios` | `{name,configuration}`; stores validated config, timestamp and model version; HTTP 201 |
+| POST `/api/reports/json` | Reproducible simulation output and configuration as JSON attachment |
+| POST `/api/reports/csv` | Configuration/comment rows then daily growth, supplied/recovered water and gases with units |
+| POST `/api/reports/pdf` | Actual generated PDF with configuration, outputs, method and limitations |
+
+Dataset/model registry routes are documented by the research pipeline and live OpenAPI. Scientific inference training never runs inside a request.
+
+Example:
+
+```sh
+curl -X POST http://localhost:8000/api/simulate -H 'Content-Type: application/json' -d '{"crop":"lettuce","simulationDays":35,"gravity":0.38,"temperature":22,"waterRecyclingEfficiency":90}'
+```
+
+The simulator response retains all original chart fields. Added fields: `provenance` (mode/version/validation/uncertainty), `warnings`, `stress` (factor deficits, not measured health classes), and `environment` (VPD, daily light integral and spectrum annotation). There is no empirical confidence interval for mathematical outputs.
+
+Set `SPACEAGRISIM_HISTORY_WRITES_ENABLED=false` to reject shared history saves with HTTP 403 on public deployments. This is an operator write gate, not user authentication.
+
+History is a shared demonstration workspace with bounded retention, not a private per-user account system. PostgreSQL deployment and initial schema are described in `backend/migrations/README.md`. This API contains no secrets and must not receive sensitive user data. The API caps request bodies at 64 KiB and uses per-process IP limits of 180 requests/minute (12/minute for optimization). HTTP 429 includes Retry-After. These limits are local to each worker; distributed edge limits remain appropriate for scaled deployments. Request IDs and method/path/status/duration are logged without scientific payloads or credentials. Optimization is intentionally a bounded 81-point grid. CORS origins are configured by `SPACEAGRISIM_CORS_ORIGINS`; no wildcard credential mode is used.
