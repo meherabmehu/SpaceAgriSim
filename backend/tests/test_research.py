@@ -48,8 +48,12 @@ def test_model_registry_requires_actual_verified_artifacts(scientific_client):
         assert model["status"] == "trained-exploratory"
         assert model["metrics"]
         assert model["limitations"]
+        assert model["artifactSha256"] and len(model["artifactSha256"]) == 64
+        assert model["domain"]
     regression = next(m for m in models if m["id"] == "mizuna-harvest-v1")
     assert regression["metrics"]["R2"] < 0  # Honest failed-to-beat-baseline evaluation.
+    assert regression["predictionStatus"] == "baseline-only"
+    assert regression["baselineComparison"]["outperformsBaselineMAE"] is False
 
 
 def test_mizuna_prediction_units_interval_and_domain(scientific_client):

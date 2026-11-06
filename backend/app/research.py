@@ -85,11 +85,31 @@ def load_model(model_id):
 
 
 def model_registry():
+    registry = read_json(ARTIFACTS / "registry.json")
+    registered = {item["id"]: item for item in registry.get("models", [])}
     models = []
     for model_id in sorted(MODEL_IDS):
         try:
             model = load_model(model_id)
-            models.append({k: v for k, v in model.items() if k not in ("linear", "domain", "forest") } | {"artifactExists": True})
+            # Keep executable coefficients/tree arrays private, but expose the
+            # information a researcher needs to judge applicability.
+            metrics = model.get("metrics", {})
+            baseline = model.get("baselineMetrics", {})
+            if model_id == "mizuna-harvest-v1":
+                evidence_status = "baseline-only"
+            elif model.get("status") == "trained-exploratory":
+                evidence_status = "experimental"
+            else:
+                evidence_status = "insufficient-evidence"
+            models.append({k: v for k, v in model.items() if k not in ("linear", "forest") } | {
+                "artifactExists": True,
+                "artifactSha256": registered.get(model_id, {}).get("sha256"),
+                "predictionStatus": evidence_status,
+                "baselineComparison": {
+                    "available": bool(baseline),
+                    "outperformsBaselineMAE": bool(baseline and metrics.get("MAE", float("inf")) < baseline.get("MAE", float("-inf"))),
+                },
+            })
         except (FileNotFoundError, KeyError, ValueError, json.JSONDecodeError):
             models.append({"id": model_id, "name": model_id, "status": "unavailable", "artifactExists": False, "limitations": ["Verified model artifact not available; run the offline training pipeline."]})
     return {"models": models, "simulatorMode": "Assumption-based mathematical estimates; separate from NASA-trained crop-specific and molecular models", "unsupportedTargets": ["Lettuce/tomato/radish ML yield", "measured water demand", "measured gas exchange", "disease image classification", "lunar/Martian predictive validation"]}
