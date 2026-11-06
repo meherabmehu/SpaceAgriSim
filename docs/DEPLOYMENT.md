@@ -28,6 +28,8 @@ Docker copies tracked registry/processed/model artifacts. Raw research downloads
 
 The Blueprint selects a free web-service compute plan for a constrained demonstration and disables automatic deployment. It does not create a paid database, disk, worker or object store. Supply an existing PostgreSQL service or choose infrastructure separately. Free-plan cold starts and capacity are unsuitable for an operational mission system. Training must run separately from hosting inference.
 
+`.python-version` selects the latest supported Python 3.12 patch on Render, consistent with CI and the Docker base minor version. This follows the [documented version-file behavior](https://render.com/docs/python-version); freeze a tested patch/image digest when preparing an immutable release.
+
 The Blueprint can be structurally checked against [Render's public schema](https://render.com/schema/render.yaml.json), and platform-aware validation uses:
 
 ```sh
@@ -43,6 +45,7 @@ The [Blueprint setup page](https://dashboard.render.com/blueprint/new?repo=https
 | `SPACEAGRISIM_DATABASE_URL` | SQLite locally or PostgreSQL through SQLAlchemy/psycopg |
 | `SPACEAGRISIM_CORS_ORIGINS` | JSON array of permitted browser origins |
 | `SPACEAGRISIM_MAX_HISTORY` | Bounded shared history size; default 200 |
+| `SPACEAGRISIM_HISTORY_WRITES_ENABLED` | Enables shared scenario writes locally; Blueprint disables writes until deployment access controls are configured |
 | `VITE_API_BASE_URL` | Public API base including `/api`; compiled into frontend, not a secret |
 | `VITE_BACKEND_URL` | Local Vite proxy target; default `http://127.0.0.1:8000` |
 | `PORT` | Container/Render listener; bind `0.0.0.0` |
@@ -51,9 +54,11 @@ Keep `.env` files, database credentials, provider tokens and raw secret output o
 
 ## Production safeguards still required
 
-The current app is a research demonstration with shared scenario history. Before using it as a public multi-user service, add authentication/authorization, write quotas and gateway rate limits, backup/restore procedures, retention controls, resource monitoring and load testing. Provision PostgreSQL and its initial migration with a separate migration identity where possible. Do not depend on ephemeral host SQLite or serverless filesystem writes for durable scenarios. CORS does not prevent non-browser API calls.
+The current app is a research demonstration with shared scenario history. `SPACEAGRISIM_HISTORY_WRITES_ENABLED=false` returns 403 for scenario creation; this is the Blueprint default. Local demo settings permit writes. Enable them for a hosted demonstration only after accepting shared, non-sensitive storage or putting authenticated access in front of the API. Existing history reads remain shared even when writes are disabled. Before using it as a public multi-user service, add authentication/authorization, write quotas and gateway rate limits, backup/restore procedures, retention controls, resource monitoring and load testing. Provision PostgreSQL and its initial migration with a separate migration identity where possible. Do not depend on ephemeral host SQLite or serverless filesystem writes for durable scenarios. CORS does not prevent non-browser API calls.
 
-Use CI to gate tests/builds before promotion. Runtime dependency ranges are constrained but not a fully hashed lockfile; release engineering should freeze a tested environment and publish its software inventory. Avoid training and heavy downloads during service startup. The ordinary simulation and optimization are bounded by request schema limits; monitor real resource use before increasing them.
+The API request guard caps bodies at 64 KiB and uses per-process, per-client rolling limits of 180 general requests/minute and 12 optimization requests/minute. It adds request IDs and logs method/path/status/duration without logging request bodies or secrets. These in-memory limits reset on restart, do not coordinate between workers or instances, and can aggregate clients behind a proxy. Configure trusted proxy handling deliberately and add a distributed gateway limit for public production. A 429 response has a `Retry-After` header; the limits do not supply authentication or tenant isolation.
+
+Use CI to gate backend tests, frontend lint/type checking/build, dependency audits and Playwright browser checks before promotion. Runtime dependency ranges are constrained but not a fully hashed lockfile; release engineering should freeze a tested environment and publish its software inventory. Avoid training and heavy downloads during service startup. The ordinary simulation and optimization are bounded by request schema limits; monitor real resource use before increasing them.
 
 ## Rollback
 
@@ -62,3 +67,5 @@ Record the Git commit, dataset manifest checksum, model version and provider dep
 ## Verification status
 
 Configuration files are reviewable source; they do not prove a live deployment. At initial inspection no `spaceagrisim` Vercel project was found and no hosting credential environment variables were present. Render connectivity exists, but no target workspace was selected/confirmed and no new paid resources were provisioned. Actual validation and deployment outcomes are recorded in `TEST_REPORT.md` and `IMPLEMENTATION_PROGRESS.md` as work completes.
+
+The Render Blueprint passed validation against the downloaded public JSON schema (zero errors), and `docker compose config --quiet` passed. The Render CLI is not installed, so platform-aware Blueprint validation was not executed. Docker Desktop's Linux daemon was unavailable (`dockerDesktopLinuxEngine` pipe absent), so container build/start was not executed. These are verification limits, not application pass results.
