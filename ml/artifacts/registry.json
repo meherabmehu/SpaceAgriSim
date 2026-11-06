@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "trainedAt": "2026-11-06T09:01:19.358387+00:00",
+  "environment": {
+    "python": "3.12.10",
+    "numpy": "2.5.4",
+    "pandas": "3.1.1",
+    "sklearn": "1.9.1"
+  },
+  "dataVersion": "ee94fff355b07b5de8733924ab64554730e12c1205aa22776b8b2b9a1bf41564",
+  "models": [
+    {
+      "id": "mizuna-harvest-v1",
+      "artifact": "ml/artifacts/mizuna-harvest-v1.json",
+      "sha256": "859ad226a5eb0d1a984437956faba0fca9567a83fd498031f7fe6285992077d1"
+    },
+    {
+      "id": "tomato-flight-response-v1",
+      "artifact": "ml/artifacts/tomato-flight-response-v1.json",
+      "sha256": "d6257535d3969d65464254fc2805858350a50e19fd0d00eae2b18b4c6b744772"
+    }
+  ]
+}
