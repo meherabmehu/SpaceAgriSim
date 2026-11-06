@@ -24,6 +24,25 @@ class MolecularPredictionRequest(BaseModel):
     expression: dict[str, float] = Field(min_length=1, max_length=128, description="Exact artifact gene IDs, each normalized log1p(CPM), never raw counts")
 
 
+class LettucePredictionRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    crop: Literal['lettuce'] = 'lettuce'
+    daysAfterTransplant: float = Field(ge=0, le=60)
+    airTemperature: float = Field(ge=5, le=40)
+    rootTemperature: float = Field(ge=5, le=40)
+    ppfd: float = Field(ge=0, le=1000)
+
+
+@router.post('/predict/lettuce-earth-growth-v1')
+def predict_lettuce(request: LettucePredictionRequest):
+    model=artifact('lettuce-earth-growth-v1')
+    value, warnings=research.predict_values(model,[request.daysAfterTransplant,request.airTemperature,request.rootTemperature,request.ppfd])
+    if request.airTemperature >= 28 and request.rootTemperature <= 24 and request.ppfd >= 400:
+        warnings.append('Tip-burn treatment combinations were omitted in the published analysis; this region is unsupported.')
+    radius=model['interval']['radius']
+    return {'modelId':model['id'],'prediction':value,'unit':model['unit'],'method':model['method'],'sourceStudy':'WUR-lettuce','sourceUrl':model['sourceUrl'],'interval':{'low':max(0,value-radius),'high':value+radius,'kind':model['interval']['kind']},'outOfDistribution':bool(warnings),'warnings':warnings+model['limitations'],'inputs':request.model_dump()}
+
+
 def dataset(study_id):
     found = next((d for d in research.manifest()["datasets"] if d["id"] == study_id.upper()), None)
     if found is None:
@@ -66,6 +85,12 @@ def provenance():
 @router.get("/models")
 def models():
     return research.model_registry()
+
+
+@router.get('/external-datasets')
+def external_datasets():
+    path=research.DATA/'metadata/external_lettuce.json'
+    return {'datasets':[research.read_json(path)] if path.exists() else [],'note':'External scientific sources; separate from NASA study registry.'}
 
 
 @router.post("/predict/mizuna-harvest-v1")

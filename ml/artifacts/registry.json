@@ -18,6 +18,17 @@
       "id": "tomato-flight-response-v1",
       "artifact": "ml/artifacts/tomato-flight-response-v1.json",
       "sha256": "d6257535d3969d65464254fc2805858350a50e19fd0d00eae2b18b4c6b744772"
+    },
+    {
+      "id": "lettuce-earth-growth-v1",
+      "artifact": "ml/artifacts/lettuce-earth-growth-v1.json",
+      "sha256": "19e2cbf46a00dd7edeccc45e1852901a9c0b17c8786564c0932cfcf86ec827a2"
     }
-  ]
+  ],
+  "externalDataVersion": "539e724e1ca68142a96f9f45ba4247e45ba6b120a259e9017d82d01b71e14d04",
+  "externalTrainingEnvironment": {
+    "numpy": "2.5.4",
+    "pandas": "3.1.1",
+    "sklearn": "1.9.1"
+  }
 }

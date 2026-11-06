@@ -42,7 +42,7 @@ def test_dataset_search_detail_preview_and_unknown(scientific_client):
 
 def test_model_registry_requires_actual_verified_artifacts(scientific_client):
     models = scientific_client.get("/api/models").json()["models"]
-    assert len(models) == 2
+    assert len(models) == 3
     assert all(m["artifactExists"] for m in models)
     for model in models:
         assert model["status"] == "trained-exploratory"
@@ -105,3 +105,20 @@ def test_tracked_physiological_source_files_have_valid_hashes():
     for item in checks:
         if item["studyId"] != "OSD-767":
             assert hashlib.sha256((research.ROOT / item["path"]).read_bytes()).hexdigest() == item["sha256"]
+
+
+def test_lettuce_external_model_scope_and_experiment_splits(scientific_client):
+    inputs={'crop':'lettuce','daysAfterTransplant':20,'airTemperature':24,'rootTemperature':28,'ppfd':400}
+    response=scientific_client.post('/api/predict/lettuce-earth-growth-v1',json=inputs)
+    assert response.status_code==200
+    result=response.json()
+    assert result['sourceStudy']=='WUR-lettuce' and 'External' in result['method']
+    assert 0 < result['prediction'] < 1000 and result['outOfDistribution'] is False
+    assert result['interval']['low'] <= result['prediction'] <= result['interval']['high']
+    unsupported=scientific_client.post('/api/predict/lettuce-earth-growth-v1',json=inputs|{'daysAfterTransplant':45})
+    assert unsupported.json()['outOfDistribution'] is True
+    tipburn=scientific_client.post('/api/predict/lettuce-earth-growth-v1',json=inputs|{'airTemperature':32,'rootTemperature':20})
+    assert tipburn.json()['outOfDistribution'] is True
+    assert scientific_client.post('/api/predict/lettuce-earth-growth-v1',json=inputs|{'gravity':.38}).status_code==422
+    splits=json.loads((research.ROOT/'ml/evaluation/lettuce_splits.json').read_text())
+    assert len(splits)==4 and all(not set(s['trainExperiments'])&set(s['testExperiments']) for s in splits)

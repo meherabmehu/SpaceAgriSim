@@ -9,9 +9,10 @@ from functools import lru_cache
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-DATA = ROOT / "data"
-ARTIFACTS = ROOT / "ml" / "artifacts"
-MODEL_IDS = {"mizuna-harvest-v1", "tomato-flight-response-v1"}
+BUNDLE = Path(__file__).resolve().parents[1] / 'scientific_data'
+DATA = (BUNDLE if BUNDLE.exists() else ROOT) / "data"
+ARTIFACTS = (BUNDLE if BUNDLE.exists() else ROOT) / "ml" / "artifacts"
+MODEL_IDS = {"mizuna-harvest-v1", "tomato-flight-response-v1", "lettuce-earth-growth-v1"}
 
 
 def read_json(path):
@@ -27,7 +28,7 @@ def coverage():
     return [
         {"feature": name, "status": status, "source": source, "method": method, "limitation": limitation}
         for name, status, source, method, limitation in [
-            ("Plant growth", "NASA data available only as aggregated experimental results", "NASA BPC literature; OSD-655 harvest endpoints", "Assumption-based simulator", "No matched crop growth time series acquired for lettuce/tomato/radish."),
+            ("Plant growth", "NASA data available only as aggregated experimental results", "NASA BPC literature; external WUR lettuce endpoints (not NASA)", "Assumption-based habitat simulator; separate external Earth-only model", "No matched space-habitat growth time series acquired for lettuce/tomato/radish."),
             ("Biomass", "Direct NASA training data available", "OSD-655 VEG04A", "Exploratory mizuna regression only", "14 harvested pillow endpoints; retrospective irrigation input."),
             ("Harvest yield", "Direct NASA training data available", "OSD-655 VEG04A", "Exploratory mizuna regression only", "No transfer to lettuce/tomato/radish."),
             ("Gravity effects", "NASA data available but requiring processing", "OSD-436, OSD-7, OSD-120", "Heuristic simulator factor", "Molecular responses cannot calibrate edible-yield gravity factors."),
@@ -61,8 +62,21 @@ def load_model(model_id):
     model = json.loads(body)
     if model["id"] != model_id:
         raise ValueError("Model identifier mismatch")
-    linear = model["linear"]
     width = len(model["features"])
+    if "forest" in model:
+        if not 1 <= len(model["forest"]) <= 128:
+            raise ValueError("Invalid forest size")
+        for tree in model["forest"]:
+            count = len(tree["value"])
+            if not 1 <= count <= 4096 or any(len(tree[k]) != count for k in ("left","right","feature","threshold")):
+                raise ValueError("Invalid tree dimensions")
+            for i in range(count):
+                if not math.isfinite(tree['value'][i]) or not math.isfinite(tree['threshold'][i]):
+                    raise ValueError("Non-finite tree values")
+                if tree['left'][i] != -1 and (not 0 <= tree['feature'][i] < width or not i < tree['left'][i] < count or not i < tree['right'][i] < count):
+                    raise ValueError("Invalid or cyclic tree branches")
+        return model
+    linear = model["linear"]
     if any(len(linear[k]) != width for k in ("mean", "scale", "coefficients")):
         raise ValueError("Model feature dimensions mismatch")
     if not all(math.isfinite(v) for k in ("mean", "scale", "coefficients") for v in linear[k]) or not math.isfinite(linear["intercept"]) or min(linear["scale"]) <= 0:
@@ -75,15 +89,26 @@ def model_registry():
     for model_id in sorted(MODEL_IDS):
         try:
             model = load_model(model_id)
-            models.append({k: v for k, v in model.items() if k not in ("linear", "domain") } | {"artifactExists": True})
+            models.append({k: v for k, v in model.items() if k not in ("linear", "domain", "forest") } | {"artifactExists": True})
         except (FileNotFoundError, KeyError, ValueError, json.JSONDecodeError):
             models.append({"id": model_id, "name": model_id, "status": "unavailable", "artifactExists": False, "limitations": ["Verified model artifact not available; run the offline training pipeline."]})
     return {"models": models, "simulatorMode": "Assumption-based mathematical estimates; separate from NASA-trained crop-specific and molecular models", "unsupportedTargets": ["Lettuce/tomato/radish ML yield", "measured water demand", "measured gas exchange", "disease image classification", "lunar/Martian predictive validation"]}
 
 
 def predict_values(model, values):
-    linear = model["linear"]
-    result = linear["intercept"] + sum((v - m) / s * c for v, m, s, c in zip(values, linear["mean"], linear["scale"], linear["coefficients"]))
+    if len(values) != len(model['features']) or not all(math.isfinite(v) for v in values):
+        raise ValueError('Invalid model feature vector')
+    if 'forest' in model:
+        predictions=[]
+        for tree in model['forest']:
+            index=0
+            while tree['left'][index] != -1:
+                index=tree['left'][index] if values[tree['feature'][index]] <= tree['threshold'][index] else tree['right'][index]
+            predictions.append(tree['value'][index])
+        result=sum(predictions)/len(predictions)
+    else:
+        linear = model["linear"]
+        result = linear["intercept"] + sum((v - m) / s * c for v, m, s, c in zip(values, linear["mean"], linear["scale"], linear["coefficients"]))
     warnings = []
     for name, value in zip(model["features"], values):
         domain = model["domain"][name]
