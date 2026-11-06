@@ -31,6 +31,11 @@ def simulate(request: SimulationRequest) -> SimulationResponse:
         simulation_days=request.simulationDays,
         growing_area=request.growingArea,
         earth_comparison_mode=request.earthComparisonMode,
+        light_intensity=request.lightIntensity,
+        temperature=request.temperature,
+        humidity=request.humidity,
+        light_spectrum=request.lightSpectrum,
+        water_recycling_efficiency=request.waterRecyclingEfficiency / 100.0,
     )
     try:
         result = run_simulation(params)

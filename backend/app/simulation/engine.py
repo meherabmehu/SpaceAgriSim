@@ -41,6 +41,11 @@ class SimulationInput:
     # "matched": Earth run keeps the user's water/light/CO2 (isolates gravity + radiation)
     # "baseline": Earth run also resets water/light/CO2 to the crop's reference values
     earth_comparison_mode: str = "matched"
+    light_intensity: float = 300.0
+    temperature: float = 22.0
+    humidity: float = 60.0
+    water_recycling_efficiency: float = 0.90
+    light_spectrum: str = "balanced"
 
 
 @dataclass(frozen=True)
@@ -137,6 +142,10 @@ def _run_scenario(
     co2_level: float,
     simulation_days: int,
     growing_area: float,
+    light_intensity: float = 300.0,
+    temperature: float = 22.0,
+    humidity: float = 60.0,
+    water_recycling_efficiency: float = 0.90,
 ) -> ScenarioResult:
     env = factors.combined_growth_factor(
         crop,
@@ -145,6 +154,9 @@ def _run_scenario(
         water_availability_percent=water_availability,
         light_hours=light_hours,
         co2_ppm=co2_level,
+        light_intensity=light_intensity,
+        temperature=temperature,
+        humidity=humidity,
     )
 
     daily_growth = growth.simulate_growth(crop, env["combined"], simulation_days, growing_area)
@@ -154,6 +166,9 @@ def _run_scenario(
         water_availability_percent=water_availability,
         light_scale=env["light"],
         growing_area_m2=growing_area,
+        recovery_efficiency=water_recycling_efficiency,
+        demand_scale=(factors.vapor_pressure_deficit(temperature, humidity) /
+                      factors.vapor_pressure_deficit(22.0, 60.0)),
     )
     daily_gas = gas_exchange.simulate_gas_exchange(crop, daily_growth)
 
@@ -191,12 +206,19 @@ def earth_reference_conditions(params: SimulationInput, crop: CropProfile) -> di
         "water_availability": params.water_availability,
         "light_hours": params.light_hours,
         "co2_level": params.co2_level,
+        "light_intensity": params.light_intensity,
+        "temperature": params.temperature,
+        "humidity": params.humidity,
+        "water_recycling_efficiency": params.water_recycling_efficiency,
     }
     if params.earth_comparison_mode == "baseline":
         conditions.update(
             water_availability=constants.EARTH_REFERENCE_WATER_AVAILABILITY,
             light_hours=crop.optimal_light_hours,
             co2_level=constants.EARTH_AMBIENT_CO2_PPM,
+            light_intensity=300.0,
+            temperature=22.0,
+            humidity=60.0,
         )
     return conditions
 
@@ -215,6 +237,10 @@ def run_simulation(params: SimulationInput) -> SimulationResult:
         co2_level=params.co2_level,
         simulation_days=params.simulation_days,
         growing_area=params.growing_area,
+        light_intensity=params.light_intensity,
+        temperature=params.temperature,
+        humidity=params.humidity,
+        water_recycling_efficiency=params.water_recycling_efficiency,
     )
 
     earth_conditions = earth_reference_conditions(params, crop)

@@ -125,6 +125,9 @@ def combined_growth_factor(
     water_availability_percent: float,
     light_hours: float,
     co2_ppm: float,
+    light_intensity: float = 300.0,
+    temperature: float = 22.0,
+    humidity: float = 60.0,
 ) -> dict[str, float]:
     """
     Evaluate every factor once and return them together with their product.
@@ -137,9 +140,33 @@ def combined_growth_factor(
         "gravity": gravity_factor(gravity_g, crop),
         "radiation": radiation_factor(radiation_mgy_per_day, crop),
         "co2": co2_factor(co2_ppm),
+        "intensity": intensity_factor(light_intensity),
+        "temperature": temperature_factor(temperature),
+        "humidity": humidity_factor(humidity),
     }
     combined = 1.0
     for value in factors.values():
         combined *= value
     factors["combined"] = combined
     return factors
+
+
+def intensity_factor(ppfd: float) -> float:
+    """Assumed saturating PPFD response, normalized at 300 ?mol/m?/s."""
+    return (ppfd / (ppfd + 200.0)) / (300.0 / 500.0) if ppfd > 0 else 0.0
+
+
+def temperature_factor(celsius: float) -> float:
+    """Exploratory Gaussian response at 22 C, width 12 C; not fitted crop physiology."""
+    return math.exp(-((celsius - 22.0) / 12.0) ** 2)
+
+
+def humidity_factor(relative_humidity: float) -> float:
+    """Exploratory humidity response at 60% RH, width 50 percentage points."""
+    return math.exp(-((relative_humidity - 60.0) / 50.0) ** 2)
+
+
+def vapor_pressure_deficit(temperature: float, humidity: float) -> float:
+    """Air VPD (kPa), Tetens saturation-vapour-pressure relationship."""
+    saturation = 0.6108 * math.exp(17.27 * temperature / (temperature + 237.3))
+    return saturation * (1 - humidity / 100.0)
