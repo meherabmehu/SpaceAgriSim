@@ -63,15 +63,15 @@ def test_vpd_is_zero_at_saturation_and_increases_with_temperature():
 def test_water_balance_is_bounded_and_conserved_in_accounting(client):
     result=estimate(client,waterAvailability=63,waterRecyclingEfficiency=81,simulationDays=30)
     water=result["lifeSupport"]["water"]
-    assert water["demand"] == pytest.approx(water["used"] + water["deficit"], abs=1e-8)
-    assert 0 <= water["recovered"] <= water["used"]
-    assert water["netConsumed"] == pytest.approx(water["used"] - water["recovered"], abs=1e-8)
+    assert water["demand"] == pytest.approx(water["supplied"] + water["deficit"], abs=1e-8)
+    assert 0 <= water["recovered"] <= water["supplied"]
+    assert water["netConsumed"] == pytest.approx(water["supplied"] - water["recovered"], abs=1e-8)
 
 
 def test_all_public_life_support_outputs_are_finite_and_nonnegative(client):
     result=estimate(client,gravity=.38,radiation=1.2,waterAvailability=47,lightHours=18,co2Level=900,simulationDays=90)
     for value in [
-        result["cropYield"], result["harvestedYield"], result["standingBiomass"],
-        result["waterUsed"], result["waterRecovered"], result["co2Removed"], result["o2Produced"],
+        result["cropYield"], result["space"]["harvestedYield"], result["space"]["standingBiomass"],
+        result["waterUsed"], result["waterRecovered"], result["co2Removed"], result["estimatedOxygenProduced"],
     ]:
         assert math.isfinite(value) and value >= 0
