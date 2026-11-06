@@ -309,3 +309,4 @@ class SimulationConfigResponse(BaseModel):
     disclaimer: str
     assumptions: list[ModelAssumption] = []
     modelStatus: ModelStatus | None = None
+    capabilities: dict = Field(default_factory=dict)

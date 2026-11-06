@@ -18,8 +18,8 @@ app = FastAPI(
     version=settings.app_version,
     description=(
         "Backend for the Space Agriculture & Life Support Simulator. "
-        "Phase 1 is a mathematical simulation prototype; the numbers are based on "
-        "documented assumptions, not validated NASA predictions."
+        "Transparent mathematical habitat scenarios and separate artifact-backed "
+        "NASA and external-data learning experiments. Not validated for spacecraft operations."
     ),
     # Docs live under the API prefix so they stay reachable when only /api/*
     # is routed to this app (e.g. behind the Vercel rewrite in vercel.json).

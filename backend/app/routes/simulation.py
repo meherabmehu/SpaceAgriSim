@@ -9,6 +9,7 @@ GET  /api/config    parameter ranges, defaults and presets for the UI
 from fastapi import APIRouter, HTTPException
 
 from app.config import simulation_constants as constants
+from app.config.settings import settings
 from app.models.simulation import SimulationConfigResponse, SimulationRequest, SimulationResponse
 from app.simulation import crops
 from app.simulation.engine import SimulationInput, run_simulation
@@ -67,6 +68,7 @@ def simulation_config() -> SimulationConfigResponse:
         disclaimer=PHASE_1_DISCLAIMER,
         assumptions=describe_assumptions(),
         modelStatus=MODEL_STATUS,
+        capabilities={"historyWritesEnabled":settings.history_writes_enabled,"historyScope":"shared workspace","durableHistory":not settings.database_url.startswith('sqlite')},
     )
 
 

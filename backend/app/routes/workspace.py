@@ -18,6 +18,7 @@ from sqlalchemy import text
 from app.models.simulation import SimulationRequest
 from app.routes.simulation import simulate
 from app import storage
+from app import research
 from app.config.settings import settings
 
 logger = logging.getLogger(__name__)
