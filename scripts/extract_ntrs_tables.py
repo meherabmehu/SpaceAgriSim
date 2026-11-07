@@ -50,6 +50,7 @@ REPORT = ROOT / "data" / "metadata" / "ntrs_extraction_report.json"
 
 TM102784 = "19900009537"   # Continuous hydroponic wheat production (harvest + growth)
 TM102788 = "19900016137"   # CO2 and water exchange, 86-day wheat study
+TM103494 = "19900016140"   # BPC system development and early biological tests
 
 # Tray area used by the authors for the per-area conversions.
 # The report states 0.24 m2; the published seed-mass-per-m2 column implies
@@ -189,6 +190,66 @@ GAS_ROWS = [
      "1500", "recorded against the Gerbaud et al. comparison"),
 ]
 
+# ---------------------------------------------------------------------------
+# NASA TM-103494: system development and early biological tests in the BPC.
+# This report carries the WATER BALANCE the Phase 6 audit declared non-existent
+# (condensed 3615 L vs added 3914 L over 8 m2 and 74 days), and a second
+# irradiance/photoperiod operating point (660 umol/m2/s at 24 h in Phase II vs
+# 530 umol/m2/s at 20 h in Phase IV). Every figure below is a printed statement
+# with its page and the string that must be present on that page.
+# ---------------------------------------------------------------------------
+BPC_ROWS = [
+    # variable, value, unit, basis, page, evidence substring, note
+    ("water_condensed_total", 3615.0, "L", "chamber heat-exchanger condensate", 12,
+     "3615 liters", "authors treat condensate as a proxy for stand transpiration"),
+    ("water_added_total", 3914.0, "L", "added to nutrient solution systems", 13,
+     "3914 liters", "exceeds condensate; authors attribute the gap to plumbing leaks"),
+    ("stand_transpiration_areal_mean", 6.1, "L/m2/day", "per m2 over 8 m2, 74 days", 12,
+     "6.1 liters m -2 day -I", "authors' own areal conversion"),
+    ("total_biomass_phase2", 23.07, "kg", "32-tray Phase II harvest", 10,
+     "23.07 kg", "sum of harvested plant biomass across four harvest dates"),
+    ("total_seed_phase2", 9.25, "kg", "32-tray Phase II harvest", 10,
+     "9.25 kg", "seed fraction of the 23.07 kg total"),
+    ("harvest_index_phase2", 40.0, "%", "seed / total biomass", 10,
+     "harvest index of 40%", "authors' own rounding of 9.25/23.07"),
+    ("growing_area_phase2", 8.0, "m2", "32 trays x 0.25 m2", 10,
+     "8 m 2", "stated as approximately 8 m2"),
+    ("cycle_days_phase2", 74.0, "days", "average cycle", 10,
+     "74", "average across staggered harvest dates"),
+    ("crop_growth_rate_biomass", 39.0, "g/m2/day", "total biomass", 10,
+     "39.0 g m -2 day -1", "23.07 kg / 8 m2 / 74 d"),
+    ("crop_growth_rate_seed", 15.6, "g/m2/day", "seed mass", 10,
+     "15.6 g m -2 day -I", "9.25 kg / 8 m2 / 74 d"),
+    ("best_tray_biomass", 908.0, "g", "best 4 of 32 trays", 10,
+     "908 g", "mean of two trays at 72 d and two at 74 d"),
+    ("best_tray_seed", 391.0, "g", "best 4 of 32 trays", 10,
+     "391 g", "harvest index 43 %"),
+    ("best_tray_crop_growth_rate_biomass", 50.4, "g/m2/day", "best 4 trays at 72 d", 10,
+     "50.4 g m -2 day -I", "908 g / 0.25 m2 / 72 d"),
+    ("best_tray_crop_growth_rate_seed", 21.7, "g/m2/day", "best 4 trays at 72 d", 10,
+     "21.7 g m -2 day -1", "391 g / 0.25 m2 / 72 d"),
+    ("ppfd_phase2", 660.0, "umol/m2/s", "canopy average, Phase II", 9,
+     "660", "continuous light"),
+    ("photoperiod_phase2", 24.0, "h", "Phase II", 9,
+     "24-hr photoperiod", "full lamp intensity throughout"),
+    ("seeds_per_area", 1600.0, "seeds/m2", "sowing density", 9,
+     "1600 seeds", "Phase II planting"),
+    ("ppfd_phase4", 530.0, "umol/m2/s", "canopy average, Phase IV", 18,
+     "530 umol m -2 s -1 for 20 h/day", "second operating point"),
+    ("daily_light_integral_phase4", 38.0, "mol/m2/day", "Phase IV", 18,
+     "38 mol m -2 day -1", "530 umol/m2/s x 20 h"),
+    ("total_biomass_phase4", 44.24, "kg", "64-tray Phase IV harvest", 22,
+     "44.24 kg", "at 16 m2 growing area"),
+    ("crop_growth_rate_biomass_phase4", 32.5, "g/m2/day", "Phase IV", 22,
+     "32.5 g m -2 day-l", "44.24 kg / 16 m2 / 85 d"),
+    ("ppfd_end_tray_penalty", 30.0, "%", "sensor survey", 12,
+     "25 to 35% lower", "midpoint of the published 25-35 % range; approximate"),
+    ("chamber_leakage_phase2", 30.0, "%/day", "seal test", 12,
+     "20-40", "midpoint of the published 20-40 %/day range; approximate"),
+    ("chamber_leakage_phase4", 7.5, "%/day", "seal test", 16,
+     "5-10%", "midpoint of the published 5-10 %/day range; approximate"),
+]
+
 # Environment set points for the 86-day study (TM-102788 p.7).
 ENVIRONMENT = {
     "study": "BPC wheat 86-day study (planted 1989-01-19)",
@@ -305,6 +366,48 @@ def check_growth_derived(rows: list[dict]) -> list[str]:
     return problems
 
 
+def check_bpc_arithmetic(rows: dict) -> list[str]:
+    """Recompute TM-103494's own derived figures from its primary measurements.
+
+    Every one of these is published as a round number, so each is a genuine
+    independent check on the transcription rather than a tautology.
+    """
+    problems = []
+    area, days = rows["growing_area_phase2"], rows["cycle_days_phase2"]
+    cgr_b = rows["total_biomass_phase2"] * 1000 / area / days
+    if abs(cgr_b - rows["crop_growth_rate_biomass"]) > 0.15:
+        problems.append(f"TM-103494: total CGR {cgr_b:.2f} != published "
+                        f"{rows['crop_growth_rate_biomass']}")
+    cgr_s = rows["total_seed_phase2"] * 1000 / area / days
+    if abs(cgr_s - rows["crop_growth_rate_seed"]) > 0.15:
+        problems.append(f"TM-103494: seed CGR {cgr_s:.2f} != published "
+                        f"{rows['crop_growth_rate_seed']}")
+    hi = rows["total_seed_phase2"] / rows["total_biomass_phase2"] * 100
+    if abs(hi - rows["harvest_index_phase2"]) > 0.5:
+        problems.append(f"TM-103494: harvest index {hi:.2f} != published "
+                        f"{rows['harvest_index_phase2']}")
+    best_b = rows["best_tray_biomass"] / 0.25 / 72
+    if abs(best_b - rows["best_tray_crop_growth_rate_biomass"]) > 0.15:
+        problems.append(f"TM-103494: best-tray CGR {best_b:.2f} != published "
+                        f"{rows['best_tray_crop_growth_rate_biomass']}")
+    transp = rows["water_condensed_total"] / area / days
+    if abs(transp - rows["stand_transpiration_areal_mean"]) > 0.1:
+        problems.append(f"TM-103494: transpiration {transp:.2f} L/m2/day != "
+                        f"published {rows['stand_transpiration_areal_mean']}")
+    recovery = rows["water_condensed_total"] / rows["water_added_total"]
+    if not 0.85 <= recovery <= 1.05:
+        problems.append(f"TM-103494: water recovery {recovery:.3f} outside the "
+                        "physically plausible range for a sealed chamber")
+    dli = rows["ppfd_phase4"] * 20 * 3600 / 1e6
+    if abs(dli - rows["daily_light_integral_phase4"]) > 0.6:
+        problems.append(f"TM-103494: DLI {dli:.2f} != published "
+                        f"{rows['daily_light_integral_phase4']}")
+    if not (rows["water_condensed_total"] < rows["water_added_total"]):
+        problems.append("TM-103494: condensate exceeds added water, contradicting "
+                        "the report's stated leak explanation")
+    return problems
+
+
 def main() -> int:
     PROCESSED.mkdir(parents=True, exist_ok=True)
     text_102784 = read_pdf_text(TM102784)
@@ -355,6 +458,23 @@ def main() -> int:
             "provenanceVerified": found, "note": note,
         })
 
+    bpc, text_103494 = [], read_pdf_text(TM103494)
+    for variable, value, unit, basis, page, evidence, note in BPC_ROWS:
+        found = True
+        if text_103494:
+            found = normalise(text_103494.get(page, "")).find(evidence) >= 0
+            if not found:
+                problems.append(f"provenance: '{evidence}' not found on "
+                                f"TM-103494 p.{page} for {variable}")
+        bpc.append({
+            "variable": variable, "value": value, "unit": unit,
+            "measurementBasis": basis, "sourceReport": "NASA TM-103494",
+            "ntrsId": TM103494, "page": page, "evidenceString": evidence,
+            "provenanceVerified": found, "note": note,
+        })
+    bpc_values = {row["variable"]: row["value"] for row in bpc}
+    problems += check_bpc_arithmetic(bpc_values)
+
     if problems:
         print("EXTRACTION REJECTED - validation failures:", file=sys.stderr)
         for problem in problems:
@@ -383,6 +503,15 @@ def main() -> int:
     gas_frame.to_csv(PROCESSED / "ntrs_wheat_gas_exchange.csv",
                      index=False, lineterminator="\n")
 
+    bpc_frame = pd.DataFrame(bpc)
+    bpc_frame["waterRecoveredFraction"] = [
+        bpc_values["water_condensed_total"] / bpc_values["water_added_total"]
+        if row["variable"] == "water_added_total" else ""
+        for row in bpc
+    ]
+    bpc_frame.to_csv(PROCESSED / "ntrs_bpc_water_balance.csv",
+                     index=False, lineterminator="\n")
+
     report = {
         "generatedAt": datetime.now(timezone.utc).isoformat(),
         "source": "NASA Technical Reports Server (NTRS)",
@@ -390,6 +519,9 @@ def main() -> int:
             TM102784: {"label": "NASA TM-102784",
                        "title": "Continuous Hydroponic Wheat Production Using a Recirculating System",
                        "tables": ["Table 6 (p.40)", "Table 7 (p.41)", "Table 9 (p.43)", "Table 10 (p.43)"]},
+            TM103494: {"label": "NASA TM-103494",
+                       "title": "System Development and Early Biological Tests in NASA's Biomass Production Chamber",
+                       "tables": ["Table 2 (p.12-13) water balance", "Table 2 (p.10) harvest results"]},
             TM102788: {"label": "NASA TM-102788",
                        "title": "Carbon Dioxide and Water Exchange Rates by a Wheat Crop in NASA's Biomass Production Chamber",
                        "tables": ["measured statements, pages recorded per variable"]},
@@ -438,6 +570,17 @@ def main() -> int:
             "harvestTrays": len(harvest),
             "growthAges": len(growth),
             "measuredVariables": len(gas),
+            "bpcVariables": len(bpc),
+            "waterBalance": {
+                "condensedL": bpc_values["water_condensed_total"],
+                "addedL": bpc_values["water_added_total"],
+                "recoveredFraction": round(bpc_values["water_condensed_total"]
+                                           / bpc_values["water_added_total"], 4),
+                "arealTranspirationLPerM2Day": bpc_values["stand_transpiration_areal_mean"],
+                "caveat": ("Condensate is the authors' proxy for transpiration, not a closed "
+                           "water-recovery test: the chamber leaked 20-40 %/day in this phase "
+                           "and the added-water total includes plumbing losses."),
+            },
         },
         "provenance": provenance,
     }
@@ -448,6 +591,7 @@ def main() -> int:
     print(f"  harvest trays          : {len(harvest)}")
     print(f"  growth ages            : {len(growth)} (days {list(growth_frame['ageDays'])})")
     print(f"  gas/water variables    : {len(gas)}")
+    print(f"  BPC water/yield vars   : {len(bpc)}")
     print(f"  provenance checks      : {len(provenance)}")
     print()
     print("Recomputed vs published aggregates (16-tray harvest):")
@@ -460,7 +604,9 @@ def main() -> int:
     for row in growth_frame[["ageDays", "dryMassPerM2G", "rootDryMassG", "totalPlants"]].itertuples(index=False):
         print(f"  day {row.ageDays:>3}  DW {row.dryMassPerM2G:>5} g/m2  root {row.rootDryMassG:>6} g  "
               f"plants {row.totalPlants}")
-    print(f"\nwritten: data/processed/ntrs_wheat_*.csv")
+    print(f"  water recovery (condensed/added): "
+          f"{bpc_values['water_condensed_total'] / bpc_values['water_added_total']:.3f}")
+    print(f"\nwritten: data/processed/ntrs_wheat_*.csv, ntrs_bpc_water_balance.csv")
     return 0
 
 

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-07T14:55:00.231572+00:00",
+  "generatedAt": "2026-11-07T14:56:31.804561+00:00",
   "source": "NASA Technical Reports Server (NTRS)",
   "reports": {
     "19900009537": {
@@ -10,6 +10,14 @@
         "Table 7 (p.41)",
         "Table 9 (p.43)",
         "Table 10 (p.43)"
+      ]
+    },
+    "19900016140": {
+      "label": "NASA TM-103494",
+      "title": "System Development and Early Biological Tests in NASA's Biomass Production Chamber",
+      "tables": [
+        "Table 2 (p.12-13) water balance",
+        "Table 2 (p.10) harvest results"
       ]
     },
     "19900016137": {
@@ -78,7 +86,15 @@
   "counts": {
     "harvestTrays": 16,
     "growthAges": 7,
-    "measuredVariables": 15
+    "measuredVariables": 15,
+    "bpcVariables": 24,
+    "waterBalance": {
+      "condensedL": 3615.0,
+      "addedL": 3914.0,
+      "recoveredFraction": 0.9236,
+      "arealTranspirationLPerM2Day": 6.1,
+      "caveat": "Condensate is the authors' proxy for transpiration, not a closed water-recovery test: the chamber leaked 20-40 %/day in this phase and the added-water total includes plumbing losses."
+    }
   },
   "provenance": [
     {
