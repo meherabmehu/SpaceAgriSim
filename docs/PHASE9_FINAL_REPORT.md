@@ -177,11 +177,20 @@ sentence mentioning yield on the served cards is a negation.
 
 ## Merge status
 
-Merged into `main` with `--no-ff` as commit **`8a90d48`**, whose parents are
-`9669553` (the previous `main`) and `93465aa` (the Phase 9 tip), and pushed to
-`origin/main`. Verified by re-reading the remote: `origin/main` resolves to
-`8a90d48`, and `git branch -r --contains 8a90d48` lists `origin/main`.
+Two merges, both `--no-ff` and both verified against the remote.
+
+| Merge | Commit | Parents | Contents |
+| --- | --- | --- | --- |
+| Phase 9 | `8a90d48` | `9669553`, `93465aa` | the two radiation models and their evaluation |
+| Phase 9 audit | `a5cdb48` | `d2f1ae2`, `42bf597` | catalogue, coverage, preview, comparator, demo |
+
+The audit follow-ups are `e02ad78` (OSD-780 count), `f71f660` (genotype label),
+`641f36f` (count definitions) and `33d5fe9` (document reconciliation).
+`origin/main` resolves to `33d5fe9`, confirmed by both `git fetch` and an
+independent `git ls-remote`, and `git branch -r --contains a5cdb48` lists
+`origin/main`.
 
 All gates were run on the merged tree, not only on the feature branch: 261 backend
-tests, 24 browser tests across three viewports, lint, typecheck, build and the
-visual regression comparison.
+tests against PostgreSQL, 24 browser tests across three viewports, lint, typecheck,
+build and the visual regression comparison. The merged tree was checked to be
+identical to the tree the gates ran against.
