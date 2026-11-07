@@ -21,7 +21,12 @@ def read_json(path):
 
 def manifest():
     path = DATA / "metadata" / "dataset_manifest.json"
-    return read_json(path) if path.is_file() else {"datasets": [], "status": "not-acquired"}
+    base = read_json(path) if path.is_file() else {"datasets": [], "status": "not-acquired"}
+    candidates = DATA / "metadata" / "phase2_nasa_candidates.json"
+    if candidates.is_file():
+        base = dict(base)
+        base["datasets"] = [*base["datasets"], *read_json(candidates).get("datasets", [])]
+    return base
 
 
 def coverage():
@@ -85,11 +90,31 @@ def load_model(model_id):
 
 
 def model_registry():
+    registry = read_json(ARTIFACTS / "registry.json")
+    registered = {item["id"]: item for item in registry.get("models", [])}
     models = []
     for model_id in sorted(MODEL_IDS):
         try:
             model = load_model(model_id)
-            models.append({k: v for k, v in model.items() if k not in ("linear", "domain", "forest") } | {"artifactExists": True})
+            # Keep executable coefficients/tree arrays private, but expose the
+            # information a researcher needs to judge applicability.
+            metrics = model.get("metrics", {})
+            baseline = model.get("baselineMetrics", {})
+            if model_id == "mizuna-harvest-v1":
+                evidence_status = "baseline-only"
+            elif model.get("status") == "trained-exploratory":
+                evidence_status = "experimental"
+            else:
+                evidence_status = "insufficient-evidence"
+            models.append({k: v for k, v in model.items() if k not in ("linear", "forest") } | {
+                "artifactExists": True,
+                "artifactSha256": registered.get(model_id, {}).get("sha256"),
+                "predictionStatus": evidence_status,
+                "baselineComparison": {
+                    "available": bool(baseline),
+                    "outperformsBaselineMAE": bool(baseline and metrics.get("MAE", float("inf")) < baseline.get("MAE", float("-inf"))),
+                },
+            })
         except (FileNotFoundError, KeyError, ValueError, json.JSONDecodeError):
             models.append({"id": model_id, "name": model_id, "status": "unavailable", "artifactExists": False, "limitations": ["Verified model artifact not available; run the offline training pipeline."]})
     return {"models": models, "simulatorMode": "Assumption-based mathematical estimates; separate from NASA-trained crop-specific and molecular models", "unsupportedTargets": ["Lettuce/tomato/radish ML yield", "measured water demand", "measured gas exchange", "disease image classification", "lunar/Martian predictive validation"]}
@@ -126,6 +151,8 @@ def preview(study_id):
     elif study_id == "OSD-745":
         files = sorted((DATA / "raw" / study_id).glob("*TRANSFORMED.csv"))
         targets = [(p, "NASA-transformed nutritional assay; column headers state units. Not a yield table.", {}) for p in files]
+    elif study_id == "OSD-895":
+        targets = [("eden_iss_2018_biomass_summary.csv", "EDEN ISS terrestrial-analogue crop/cycle summaries. Values are not independent plant-level replicates and are not a general yield-training table.", {"harvestAgeDays": "days", "meanEdibleFreshweightKgM2": "kg/m2", "edibleFreshweightRangeGm2": "g/m2", "abovegroundDryBiomassGm2": "g/m2", "belowgroundDryBiomassGm2": "g/m2"})]
     else:
         targets = []
     for name, note, units in targets:

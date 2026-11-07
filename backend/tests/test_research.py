@@ -20,13 +20,16 @@ def test_actual_dataset_inventory_and_no_cross_crop_claim(scientific_client):
     response = scientific_client.get("/api/datasets")
     assert response.status_code == 200
     studies = response.json()["datasets"]
-    assert len(studies) == 13
+    assert len(studies) == 14
     mizuna = next(d for d in studies if d["id"] == "OSD-655")
     assert mizuna["organisms"] == ["Brassica rapa"]
     assert mizuna["sampleCount"] == 37
     assert mizuna["downloadedFileCount"] > 0
     assert "files" not in mizuna
     assert len(response.json()["coverage"]) == 15
+    eden = next(d for d in studies if d["id"] == "OSD-895")
+    assert eden["classification"] == "useful for scientific calibration"
+    assert eden["rowCount"] == 19
 
 
 def test_dataset_search_detail_preview_and_unknown(scientific_client):
@@ -38,6 +41,9 @@ def test_dataset_search_detail_preview_and_unknown(scientific_client):
     assert harvest["rowCount"] == 14
     assert all(r["crop"] == "mizuna" for r in harvest["rows"])
     assert scientific_client.get("/api/datasets/OSD-999999").status_code == 404
+    eden = scientific_client.get("/api/datasets/OSD-895/preview").json()
+    assert eden["tables"][0]["rowCount"] == 19
+    assert eden["tables"][0]["units"]["meanEdibleFreshweightKgM2"] == "kg/m2"
 
 
 def test_model_registry_requires_actual_verified_artifacts(scientific_client):
@@ -48,8 +54,12 @@ def test_model_registry_requires_actual_verified_artifacts(scientific_client):
         assert model["status"] == "trained-exploratory"
         assert model["metrics"]
         assert model["limitations"]
+        assert model["artifactSha256"] and len(model["artifactSha256"]) == 64
+        assert model["domain"]
     regression = next(m for m in models if m["id"] == "mizuna-harvest-v1")
     assert regression["metrics"]["R2"] < 0  # Honest failed-to-beat-baseline evaluation.
+    assert regression["predictionStatus"] == "baseline-only"
+    assert regression["baselineComparison"]["outperformsBaselineMAE"] is False
 
 
 def test_mizuna_prediction_units_interval_and_domain(scientific_client):

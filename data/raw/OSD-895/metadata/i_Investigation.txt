@@ -1,0 +1,111 @@
+ONTOLOGY SOURCE REFERENCE
+Term Source Name	EFO	CRO	OSD	OBI
+Term Source File			https://osdr.nasa.gov/	http://data.bioontology.org/ontologies/OBI
+Term Source Version			1.0	29
+Term Source Description			User defined terms	Ontology for Biomedical Investigations
+INVESTIGATION
+Investigation Identifier	
+Investigation Title	
+Investigation Description	
+Investigation Submission Date	
+Investigation Public Release Date	
+INVESTIGATION PUBLICATIONS
+Investigation PubMed ID
+Investigation Publication DOI
+Investigation Publication Author List
+Investigation Publication Title
+Investigation Publication Status
+Investigation Publication Status Term Accession Number
+Investigation Publication Status Term Source REF
+INVESTIGATION CONTACTS
+Investigation Person Last Name
+Investigation Person First Name
+Investigation Person Mid Initials
+Investigation Person Email
+Investigation Person Phone
+Investigation Person Fax
+Investigation Person Address
+Investigation Person Affiliation
+Investigation Person Roles
+Investigation Person Roles Term Accession Number
+Investigation Person Roles Term Source REF
+STUDY
+Study Identifier	OSD-895
+Study Title	Biomass Production of the EDEN ISS Space Greenhouse in Antarctica During the 2018 Experiment Phase
+Study Description	The EDEN ISS greenhouse is a space-analog test facility near the German Neumayer III station in Antarctica. The facility is part of the project of the same name and was designed and built starting from March 2015 and eventually deployed in Antarctica in January 2018. The nominal operation of the greenhouse started on February 7th and continued until the 20th of November. The purpose of the facility is to enable multidisciplinary research on topics related to future plant cultivation on human space exploration missions. Research on food quality and safety, plant health monitoring, microbiology, system validation, human factors and horticultural sciences was conducted. Part of the latter is the determination of the biomass production of the different crops. The data on this topic is presented in this dataset. During the first season 26 different crops were grown on the 12.5 m2 cultivation area of the greenhouse. A large number of crops were grown continuously throughout the 9 months of operation, but there were also crops that were only grown a few times for test purposes. The focus of this season was on growing lettuce, leafy greens and fresh vegetables. In total more than 268 kg of edible biomass was produced by the EDEN ISS greenhouse facility in 2018. Most of the harvest was cucumbers (67 kg), lettuces (56 kg), leafy greens (49 kg), and tomatoes (50 kg) complemented with smaller amounts of herbs (12 kg), radish (8 kg), and kohlrabi (19 kg). The environmental set points for the crops were 330 micromole per square meter per second LED light, 21C, a 65% relative humidity, 1000 ppm and the photoperiod was 17 h per day. The overall yearly productivity of the EDEN ISS greenhouse in 2018 was 27.4 kg/m2, which is equal to 0.075 kg/(m2d). This OSD includes data on edible and inedible biomass production of each crop grown in the EDEN ISS greenhouse in Antarctica during the 2018 season.
+Study Submission Date	22-Sep-2025
+Study Public Release Date	28-Sep-2026
+Study File Name	s_OSD-895.txt
+Comment[Acknowledgments]	
+Comment[DOI]	10.26030/8556-mr78
+Comment[Data Source Accession]	
+Comment[Data Source Link]	
+Comment[Experiment Platform]	
+Comment[Flight Program]	
+Comment[Funding]	The EDEN ISS project has received funding from the European Union’s Horizon 2020 Research and Innovation program under grant agreement No 636501.
+Comment[Identifiers]	
+Comment[Managing NASA Center]	
+Comment[Mission End]	
+Comment[Mission Link]	
+Comment[Mission Name]	
+Comment[Mission Start]	
+Comment[Project Identifier]	
+Comment[Project Link]	
+Comment[Project Title]	
+Comment[Project Type]	Ground Study
+Comment[Space Program]	NASA
+Comment[Study Grant Number]	
+STUDY DESIGN DESCRIPTORS
+Study Design Type	growth condition design
+Study Design Type Term Accession Number	http://www.ebi.ac.uk/efo/EFO_0001759
+Study Design Type Term Source REF	EFO
+STUDY PUBLICATIONS
+Study PubMed ID	32528506
+Study Publication DOI	10.3389/fpls.2020.00656
+Study Publication Author List	Zabel P, Zeidler C, Vrakking V, Dorn M, Schubert D.
+Study Publication Title	Biomass Production of the EDEN ISS Space Greenhouse in Antarctica During the 2018 Experiment Phase.
+Study Publication Status	published
+Study Publication Status Term Accession Number	http://www.ebi.ac.uk/efo/EFO_0001796
+Study Publication Status Term Source REF	EFO
+Comment[Study Publication Link]	https://doi.org/10.3389/fpls.2020.00656
+STUDY FACTORS
+Study Factor Name	Nutrient Treatment	Light Treatment
+Study Factor Type	nutrient treatment	treatment
+Study Factor Type Term Accession Number	https://osdr.nasa.gov/	http://www.ebi.ac.uk/efo/EFO_0000727
+Study Factor Type Term Source REF	OSD	EFO
+STUDY ASSAYS
+Study Assay File Name	a_OSD-895_germination-and-growth-assesment_plant-material-biomass_ECSO.txt
+Study Assay Measurement Type	Germination and Growth Assesment
+Study Assay Measurement Type Term Accession Number	http://purl.obolibrary.org/obo/GO_0009791
+Study Assay Measurement Type Term Source REF	
+Study Assay Technology Type	Plant Material Biomass
+Study Assay Technology Type Term Accession Number	http://purl.dataone.org/odo/ECSO_00001148
+Study Assay Technology Type Term Source REF	
+Study Assay Technology Platform	ECSO
+STUDY PROTOCOLS
+Study Protocol Name	growth protocol	treatment protocol	sample collection	Seed Germination	Biomass Assessment
+Study Protocol Type	growth protocol	sample treatment protocol	sample collection	Seed Germination	Biomass Assessment
+Study Protocol Type Term Accession Number	http://www.ebi.ac.uk/efo/EFO_0003789	http://www.ebi.ac.uk/efo/EFO_0003809			https://osdr.nasa.gov/
+Study Protocol Type Term Source REF	EFO	EFO	EFO	EFO	OSD
+Study Protocol Description	Crops were cultivated in the Future Exploration Greenhouse (FEG) of the EDEN ISS Mobile Test Facility near Neumayer Station III, Antarctica, during the 2018 experiment phase (first sowing 7 February, final harvest 20 November; 286 days). All crops shared a single compromise climate. Most species were sown in 2 x 2 x 4 cm (L x W x H) rockwool blocks and kept in a nursery tray for 10-20 days (species dependent) before transfer to the plant cultivation trays; parsley, chives and arugula were sown directly in the cultivation trays on recycled cotton fiber mats. Planting density per tray depended on the crop. Cucumber, tomato and pepper were pruned regularly (excess side shoots, old or withered leaves; cucumber trained to 2 stems per plant); basil shoots were shortened when approaching the lamps, and kohlrabi leaves shading neighboring trays were removed. Each cultivation tray had its own independently controlled, liquid-cooled LED lamp (Heliospectra LX601, modified) with a spectrum dominated by blue (~450 nm) and red (~650 nm) light. Photoperiod: 15 h at full intensity with 1 h at 50% intensity before and after (17 h light), followed by 7 h dark. Light intensity measured at 16 cm height: 330 micromole per square meter per second for the four lettuces, red mustard, Swiss chard, mizuna, basil, chives, parsley and arugula (initial setting); 600 micromole per square meter per second  for radish and arugula (higher setting); 300-400 micromole per square meter per second  for tomato, kohlrabi and pepper; greater than 500 micromole per square meter per second at top of canopy for cucumber. Air temperature set points were 21 C during the photoperiod and 19 C during the dark period, relative humidity 65%, and CO2 1000 ppm. Deviations: dark-period temperature dropped to ~16 C during the Antarctic winter; relative humidity reached up to 86% for hours at a time between April and July; CO2 was usually above set point (up to ~2000-4000 ppm) because of operator presence and the absence of a CO2 removal system. Ethylene was scrubbed with an activated carbon filter (target less than 15 ppb; not measured). Each tray was photographed daily from the top and side for remote monitoring.	Nutrient solution was supplied by a hybrid aeroponic/nutrient film technique: high-pressure pumps misted the root zone for 30 s every 6 min, and run-off formed a nutrient film once roots had developed. During germination the on-site operator supplied solution manually. Two solutions were used depending on crop classification, a leafy crop solution and a fruit crop solution, each mixed automatically in bulk tanks from concentrated stock solutions and deionized water. Nutrient parameter values are the expected initial amounts per 100 L of bulk solution. Part way through the mission the fruit crop solution was adjusted to increase calcium and slightly reduce potassium after calcium deficiency was observed on tomato; for the fruit solution, values are given as initial followed by adjusted. pH was controlled with 1.25% nitric acid and 1% potassium hydroxide (tank 1: 6.06 plus or minus 0.18; tank 2: 5.91 plus or minus 0.12). EC set points differed per tank (tank 1: 2.21 plus or minus 0.13 mS/cm; tank 2: 3.49 plus or minus 0.17 mS/cm). Solution temperature followed room temperature (around 19.9 C). Tanks were emptied and refilled with fresh solution approximately every 3 months (tank 1) and every 2 months (tank 2)	Two harvest methods were used. Batch harvest: whole plants were harvested once they reached a set age (lettuces, arugula, radishes, kohlrabi). Spread harvest: only leaves or fruits were removed so the plants continued growing (red mustard, Swiss chard, mizuna, basil, chives, parsley, tomato, cucumber). Sowing, transfer, pruning and harvest dates were recorded for each cultivation tray. At harvest, fresh edible biomass was weighed; inedible biomass was weighed separately for roots and for stems/leaves, and was recovered wet (e.g., roots with rockwool), fresh (e.g., radish leaves) or dry (e.g., withered tomato leaves). Subsamples of plant material were freeze-dried (lyophilized) to determine dry weight ratios; the amount dried was limited by equipment capacity. Most produce was consumed by the overwintering crew, with small amounts set aside for other analyses (e.g., dry weight ratio, nitrate content). Cycles affected by extensive sampling or unsuitable growing procedures were excluded from evaluation; Cycles Evaluated gives the number of valid cycles per crop.	Seeds of most species were sown into 2 x 2 x 4 cm (L x W x H) rockwool blocks placed in a nursery (germination) tray; parsley, chives and arugula were sown directly onto recycled cotton fiber mats in the plant cultivation trays. The on-site operator added small amounts of nutrient solution manually to keep the rockwool blocks moist. Seedlings stayed in the nursery tray for 10-20 days depending on species before being transferred to the cultivation trays. The germination tray was located in the FEG under the same climate set points as the cultivation area. Seed pre-treatment, number of seeds sown, and germination rates were not reported.	For each valid cultivation cycle, edible fresh biomass was normalized to cultivation area (Kilograms per square meter), cultivation time (Kilograms per square meter per day) and cultivation volume (Kilogram per cubic meter). Mean Edible Fresh Weight is the mean edible fresh weight per cultivation area across evaluated cycles, and Edible Fresh Weight Range gives the minimum-maximum (the publication reports mean +/- standard error). Age At Sample Harvest is the average cultivation cycle length. Dry weight (DW) ratio equals mass of lyophilized biomass / original fresh mass (%). Edible Biomass Dry Weight, Inedible Belowground Biomass Dry Weight (roots) and Inedible Aboveground Biomass Dry Weight (stems/leaves; kohlrabi given separately for leaves and skin) are these DW ratios. Aboveground Dry Biomass and Belowground Dry Biomass are the dry inedible biomass of stems/leaves and of roots per cultivation area (grams per square meter; range across measured cycles). Stem/leaf dry biomass measurements for tomato and cucumber were erroneous and are not reported. For fruit crops, the average number of fruits per tray per cycle is given. Over the season the greenhouse produced ~268 kg of fresh edible biomass (27.4 kg/m2 over the 12.5 square meter cultivation area, 0.075 kg/(m2*d)) and ~11.2 kg of dry inedible biomass (excluding miscellaneous crops).
+Study Protocol URI					
+Study Protocol Version					
+Study Protocol Parameters Name	Growth Medium;light source;light cycle;Light Intensity;Height of Light Source;Relative Humidity;Mean Growth Temperature;Mean Growth Time;growth environment;Planting Density	ammonium;Calcium;Potassium;Magnesium;Nitrate;chloride;sulfate;Phosphorus;Iron;Manganese;Zinc;Boron;Copper;Molybdenum	Sample Preservation Method;Sample Storage Temperature;Cycles Evaluated;Harvest Type	Substrate Type;Seed Imbibition Method;Mean Germination Temperature;Relative Humidity;Container;Container Size	Age At Sample Harvest;Aboveground Dry Biomass;Belowground Dry Biomass;Mean Edible Freshweight;Edible Freshweight Range;Edible Biomass Dry Weight Ratio;Inedible Belowground Biomass Dry Weight Ratio;Inedible Aboveground Biomass Dry Weight Ratio;Average Number of Fruit per tray per cycle;Supplemental File
+Study Protocol Parameters Name Term Accession Number	http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl;http://purl.obolibrary.org/obo/OBI_0400065;http://purl.obolibrary.org/obo/NCIT_C90419;https://osdr.nasa.gov/;https://osdr.nasa.gov/;https://osdr.nasa.gov/;https://osdr.nasa.gov/;https://osdr.nasa.gov/;http://purl.obolibrary.org/obo/OBI_0000997;https://osdr.nasa.gov/	http://purl.obolibrary.org/obo/CHEBI_28938;http://purl.bioontology.org/ontology/MESH/D002118;http://purl.bioontology.org/ontology/MESH/D011188;http://purl.bioontology.org/ontology/MESH/D008274;http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl;http://purl.obolibrary.org/obo/CHEBI_17996;http://purl.obolibrary.org/obo/CHEBI_16189;http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl;http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl;http://purl.bioontology.org/ontology/MESH/D008345;http://purl.bioontology.org/ontology/MESH/D015032;http://purl.bioontology.org/ontology/MESH/D001895;http://purl.bioontology.org/ontology/MESH/D003300;http://purl.bioontology.org/ontology/MESH/D008982	https://genelab-data.ndc.nasa.gov/;https://genelab-data.ndc.nasa.gov/;https://osdr.nasa.gov/;https://osdr.nasa.gov/	;;;;;	;;;https://osdr.nasa.gov/;https://osdr.nasa.gov/;https://osdr.nasa.gov/;https://osdr.nasa.gov/;https://osdr.nasa.gov/;https://osdr.nasa.gov/;https://osdr.nasa.gov/
+Study Protocol Parameters Name Term Source REF	;;;OSD;OSD;OSD;OSD;OSD;;OSD	;;;;;;;;;;;;;	;;OSD;OSD	;;;;;	;;;OSD;OSD;OSD;OSD;OSD;OSD;OSD
+Study Protocol Components Name					
+Study Protocol Components Type					
+Study Protocol Components Type Term Accession Number					
+Study Protocol Components Type Term Source REF					
+STUDY CONTACTS
+Study Person Last Name	Zabel
+Study Person First Name	Paul
+Study Person Mid Initials	
+Study Person Email	paul.zabel@dlr.de
+Study Person Phone	
+Study Person Fax	
+Study Person Address	Bremen, Germany
+Study Person Affiliation	EDEN Research Group, German Aerospace Center (DLR), Institute of Space Systems
+Study Person Roles	investigation role
+Study Person Roles Term Accession Number	http://purl.org/credit/ontology
+Study Person Roles Term Source REF	CRO
