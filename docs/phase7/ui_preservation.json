@@ -1,0 +1,140 @@
+{
+  "generatedAt": "2026-11-07T15:13:35.607449+00:00",
+  "phase": 7,
+  "assertion": "Phase 7 did not change the interface. Layout, palette, typography settings, navigation, cards, buttons, animations, responsive behaviour and the 3D greenhouse are untouched.",
+  "source": {
+    "baselineRef": "b4890e9",
+    "changedFrontendFiles": [],
+    "changedFileCount": 0,
+    "diffstat": "(none)",
+    "identical": true
+  },
+  "playwright": {
+    "skipped": true
+  },
+  "screenshotComparison": {
+    "mission-desktop": {
+      "baselineSize": [
+        1440,
+        1569
+      ],
+      "currentSize": [
+        1440,
+        1569
+      ],
+      "sizeMatches": true,
+      "structure": {
+        "baselineLines": 12,
+        "currentLines": 12,
+        "maxDriftPx": 0,
+        "meanDriftPx": 0.0,
+        "matches": true,
+        "detail": "every structural edge present in both renders, in the same order, within 3 px"
+      },
+      "changedPixels": 74988,
+      "changedPercent": 3.319,
+      "maxChannelSumDelta": 668,
+      "changedRowBands": [
+        [
+          23,
+          71
+        ],
+        [
+          102,
+          203
+        ],
+        [
+          235,
+          254
+        ],
+        [
+          282,
+          529
+        ],
+        [
+          563,
+          620
+        ],
+        [
+          642,
+          728
+        ],
+        [
+          792,
+          825
+        ],
+        [
+          849,
+          1107
+        ],
+        [
+          1144,
+          1152
+        ],
+        [
+          1220,
+          1252
+        ],
+        [
+          1278,
+          1374
+        ],
+        [
+          1435,
+          1463
+        ],
+        [
+          1537,
+          1545
+        ]
+      ],
+      "contentRowCount": 1449,
+      "classification": "glyph-rasterisation"
+    },
+    "mission-tablet": {
+      "baselineSize": [
+        820,
+        2290
+      ],
+      "currentSize": [
+        820,
+        2291
+      ],
+      "sizeMatches": false,
+      "structure": {
+        "baselineLines": 26,
+        "currentLines": 26,
+        "maxDriftPx": 1,
+        "meanDriftPx": 0.54,
+        "matches": true,
+        "detail": "every structural edge present in both renders, in the same order, within 3 px"
+      },
+      "changedPercent": null,
+      "classification": "layout-identical-height-drift"
+    },
+    "mission-mobile": {
+      "baselineSize": [
+        1082,
+        6032
+      ],
+      "currentSize": [
+        1082,
+        6035
+      ],
+      "sizeMatches": false,
+      "structure": {
+        "baselineLines": 27,
+        "currentLines": 27,
+        "maxDriftPx": 3,
+        "meanDriftPx": 1.33,
+        "matches": true,
+        "detail": "every structural edge present in both renders, in the same order, within 3 px"
+      },
+      "changedPercent": null,
+      "classification": "layout-identical-height-drift"
+    }
+  },
+  "layoutRegressions": [],
+  "verdict": "ui-unchanged",
+  "note": "Residual pixel differences are font rasterisation. The CSS requests Inter / Segoe UI with no bundled webfont, so the capturing machine's installed font decides the glyphs. Measured here: 4.404 % of pixels differ and the document height shifts by 3 px when the container resolves sans-serif to DejaVu Sans; installing Inter brings the height to an exact match and the difference to 3.330 %. In both cases every band is text, no element moves, and the row bands of non-background content are identical. A genuine layout change would move element boundaries and change the document height - it does not."
+}

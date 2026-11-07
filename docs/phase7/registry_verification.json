@@ -1,0 +1,170 @@
+{
+  "generatedAt": "2026-11-07T15:14:16.802132+00:00",
+  "phase": 7,
+  "registrySchemaVersion": 1,
+  "modelCount": 5,
+  "modelIds": [
+    "lettuce-earth-growth-v1",
+    "mizuna-harvest-v1",
+    "mizuna-microbial-load-v1",
+    "mizuna-microbial-relative-load-v2",
+    "tomato-flight-response-v1"
+  ],
+  "artifactDigests": {
+    "lettuce-earth-growth-v1": "bdd6dd96b57499e632a7ebfe779c62017d2bd2ac2802bada8af255b37533fbe0",
+    "mizuna-harvest-v1": "78029d6d9a93946bdaf50427f697a463a805f3c588a4deb17afb61314cf22f38",
+    "mizuna-microbial-load-v1": "8c05cd95a4df902300973425e6fbfe4e1534da5a11b4a8aa6c8d99e1448e019f",
+    "tomato-flight-response-v1": "b1dd72b63130fccc6a334e3de286ae6774152291ce5fe00caf365d74cb10f593",
+    "mizuna-microbial-relative-load-v2": "0f6f7452bd9671b6738c2a2d3c12b4cb7e9c2a7ddef75151aa6fcbb20b1f996f"
+  },
+  "environment": {
+    "python": "3.13.16",
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "sklearn": "1.6.1"
+  },
+  "pinnedEnvironment": {
+    "python": "3.13.16",
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "scikit-learn": "1.6.1",
+    "scipy": "1.17.1",
+    "pyarrow": "26.0.1",
+    "matplotlib": "3.11.2",
+    "openpyxl": "3.1.5"
+  },
+  "checks": [
+    {
+      "check": "checksum matches: lettuce-earth-growth-v1",
+      "passed": true,
+      "detail": "bdd6dd96b574 vs recorded bdd6dd96b574"
+    },
+    {
+      "check": "checksum matches: mizuna-harvest-v1",
+      "passed": true,
+      "detail": "78029d6d9a93 vs recorded 78029d6d9a93"
+    },
+    {
+      "check": "checksum matches: mizuna-microbial-load-v1",
+      "passed": true,
+      "detail": "8c05cd95a4df vs recorded 8c05cd95a4df"
+    },
+    {
+      "check": "checksum matches: tomato-flight-response-v1",
+      "passed": true,
+      "detail": "b1dd72b63130 vs recorded b1dd72b63130"
+    },
+    {
+      "check": "checksum matches: mizuna-microbial-relative-load-v2",
+      "passed": true,
+      "detail": "0f6f7452bd96 vs recorded 0f6f7452bd96"
+    },
+    {
+      "check": "no unregistered model artifacts",
+      "passed": true,
+      "detail": "orphans=[]"
+    },
+    {
+      "check": "superseded model still registered: mizuna-microbial-load-v1",
+      "passed": true,
+      "detail": "mizuna-microbial-relative-load-v2 supersedes mizuna-microbial-load-v1"
+    },
+    {
+      "check": "supersession is one-directional: mizuna-microbial-load-v1",
+      "passed": true,
+      "detail": "registered successor of mizuna-microbial-load-v1 is mizuna-microbial-relative-load-v2"
+    },
+    {
+      "check": "api can load: lettuce-earth-growth-v1",
+      "passed": true,
+      "detail": "?"
+    },
+    {
+      "check": "api can load: mizuna-harvest-v1",
+      "passed": true,
+      "detail": "?"
+    },
+    {
+      "check": "api can load: mizuna-microbial-load-v1",
+      "passed": true,
+      "detail": "experimental"
+    },
+    {
+      "check": "api can load: mizuna-microbial-relative-load-v2",
+      "passed": true,
+      "detail": "experimental"
+    },
+    {
+      "check": "api can load: tomato-flight-response-v1",
+      "passed": true,
+      "detail": "?"
+    },
+    {
+      "check": "pinned version recorded: numpy",
+      "passed": true,
+      "detail": "registry=2.3.5 pins=2.3.5"
+    },
+    {
+      "check": "pinned version recorded: pandas",
+      "passed": true,
+      "detail": "registry=2.2.3 pins=2.2.3"
+    },
+    {
+      "check": "training pins file lists the core stack",
+      "passed": true,
+      "detail": "pins=['matplotlib', 'numpy', 'openpyxl', 'pandas', 'pyarrow', 'python', 'scikit-learn', 'scipy']"
+    },
+    {
+      "check": "artifact reports metrics: lettuce-earth-growth-v1",
+      "passed": true,
+      "detail": "3 numeric metrics"
+    },
+    {
+      "check": "artifact reports limitations: lettuce-earth-growth-v1",
+      "passed": true,
+      "detail": "8 statements"
+    },
+    {
+      "check": "artifact reports metrics: mizuna-harvest-v1",
+      "passed": true,
+      "detail": "3 numeric metrics"
+    },
+    {
+      "check": "artifact reports limitations: mizuna-harvest-v1",
+      "passed": true,
+      "detail": "6 statements"
+    },
+    {
+      "check": "artifact reports metrics: mizuna-microbial-load-v1",
+      "passed": true,
+      "detail": "3 numeric metrics"
+    },
+    {
+      "check": "artifact reports limitations: mizuna-microbial-load-v1",
+      "passed": true,
+      "detail": "7 statements"
+    },
+    {
+      "check": "artifact reports metrics: tomato-flight-response-v1",
+      "passed": true,
+      "detail": "6 numeric metrics"
+    },
+    {
+      "check": "artifact reports limitations: tomato-flight-response-v1",
+      "passed": true,
+      "detail": "5 statements"
+    },
+    {
+      "check": "artifact reports metrics: mizuna-microbial-relative-load-v2",
+      "passed": true,
+      "detail": "3 numeric metrics"
+    },
+    {
+      "check": "artifact reports limitations: mizuna-microbial-relative-load-v2",
+      "passed": true,
+      "detail": "7 statements"
+    }
+  ],
+  "passed": true,
+  "failures": []
+}
