@@ -622,7 +622,7 @@
     },
     {
       "task": "cross-study transfer, irradiated vs control",
-      "trainStudy": "OSD-46 (Affymetrix ATH1, Wassilewskija)",
+      "trainStudy": "OSD-46 (Affymetrix ATH1, Wild Type + atm-1)",
       "testStudy": "OSD-782 (Illumina RNA-seq, Col-0)",
       "sharedGenes": 17997,
       "genesUsed": 500,

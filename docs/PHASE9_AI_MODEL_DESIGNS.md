@@ -86,7 +86,7 @@ expression?
 | Pre-registered schemes | cell hold-out, timepoint hold-out, dose hold-out, dose + collection time as covariate |
 
 **Outcome.** Best learner logistic-L1 at balanced accuracy **0.361** against a
-0.333 chance rate, p = 0.353. Dose is confounded with sample processing order.
+0.333 chance rate, p = 0.2475. Dose is confounded with sample processing order.
 Excluded, evidence retained in `ml/evaluation/excluded/`.
 
 **Why not retuned.** The brief forbids models built to look good; the failure
@@ -121,7 +121,7 @@ invented label, which the brief forbids.
 
 **E, cross-study harmonised molecular.** Designed and run as a genuine experiment
 (`ml/training/train_cross_study_transfer.py`): 17,997 shared TAIR genes between
-OSD-46 (Wassilewskija, microarray) and OSD-782 (Col-0, RNA-seq), per-gene z-scoring
+OSD-46 (Wild Type + atm-1, microarray) and OSD-782 (Col-0, RNA-seq), per-gene z-scoring
 within each study, in-fold ANOVA selection, 4 × 4 grid over C and k.
 
 **Outcome: a verified negative.** All 16 settings landed on identical

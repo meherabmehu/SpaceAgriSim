@@ -172,7 +172,7 @@ def cross_study() -> dict:
     from sklearn.metrics import accuracy_score, balanced_accuracy_score, confusion_matrix
     result = {
         "task": "cross-study transfer, irradiated vs control",
-        "trainStudy": "OSD-46 (Affymetrix ATH1, Wassilewskija)",
+        "trainStudy": "OSD-46 (Affymetrix ATH1, Wild Type + atm-1)",
         "testStudy": "OSD-782 (Illumina RNA-seq, Col-0)",
         "sharedGenes": len(shared),
         "genesUsed": int(len(chosen)),

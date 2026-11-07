@@ -2,7 +2,7 @@
   "phase": 9,
   "task": "irradiated versus non-irradiated",
   "generatedAt": "2026-11-07T16:14:53.506546+00:00",
-  "trainStudy": "OSD-46 (Affymetrix ATH1 microarray, Wassilewskija)",
+  "trainStudy": "OSD-46 (Affymetrix ATH1 microarray, Wild Type + atm-1)",
   "testStudy": "OSD-782 (Illumina RNA-seq, Col-0, GeneLab VST)",
   "sharedGeneModels": 17997,
   "harmonisation": "per-gene z-score within each study (unsupervised, no label use)",

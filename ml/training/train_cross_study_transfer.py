@@ -10,7 +10,7 @@ same contrast with a different platform.
 
 Setup
 -----
-  train  OSD-46   Affymetrix ATH1 microarray, 44 arrays, Wassilewskija background
+  train  OSD-46   Affymetrix ATH1 microarray, 44 arrays, genotype Wild Type + atm-1 (ISA)
   test   OSD-782  Illumina bulk RNA-seq, 36 libraries, Col-0 background
   task   irradiated versus non-irradiated
 
@@ -194,7 +194,7 @@ def main() -> None:
         "phase": 9,
         "task": "irradiated versus non-irradiated",
         "generatedAt": stamp(),
-        "trainStudy": "OSD-46 (Affymetrix ATH1 microarray, Wassilewskija)",
+        "trainStudy": "OSD-46 (Affymetrix ATH1 microarray, Wild Type + atm-1)",
         "testStudy": "OSD-782 (Illumina RNA-seq, Col-0, GeneLab VST)",
         "sharedGeneModels": len(common),
         "harmonisation": "per-gene z-score within each study (unsupervised, no label use)",
