@@ -237,10 +237,12 @@ def build(study: str, manifest: dict) -> dict:
             "verifiedAt": datetime.now(timezone.utc).isoformat(),
             "organisms": ["Brassica rapa var. nipposinica"],
             "assayTypes": ["Microbial plate counts"],
-            "sampleCount": len(files),
+            # Two assay tables plus a data dictionary: the file count is 3 but the
+            # measurement tables are 2, and neither is one row per plant.
+            "sampleCount": sum("Plate_Count" in f["name"] for f in files),
             "sampleCountDefinition": (
-                "Two assay tables (aerobic, yeast/mould) rather than one row per "
-                "sample; counts are per harvest group, not per plant."),
+                "Two measured assay tables (aerobic, yeast/mould) plus a data "
+                "dictionary; counts are per harvest group, not per plant."),
             "fileCount": len(files),
             "factors": ["Spaceflight", "Harvest"],
             "publications": [],

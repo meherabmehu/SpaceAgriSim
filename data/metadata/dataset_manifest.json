@@ -25790,7 +25790,7 @@
       "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/46",
       "metadataSha256": "bf478a09853f644bbb7413d6a70c2a0a5c69cc2c44e83f07ab2557f0d200eb71",
       "version": 6,
-      "verifiedAt": "2026-11-07T17:26:11.570575+00:00",
+      "verifiedAt": "2026-11-07T18:24:42.217828+00:00",
       "organisms": [
         "Arabidopsis thaliana"
       ],
@@ -25865,7 +25865,7 @@
       "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/782",
       "metadataSha256": "9564320f24498ddcec0d47895bf697d04113fcdf2277d592663c8b65c83e595c",
       "version": 2,
-      "verifiedAt": "2026-11-07T17:26:11.571620+00:00",
+      "verifiedAt": "2026-11-07T18:24:42.225345+00:00",
       "organisms": [
         "Arabidopsis thaliana"
       ],
@@ -25937,7 +25937,7 @@
       "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/411",
       "metadataSha256": "ab6687e01802dfabffa8e891c982846e33bd7a239fe26b51a79c2b20c748870c",
       "version": 4,
-      "verifiedAt": "2026-11-07T17:26:11.573310+00:00",
+      "verifiedAt": "2026-11-07T18:24:42.226887+00:00",
       "organisms": [
         "Arabidopsis thaliana"
       ],
@@ -25994,15 +25994,15 @@
       "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/780",
       "metadataSha256": null,
       "version": null,
-      "verifiedAt": "2026-11-07T17:26:11.573460+00:00",
+      "verifiedAt": "2026-11-07T18:24:42.227012+00:00",
       "organisms": [
         "Brassica rapa var. nipposinica"
       ],
       "assayTypes": [
         "Microbial plate counts"
       ],
-      "sampleCount": 3,
-      "sampleCountDefinition": "Two assay tables (aerobic, yeast/mould) rather than one row per sample; counts are per harvest group, not per plant.",
+      "sampleCount": 2,
+      "sampleCountDefinition": "Two measured assay tables (aerobic, yeast/mould) plus a data dictionary; counts are per harvest group, not per plant.",
       "fileCount": 3,
       "factors": [
         "Spaceflight",
