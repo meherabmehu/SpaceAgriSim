@@ -24,7 +24,7 @@ Completed on `feat/phase4-production-security` from verified Phase 3 `main` base
 | Auth/authorization coverage | registration, duplicate login, wrong-password rejection, logout revocation, unauthenticated rejection, cross-user scenario isolation and security headers covered |
 | Frontend lint/typecheck/build | passed |
 | Playwright | 15 passed across desktop, tablet and mobile using a fresh backend process |
-| Vercel preview | READY: `https://space-agri-ap2gn753h-meherabmehus-projects.vercel.app` |
+| Vercel preview | READY for commit `b93f026`: `https://space-agri-52sq2ctq4-meherabmehus-projects.vercel.app` |
 | Live GET smoke checks | `/api/ready`, `/api/health`, `/api/metrics`, `/api/datasets`, `/api/models`: HTTP 200 |
 | Docker Compose configuration | passed |
 
