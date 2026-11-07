@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -49,6 +50,17 @@ RADIATION = tuple(f"radiation-{viewport}-{model}"
                   for viewport in ("desktop", "tablet", "mobile")
                   for model in RADIATION_MODELS)
 ALL_CAPTURES = VIEWPORTS + RADIATION
+
+
+def _dirty_baselines() -> list[str]:
+    """Uncommitted or untracked changes under docs/screenshots, if git is available."""
+    try:
+        completed = subprocess.run(
+            ["git", "status", "--porcelain", "--", "docs/screenshots"],
+            cwd=ROOT, capture_output=True, text=True, check=True)
+    except (OSError, subprocess.CalledProcessError):
+        return []
+    return [line.strip() for line in completed.stdout.splitlines() if line.strip()]
 
 
 def compare(baseline_path: Path, fresh_path: Path) -> dict:
@@ -118,6 +130,20 @@ def main() -> int:
             target = SCREENSHOTS / f"{name}.png"
             Image.open(fresh_dir / f"{name}.png").save(target)
         print(f"created first baseline(s): {', '.join(new_baselines)}")
+
+    # Guard against the circularity this gate is meant to prevent: if a capture
+    # ever lands in docs/screenshots and gets committed, every future comparison
+    # is a file against itself and always passes. Baselines must be clean.
+    dirty = _dirty_baselines()
+    if dirty:
+        print("WARNING: the committed baselines have uncommitted changes:")
+        for line in dirty:
+            print(f"  {line}")
+        print("         A comparison against a modified baseline proves nothing.")
+        print("         Commit the baseline change deliberately, or restore it with")
+        print("         git checkout -- docs/screenshots")
+        if not args.refresh:
+            return 2
 
     results = [compare(SCREENSHOTS / f"{name}.png", fresh_dir / f"{name}.png")
                for name in names]
