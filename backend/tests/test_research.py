@@ -20,7 +20,10 @@ def test_actual_dataset_inventory_and_no_cross_crop_claim(scientific_client):
     response = scientific_client.get("/api/datasets")
     assert response.status_code == 200
     studies = response.json()["datasets"]
-    assert len(studies) == 14
+    # 14 from the original inventory, plus the four studies Phase 9 catalogued
+    # after finding that models cited studies the explorer did not list
+    # (OSD-46, OSD-782, OSD-411, OSD-780).
+    assert len(studies) == 18
     mizuna = next(d for d in studies if d["id"] == "OSD-655")
     assert mizuna["organisms"] == ["Brassica rapa"]
     assert mizuna["sampleCount"] == 37

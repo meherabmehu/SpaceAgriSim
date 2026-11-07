@@ -303,3 +303,92 @@ def test_every_registered_model_is_classified():
     served = set(payload["summary"]["servedAsPrediction"])
     retired = set(payload["summary"]["retiredAsPrediction"])
     assert registered.issubset(served | retired)
+
+
+# ---------------------------------------------------------------------------
+# Dataset explorer consistency
+# ---------------------------------------------------------------------------
+def test_every_modelled_study_is_in_the_dataset_explorer():
+    """A model that cites a study the explorer does not list is a dead end.
+
+    Before this test, OSD-46, OSD-782 and OSD-411 trained Phase 9 models while
+    being absent from /api/datasets, so a reader following a model back to its
+    source data found nothing.
+    """
+    catalogue = {entry["id"] for entry in research.manifest()["datasets"]}
+    # Non-NASA sources are surfaced by /api/external-datasets instead of the OSDR
+    # catalogue, so they are checked against that payload rather than this one.
+    external = {(research.read_json(research.DATA / "metadata" / "external_lettuce.json")
+                 or {}).get("id", "WUR-lettuce")}
+    for entry in research.model_registry()["models"]:
+        study = research.load_model(entry["id"]).get("sourceStudy")
+        if not study:
+            continue
+        if study.startswith("OSD-"):
+            assert study in catalogue, f"{entry['id']} cites {study}, which is not catalogued"
+        else:
+            assert study in external, f"{entry['id']} cites external {study}, which is not published"
+
+
+def test_phase9_catalogue_entries_carry_verified_provenance():
+    manifest = json.loads((research.DATA / "metadata" / "phase9_nasa_datasets.json").read_text())
+    pinned = {(spec["study"], spec["name"]): spec["sha256"] for spec in manifest["files"]}
+    catalogue = {entry["id"]: entry for entry in research.manifest()["datasets"]}
+    for study in ("OSD-46", "OSD-782", "OSD-411"):
+        entry = catalogue[study]
+        assert entry["status"] == "verified-data"
+        assert entry["sampleCount"] > 0
+        assert entry["sampleCountDefinition"]
+        downloaded = [f for f in entry["files"] if f.get("downloaded")]
+        assert downloaded, "at least one file must be recorded as acquired"
+        for item in downloaded:
+            assert pinned[(study, item["name"])] == item["sha256"]
+            assert item["url"].startswith("https://nasa-osdr.s3.us-west-2.amazonaws.com/")
+
+
+def test_biological_unit_counts_are_stated_not_inflated():
+    """64 libraries from 16 seedlings must not be described as 64 units."""
+    catalogue = {entry["id"]: entry for entry in research.manifest()["datasets"]}
+    osd411 = catalogue["OSD-411"]
+    assert osd411["sampleCount"] == 64
+    assert "16" in osd411["sampleCountDefinition"]
+    assert any("repeated measures" in note for note in osd411["limitations"])
+
+
+def test_microbiome_sample_count_disagreement_is_disclosed():
+    """The ISA sheet and the processed table differ by one sample; say so."""
+    catalogue = {entry["id"]: entry for entry in research.manifest()["datasets"]}
+    reconciliation = catalogue["OSD-267"]["sampleCountReconciliation"]
+    assert reconciliation["metadataSamples"] == 12
+    assert reconciliation["processed16sSamples"] == 11
+    assert reconciliation["explanation"]
+
+
+def test_coverage_no_longer_claims_no_radiation_dataset_exists():
+    """The coverage table gates what the UI says is known; it must not go stale."""
+    coverage = {row["feature"]: row for row in research.coverage()}
+    assert "No suitable NASA dataset identified" not in coverage["Radiation effects"]["status"]
+    assert "OSD-46" in coverage["Radiation effects"]["source"]
+    assert "not partial gravity" in coverage["Gravity effects"]["limitation"].lower()
+
+
+# ---------------------------------------------------------------------------
+# Harness arithmetic
+# ---------------------------------------------------------------------------
+def test_harness_reference_evaluator_matches_the_served_evaluator():
+    """Two implementations of the same softmax must agree.
+
+    The training harness and the API are separate code paths, so a silent change
+    to either could serve probabilities that no longer match the trained model.
+    """
+    import sys
+    sys.path.insert(0, str(research.ROOT / "ml" / "training"))
+    import phase9_harness as harness
+
+    for model_id in NATIVE_MODELS:
+        model = research.load_model(model_id)
+        for values in model["referenceProfiles"].values():
+            mine = harness.softmax_probabilities(model["evaluator"], values)
+            served = research.predict_probabilities(model, values)
+            for label, probability in mine.items():
+                assert abs(probability - served[label]) < 1e-12
