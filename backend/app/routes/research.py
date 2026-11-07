@@ -5,7 +5,7 @@ from typing import Literal
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
-from app import research
+from app import research, science_classification
 
 router = APIRouter(tags=["scientific data and models"])
 
@@ -33,7 +33,13 @@ class LettucePredictionRequest(BaseModel):
     ppfd: float = Field(ge=0, le=1000)
 
 
-@router.post('/predict/lettuce-earth-growth-v1')
+@router.post(
+    '/predict/lettuce-earth-growth-v1',
+    deprecated=True,
+    responses={200: {"description": "Still served for reproducibility; superseded by "
+                                   "/predict/lettuce-earth-growth-v2, which was better on "
+                                   "every held-out experiment."}},
+)
 def predict_lettuce(request: LettucePredictionRequest):
     model=artifact('lettuce-earth-growth-v1')
     value, warnings=research.predict_values(model,[request.daysAfterTransplant,request.airTemperature,request.rootTemperature,request.ppfd])
@@ -41,6 +47,54 @@ def predict_lettuce(request: LettucePredictionRequest):
         warnings.append('Tip-burn treatment combinations were omitted in the published analysis; this region is unsupported.')
     radius=model['interval']['radius']
     return {'modelId':model['id'],'prediction':value,'unit':model['unit'],'method':model['method'],'sourceStudy':'WUR-lettuce','sourceUrl':model['sourceUrl'],'interval':{'low':max(0,value-radius),'high':value+radius,'kind':model['interval']['kind']},'outOfDistribution':bool(warnings),'warnings':warnings+model['limitations'],'inputs':request.model_dump()}
+
+
+@router.post("/predict/lettuce-earth-growth-v2")
+def predict_lettuce_v2(request: LettucePredictionRequest):
+    """Phase 8 successor to the Earth lettuce model: same data, better model class.
+
+    Phase 7's own benchmark had already shown gradient boosting ahead of the random
+    forest that was actually registered (R2 0.8699 vs 0.8131 on identical
+    leave-one-experiment-out folds, and better MAE in all four held-out
+    experiments), so the served model was the weaker of the two candidates it had
+    measured. v2 ships the boosting model; v1 is kept, not overwritten, so the
+    Phase 7 result stays reproducible.
+    """
+    model = artifact("lettuce-earth-growth-v2")
+    raw, warnings = research.predict_values(
+        model, [request.daysAfterTransplant, request.airTemperature,
+                request.rootTemperature, request.ppfd])
+    # Fresh mass cannot be negative. Boosted trees will cross zero just below the
+    # measured range, so clamp and say so rather than returning a physical
+    # impossibility.
+    value = max(0.0, raw)
+    clamped = value != raw
+    if request.airTemperature >= 28 and request.rootTemperature <= 24 and request.ppfd >= 400:
+        warnings.append("Tip-burn treatment combinations were omitted in the published "
+                        "analysis; this region is unsupported.")
+    radius = model["interval"]["radius"]
+    selection = model.get("modelSelection") or {}
+    return {
+        "modelId": model["id"],
+        "prediction": value,
+        "unit": model["unit"],
+        "method": model["method"],
+        "sourceStudy": "WUR-lettuce",
+        "sourceUrl": model["sourceUrl"],
+        "supersedes": model.get("supersedes"),
+        "interval": {"low": max(0.0, value - radius), "high": value + radius,
+                     "kind": model["interval"]["kind"],
+                     "calibrated": False},
+        "outputClamped": clamped,
+        "modelSelection": {
+            "shipped": selection.get("shipped"),
+            "comparedOnIdenticalFolds": selection.get("compared"),
+            "note": selection.get("rule"),
+        },
+        "outOfDistribution": bool(warnings),
+        "warnings": warnings + model["limitations"],
+        "inputs": request.model_dump(),
+    }
 
 
 def dataset(study_id):
@@ -143,45 +197,53 @@ class MicrobialPredictionRequest(BaseModel):
     harvestIndex: int = Field(ge=1, le=5, description="VEG-04B harvest number; 1 for VEG-04A")
 
 
-@router.post("/predict/mizuna-microbial-load-v1")
+@router.post(
+    "/predict/mizuna-microbial-load-v1",
+    deprecated=True,
+    responses={410: {"description": "Retired as a predictive feature by the Phase 8 "
+                                   "scientific integrity audit; see detail for evidence."}},
+)
 def predict_microbial(request: MicrobialPredictionRequest):
+    """Retired: absolute leaf microbial load is not predictable for an unseen campaign.
+
+    The Phase 6 artifact is retained and still registered, because deleting it would
+    destroy the reproducibility of the reported result. What has been withdrawn is the
+    *claim to predict*: leave-one-campaign-out R2 is -0.55 (VEG-04A held out) and -0.58
+    (VEG-04B held out), i.e. worse than predicting the training mean, on both held-out
+    campaigns. Phase 7 established that the campaign offset - not the flight/ground
+    effect - is the component that fails to transfer.
+
+    Phase 8's policy is that a surface whose only honest description is "worse than the
+    mean" must not answer 200 with a number. It keeps request validation so that a
+    malformed call still fails with 422, and returns 410 Gone with the measured
+    evidence instead of a prediction.
+
+    Use /predict/mizuna-microbial-relative-load-v2, which predicts the within-campaign
+    standardised load (held-out R2 +0.444 / +0.373, permutation p = 0.000).
+    """
     model = artifact("mizuna-microbial-load-v1")
-    values = [
-        int(request.environment == "flight"),
-        int(request.spectrum == "blue"),
-        int(request.experiment == "VEG04B"),
-        int(request.sanitised),
-        request.freshWeightG,
-        request.harvestIndex,
-    ]
-    value, warnings = research.predict_values(model, values)
-    radius = model["interval"]["radius"]
-    calibrated = bool(model["interval"].get("empiricallyCalibrated", False))
-    return {
+    raise HTTPException(status_code=410, detail={
+        "error": "retired-prediction",
         "modelId": model["id"],
-        "prediction": value,
-        "unit": model["unit"],
-        "method": model["method"],
-        "sourceStudy": model["sourceStudy"],
-        "sourceUrl": model["sourceUrl"],
-        "evidenceStatus": model.get("evidenceStatus", "experimental"),
-        "recommendedUse": model.get("recommendedUse"),
-        "interval": {
-            "low": value - radius,
-            "high": value + radius,
-            "kind": model["interval"]["kind"],
-            "calibrated": calibrated,
-            "empiricalCoverage": model["interval"].get("empiricalCoverage"),
-            "nominalCoverage": model["interval"].get("nominalCoverage"),
+        "reason": (
+            "Absolute microbial load does not transfer to an unseen experiment; the "
+            "model is worse than the training mean on both held-out campaigns."
+        ),
+        "evidence": {
+            "leaveOneExperimentOutR2": {
+                campaign: result.get("R2")
+                for campaign, result in (model.get("leaveOneExperimentOut") or {}).items()
+            },
+            "transfersToHeldOutExperiment": bool(
+                (model.get("evidenceBasis") or {}).get("transfersToHeldOutExperiment", False)),
         },
-        "crossExperimentGeneralisation": {
-            "leaveOneExperimentOut": model.get("leaveOneExperimentOut"),
-            "transfers": bool((model.get("evidenceBasis") or {}).get("transfersToHeldOutExperiment", False)),
-        },
-        "outOfDistribution": bool(warnings),
-        "warnings": warnings + model["limitations"],
-        "inputs": request.model_dump(),
-    }
+        "retainedFor": (
+            "The registered artifact and its evaluation remain available via GET /api/models "
+            "so the Phase 6/7 result stays reproducible."
+        ),
+        "replacement": "/api/predict/mizuna-microbial-relative-load-v2",
+        "classification": "category 6 - unsupported scientific prediction",
+    })
 
 
 class MicrobialRelativePredictionRequest(BaseModel):
@@ -319,6 +381,17 @@ def science_calibration():
 @router.get("/science/evidence")
 def science_evidence():
     return research.evidence_summary()
+
+
+@router.get("/science/classification")
+def science_classification_of_features():
+    """Every prediction surface classified against the Phase 8 evidence policy.
+
+    Phase 8 requires that no feature claim more support than the measurements
+    behind it. The classification is served rather than filed so the claim can be
+    checked against the running system, not only against a document.
+    """
+    return science_classification.classifier_response()
 
 
 @router.get("/scientific-summary")

@@ -16,6 +16,7 @@ MODEL_IDS = {
     "mizuna-harvest-v1",
     "tomato-flight-response-v1",
     "lettuce-earth-growth-v1",
+    "lettuce-earth-growth-v2",
     "mizuna-microbial-load-v1",
     "mizuna-microbial-relative-load-v2",
 }
@@ -58,7 +59,32 @@ def coverage():
     ]
 
 
-@lru_cache(maxsize=4)
+def _validate_trees(trees, width):
+    """Structural validation shared by bagged forests and boosted ensembles.
+
+    Both store plain decision trees as parallel arrays, so neither the branch
+    bounds nor the cycle/width checks may diverge between them.
+    """
+    for tree in trees:
+        count = len(tree["value"])
+        if not 1 <= count <= 4096 or any(len(tree[k]) != count for k in ("left", "right", "feature", "threshold")):
+            raise ValueError("Invalid tree dimensions")
+        for i in range(count):
+            if not math.isfinite(tree["value"][i]) or not math.isfinite(tree["threshold"][i]):
+                raise ValueError("Non-finite tree values")
+            if tree["left"][i] != -1 and (not 0 <= tree["feature"][i] < width
+                                          or not i < tree["left"][i] < count
+                                          or not i < tree["right"][i] < count):
+                raise ValueError("Invalid or cyclic tree branches")
+
+
+# The cache size must be at least the number of registered models. Phase 7 raised
+# the registry from four models to five while this decorator stayed at maxsize=4,
+# so every GET /api/models pass produced misses=5, currsize=4 and evicted an entry
+# it had just loaded - zero reuse, and ~1 MB of artifacts re-read and re-hashed per
+# request. Deriving the size from MODEL_IDS means adding a model can never silently
+# reintroduce the thrash; backend/tests/test_phase8_performance.py asserts it.
+@lru_cache(maxsize=len(MODEL_IDS))
 def load_model(model_id):
     if model_id not in MODEL_IDS:
         raise KeyError(model_id)
@@ -77,15 +103,17 @@ def load_model(model_id):
     if "forest" in model:
         if not 1 <= len(model["forest"]) <= 128:
             raise ValueError("Invalid forest size")
-        for tree in model["forest"]:
-            count = len(tree["value"])
-            if not 1 <= count <= 4096 or any(len(tree[k]) != count for k in ("left","right","feature","threshold")):
-                raise ValueError("Invalid tree dimensions")
-            for i in range(count):
-                if not math.isfinite(tree['value'][i]) or not math.isfinite(tree['threshold'][i]):
-                    raise ValueError("Non-finite tree values")
-                if tree['left'][i] != -1 and (not 0 <= tree['feature'][i] < width or not i < tree['left'][i] < count or not i < tree['right'][i] < count):
-                    raise ValueError("Invalid or cyclic tree branches")
+        _validate_trees(model["forest"], width)
+        return model
+    if "boostedTrees" in model:
+        boosted = model["boostedTrees"]
+        if not 1 <= len(boosted["trees"]) <= 512:
+            raise ValueError("Invalid boosting round count")
+        if not math.isfinite(boosted["init"]) or not math.isfinite(boosted["learningRate"]):
+            raise ValueError("Non-finite boosting parameters")
+        if not 0 < boosted["learningRate"] <= 1:
+            raise ValueError("Invalid learning rate")
+        _validate_trees(boosted["trees"], width)
         return model
     linear = model["linear"]
     if any(len(linear[k]) != width for k in ("mean", "scale", "coefficients")):
@@ -120,7 +148,7 @@ def model_registry():
                 evidence_status = "experimental"
             else:
                 evidence_status = "insufficient-evidence"
-            models.append({k: v for k, v in model.items() if k not in ("linear", "forest") } | {
+            models.append({k: v for k, v in model.items() if k not in ("linear", "forest", "boostedTrees") } | {
                 "artifactExists": True,
                 "artifactSha256": registered.get(model_id, {}).get("sha256"),
                 "predictionStatus": evidence_status,
@@ -134,17 +162,25 @@ def model_registry():
     return {"models": models, "simulatorMode": "Assumption-based mathematical estimates; separate from NASA-trained crop-specific and molecular models", "unsupportedTargets": ["Lettuce/tomato/radish ML yield", "measured water demand", "measured gas exchange", "disease image classification", "lunar/Martian predictive validation"]}
 
 
+def _eval_tree(tree, values):
+    """Walk one decision tree to a leaf and return its value."""
+    index = 0
+    while tree['left'][index] != -1:
+        index = (tree['left'][index] if values[tree['feature'][index]] <= tree['threshold'][index]
+                 else tree['right'][index])
+    return tree['value'][index]
+
+
 def predict_values(model, values):
     if len(values) != len(model['features']) or not all(math.isfinite(v) for v in values):
         raise ValueError('Invalid model feature vector')
     if 'forest' in model:
-        predictions=[]
-        for tree in model['forest']:
-            index=0
-            while tree['left'][index] != -1:
-                index=tree['left'][index] if values[tree['feature'][index]] <= tree['threshold'][index] else tree['right'][index]
-            predictions.append(tree['value'][index])
-        result=sum(predictions)/len(predictions)
+        result = sum(_eval_tree(tree, values) for tree in model['forest']) / len(model['forest'])
+    elif 'boostedTrees' in model:
+        # Additive ensemble: init + learning_rate * sum of tree outputs.
+        boosted = model['boostedTrees']
+        result = boosted['init'] + boosted['learningRate'] * sum(
+            _eval_tree(tree, values) for tree in boosted['trees'])
     else:
         linear = model["linear"]
         result = linear["intercept"] + sum((v - m) / s * c for v, m, s, c in zip(values, linear["mean"], linear["scale"], linear["coefficients"]))
