@@ -33,7 +33,13 @@ class LettucePredictionRequest(BaseModel):
     ppfd: float = Field(ge=0, le=1000)
 
 
-@router.post('/predict/lettuce-earth-growth-v1')
+@router.post(
+    '/predict/lettuce-earth-growth-v1',
+    deprecated=True,
+    responses={200: {"description": "Still served for reproducibility; superseded by "
+                                   "/predict/lettuce-earth-growth-v2, which was better on "
+                                   "every held-out experiment."}},
+)
 def predict_lettuce(request: LettucePredictionRequest):
     model=artifact('lettuce-earth-growth-v1')
     value, warnings=research.predict_values(model,[request.daysAfterTransplant,request.airTemperature,request.rootTemperature,request.ppfd])
@@ -41,6 +47,54 @@ def predict_lettuce(request: LettucePredictionRequest):
         warnings.append('Tip-burn treatment combinations were omitted in the published analysis; this region is unsupported.')
     radius=model['interval']['radius']
     return {'modelId':model['id'],'prediction':value,'unit':model['unit'],'method':model['method'],'sourceStudy':'WUR-lettuce','sourceUrl':model['sourceUrl'],'interval':{'low':max(0,value-radius),'high':value+radius,'kind':model['interval']['kind']},'outOfDistribution':bool(warnings),'warnings':warnings+model['limitations'],'inputs':request.model_dump()}
+
+
+@router.post("/predict/lettuce-earth-growth-v2")
+def predict_lettuce_v2(request: LettucePredictionRequest):
+    """Phase 8 successor to the Earth lettuce model: same data, better model class.
+
+    Phase 7's own benchmark had already shown gradient boosting ahead of the random
+    forest that was actually registered (R2 0.8699 vs 0.8131 on identical
+    leave-one-experiment-out folds, and better MAE in all four held-out
+    experiments), so the served model was the weaker of the two candidates it had
+    measured. v2 ships the boosting model; v1 is kept, not overwritten, so the
+    Phase 7 result stays reproducible.
+    """
+    model = artifact("lettuce-earth-growth-v2")
+    raw, warnings = research.predict_values(
+        model, [request.daysAfterTransplant, request.airTemperature,
+                request.rootTemperature, request.ppfd])
+    # Fresh mass cannot be negative. Boosted trees will cross zero just below the
+    # measured range, so clamp and say so rather than returning a physical
+    # impossibility.
+    value = max(0.0, raw)
+    clamped = value != raw
+    if request.airTemperature >= 28 and request.rootTemperature <= 24 and request.ppfd >= 400:
+        warnings.append("Tip-burn treatment combinations were omitted in the published "
+                        "analysis; this region is unsupported.")
+    radius = model["interval"]["radius"]
+    selection = model.get("modelSelection") or {}
+    return {
+        "modelId": model["id"],
+        "prediction": value,
+        "unit": model["unit"],
+        "method": model["method"],
+        "sourceStudy": "WUR-lettuce",
+        "sourceUrl": model["sourceUrl"],
+        "supersedes": model.get("supersedes"),
+        "interval": {"low": max(0.0, value - radius), "high": value + radius,
+                     "kind": model["interval"]["kind"],
+                     "calibrated": False},
+        "outputClamped": clamped,
+        "modelSelection": {
+            "shipped": selection.get("shipped"),
+            "comparedOnIdenticalFolds": selection.get("compared"),
+            "note": selection.get("rule"),
+        },
+        "outOfDistribution": bool(warnings),
+        "warnings": warnings + model["limitations"],
+        "inputs": request.model_dump(),
+    }
 
 
 def dataset(study_id):

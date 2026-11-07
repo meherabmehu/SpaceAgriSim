@@ -51,11 +51,14 @@ def test_model_registry_requires_actual_verified_artifacts(scientific_client):
     # Phase 6 added mizuna-microbial-load-v1 (NASA OSD-780 plate counts). Phase 7
     # added mizuna-microbial-relative-load-v2, which supersedes v1's estimand; v1
     # stays registered and on disk so the Phase 6 claim remains reproducible.
-    assert len(models) == 5
+    # Phase 8 added lettuce-earth-growth-v2, a gradient-boosting successor that
+    # beat the registered random forest on identical folds. v1 stays registered and
+    # on disk so the Phase 7 result remains reproducible.
+    assert len(models) == 6
     assert {m["id"] for m in models} == {
         "mizuna-harvest-v1", "tomato-flight-response-v1",
-        "lettuce-earth-growth-v1", "mizuna-microbial-load-v1",
-        "mizuna-microbial-relative-load-v2",
+        "lettuce-earth-growth-v1", "lettuce-earth-growth-v2",
+        "mizuna-microbial-load-v1", "mizuna-microbial-relative-load-v2",
     }
     assert all(m["artifactExists"] for m in models)
     for model in models:
@@ -289,5 +292,5 @@ def test_scientific_summary_never_claims_validation(scientific_client):
     assert payload["missionCertified"] is False
     assert payload["validatedModels"] == []
     assert payload["platformMaturity"] == "research-and-education"
-    assert len(payload["models"]) == 5
+    assert len(payload["models"]) == 6
     assert payload["calibration"]["invariantsAllPassed"] is True

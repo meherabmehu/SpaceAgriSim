@@ -74,21 +74,44 @@ FEATURES: list[Feature] = [
     # ------------------------- category 3: external measured -----------------
     Feature(
         id="lettuce-earth-growth-v1",
-        name="Earth lettuce fresh shoot mass",
+        name="Earth lettuce fresh shoot mass (random forest)",
         surface="POST /api/predict/lettuce-earth-growth-v1",
         category=3,
-        status="served",
+        status="served-superseded",
         evidence=(
             "WUR lettuce dataset, 1648 plants across 4 experiments, held-out-"
             "experiment R2 0.880. External data, not NASA."
         ),
         user_facing=(
-            "Presented as an Earth-only experimental model with a stated measured "
-            "domain; explicitly not a space-crop forecast."
+            "Still served and still disclosed as an Earth-only experimental model, but "
+            "marked deprecated in OpenAPI in favour of v2, which beat it on every "
+            "held-out experiment."
         ),
         notes=[
             "Earth-only domain: 2-29 days after transplant, air/root 20-32 C, PPFD 200-750.",
             "Tip-burn treatment combinations were omitted from the source analysis and are refused.",
+        ],
+    ),
+    Feature(
+        id="lettuce-earth-growth-v2",
+        name="Earth lettuce fresh shoot mass (gradient boosting)",
+        surface="POST /api/predict/lettuce-earth-growth-v2",
+        category=3,
+        status="served",
+        evidence=(
+            "Same WUR dataset and identical leave-one-experiment-out folds as v1. "
+            "Gradient boosting R2 0.8699 / MAE 34.9 g versus the registered random "
+            "forest's 0.8131 / 39.1 g, winning on MAE in 4 of 4 held-out experiments."
+        ),
+        user_facing=(
+            "Served as the current Earth-only model; v1 remains callable and remains "
+            "registered so the Phase 7 result stays reproducible."
+        ),
+        notes=[
+            "Model class chosen by measurement on the platform's own benchmark, not by preference.",
+            "Serialised ensemble reproduces sklearn exactly (max abs difference 0.0).",
+            "Predictions are clamped at zero because fresh mass cannot be negative.",
+            "Still external Earth data, not NASA data, and still not space-crop calibrated.",
         ],
     ),
     Feature(
