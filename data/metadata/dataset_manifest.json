@@ -40,7 +40,8 @@
       "licenseUrl": "https://science.nasa.gov/reference/osdr-help-terms-and-conditions/",
       "limitations": [
         "No matched lunar or Martian crop experiments identified in this study.",
-        "Study metadata and assay measurements are different evidence types."
+        "Study metadata and assay measurements are different evidence types.",
+        "The ISA sheet lists 12 samples but the processed 16S taxonomy-and-counts table has 11 columns; one sample has no processed 16S data. The Phase 9 microbiome analysis uses the 11 with data and says so."
       ],
       "files": [
         {
@@ -1747,7 +1748,12 @@
           "restricted": false,
           "downloaded": false
         }
-      ]
+      ],
+      "sampleCountReconciliation": {
+        "metadataSamples": 12,
+        "processed16sSamples": 11,
+        "explanation": "The ISA sheet lists 12 samples but the processed 16S taxonomy-and-counts table has 11 columns; one sample has no processed 16S data. The Phase 9 microbiome analysis uses the 11 with data and says so."
+      }
     },
     {
       "id": "OSD-268",
@@ -3397,7 +3403,8 @@
       "licenseUrl": "https://science.nasa.gov/reference/osdr-help-terms-and-conditions/",
       "limitations": [
         "No matched lunar or Martian crop experiments identified in this study.",
-        "Study metadata and assay measurements are different evidence types."
+        "Study metadata and assay measurements are different evidence types.",
+        "ISA samples and processed 16S columns agree."
       ],
       "files": [
         {
@@ -4248,7 +4255,12 @@
           "restricted": false,
           "downloaded": false
         }
-      ]
+      ],
+      "sampleCountReconciliation": {
+        "metadataSamples": 15,
+        "processed16sSamples": 15,
+        "explanation": "ISA samples and processed 16S columns agree."
+      }
     },
     {
       "id": "OSD-745",
@@ -25766,6 +25778,275 @@
           "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-655/download?source=datamanager&file=OSD-655_sup_OSD-655_sup_Veg-04A_B_Master+Chem.xlsx",
           "restricted": false,
           "downloaded": false
+        }
+      ]
+    },
+    {
+      "id": "OSD-46",
+      "title": "Gamma radiation and HZE treatment of seedlings in Arabidopsis",
+      "description": "Plants exhibit a robust transcriptional response to gamma radiation which includes the induction of transcripts required for homologous recombination and the suppression of transcripts that promote cell cycle progression. Various DNA damaging agents induce different spectra of DNA damage as well as collateral damage to other cellular components and therefore are not expected to provoke identical responses by the cell. Here we study the effects of two different types of ionizing radiation (IR) treatment, HZE (1 GeV Fe26+ high mass, high charge, and high energy relativistic particles) and gamma photons, on the transcriptome of Arabidopsis thaliana seedlings. Both types of IR induce small clusters of radicals that can result in the formation of double strand breaks (DSBs), but HZE also produces linear arrays of extremely clustered damage. We performed these experiments across a range of time points (1.5-24 h after irradiation) in both wild-type plants and in mutants defective in the DSB-sensing protein kinase ATM. The two types of IR exhibit a shared double strand break-repair-related damage response, although they differ slightly in the timing, degree, and ATM-dependence of the response. The ATM-dependent, DNA metabolism-related transcripts of the DSB response were also induced by other DNA damaging agents, but were not induced by conventional stresses. Both Gamma and HZE irradiation induced, at 24 h post-irradiation, ATM-dependent transcripts associated with a variety of conventional stresses; these were overrepresented for pathogen response, rather than DNA metabolism. In contrast, only HZE-irradiated plants, at 1.5 h after irradiation, exhibited an additional and very extensive transcriptional response, shared with plants experiencing extended night. This response was not apparent in gamma-irradiated plants. We treated 5-day-old WT and atm-1 seedlings of Arabidopsis thaliana with 100 Gy of Gamma radiation (over a span of 15 minutes) or 30 Gy of HZE (over a span of approximately 12 minutes). Gamma irradiations were completed at 8:40 am, while HZE irradiations were conducted in two runs (due to space limitations) which were completed at 1:09 and 1:28pm respectively. Gamma treated seedlings were sampled at 10:10 am, 11:40 am, 2:55 pm, 8:40 pm, and 8:40 am. HZE treated seedlings were sampled at 2:39 pm, 4:09 pm, 7:24 pm, 1:09 am, and 1:09 pm. Un-irradiated WT and atm-1 control seedlings were sampled at 10:45 am on Day #1 and 9:15 am on Day #2. There are a total of 22 experimental or control conditions, with two replicates per condition, yielding 44 samples overall.",
+      "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-46",
+      "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/46",
+      "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/46",
+      "metadataSha256": "bf478a09853f644bbb7413d6a70c2a0a5c69cc2c44e83f07ab2557f0d200eb71",
+      "version": 6,
+      "verifiedAt": "2026-11-07T17:26:11.570575+00:00",
+      "organisms": [
+        "Arabidopsis thaliana"
+      ],
+      "assayTypes": [
+        "Transcription profiling (Affymetrix ATH1 microarray)"
+      ],
+      "sampleCount": 44,
+      "sampleCountDefinition": "44 arrays over 22 biological groups (genotype x condition x dose x timepoint x age); each group holds two replicate arrays.",
+      "fileCount": 3,
+      "factors": [
+        "Ionizing Radiation",
+        "Absorbed Radiation Dose",
+        "Exposure Duration",
+        "Time of Sample Collection After Treatment",
+        "Genotype",
+        "Age"
+      ],
+      "publications": [
+        {
+          "title": "High atomic weight, high-energy radiation (HZE) induces transcriptional responses shared with conventional stresses",
+          "doi": "10.3389/fpls.2014.00364"
+        }
+      ],
+      "trainingEligibility": "Eligible and trained: radiation-quality and radiation-exposure classifiers, group-held-out. Not eligible for yield or dose-regression training.",
+      "status": "verified-data",
+      "license": "Public OSDR access; retain study attribution and comply with OSDR terms; do not assume every contributed file is public domain.",
+      "licenseUrl": "https://science.nasa.gov/reference/osdr-help-terms-and-conditions/",
+      "limitations": [
+        "Ground-based irradiation of Arabidopsis seedlings, not a crop and not spaceflight.",
+        "Array batch is not reported in the ISA record and had to be recovered from the raw CEL headers; controls are not balanced across batches.",
+        "100 Gy gamma and 30 Gy Fe-56 differ in both quality and absorbed dose."
+      ],
+      "files": [
+        {
+          "name": "GLDS-46_array_normalized_expression_probeset_GLmicroarray.csv",
+          "bytes": 23794742,
+          "category": "Processed assay data",
+          "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-46/version-6/array/GLDS-46_array_normalized_expression_probeset_GLmicroarray.csv",
+          "restricted": false,
+          "downloaded": true,
+          "sha256": "f15c4179dbbebdfd39c53ffb906f6251ed1fc3fa3c926efc3c71c4736eefda27",
+          "role": "log2-normalised probeset expression, 22810 probesets x 44 samples"
+        },
+        {
+          "name": "GLDS-46_array_SampleTable_GLmicroarray.csv",
+          "bytes": 4139,
+          "category": "Processed assay data",
+          "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-46/version-6/array/GLDS-46_array_SampleTable_GLmicroarray.csv",
+          "restricted": false,
+          "downloaded": true,
+          "sha256": "0ae05ae0938670bce8e923889093658eac4f9e26537197b9a54d4ad96061532e",
+          "role": "sample to experimental-group assignment, 44 rows"
+        },
+        {
+          "name": "OSD-46_metadata_OSD-46-ISA.zip",
+          "bytes": 76123,
+          "category": "Study Metadata Files",
+          "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-46/version-6/metadata/OSD-46_metadata_OSD-46-ISA.zip",
+          "restricted": false,
+          "downloaded": true,
+          "sha256": "bf478a09853f644bbb7413d6a70c2a0a5c69cc2c44e83f07ab2557f0d200eb71",
+          "role": "ISA-Tab study metadata: title, description, six factors incl. absorbed dose"
+        }
+      ]
+    },
+    {
+      "id": "OSD-782",
+      "title": "Multi-omics profiling reveals ethylene signalling as a key pathway underlying both genetic and epigenetic responses to low-dose ionizing radiation in Arabidopsis",
+      "description": "There is increasing interest in the effects of low-dose ionizing radiation (IR) on plants as might occur during spaceflight, or as a consequence of human activities, such as nuclear power generation, that may result in the release of radioactive materials into the environment. High doses of IR have long been used for the induction of mutations in plants with the goal of generating desirable traits for agribusiness. However, less is known about the responses of plants to acute low doses of IR exposure. Here, we take a multi-omics approach to characterize the response to low dose IR in A. thaliana. We adapt the Methyltransferase Accessibility Protocol for individual templates (MAPit) technique for use in plants allowing us to assay the epigenetic response to acute low-dose IR (10 cGy and 100 cGy) 72 hr after exposure, and, in parallel, use RNA sequencing to profile the transcription response at 1, 3, 24 and 72 hr after exposure. We observe that IR exposures as low as 10 cGy elicit robust genetic responses in Arabidopsis thaliana detectable as early as 1 hr after exposure. Examination of these responses revealed dose-dependent changes in gene expression, chromatin accessibility and DNA methylation that implicate the ethylene signalling pathway and response to abiotic stress as underlying the transcriptional and epigenetic changes associated with IR. These changes are observable up to 72 hr after exposure suggesting that they are maintained well after the initial acute exposure. Our findings indicate that A. thaliana executes a coordinated, multi-modal response to low-dose IR through induction and regulation of the ethylene response pathway.",
+      "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-782",
+      "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/782",
+      "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/782",
+      "metadataSha256": "9564320f24498ddcec0d47895bf697d04113fcdf2277d592663c8b65c83e595c",
+      "version": 2,
+      "verifiedAt": "2026-11-07T17:26:11.571620+00:00",
+      "organisms": [
+        "Arabidopsis thaliana"
+      ],
+      "assayTypes": [
+        "RNA Sequencing (RNA-Seq)",
+        "Bisulfite sequencing"
+      ],
+      "sampleCount": 36,
+      "sampleCountDefinition": "36 rosette samples, 3 doses x 4 collection times x 3 replicates, so 12 independent conditions.",
+      "fileCount": 3,
+      "factors": [
+        "Ionizing Radiation",
+        "Absorbed Radiation Dose",
+        "Time of Sample Collection After Treatment"
+      ],
+      "publications": [
+        {
+          "title": "Multi-omics profiling reveals ethylene signalling as a key pathway underlying responses to low-dose ionizing radiation",
+          "doi": "10.1101/2023.10.14.562363"
+        }
+      ],
+      "trainingEligibility": "Acquired and evaluated; dose classification did NOT beat its baseline on held-out conditions, so no model is registered. Retained as a documented negative and as the cross-study transfer target.",
+      "status": "verified-data",
+      "license": "Public OSDR access; retain study attribution and comply with OSDR terms; do not assume every contributed file is public domain.",
+      "licenseUrl": "https://science.nasa.gov/reference/osdr-help-terms-and-conditions/",
+      "limitations": [
+        "All samples are one ecotype (Col-0) and one tissue (rosette).",
+        "Dose classification failed to generalise to held-out conditions; see ml/evaluation/phase9_rnaseq_candidates.json."
+      ],
+      "files": [
+        {
+          "name": "GLDS-679_rna_seq_RSEM_Unnormalized_Counts_GLbulkRNAseq.csv",
+          "bytes": 4527540,
+          "category": "Processed assay data",
+          "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-782/version-2/rna_seq/GLDS-679_rna_seq_RSEM_Unnormalized_Counts_GLbulkRNAseq.csv",
+          "restricted": false,
+          "downloaded": true,
+          "sha256": "dc98d786d7970f7258aa5474325ff4e9e19ff13b7a6c17e95282a97d924f2f9d",
+          "role": "RSEM unnormalised gene counts, 32833 genes x 36 samples"
+        },
+        {
+          "name": "GLDS-679_rna_seq_VST_Counts_GLbulkRNAseq.csv",
+          "bytes": 14679817,
+          "category": "Processed assay data",
+          "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-782/version-2/rna_seq/GLDS-679_rna_seq_VST_Counts_GLbulkRNAseq.csv",
+          "restricted": false,
+          "downloaded": true,
+          "sha256": "6f1d41e0d2debeee6abb7cdce04064ee8d8afe41cb8f705c6189b5aff59caee4",
+          "role": "GeneLab variance-stabilising-transformed counts, 23667 genes x 36 samples"
+        },
+        {
+          "name": "OSD-782_metadata_OSD-782-ISA.zip",
+          "bytes": 166136,
+          "category": "Study Metadata Files",
+          "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-782/version-2/metadata/OSD-782_metadata_OSD-782-ISA.zip",
+          "restricted": false,
+          "downloaded": true,
+          "sha256": "9564320f24498ddcec0d47895bf697d04113fcdf2277d592663c8b65c83e595c",
+          "role": "ISA-Tab study metadata (sample sheet, assay, investigation)"
+        }
+      ]
+    },
+    {
+      "id": "OSD-411",
+      "title": "Plant Gravity Perception: Pilot (PGP Pilot)",
+      "description": "This study examined tissue-specific early transcriptional responses upon reorientation in wild type and starchless pgm-1 mutant seedlings of Arabidopsis. Seedlings were grown in vertical Petri dishes for four days. Treatment samples were reoriented 90 degrees for ten minutes while control plants remained vertical. All seedlings were flash frozen in liquid nitrogen and RNA was extracted from root tips, mature root, hypocotyl, and cotyledon fractions of the seedlings. RNA was sequenced via NovaSeq.",
+      "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-411",
+      "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/411",
+      "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/411",
+      "metadataSha256": "ab6687e01802dfabffa8e891c982846e33bd7a239fe26b51a79c2b20c748870c",
+      "version": 4,
+      "verifiedAt": "2026-11-07T17:26:11.573310+00:00",
+      "organisms": [
+        "Arabidopsis thaliana"
+      ],
+      "assayTypes": [
+        "RNA Sequencing (RNA-Seq)"
+      ],
+      "sampleCount": 64,
+      "sampleCountDefinition": "64 samples from 16 seedlings (2 genotypes x 2 treatments x 4 seedlings); each seedling contributes four tissue samples, so 16 is the independent unit count, not 64.",
+      "fileCount": 2,
+      "factors": [
+        "Genotype",
+        "Organism Part",
+        "Treatment"
+      ],
+      "publications": [],
+      "trainingEligibility": "Acquired and evaluated; reorientation classification did not beat chance on held-out seedlings, so no model is registered. A 90-degree ground reorientation is not partial gravity in any case.",
+      "status": "verified-data",
+      "license": "Public OSDR access; retain study attribution and comply with OSDR terms; do not assume every contributed file is public domain.",
+      "licenseUrl": "https://science.nasa.gov/reference/osdr-help-terms-and-conditions/",
+      "limitations": [
+        "64 samples come from only 16 seedlings; the four tissues per seedling are repeated measures, not independent observations.",
+        "One library (sample 14-4) is two orders of magnitude shallower than the rest and was excluded before modelling.",
+        "Ground reorientation, not microgravity or partial gravity."
+      ],
+      "files": [
+        {
+          "name": "GLDS-411_rna_seq_RSEM_Unnormalized_Counts_GLbulkRNAseq.csv",
+          "bytes": 8936306,
+          "category": "Processed assay data",
+          "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-411/version-4/rna_seq/GLDS-411_rna_seq_RSEM_Unnormalized_Counts_GLbulkRNAseq.csv",
+          "restricted": false,
+          "downloaded": true,
+          "sha256": "3a0d6c17473db8df6f84afe8af5648946e2ed74d686a9373ca43c71ca4cd954f",
+          "role": "RSEM unnormalised gene counts, 32833 genes x 64 samples"
+        },
+        {
+          "name": "GLDS-411_metadata_GLDS-411-ISA.zip",
+          "bytes": 123676,
+          "category": "Study Metadata Files",
+          "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-411/version-2/metadata/GLDS-411_metadata_GLDS-411-ISA.zip",
+          "restricted": false,
+          "downloaded": true,
+          "sha256": "ab6687e01802dfabffa8e891c982846e33bd7a239fe26b51a79c2b20c748870c",
+          "role": "ISA-Tab study metadata (sample sheet, assay, investigation)"
+        }
+      ]
+    },
+    {
+      "id": "OSD-780",
+      "title": "VEG-04A mizuna microbial load (plate counts)",
+      "description": "Aerobic and yeast/mould plate counts on mizuna harvested from the VEG-04A ISS and ground-control campaigns.",
+      "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-780",
+      "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/780",
+      "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/780",
+      "metadataSha256": null,
+      "version": null,
+      "verifiedAt": "2026-11-07T17:26:11.573460+00:00",
+      "organisms": [
+        "Brassica rapa var. nipposinica"
+      ],
+      "assayTypes": [
+        "Microbial plate counts"
+      ],
+      "sampleCount": 3,
+      "sampleCountDefinition": "Two assay tables (aerobic, yeast/mould) rather than one row per sample; counts are per harvest group, not per plant.",
+      "fileCount": 3,
+      "factors": [
+        "Spaceflight",
+        "Harvest"
+      ],
+      "publications": [],
+      "trainingEligibility": "Eligible and trained: exploratory mizuna microbial-load regressions (Phase 6/7).",
+      "status": "verified-data",
+      "license": "Public OSDR access; retain study attribution and comply with OSDR terms; do not assume every contributed file is public domain.",
+      "licenseUrl": "https://science.nasa.gov/reference/osdr-help-terms-and-conditions/",
+      "limitations": [
+        "Plate counts are culture-based and do not describe total microbial load.",
+        "Counts are per harvest group, so they are not independent per-plant measurements."
+      ],
+      "files": [
+        {
+          "name": "LSDS-128_Plate Count_Aerobic_Plate_Count_TRANSFORMED.csv",
+          "bytes": 11708,
+          "category": "Processed assay data",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-780/download?source=datamanager&file=LSDS-128_Plate+Count_Aerobic_Plate_Count_TRANSFORMED.csv",
+          "restricted": false,
+          "downloaded": true,
+          "sha256": "229a0d93fff866257bc431fb1d069011232750d4e09cd1883a5e4e56177e2a55",
+          "role": "VEG-04A aerobic microbial plate counts (CFU)"
+        },
+        {
+          "name": "LSDS-128_Plate Count_Yeast_Mold_Plate_Count_Transformed.csv",
+          "bytes": 9106,
+          "category": "Processed assay data",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-780/download?source=datamanager&file=LSDS-128_Plate+Count_Yeast_Mold_Plate_Count_Transformed.csv",
+          "restricted": false,
+          "downloaded": true,
+          "sha256": "0170d2fbc1daaaea629c7b7a33c3c28a001991c40550eb24cf96da1dc90c8b1b",
+          "role": "VEG-04A yeast/mould plate counts (CFU)"
+        },
+        {
+          "name": "OSD-780_dictionary_DataDictionary_OSD-780.csv",
+          "bytes": 1012,
+          "category": "Processed assay data",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-780/download?source=datamanager&file=OSD-780_dictionary_DataDictionary_OSD-780.csv",
+          "restricted": false,
+          "downloaded": true,
+          "sha256": "4ea878d266ad1f1388ba34646c08ec6667fd995623ae2750d996b166b7735c96",
+          "role": "OSD-780 data dictionary (units and factor definitions)"
         }
       ]
     }

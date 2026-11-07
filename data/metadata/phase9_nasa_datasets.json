@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-07T16:56:54.498076+00:00",
+  "generatedAt": "2026-11-07T18:14:16.154934+00:00",
   "accessPath": "osdr.nasa.gov GEODE API returns HTTP 403 for every study and the GeneLab visualisation site exposes no public JSON API; these files are the same releases served from the NASA OSDR Open Data S3 bucket.",
   "bucket": "arn:aws:s3:::nasa-osdr (us-west-2), public, no credentials",
   "license": "NASA OSDR: no restrictions on use; attribution retained",
@@ -23,6 +23,16 @@
       "sha256": "0ae05ae0938670bce8e923889093658eac4f9e26537197b9a54d4ad96061532e",
       "role": "sample to experimental-group assignment, 44 rows",
       "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-46/version-6/array/GLDS-46_array_SampleTable_GLmicroarray.csv",
+      "committed": true
+    },
+    {
+      "study": "OSD-46",
+      "name": "OSD-46_metadata_OSD-46-ISA.zip",
+      "key": "OSD-46/version-6/metadata/OSD-46_metadata_OSD-46-ISA.zip",
+      "bytes": 76123,
+      "sha256": "bf478a09853f644bbb7413d6a70c2a0a5c69cc2c44e83f07ab2557f0d200eb71",
+      "role": "ISA-Tab study metadata: title, description, six factors incl. absorbed dose",
+      "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-46/version-6/metadata/OSD-46_metadata_OSD-46-ISA.zip",
       "committed": true
     },
     {
