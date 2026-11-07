@@ -8,7 +8,9 @@ from app.config.settings import settings
 
 def auth_header(client, email="workspace@example.test"):
     response=client.post("/api/auth/register",json={"email":email,"password":"CorrectHorseBattery1!"})
-    assert response.status_code==201,response.text
+    if response.status_code==409:
+        response=client.post("/api/auth/login",json={"email":email,"password":"CorrectHorseBattery1!"})
+    assert response.status_code in {200,201},response.text
     return {"Authorization":f"Bearer {response.json()['accessToken']}"}
 
 

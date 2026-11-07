@@ -608,14 +608,14 @@ export default function MissionPlatform() {
               <ChevronRight size={13} />
             </button>
           </footer>
-          {authMode && <AuthDialog mode={authMode} onClose={() => setAuthMode(null)} onAuthenticated={(next) => { setSession(next); setAuthMode(null); setNotice("Signed in. Your scenarios are private to your account."); }} />}
+          {authMode && <AuthDialog mode={authMode} onModeChange={setAuthMode} onClose={() => setAuthMode(null)} onAuthenticated={(next) => { setSession(next); setAuthMode(null); setNotice("Signed in. Your scenarios are private to your account."); }} />}
         </main>
       </div>
     </div>
   );
 }
 
-function AuthDialog({ mode, onClose, onAuthenticated }) {
+function AuthDialog({ mode, onModeChange, onClose, onAuthenticated }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -634,6 +634,9 @@ function AuthDialog({ mode, onClose, onAuthenticated }) {
       <label className="block text-xs text-slate-300">Password<input required minLength="12" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1 w-full rounded border border-line-strong bg-space-950 p-2" /></label>
       {error && <p className="text-xs text-warn" role="alert">{error}</p>}
       <button disabled={busy} className="primary-button" type="submit">{busy ? "Working…" : mode === "login" ? "Sign in" : "Create account"}</button>
+      <button type="button" className="text-xs text-accent" onClick={() => { setError(""); onModeChange(mode === "login" ? "register" : "login"); }}>
+        {mode === "login" ? "Create account" : "I already have an account"}
+      </button>
       <button type="button" className="text-xs text-accent" onClick={() => { setError(""); onClose(); }}>Cancel</button>
     </form>
   </div>;

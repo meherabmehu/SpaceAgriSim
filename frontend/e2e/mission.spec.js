@@ -101,7 +101,7 @@ test("saved models use real artifacts and reject unsupported scientific scope", 
 });
 test("deterministic advisor, constrained optimization, exports and fallback", async ({
   page,
-}) => {
+}, testInfo) => {
   await ready(page, "advisor");
   await expect(
     page.getByRole("heading", { name: "Training coverage", exact: true }),
@@ -129,6 +129,12 @@ test("deterministic advisor, constrained optimization, exports and fallback", as
   await page
     .getByRole("button", { name: "Save scenario", exact: true })
     .click();
+  await page.getByRole("button", { name: "Create account", exact: true }).click();
+  await page.getByRole("textbox", { name: "Email" }).fill(`scenario-${testInfo.project.name}-${Date.now()}@example.test`);
+  await page.getByRole("textbox", { name: "Password" }).fill("CorrectHorseBattery1!");
+  await page.getByRole("button", { name: "Create account", exact: true }).click();
+  await expect(page.getByText(/Your scenarios are private/)).toBeVisible();
+  await page.getByRole("button", { name: "Save scenario", exact: true }).click();
   await expect(
     page.getByText("Scenario saved to mission history."),
   ).toBeVisible();

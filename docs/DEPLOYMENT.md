@@ -21,7 +21,7 @@ Docker copies tracked registry/processed/model artifacts. Raw research downloads
 
 1. Promote reviewed commits to `main` through normal review. Use a feature-branch Vercel preview for pre-merge verification; the root `vercel.json` deploys the Vite frontend and FastAPI service together.
 2. Create a Render Blueprint from the repository using `render.yaml`. Its API uses the repository root so `data/` and `ml/` resolve beside `backend/`.
-3. Supply `SPACEAGRISIM_DATABASE_URL` using PostgreSQL with a `postgresql+psycopg://` URL, and `SPACEAGRISIM_CORS_ORIGINS` as a JSON list of exact frontend origins. Set values through the hosting secret UI, never Git.
+3. Supply `SPACEAGRISIM_DATABASE_URL` using PostgreSQL with a `postgresql+psycopg://` URL, `SPACEAGRISIM_AUTH_SECRET` as a unique 32+-character secret, and `SPACEAGRISIM_CORS_ORIGINS` as a JSON list of exact frontend origins. Set values through the hosting secret UI, never Git.
 4. Create a Vercel Vite project with root directory `frontend`, install command `npm ci`, build command `npm run build`, output `dist`, and build-time variable `VITE_API_BASE_URL=https://YOUR-API.onrender.com/api`.
 5. Redeploy the API after setting the exact resulting Vercel origin in CORS. Add explicitly chosen preview origins when needed; do not use wildcard credentialed origins.
 6. Check API health/readiness, actual simulation responses, dataset registry, model loading, scenario save/read and all report formats from the deployed frontend. Verify desktop and mobile operation.
@@ -43,9 +43,11 @@ The [Blueprint setup page](https://dashboard.render.com/blueprint/new?repo=https
 | Variable | Purpose |
 | --- | --- |
 | `SPACEAGRISIM_DATABASE_URL` | SQLite locally or PostgreSQL through SQLAlchemy/psycopg |
+| `SPACEAGRISIM_AUTH_SECRET` | High-entropy signing secret for expiring account bearer tokens; required to be stable in hosted deployments |
+| `SPACEAGRISIM_AUTH_TOKEN_MINUTES` | Token lifetime; default 60 minutes |
 | `SPACEAGRISIM_CORS_ORIGINS` | JSON array of permitted browser origins |
 | `SPACEAGRISIM_MAX_HISTORY` | Bounded shared history size; default 200 |
-| `SPACEAGRISIM_HISTORY_WRITES_ENABLED` | Enables shared scenario writes locally; Blueprint disables writes until deployment access controls are configured |
+| `SPACEAGRISIM_HISTORY_WRITES_ENABLED` | Enables authenticated scenario writes; Blueprint disables writes until deployment access controls are configured |
 | `VITE_API_BASE_URL` | Public API base including `/api`; compiled into frontend, not a secret |
 | `VITE_BACKEND_URL` | Local Vite proxy target; default `http://127.0.0.1:8000` |
 | `PORT` | Container/Render listener; bind `0.0.0.0` |
@@ -54,7 +56,7 @@ Keep `.env` files, database credentials, provider tokens and raw secret output o
 
 ## Production safeguards still required
 
-The current app is a research demonstration with shared scenario history. `SPACEAGRISIM_HISTORY_WRITES_ENABLED=false` returns 403 for scenario creation; this is the Blueprint default. Local demo settings permit writes. Enable them for a hosted demonstration only after accepting shared, non-sensitive storage or putting authenticated access in front of the API. Existing history reads remain shared even when writes are disabled. Before using it as a public multi-user service, add authentication/authorization, write quotas and gateway rate limits, backup/restore procedures, retention controls, resource monitoring and load testing. Provision PostgreSQL and its initial migration with a separate migration identity where possible. Do not depend on ephemeral host SQLite or serverless filesystem writes for durable scenarios. CORS does not prevent non-browser API calls.
+The current app is a research demonstration with private account scenario history. `SPACEAGRISIM_HISTORY_WRITES_ENABLED=false` returns 403 for scenario creation; this is the Blueprint default. Scenario read/write endpoints require an authenticated bearer token and are filtered by owner. Local development generates an ephemeral signing secret if none is supplied; hosted deployments must set a durable secret through the provider UI. Before using it as a public multi-user service, add email verification/password-reset operations, write quotas and gateway rate limits, backup/restore procedures, retention controls, resource monitoring and load testing. Provision PostgreSQL and its initial migration with a separate migration identity where possible. Do not depend on ephemeral host SQLite or serverless filesystem writes for durable scenarios. CORS does not prevent non-browser API calls.
 
 The API request guard caps bodies at 64 KiB and uses per-process, per-client rolling limits of 180 general requests/minute and 12 optimization requests/minute. It adds request IDs and logs method/path/status/duration without logging request bodies or secrets. These in-memory limits reset on restart, do not coordinate between workers or instances, and can aggregate clients behind a proxy. Configure trusted proxy handling deliberately and add a distributed gateway limit for public production. A 429 response has a `Retry-After` header; the limits do not supply authentication or tenant isolation.
 

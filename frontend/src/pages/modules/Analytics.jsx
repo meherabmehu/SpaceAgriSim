@@ -83,9 +83,9 @@ export function Analytics({
           </table>
         </div>
       </Card>
-      <Card title="Saved scenarios" label="SHARED WORKSPACE HISTORY">
+      <Card title="Saved scenarios" label="PRIVATE ACCOUNT HISTORY">
         <p className="muted fine">
-          This is shared demonstration history. Do not store sensitive
+          Sign in to view scenarios saved to your account. Do not store sensitive
           information.
         </p>
         <RequestState state={history} />
