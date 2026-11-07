@@ -17,7 +17,7 @@ conclusions are unchanged by Phase 7.
 | Property | Value |
 |---|---|
 | Server | PostgreSQL **17.11** (Debian 17.11-0+deb13u1), installed from apt |
-| Cluster | `initdb -D /tmp/pgdata -A trust`, **port 55432**, `listen_addresses=127.0.0.1` |
+| Cluster | `initdb -E UTF8 --locale=C.UTF-8`, **port 55432**, `listen_addresses=127.0.0.1` |
 | Database | `spaceagrisim_test` (integration test), `spaceagrisim_test2` (deployment verification) |
 | Role | `sasim` / `sasim_test`, TCP-authenticated |
 | Durability | none — `/tmp` data directory, disposable by design |
@@ -44,11 +44,13 @@ be mistaken for coverage, because the result is recorded here as executed.
 
 ## 2. What was verified against the live database
 
-`scripts/verify_deployment_config.py` runs 19 checks; it asserts nothing from
+`scripts/verify_deployment_config.py` runs 21 checks; it asserts nothing from
 documentation and exits non-zero on any failure, so it is CI-usable.
 
 | Group | Check | Result |
 |---|---|---|
+| Encoding | server encoding is UTF-8 | PASS |
+| Encoding | client encoding is UTF-8 | PASS |
 | Migration | `001_scenarios.sql` applies cleanly | PASS |
 | Migration | creates `scenarios`, `users`, `revoked_tokens` | PASS |
 | Migration | `scenarios` has all six ORM columns | PASS |
@@ -60,7 +62,7 @@ documentation and exits non-zero on any failure, so it is CI-usable.
 | Parity | every ORM column appears in the SQL migration | PASS |
 | Security | 7 Phase 4 invariants (see §3) | PASS |
 
-**19/19 passed.** Evidence artifact: `docs/phase7/deployment_verification.json`.
+**21/21 passed.** Evidence artifact: `docs/phase7/deployment_verification.json`.
 
 The idempotence check matters more than it looks: deployments re-run migrations,
 and `ADD COLUMN IF NOT EXISTS` / `CREATE TABLE IF NOT EXISTS` are what make that
@@ -89,6 +91,44 @@ The last row is the Phase 4 "no public persistent writes without a durable
 database and verified authorization" rule, expressed as a test: the default local
 configuration must never quietly point at a shared PostgreSQL instance.
 
+## 3a. Cluster encoding — a defect this verification caught
+
+Re-running the whole matrix on a **clean environment** reproduced two failures
+that had not appeared during the original Phase 7 work:
+
+```
+pytest backend/tests/test_postgres_integration.py → 1 failed
+TypeError: cannot use a string pattern on a bytes-like object
+```
+
+The traceback named neither the database nor the fix. The actual cause:
+
+**The cluster had been initialised with `SQL_ASCII`**, because `initdb` ran
+without an explicit encoding under an unset locale. psycopg then returns `bytes`
+instead of `str` for text results, SQLAlchemy's dialect does
+`re.match(pattern, value)` on that value during connection setup, and the
+PostgreSQL path fails before it can execute a single statement.
+
+| Attempted fix | Result |
+|---|---|
+| Downgrade SQLAlchemy to 2.0.57 / psycopg to 3.2.13 | **still failed** — version was not the cause |
+| Restore SQLAlchemy 2.1.8 / psycopg 3.3.8 | fails only on `SQL_ASCII`; **passes on UTF-8** |
+| Recreate cluster with `-E UTF8 --locale=C.UTF-8` | **all tests pass, 0 skipped** |
+
+So **no dependency pin was changed** — capping library versions would have hidden
+an environment defect behind a false fix. Instead:
+
+- the verifier gained a **server/client encoding preflight** that fails with an
+  actionable message and aborts before the unrelated SQLAlchemy errors;
+- the guard was proven to work by creating a `SQL_ASCII` database on purpose:
+  the verifier exits **1** with the diagnostic, and **0** against a UTF-8 database;
+- the reproduce instructions above now carry `-E UTF8 --locale=C.UTF-8`.
+
+**Why this matters beyond the test harness:** a production PostgreSQL cluster
+created with a non-UTF-8 locale would fail exactly this way, and the error it
+emits points nowhere near the cause. Any managed instance must be provisioned as
+UTF-8. This is now an explicit deployment requirement rather than an assumption.
+
 ## 4. What is still not verified — and must not be described as though it were
 
 | Item | Status | Why |
@@ -98,6 +138,7 @@ configuration must never quietly point at a shared PostgreSQL instance.
 | Multi-instance token revocation | **not verified** | `revoked_tokens` is created and the table exists, but cross-instance behaviour needs more than one instance |
 | Backup/restore on real data | **not verified** | `test_db_backup.py` covers the local path only |
 | Managed-host migration path | **not verified** | Requires the host's console |
+| Managed-host cluster encoding | **not verified** | Must be provisioned UTF-8; see §3a. Not checkable without the host |
 | TLS to the database | **not verified** | The local cluster used `trust` authentication on loopback; production must use TLS and this run says nothing about it |
 
 `trust` authentication over loopback is appropriate for a disposable test cluster
@@ -108,7 +149,9 @@ harness is not mistaken for a deployment template.
 
 ```bash
 sudo -u postgres mkdir -p /tmp/pgdata /tmp/pgrun
-sudo -u postgres /usr/lib/postgresql/17/bin/initdb -D /tmp/pgdata -A trust
+# -E UTF8 is REQUIRED, not cosmetic. See "Cluster encoding" below.
+sudo -u postgres /usr/lib/postgresql/17/bin/initdb -D /tmp/pgdata -A trust \
+    -E UTF8 --locale=C.UTF-8
 sudo -u postgres /usr/lib/postgresql/17/bin/pg_ctl -D /tmp/pgdata \
     -o "-p 55432 -k /tmp/pgrun -c listen_addresses=127.0.0.1" -l /tmp/pg.log start
 psql -h 127.0.0.1 -p 55432 -U postgres -c \

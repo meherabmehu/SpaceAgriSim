@@ -12,21 +12,22 @@ Base: `b4890e9` (Phase 6 head)
 | 5 | Eligibility matrix + diagnostic retrain (v2) | ✅ Completed | Held-out R² −0.55/−0.58 → +0.444/+0.373, p=0.000 | `9188451` | ✅ |
 | 6 | Model-class benchmark | ✅ Completed | 5 tasks × 4 families, grouped folds; linear wins 1 of 5 | `9188451` | ✅ |
 | 7 | Part C calibration (zero applied) | ✅ Completed | 4 checks; 54 mass-balance checks; output hash locked | `d1da304` | ✅ |
-| 8 | PostgreSQL executed + deployment config | ✅ Completed | 1 real integration test; 19/19 config checks | `afe087e` | ✅ |
+| 8 | PostgreSQL executed + deployment config | ✅ Completed | 1 real integration test; 21/21 config checks | `afe087e` | ✅ |
 | 9 | Versioned endpoints + registry + checksums | ✅ Completed | 13 integration tests; suite 187 passed | `7e3b8dc` | ✅ |
 | 10 | UI preservation proof + registry verifier | ✅ Completed | 0 frontend files changed; 15/15 Playwright; 26/26 registry | `e32b6ba` | ✅ |
-| 11 | Final documentation set | ✅ Completed | This ledger + `PHASE7_FINAL_REPORT.md` | — | — |
+| 11 | Final documentation set | ✅ Completed | This ledger + `PHASE7_FINAL_REPORT.md` | `1f2a540` | ✅ |
+| 12 | Clean-environment re-verification (caught SQL_ASCII defect) | ✅ Completed | Encoding preflight added; 21/21; 188 passed 0 skipped | pending | pending |
 
 ## Verification totals
 
 | Gate | Result |
 |---|---|
-| Backend tests | **187 passed, 1 skipped** |
+| Backend tests | **187 passed, 1 skipped** (no DB) · **188 passed, 0 skipped** (live PostgreSQL) |
 | Playwright e2e (3 viewports) | **15 / 15 passed** |
 | Extraction safeguards | **46 provenance + 8 aggregate + 6 derived checks pass** |
 | Mass-balance checks | **54 / 54 pass** |
 | Registry checks | **26 / 26 pass** |
-| Deployment config checks | **19 / 19 pass** (against live PostgreSQL 17.11) |
+| Deployment config checks | **21 / 21 pass** (against live PostgreSQL 17.11, UTF-8) |
 | Frontend source diff vs base | **0 files** |
 
 ## Determinism

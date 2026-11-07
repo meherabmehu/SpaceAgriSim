@@ -58,6 +58,33 @@ def psql(dsn: str, sql: str) -> tuple[int, str]:
     return result.returncode, (result.stdout + result.stderr).strip()
 
 
+def verify_server_encoding(dsn: str) -> dict:
+    """Fail loudly if the cluster is not UTF-8.
+
+    A cluster initialised under a non-UTF-8 locale defaults to SQL_ASCII, and
+    psycopg then hands SQLAlchemy `bytes` instead of `str` for text results. The
+    dialect's version probe does `re.match(pattern, value)` on that value and
+    raises `TypeError: cannot use a string pattern on a bytes-like object`, which
+    names neither the encoding nor the fix. Catching it here turns a cryptic
+    traceback into one line the operator can act on.
+    """
+    code, encoding = psql(dsn, "SHOW server_encoding")
+    encoding = encoding.strip()
+    ok = code == 0 and encoding.upper() in ("UTF8", "UTF-8")
+    check("server encoding is UTF-8", ok, encoding or "could not read server_encoding")
+    if not ok:
+        check(
+            "diagnostic: cluster must be initialised with -E UTF8",
+            False,
+            ("Recreate the cluster: initdb -D <dir> -E UTF8 --locale=C.UTF-8. "
+             "A SQL_ASCII cluster makes psycopg return bytes and breaks the "
+             "SQLAlchemy PostgreSQL dialect."))
+    code, client = psql(dsn, "SHOW client_encoding")
+    check("client encoding is UTF-8", code == 0 and client.strip().upper() in ("UTF8", "UTF-8"),
+          client.strip())
+    return {"serverEncoding": encoding, "clientEncoding": client.strip()}
+
+
 def verify_migration(dsn: str) -> dict:
     code, output = psql(dsn, (ROOT / "backend/migrations/001_scenarios.sql").read_text())
     check("migration applies cleanly", code == 0, output.splitlines()[-1] if output else "ok")
@@ -217,6 +244,20 @@ def main() -> int:
         from urllib.parse import urlparse
         payload["database"]["dsnHost"] = urlparse(
             dsn.replace("postgresql+psycopg://", "postgresql://")).hostname
+        payload["database"]["encoding"] = verify_server_encoding(dsn)
+        if not all(entry["passed"] for entry in CHECKS if "encoding" in entry["check"]):
+            # Don't bury the real cause under unrelated SQLAlchemy failures.
+            payload["checks"] = CHECKS
+            payload["passed"] = False
+            payload["failures"] = FAILURES
+            out = ROOT / "docs" / "phase7" / "deployment_verification.json"
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(json.dumps(payload, indent=2, ensure_ascii=True) + "\n")
+            for entry in CHECKS:
+                print(f"  [{'PASS' if entry['passed'] else 'FAIL'}] "
+                      f"{entry['check']}: {entry['detail']}")
+            print("\nABORTED: database encoding is not UTF-8; see the diagnostic above.")
+            return 1
         payload["database"]["migration"] = verify_migration(dsn)
         payload["database"]["storageRoundtrip"] = verify_storage_roundtrip(dsn)
     else:

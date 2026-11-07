@@ -1,10 +1,14 @@
 {
-  "generatedAt": "2026-11-07T15:06:36.276360+00:00",
+  "generatedAt": "2026-11-07T15:20:52.076894+00:00",
   "phase": 7,
   "purpose": "Verify the PostgreSQL path and the Phase 4 security invariants against a running instance rather than against documentation.",
   "database": {
     "configured": true,
     "dsnHost": "127.0.0.1",
+    "encoding": {
+      "serverEncoding": "UTF8",
+      "clientEncoding": "UTF8"
+    },
     "migration": {
       "tables": [
         "revoked_tokens",
@@ -21,7 +25,7 @@
       ]
     },
     "storageRoundtrip": {
-      "rowId": "2fd4e69c-57b0-4b30-b58d-d5cdd433bc92",
+      "rowId": "473b8fa1-cfb6-4523-ba72-0d88aa125aa6",
       "health": {
         "dialect": "postgresql",
         "status": "available"
@@ -106,9 +110,19 @@
       "detail": "missing=[]"
     },
     {
+      "check": "server encoding is UTF-8",
+      "passed": true,
+      "detail": "UTF8"
+    },
+    {
+      "check": "client encoding is UTF-8",
+      "passed": true,
+      "detail": "UTF8"
+    },
+    {
       "check": "migration applies cleanly",
       "passed": true,
-      "detail": "NOTICE:  column \"owner_id\" of relation \"scenarios\" already exists, skipping"
+      "detail": "NOTICE:  relation \"revoked_tokens\" already exists, skipping"
     },
     {
       "check": "migration creates the three required tables",
@@ -133,7 +147,7 @@
     {
       "check": "scenario write reaches PostgreSQL",
       "passed": true,
-      "detail": "2fd4e69c-57b0-4b30-b58d-d5cdd433bc92"
+      "detail": "473b8fa1-cfb6-4523-ba72-0d88aa125aa6"
     },
     {
       "check": "scenario is readable back",

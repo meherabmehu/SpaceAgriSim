@@ -178,7 +178,7 @@ A SHA-256 over every output field (`crop_yield_g`, `growth_rate_g_per_day`, `wat
 
 Phase 6 **skipped** the integration test — a skipped test proves nothing. Phase 7 stood up PostgreSQL **17.11** on port 55432 and ran it: **1 passed**, executed.
 
-`verify_deployment_config.py`: **19/19** — migrations apply and are idempotent, all three tables and six columns and the owner index exist, a scenario round-trips through the API's storage layer, ORM and SQL cannot drift, and **7 Phase 4 security invariants still hold** (wildcard and plaintext non-local CORS rejected; default local config never points at shared PostgreSQL).
+`verify_deployment_config.py`: **21/21** — migrations apply and are idempotent, all three tables and six columns and the owner index exist, a scenario round-trips through the API's storage layer, ORM and SQL cannot drift, and **7 Phase 4 security invariants still hold** (wildcard and plaintext non-local CORS rejected; default local config never points at shared PostgreSQL).
 
 **Status of production PostgreSQL: Blocked by infrastructure or credentials.** No production database or credentials exist here. Not verified and not claimed: production database, pooling under load, multi-instance token revocation, TLS (the local cluster used `trust` on loopback, which would be a serious production defect). `PRODUCTION_DEPLOYMENT_VERIFICATION.md` conclusions are unchanged.
 
@@ -222,13 +222,13 @@ Phase 6 **skipped** the integration test — a skipped test proves nothing. Phas
 
 | Gate | Result |
 |---|---|
-| Backend tests | **187 passed, 1 skipped** |
+| Backend tests | **187 passed, 1 skipped** without a database · **188 passed, 0 skipped** with a live PostgreSQL (executed for this delivery) |
 | Playwright e2e (3 viewports) | **15 / 15 passed** |
 | Extraction safeguards | **46 provenance + 8 aggregate + 6 derived** |
 | Mass-balance checks | **54 / 54** |
 | Registry checks | **26 / 26** |
-| Deployment config checks | **19 / 19** (live PostgreSQL 17.11) |
-| PostgreSQL integration test | **1 passed** (executed, not skipped) |
+| Deployment config checks | **21 / 21** (live PostgreSQL 17.11, UTF-8) |
+| PostgreSQL integration test | **1 passed** (executed against a UTF-8 cluster, not skipped) |
 | Frontend source diff vs base | **0 files** |
 
 ## What Phase 7 did not do
