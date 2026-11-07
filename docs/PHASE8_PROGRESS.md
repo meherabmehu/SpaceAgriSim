@@ -119,7 +119,22 @@ committed.
 | Suspected a 12-byte JWT key in the app | It was the key in my own forged-token probe; app secret is 64 chars with `min_length=32` |
 | Bundled artifacts were stale after training | Discovered `backend/scientific_data` shadows `ml/artifacts`; ran `package_runtime_data.py` |
 
-## 9. Verification at the close of Phase 8
+## 9. Merge and push
+
+- `git fetch origin`; remote `main` was `fe6bbe2`, unchanged since the branch point,
+  so no rebase was needed and no force-push was ever considered.
+- Pushed the feature branch **first** (`48c70e7..eea1dda`) and read back
+  `refs/heads/feat/phase8-complete-platform-improvement` = `eea1dda`.
+- Merged `--no-ff` into `main`. Result: `039cd6a`, a two-parent merge commit.
+- **Re-ran every gate on `main` after the merge**: backend 212 passed / 0 skipped
+  against live PostgreSQL, registry 32/32, deployment config 21/21, frontend lint
+  and build clean, Playwright 15/15.
+- Pushed `main` (`fe6bbe2..039cd6a`) and verified with `git ls-remote` that the
+  remote HEAD equals the local HEAD: `039cd6aa…`.
+- Verified `origin/feat/phase8-complete-platform-improvement` is an ancestor of
+  `origin/main`, so no completed work was left unmerged.
+
+## 10. Verification at the close of Phase 8
 
 - Backend: **212 passed, 0 failed, 0 skipped** against live PostgreSQL.
 - Model registry: **32 / 32**. Deployment config: **21 / 21**.

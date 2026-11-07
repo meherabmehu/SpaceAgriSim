@@ -166,9 +166,28 @@ patch that cannot be verified.
 
 Baseline was 188 passed / 0 skipped; Phase 8 adds 24 tests and breaks none.
 
-## Merged
+## Merged and verified
 
-`feat/phase8-complete-platform-improvement` merged into `main` with `--no-ff` after
-the gates above, and the remote HEAD verified to contain the merge commit. Merge
-commit and verification output are recorded in `PHASE8_PROGRESS.md` history and the
-git log; no claim of a push is made without a re-read of the remote.
+| Item | Value |
+|---|---|
+| Merge commit | `039cd6aac39d700ed2f5a4548359ac23d729e1bc` |
+| Parents | `fe6bbe2` (main) + `eea1dda` (feature branch) |
+| Remote `refs/heads/main` | `039cd6aa…` — read back from `git ls-remote` after the push |
+| Local `HEAD` | `039cd6aa…` — identical |
+
+The merge is a genuine `--no-ff` merge commit with two parents, not a fast-forward.
+`git merge-base --is-ancestor origin/feat/phase8-complete-platform-improvement origin/main`
+confirms the feature branch is contained in the remote `main`. The full gate suite
+was re-run **on `main` after the merge**, not only on the feature branch, and only
+then pushed.
+
+Commits on the branch:
+
+```
+48c70e7 docs: audit phase eight baseline
+a843ad7 feat: add phase eight scientific classification and retire unsupported prediction
+266c200 feat: improve lettuce model with gradient boosting as versioned v2
+eea1dda docs: record phase eight audit, integrity, ml, security and readiness findings
+```
+
+No force-push and no history rewrite was used at any point.
