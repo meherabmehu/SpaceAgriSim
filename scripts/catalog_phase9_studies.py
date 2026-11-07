@@ -282,6 +282,79 @@ SAMPLE_COUNT_RECONCILIATION = {
 }
 
 
+def reconcile_files(catalogue: dict, manifest: dict) -> list[str]:
+    """Mark catalogue files that were actually acquired, using the verified bytes.
+
+    The older entries were built from a live OSDR listing, so every file is marked
+    ``downloaded: false`` even where this repository holds a checksum-verified
+    copy. That misreports what is on disk, which is the one thing a provenance
+    catalogue must not do.
+
+    Matching is by file name within a study. Where the verified byte length differs
+    from the listed one, the listing is kept in ``supersededListing`` rather than
+    overwritten: a size change means OSDR re-released the file, and silently
+    replacing the number would hide that.
+    """
+    verified = {}
+    for spec in manifest["files"]:
+        verified.setdefault(spec["study"], {})[spec["name"]] = spec
+
+    notes = []
+    for entry in catalogue["datasets"]:
+        specs = verified.get(entry["id"], {})
+        if not specs:
+            continue
+        matched = 0
+        for file in entry.get("files", []):
+            spec = specs.get(file["name"])
+            if spec is None:
+                continue
+            matched += 1
+            listed_bytes = file.get("bytes")
+            file.update({
+                "url": spec["url"],
+                "bytes": spec["bytes"],
+                "sha256": spec["sha256"],
+                "downloaded": True,
+                "verifiedAt": spec.get("verifiedAt"),
+                "verification": "sha256 match against pinned value",
+            })
+            if listed_bytes is not None and listed_bytes != spec["bytes"]:
+                file["supersededListing"] = {"bytes": listed_bytes}
+                notes.append(
+                    f"{entry['id']}/{file['name']}: listing said {listed_bytes} bytes, "
+                    f"verified copy is {spec['bytes']} - OSDR re-released the file")
+        # A verified acquisition whose file name is absent from the earlier OSDR
+        # listing is not a match failure to be dropped: the release renamed or
+        # replaced it. Appending it keeps the catalogue a superset of what this
+        # repository can actually prove it holds.
+        listed = {file["name"] for file in entry.get("files", [])}
+        for name, spec in specs.items():
+            if name in listed:
+                continue
+            entry.setdefault("files", []).append({
+                "name": name,
+                "bytes": spec["bytes"],
+                "category": "Processed assay data" if "metadata" not in name
+                            else "Study Metadata Files",
+                "url": spec["url"],
+                "restricted": False,
+                "downloaded": True,
+                "sha256": spec["sha256"],
+                "role": spec["role"],
+                "verifiedAt": spec.get("verifiedAt"),
+                "verification": "sha256 match against pinned value",
+                "note": ("Absent from the earlier OSDR listing, which named this "
+                         "file differently; acquired and checksum-verified in Phase 9."),
+            })
+            notes.append(f"{entry['id']}/{name}: added, the earlier listing did not "
+                         f"contain this file name")
+        entry["fileCount"] = len(entry.get("files", []))
+        if matched:
+            print(f"  reconciled {matched} verified file(s) for {entry['id']}")
+    return notes
+
+
 def main() -> int:
     manifest = json.loads((METADATA / "phase9_nasa_datasets.json").read_text())
     catalogue = json.loads(MANIFEST.read_text())
@@ -304,6 +377,11 @@ def main() -> int:
         note = reconciliation["explanation"]
         if note not in entry.get("limitations", []):
             entry.setdefault("limitations", []).append(note)
+
+    print("\nReconciling catalogue listings against verified local copies:")
+    superseded = reconcile_files(catalogue, manifest)
+    for note in superseded:
+        print(f"  ! {note}")
 
     MANIFEST.write_text(json.dumps(catalogue, indent=2) + "\n")
     print(f"\nwrote {MANIFEST.relative_to(ROOT)} ({len(catalogue['datasets'])} datasets)")

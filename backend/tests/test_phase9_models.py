@@ -439,3 +439,25 @@ def test_catalogued_sample_counts_state_what_they_count():
     # field, and retrofitting them is a separate refactor, not a Phase 9 claim.
     for study in ("OSD-46", "OSD-782", "OSD-411", "OSD-780", "OSD-267", "OSD-269"):
         assert catalogue[study].get("sampleCountDefinition"), f"{study} count undefined"
+
+
+def test_every_acquired_phase9_file_is_marked_downloaded_in_the_catalogue():
+    """The explorer's `downloadedFileCount` is only meaningful if it is true.
+
+    Before the reconciliation pass, files this repository holds and has
+    checksum-verified were marked `downloaded: false` because the catalogue was
+    built from a live OSDR listing. A provenance catalogue that under-reports what
+    it can prove is as wrong as one that over-reports.
+    """
+    manifest = research.read_json(research.DATA / "metadata" / "phase9_nasa_datasets.json")
+    catalogue = {entry["id"]: entry for entry in research.manifest()["datasets"]}
+
+    for spec in manifest["files"]:
+        entry = catalogue.get(spec["study"])
+        assert entry is not None, f"{spec['study']} is not catalogued"
+        recorded = {file["name"]: file for file in entry["files"]}
+        assert spec["name"] in recorded, f"{spec['study']}/{spec['name']} missing from catalogue"
+        file = recorded[spec["name"]]
+        assert file.get("downloaded") is True, f"{spec['name']} is held but not marked downloaded"
+        assert file.get("sha256") == spec["sha256"], f"{spec['name']} sha256 not pinned to the manifest"
+        assert file.get("bytes") == spec["bytes"], f"{spec['name']} byte length drifted"
