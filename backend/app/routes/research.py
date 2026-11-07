@@ -231,6 +231,7 @@ def model_explanation(model_id: str):
         "perClass": report["perClass"],
         "selectionStability": report["selectionStability"],
         "permutationImportance": report["permutationImportance"],
+        "singleGeneDependence": report.get("singleGeneDependence"),
         "selectionLeakageNote": report.get("selectionLeakageNote"),
         "binaryEncodingNote": report.get("binaryEncodingNote"),
         "interpretationLimits": report["interpretationLimits"],

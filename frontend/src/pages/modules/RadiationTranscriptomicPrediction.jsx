@@ -123,6 +123,11 @@ function RadiationModelCard({ model }) {
               </li>
             )))}
         </ul>
+        {explanation.singleGeneDependence && <p className="muted fine">
+          {explanation.singleGeneDependence.statement} Largest single-gene drop:{' '}
+          {explanation.singleGeneDependence.maxMeanDrop.toFixed(4)} balanced accuracy across{' '}
+          {explanation.singleGeneDependence.deployedGeneCount} deployed genes.
+        </p>}
         <Limitations items={explanation.interpretationLimits} />
       </>}
     </>}

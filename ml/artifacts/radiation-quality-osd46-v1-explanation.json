@@ -1,7 +1,7 @@
 {
   "phase": 10,
   "modelId": "radiation-quality-osd46-v1",
-  "generatedAt": "2026-11-07T20:31:14.159163+00:00",
+  "generatedAt": "2026-11-07T21:00:39.128467+00:00",
   "seed": 20261107,
   "task": "Three-class radiation quality classification from seedling expression",
   "classLabels": [
@@ -1432,6 +1432,13 @@
       }
     ],
     "genesWithNegativeDrop": 0
+  },
+  "singleGeneDependence": {
+    "maxMeanDrop": 0.0037037037037036978,
+    "genesWithZeroOrNegativeDrop": 0,
+    "deployedGeneCount": 150,
+    "signalIsDistributed": true,
+    "statement": "No single deployed gene is individually necessary: removing any one of them barely moves held-out balanced accuracy. The signal is spread across the selected set, so these genes are a signature, not biomarkers, and no individual gene should be reported as one."
   },
   "selectionLeakageNote": "The permutation baseline reuses the deployed gene set, which was selected on all 44 arrays. Its balanced accuracy is therefore optimistic relative to the honest group-held-out figure in the model artifact (0.898 for quality, 0.910 for exposure). The importance values are differences against that baseline, so they are reported for ranking genes, not as evidence of performance.",
   "interpretationLimits": [
