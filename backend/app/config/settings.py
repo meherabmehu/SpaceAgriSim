@@ -8,7 +8,7 @@ Values can be overridden through environment variables, e.g.
 
 import os
 import secrets
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -34,6 +34,15 @@ class Settings(BaseSettings):
     # Origins allowed to call the API from a browser. The Vite dev server
     # proxies /api so this mostly matters when the frontend is served elsewhere.
     cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
+
+    @field_validator("cors_origins")
+    @classmethod
+    def explicit_cors_origins(cls, origins: list[str]) -> list[str]:
+        if not origins or any(origin == "*" or "*" in origin for origin in origins):
+            raise ValueError("CORS origins must be explicit; wildcards are not permitted")
+        if any(not origin.startswith(("https://", "http://localhost", "http://127.0.0.1")) for origin in origins):
+            raise ValueError("CORS origins must use HTTPS outside local development")
+        return origins
 
 
 settings = Settings()

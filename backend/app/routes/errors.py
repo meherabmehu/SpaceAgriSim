@@ -9,6 +9,9 @@ per-field map while keeping the original `detail` for compatibility.
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+import logging
+
+logger = logging.getLogger("uvicorn.error")
 
 
 def _field_name(loc) -> str:
@@ -40,3 +43,10 @@ async def validation_error_handler(_: Request, exc: RequestValidationError) -> J
 
 def register_error_handlers(app: FastAPI) -> None:
     app.add_exception_handler(RequestValidationError, validation_error_handler)
+
+    @app.exception_handler(Exception)
+    async def unhandled_error(_: Request, exc: Exception) -> JSONResponse:
+        # Diagnostic detail remains in the host log; clients never receive
+        # tracebacks, driver errors, connection strings, or secret material.
+        logger.exception("Unhandled application error: %s", type(exc).__name__)
+        return JSONResponse(status_code=500, content={"error": "internal_error", "message": "An internal server error occurred"})
