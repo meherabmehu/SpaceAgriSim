@@ -1,30 +1,35 @@
 {
   "schemaVersion": 1,
-  "trainedAt": "2026-11-07T14:32:46.972775+00:00",
+  "trainedAt": "2026-11-07T14:37:58.924105+00:00",
   "environment": {
     "python": "3.13.16",
     "numpy": "2.3.5",
     "pandas": "2.2.3",
     "sklearn": "1.6.1"
   },
-  "dataVersion": "e5a3967ac7c471a2a81ed71e6ac179e8ca01809d199a8739afc9b498b18fdc7c",
   "models": [
+    {
+      "id": "lettuce-earth-growth-v1",
+      "artifact": "ml/artifacts/lettuce-earth-growth-v1.json",
+      "sha256": "bdd6dd96b57499e632a7ebfe779c62017d2bd2ac2802bada8af255b37533fbe0"
+    },
     {
       "id": "mizuna-harvest-v1",
       "artifact": "ml/artifacts/mizuna-harvest-v1.json",
       "sha256": "78029d6d9a93946bdaf50427f697a463a805f3c588a4deb17afb61314cf22f38"
     },
     {
+      "id": "mizuna-microbial-load-v1",
+      "artifact": "ml/artifacts/mizuna-microbial-load-v1.json",
+      "sha256": "8c05cd95a4df902300973425e6fbfe4e1534da5a11b4a8aa6c8d99e1448e019f"
+    },
+    {
       "id": "tomato-flight-response-v1",
       "artifact": "ml/artifacts/tomato-flight-response-v1.json",
       "sha256": "b1dd72b63130fccc6a334e3de286ae6774152291ce5fe00caf365d74cb10f593"
-    },
-    {
-      "id": "lettuce-earth-growth-v1",
-      "artifact": "ml/artifacts/lettuce-earth-growth-v1.json",
-      "sha256": "bdd6dd96b57499e632a7ebfe779c62017d2bd2ac2802bada8af255b37533fbe0"
     }
   ],
+  "dataVersion": "e5a3967ac7c471a2a81ed71e6ac179e8ca01809d199a8739afc9b498b18fdc7c",
   "externalDataVersion": "539e724e1ca68142a96f9f45ba4247e45ba6b120a259e9017d82d01b71e14d04",
   "externalTrainingEnvironment": {
     "numpy": "2.3.5",

@@ -127,3 +127,111 @@ def predict_molecular(request: MolecularPredictionRequest):
     logit, warnings = research.predict_values(model, values)
     probability = 1 / (1 + math.exp(-max(-700, min(700, logit))))
     return {"modelId": model["id"], "prediction": "flight" if probability >= .5 else "ground", "probabilityFlight": probability, "calibrated": False, "sourceStudy": model["sourceStudy"], "method": model["method"], "outOfDistribution": bool(warnings), "warnings": warnings + model["limitations"]}
+
+
+# ---------------------------------------------------------------------------
+# Phase 6: NASA OSD-780 edible-leaf microbial load
+# ---------------------------------------------------------------------------
+class MicrobialPredictionRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    experiment: Literal["VEG04A", "VEG04B"] = Field(
+        description="VEG-04 campaign; the model does not transfer across campaigns, so this is a required input")
+    environment: Literal["flight", "ground"]
+    spectrum: Literal["red", "blue"]
+    sanitised: bool = Field(description="Sampled after sanitisation (clean) or before (unclean)")
+    freshWeightG: float = Field(ge=0, le=50, description="Mass of the tissue subsample weighed for the assay, in grams. NOT harvest biomass.")
+    harvestIndex: int = Field(ge=1, le=5, description="VEG-04B harvest number; 1 for VEG-04A")
+
+
+@router.post("/predict/mizuna-microbial-load-v1")
+def predict_microbial(request: MicrobialPredictionRequest):
+    model = artifact("mizuna-microbial-load-v1")
+    values = [
+        int(request.environment == "flight"),
+        int(request.spectrum == "blue"),
+        int(request.experiment == "VEG04B"),
+        int(request.sanitised),
+        request.freshWeightG,
+        request.harvestIndex,
+    ]
+    value, warnings = research.predict_values(model, values)
+    radius = model["interval"]["radius"]
+    calibrated = bool(model["interval"].get("empiricallyCalibrated", False))
+    return {
+        "modelId": model["id"],
+        "prediction": value,
+        "unit": model["unit"],
+        "method": model["method"],
+        "sourceStudy": model["sourceStudy"],
+        "sourceUrl": model["sourceUrl"],
+        "evidenceStatus": model.get("evidenceStatus", "experimental"),
+        "recommendedUse": model.get("recommendedUse"),
+        "interval": {
+            "low": value - radius,
+            "high": value + radius,
+            "kind": model["interval"]["kind"],
+            "calibrated": calibrated,
+            "empiricalCoverage": model["interval"].get("empiricalCoverage"),
+            "nominalCoverage": model["interval"].get("nominalCoverage"),
+        },
+        "crossExperimentGeneralisation": {
+            "leaveOneExperimentOut": model.get("leaveOneExperimentOut"),
+            "transfers": bool((model.get("evidenceBasis") or {}).get("transfersToHeldOutExperiment", False)),
+        },
+        "outOfDistribution": bool(warnings),
+        "warnings": warnings + model["limitations"],
+        "inputs": request.model_dump(),
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 6: scientific evidence surface
+# ---------------------------------------------------------------------------
+@router.get("/science/calibration")
+def science_calibration():
+    return research.calibration()
+
+
+@router.get("/science/evidence")
+def science_evidence():
+    return research.evidence_summary()
+
+
+@router.get("/scientific-summary")
+def scientific_summary():
+    """Deliberately blunt machine-readable statement of platform maturity.
+
+    This endpoint exists so no downstream consumer has to infer how strong the
+    evidence is from prose.
+    """
+    registry = research.model_registry()["models"]
+    calibration = research.calibration()
+    return {
+        "platformMaturity": "research-and-education",
+        "nasaEndorsed": False,
+        "missionCertified": False,
+        "models": [
+            {
+                "id": m["id"],
+                "evidenceStatus": m.get("predictionStatus"),
+                "sourceStudy": m.get("sourceStudy"),
+                "samples": m.get("samples"),
+                "groups": m.get("groups"),
+                "beatsBaseline": (m.get("baselineComparison") or {}).get("outperformsBaselineMAE"),
+                "artifactVerified": m.get("artifactExists"),
+            }
+            for m in registry
+        ],
+        "calibration": {
+            "status": calibration.get("status"),
+            "invariantsAllPassed": (calibration.get("invariants") or {}).get("allPassed"),
+            "invariantsChecks": (calibration.get("invariants") or {}).get("checksRun"),
+        },
+        "validatedModels": [m["id"] for m in registry if m.get("predictionStatus") == "validated"],
+        "note": (
+            "No model in this repository is validated for operational or mission "
+            "use. Simulation outputs are transparent mechanistic estimates with "
+            "explicitly labelled assumptions; they are not NASA-validated growth "
+            "predictions."
+        ),
+    }

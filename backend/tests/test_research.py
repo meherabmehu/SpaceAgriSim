@@ -48,7 +48,13 @@ def test_dataset_search_detail_preview_and_unknown(scientific_client):
 
 def test_model_registry_requires_actual_verified_artifacts(scientific_client):
     models = scientific_client.get("/api/models").json()["models"]
-    assert len(models) == 3
+    # Phase 6 added mizuna-microbial-load-v1 (NASA OSD-780 plate counts), the only
+    # new model the verified NASA data could support.
+    assert len(models) == 4
+    assert {m["id"] for m in models} == {
+        "mizuna-harvest-v1", "tomato-flight-response-v1",
+        "lettuce-earth-growth-v1", "mizuna-microbial-load-v1",
+    }
     assert all(m["artifactExists"] for m in models)
     for model in models:
         assert model["status"] == "trained-exploratory"
@@ -132,3 +138,116 @@ def test_lettuce_external_model_scope_and_experiment_splits(scientific_client):
     assert scientific_client.post('/api/predict/lettuce-earth-growth-v1',json=inputs|{'gravity':.38}).status_code==422
     splits=json.loads((research.ROOT/'ml/evaluation/lettuce_splits.json').read_text())
     assert len(splits)==4 and all(not set(s['trainExperiments'])&set(s['testExperiments']) for s in splits)
+
+
+# ---------------------------------------------------------------------------
+# Phase 6: NASA OSD-780 microbial load model and evidence surface
+# ---------------------------------------------------------------------------
+def test_microbial_model_is_registered_with_honest_evidence(scientific_client):
+    models = {m["id"]: m for m in scientific_client.get("/api/models").json()["models"]}
+    model = models["mizuna-microbial-load-v1"]
+    assert model["sourceStudy"] == "OSD-780"
+    assert model["samples"] == 123
+    assert model["groups"] == 35
+    assert model["target"].startswith("log10(1 + CFU per gram")
+    # It beats the baseline in pooled data but does not transfer, so it must not
+    # be advertised as validated.
+    assert model["evidenceStatus"] == "experimental"
+    assert model["evidenceBasis"]["beatsBaselineWithinPooledData"] is True
+    assert model["evidenceBasis"]["transfersToHeldOutExperiment"] is False
+    # Intervals under-cover and must be labelled uncalibrated.
+    assert model["interval"]["empiricallyCalibrated"] is False
+    assert "uncalibrated" in model["interval"]["kind"].lower()
+    # Leave-one-experiment-out must be negative for both campaigns.
+    for held_out in ("VEG04A", "VEG04B"):
+        assert model["leaveOneExperimentOut"][held_out]["R2"] < 0
+    # The biomass category error must be forbidden in the prose.
+    assert any("not harvest biomass" in note.lower() for note in model["limitations"])
+
+
+def test_microbial_prediction_contract(scientific_client):
+    base = {
+        "experiment": "VEG04B", "environment": "flight", "spectrum": "red",
+        "sanitised": True, "freshWeightG": 5.4, "harvestIndex": 1,
+    }
+    result = scientific_client.post("/api/predict/mizuna-microbial-load-v1", json=base)
+    assert result.status_code == 200
+    body = result.json()
+    assert body["unit"] == "log10 CFU/g fresh weight"
+    assert body["evidenceStatus"] == "experimental"
+    assert body["interval"]["low"] <= body["prediction"] <= body["interval"]["high"]
+    assert body["interval"]["calibrated"] is False
+    assert body["crossExperimentGeneralisation"]["transfers"] is False
+    assert body["outOfDistribution"] is False
+    # Flight is measured to be higher than ground, so the sign must be positive.
+    ground = scientific_client.post(
+        "/api/predict/mizuna-microbial-load-v1", json=base | {"environment": "ground"})
+    assert body["prediction"] > ground.json()["prediction"]
+
+
+def test_microbial_prediction_rejects_invalid_input(scientific_client):
+    base = {
+        "experiment": "VEG04A", "environment": "flight", "spectrum": "red",
+        "sanitised": False, "freshWeightG": 5.0, "harvestIndex": 1,
+    }
+    # Unknown campaign, impossible harvest index, negative mass, extra fields.
+    assert scientific_client.post(
+        "/api/predict/mizuna-microbial-load-v1",
+        json=base | {"experiment": "VEG04C"}).status_code == 422
+    assert scientific_client.post(
+        "/api/predict/mizuna-microbial-load-v1",
+        json=base | {"harvestIndex": 0}).status_code == 422
+    assert scientific_client.post(
+        "/api/predict/mizuna-microbial-load-v1",
+        json=base | {"freshWeightG": -1}).status_code == 422
+    assert scientific_client.post(
+        "/api/predict/mizuna-microbial-load-v1",
+        json=base | {"gravity": 0.38}).status_code == 422
+
+
+def test_microbial_prediction_flags_out_of_domain(scientific_client):
+    """An assay subsample far above the measured range must raise the flag."""
+    body = scientific_client.post("/api/predict/mizuna-microbial-load-v1", json={
+        "experiment": "VEG04A", "environment": "ground", "spectrum": "blue",
+        "sanitised": True, "freshWeightG": 40.0, "harvestIndex": 1,
+    }).json()
+    assert body["outOfDistribution"] is True
+    assert any("outside observed training range" in w for w in body["warnings"])
+
+
+def test_science_calibration_exposes_measured_evidence(scientific_client):
+    payload = scientific_client.get("/api/science/calibration").json()
+    assert payload["status"] == "available"
+    assert payload["invariants"]["allPassed"] is True
+    assert payload["invariants"]["checksRun"] > 1000
+    lettuce = payload["calibration"]["lettuce"]
+    # Lettuce is the only crop whose baseline is supported by measured data.
+    assert lettuce["evidenceLevel"] == "measured-comparable"
+    assert lettuce["baselineWithinMeasuredRange"] is True
+    assert lettuce["decision"] == "retained-within-measured-range"
+    # Flagged crops must not have been silently changed.
+    for crop in ("tomato", "radish"):
+        assert payload["calibration"][crop]["decision"] == "flagged"
+        assert "NOT applied" in payload["calibration"][crop]["suggestionStatus"]
+    assert "PDF" in payload["sourceCaveat"]
+
+
+def test_science_evidence_separates_measured_from_assumed(scientific_client):
+    payload = scientific_client.get("/api/science/evidence").json()
+    assert payload["measuredTargets"] and payload["assumedTargets"]
+    assert payload["blockedTargets"]
+    # Every blocked target from the Phase 6 brief must be represented.
+    blocked = " ".join(payload["blockedTargets"]).lower()
+    for term in ("transpiration", "co2", "radiation", "gravity", "dry mass"):
+        assert term in blocked
+    assert payload["modelEvidenceStatus"]["mizuna-harvest-v1"] == "baseline-only"
+
+
+def test_scientific_summary_never_claims_validation(scientific_client):
+    payload = scientific_client.get("/api/scientific-summary").json()
+    assert payload["nasaEndorsed"] is False
+    assert payload["missionCertified"] is False
+    assert payload["validatedModels"] == []
+    assert payload["platformMaturity"] == "research-and-education"
+    assert len(payload["models"]) == 4
+    assert payload["calibration"]["invariantsAllPassed"] is True

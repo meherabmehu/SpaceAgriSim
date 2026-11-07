@@ -12,7 +12,12 @@ ROOT = Path(__file__).resolve().parents[2]
 BUNDLE = Path(__file__).resolve().parents[1] / 'scientific_data'
 DATA = (BUNDLE if BUNDLE.exists() else ROOT) / "data"
 ARTIFACTS = (BUNDLE if BUNDLE.exists() else ROOT) / "ml" / "artifacts"
-MODEL_IDS = {"mizuna-harvest-v1", "tomato-flight-response-v1", "lettuce-earth-growth-v1"}
+MODEL_IDS = {
+    "mizuna-harvest-v1",
+    "tomato-flight-response-v1",
+    "lettuce-earth-growth-v1",
+    "mizuna-microbial-load-v1",
+}
 
 
 def read_json(path):
@@ -100,8 +105,16 @@ def model_registry():
             # information a researcher needs to judge applicability.
             metrics = model.get("metrics", {})
             baseline = model.get("baselineMetrics", {})
+            # Prefer the status the artifact computed from its own measured
+            # metrics; fall back to a conservative default. A model must never be
+            # able to acquire a confident label by omission.
+            declared = model.get("evidenceStatus")
             if model_id == "mizuna-harvest-v1":
+                # Target mixes two measurement definitions across arms; see
+                # docs/DATA_HARMONIZATION.md H1. Never promotable.
                 evidence_status = "baseline-only"
+            elif declared:
+                evidence_status = declared
             elif model.get("status") == "trained-exploratory":
                 evidence_status = "experimental"
             else:
@@ -163,3 +176,84 @@ def preview(study_id):
             reader = csv.DictReader(handle); rows = list(reader)
             tables.append({"name": path.name, "columns": reader.fieldnames, "rows": rows[:20], "rowCount": len(rows), "units": units, "note": note})
     return {"studyId": study_id, "tables": tables, "note": "Only acquired, processed measurements are previewed; absent tables are not synthetic."}
+
+
+def phase6_report(name):
+    """Load a Phase 6 evidence artifact, if the analysis has been run.
+
+    These files are produced by the offline analysis scripts and committed, so
+    the API can serve measured provenance without re-running any training.
+    """
+    candidates = [
+        ROOT / "docs" / "phase6" / name,
+        BUNDLE / "phase6" / name,
+    ]
+    for path in candidates:
+        if path.is_file():
+            return read_json(path)
+    return None
+
+
+def calibration():
+    """Crop-baseline calibration evidence and simulation invariant results."""
+    payload = phase6_report("simulation_calibration.json")
+    if payload is None:
+        return {
+            "status": "not-run",
+            "note": "Run scripts/calibrate_simulation.py to generate calibration evidence.",
+        }
+    invariants = payload.get("invariants", {})
+    return {
+        "status": "available",
+        "source": payload.get("source"),
+        "sourceCaveat": payload.get("sourceCaveat"),
+        "normalisationPolicy": payload.get("normalisationPolicy"),
+        "calibration": payload.get("calibration", {}),
+        "invariants": {
+            "checksRun": invariants.get("checksRun"),
+            "allPassed": invariants.get("allPassed"),
+            "failureCount": len(invariants.get("failures", [])),
+        },
+    }
+
+
+def evidence_summary():
+    """One place that states what is measured, estimated, assumed or blocked."""
+    statuses = {}
+    for model_id in sorted(MODEL_IDS):
+        try:
+            model = load_model(model_id)
+        except (FileNotFoundError, KeyError, ValueError, json.JSONDecodeError):
+            statuses[model_id] = "unavailable"
+            continue
+        statuses[model_id] = model.get("evidenceStatus") or (
+            "baseline-only" if model_id == "mizuna-harvest-v1" else "experimental")
+    return {
+        "modelEvidenceStatus": statuses,
+        "measuredTargets": [
+            "OSD-655 VEG-04A harvest mass per pillow (14 usable endpoints; target defined differently per arm)",
+            "OSD-780 VEG-04A/B culturable aerobic and yeast/mould plate counts per g fresh weight (203 + 169 measured rows)",
+            "OSD-745 VEG-01/03A elemental, phenolic, anthocyanin and ORAC assays",
+            "EDEN ISS 2018 per-crop edible fresh mass in kg/m2 (OSD-895; transcribed from the published paper, not a NASA table)",
+        ],
+        "assumedTargets": [
+            "gravity, radiation, light-intensity, temperature and humidity response curve shapes",
+            "crop growth duration, harvest index, dry-matter fraction and peak water demand",
+            "water recovery efficiency",
+        ],
+        "blockedTargets": [
+            "harvest dry mass",
+            "repeated per-day growth observations",
+            "plant water uptake and transpiration",
+            "water recovery fraction",
+            "CO2 assimilation and O2 evolution",
+            "measured PPFD and photoperiod per sample",
+            "radiation dose paired with plant response",
+            "continuous gravity response and plant stress severity labels",
+        ],
+        "note": (
+            "Measured, estimated, assumed and hypothetical quantities are kept in "
+            "separate fields and are never blended into a single number presented "
+            "as a prediction."
+        ),
+    }
