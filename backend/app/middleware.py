@@ -2,9 +2,12 @@
 from collections import defaultdict, deque
 from time import monotonic
 import logging
+import json
 from uuid import uuid4
 
 from starlette.responses import JSONResponse
+from app.config.settings import settings
+from app.observability import record
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -23,12 +26,13 @@ class RequestGuard:
         start=monotonic()
         address=(scope.get("client") or ("unknown",0))[0]
         path=scope.get("path","")
-        bucket="optimize" if path.endswith("/optimize") else "general"
+        bucket="auth" if "/auth/" in path else ("optimize" if path.endswith("/optimize") else "general")
         key=(address,bucket)
         window=self.requests[key]
         while window and window[0] < start-60:
             window.popleft()
-        limit=self.optimize_per_minute if bucket=="optimize" else self.max_per_minute
+        limit=(settings.auth_rate_limit_per_minute if bucket=="auth" else
+               self.optimize_per_minute if bucket=="optimize" else self.max_per_minute)
         if len(window)>=limit:
             response=JSONResponse({"error":"rate_limit","message":"Request limit reached; retry after one minute"},
                                   status_code=429,headers={"Retry-After":"60"})
@@ -64,10 +68,22 @@ class RequestGuard:
             nonlocal status
             if message["type"]=="http.response.start":
                 status=message["status"]
-                message["headers"]=list(message.get("headers",[]))+[(b"x-request-id",request_id.encode())]
+                headers=list(message.get("headers",[]))
+                headers.extend([
+                    (b"x-request-id",request_id.encode()),
+                    (b"x-content-type-options",b"nosniff"),
+                    (b"x-frame-options",b"DENY"),
+                    (b"referrer-policy",b"no-referrer"),
+                    (b"permissions-policy",b"geolocation=(), microphone=(), camera=()"),
+                ])
+                if "/auth/" in path or path.endswith("/scenarios"):
+                    headers.append((b"cache-control",b"no-store"))
+                message["headers"]=headers
             await send(message)
         try:
             await self.app(scope,receive,tracked_send)
         finally:
-            logger.info("request id=%s method=%s path=%s status=%s elapsed_ms=%.2f",request_id,
-                        scope.get("method"),path,status,(monotonic()-start)*1000)
+            record(path, status)
+            logger.info(json.dumps({"event":"request_complete","request_id":request_id,
+                        "method":scope.get("method"),"path":path,"status":status,
+                        "elapsed_ms":round((monotonic()-start)*1000,2)}))

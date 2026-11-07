@@ -1,0 +1,62 @@
+"""Small, explicit bearer-token authentication boundary for account data."""
+from datetime import datetime, timedelta, timezone
+import re
+from uuid import uuid4
+
+import jwt
+from argon2 import PasswordHasher
+from argon2.exceptions import InvalidHashError, VerifyMismatchError
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+from app import storage
+from app.config.settings import settings
+
+password_hasher = PasswordHasher()
+bearer = HTTPBearer(auto_error=False)
+EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
+
+
+def normalize_email(value: str) -> str:
+    email = value.strip().lower()
+    if len(email) > 254 or not EMAIL_RE.fullmatch(email):
+        raise ValueError("Enter a valid email address")
+    return email
+
+
+def hash_password(password: str) -> str:
+    return password_hasher.hash(password)
+
+
+def verify_password(password_hash: str, password: str) -> bool:
+    try:
+        return password_hasher.verify(password_hash, password)
+    except (VerifyMismatchError, InvalidHashError):
+        return False
+
+
+def issue_token(user: dict) -> dict[str, str | int]:
+    now = datetime.now(timezone.utc)
+    expires = now + timedelta(minutes=settings.auth_token_minutes)
+    jti = uuid4().hex
+    token = jwt.encode({"sub": user["id"], "email": user["email"], "jti": jti,
+                        "iat": now, "exp": expires}, settings.auth_secret, algorithm="HS256")
+    return {"accessToken": token, "tokenType": "bearer", "expiresIn": settings.auth_token_minutes * 60,
+            "expiresAt": expires.isoformat()}
+
+
+def current_user(credentials: HTTPAuthorizationCredentials | None = Depends(bearer)) -> dict:
+    if credentials is None or credentials.scheme.lower() != "bearer":
+        raise HTTPException(401, "Authentication is required", headers={"WWW-Authenticate": "Bearer"})
+    try:
+        payload = jwt.decode(credentials.credentials, settings.auth_secret, algorithms=["HS256"], options={"require": ["sub", "jti", "exp"]})
+    except jwt.PyJWTError as exc:
+        raise HTTPException(401, "Invalid or expired authentication token", headers={"WWW-Authenticate": "Bearer"}) from exc
+    if storage.token_is_revoked(payload["jti"]):
+        raise HTTPException(401, "Authentication token has been revoked", headers={"WWW-Authenticate": "Bearer"})
+    user = storage.find_user_by_email(str(payload.get("email", "")))
+    if not user or user["id"] != payload["sub"] or user["disabled"]:
+        raise HTTPException(401, "Authentication is no longer valid", headers={"WWW-Authenticate": "Bearer"})
+    user["token_jti"] = payload["jti"]
+    user["token_expires_at"] = datetime.fromtimestamp(payload["exp"], timezone.utc).isoformat()
+    return user

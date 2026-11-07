@@ -6,6 +6,14 @@ from app import storage
 from app.config.settings import settings
 
 
+def auth_header(client, email="workspace@example.test"):
+    response=client.post("/api/auth/register",json={"email":email,"password":"CorrectHorseBattery1!"})
+    if response.status_code==409:
+        response=client.post("/api/auth/login",json={"email":email,"password":"CorrectHorseBattery1!"})
+    assert response.status_code in {200,201},response.text
+    return {"Authorization":f"Bearer {response.json()['accessToken']}"}
+
+
 def test_compare_has_matched_resources_and_actual_outputs(client):
     response=client.post("/api/compare",json={"simulationDays":7,"growingArea":2})
     assert response.status_code==200
@@ -60,10 +68,11 @@ def test_history_roundtrip_bounded_and_readiness(client,tmp_path,monkeypatch):
     monkeypatch.setattr(settings,"database_url",f"sqlite:///{(tmp_path/'scenarios.db').as_posix()}")
     monkeypatch.setattr(settings,"max_history",2)
     try:
+        headers=auth_header(client)
         for name in ("first","second","third"):
-            response=client.post("/api/scenarios",json={"name":name,"configuration":{"crop":"radish"}})
+            response=client.post("/api/scenarios",json={"name":name,"configuration":{"crop":"radish"}},headers=headers)
             assert response.status_code==201,response.text
-        rows=client.get("/api/scenarios").json()["scenarios"]
+        rows=client.get("/api/scenarios",headers=headers).json()["scenarios"]
         assert len(rows)==2
         assert [row["name"] for row in rows]==["third","second"]
         assert rows[0]["configuration"]["crop"]=="radish"
@@ -74,7 +83,7 @@ def test_history_roundtrip_bounded_and_readiness(client,tmp_path,monkeypatch):
 
 
 def test_blank_scenario_name_rejected(client):
-    assert client.post("/api/scenarios",json={"name":"   ","configuration":{}}).status_code==422
+    assert client.post("/api/scenarios",json={"name":"   ","configuration":{}},headers=auth_header(client,"blank@example.test")).status_code==422
 
 
 def test_request_guard_limits_body_and_attaches_request_id(client):
@@ -102,5 +111,5 @@ def test_request_guard_rate_limit_is_retryable():
 
 def test_operator_can_disable_shared_history_writes(client,monkeypatch):
     monkeypatch.setattr(settings,"history_writes_enabled",False)
-    response=client.post("/api/scenarios",json={"name":"test","configuration":{}})
+    response=client.post("/api/scenarios",json={"name":"test","configuration":{}},headers=auth_header(client,"disabled@example.test"))
     assert response.status_code==403

@@ -1,3 +1,5 @@
+import { authorizationHeader } from "./auth";
+
 export interface MissionParameters {
   crop: string;
   gravity: number;
@@ -23,8 +25,10 @@ export async function api<T = Record<string, unknown>>(
   const response = await fetch(`${base}${path}`, {
     method: body === undefined ? "GET" : "POST",
     signal,
-    headers:
-      body === undefined ? undefined : { "Content-Type": "application/json" },
+    headers: {
+      ...authorizationHeader(),
+      ...(body === undefined ? {} : { "Content-Type": "application/json" }),
+    },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   const payload = await response.json().catch(() => null);
@@ -42,7 +46,7 @@ export async function downloadReport(
 ) {
   const response = await fetch(`${base}/reports/${format}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { ...authorizationHeader(), "Content-Type": "application/json" },
     body: JSON.stringify(params),
   });
   if (!response.ok) throw new Error(`Report failed (${response.status})`);
@@ -53,3 +57,4 @@ export async function downloadReport(
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+
