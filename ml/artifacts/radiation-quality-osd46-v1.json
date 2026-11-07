@@ -2715,5 +2715,11 @@
     "The design is unbalanced: atm-1 lacks a 3 hour timepoint and controls carry no collection time.",
     "Never predicts yield, biomass, survival or crop productivity; no such measurement exists in this study."
   ],
-  "recommendedUse": "Demonstrating that radiation quality leaves a recoverable molecular signature that generalises to held-out biological groups and across array batches. Not a dosimeter and not a crop-performance predictor."
+  "recommendedUse": "Demonstrating that radiation quality leaves a recoverable molecular signature that generalises to held-out biological groups and across array batches. Not a dosimeter and not a crop-performance predictor.",
+  "phase10": {
+    "explanationAvailable": true,
+    "explanationArtifact": "ml/artifacts/radiation-quality-osd46-v1-explanation.json",
+    "explanationMethod": "exact linear attribution of the served linear-softmax evaluator; the contributions reconstruct the served logits",
+    "explanationIsSurrogate": false
+  }
 }

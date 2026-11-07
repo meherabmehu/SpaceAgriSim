@@ -2354,5 +2354,11 @@
     "Mixes two radiation qualities and two absorbed doses into one label; it does not separate quality from dose.",
     "Never predicts yield, biomass, survival or crop productivity; no such measurement exists in this study."
   ],
-  "recommendedUse": "Evidence that an irradiation-exposure signature is recoverable, reported alongside a batch-controlled evaluation because the control class is not batch-balanced."
+  "recommendedUse": "Evidence that an irradiation-exposure signature is recoverable, reported alongside a batch-controlled evaluation because the control class is not batch-balanced.",
+  "phase10": {
+    "explanationAvailable": true,
+    "explanationArtifact": "ml/artifacts/radiation-exposure-osd46-v1-explanation.json",
+    "explanationMethod": "exact linear attribution of the served linear-softmax evaluator; the contributions reconstruct the served logits",
+    "explanationIsSurrogate": false
+  }
 }

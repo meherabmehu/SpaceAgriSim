@@ -43,12 +43,12 @@
   {
    "id": "radiation-quality-osd46-v1",
    "artifact": "ml/artifacts/radiation-quality-osd46-v1.json",
-   "sha256": "2a0bdec65c1b37610f79fcf0082c8b5368adaf45685db2eac05b203799c146d9"
+   "sha256": "5155d235b4511a2f28442f9f544cbbbc7f98a8f136fdcd45a771a9db5264d8eb"
   },
   {
    "id": "radiation-exposure-osd46-v1",
    "artifact": "ml/artifacts/radiation-exposure-osd46-v1.json",
-   "sha256": "37003a6959c6032e559ddea3e1eaf07839052b5466f6aa0ded2c3f15c03aa8aa"
+   "sha256": "dc7a324d3c55401bfbe1f3d8740cf4b70e1590efd3bd11d618c066808d565281"
   }
  ],
  "dataVersion": "e5a3967ac7c471a2a81ed71e6ac179e8ca01809d199a8739afc9b498b18fdc7c",

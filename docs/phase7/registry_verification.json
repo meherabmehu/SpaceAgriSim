@@ -1,21 +1,27 @@
 {
-  "generatedAt": "2026-11-07T15:14:16.802132+00:00",
+  "generatedAt": "2026-11-07T21:20:31.298196+00:00",
   "phase": 7,
   "registrySchemaVersion": 1,
-  "modelCount": 5,
+  "modelCount": 8,
   "modelIds": [
     "lettuce-earth-growth-v1",
+    "lettuce-earth-growth-v2",
     "mizuna-harvest-v1",
     "mizuna-microbial-load-v1",
     "mizuna-microbial-relative-load-v2",
+    "radiation-exposure-osd46-v1",
+    "radiation-quality-osd46-v1",
     "tomato-flight-response-v1"
   ],
   "artifactDigests": {
-    "lettuce-earth-growth-v1": "bdd6dd96b57499e632a7ebfe779c62017d2bd2ac2802bada8af255b37533fbe0",
+    "lettuce-earth-growth-v1": "b5af3819a4d55a1d9f7dd293886a72c692bbc57bf6d488bbcf45b1a4079491db",
     "mizuna-harvest-v1": "78029d6d9a93946bdaf50427f697a463a805f3c588a4deb17afb61314cf22f38",
-    "mizuna-microbial-load-v1": "8c05cd95a4df902300973425e6fbfe4e1534da5a11b4a8aa6c8d99e1448e019f",
+    "mizuna-microbial-load-v1": "9868c660351f906ede6001ea7e2eb8d5fd2fc7b60b1c393c3dec94017db8cfff",
     "tomato-flight-response-v1": "b1dd72b63130fccc6a334e3de286ae6774152291ce5fe00caf365d74cb10f593",
-    "mizuna-microbial-relative-load-v2": "0f6f7452bd9671b6738c2a2d3c12b4cb7e9c2a7ddef75151aa6fcbb20b1f996f"
+    "mizuna-microbial-relative-load-v2": "11ad54a2fcf24c040796f4cdd256f624d79b40e80f2f732096ba7b271cf5de39",
+    "lettuce-earth-growth-v2": "9931f375baf5fa11c55e2647f1fd2b9c4775deb4166c1e0879932e8b004e1b7c",
+    "radiation-quality-osd46-v1": "5155d235b4511a2f28442f9f544cbbbc7f98a8f136fdcd45a771a9db5264d8eb",
+    "radiation-exposure-osd46-v1": "dc7a324d3c55401bfbe1f3d8740cf4b70e1590efd3bd11d618c066808d565281"
   },
   "environment": {
     "python": "3.13.16",
@@ -37,7 +43,7 @@
     {
       "check": "checksum matches: lettuce-earth-growth-v1",
       "passed": true,
-      "detail": "bdd6dd96b574 vs recorded bdd6dd96b574"
+      "detail": "b5af3819a4d5 vs recorded b5af3819a4d5"
     },
     {
       "check": "checksum matches: mizuna-harvest-v1",
@@ -47,7 +53,7 @@
     {
       "check": "checksum matches: mizuna-microbial-load-v1",
       "passed": true,
-      "detail": "8c05cd95a4df vs recorded 8c05cd95a4df"
+      "detail": "9868c660351f vs recorded 9868c660351f"
     },
     {
       "check": "checksum matches: tomato-flight-response-v1",
@@ -57,7 +63,22 @@
     {
       "check": "checksum matches: mizuna-microbial-relative-load-v2",
       "passed": true,
-      "detail": "0f6f7452bd96 vs recorded 0f6f7452bd96"
+      "detail": "11ad54a2fcf2 vs recorded 11ad54a2fcf2"
+    },
+    {
+      "check": "checksum matches: lettuce-earth-growth-v2",
+      "passed": true,
+      "detail": "9931f375baf5 vs recorded 9931f375baf5"
+    },
+    {
+      "check": "checksum matches: radiation-quality-osd46-v1",
+      "passed": true,
+      "detail": "5155d235b451 vs recorded 5155d235b451"
+    },
+    {
+      "check": "checksum matches: radiation-exposure-osd46-v1",
+      "passed": true,
+      "detail": "dc7a324d3c55 vs recorded dc7a324d3c55"
     },
     {
       "check": "no unregistered model artifacts",
@@ -75,7 +96,22 @@
       "detail": "registered successor of mizuna-microbial-load-v1 is mizuna-microbial-relative-load-v2"
     },
     {
+      "check": "superseded model still registered: lettuce-earth-growth-v1",
+      "passed": true,
+      "detail": "lettuce-earth-growth-v2 supersedes lettuce-earth-growth-v1"
+    },
+    {
+      "check": "supersession is one-directional: lettuce-earth-growth-v1",
+      "passed": true,
+      "detail": "registered successor of lettuce-earth-growth-v1 is lettuce-earth-growth-v2"
+    },
+    {
       "check": "api can load: lettuce-earth-growth-v1",
+      "passed": true,
+      "detail": "?"
+    },
+    {
+      "check": "api can load: lettuce-earth-growth-v2",
       "passed": true,
       "detail": "?"
     },
@@ -91,6 +127,16 @@
     },
     {
       "check": "api can load: mizuna-microbial-relative-load-v2",
+      "passed": true,
+      "detail": "experimental"
+    },
+    {
+      "check": "api can load: radiation-exposure-osd46-v1",
+      "passed": true,
+      "detail": "experimental"
+    },
+    {
+      "check": "api can load: radiation-quality-osd46-v1",
       "passed": true,
       "detail": "experimental"
     },
@@ -163,6 +209,36 @@
       "check": "artifact reports limitations: mizuna-microbial-relative-load-v2",
       "passed": true,
       "detail": "7 statements"
+    },
+    {
+      "check": "artifact reports metrics: lettuce-earth-growth-v2",
+      "passed": true,
+      "detail": "3 numeric metrics"
+    },
+    {
+      "check": "artifact reports limitations: lettuce-earth-growth-v2",
+      "passed": true,
+      "detail": "7 statements"
+    },
+    {
+      "check": "artifact reports metrics: radiation-quality-osd46-v1",
+      "passed": true,
+      "detail": "6 numeric metrics"
+    },
+    {
+      "check": "artifact reports limitations: radiation-quality-osd46-v1",
+      "passed": true,
+      "detail": "6 statements"
+    },
+    {
+      "check": "artifact reports metrics: radiation-exposure-osd46-v1",
+      "passed": true,
+      "detail": "6 numeric metrics"
+    },
+    {
+      "check": "artifact reports limitations: radiation-exposure-osd46-v1",
+      "passed": true,
+      "detail": "5 statements"
     }
   ],
   "passed": true,
