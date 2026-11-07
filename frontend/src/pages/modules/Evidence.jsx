@@ -8,6 +8,7 @@ import {
 } from "./moduleSupport.jsx";
 import { useState } from "react";
 import EarthLettucePrediction from './EarthLettucePrediction.jsx';
+import RadiationTranscriptomicPrediction from './RadiationTranscriptomicPrediction.jsx';
 import {
   ArrowRight,
   Database,
@@ -370,6 +371,7 @@ export function Predictions({ models, registryError }) {
         (m) => m.id === "tomato-flight-response-v1" && m.artifactExists,
       ) && <MolecularPrediction />}
       {models?.models?.some(m=>m.id==='lettuce-earth-growth-v1'&&m.artifactExists)&&<EarthLettucePrediction/>}
+      {models?.models?.some(m=>m.id==='radiation-quality-osd46-v1'&&m.artifactExists)&&<RadiationTranscriptomicPrediction/>}
     </>
   );
 }

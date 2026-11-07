@@ -23,8 +23,11 @@ test("mission shell, real controls, and responsive navigation", async ({
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBeTruthy();
+  // Captured into the gitignored test-results tree, not over the committed
+  // baselines in docs/screenshots. Writing over the baseline would make the
+  // visual regression gate compare a file against itself and always pass.
   await page.screenshot({
-    path: `../docs/screenshots/mission-${testInfo.project.name}.png`,
+    path: `test-results/screenshots/mission-${testInfo.project.name}.png`,
     fullPage: true,
   });
   await page.getByRole("button", { name: "Open simulation lab" }).click();

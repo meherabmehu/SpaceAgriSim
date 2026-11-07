@@ -178,7 +178,11 @@ def _transcriptomic_prediction(model_id: str, request: TranscriptomicPredictionR
             "samples": model.get("samples"),
             "biologicalGroups": model.get("groups"),
         },
-        "batchConfound": (model.get("batchConfound") or {}).get("cramersV"),
+        # Full cross-tabulation, not just the scalar: a reader can then judge the
+        # confound instead of being asked to trust one number.
+        "batchConfound": model.get("batchConfound"),
+        # Present only where the model publishes a confound-reduced re-evaluation.
+        "supplementaryEvaluation": model.get("supplementaryEvaluation"),
         "interval": {"kind": "none", "calibrated": False,
                      "note": ("A softmax probability from an uncalibrated linear model "
                               "is not a confidence interval. It is reported as a "

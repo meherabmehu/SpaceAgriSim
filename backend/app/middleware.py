@@ -13,7 +13,10 @@ logger = logging.getLogger("uvicorn.error")
 
 
 class RequestGuard:
-    def __init__(self, app, max_body=65536, max_per_minute=180, optimize_per_minute=12):
+    def __init__(self, app, max_body=65536, max_per_minute=None, optimize_per_minute=12):
+        # An explicit constructor value wins, so tests can pin a tight budget. With
+        # no explicit value the operator setting decides, which is how the browser
+        # suite gets headroom without weakening the shipped default.
         self.app=app
         self.max_body=max_body
         self.max_per_minute=max_per_minute
@@ -32,7 +35,8 @@ class RequestGuard:
         while window and window[0] < start-60:
             window.popleft()
         limit=(settings.auth_rate_limit_per_minute if bucket=="auth" else
-               self.optimize_per_minute if bucket=="optimize" else self.max_per_minute)
+               self.optimize_per_minute if bucket=="optimize"
+               else (self.max_per_minute or settings.general_rate_limit_per_minute))
         if len(window)>=limit:
             response=JSONResponse({"error":"rate_limit","message":"Request limit reached; retry after one minute"},
                                   status_code=429,headers={"Retry-After":"60"})

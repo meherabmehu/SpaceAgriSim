@@ -198,7 +198,26 @@ def test_prediction_response_carries_its_own_limitations(client, model_id):
     assert body["validation"]["biologicalGroups"] >= 20
     assert body["interval"]["calibrated"] is False
     assert any("yield" in warning.lower() for warning in body["warnings"])
-    assert "batch" in json.dumps(body).lower()
+    # The batch confound travels with every prediction, as data rather than prose.
+    assert 0.0 <= body["batchConfound"]["cramersV"] <= 1.0
+    assert body["batchConfound"]["contingency"]
+
+
+def test_exposure_prediction_carries_the_batch_controlled_figure(client):
+    expression = profile_request(client, "radiation-exposure-osd46-v1", "control")
+    body = client.post("/api/predict/radiation-exposure-osd46-v1",
+                       json={"expression": expression}).json()
+    supplementary = body["supplementaryEvaluation"]
+    assert supplementary["batch"] == "0806A-10"
+    assert supplementary["bestBalancedAccuracy"] > 0.8
+
+
+def test_quality_prediction_has_no_supplementary_evaluation(client):
+    """Only the confounded binary task needs one; there must be no invented field."""
+    expression = profile_request(client, "radiation-quality-osd46-v1", "control")
+    body = client.post("/api/predict/radiation-quality-osd46-v1",
+                       json={"expression": expression}).json()
+    assert body["supplementaryEvaluation"] is None
 
 
 def test_out_of_domain_values_raise_a_warning(client):
