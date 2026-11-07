@@ -17,7 +17,6 @@ from reportlab.pdfgen import canvas
 from app.models.simulation import SimulationRequest
 from app.routes.simulation import simulate
 from app import storage
-from app import research
 from app.config.settings import settings
 from app.auth import current_user
 
