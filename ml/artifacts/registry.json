@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "trainedAt": "2026-11-06T09:01:19.358387+00:00",
+  "trainedAt": "2026-11-07T14:30:58.934806+00:00",
   "environment": {
-    "python": "3.12.10",
-    "numpy": "2.5.4",
-    "pandas": "3.1.1",
-    "sklearn": "1.9.1"
+    "python": "3.13.16",
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "sklearn": "1.6.1"
   },
   "dataVersion": "ee94fff355b07b5de8733924ab64554730e12c1205aa22776b8b2b9a1bf41564",
   "models": [
@@ -23,6 +23,11 @@
       "id": "lettuce-earth-growth-v1",
       "artifact": "ml/artifacts/lettuce-earth-growth-v1.json",
       "sha256": "19e2cbf46a00dd7edeccc45e1852901a9c0b17c8786564c0932cfcf86ec827a2"
+    },
+    {
+      "id": "mizuna-microbial-load-v1",
+      "artifact": "ml/artifacts/mizuna-microbial-load-v1.json",
+      "sha256": "8c05cd95a4df902300973425e6fbfe4e1534da5a11b4a8aa6c8d99e1448e019f"
     }
   ],
   "externalDataVersion": "539e724e1ca68142a96f9f45ba4247e45ba6b120a259e9017d82d01b71e14d04",
