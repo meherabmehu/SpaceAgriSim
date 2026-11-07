@@ -16,7 +16,8 @@ Base: `b4890e9` (Phase 6 head)
 | 9 | Versioned endpoints + registry + checksums | ✅ Completed | 13 integration tests; suite 187 passed | `7e3b8dc` | ✅ |
 | 10 | UI preservation proof + registry verifier | ✅ Completed | 0 frontend files changed; 15/15 Playwright; 26/26 registry | `e32b6ba` | ✅ |
 | 11 | Final documentation set | ✅ Completed | This ledger + `PHASE7_FINAL_REPORT.md` | `1f2a540` | ✅ |
-| 12 | Clean-environment re-verification (caught SQL_ASCII defect) | ✅ Completed | Encoding preflight added; 21/21; 188 passed 0 skipped | pending | pending |
+| 12 | Clean-environment re-verification (caught SQL_ASCII defect) | ✅ Completed | Encoding preflight added; 21/21; 188 passed, 0 skipped | `acaa253` | ✅ |
+| 13 | UI pixel figure corrected to measured value | ✅ Completed | 4.31 % reported, not 3.32 %; height/pixel dissociation documented | `a832f24` | ✅ |
 
 ## Verification totals
 
