@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-06T08:56:40.769682+00:00",
+  "generatedAt": "2026-11-07T14:32:00.044485+00:00",
   "source": "NASA OSDR official study and file APIs",
   "datasets": [
     {
@@ -10,9 +10,9 @@
       "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-267",
       "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/267",
       "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/267",
-      "metadataSha256": "91794c479e0fff872e350e718d23a16b1ab8a699959c6d678f104b751584bbe2",
+      "metadataSha256": "7c368af9d31cfd8d3fb3ecbf4a9582cdc69050a6c3a5a05f12fd1433f8c02e95",
       "version": 8,
-      "verifiedAt": "2026-11-06T08:56:40.685541+00:00",
+      "verifiedAt": "2026-11-07T14:31:58.024741+00:00",
       "organisms": [
         "Lactuca sativa",
         "Microbiota"
@@ -1756,9 +1756,9 @@
       "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-268",
       "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/268",
       "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/268",
-      "metadataSha256": "d5760f5682b50ca0484cc08b223b2fcc41522a6d4fc521dc71097c55ea4c2d1b",
+      "metadataSha256": "7cfd3ba936b272404a86178fb6de56bb923606f6deb4570b69c8ae63403b8c95",
       "version": 6,
-      "verifiedAt": "2026-11-06T08:56:40.695004+00:00",
+      "verifiedAt": "2026-11-07T14:31:57.952731+00:00",
       "organisms": [
         "Lactuca sativa"
       ],
@@ -3365,9 +3365,9 @@
       "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-269",
       "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/269",
       "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/269",
-      "metadataSha256": "908a76b58bbd040c367917e136ed6f0b38a11d4d5fe474a4233bb8b639f7ec3d",
+      "metadataSha256": "51471828f2e6352c7c3d7af4bc34994a15b8cb91af3cc37fe666fe43d72a5d29",
       "version": 6,
-      "verifiedAt": "2026-11-06T08:56:40.685006+00:00",
+      "verifiedAt": "2026-11-07T14:31:57.795822+00:00",
       "organisms": [
         "Lactuca sativa"
       ],
@@ -4257,9 +4257,9 @@
       "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-745",
       "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/745",
       "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/745",
-      "metadataSha256": "78721ab8a0b0544fd7f6457fb33d7a545592895ebc1e75acfd9bf313a838ff7b",
+      "metadataSha256": "97de41d3e5e76ef647d4a65b7e837ab0799f82e7f6913c302d9cc61b16f15a0b",
       "version": 1,
-      "verifiedAt": "2026-11-06T08:56:40.686171+00:00",
+      "verifiedAt": "2026-11-07T14:31:57.722636+00:00",
       "organisms": [
         "Lactuca sativa"
       ],
@@ -4741,9 +4741,9 @@
       "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-766",
       "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/766",
       "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/766",
-      "metadataSha256": "d36c6e46a3878b43ac62165b65666ec00933c23f5a635f54677fb8d06f5f6fc2",
+      "metadataSha256": "617be25e026362b755be8adb2cb33bdd4bf687c253807a929563c1946c859f0d",
       "version": 1,
-      "verifiedAt": "2026-11-06T08:56:40.697064+00:00",
+      "verifiedAt": "2026-11-07T14:31:58.901448+00:00",
       "organisms": [
         "Solanum lycopersicum"
       ],
@@ -9351,9 +9351,9 @@
       "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-767",
       "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/767",
       "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/767",
-      "metadataSha256": "879d8d76f731a9d9e408f9564f3aace4383f2db9716efa9e428844b41718c337",
+      "metadataSha256": "8e5c0e642a64d6c561303b5bf0d79a2726820005938d2045a1c41fff749bc4d1",
       "version": 2,
-      "verifiedAt": "2026-11-06T08:56:40.691110+00:00",
+      "verifiedAt": "2026-11-07T14:31:58.743918+00:00",
       "organisms": [
         "Solanum lycopersicum"
       ],
@@ -14496,9 +14496,9 @@
       "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-773",
       "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/773",
       "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/773",
-      "metadataSha256": "1f2b44242df2c6ac5ea85cd325bf487ae5053021dd76c730270edeecc42f07fb",
+      "metadataSha256": "f12f39c3e246b9d265eb0d25c0876b68d7f362621b15ecd2024539e13a7a5308",
       "version": 2,
-      "verifiedAt": "2026-11-06T08:56:40.754609+00:00",
+      "verifiedAt": "2026-11-07T14:31:58.946554+00:00",
       "organisms": [
         "Brassica rapa",
         "Lactuca sativa",
@@ -17061,9 +17061,9 @@
       "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-7",
       "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/7",
       "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/7",
-      "metadataSha256": "055fc6bb3b0ff6804bdd06e51a1b696c63799f8f5c09232cb43d907bc4d21073",
+      "metadataSha256": "582350577b018d754489363ff593cebb90bda2715135c528ff3c719eb983910d",
       "version": 6,
-      "verifiedAt": "2026-11-06T08:56:40.758802+00:00",
+      "verifiedAt": "2026-11-07T14:31:58.556416+00:00",
       "organisms": [
         "Arabidopsis thaliana"
       ],
@@ -17469,9 +17469,9 @@
       "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-120",
       "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/120",
       "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/120",
-      "metadataSha256": "b5525cb76e0712bb43d2942789b96056735302e6a4e6fb24964023395ee0e4cc",
+      "metadataSha256": "ecc64519731d3e266102186c9301db387fafde3360b30b1f0e19fd017e265bcd",
       "version": 14,
-      "verifiedAt": "2026-11-06T08:56:40.753159+00:00",
+      "verifiedAt": "2026-11-07T14:32:00.041900+00:00",
       "organisms": [
         "Arabidopsis thaliana"
       ],
@@ -24319,9 +24319,9 @@
       "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-436",
       "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/436",
       "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/436",
-      "metadataSha256": "46ebc37c621309671da121d382d62dbaa449c69df5b10c70c5b69958b6a7a2ca",
+      "metadataSha256": "df8fd5efc0e845261cbab6bc4fe5926195084959d44e076ee6b0535a6f288c1b",
       "version": 3,
-      "verifiedAt": "2026-11-06T08:56:40.752631+00:00",
+      "verifiedAt": "2026-11-07T14:31:58.623645+00:00",
       "organisms": [
         "Arabidopsis thaliana"
       ],
@@ -24535,9 +24535,9 @@
       "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-625",
       "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/625",
       "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/625",
-      "metadataSha256": "21e67e3d9bd88975bf0b3aca69849be28c056587e78d2d2827d909e77c41cddd",
+      "metadataSha256": "5c01feeb544cccc3c353eb668d1c4ac97198325cfb7d775c405c9acad5d0fb70",
       "version": 1,
-      "verifiedAt": "2026-11-06T08:56:40.758091+00:00",
+      "verifiedAt": "2026-11-07T14:31:59.126129+00:00",
       "organisms": [
         "Arabidopsis thaliana"
       ],
@@ -24727,9 +24727,9 @@
       "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-375",
       "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/375",
       "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/375",
-      "metadataSha256": "990179bb45af76e38cf1db71c010cd8a5410be25369915517cfaccf32b4ae3c2",
+      "metadataSha256": "75f8a786fbe024f0a0b558a8bda5c31acf3c741d20f350adb6d79b0bced636a9",
       "version": 2,
-      "verifiedAt": "2026-11-06T08:56:40.756161+00:00",
+      "verifiedAt": "2026-11-07T14:31:59.547354+00:00",
       "organisms": [
         "Brachypodium distachyon"
       ],
@@ -25555,9 +25555,9 @@
       "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-655",
       "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/655",
       "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/655",
-      "metadataSha256": "3201fe59a2daebff425cf764ccc7da7aff2a9abff007cecc43260868cb6893d9",
+      "metadataSha256": "11fd26fe2225d1def76890132f61addd64ffa091979632274d5361d5ead9c8ef",
       "version": 2,
-      "verifiedAt": "2026-11-06T08:56:40.768876+00:00",
+      "verifiedAt": "2026-11-07T14:31:59.334385+00:00",
       "organisms": [
         "Brassica rapa"
       ],
