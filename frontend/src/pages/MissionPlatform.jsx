@@ -29,6 +29,7 @@ import { useSimulationConfig } from "../hooks/useSimulationConfig.js";
 import { useSimulationParams } from "../hooks/useSimulationParams.js";
 import { useSimulation } from "../hooks/useSimulation.js";
 import { api, downloadReport } from "../services/platformApi.ts";
+import { authenticate, logout, readSession } from "../services/auth.ts";
 import PlatformModules from "./PlatformModules.jsx";
 import { Card, GrowthPlot, number } from "./missionUI.jsx";
 
@@ -66,6 +67,8 @@ export default function MissionPlatform() {
   const [registry, setRegistry] = useState(null);
   const [models, setModels] = useState(null);
   const [registryError, setRegistryError] = useState("");
+  const [session, setSession] = useState(() => readSession());
+  const [authMode, setAuthMode] = useState(null);
   useEffect(() => {
     const change = () => setPage(location.hash.slice(1) || "dashboard");
     window.addEventListener("hashchange", change);
@@ -106,6 +109,11 @@ export default function MissionPlatform() {
     }
   };
   const saveScenario = async () => {
+    if (!session) {
+      setAuthMode("login");
+      setNotice("Sign in to save a private scenario.");
+      return;
+    }
     try {
       await api("/scenarios", {
         name: `${world} · ${params.crop} · ${params.simulationDays}d`,
@@ -228,6 +236,11 @@ export default function MissionPlatform() {
                   : "API connected"}
             </span>
             <span className="research-tag">RESEARCH PREVIEW</span>
+            {session ? (
+              <button className="icon-button" title={`Signed in as ${session.user.email}`} onClick={async () => { await logout(); setSession(null); setNotice("Signed out."); }}>
+                Sign out
+              </button>
+            ) : <button className="icon-button" onClick={() => setAuthMode("login")}>Sign in</button>}
             <span className="avatar small">SA</span>
           </div>
         </header>
@@ -595,10 +608,35 @@ export default function MissionPlatform() {
               <ChevronRight size={13} />
             </button>
           </footer>
+          {authMode && <AuthDialog mode={authMode} onClose={() => setAuthMode(null)} onAuthenticated={(next) => { setSession(next); setAuthMode(null); setNotice("Signed in. Your scenarios are private to your account."); }} />}
         </main>
       </div>
     </div>
   );
+}
+
+function AuthDialog({ mode, onClose, onAuthenticated }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const submit = async (event) => {
+    event.preventDefault(); setBusy(true); setError("");
+    try { onAuthenticated(await authenticate(mode, email, password)); }
+    catch (err) { setError(err.message); }
+    finally { setBusy(false); }
+  };
+  return <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/80 p-4" role="dialog" aria-modal="true" aria-label="Account access">
+    <form onSubmit={submit} className="w-full max-w-sm space-y-4 rounded border border-line bg-space-900 p-5 shadow-2xl">
+      <div className="flex items-center justify-between"><h2 className="text-lg text-slate-100">{mode === "login" ? "Sign in" : "Create account"}</h2><button type="button" className="icon-button" onClick={onClose}>Close</button></div>
+      <p className="text-xs text-slate-400">Public science tools remain available without an account. Accounts protect saved scenarios.</p>
+      <label className="block text-xs text-slate-300">Email<input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 w-full rounded border border-line-strong bg-space-950 p-2" /></label>
+      <label className="block text-xs text-slate-300">Password<input required minLength="12" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1 w-full rounded border border-line-strong bg-space-950 p-2" /></label>
+      {error && <p className="text-xs text-warn" role="alert">{error}</p>}
+      <button disabled={busy} className="primary-button" type="submit">{busy ? "Working…" : mode === "login" ? "Sign in" : "Create account"}</button>
+      <button type="button" className="text-xs text-accent" onClick={() => { setError(""); onClose(); }}>Cancel</button>
+    </form>
+  </div>;
 }
 function Metric({ icon: Icon, label, value, unit, caption, color, hasResult }) {
   return (
