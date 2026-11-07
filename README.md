@@ -64,3 +64,8 @@ NASA study records point to their official OSDR sources; the product is not endo
 - [Data provenance](docs/DATA_PROVENANCE.md)
 - [ML training report](docs/ML_TRAINING_REPORT.md)
 - [Implementation progress](docs/IMPLEMENTATION_PROGRESS.md)
+- [Phase 7 final report — NASA scientific completion](docs/PHASE7_FINAL_REPORT.md)
+- [NASA measurement catalog](docs/NASA_MEASUREMENT_CATALOG.md)
+- [Phase 7 ML training](docs/PHASE7_ML_TRAINING.md) · [evaluation](docs/PHASE7_ML_EVALUATION.md)
+- [Phase 7 scientific calibration](docs/PHASE7_SCIENTIFIC_CALIBRATION.md)
+- [Phase 7 PostgreSQL verification](docs/PHASE7_POSTGRESQL_VERIFICATION.md)
