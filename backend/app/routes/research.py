@@ -205,6 +205,40 @@ def predict_radiation_exposure(request: TranscriptomicPredictionRequest):
     return _transcriptomic_prediction("radiation-exposure-osd46-v1", request)
 
 
+@router.get("/models/{model_id}/explanation")
+def model_explanation(model_id: str):
+    """Exact attribution for a model that can carry one, with its stated limits.
+
+    Returns 404 rather than a stub for models where no valid explanation method
+    exists. A surrogate fitted to mimic a tree ensemble would produce a plausible
+    table that is not of the model being served, which is the failure mode this
+    endpoint is designed to avoid.
+    """
+    if model_id not in research.MODEL_IDS:
+        raise HTTPException(404, "Unknown model")
+    try:
+        report = research.explanation(model_id)
+    except ValueError as exc:
+        raise HTTPException(503, str(exc)) from exc
+    if report is None:
+        raise HTTPException(404, "No valid explanation method is implemented for this model")
+    return {
+        "modelId": report["modelId"],
+        "method": report["method"],
+        "notASurrogate": report["notASurrogate"],
+        "identityResidual": report["identityResidual"],
+        "explainedInput": report["explainedInput"],
+        "perClass": report["perClass"],
+        "selectionStability": report["selectionStability"],
+        "permutationImportance": report["permutationImportance"],
+        "singleGeneDependence": report.get("singleGeneDependence"),
+        "selectionLeakageNote": report.get("selectionLeakageNote"),
+        "binaryEncodingNote": report.get("binaryEncodingNote"),
+        "interpretationLimits": report["interpretationLimits"],
+        "generatedAt": report["generatedAt"],
+    }
+
+
 @router.get("/models/{model_id}/reference-profiles")
 def reference_profiles(model_id: str):
     """Per-class mean expression profiles for a transcriptomic model.

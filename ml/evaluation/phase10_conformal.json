@@ -1,0 +1,304 @@
+{
+  "phase": 10,
+  "generatedAt": "2026-11-07T20:22:19.644110+00:00",
+  "seed": 42,
+  "alpha": 0.1,
+  "purpose": "Measure the coverage the platform's stated 90% intervals actually achieve on held-out groups, and compare split conformal against grouped cross-conformal on identical folds.",
+  "methods": {
+    "split": "Phase 9 method: fit on part of the training groups, calibrate on the rest",
+    "cv_plus": "Grouped cross-conformal: out-of-fold residuals from all training groups",
+    "mondrian": "As cv_plus, with the quantile taken within each campaign"
+  },
+  "caveat": "Conformal coverage is marginal under exchangeability. Multiple tissues from one pillow, and two campaigns, are not a sample of future campaigns. These are measured held-out coverages, not guarantees.",
+  "models": {
+    "mizuna-microbial-relative-load-v2": {
+      "samples": 123,
+      "groups": 35,
+      "features": [
+        "flight",
+        "blueLight",
+        "sanitised",
+        "harvestIndex",
+        "logFreshWeightG"
+      ],
+      "task": "within-campaign standardised log10 CFU/g",
+      "shippedMethod": "split conformal",
+      "summary": {
+        "split": {
+          "nominalCoverage": 0.9,
+          "empiricalCoverage": 0.8699,
+          "meanIntervalWidth": 2.4412,
+          "covered": 107,
+          "total": 123
+        },
+        "cv_plus": {
+          "nominalCoverage": 0.9,
+          "empiricalCoverage": 0.8699,
+          "meanIntervalWidth": 2.25,
+          "covered": 107,
+          "total": 123
+        },
+        "mondrian": {
+          "nominalCoverage": 0.9,
+          "empiricalCoverage": 0.8699,
+          "meanIntervalWidth": 2.218,
+          "covered": 107,
+          "total": 123
+        },
+        "group_level": {
+          "nominalCoverage": 0.9,
+          "empiricalCoverage": 0.9919,
+          "meanIntervalWidth": 3.4015,
+          "covered": 122,
+          "total": 123
+        }
+      },
+      "detail": {
+        "split": {
+          "lastFold": {
+            "calibrationResiduals": 49,
+            "calibrationGroups": 14
+          }
+        },
+        "cv_plus": {
+          "lastFold": {
+            "calibrationResiduals": 98,
+            "calibrationGroups": 29
+          }
+        },
+        "mondrian": {
+          "lastFold": {
+            "calibrationResiduals": 98,
+            "calibrationGroups": 29,
+            "perStratum": {
+              "VEG04A": {
+                "radius": 1.170675920244574,
+                "n": 16,
+                "fallback": "pooled (stratum has 16 residuals, 20 needed)"
+              },
+              "VEG04B": {
+                "radius": 1.120408041606134,
+                "n": 82,
+                "fallback": null
+              }
+            },
+            "pooledFallbackFor": [
+              "VEG04A"
+            ]
+          }
+        },
+        "group_level": {
+          "lastFold": {
+            "calibrationGroups": 29,
+            "calibrationResiduals": 29,
+            "unit": "group (worst residual within group)"
+          }
+        }
+      },
+      "protocol": "5-fold group-held-out outer evaluation; each method calibrates only on training groups; identical outer folds for every method"
+    },
+    "mizuna-microbial-load-v1": {
+      "samples": 123,
+      "groups": 35,
+      "features": [
+        "flight",
+        "blueLight",
+        "isVEG04B",
+        "sanitised",
+        "freshWeightG",
+        "harvestIndex"
+      ],
+      "task": "log10 CFU/g",
+      "shippedMethod": "split conformal",
+      "summary": {
+        "split": {
+          "nominalCoverage": 0.9,
+          "empiricalCoverage": 0.8862,
+          "meanIntervalWidth": 4.9148,
+          "covered": 109,
+          "total": 123
+        },
+        "cv_plus": {
+          "nominalCoverage": 0.9,
+          "empiricalCoverage": 0.8862,
+          "meanIntervalWidth": 4.8486,
+          "covered": 109,
+          "total": 123
+        },
+        "mondrian": {
+          "nominalCoverage": 0.9,
+          "empiricalCoverage": 0.8862,
+          "meanIntervalWidth": 4.8524,
+          "covered": 109,
+          "total": 123
+        },
+        "group_level": {
+          "nominalCoverage": 0.9,
+          "empiricalCoverage": 0.9919,
+          "meanIntervalWidth": 7.2621,
+          "covered": 122,
+          "total": 123
+        }
+      },
+      "detail": {
+        "split": {
+          "lastFold": {
+            "calibrationResiduals": 49,
+            "calibrationGroups": 14
+          }
+        },
+        "cv_plus": {
+          "lastFold": {
+            "calibrationResiduals": 98,
+            "calibrationGroups": 29
+          }
+        },
+        "mondrian": {
+          "lastFold": {
+            "calibrationResiduals": 98,
+            "calibrationGroups": 29,
+            "perStratum": {
+              "VEG04A": {
+                "radius": 2.3122207284668264,
+                "n": 16,
+                "fallback": "pooled (stratum has 16 residuals, 20 needed)"
+              },
+              "VEG04B": {
+                "radius": 2.3122207284668264,
+                "n": 82,
+                "fallback": null
+              }
+            },
+            "pooledFallbackFor": [
+              "VEG04A"
+            ]
+          }
+        },
+        "group_level": {
+          "lastFold": {
+            "calibrationGroups": 29,
+            "calibrationResiduals": 29,
+            "unit": "group (worst residual within group)"
+          }
+        }
+      },
+      "protocol": "5-fold group-held-out outer evaluation; each method calibrates only on training groups; identical outer folds for every method"
+    },
+    "lettuce-earth-growth-v1": {
+      "samples": 1648,
+      "groups": 4,
+      "features": [
+        "daysAfterTransplant",
+        "airTemperature",
+        "rootTemperature",
+        "ppfd"
+      ],
+      "task": "fresh shoot mass (g)",
+      "shippedMethod": "90th percentile residual range",
+      "summary": {
+        "split": {
+          "nominalCoverage": 0.9,
+          "empiricalCoverage": 0.9084,
+          "meanIntervalWidth": 445.7081,
+          "covered": 1497,
+          "total": 1648
+        },
+        "cv_plus": {
+          "nominalCoverage": 0.9,
+          "empiricalCoverage": 0.9393,
+          "meanIntervalWidth": 313.7135,
+          "covered": 1548,
+          "total": 1648
+        },
+        "group_level": {
+          "nominalCoverage": 0.9,
+          "empiricalCoverage": 1.0,
+          "meanIntervalWidth": 1005.5925,
+          "covered": 1648,
+          "total": 1648
+        }
+      },
+      "detail": {
+        "split": {
+          "lastFold": {
+            "calibrationResiduals": 784,
+            "calibrationGroups": 2
+          }
+        },
+        "cv_plus": {
+          "lastFold": {
+            "calibrationResiduals": 1216,
+            "calibrationGroups": 3
+          }
+        },
+        "group_level": {
+          "lastFold": {
+            "calibrationGroups": 3,
+            "calibrationResiduals": 3,
+            "unit": "group (worst residual within group)"
+          }
+        }
+      },
+      "protocol": "4-fold group-held-out outer evaluation; each method calibrates only on training groups; identical outer folds for every method",
+      "mondrianOmitted": "only 4 experiments; conditioning on experiment leaves strata below the 10 residuals a finite 90% quantile needs"
+    },
+    "lettuce-earth-growth-v2": {
+      "samples": 1648,
+      "groups": 4,
+      "features": [
+        "daysAfterTransplant",
+        "airTemperature",
+        "rootTemperature",
+        "ppfd"
+      ],
+      "task": "fresh shoot mass (g)",
+      "shippedMethod": "90th percentile residual range",
+      "summary": {
+        "split": {
+          "nominalCoverage": 0.9,
+          "empiricalCoverage": 0.9072,
+          "meanIntervalWidth": 475.0851,
+          "covered": 1495,
+          "total": 1648
+        },
+        "cv_plus": {
+          "nominalCoverage": 0.9,
+          "empiricalCoverage": 0.9606,
+          "meanIntervalWidth": 329.451,
+          "covered": 1583,
+          "total": 1648
+        },
+        "group_level": {
+          "nominalCoverage": 0.9,
+          "empiricalCoverage": 1.0,
+          "meanIntervalWidth": 1022.6144,
+          "covered": 1648,
+          "total": 1648
+        }
+      },
+      "detail": {
+        "split": {
+          "lastFold": {
+            "calibrationResiduals": 784,
+            "calibrationGroups": 2
+          }
+        },
+        "cv_plus": {
+          "lastFold": {
+            "calibrationResiduals": 1216,
+            "calibrationGroups": 3
+          }
+        },
+        "group_level": {
+          "lastFold": {
+            "calibrationGroups": 3,
+            "calibrationResiduals": 3,
+            "unit": "group (worst residual within group)"
+          }
+        }
+      },
+      "protocol": "4-fold group-held-out outer evaluation; each method calibrates only on training groups; identical outer folds for every method",
+      "mondrianOmitted": "only 4 experiments; conditioning on experiment leaves strata below the 10 residuals a finite 90% quantile needs"
+    }
+  }
+}

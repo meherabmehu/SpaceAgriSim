@@ -1,0 +1,1139 @@
+{
+  "phase": 10,
+  "modelId": "radiation-exposure-osd46-v1",
+  "generatedAt": "2026-11-07T21:02:34.550798+00:00",
+  "seed": 20261107,
+  "task": "Binary irradiated-versus-control classification from seedling expression",
+  "classLabels": [
+    "control",
+    "irradiated"
+  ],
+  "method": "exact linear attribution of the served linear-softmax evaluator",
+  "notASurrogate": "Computed from the shipped weight vectors, not a surrogate fitted to imitate them. The reconstruction identity is asserted to 1e-9.",
+  "identityResidual": 0.0,
+  "explainedInput": "class centroid of the control class: a synthetic training mean, not a measured specimen",
+  "perClass": {
+    "decisionFunction": {
+      "logit": -3.8614528111941926,
+      "intercept": 9.241402751737054,
+      "topContributions": [
+        {
+          "gene": "AT3G27060",
+          "contribution": -0.3279254027183244,
+          "standardisedExpression": -1.5671358875942119,
+          "weight": 0.20925141547344625
+        },
+        {
+          "gene": "AT5G48720",
+          "contribution": -0.27908133358171344,
+          "standardisedExpression": -1.5056483508059484,
+          "weight": 0.18535625096811342
+        },
+        {
+          "gene": "AT4G21070",
+          "contribution": -0.26694057351666034,
+          "standardisedExpression": -1.4888129818452107,
+          "weight": 0.17929758591023198
+        },
+        {
+          "gene": "AT5G24420",
+          "contribution": -0.2663713085260178,
+          "standardisedExpression": 1.2001921652443002,
+          "weight": -0.22194054938843708
+        },
+        {
+          "gene": "AT3G07800",
+          "contribution": -0.26272110768972745,
+          "standardisedExpression": -1.4751080339927627,
+          "weight": 0.17810296034969356
+        },
+        {
+          "gene": "AT4G28950",
+          "contribution": -0.24879146260120175,
+          "standardisedExpression": -1.4203413357834818,
+          "weight": 0.17516315010572062
+        },
+        {
+          "gene": "AT4G37290",
+          "contribution": -0.23371276502119703,
+          "standardisedExpression": -1.1899585464785247,
+          "weight": 0.19640412324683856
+        },
+        {
+          "gene": "AT1G72900",
+          "contribution": -0.18960054300610235,
+          "standardisedExpression": -1.2270356992578226,
+          "weight": 0.154519174234933
+        },
+        {
+          "gene": "AT3G58120",
+          "contribution": -0.18482141465350332,
+          "standardisedExpression": 1.0794617631220866,
+          "weight": -0.17121626811398238
+        },
+        {
+          "gene": "AT3G02040",
+          "contribution": -0.17921004276136787,
+          "standardisedExpression": -0.9031784816752797,
+          "weight": 0.19842151512396125
+        },
+        {
+          "gene": "AT4G37490",
+          "contribution": -0.1749261104872211,
+          "standardisedExpression": -1.3321442923207212,
+          "weight": 0.1313116840987873
+        },
+        {
+          "gene": "AT5G02760",
+          "contribution": -0.17153252820375062,
+          "standardisedExpression": 1.0645582053360794,
+          "weight": -0.1611302485330974
+        },
+        {
+          "gene": "AT5G01740",
+          "contribution": -0.16536267672102942,
+          "standardisedExpression": 1.06591179260582,
+          "weight": -0.15513729922883163
+        },
+        {
+          "gene": "AT4G22960",
+          "contribution": -0.16181764291132572,
+          "standardisedExpression": -1.3438661270505934,
+          "weight": 0.12041202591099588
+        },
+        {
+          "gene": "AT4G14365",
+          "contribution": -0.15995553337989635,
+          "standardisedExpression": -0.9938085391223395,
+          "weight": 0.16095206177354607
+        },
+        {
+          "gene": "AT5G11460",
+          "contribution": -0.15465354335491668,
+          "standardisedExpression": -1.235993633441721,
+          "weight": 0.12512487052564486
+        },
+        {
+          "gene": "AT5G24280",
+          "contribution": -0.15228579116285498,
+          "standardisedExpression": -1.3457591512853373,
+          "weight": 0.11315976637974672
+        },
+        {
+          "gene": "AT2G21640",
+          "contribution": -0.14977127271371335,
+          "standardisedExpression": -1.186432261388763,
+          "weight": 0.12623668252109102
+        },
+        {
+          "gene": "AT5G57220",
+          "contribution": -0.14916949472082006,
+          "standardisedExpression": -0.9758311863372696,
+          "weight": 0.15286403715044178
+        },
+        {
+          "gene": "AT5G20150",
+          "contribution": -0.14754518647908912,
+          "standardisedExpression": -1.0921630515494114,
+          "weight": 0.13509446805563713
+        },
+        {
+          "gene": "AT2G47680",
+          "contribution": -0.14585057007358052,
+          "standardisedExpression": -1.332054326107673,
+          "weight": 0.10949295926973408
+        },
+        {
+          "gene": "AT5G02220",
+          "contribution": -0.14433819363810738,
+          "standardisedExpression": -1.051041908146971,
+          "weight": 0.13732867597314116
+        },
+        {
+          "gene": "AT5G23910",
+          "contribution": -0.14191421015305183,
+          "standardisedExpression": -1.2119924018002317,
+          "weight": 0.1170916665337668
+        },
+        {
+          "gene": "AT2G22330",
+          "contribution": -0.13869814596456942,
+          "standardisedExpression": 1.0008564071895165,
+          "weight": -0.1385794655139839
+        },
+        {
+          "gene": "AT3G02640",
+          "contribution": -0.13760598344890035,
+          "standardisedExpression": 1.2106817086923065,
+          "weight": -0.11365991776445741
+        }
+      ],
+      "totalAbsContribution": 13.32251809336444
+    },
+    "controlIsReference": true,
+    "classZeroRowIsAllZero": true
+  },
+  "selectionStability": {
+    "folds": 22,
+    "geneSpace": 21267,
+    "genesSelectedInEveryFold": 95,
+    "genesSelectedAtLeastOnce": 254,
+    "deployedGenesChosenInFewerThanHalfTheFolds": 9,
+    "deployedGeneCount": 150,
+    "deployed": [
+      {
+        "gene": "AT3G27060",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G48720",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT4G21070",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT3G07800",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT4G28950",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G24280",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT4G22960",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT4G37490",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT2G47680",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G46710",
+        "foldCount": 14,
+        "selectionFrequency": 0.6364
+      },
+      {
+        "gene": "AT5G64060",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G49480",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G48020",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G67460",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G11460",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT1G72900",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT4G31840",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT4G02390",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT4G19130",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G23910",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT3G02640",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G24420",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G03780",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT2G22240",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT4G37290",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT2G21640",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G60250",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT1G17460",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT1G13330",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT1G09815",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT1G07500",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT2G39650",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT3G25250",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G40840",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT1G69830",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT1G08260",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G16250",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT1G74390",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT2G28780",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G20850",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT2G21790",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT4G29170",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G66130",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT4G33260|AT4G33270",
+        "foldCount": 18,
+        "selectionFrequency": 0.8182
+      },
+      {
+        "gene": "AT2G18600",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G66140",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT2G30250",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G14930",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G20150",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G35735",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT3G58120",
+        "foldCount": 15,
+        "selectionFrequency": 0.6818
+      },
+      {
+        "gene": "AT1G13930",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G55490",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT3G10500",
+        "foldCount": 21,
+        "selectionFrequency": 0.9545
+      },
+      {
+        "gene": "AT1G14720",
+        "foldCount": 11,
+        "selectionFrequency": 0.5
+      },
+      {
+        "gene": "AT1G08560",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G54960",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G01740",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT2G47180",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G02760",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT2G22450",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT2G45460",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT4G35740",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT2G30360",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT1G33970",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G02220",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT1G67970",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT1G22770",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G48490",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT3G48770",
+        "foldCount": 15,
+        "selectionFrequency": 0.6818
+      },
+      {
+        "gene": "AT2G38470",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT1G02730",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT3G42860",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT1G79440",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT4G34950",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT2G22330",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT4G33490",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT4G15830",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT4G14365",
+        "foldCount": 18,
+        "selectionFrequency": 0.8182
+      },
+      {
+        "gene": "AT2G46610",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT2G26710",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT2G40140",
+        "foldCount": 21,
+        "selectionFrequency": 0.9545
+      },
+      {
+        "gene": "AT3G50930",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G57220",
+        "foldCount": 18,
+        "selectionFrequency": 0.8182
+      },
+      {
+        "gene": "AT4G25330",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G27280",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT3G52360",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT1G23710",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G11150",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT2G41630",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT3G54560",
+        "foldCount": 20,
+        "selectionFrequency": 0.9091
+      },
+      {
+        "gene": "AT2G31320",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT1G49720",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G43440",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G14920",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G64860",
+        "foldCount": 21,
+        "selectionFrequency": 0.9545
+      },
+      {
+        "gene": "AT3G26580",
+        "foldCount": 14,
+        "selectionFrequency": 0.6364
+      },
+      {
+        "gene": "AT2G17840",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT4G26670",
+        "foldCount": 21,
+        "selectionFrequency": 0.9545
+      },
+      {
+        "gene": "AT1G21680",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT4G09020",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT5G24460",
+        "foldCount": 21,
+        "selectionFrequency": 0.9545
+      },
+      {
+        "gene": "AT5G62280",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT1G65490",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT3G20490",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT3G45730",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT4G17245",
+        "foldCount": 21,
+        "selectionFrequency": 0.9545
+      },
+      {
+        "gene": "AT4G05190",
+        "foldCount": 18,
+        "selectionFrequency": 0.8182
+      },
+      {
+        "gene": "AT1G49050",
+        "foldCount": 19,
+        "selectionFrequency": 0.8636
+      },
+      {
+        "gene": "AT4G18240",
+        "foldCount": 21,
+        "selectionFrequency": 0.9545
+      },
+      {
+        "gene": "AT5G49520",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT3G02040",
+        "foldCount": 20,
+        "selectionFrequency": 0.9091
+      },
+      {
+        "gene": "AT4G22570",
+        "foldCount": 19,
+        "selectionFrequency": 0.8636
+      },
+      {
+        "gene": "AT2G26530",
+        "foldCount": 20,
+        "selectionFrequency": 0.9091
+      },
+      {
+        "gene": "AT3G27050",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT3G17510",
+        "foldCount": 11,
+        "selectionFrequency": 0.5
+      },
+      {
+        "gene": "AT4G34510",
+        "foldCount": 21,
+        "selectionFrequency": 0.9545
+      },
+      {
+        "gene": "AT3G46900",
+        "foldCount": 14,
+        "selectionFrequency": 0.6364
+      },
+      {
+        "gene": "AT2G34920",
+        "foldCount": 21,
+        "selectionFrequency": 0.9545
+      },
+      {
+        "gene": "AT1G69160",
+        "foldCount": 21,
+        "selectionFrequency": 0.9545
+      },
+      {
+        "gene": "AT4G14230",
+        "foldCount": 22,
+        "selectionFrequency": 1.0
+      },
+      {
+        "gene": "AT3G15650",
+        "foldCount": 21,
+        "selectionFrequency": 0.9545
+      },
+      {
+        "gene": "AT5G18060",
+        "foldCount": 21,
+        "selectionFrequency": 0.9545
+      },
+      {
+        "gene": "AT4G23800",
+        "foldCount": 21,
+        "selectionFrequency": 0.9545
+      },
+      {
+        "gene": "AT1G72970",
+        "foldCount": 19,
+        "selectionFrequency": 0.8636
+      },
+      {
+        "gene": "AT5G52750",
+        "foldCount": 19,
+        "selectionFrequency": 0.8636
+      },
+      {
+        "gene": "AT1G73870",
+        "foldCount": 19,
+        "selectionFrequency": 0.8636
+      },
+      {
+        "gene": "AT5G39410",
+        "foldCount": 21,
+        "selectionFrequency": 0.9545
+      },
+      {
+        "gene": "AT4G19120",
+        "foldCount": 17,
+        "selectionFrequency": 0.7727
+      },
+      {
+        "gene": "AT1G76600",
+        "foldCount": 16,
+        "selectionFrequency": 0.7273
+      },
+      {
+        "gene": "AT1G69570",
+        "foldCount": 16,
+        "selectionFrequency": 0.7273
+      },
+      {
+        "gene": "AT1G75100",
+        "foldCount": 20,
+        "selectionFrequency": 0.9091
+      },
+      {
+        "gene": "AT1G27940",
+        "foldCount": 20,
+        "selectionFrequency": 0.9091
+      },
+      {
+        "gene": "AT3G47540",
+        "foldCount": 15,
+        "selectionFrequency": 0.6818
+      },
+      {
+        "gene": "AT1G44446",
+        "foldCount": 14,
+        "selectionFrequency": 0.6364
+      },
+      {
+        "gene": "AT3G16800",
+        "foldCount": 9,
+        "selectionFrequency": 0.4091
+      },
+      {
+        "gene": "AT5G18470",
+        "foldCount": 15,
+        "selectionFrequency": 0.6818
+      },
+      {
+        "gene": "AT2G28900",
+        "foldCount": 11,
+        "selectionFrequency": 0.5
+      },
+      {
+        "gene": "AT5G01790",
+        "foldCount": 10,
+        "selectionFrequency": 0.4545
+      },
+      {
+        "gene": "AT5G59870",
+        "foldCount": 10,
+        "selectionFrequency": 0.4545
+      },
+      {
+        "gene": "AT5G22390",
+        "foldCount": 14,
+        "selectionFrequency": 0.6364
+      },
+      {
+        "gene": "AT1G29395",
+        "foldCount": 14,
+        "selectionFrequency": 0.6364
+      },
+      {
+        "gene": "AT3G02380",
+        "foldCount": 13,
+        "selectionFrequency": 0.5909
+      },
+      {
+        "gene": "AT3G50560",
+        "foldCount": 9,
+        "selectionFrequency": 0.4091
+      },
+      {
+        "gene": "AT1G27730",
+        "foldCount": 9,
+        "selectionFrequency": 0.4091
+      },
+      {
+        "gene": "AT5G49700",
+        "foldCount": 11,
+        "selectionFrequency": 0.5
+      },
+      {
+        "gene": "AT1G68520",
+        "foldCount": 9,
+        "selectionFrequency": 0.4091
+      },
+      {
+        "gene": "AT4G17490",
+        "foldCount": 9,
+        "selectionFrequency": 0.4091
+      },
+      {
+        "gene": "AT5G47230",
+        "foldCount": 7,
+        "selectionFrequency": 0.3182
+      },
+      {
+        "gene": "AT2G28720",
+        "foldCount": 10,
+        "selectionFrequency": 0.4545
+      }
+    ]
+  },
+  "permutationImportance": {
+    "baselineBalancedAccuracy": 0.9861111111111112,
+    "metric": "balanced accuracy, leave-one-biological-group-out, model refit per fold",
+    "inSample": false,
+    "nRepeats": 5,
+    "permutationUnit": "one gene's values permuted across arrays",
+    "top": [
+      {
+        "gene": "AT3G27060",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT5G48720",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT4G21070",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT3G07800",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT4G28950",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT5G24280",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT4G22960",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT4G37490",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT2G47680",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT5G46710",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT5G64060",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT5G49480",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT5G48020",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT5G67460",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT5G11460",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT1G72900",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT4G31840",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT4G02390",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT4G19130",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT5G23910",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT3G02640",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT5G24420",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT5G03780",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT2G22240",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT4G37290",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      }
+    ],
+    "bottom": [
+      {
+        "gene": "AT1G27730",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT5G49700",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT1G68520",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT4G17490",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT5G47230",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT2G28720",
+        "meanDrop": 0.0,
+        "sdDrop": 0.0
+      },
+      {
+        "gene": "AT2G30250",
+        "meanDrop": -0.002777777777777768,
+        "sdDrop": 0.005555555555555536
+      },
+      {
+        "gene": "AT2G17840",
+        "meanDrop": -0.002777777777777768,
+        "sdDrop": 0.005555555555555536
+      },
+      {
+        "gene": "AT4G09020",
+        "meanDrop": -0.002777777777777768,
+        "sdDrop": 0.005555555555555536
+      },
+      {
+        "gene": "AT1G27940",
+        "meanDrop": -0.002777777777777768,
+        "sdDrop": 0.005555555555555536
+      }
+    ],
+    "genesWithNegativeDrop": 4
+  },
+  "singleGeneDependence": {
+    "maxMeanDrop": 0.0,
+    "genesWithZeroOrNegativeDrop": 4,
+    "deployedGeneCount": 150,
+    "signalIsDistributed": true,
+    "statement": "No single deployed gene is individually necessary: removing any one of them barely moves held-out balanced accuracy. The signal is spread across the selected set, so these genes are a signature, not biomarkers, and no individual gene should be reported as one."
+  },
+  "selectionLeakageNote": "The permutation baseline reuses the deployed gene set, which was selected on all 44 arrays. Its balanced accuracy is therefore optimistic relative to the honest group-held-out figure in the model artifact (0.898 for quality, 0.910 for exposure). The importance values are differences against that baseline, so they are reported for ranking genes, not as evidence of performance.",
+  "interpretationLimits": [
+    "A large contribution means the gene separated these conditions in this study.",
+    "It is not a causal claim and not a biomarker claim.",
+    "Contributions are additive on the logit scale, so the sign is relative to the other classes and does not mean up-regulation.",
+    "Two genotypes, one laboratory, one microarray platform, 44 arrays.",
+    "9 of 150 deployed genes are chosen in fewer than half of the folds; their individual contributions are the least stable part of this explanation."
+  ],
+  "binaryEncodingNote": "The evaluator stores an all-zero coefficient row for class 0 and the weight vector for class 1. The contributions below are for the decision function logit(irradiated) - logit(control), which is the model's only free parameter. A per-class attribution of class 0 is identically zero by construction and carries no information."
+}

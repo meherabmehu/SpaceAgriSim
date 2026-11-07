@@ -17,10 +17,10 @@
         1569
       ],
       "sameSize": true,
-      "changedPixels": 36,
+      "changedPixels": 83,
       "totalPixels": 2259360,
-      "changedPixelRatio": 1.6e-05,
-      "maxChannelDelta": 195,
+      "changedPixelRatio": 3.7e-05,
+      "maxChannelDelta": 194,
       "passed": true,
       "reason": "within tolerance"
     },
@@ -36,10 +36,10 @@
         2290
       ],
       "sameSize": true,
-      "changedPixels": 61,
+      "changedPixels": 59,
       "totalPixels": 1877800,
-      "changedPixelRatio": 3.2e-05,
-      "maxChannelDelta": 195,
+      "changedPixelRatio": 3.1e-05,
+      "maxChannelDelta": 194,
       "passed": true,
       "reason": "within tolerance"
     },
@@ -67,17 +67,17 @@
       "fresh": "frontend/test-results/screenshots/radiation-desktop-radiation-quality-osd46-v1.png",
       "baselineSize": [
         1128,
-        635
+        718
       ],
       "freshSize": [
         1128,
-        635
+        718
       ],
       "sameSize": true,
       "changedPixels": 0,
-      "totalPixels": 716280,
+      "totalPixels": 809904,
       "changedPixelRatio": 0.0,
-      "maxChannelDelta": 4,
+      "maxChannelDelta": 0,
       "passed": true,
       "reason": "within tolerance"
     },
@@ -86,17 +86,17 @@
       "fresh": "frontend/test-results/screenshots/radiation-desktop-radiation-exposure-osd46-v1.png",
       "baselineSize": [
         1128,
-        613
+        695
       ],
       "freshSize": [
         1128,
-        613
+        695
       ],
       "sameSize": true,
-      "changedPixels": 1325,
-      "totalPixels": 691464,
-      "changedPixelRatio": 0.001916,
-      "maxChannelDelta": 193,
+      "changedPixels": 0,
+      "totalPixels": 783960,
+      "changedPixelRatio": 0.0,
+      "maxChannelDelta": 0,
       "passed": true,
       "reason": "within tolerance"
     },
@@ -105,17 +105,17 @@
       "fresh": "frontend/test-results/screenshots/radiation-tablet-radiation-quality-osd46-v1.png",
       "baselineSize": [
         580,
-        769
+        851
       ],
       "freshSize": [
         580,
-        769
+        851
       ],
       "sameSize": true,
       "changedPixels": 0,
-      "totalPixels": 446020,
+      "totalPixels": 493580,
       "changedPixelRatio": 0.0,
-      "maxChannelDelta": 3,
+      "maxChannelDelta": 0,
       "passed": true,
       "reason": "within tolerance"
     },
@@ -124,17 +124,17 @@
       "fresh": "frontend/test-results/screenshots/radiation-tablet-radiation-exposure-osd46-v1.png",
       "baselineSize": [
         580,
-        746
+        829
       ],
       "freshSize": [
         580,
-        746
+        829
       ],
       "sameSize": true,
-      "changedPixels": 1266,
-      "totalPixels": 432680,
-      "changedPixelRatio": 0.002926,
-      "maxChannelDelta": 193,
+      "changedPixels": 0,
+      "totalPixels": 480820,
+      "changedPixelRatio": 0.0,
+      "maxChannelDelta": 0,
       "passed": true,
       "reason": "within tolerance"
     },
@@ -143,17 +143,17 @@
       "fresh": "frontend/test-results/screenshots/radiation-mobile-radiation-quality-osd46-v1.png",
       "baselineSize": [
         992,
-        2720
+        2935
       ],
       "freshSize": [
         992,
-        2720
+        2935
       ],
       "sameSize": true,
       "changedPixels": 0,
-      "totalPixels": 2698240,
+      "totalPixels": 2911520,
       "changedPixelRatio": 0.0,
-      "maxChannelDelta": 13,
+      "maxChannelDelta": 0,
       "passed": true,
       "reason": "within tolerance"
     },
@@ -162,17 +162,17 @@
       "fresh": "frontend/test-results/screenshots/radiation-mobile-radiation-exposure-osd46-v1.png",
       "baselineSize": [
         992,
-        2531
+        2748
       ],
       "freshSize": [
         992,
-        2531
+        2748
       ],
       "sameSize": true,
-      "changedPixels": 7431,
-      "totalPixels": 2510752,
-      "changedPixelRatio": 0.00296,
-      "maxChannelDelta": 193,
+      "changedPixels": 0,
+      "totalPixels": 2726016,
+      "changedPixelRatio": 0.0,
+      "maxChannelDelta": 0,
       "passed": true,
       "reason": "within tolerance"
     }

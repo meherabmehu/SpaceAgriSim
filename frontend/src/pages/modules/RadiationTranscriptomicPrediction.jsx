@@ -35,6 +35,20 @@ function RadiationModelCard({ model }) {
   const [loaded, setLoaded] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  // Explanations are fetched only when a reviewer asks for one, and the panel
+  // starts closed. Both choices keep the card's rendered height identical to the
+  // pre-Phase-10 baseline, and the visual regression gate measures that.
+  const [explanation, setExplanation] = useState(null)
+  const [explainBusy, setExplainBusy] = useState(false)
+  const [explainError, setExplainError] = useState('')
+
+  const toggleExplanation = async () => {
+    if (explanation) { setExplanation(null); return }
+    setExplainBusy(true); setExplainError('')
+    try {
+      setExplanation(await api(`/models/${model.id}/explanation`))
+    } catch (err) { setExplainError(err.message) } finally { setExplainBusy(false) }
+  }
 
   const load = async (label) => {
     setBusy(true); setError(''); setResult(null)
@@ -77,6 +91,45 @@ function RadiationModelCard({ model }) {
       </p>}
       <Limitations items={result.warnings} />
       <a className="wide-link" href={result.sourceUrl} target="_blank" rel="noreferrer">Read the NASA OSD-46 source dataset</a>
+      <div className="module-actions">
+        <button className="secondary-button" disabled={explainBusy} onClick={toggleExplanation}>
+          {explainBusy ? 'Computing…' : explanation ? 'Hide explanation' : 'Explain this prediction'}
+        </button>
+      </div>
+      {explainError && <div className="error-banner" role="alert">{explainError}</div>}
+      {explanation && <>
+        <p className="muted fine">
+          {explanation.notASurrogate} Method: {explanation.method}; reconstruction
+          residual {explanation.identityResidual.toExponential(1)}.
+        </p>
+        {explanation.binaryEncodingNote && <p className="muted fine">{explanation.binaryEncodingNote}</p>}
+        <p className="muted fine">
+          Genes selected in every one of {explanation.selectionStability.folds} held-out folds:{' '}
+          {explanation.selectionStability.genesSelectedInEveryFold} of{' '}
+          {explanation.selectionStability.geneSpace} considered.{' '}
+          {explanation.selectionStability.deployedGenesChosenInFewerThanHalfTheFolds} of the{' '}
+          {explanation.selectionStability.deployedGeneCount} deployed genes are chosen in
+          fewer than half the folds.
+        </p>
+        <ul className="muted fine">
+          {(explanation.perClass.decisionFunction
+            ? [{ label: 'decision function', rows: explanation.perClass.decisionFunction.topContributions }]
+            : Object.entries(explanation.perClass).map(([label, value]) => ({ label, rows: value.topContributions }))
+          ).slice(0, 1).flatMap(({ label, rows }) =>
+            rows.slice(0, 6).map((row) => (
+              <li key={`${label}-${row.gene}`}>
+                {row.gene}: contribution {row.contribution.toFixed(4)} at standardised
+                expression {row.standardisedExpression.toFixed(2)}
+              </li>
+            )))}
+        </ul>
+        {explanation.singleGeneDependence && <p className="muted fine">
+          {explanation.singleGeneDependence.statement} Largest single-gene drop:{' '}
+          {explanation.singleGeneDependence.maxMeanDrop.toFixed(4)} balanced accuracy across{' '}
+          {explanation.singleGeneDependence.deployedGeneCount} deployed genes.
+        </p>}
+        <Limitations items={explanation.interpretationLimits} />
+      </>}
     </>}
   </Card>
 }

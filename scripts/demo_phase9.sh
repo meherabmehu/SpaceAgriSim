@@ -75,7 +75,7 @@ step "4/6 Verify registry checksums and run the scientific test suite"
 python3 scripts/package_runtime_data.py
 ( cd backend && python3 -m pytest -q tests/test_phase9_models.py )
 
-step "5/6 Show the two negative results, which are part of the record"
+step "5/6 Show the interval calibration and the two negative results"
 python3 - <<'PY'
 import json
 from pathlib import Path
@@ -90,6 +90,22 @@ for result in r["results"]:
               f"-> {result['verdict']} (accuracy {result['accuracy']:.3f} is misleading)")
 excluded = sorted(p.stem for p in Path("ml/evaluation/excluded").glob("*.json"))
 print(f"  excluded from the registry: {', '.join(excluded)}")
+
+# Phase 10: what each served interval actually covers, on held-out groups.
+conformal = json.loads(Path("ml/evaluation/phase10_conformal.json").read_text())
+decision = json.loads(Path("ml/evaluation/phase10_uncertainty_decision.json").read_text())
+print("  interval coverage, nominal 0.90 (split was the Phase 9 method):")
+for model_id, choice in decision["decisions"].items():
+    measured = conformal["models"][model_id]["summary"]
+    print(f"    {model_id:34s} split {measured['split']['empiricalCoverage']:.3f}"
+          f" -> {choice['adopted']} {choice['achievedCoverage']:.3f}")
+
+transfer = json.loads(Path("ml/evaluation/phase10_cross_study.json").read_text())
+reference = transfer["withinStudyReference"]
+print(f"  cross-study: {transfer['verdict']}; but OSD-782's own within-study balanced "
+      f"accuracy is {reference['balancedAccuracy']:.3f} "
+      f"(95% CI {reference['bootstrapCi95'][0]:.2f}-{reference['bootstrapCi95'][1]:.2f}), "
+      f"so the negative is inconclusive about harmonisation")
 PY
 
 if [ "$SERVER" -eq 1 ]; then
@@ -131,9 +147,28 @@ except urllib.error.HTTPError as error:
     detail = json.loads(error.read())["detail"]
     print(f"  partial vector -> HTTP {error.code} "
           f"({detail['error']}, missing {detail['missingGeneCount']} genes)")
+
+# Phase 10: the explanation must reconstruct the served logits, and must admit
+# that no single gene is individually necessary.
+explanation = json.loads(urllib.request.urlopen(
+    f"{base}/models/{model}/explanation").read())
+print(f"  explanation: {explanation['method']}")
+print(f"    identity residual {explanation['identityResidual']:.2e}, "
+      f"{explanation['selectionStability']['genesSelectedInEveryFold']} genes chosen in "
+      f"all {explanation['selectionStability']['folds']} folds")
+print(f"    largest single-gene permutation drop: "
+      f"{explanation['singleGeneDependence']['maxMeanDrop']:.4f} -> "
+      f"{'signal is distributed' if explanation['singleGeneDependence']['signalIsDistributed'] else 'a gene matters'}")
+
+# Models with no valid explanation method must 404 rather than return a surrogate.
+try:
+    urllib.request.urlopen(f"{base}/models/lettuce-earth-growth-v2/explanation")
+    raise SystemExit("FAILED: a tree ensemble returned an explanation")
+except urllib.error.HTTPError as error:
+    print(f"  lettuce explanation -> HTTP {error.code} (no valid method, no stub)")
 PY
 else
   step "6/6 Skipped the live API section (--no-server)"
 fi
 
-printf '\n\033[1mPhase 9 demo complete.\033[0m Two models served, four negatives documented.\n'
+printf '\n\033[1mDemo complete.\033[0m Two models served with exact explanations, four negatives documented, intervals calibrated on held-out groups.\n'
