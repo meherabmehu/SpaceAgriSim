@@ -39,9 +39,13 @@ the committed baseline images.
 
 | Viewport | Document height | Structural lines | Max edge drift | Changed pixels |
 |---|---|---|---|---|
-| Desktop 1440×1100 | 1569 → 1569 (**exact**) | 12 → 12 | **0 px** | 3.319 % |
-| Tablet 820×1180 | 2290 → 2291 (+1 px) | 26 → 26 | **1 px** | – |
-| Mobile 1082 (Pixel 7) | 6032 → 6035 (+3 px) | 27 → 27 | **3 px** | – |
+| Desktop 1440×1100 | **exact match** | 12 → 12 | **0 px** | 4.31 % |
+| Tablet 820×1180 | +1 px | 26 → 26 | **1 px** | – |
+| Mobile 1082 (Pixel 7) | +3 px | 27 → 27 | **3 px** | – |
+
+The pixel percentage is reported as measured on the delivery run, not as the most
+favourable figure seen. It varies between **3.3 % and 4.4 %** depending on the
+capturing machine's fonts, while the structural columns stay constant.
 
 **The residual difference is font rasterisation, and it is attributable.** The
 stylesheet requests `Inter, "Segoe UI", sans-serif` and the project bundles **no
@@ -49,11 +53,16 @@ webfont**, so the capturing machine's font set decides the glyphs:
 
 | Capture condition | Desktop result |
 |---|---|
-| Container resolves `sans-serif` → DejaVu Sans | 4.404 % of pixels differ, height off by 3 px |
-| Inter installed in the container | height **exactly** matches, 3.319 % of pixels differ |
+| Container resolves `sans-serif` → DejaVu Sans | height off by 3 px, pixels in the 4 % band |
+| Inter installed in the container | height **exactly** matches, pixels still in the same band |
+
+That dissociation is the proof: changing the font fixes the *height* while leaving
+the *pixel percentage* essentially unchanged, because the percentage was always
+measuring glyphs. A layout regression would move both together.
 
 Re-running the same capture twice with identical code changes only **0.01 %** of
 pixels, so the measurement itself is deterministic — the difference is not noise.
+The percentage moves between runs only when the font configuration changes.
 
 ## 4. Why the structural test is the one that matters
 

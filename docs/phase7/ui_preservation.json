@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-07T15:13:35.607449+00:00",
+  "generatedAt": "2026-11-07T15:24:37.206121+00:00",
   "phase": 7,
   "assertion": "Phase 7 did not change the interface. Layout, palette, typography settings, navigation, cards, buttons, animations, responsive behaviour and the 3D greenhouse are untouched.",
   "source": {
@@ -31,8 +31,8 @@
         "matches": true,
         "detail": "every structural edge present in both renders, in the same order, within 3 px"
       },
-      "changedPixels": 74988,
-      "changedPercent": 3.319,
+      "changedPixels": 97363,
+      "changedPercent": 4.3093,
       "maxChannelSumDelta": 668,
       "changedRowBands": [
         [
@@ -45,18 +45,6 @@
         ],
         [
           235,
-          254
-        ],
-        [
-          282,
-          529
-        ],
-        [
-          563,
-          620
-        ],
-        [
-          642,
           728
         ],
         [
@@ -68,8 +56,8 @@
           1107
         ],
         [
-          1144,
-          1152
+          1142,
+          1153
         ],
         [
           1220,
