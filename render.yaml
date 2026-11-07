@@ -7,7 +7,7 @@ services:
     runtime: python
     plan: free
     repo: https://github.com/meherabmehu/SpaceAgriSim
-    branch: feat/scientific-mission-platform
+    branch: main
     buildCommand: pip install -r backend/requirements.txt
     startCommand: uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port $PORT --workers 1 --timeout-graceful-shutdown 25
     healthCheckPath: /api/ready
