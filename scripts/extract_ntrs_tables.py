@@ -530,7 +530,12 @@ def main() -> int:
             "aggregatesRecomputed": sorted(HARVEST_PUBLISHED),
             "derivedColumnsRecomputed": True,
             "crossTableChecks": "Table 9 root dry mass reconciles with Table 10 total dry mass",
-            "provenanceChecks": len(provenance),
+            "provenanceChecks": len(provenance) + len(gas) + len(bpc),
+            "provenanceChecksByReport": {
+                "TM-102784": len(provenance),
+                "TM-102788": len(gas),
+                "TM-103494": len(bpc),
+            },
             "allPassed": True,
             "failures": [],
         },

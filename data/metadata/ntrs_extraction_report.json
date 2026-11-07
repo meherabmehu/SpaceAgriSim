@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-07T14:56:31.804561+00:00",
+  "generatedAt": "2026-11-07T14:57:54.739679+00:00",
   "source": "NASA Technical Reports Server (NTRS)",
   "reports": {
     "19900009537": {
@@ -41,7 +41,12 @@
     ],
     "derivedColumnsRecomputed": true,
     "crossTableChecks": "Table 9 root dry mass reconciles with Table 10 total dry mass",
-    "provenanceChecks": 7,
+    "provenanceChecks": 46,
+    "provenanceChecksByReport": {
+      "TM-102784": 7,
+      "TM-102788": 15,
+      "TM-103494": 24
+    },
     "allPassed": true,
     "failures": []
   },
