@@ -106,6 +106,44 @@ FILES = [
         "sha256": "ab6687e01802dfabffa8e891c982846e33bd7a239fe26b51a79c2b20c748870c",
         "role": "ISA-Tab study metadata (sample sheet, assay, investigation)",
     },
+    # Priority C: ISS lettuce microbiome. These are the only crop-microbiome
+    # studies in OSDR that publish a processed taxonomic count table, and they were
+    # found by the systematic sweep rather than by prior inspection.
+    {
+        "study": 'OSD-267', "name": 'GLDS-267_GAmplicon_16S-taxonomy-and-counts.tsv',
+        "key": 'OSD-267/version-3/GAmplicon/GLDS-267_GAmplicon_16S-taxonomy-and-counts.tsv',
+        "bytes": 15821,
+        "sha256": '2583de1db8219392da936df8245327416735c3af32aa0cf767d2f83490d49ca3',
+        "role": '16S ASV x sample counts with taxonomy, 137 ASVs x 11 lettuce samples',
+    },
+    {
+        "study": 'OSD-267', "name": 'GLDS-267_GAmplicon_SampleTable_16S_GLAmpSeq.csv',
+        "key": 'OSD-267/version-7/GAmplicon/GLDS-267_GAmplicon_SampleTable_16S_GLAmpSeq.csv',
+        "bytes": 473,
+        "sha256": '79613c01e747d6e6c14c0c57c5110433ec5b6c8ed3cc8a4ecd52990b83a83b07',
+        "role": 'sample to flight/ground and tissue group assignment, 11 rows',
+    },
+    {
+        "study": 'OSD-269', "name": 'GLDS-269_GAmplicon_taxonomy-and-counts.tsv',
+        "key": 'OSD-269/version-3/GAmplicon/GLDS-269_GAmplicon_taxonomy-and-counts.tsv',
+        "bytes": 24144,
+        "sha256": '22ebf8714037b90688e601051b463646cc2a7d3b3178d74d472cfb3309f67373',
+        "role": '16S ASV x sample counts with taxonomy, 201 ASVs x 15 lettuce samples',
+    },
+    {
+        "study": 'OSD-267', "name": 'OSD-267_metadata_OSD-267-ISA.zip',
+        "key": 'OSD-267/version-7/metadata/OSD-267_metadata_OSD-267-ISA.zip',
+        "bytes": 101415,
+        "sha256": 'daee85572f94cb39239bee5f56ddb47d2465c9e8b208587a19a9c8900fd8d0ed',
+        "role": 'ISA-Tab study metadata for VEG-01A',
+    },
+    {
+        "study": 'OSD-269', "name": 'OSD-269_metadata_OSD-269-ISA.zip',
+        "key": 'OSD-269/version-5/metadata/OSD-269_metadata_OSD-269-ISA.zip',
+        "bytes": 62785,
+        "sha256": 'ea1c96a511876635deacfa9c6159e7b5ac2ef3591cb1fdebd43c6cdcdb3cd194',
+        "role": 'ISA-Tab study metadata for VEG-03A',
+    },
 ]
 
 # Files above this size are fetched on demand rather than committed, following
@@ -287,6 +325,9 @@ def main() -> None:
             "OSD-412": "87 objects raw amplicon FASTQ; no processed abundance table",
             "OSD-413": "25 objects raw amplicon FASTQ; no processed abundance table",
             "OSD-414": "21 objects raw amplicon FASTQ; no processed abundance table",
+            # OSD-267/OSD-269 are acquired, but no classifier is built from them:
+            # see ml/evaluation/phase9_veg_microbiome_feasibility.json for the
+            # design numbers that make a predictor indefensible here.
         },
     }
     METADATA.mkdir(parents=True, exist_ok=True)

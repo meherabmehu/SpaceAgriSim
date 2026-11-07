@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-07T16:00:48.150888+00:00",
+  "generatedAt": "2026-11-07T16:56:54.498076+00:00",
   "accessPath": "osdr.nasa.gov GEODE API returns HTTP 403 for every study and the GeneLab visualisation site exposes no public JSON API; these files are the same releases served from the NASA OSDR Open Data S3 bucket.",
   "bucket": "arn:aws:s3:::nasa-osdr (us-west-2), public, no credentials",
   "license": "NASA OSDR: no restrictions on use; attribution retained",
@@ -73,6 +73,56 @@
       "sha256": "ab6687e01802dfabffa8e891c982846e33bd7a239fe26b51a79c2b20c748870c",
       "role": "ISA-Tab study metadata (sample sheet, assay, investigation)",
       "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-411/version-2/metadata/GLDS-411_metadata_GLDS-411-ISA.zip",
+      "committed": true
+    },
+    {
+      "study": "OSD-267",
+      "name": "GLDS-267_GAmplicon_16S-taxonomy-and-counts.tsv",
+      "key": "OSD-267/version-3/GAmplicon/GLDS-267_GAmplicon_16S-taxonomy-and-counts.tsv",
+      "bytes": 15821,
+      "sha256": "2583de1db8219392da936df8245327416735c3af32aa0cf767d2f83490d49ca3",
+      "role": "16S ASV x sample counts with taxonomy, 137 ASVs x 11 lettuce samples",
+      "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-267/version-3/GAmplicon/GLDS-267_GAmplicon_16S-taxonomy-and-counts.tsv",
+      "committed": true
+    },
+    {
+      "study": "OSD-267",
+      "name": "GLDS-267_GAmplicon_SampleTable_16S_GLAmpSeq.csv",
+      "key": "OSD-267/version-7/GAmplicon/GLDS-267_GAmplicon_SampleTable_16S_GLAmpSeq.csv",
+      "bytes": 473,
+      "sha256": "79613c01e747d6e6c14c0c57c5110433ec5b6c8ed3cc8a4ecd52990b83a83b07",
+      "role": "sample to flight/ground and tissue group assignment, 11 rows",
+      "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-267/version-7/GAmplicon/GLDS-267_GAmplicon_SampleTable_16S_GLAmpSeq.csv",
+      "committed": true
+    },
+    {
+      "study": "OSD-269",
+      "name": "GLDS-269_GAmplicon_taxonomy-and-counts.tsv",
+      "key": "OSD-269/version-3/GAmplicon/GLDS-269_GAmplicon_taxonomy-and-counts.tsv",
+      "bytes": 24144,
+      "sha256": "22ebf8714037b90688e601051b463646cc2a7d3b3178d74d472cfb3309f67373",
+      "role": "16S ASV x sample counts with taxonomy, 201 ASVs x 15 lettuce samples",
+      "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-269/version-3/GAmplicon/GLDS-269_GAmplicon_taxonomy-and-counts.tsv",
+      "committed": true
+    },
+    {
+      "study": "OSD-267",
+      "name": "OSD-267_metadata_OSD-267-ISA.zip",
+      "key": "OSD-267/version-7/metadata/OSD-267_metadata_OSD-267-ISA.zip",
+      "bytes": 101415,
+      "sha256": "daee85572f94cb39239bee5f56ddb47d2465c9e8b208587a19a9c8900fd8d0ed",
+      "role": "ISA-Tab study metadata for VEG-01A",
+      "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-267/version-7/metadata/OSD-267_metadata_OSD-267-ISA.zip",
+      "committed": true
+    },
+    {
+      "study": "OSD-269",
+      "name": "OSD-269_metadata_OSD-269-ISA.zip",
+      "key": "OSD-269/version-5/metadata/OSD-269_metadata_OSD-269-ISA.zip",
+      "bytes": 62785,
+      "sha256": "ea1c96a511876635deacfa9c6159e7b5ac2ef3591cb1fdebd43c6cdcdb3cd194",
+      "role": "ISA-Tab study metadata for VEG-03A",
+      "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-269/version-5/metadata/OSD-269_metadata_OSD-269-ISA.zip",
       "committed": true
     }
   ],
