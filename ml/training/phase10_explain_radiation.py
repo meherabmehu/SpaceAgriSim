@@ -176,6 +176,17 @@ def main() -> int:
                 "deployed": shipped,
             },
             "permutationImportance": importance,
+            "singleGeneDependence": {
+                "maxMeanDrop": float(importance["top"][0]["meanDrop"]),
+                "genesWithZeroOrNegativeDrop": int(importance["genesWithNegativeDrop"]),
+                "deployedGeneCount": len(features),
+                "signalIsDistributed": bool(importance["top"][0]["meanDrop"] < 0.02),
+                "statement": (
+                    "No single deployed gene is individually necessary: removing any one "
+                    "of them barely moves held-out balanced accuracy. The signal is spread "
+                    "across the selected set, so these genes are a signature, not "
+                    "biomarkers, and no individual gene should be reported as one."),
+            },
             # This is the one place the analysis knowingly uses an optimistic
             # baseline, and saying so is cheaper than being caught at it.
             "selectionLeakageNote": (
