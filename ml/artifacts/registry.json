@@ -1,6 +1,6 @@
 {
  "schemaVersion": 1,
- "trainedAt": "2026-11-07T17:48:08.975042+00:00",
+ "trainedAt": "2026-11-07T20:23:01.761929+00:00",
  "environment": {
   "python": "3.13.16",
   "numpy": "2.3.5",
@@ -11,7 +11,7 @@
   {
    "id": "lettuce-earth-growth-v1",
    "artifact": "ml/artifacts/lettuce-earth-growth-v1.json",
-   "sha256": "bdd6dd96b57499e632a7ebfe779c62017d2bd2ac2802bada8af255b37533fbe0"
+   "sha256": "b5af3819a4d55a1d9f7dd293886a72c692bbc57bf6d488bbcf45b1a4079491db"
   },
   {
    "id": "mizuna-harvest-v1",
@@ -21,7 +21,7 @@
   {
    "id": "mizuna-microbial-load-v1",
    "artifact": "ml/artifacts/mizuna-microbial-load-v1.json",
-   "sha256": "8c05cd95a4df902300973425e6fbfe4e1534da5a11b4a8aa6c8d99e1448e019f"
+   "sha256": "9868c660351f906ede6001ea7e2eb8d5fd2fc7b60b1c393c3dec94017db8cfff"
   },
   {
    "id": "tomato-flight-response-v1",
@@ -31,13 +31,13 @@
   {
    "id": "mizuna-microbial-relative-load-v2",
    "artifact": "ml/artifacts/mizuna-microbial-relative-load-v2.json",
-   "sha256": "0f6f7452bd9671b6738c2a2d3c12b4cb7e9c2a7ddef75151aa6fcbb20b1f996f",
+   "sha256": "11ad54a2fcf24c040796f4cdd256f624d79b40e80f2f732096ba7b271cf5de39",
    "supersedes": "mizuna-microbial-load-v1"
   },
   {
    "id": "lettuce-earth-growth-v2",
    "artifact": "ml/artifacts/lettuce-earth-growth-v2.json",
-   "sha256": "ef09d7aa36edabd43af8f4267d44a5ae916231fba1d7b9fe25f532f6b2716841",
+   "sha256": "9931f375baf5fa11c55e2647f1fd2b9c4775deb4166c1e0879932e8b004e1b7c",
    "supersedes": "lettuce-earth-growth-v1"
   },
   {

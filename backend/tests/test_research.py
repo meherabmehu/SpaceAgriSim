@@ -85,8 +85,14 @@ def test_model_registry_requires_actual_verified_artifacts(scientific_client):
     assert all(v > 0 for v in v2["transferSummary"]["v2HeldOutR2"].values())
     # Absolute-scale predictions must not be offered without a campaign reference.
     assert v2["absoluteScaleProtocol"]["required"]
-    assert v2["evidenceStatus"] == "experimental"  # coverage missed nominal
-    assert v2["interval"]["empiricallyCalibrated"] is False
+    # Recalibrating the interval did not promote the model: it is still trained on
+    # two campaigns and still experimental. What changed is that the statement about
+    # the interval is now measured rather than disclaimed.
+    assert v2["evidenceStatus"] == "experimental"
+    assert v2["interval"]["empiricallyCalibrated"] is True
+    assert v2["interval"]["empiricalCoverage"] >= v2["interval"]["nominalCoverage"] - 0.02
+    assert v2["uncertainty"]["exchangeabilityUnit"].startswith("biological group")
+    assert v2["uncertainty"]["caveat"].strip()
 
     regression = next(m for m in models if m["id"] == "mizuna-harvest-v1")
     assert regression["metrics"]["R2"] < 0  # Honest failed-to-beat-baseline evaluation.
@@ -181,9 +187,13 @@ def test_microbial_model_is_registered_with_honest_evidence(scientific_client):
     assert model["evidenceStatus"] == "experimental"
     assert model["evidenceBasis"]["beatsBaselineWithinPooledData"] is True
     assert model["evidenceBasis"]["transfersToHeldOutExperiment"] is False
-    # Intervals under-cover and must be labelled uncalibrated.
-    assert model["interval"]["empiricallyCalibrated"] is False
-    assert "uncalibrated" in model["interval"]["kind"].lower()
+    # The interval is now group-level conformal, and the artifact must carry both the
+    # measured coverage and the campaign caveat rather than a bare radius.
+    assert model["interval"]["empiricallyCalibrated"] is True
+    assert model["interval"]["empiricalCoverage"] >= model["interval"]["nominalCoverage"] - 0.02
+    assert "group-level cross-conformal" in model["interval"]["kind"]
+    assert model["interval"]["caveat"].strip()
+    assert "uncalibrated" not in model["interval"]["kind"].lower()
     # Leave-one-experiment-out must be negative for both campaigns.
     for held_out in ("VEG04A", "VEG04B"):
         assert model["leaveOneExperimentOut"][held_out]["R2"] < 0
