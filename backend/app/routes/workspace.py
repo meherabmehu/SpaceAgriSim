@@ -13,7 +13,6 @@ from fastapi.responses import Response
 from pydantic import BaseModel, ConfigDict, Field
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
-from sqlalchemy import text
 
 from app.models.simulation import SimulationRequest
 from app.routes.simulation import simulate
@@ -150,12 +149,11 @@ def save_scenario(request: SaveScenario):
 @router.get("/ready")
 def readiness():
     try:
-        with storage.database().connect() as connection:
-            connection.execute(text("SELECT 1"))
+        database_status = storage.database_health()
     except Exception as exc:
         logger.exception("Readiness database check failed")
         raise HTTPException(503,"Database unavailable") from exc
-    return {"status":"ready","simulation":"available","database":"available",
+    return {"status":"ready","simulation":"available","database":database_status["status"],"databaseDialect":database_status["dialect"],
             "scientificValidation":"uncalibrated mathematical estimates"}
 
 
