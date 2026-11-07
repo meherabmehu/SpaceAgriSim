@@ -8,7 +8,7 @@ import logging
 from itertools import product
 from typing import Literal
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
 from pydantic import BaseModel, ConfigDict, Field
 from reportlab.lib.pagesizes import A4
@@ -19,6 +19,7 @@ from app.routes.simulation import simulate
 from app import storage
 from app import research
 from app.config.settings import settings
+from app.auth import current_user
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["mission workspace"])
@@ -122,23 +123,23 @@ class SaveScenario(BaseModel):
 
 
 @router.get("/scenarios")
-def scenarios():
+def scenarios(user: dict = Depends(current_user)):
     try:
-        rows = storage.list_scenarios()
+        rows = storage.list_scenarios(user["id"])
     except Exception as exc:
         logger.exception("Scenario history unavailable")
         raise HTTPException(503,"Scenario history unavailable; check database configuration") from exc
     for row in rows:
         row["configuration"] = json.loads(row["configuration"])
-    return {"scenarios":rows,"scope":"shared workspace history; do not store sensitive information"}
+    return {"scenarios":rows,"scope":"private account scenario history"}
 
 
 @router.post("/scenarios",status_code=201)
-def save_scenario(request: SaveScenario):
+def save_scenario(request: SaveScenario, user: dict = Depends(current_user)):
     if not settings.history_writes_enabled:
         raise HTTPException(403,"Shared history writes are disabled by the operator")
     try:
-        row = storage.save_scenario(request.name.strip(), request.configuration.model_dump_json())
+        row = storage.save_scenario(request.name.strip(), request.configuration.model_dump_json(), user["id"])
     except Exception as exc:
         logger.exception("Scenario save unavailable")
         raise HTTPException(503,"Scenario history unavailable; check database configuration") from exc
