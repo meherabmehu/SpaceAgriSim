@@ -1,0 +1,175 @@
+{
+  "phase": 10,
+  "generatedAt": "2026-11-07T20:57:10.029182+00:00",
+  "seed": 42,
+  "protocol": "Every candidate is scored on identical group-held-out folds, including a mean baseline, so 'improvement' is always measured against predicting the mean rather than against nothing.",
+  "models": [
+    {
+      "model": "mizuna-harvest-v1",
+      "samples": 14,
+      "groups": 10,
+      "experiments": 1,
+      "features": [
+        "waterSuppliedL",
+        "establishedPlants",
+        "flight",
+        "blue"
+      ],
+      "failureMode": "only 14 harvested endpoints in a single experiment, and the irrigation feature is recorded retrospectively",
+      "limitingFactor": "sample size, not model class",
+      "addressable": false,
+      "baseline": {
+        "R2": -0.13836340373596334,
+        "MAE": 14.409584415584415
+      },
+      "candidates": {
+        "baseline_mean": {
+          "R2": -0.13836340373596334,
+          "MAE": 14.409584415584415,
+          "perFoldR2": [
+            -0.1931,
+            -0.2188,
+            -2.3845,
+            -0.0117
+          ]
+        },
+        "ridge": {
+          "R2": -0.37610272053009663,
+          "MAE": 16.294911162150047,
+          "perFoldR2": [
+            -2.2347,
+            -0.2496,
+            -2.4309,
+            -0.205
+          ]
+        },
+        "randomForest": {
+          "R2": -0.10569721497730122,
+          "MAE": 13.925642866805811,
+          "perFoldR2": [
+            0.3022,
+            -0.0964,
+            -2.798,
+            -0.2927
+          ]
+        },
+        "gradientBoosting": {
+          "R2": -0.9952189763899579,
+          "MAE": 18.004709239392938,
+          "perFoldR2": [
+            -3.761,
+            -0.5679,
+            -1.5225,
+            -2.9934
+          ]
+        }
+      },
+      "bestNonBaseline": "randomForest",
+      "bestNonBaselineR2": -0.10569721497730122,
+      "beatsBaseline": false,
+      "promotionBar": "R2 > 0 and R2 above the mean baseline",
+      "decision": "keep baseline-only status: no candidate reaches R2 > 0, so nothing here is a predictor",
+      "note": "Synthetic augmentation is refused: generating training rows from 14 real harvests would manufacture the evidence the model is supposed to rest on."
+    },
+    {
+      "model": "lettuce-earth-growth-v2",
+      "samples": 1648,
+      "groups": 4,
+      "features": [
+        "daysAfterTransplant",
+        "airTemperature",
+        "rootTemperature",
+        "ppfd"
+      ],
+      "failureMode": "R2 0.870 with only four held-out experiments; the interval was uncalibrated until Phase 10 recalibrated it",
+      "limitingFactor": "group count (4 experiments), not model class",
+      "addressable": false,
+      "baseline": {
+        "R2": -0.054195908898403866,
+        "MAE": 125.82608582930726
+      },
+      "shipped": {
+        "R2": 0.8698583249949963,
+        "MAE": 34.915619043397,
+        "perFoldR2": [
+          0.7922,
+          0.9164,
+          0.8869,
+          0.1439
+        ]
+      },
+      "attempts": {
+        "v3_gbm_deeper": {
+          "R2": 0.8682528633544759,
+          "MAE": 35.32957749883484,
+          "perFoldR2": [
+            0.7775,
+            0.9177,
+            0.8865,
+            0.1431
+          ]
+        },
+        "v3_gbm_shallower_slow": {
+          "R2": 0.7997693618286497,
+          "MAE": 45.59987462931239,
+          "perFoldR2": [
+            0.6037,
+            0.8618,
+            0.8454,
+            -0.0927
+          ]
+        },
+        "v3_engineered_gbm": {
+          "R2": 0.8594556605668308,
+          "MAE": 36.04594999308541,
+          "perFoldR2": [
+            0.7381,
+            0.911,
+            0.8746,
+            0.2426
+          ]
+        }
+      },
+      "bestAttempt": "v3_gbm_deeper",
+      "promotionRule": "must beat the shipped model on pooled R2 and MAE and win at least 3 of 4 held-out experiments",
+      "promotionChecks": {
+        "pooledR2": false,
+        "pooledMAE": false,
+        "heldOutWins": 1
+      },
+      "promoted": false,
+      "decision": "no v3; keep v2",
+      "note": "With four experiments a 0.01 R2 difference is one experiment's worth of noise, which is why the rule requires per-experiment wins rather than a pooled gain."
+    },
+    {
+      "model": "tomato-flight-response-v1",
+      "samples": 36,
+      "groups": 21,
+      "features": 64,
+      "failureMode": "36 samples over 21 plants; the classifier separates recorded flight context, which is not stress or yield",
+      "limitingFactor": "sample size and label meaning, not model class",
+      "addressable": false,
+      "baseline": {
+        "macroF1": 0.4444444444444444
+      },
+      "shipped": {
+        "accuracy": 0.9166666666666666,
+        "macroF1": 0.916083916083916,
+        "confusionMatrix": [
+          [
+            18,
+            0
+          ],
+          [
+            3,
+            15
+          ]
+        ]
+      },
+      "attempts": {},
+      "promoted": false,
+      "decision": "no new version",
+      "note": "No hyperparameter search is run. With 21 groups, a search that improves the number without a held-out plant set to confirm it is a search over noise."
+    }
+  ]
+}
