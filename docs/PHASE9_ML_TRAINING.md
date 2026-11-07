@@ -43,7 +43,8 @@ byte-identical metrics; the artifacts differ only in their `trainedAt` timestamp
 | Check | OSD-46 | OSD-782 | OSD-411 |
 | --- | --- | --- | --- |
 | Missing values | none; imputation refused | none after VST | none in usable rows |
-| Probeset collapse | 22,810 → 22,560 gene models by mean | n/a | n/a |
+| Probeset collapse | 22,810 probesets → 22,560 gene models by mean | n/a | n/a |
+| Complete-data filter | 22,560 → **21,267** genes finite across all 44 arrays (the figure the artifact reports as `genesAvailable`) | n/a | n/a |
 | Library size floor | n/a | 5,000,000 reads (`MIN_LIBRARY_READS`) | same |
 | Transformation | published log2 normalised | GeneLab VST | published counts, VST |
 | Batch metadata | recovered from S3 CEL headers → `osd46_array_batch.csv` | confounded, documented | none published |

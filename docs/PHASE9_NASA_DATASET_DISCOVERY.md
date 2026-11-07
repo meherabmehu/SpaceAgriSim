@@ -86,6 +86,25 @@ raw-only studies suggested, and a compositional analysis is possible even though
 classifier is not. The correction is therefore to the data inventory, not to the
 modelling verdict.
 
+## What the explorer now publishes
+
+The sweep is only worth anything if the studies are reachable, so the catalogue was
+rebuilt from the verified manifest rather than from prose:
+
+| Study | Catalogue entry | Samples / units | Files |
+| --- | --- | --- | --- |
+| OSD-46 | Arabidopsis gamma vs Fe-56 microarray | 44 / 22 groups | 3 |
+| OSD-782 | Arabidopsis absorbed-dose RNA-seq | 36 / 12 groups | 3 |
+| OSD-411 | Arabidopsis root-tip reorientation RNA-seq | 64 libraries / 16 seedlings | 2 |
+| OSD-780 | VEG-04A mizuna plate counts | 2 assay tables | 3 (2 assay tables + data dictionary) |
+
+`GET /api/datasets` reports 17 datasets (18 entries through the API, which also
+surfaces the external Earth lettuce source). Where a study has two defensible
+sample counts they are both stated, with the definition, rather than rounded to one
+number: OSD-267 keeps 12 ISA rows and 11 processed-16S samples, and OSD-411 records
+that 64 libraries came from 16 seedlings so no reader can mistake the libraries for
+64 biological units.
+
 ## What this changed
 
 The refined statement, supported by
@@ -104,12 +123,13 @@ grounds.
 
 `scripts/acquire_phase9.py` downloads each file and refuses it unless byte length
 **and** SHA-256 match the pinned value. `data/metadata/phase9_nasa_datasets.json`
-records 12 files: 9 small enough to commit, 3 fetched on demand.
+records 13 files: 10 small enough to commit, 3 fetched on demand.
 
 | Study | File | Bytes | SHA-256 (prefix) |
 | --- | --- | --- | --- |
 | OSD-46 | array normalised expression | 23,794,742 | `f15c4179dbbe` |
 | OSD-46 | array sample table | 4,139 | `0ae05ae09386` |
+| OSD-46 | ISA metadata | 76,123 | `bf478a09853f` |
 | OSD-782 | RSEM unnormalised counts | 4,527,540 | `dc98d786d797` |
 | OSD-782 | VST counts | 14,679,817 | `6f1d41e0d2de` |
 | OSD-782 | ISA metadata | 166,136 | `9564320f2449` |

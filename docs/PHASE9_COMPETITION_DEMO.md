@@ -23,7 +23,7 @@ study, not yield prediction.
 | Organism | *Arabidopsis thaliana*, genotypes WT and atm-1 |
 | Platform | Affymetrix ATH1 microarray, log2 normalised |
 | Samples | 44 arrays over **22 biological groups** |
-| Genes | 22,560 gene models after probeset collapse |
+| Genes | 22,560 ATH1 probesets collapse to **21,267 gene models** with complete data across all 44 arrays |
 | Access | `nasa-osdr` public S3 bucket, checksum-pinned |
 
 Supporting datasets, evaluated and reported: OSD-782 (dose, 36 samples), OSD-411
@@ -33,8 +33,8 @@ Supporting datasets, evaluated and reported: OSD-782 (dose, 36 samples), OSD-411
 
 150 gene models per model, selected **inside each training fold** by a three-stage
 rule: detection filter (expressed in ≥20 % of training samples) → top 1000 by
-variance → top 150 by one-way ANOVA F on training labels. 74 of the 150 are chosen
-by all 22 folds.
+variance → top 150 by one-way ANOVA F on training labels. 75 of the 150 are chosen by
+all 22 folds, so the signature is not an artefact of one fold's selection.
 
 ### 4. What is the target?
 
@@ -79,8 +79,8 @@ majority predictor on the 8:36 imbalance.
 | A2 exposure (all) | 0.932 | 0.910 | 0.891 | — | 0.0099 |
 | A2 exposure (batch-controlled) | — | **0.969** | — | — | — |
 
-Plus the negatives, which are part of the result: dose 0.361 (p = 0.353), gravity
-0.500 (p = 0.517), cross-study transfer 0.500 with control recall 0.00 across 16
+Plus the negatives, which are part of the result: dose 0.361 (p = 0.2475), gravity
+0.500 (p = 0.6931), cross-study transfer 0.500 with control recall 0.00 across 16
 settings, ISS lettuce microbiome p = 0.904 / 0.794.
 
 ### 10. What are the limitations?
@@ -108,6 +108,11 @@ synthetic on screen and in the payload.
 
 ## Reproducible demo script
 
+Everything below is automated in `scripts/demo_phase9.sh`. Run it with `--fast` to
+check the committed state in seconds, or without arguments to re-verify every
+checksum and retrain both models (about six minutes). It asserts the documented
+metrics rather than printing them, so a drift fails the script.
+
 ```bash
 # 0. prerequisites
 python3 -m pip install -r backend/requirements-dev.txt
@@ -116,7 +121,7 @@ cd ../frontend && npm ci && npm run dev
 
 # 1. verify provenance: download and checksum every NASA file
 python3 scripts/acquire_phase9.py
-#    -> 12 files, each verified by byte length and SHA-256
+#    -> 13 files, each verified by byte length and SHA-256
 
 # 2. confirm the repository-wide sweep (optional, ~85 s)
 python3 scripts/sweep_phase9_osdr.py --start 1 --end 900
@@ -128,7 +133,7 @@ python3 ml/training/train_radiation_osd46.py
 
 # 4. package artifacts for the runtime and verify integrity
 python3 scripts/package_runtime_data.py
-cd backend && python3 -m pytest -q      # 253 passed
+cd backend && python3 -m pytest -q      # 261 passed
 
 # 5. see the models answer
 curl -s localhost:8000/api/models/radiation-quality-osd46-v1/reference-profiles > /tmp/p.json
@@ -149,7 +154,7 @@ EOF
 # 7. browser suite and visual regression
 cd frontend && npx playwright test          # 24 passed across three viewports
 cd .. && python3 scripts/visual_regression.py
-#    -> existing viewports 0.000-0.001 % pixel change
+#    -> 9 of 9 captures pass; dashboard 0.002-0.003 %, new cards 0.00-0.30 %
 ```
 
 ## The three-minute pitch

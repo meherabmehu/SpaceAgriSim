@@ -11,8 +11,8 @@ a design in which the label is not confounded with processing.
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | **OSD-46** | A radiation | biological group (genotype × condition × age × timepoint) | 44 samples / **22 groups** | applied treatment (0 / 100 Gy γ / 30 Gy Fe-56) | **eligible** | three measured conditions, and γ vs HZE are batch-balanced |
 | 2 | **OSD-46** (binary) | A radiation | same | 44 / 22 | irradiated vs not | **eligible with a stated confound** | controls are not batch-balanced; a batch-controlled subset is reported |
-| 3 | OSD-782 | A radiation dose | biological group | 36 / 12 | nominal absorbed dose 0 / 10 / 100 Gy | **rejected** | dose confounded with processing order; best balanced accuracy 0.361, p = 0.353 |
-| 4 | OSD-411 | B gravity | biological group | 63 / 16 | 90° reorientation vs vertical | **rejected** | balanced accuracy 0.500 at chance, p = 0.517; failed every genotype and tissue transfer direction |
+| 3 | OSD-782 | A radiation dose | biological group | 36 / 12 | nominal absorbed dose 0 / 10 / 100 Gy | **rejected** | dose confounded with processing order; best balanced accuracy 0.361, p = 0.2475 |
+| 4 | OSD-411 | B gravity | biological group | 63 / 16 | 90° reorientation vs vertical | **rejected** | balanced accuracy 0.500 at chance, p = 0.6931; failed every genotype and tissue transfer direction |
 | 5 | OSD-267 (VEG-01A) | C crop microbiome | individual plant | 11 samples, leaf **2 flight / 5 ground** | ISS flight vs ground control | **rejected for modelling, analysed descriptively** | two flight plants cannot form a training class |
 | 6 | OSD-269 (VEG-03A) | C crop microbiome | individual plant | 15 samples, leaf 6 flight / 5 ground | ISS flight vs ground control | **rejected for modelling, analysed descriptively** | n too small, and leaf/root are repeated measures on the same plant |
 | 7 | OSD-480 | B gravity | — | 0 usable | none published | **rejected** | 3208 objects / 6.2 TB of raw FASTQ; no processed count matrix |
@@ -32,13 +32,16 @@ the dose groups are confounded with sample processing order. Four grouping schem
 were tested before rejecting it — cell hold-out (0.083), timepoint hold-out (0.500),
 dose hold-out (0.000), and dose plus collection time as a covariate (0.083) — and
 the best learner reached balanced accuracy 0.361 against a 0.333 chance rate with
-p = 0.353. Retuning was explicitly declined: the failure is structural, not
+p = 0.2475 under the final leave-one-group-out harness (an earlier 4-fold stratified
+group CV at B = 200 permutations gave p = 0.3532; both are far from significance and
+both are recorded). Retuning was explicitly declined: the failure is structural, not
 hyperparametric.
 
 **OSD-411 (gravity).** 63 samples over 16 groups looks usable until the labels are
 examined: the factor is *reorientation on the ground*, not gravity level. The model
 failed in every direction tested — WT→pgm-1 transfer 0.531, pgm-1→WT 0.419, four
-tissue hold-outs between 0.375 and 0.562, and full leave-one-group-out 0.048/0.047.
+tissue hold-outs between 0.375 and 0.562, and full leave-one-group-out 0.048/0.047. The permutation test gives p = 0.6931 (an
+earlier 4-fold run gave 0.5174; same verdict).
 A 90° reorientation is **not** partial gravity, so no Moon or Mars claim can be
 made from it in any case.
 

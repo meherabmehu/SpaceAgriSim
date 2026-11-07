@@ -13,7 +13,7 @@ fold.
 | majority baseline | 0.000 | 0.000 | 0.000 | — |
 | **logistic-L2** | **0.932** | **0.898** | **0.906** | **yes** |
 | logistic-L1 | 0.795 | 0.648 | — | no |
-| random forest | 0.932 | 0.875 | — | no (not serialisable) |
+| random forest | 0.932 | 0.898 | — | no (not serialisable) |
 | HistGBM | 0.864 | 0.843 | — | no (not serialisable) |
 
 Confusion matrix (rows = truth, columns = prediction, order control/gamma/HZE):
@@ -28,11 +28,14 @@ Per-class recall: control 0.750, gamma 1.000, HZE 0.944. The four errors are all
 control↔HZE, which is the scientifically expected confusion — both are dense-track
 conditions relative to sparse γ.
 
-- Bootstrap 95 % CI for accuracy: **0.864 – 1.000**.
-- Permutation test: observed 0.932 against a null mean of 0.318 (95th percentile
-  0.500), **p = 0.0099** over 100 permutations — the floor at that budget, computed
-  as `(1 + 0) / (1 + 100)`.
-- Genes shared across all 22 folds: **74 of 150**, so the signal is not carried by a
+- Bootstrap 95 % CI for balanced accuracy: **0.792 – 1.000** (stratified percentile
+  bootstrap over held-out predictions; 22 groups is a small resampling pool, so the
+  interval is wide and reported as such).
+- Permutation test: observed balanced accuracy 0.898 against a null mean of 0.305
+  (95th percentile 0.491), **p = 0.0099** over 100 permutations — the floor at that
+  budget, computed as `(1 + 0) / (1 + 100)`. Labels are permuted between biological
+  groups, not between arrays, so the null respects the grouping.
+- Genes shared across all 22 folds: **75 of 150**, so the signal is not carried by a
   single fold-specific gene set.
 
 **Metric revision, reconciled.** An earlier intermediate OSD-46 artifact reported
@@ -76,8 +79,15 @@ classifier advertise "does not beat baseline". Fixed in this phase.
 
 | Model | Study | Samples / groups | Best learner | Balanced accuracy | p | Verdict |
 | --- | --- | --- | --- | --- | --- | --- |
-| dose | OSD-782 | 36 / 12 | logistic-L1 | **0.361** | 0.353 | excluded |
-| gravity | OSD-411 | 63 / 16 | logistic-L1 | **0.500** | 0.517 | excluded |
+| dose | OSD-782 | 36 / 12 | logistic-L1 | **0.361** | 0.2475 | excluded |
+| gravity | OSD-411 | 63 / 16 | logistic-L1 | **0.500** | 0.6931 | excluded |
+
+Both negatives were re-run under the final leave-one-group-out harness at B = 100
+permutations, which is what the table reports. The earlier exploratory run used a
+4-fold stratified group CV at B = 200 and gave p = 0.3532 (dose) and p = 0.5174
+(gravity). The two schemes agree on the verdict and neither approaches significance;
+the difference between the p-values is sampling noise in a null built from 12 and 16
+groups, which is itself the reason these tasks cannot support a model.
 
 OSD-782 by grouping scheme: cell hold-out 0.083, timepoint hold-out 0.500, dose
 hold-out 0.000, dose + collection-time covariate 0.083. OSD-411 by transfer

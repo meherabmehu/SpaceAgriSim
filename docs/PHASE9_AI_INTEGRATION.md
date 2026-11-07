@@ -92,9 +92,23 @@ the training data, not a measured sample"*. Exposing a free-text gene box for a
 150-gene microarray model would invite confident nonsense, and the tomato card's
 existing precedent is a measured training example for exactly this reason.
 
+## Dataset explorer
+
+The models are not useful if a reader cannot reach their source. Two endpoints were
+repaired in the audit:
+
+- `GET /api/datasets` now lists **17 datasets** (18 entries through the API, which
+  also surfaces the external Earth lettuce source). The four Phase 9 studies —
+  OSD-46, OSD-782, OSD-411 and OSD-780 — were added by
+  `scripts/catalog_phase9_studies.py` from the verified manifest, and a test asserts
+  that every registered model's `sourceStudy` resolves here.
+- `GET /api/datasets/{id}/preview` returns the sample-to-condition tables for the new
+  studies. Each table's note states that the rows are design factors rather than
+  measured outcomes, because the measurements themselves are expression matrices.
+
 ## Tests
 
-`backend/tests/test_phase9_models.py` — 36 tests covering registry presence,
+`backend/tests/test_phase9_models.py` — 46 tests covering registry presence,
 checksum verification, unreachability of excluded models, baseline comparison on the
 correct metric, finite permutation p-values, group-held-out validation, batch-confound
 disclosure, synthetic labelling, centroid round-trips, 422 handling for missing and
@@ -148,7 +162,7 @@ operator-configurable via `SPACEAGRISIM_GENERAL_RATE_LIMIT_PER_MINUTE`:
 ## Authorization regressions
 
 No auth code was modified in Phase 9. The existing suite's 401/403 paths for
-scenario reads and writes are part of the 253 passing backend tests, and the browser
+scenario reads and writes are part of the 261 passing backend tests, and the browser
 suite still exercises registration and scenario save end to end.
 
 ## Not done, on purpose
