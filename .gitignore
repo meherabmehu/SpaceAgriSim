@@ -40,3 +40,14 @@ npm-debug.log*
 frontend/playwright-report/
 frontend/test-results/
 backend/scientific_data/
+
+# --- Phase 9 raw NASA downloads (provenance, not source) ---
+# These are publicly hosted and re-acquirable byte-for-byte by
+# scripts/acquire_phase9.py, which verifies every file against the checksums in
+# data/metadata/phase9_nasa_datasets.json. ~92 MB of untracked blobs would bloat
+# the repository for no reproducibility gain, so only the checksums are versioned.
+data/raw/OSD-46/
+data/raw/OSD-782/
+data/raw/OSD-411/
+data/raw/OSD-267/
+data/raw/OSD-269/

@@ -1,0 +1,65 @@
+sample,organism,strain,genotype,organismPart,treatment,materialType
+1-1,Arabidopsis thaliana,Col-0,pgm-1,root tip,Reoriented,root tip
+1-2,Arabidopsis thaliana,Col-0,pgm-1,mature root,Reoriented,mature root
+1-3,Arabidopsis thaliana,Col-0,pgm-1,Hypocotyl,Reoriented,Hypocotyl
+1-4,Arabidopsis thaliana,Col-0,pgm-1,Cotyledon,Reoriented,Cotyledon
+2-1,Arabidopsis thaliana,Col-0,pgm-1,root tip,Reoriented,root tip
+2-2,Arabidopsis thaliana,Col-0,pgm-1,mature root,Reoriented,mature root
+2-3,Arabidopsis thaliana,Col-0,pgm-1,Hypocotyl,Reoriented,Hypocotyl
+2-4,Arabidopsis thaliana,Col-0,pgm-1,Cotyledon,Reoriented,Cotyledon
+3-1,Arabidopsis thaliana,Col-0,pgm-1,root tip,Vertical control,root tip
+3-2,Arabidopsis thaliana,Col-0,pgm-1,mature root,Vertical control,mature root
+3-3,Arabidopsis thaliana,Col-0,pgm-1,Hypocotyl,Vertical control,Hypocotyl
+3-4,Arabidopsis thaliana,Col-0,pgm-1,Cotyledon,Vertical control,Cotyledon
+4-1,Arabidopsis thaliana,Col-0,pgm-1,root tip,Vertical control,root tip
+4-2,Arabidopsis thaliana,Col-0,pgm-1,mature root,Vertical control,mature root
+4-3,Arabidopsis thaliana,Col-0,pgm-1,Hypocotyl,Vertical control,Hypocotyl
+4-4,Arabidopsis thaliana,Col-0,pgm-1,Cotyledon,Vertical control,Cotyledon
+5-1,Arabidopsis thaliana,Col-0,pgm-1,root tip,Reoriented,root tip
+5-2,Arabidopsis thaliana,Col-0,pgm-1,mature root,Reoriented,mature root
+5-3,Arabidopsis thaliana,Col-0,pgm-1,Hypocotyl,Reoriented,Hypocotyl
+5-4,Arabidopsis thaliana,Col-0,pgm-1,Cotyledon,Reoriented,Cotyledon
+6-1,Arabidopsis thaliana,Col-0,pgm-1,root tip,Reoriented,root tip
+6-2,Arabidopsis thaliana,Col-0,pgm-1,mature root,Reoriented,mature root
+6-3,Arabidopsis thaliana,Col-0,pgm-1,Hypocotyl,Reoriented,Hypocotyl
+6-4,Arabidopsis thaliana,Col-0,pgm-1,Cotyledon,Reoriented,Cotyledon
+7-1,Arabidopsis thaliana,Col-0,pgm-1,root tip,Vertical control,root tip
+7-2,Arabidopsis thaliana,Col-0,pgm-1,mature root,Vertical control,mature root
+7-3,Arabidopsis thaliana,Col-0,pgm-1,Hypocotyl,Vertical control,Hypocotyl
+7-4,Arabidopsis thaliana,Col-0,pgm-1,Cotyledon,Vertical control,Cotyledon
+8-1,Arabidopsis thaliana,Col-0,pgm-1,root tip,Vertical control,root tip
+8-2,Arabidopsis thaliana,Col-0,pgm-1,mature root,Vertical control,mature root
+8-3,Arabidopsis thaliana,Col-0,pgm-1,Hypocotyl,Vertical control,Hypocotyl
+8-4,Arabidopsis thaliana,Col-0,pgm-1,Cotyledon,Vertical control,Cotyledon
+9-1,Arabidopsis thaliana,Col-0,Wild Type,root tip,Reoriented,root tip
+9-2,Arabidopsis thaliana,Col-0,Wild Type,mature root,Reoriented,mature root
+9-3,Arabidopsis thaliana,Col-0,Wild Type,Hypocotyl,Reoriented,Hypocotyl
+9-4,Arabidopsis thaliana,Col-0,Wild Type,Cotyledon,Reoriented,Cotyledon
+10-1,Arabidopsis thaliana,Col-0,Wild Type,root tip,Reoriented,root tip
+10-2,Arabidopsis thaliana,Col-0,Wild Type,mature root,Reoriented,mature root
+10-3,Arabidopsis thaliana,Col-0,Wild Type,Hypocotyl,Reoriented,Hypocotyl
+10-4,Arabidopsis thaliana,Col-0,Wild Type,Cotyledon,Reoriented,Cotyledon
+11-1,Arabidopsis thaliana,Col-0,Wild Type,root tip,Vertical control,root tip
+11-2,Arabidopsis thaliana,Col-0,Wild Type,mature root,Vertical control,mature root
+11-3,Arabidopsis thaliana,Col-0,Wild Type,Hypocotyl,Vertical control,Hypocotyl
+11-4,Arabidopsis thaliana,Col-0,Wild Type,Cotyledon,Vertical control,Cotyledon
+12-1,Arabidopsis thaliana,Col-0,Wild Type,root tip,Vertical control,root tip
+12-2,Arabidopsis thaliana,Col-0,Wild Type,mature root,Vertical control,mature root
+12-3,Arabidopsis thaliana,Col-0,Wild Type,Hypocotyl,Vertical control,Hypocotyl
+12-4,Arabidopsis thaliana,Col-0,Wild Type,Cotyledon,Vertical control,Cotyledon
+13-1,Arabidopsis thaliana,Col-0,Wild Type,root tip,Reoriented,root tip
+13-2,Arabidopsis thaliana,Col-0,Wild Type,mature root,Reoriented,mature root
+13-3,Arabidopsis thaliana,Col-0,Wild Type,Hypocotyl,Reoriented,Hypocotyl
+13-4,Arabidopsis thaliana,Col-0,Wild Type,Cotyledon,Reoriented,Cotyledon
+14-1,Arabidopsis thaliana,Col-0,Wild Type,root tip,Reoriented,root tip
+14-2,Arabidopsis thaliana,Col-0,Wild Type,mature root,Reoriented,mature root
+14-3,Arabidopsis thaliana,Col-0,Wild Type,Hypocotyl,Reoriented,Hypocotyl
+14-4,Arabidopsis thaliana,Col-0,Wild Type,Cotyledon,Reoriented,Cotyledon
+15-1,Arabidopsis thaliana,Col-0,Wild Type,root tip,Vertical control,root tip
+15-2,Arabidopsis thaliana,Col-0,Wild Type,mature root,Vertical control,mature root
+15-3,Arabidopsis thaliana,Col-0,Wild Type,Hypocotyl,Vertical control,Hypocotyl
+15-4,Arabidopsis thaliana,Col-0,Wild Type,Cotyledon,Vertical control,Cotyledon
+16-1,Arabidopsis thaliana,Col-0,Wild Type,root tip,Vertical control,root tip
+16-2,Arabidopsis thaliana,Col-0,Wild Type,mature root,Vertical control,mature root
+16-3,Arabidopsis thaliana,Col-0,Wild Type,Hypocotyl,Vertical control,Hypocotyl
+16-4,Arabidopsis thaliana,Col-0,Wild Type,Cotyledon,Vertical control,Cotyledon

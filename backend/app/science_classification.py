@@ -157,6 +157,50 @@ FEATURES: list[Feature] = [
         ],
     ),
     Feature(
+        id="radiation-quality-osd46-v1",
+        name="Arabidopsis radiation-quality classifier (NASA OSD-46)",
+        surface="POST /api/predict/radiation-quality-osd46-v1",
+        category=3,
+        status="served-with-scope",
+        evidence=(
+            "NASA OSD-46 Affymetrix ATH1 microarray, 44 arrays over 22 biological "
+            "groups. Leave-one-biological-group-out: accuracy 0.932, balanced 0.898, "
+            "macro F1 0.906 against 0.000 majority baseline; permutation p = 0.0099 "
+            "(the floor at 100 permutations)."
+        ),
+        user_facing=(
+            "Served with the full validation block, the batch confound statistic and "
+            "the study's limitations attached to every response."
+        ),
+        notes=[
+            "Gamma and HZE are balanced across array batches, so array batch cannot explain the discrimination.",
+            "The control class is NOT batch-balanced; that limitation is stated in the response.",
+            "Distinguishes 100 Gy gamma from 30 Gy Fe-56, which differ in both quality and dose.",
+            "Never predicts yield, biomass, survival or crop productivity.",
+        ],
+    ),
+    Feature(
+        id="radiation-exposure-osd46-v1",
+        name="Arabidopsis radiation-exposure classifier (NASA OSD-46)",
+        surface="POST /api/predict/radiation-exposure-osd46-v1",
+        category=3,
+        status="served-with-scope",
+        evidence=(
+            "Same study and scheme: accuracy 0.932, balanced 0.910, permutation "
+            "p = 0.0099. Batch-controlled evaluation on the single array batch "
+            "containing all three conditions gives balanced accuracy 0.969."
+        ),
+        user_facing=(
+            "Served with a batch-controlled supplementary evaluation, because controls "
+            "never appear on one of the three array batches (Cramer's V 0.715)."
+        ),
+        notes=[
+            "Irradiated-versus-control only; does not distinguish quality or dose.",
+            "Full-set evaluation is batch-confounded; the batch-controlled number is the defensible one.",
+            "Never predicts yield, biomass, survival or crop productivity.",
+        ],
+    ),
+    Feature(
         id="mizuna-harvest-v1",
         name="Mizuna harvest fresh mass per pillow",
         surface="POST /api/predict/mizuna-harvest-v1",
@@ -183,6 +227,42 @@ FEATURES: list[Feature] = [
         notes=[
             "Labels are recorded environment, not measured plant performance.",
             "Cannot be used as a gravity-response measurement.",
+        ],
+    ),
+    Feature(
+        id="radiation-dose-osd782-v1",
+        name="Arabidopsis radiation dose classifier (NASA OSD-782)",
+        surface="not served - excluded from the API",
+        category=6,
+        status="retired-as-prediction",
+        evidence=(
+            "36 libraries, 12 biological groups. Leave-one-group-out: best balanced "
+            "accuracy 0.361 against a 0.333 chance rate; permutation p = 0.353."
+        ),
+        user_facing=(
+            "No endpoint. Training script and evaluation remain in the repository as "
+            "evidence."
+        ),
+        notes=[
+            "Dose is completely confounded with sample processing order in this study.",
+            "Excluded rather than tuned until it appeared to work.",
+        ],
+    ),
+    Feature(
+        id="gravity-reorientation-osd411-v1",
+        name="Arabidopsis gravity reorientation classifier (NASA OSD-411)",
+        surface="not served - excluded from the API",
+        category=6,
+        status="retired-as-prediction",
+        evidence=(
+            "63 libraries, 16 biological groups. Leave-one-group-out balanced accuracy "
+            "0.500 at chance; permutation p = 0.517. Genotype transfer 0.531 / 0.419 "
+            "and tissue transfer 0.375-0.562, all at chance."
+        ),
+        user_facing="No endpoint. Training script and evaluation remain as evidence.",
+        notes=[
+            "Failed in every transfer direction tested, not in one unlucky split.",
+            "A 90-degree reorientation on the ground is not partial gravity.",
         ],
     ),
     Feature(

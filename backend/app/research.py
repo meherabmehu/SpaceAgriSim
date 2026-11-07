@@ -19,6 +19,9 @@ MODEL_IDS = {
     "lettuce-earth-growth-v2",
     "mizuna-microbial-load-v1",
     "mizuna-microbial-relative-load-v2",
+    # Phase 9: NASA OSD-46 radiation response models.
+    "radiation-quality-osd46-v1",
+    "radiation-exposure-osd46-v1",
 }
 
 
@@ -115,12 +118,69 @@ def load_model(model_id):
             raise ValueError("Invalid learning rate")
         _validate_trees(boosted["trees"], width)
         return model
+    if "evaluator" in model:
+        evaluator = model["evaluator"]
+        if evaluator.get("kind") != "linear-softmax":
+            raise ValueError("Unsupported evaluator kind")
+        classes = evaluator["classes"]
+        if not 2 <= len(classes) <= 8:
+            raise ValueError("Invalid class count")
+        for key in ("mean", "scale"):
+            if len(evaluator[key]) != width:
+                raise ValueError("Model feature dimensions mismatch")
+        if min(evaluator["scale"]) <= 0:
+            raise ValueError("Unsafe non-finite model artifact")
+        for name in ("mean", "scale"):
+            if not all(math.isfinite(v) for v in evaluator[name]):
+                raise ValueError("Unsafe non-finite model artifact")
+        for label in classes:
+            row = evaluator["coefficients"][label]
+            if len(row) != width or not all(math.isfinite(v) for v in row):
+                raise ValueError("Unsafe non-finite model artifact")
+        if len(evaluator["intercept"]) != len(classes) or not all(
+                math.isfinite(v) for v in evaluator["intercept"]):
+            raise ValueError("Unsafe non-finite model artifact")
+        if len(model.get("features", [])) != width:
+            raise ValueError("Feature list does not match model width")
+        return model
     linear = model["linear"]
     if any(len(linear[k]) != width for k in ("mean", "scale", "coefficients")):
         raise ValueError("Model feature dimensions mismatch")
     if not all(math.isfinite(v) for k in ("mean", "scale", "coefficients") for v in linear[k]) or not math.isfinite(linear["intercept"]) or min(linear["scale"]) <= 0:
         raise ValueError("Unsafe non-finite model artifact")
     return model
+
+
+def _baseline_comparison(metrics, baseline):
+    """Is this model better than its baseline, using the metric its task allows?
+
+    Regression models are compared on MAE. Classifiers have no MAE at all, so
+    evaluating them on that key silently reports False for a model that is in fact
+    far better than its baseline - a classifier with balanced accuracy 0.90 against
+    a 0.00 majority baseline would have been advertised as "does not beat
+    baseline". Balanced accuracy is the correct classifier metric here because it
+    is not inflated by class imbalance.
+    """
+    if not baseline:
+        return {"available": False, "metric": None, "outperformsBaseline": False,
+                "outperformsBaselineMAE": False}
+    if "balancedAccuracy" in metrics and "balancedAccuracy" in baseline:
+        better = metrics["balancedAccuracy"] > baseline["balancedAccuracy"]
+        return {
+            "available": True,
+            "metric": "balancedAccuracy",
+            "modelValue": metrics.get("balancedAccuracy"),
+            "baselineValue": baseline.get("balancedAccuracy"),
+            "outperformsBaseline": bool(better),
+            "outperformsBaselineMAE": bool(better),
+            "note": ("outperformsBaselineMAE is retained for schema compatibility and "
+                     "carries the balanced-accuracy verdict for classifiers."),
+        }
+    better = metrics.get("MAE", float("inf")) < baseline.get("MAE", float("-inf"))
+    return {"available": True, "metric": "MAE",
+            "modelValue": metrics.get("MAE"), "baselineValue": baseline.get("MAE"),
+            "outperformsBaseline": bool(better),
+            "outperformsBaselineMAE": bool(better)}
 
 
 def model_registry():
@@ -152,14 +212,52 @@ def model_registry():
                 "artifactExists": True,
                 "artifactSha256": registered.get(model_id, {}).get("sha256"),
                 "predictionStatus": evidence_status,
-                "baselineComparison": {
-                    "available": bool(baseline),
-                    "outperformsBaselineMAE": bool(baseline and metrics.get("MAE", float("inf")) < baseline.get("MAE", float("-inf"))),
-                },
+                "baselineComparison": _baseline_comparison(metrics, baseline),
             })
         except (FileNotFoundError, KeyError, ValueError, json.JSONDecodeError):
             models.append({"id": model_id, "name": model_id, "status": "unavailable", "artifactExists": False, "limitations": ["Verified model artifact not available; run the offline training pipeline."]})
     return {"models": models, "simulatorMode": "Assumption-based mathematical estimates; separate from NASA-trained crop-specific and molecular models", "unsupportedTargets": ["Lettuce/tomato/radish ML yield", "measured water demand", "measured gas exchange", "disease image classification", "lunar/Martian predictive validation"]}
+
+
+def predict_probabilities(model, values):
+    """Softmax class probabilities for a linear-softmax artifact.
+
+    Plain arithmetic on Python floats: no numpy, no picking, no framework version to
+    reproduce. The same numbers the training script measured are the numbers served.
+    """
+    evaluator = model["evaluator"]
+    if len(values) != len(evaluator["features"]):
+        raise ValueError("Feature vector length does not match the model")
+    if not all(math.isfinite(v) for v in values):
+        raise ValueError("Non-finite feature value")
+    standardised = [(v - m) / s for v, m, s in zip(values, evaluator["mean"], evaluator["scale"])]
+    scores = {}
+    for index, label in enumerate(evaluator["classes"]):
+        row = evaluator["coefficients"][label]
+        scores[label] = evaluator["intercept"][index] + sum(
+            c * v for c, v in zip(row, standardised))
+    peak = max(scores.values())
+    exponent = {label: math.exp(s - peak) for label, s in scores.items()}
+    total = sum(exponent.values())
+    return {label: value / total for label, value in exponent.items()}
+
+
+def _domain_warnings(model, values):
+    """Flag features outside their observed training range.
+
+    Supports both layouts: a per-gene map under domain['features'] (Phase 9
+    transcriptomic artifacts) and a flat name -> {min,max} map (earlier models).
+    """
+    domain = model.get("domain") or {}
+    per_gene = domain.get("features") if isinstance(domain.get("features"), dict) else domain
+    warnings = []
+    for name, value in zip(model["features"], values):
+        bound = per_gene.get(name) if isinstance(per_gene, dict) else None
+        if isinstance(bound, dict) and "min" in bound and "max" in bound:
+            if not bound["min"] <= value <= bound["max"]:
+                warnings.append(f"{name} outside observed training range "
+                                f"[{bound['min']:.3g}, {bound['max']:.3g}]")
+    return warnings
 
 
 def _eval_tree(tree, values):
@@ -181,6 +279,12 @@ def predict_values(model, values):
         boosted = model['boostedTrees']
         result = boosted['init'] + boosted['learningRate'] * sum(
             _eval_tree(tree, values) for tree in boosted['trees'])
+    elif 'evaluator' in model:
+        # Multinomial logistic regression evaluated without any numpy/sklearn
+        # dependency, so the served model stays auditable in plain arithmetic.
+        probabilities = predict_probabilities(model, values)
+        best = max(probabilities, key=probabilities.get)
+        return best, _domain_warnings(model, values)
     else:
         linear = model["linear"]
         result = linear["intercept"] + sum((v - m) / s * c for v, m, s, c in zip(values, linear["mean"], linear["scale"], linear["coefficients"]))

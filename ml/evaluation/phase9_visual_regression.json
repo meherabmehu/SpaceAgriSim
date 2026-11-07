@@ -1,0 +1,182 @@
+{
+  "phase": 9,
+  "purpose": "Verify that adding the Phase 9 prediction cards did not alter the existing visual design.",
+  "pixelBudget": 0.02,
+  "firstBaselinesCreated": [],
+  "channelThreshold": 16,
+  "viewports": [
+    {
+      "baseline": "docs/screenshots/mission-desktop.png",
+      "fresh": "frontend/test-results/screenshots/mission-desktop.png",
+      "baselineSize": [
+        1440,
+        1569
+      ],
+      "freshSize": [
+        1440,
+        1569
+      ],
+      "sameSize": true,
+      "changedPixels": 0,
+      "totalPixels": 2259360,
+      "changedPixelRatio": 0.0,
+      "maxChannelDelta": 4,
+      "passed": true,
+      "reason": "within tolerance"
+    },
+    {
+      "baseline": "docs/screenshots/mission-tablet.png",
+      "fresh": "frontend/test-results/screenshots/mission-tablet.png",
+      "baselineSize": [
+        820,
+        2290
+      ],
+      "freshSize": [
+        820,
+        2290
+      ],
+      "sameSize": true,
+      "changedPixels": 26,
+      "totalPixels": 1877800,
+      "changedPixelRatio": 1.4e-05,
+      "maxChannelDelta": 42,
+      "passed": true,
+      "reason": "within tolerance"
+    },
+    {
+      "baseline": "docs/screenshots/mission-mobile.png",
+      "fresh": "frontend/test-results/screenshots/mission-mobile.png",
+      "baselineSize": [
+        1082,
+        6032
+      ],
+      "freshSize": [
+        1082,
+        6032
+      ],
+      "sameSize": true,
+      "changedPixels": 0,
+      "totalPixels": 6526624,
+      "changedPixelRatio": 0.0,
+      "maxChannelDelta": 0,
+      "passed": true,
+      "reason": "within tolerance"
+    },
+    {
+      "baseline": "docs/screenshots/radiation-desktop-radiation-quality-osd46-v1.png",
+      "fresh": "frontend/test-results/screenshots/radiation-desktop-radiation-quality-osd46-v1.png",
+      "baselineSize": [
+        1128,
+        635
+      ],
+      "freshSize": [
+        1128,
+        635
+      ],
+      "sameSize": true,
+      "changedPixels": 0,
+      "totalPixels": 716280,
+      "changedPixelRatio": 0.0,
+      "maxChannelDelta": 1,
+      "passed": true,
+      "reason": "within tolerance"
+    },
+    {
+      "baseline": "docs/screenshots/radiation-desktop-radiation-exposure-osd46-v1.png",
+      "fresh": "frontend/test-results/screenshots/radiation-desktop-radiation-exposure-osd46-v1.png",
+      "baselineSize": [
+        1128,
+        613
+      ],
+      "freshSize": [
+        1128,
+        613
+      ],
+      "sameSize": true,
+      "changedPixels": 0,
+      "totalPixels": 691464,
+      "changedPixelRatio": 0.0,
+      "maxChannelDelta": 3,
+      "passed": true,
+      "reason": "within tolerance"
+    },
+    {
+      "baseline": "docs/screenshots/radiation-tablet-radiation-quality-osd46-v1.png",
+      "fresh": "frontend/test-results/screenshots/radiation-tablet-radiation-quality-osd46-v1.png",
+      "baselineSize": [
+        580,
+        769
+      ],
+      "freshSize": [
+        580,
+        769
+      ],
+      "sameSize": true,
+      "changedPixels": 0,
+      "totalPixels": 446020,
+      "changedPixelRatio": 0.0,
+      "maxChannelDelta": 3,
+      "passed": true,
+      "reason": "within tolerance"
+    },
+    {
+      "baseline": "docs/screenshots/radiation-tablet-radiation-exposure-osd46-v1.png",
+      "fresh": "frontend/test-results/screenshots/radiation-tablet-radiation-exposure-osd46-v1.png",
+      "baselineSize": [
+        580,
+        746
+      ],
+      "freshSize": [
+        580,
+        746
+      ],
+      "sameSize": true,
+      "changedPixels": 0,
+      "totalPixels": 432680,
+      "changedPixelRatio": 0.0,
+      "maxChannelDelta": 0,
+      "passed": true,
+      "reason": "within tolerance"
+    },
+    {
+      "baseline": "docs/screenshots/radiation-mobile-radiation-quality-osd46-v1.png",
+      "fresh": "frontend/test-results/screenshots/radiation-mobile-radiation-quality-osd46-v1.png",
+      "baselineSize": [
+        992,
+        2720
+      ],
+      "freshSize": [
+        992,
+        2720
+      ],
+      "sameSize": true,
+      "changedPixels": 0,
+      "totalPixels": 2698240,
+      "changedPixelRatio": 0.0,
+      "maxChannelDelta": 3,
+      "passed": true,
+      "reason": "within tolerance"
+    },
+    {
+      "baseline": "docs/screenshots/radiation-mobile-radiation-exposure-osd46-v1.png",
+      "fresh": "frontend/test-results/screenshots/radiation-mobile-radiation-exposure-osd46-v1.png",
+      "baselineSize": [
+        992,
+        2531
+      ],
+      "freshSize": [
+        992,
+        2531
+      ],
+      "sameSize": true,
+      "changedPixels": 0,
+      "totalPixels": 2510752,
+      "changedPixelRatio": 0.0,
+      "maxChannelDelta": 3,
+      "passed": true,
+      "reason": "within tolerance"
+    }
+  ],
+  "passed": true,
+  "note": "A tolerance is required because text rasterisation differs between machines. Canvas size must match exactly: that is the layout guard."
+}

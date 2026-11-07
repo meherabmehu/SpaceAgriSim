@@ -30,6 +30,11 @@ class Settings(BaseSettings):
     auth_secret: str = Field(default_factory=lambda: secrets.token_urlsafe(48), min_length=32)
     auth_token_minutes: int = Field(default=60, ge=5, le=1440)
     auth_rate_limit_per_minute: int = Field(default=30, ge=1, le=60)
+    # General per-IP request budget. The default is the production value; the
+    # browser suite raises it through the environment because a single page load
+    # legitimately issues several API calls and a full E2E run would otherwise
+    # trip its own guard and fail on unrelated assertions.
+    general_rate_limit_per_minute: int = Field(default=180, ge=1, le=100000)
 
     # Origins allowed to call the API from a browser. The Vite dev server
     # proxies /api so this mostly matters when the frontend is served elsewhere.

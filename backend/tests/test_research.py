@@ -54,12 +54,19 @@ def test_model_registry_requires_actual_verified_artifacts(scientific_client):
     # Phase 8 added lettuce-earth-growth-v2, a gradient-boosting successor that
     # beat the registered random forest on identical folds. v1 stays registered and
     # on disk so the Phase 7 result remains reproducible.
-    assert len(models) == 6
+    # Phase 9 added two NASA OSD-46 radiation classifiers. The two Phase 9
+    # candidates that failed their pre-specified evaluation (OSD-782 dose,
+    # OSD-411 gravity) are deliberately absent: they were excluded from the
+    # registry rather than tuned until they appeared to work.
+    assert len(models) == 8
     assert {m["id"] for m in models} == {
         "mizuna-harvest-v1", "tomato-flight-response-v1",
         "lettuce-earth-growth-v1", "lettuce-earth-growth-v2",
         "mizuna-microbial-load-v1", "mizuna-microbial-relative-load-v2",
+        "radiation-quality-osd46-v1", "radiation-exposure-osd46-v1",
     }
+    assert "radiation-dose-osd782-v1" not in {m["id"] for m in models}
+    assert "gravity-reorientation-osd411-v1" not in {m["id"] for m in models}
     assert all(m["artifactExists"] for m in models)
     for model in models:
         assert model["status"] == "trained-exploratory"
@@ -292,5 +299,5 @@ def test_scientific_summary_never_claims_validation(scientific_client):
     assert payload["missionCertified"] is False
     assert payload["validatedModels"] == []
     assert payload["platformMaturity"] == "research-and-education"
-    assert len(payload["models"]) == 6
+    assert len(payload["models"]) == 8
     assert payload["calibration"]["invariantsAllPassed"] is True

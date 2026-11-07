@@ -109,6 +109,21 @@ def test_request_guard_rate_limit_is_retryable():
         assert response.headers["retry-after"]=="60"
 
 
+def test_general_rate_limit_default_is_unchanged_and_operator_configurable():
+    """The shipped request budget must stay at 180/min.
+
+    The browser suite raises it through SPACEAGRISIM_GENERAL_RATE_LIMIT_PER_MINUTE
+    because a full three-viewport run issues more requests from one address than a
+    human ever would. That override must not become the default, or the guard would
+    stop protecting a real deployment.
+    """
+    from app.config.settings import Settings
+    assert Settings().general_rate_limit_per_minute == 180
+    assert Settings(general_rate_limit_per_minute=5000).general_rate_limit_per_minute == 5000
+    # Auth stays tightly bounded regardless.
+    assert Settings().auth_rate_limit_per_minute == 30
+
+
 def test_operator_can_disable_shared_history_writes(client,monkeypatch):
     monkeypatch.setattr(settings,"history_writes_enabled",False)
     response=client.post("/api/scenarios",json={"name":"test","configuration":{}},headers=auth_header(client,"disabled@example.test"))

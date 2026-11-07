@@ -1,0 +1,431 @@
+{
+  "phase": 9,
+  "task": "irradiated versus non-irradiated",
+  "generatedAt": "2026-11-07T16:14:53.506546+00:00",
+  "trainStudy": "OSD-46 (Affymetrix ATH1 microarray, Wassilewskija)",
+  "testStudy": "OSD-782 (Illumina RNA-seq, Col-0, GeneLab VST)",
+  "sharedGeneModels": 17997,
+  "harmonisation": "per-gene z-score within each study (unsupervised, no label use)",
+  "majorityClassRateInTest": 0.6666666666666666,
+  "withinStudyReference": {
+    "accuracy": 0.9772727272727273,
+    "balancedAccuracy": 0.9861111111111112,
+    "scheme": "leave-one-biological-group-out within OSD-46"
+  },
+  "results": [
+    {
+      "C": 0.01,
+      "genesUsed": 50,
+      "accuracy": 0.6666666666666666,
+      "balancedAccuracy": 0.5,
+      "perClassRecall": {
+        "control": 0.0,
+        "irradiated": 1.0
+      },
+      "confusionMatrix": [
+        [
+          0,
+          12
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "classLabels": [
+        "control",
+        "irradiated"
+      ]
+    },
+    {
+      "C": 0.01,
+      "genesUsed": 150,
+      "accuracy": 0.6666666666666666,
+      "balancedAccuracy": 0.5,
+      "perClassRecall": {
+        "control": 0.0,
+        "irradiated": 1.0
+      },
+      "confusionMatrix": [
+        [
+          0,
+          12
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "classLabels": [
+        "control",
+        "irradiated"
+      ]
+    },
+    {
+      "C": 0.01,
+      "genesUsed": 500,
+      "accuracy": 0.6666666666666666,
+      "balancedAccuracy": 0.5,
+      "perClassRecall": {
+        "control": 0.0,
+        "irradiated": 1.0
+      },
+      "confusionMatrix": [
+        [
+          0,
+          12
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "classLabels": [
+        "control",
+        "irradiated"
+      ]
+    },
+    {
+      "C": 0.01,
+      "genesUsed": 2000,
+      "accuracy": 0.6666666666666666,
+      "balancedAccuracy": 0.5,
+      "perClassRecall": {
+        "control": 0.0,
+        "irradiated": 1.0
+      },
+      "confusionMatrix": [
+        [
+          0,
+          12
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "classLabels": [
+        "control",
+        "irradiated"
+      ]
+    },
+    {
+      "C": 0.1,
+      "genesUsed": 50,
+      "accuracy": 0.6666666666666666,
+      "balancedAccuracy": 0.5,
+      "perClassRecall": {
+        "control": 0.0,
+        "irradiated": 1.0
+      },
+      "confusionMatrix": [
+        [
+          0,
+          12
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "classLabels": [
+        "control",
+        "irradiated"
+      ]
+    },
+    {
+      "C": 0.1,
+      "genesUsed": 150,
+      "accuracy": 0.6666666666666666,
+      "balancedAccuracy": 0.5,
+      "perClassRecall": {
+        "control": 0.0,
+        "irradiated": 1.0
+      },
+      "confusionMatrix": [
+        [
+          0,
+          12
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "classLabels": [
+        "control",
+        "irradiated"
+      ]
+    },
+    {
+      "C": 0.1,
+      "genesUsed": 500,
+      "accuracy": 0.6666666666666666,
+      "balancedAccuracy": 0.5,
+      "perClassRecall": {
+        "control": 0.0,
+        "irradiated": 1.0
+      },
+      "confusionMatrix": [
+        [
+          0,
+          12
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "classLabels": [
+        "control",
+        "irradiated"
+      ]
+    },
+    {
+      "C": 0.1,
+      "genesUsed": 2000,
+      "accuracy": 0.6666666666666666,
+      "balancedAccuracy": 0.5,
+      "perClassRecall": {
+        "control": 0.0,
+        "irradiated": 1.0
+      },
+      "confusionMatrix": [
+        [
+          0,
+          12
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "classLabels": [
+        "control",
+        "irradiated"
+      ]
+    },
+    {
+      "C": 1.0,
+      "genesUsed": 50,
+      "accuracy": 0.6666666666666666,
+      "balancedAccuracy": 0.5,
+      "perClassRecall": {
+        "control": 0.0,
+        "irradiated": 1.0
+      },
+      "confusionMatrix": [
+        [
+          0,
+          12
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "classLabels": [
+        "control",
+        "irradiated"
+      ]
+    },
+    {
+      "C": 1.0,
+      "genesUsed": 150,
+      "accuracy": 0.6666666666666666,
+      "balancedAccuracy": 0.5,
+      "perClassRecall": {
+        "control": 0.0,
+        "irradiated": 1.0
+      },
+      "confusionMatrix": [
+        [
+          0,
+          12
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "classLabels": [
+        "control",
+        "irradiated"
+      ]
+    },
+    {
+      "C": 1.0,
+      "genesUsed": 500,
+      "accuracy": 0.6666666666666666,
+      "balancedAccuracy": 0.5,
+      "perClassRecall": {
+        "control": 0.0,
+        "irradiated": 1.0
+      },
+      "confusionMatrix": [
+        [
+          0,
+          12
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "classLabels": [
+        "control",
+        "irradiated"
+      ]
+    },
+    {
+      "C": 1.0,
+      "genesUsed": 2000,
+      "accuracy": 0.6666666666666666,
+      "balancedAccuracy": 0.5,
+      "perClassRecall": {
+        "control": 0.0,
+        "irradiated": 1.0
+      },
+      "confusionMatrix": [
+        [
+          0,
+          12
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "classLabels": [
+        "control",
+        "irradiated"
+      ]
+    },
+    {
+      "C": 10.0,
+      "genesUsed": 50,
+      "accuracy": 0.6666666666666666,
+      "balancedAccuracy": 0.5,
+      "perClassRecall": {
+        "control": 0.0,
+        "irradiated": 1.0
+      },
+      "confusionMatrix": [
+        [
+          0,
+          12
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "classLabels": [
+        "control",
+        "irradiated"
+      ]
+    },
+    {
+      "C": 10.0,
+      "genesUsed": 150,
+      "accuracy": 0.6666666666666666,
+      "balancedAccuracy": 0.5,
+      "perClassRecall": {
+        "control": 0.0,
+        "irradiated": 1.0
+      },
+      "confusionMatrix": [
+        [
+          0,
+          12
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "classLabels": [
+        "control",
+        "irradiated"
+      ]
+    },
+    {
+      "C": 10.0,
+      "genesUsed": 500,
+      "accuracy": 0.6666666666666666,
+      "balancedAccuracy": 0.5,
+      "perClassRecall": {
+        "control": 0.0,
+        "irradiated": 1.0
+      },
+      "confusionMatrix": [
+        [
+          0,
+          12
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "classLabels": [
+        "control",
+        "irradiated"
+      ]
+    },
+    {
+      "C": 10.0,
+      "genesUsed": 2000,
+      "accuracy": 0.6666666666666666,
+      "balancedAccuracy": 0.5,
+      "perClassRecall": {
+        "control": 0.0,
+        "irradiated": 1.0
+      },
+      "confusionMatrix": [
+        [
+          0,
+          12
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "classLabels": [
+        "control",
+        "irradiated"
+      ]
+    }
+  ],
+  "bestByBalancedAccuracy": {
+    "C": 0.01,
+    "genesUsed": 50,
+    "accuracy": 0.6666666666666666,
+    "balancedAccuracy": 0.5,
+    "perClassRecall": {
+      "control": 0.0,
+      "irradiated": 1.0
+    },
+    "confusionMatrix": [
+      [
+        0,
+        12
+      ],
+      [
+        0,
+        24
+      ]
+    ],
+    "classLabels": [
+      "control",
+      "irradiated"
+    ]
+  },
+  "allSettingsIdentical": true,
+  "settingsTested": 16,
+  "verdict": "transfer-failed-collapsed-to-majority",
+  "conclusion": "A radiation-exposure classifier trained on OSD-46 does not transfer to OSD-782. Pooled accuracy is misleading here; balanced accuracy and per-class recall show the model collapses to a single class.",
+  "interpretation": "Two studies measuring nominally the same contrast (irradiated vs control Arabidopsis) do not yield a shared transferable signature under this harmonisation. Candidate explanations, none of which this data can separate: different platforms (3'-biased array vs RNA-seq), different ecotypes (Ws vs Col-0), different radiation qualities and dose levels (100 Gy gamma + 30 Gy Fe-56 vs 10/100 Gy Cs-137), different tissues and harvest timings, and study-level batch structure that per-gene standardisation does not remove. This is reported as a negative result, not adjusted until it becomes positive.",
+  "deepLearningUsed": false
+}

@@ -1,0 +1,45 @@
+sample,sourceGroup,ageDays,genotype,radiation,doseGy,exposureDuration,hoursAfterIrradiation
+GSM1506014_1,(5 day & Wild Type & gamma radiation & 100 gray & 15 minute & 1.5 hour),5,Wild Type,gamma radiation,100,15 minute,1.5
+GSM1506015_1,(5 day & Wild Type & gamma radiation & 100 gray & 15 minute & 1.5 hour),5,Wild Type,gamma radiation,100,15 minute,1.5
+GSM1506016_1,(5 day & Wild Type & gamma radiation & 100 gray & 15 minute & 3 hour),5,Wild Type,gamma radiation,100,15 minute,3
+GSM1506017_1,(5 day & Wild Type & gamma radiation & 100 gray & 15 minute & 3 hour),5,Wild Type,gamma radiation,100,15 minute,3
+GSM1506018_1,(5 day & Wild Type & gamma radiation & 100 gray & 15 minute & 6 hour),5,Wild Type,gamma radiation,100,15 minute,6
+GSM1506019_1,(5 day & Wild Type & gamma radiation & 100 gray & 15 minute & 6 hour),5,Wild Type,gamma radiation,100,15 minute,6
+GSM1506020_1,(5 day & Wild Type & gamma radiation & 100 gray & 15 minute & 12 hour),5,Wild Type,gamma radiation,100,15 minute,12
+GSM1506021_1,(5 day & Wild Type & gamma radiation & 100 gray & 15 minute & 12 hour),5,Wild Type,gamma radiation,100,15 minute,12
+GSM1506022_1,(6 day & Wild Type & gamma radiation & 100 gray & 15 minute & 24 hour),6,Wild Type,gamma radiation,100,15 minute,24
+GSM1506023_1,(6 day & Wild Type & gamma radiation & 100 gray & 15 minute & 24 hour),6,Wild Type,gamma radiation,100,15 minute,24
+GSM1506024_1,(5 day & Wild Type & Fe-56 ion radiation & 30 gray & approx. 12 minute & 1.5 hour),5,Wild Type,Fe-56 ion radiation,30,approx. 12 minute,1.5
+GSM1506025_1,(5 day & Wild Type & Fe-56 ion radiation & 30 gray & approx. 12 minute & 1.5 hour),5,Wild Type,Fe-56 ion radiation,30,approx. 12 minute,1.5
+GSM1506026_1,(5 day & Wild Type & Fe-56 ion radiation & 30 gray & approx. 12 minute & 3 hour),5,Wild Type,Fe-56 ion radiation,30,approx. 12 minute,3
+GSM1506027_1,(5 day & Wild Type & Fe-56 ion radiation & 30 gray & approx. 12 minute & 3 hour),5,Wild Type,Fe-56 ion radiation,30,approx. 12 minute,3
+GSM1506028_1,(5 day & Wild Type & Fe-56 ion radiation & 30 gray & approx. 12 minute & 6 hour),5,Wild Type,Fe-56 ion radiation,30,approx. 12 minute,6
+GSM1506029_1,(5 day & Wild Type & Fe-56 ion radiation & 30 gray & approx. 12 minute & 6 hour),5,Wild Type,Fe-56 ion radiation,30,approx. 12 minute,6
+GSM1506030_1,(5 day & Wild Type & Fe-56 ion radiation & 30 gray & approx. 12 minute & 12 hour),5,Wild Type,Fe-56 ion radiation,30,approx. 12 minute,12
+GSM1506031_1,(5 day & Wild Type & Fe-56 ion radiation & 30 gray & approx. 12 minute & 12 hour),5,Wild Type,Fe-56 ion radiation,30,approx. 12 minute,12
+GSM1506032_1,(6 day & Wild Type & Fe-56 ion radiation & 30 gray & approx. 12 minute & 24 hour),6,Wild Type,Fe-56 ion radiation,30,approx. 12 minute,24
+GSM1506033_1,(6 day & Wild Type & Fe-56 ion radiation & 30 gray & approx. 12 minute & 24 hour),6,Wild Type,Fe-56 ion radiation,30,approx. 12 minute,24
+GSM1506034_1,(5 day & atm-1 & gamma radiation & 100 gray & 15 minute & 1.5 hour),5,atm-1,gamma radiation,100,15 minute,1.5
+GSM1506035_1,(5 day & atm-1 & gamma radiation & 100 gray & 15 minute & 1.5 hour),5,atm-1,gamma radiation,100,15 minute,1.5
+GSM1506036_1,(5 day & atm-1 & gamma radiation & 100 gray & 15 minute & 6 hour),5,atm-1,gamma radiation,100,15 minute,6
+GSM1506037_1,(5 day & atm-1 & gamma radiation & 100 gray & 15 minute & 6 hour),5,atm-1,gamma radiation,100,15 minute,6
+GSM1506038_1,(5 day & atm-1 & gamma radiation & 100 gray & 15 minute & 12 hour),5,atm-1,gamma radiation,100,15 minute,12
+GSM1506039_1,(5 day & atm-1 & gamma radiation & 100 gray & 15 minute & 12 hour),5,atm-1,gamma radiation,100,15 minute,12
+GSM1506040_1,(6 day & atm-1 & gamma radiation & 100 gray & 15 minute & 24 hour),6,atm-1,gamma radiation,100,15 minute,24
+GSM1506041_1,(6 day & atm-1 & gamma radiation & 100 gray & 15 minute & 24 hour),6,atm-1,gamma radiation,100,15 minute,24
+GSM1506042_1,(5 day & atm-1 & Fe-56 ion radiation & 30 gray & approx. 12 minute & 1.5 hour),5,atm-1,Fe-56 ion radiation,30,approx. 12 minute,1.5
+GSM1506043_1,(5 day & atm-1 & Fe-56 ion radiation & 30 gray & approx. 12 minute & 1.5 hour),5,atm-1,Fe-56 ion radiation,30,approx. 12 minute,1.5
+GSM1506044_1,(5 day & atm-1 & Fe-56 ion radiation & 30 gray & approx. 12 minute & 6 hour),5,atm-1,Fe-56 ion radiation,30,approx. 12 minute,6
+GSM1506045_1,(5 day & atm-1 & Fe-56 ion radiation & 30 gray & approx. 12 minute & 6 hour),5,atm-1,Fe-56 ion radiation,30,approx. 12 minute,6
+GSM1506046_1,(5 day & atm-1 & Fe-56 ion radiation & 30 gray & approx. 12 minute & 12 hour),5,atm-1,Fe-56 ion radiation,30,approx. 12 minute,12
+GSM1506047_1,(5 day & atm-1 & Fe-56 ion radiation & 30 gray & approx. 12 minute & 12 hour),5,atm-1,Fe-56 ion radiation,30,approx. 12 minute,12
+GSM1506048_1,(6 day & atm-1 & Fe-56 ion radiation & 30 gray & approx. 12 minute & 24 hour),6,atm-1,Fe-56 ion radiation,30,approx. 12 minute,24
+GSM1506049_1,(6 day & atm-1 & Fe-56 ion radiation & 30 gray & approx. 12 minute & 24 hour),6,atm-1,Fe-56 ion radiation,30,approx. 12 minute,24
+GSM1506050_1,(5 day & Wild Type & non-irradiated & 0 gray & nan Not Applicable & nan Not Applicable),5,Wild Type,non-irradiated,0,nan Not Applicable,
+GSM1506051_1,(5 day & Wild Type & non-irradiated & 0 gray & nan Not Applicable & nan Not Applicable),5,Wild Type,non-irradiated,0,nan Not Applicable,
+GSM1506052_1,(6 day & Wild Type & non-irradiated & 0 gray & nan Not Applicable & nan Not Applicable),6,Wild Type,non-irradiated,0,nan Not Applicable,
+GSM1506053_1,(6 day & Wild Type & non-irradiated & 0 gray & nan Not Applicable & nan Not Applicable),6,Wild Type,non-irradiated,0,nan Not Applicable,
+GSM1506054_1,(5 day & atm-1 & non-irradiated & 0 gray & nan Not Applicable & nan Not Applicable),5,atm-1,non-irradiated,0,nan Not Applicable,
+GSM1506055_1,(5 day & atm-1 & non-irradiated & 0 gray & nan Not Applicable & nan Not Applicable),5,atm-1,non-irradiated,0,nan Not Applicable,
+GSM1506056_1,(6 day & atm-1 & non-irradiated & 0 gray & nan Not Applicable & nan Not Applicable),6,atm-1,non-irradiated,0,nan Not Applicable,
+GSM1506057_1,(6 day & atm-1 & non-irradiated & 0 gray & nan Not Applicable & nan Not Applicable),6,atm-1,non-irradiated,0,nan Not Applicable,

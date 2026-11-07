@@ -1,6 +1,6 @@
 {
  "schemaVersion": 1,
- "trainedAt": "2026-11-07T15:33:49.518490+00:00",
+ "trainedAt": "2026-11-07T16:32:44.797652+00:00",
  "environment": {
   "python": "3.13.16",
   "numpy": "2.3.5",
@@ -39,6 +39,16 @@
    "artifact": "ml/artifacts/lettuce-earth-growth-v2.json",
    "sha256": "ef09d7aa36edabd43af8f4267d44a5ae916231fba1d7b9fe25f532f6b2716841",
    "supersedes": "lettuce-earth-growth-v1"
+  },
+  {
+   "id": "radiation-quality-osd46-v1",
+   "artifact": "ml/artifacts/radiation-quality-osd46-v1.json",
+   "sha256": "bdb50142a7e74a184e64719343c2d9fddca6c5f3c668246554adb8e9ca1475c1"
+  },
+  {
+   "id": "radiation-exposure-osd46-v1",
+   "artifact": "ml/artifacts/radiation-exposure-osd46-v1.json",
+   "sha256": "23a9f595ebd1d74d6bdb2657ddc43f22ae7f5e2fa067f55ee0b10d4ddb9bd093"
   }
  ],
  "dataVersion": "e5a3967ac7c471a2a81ed71e6ac179e8ca01809d199a8739afc9b498b18fdc7c",

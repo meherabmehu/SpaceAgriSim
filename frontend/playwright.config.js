@@ -34,6 +34,11 @@ export default defineConfig({
       // venv path, so the suite runs on Linux/macOS CI as well as on Windows.
       // PYTHON env var wins if the operator needs to point at a specific venv.
       command: `${process.env.PYTHON || (process.platform === "win32" ? "..\\\\backend\\\\.venv\\\\Scripts\\\\python.exe" : "python3")} -m uvicorn app.main:app --app-dir ../backend --host 127.0.0.1 --port 8000`,
+      // A full run across three viewports issues many hundreds of API calls from
+      // one address, which exceeds the production request budget. Raising it here
+      // keeps the guard enabled (it still protects a real deployment) without
+      // failing tests on unrelated rate-limit responses.
+      env: { SPACEAGRISIM_GENERAL_RATE_LIMIT_PER_MINUTE: "5000" },
       url: "http://127.0.0.1:8000/api/health",
       reuseExistingServer: !process.env.CI,
       timeout: 60000,
