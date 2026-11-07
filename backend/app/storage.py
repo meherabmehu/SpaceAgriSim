@@ -4,7 +4,7 @@ from functools import lru_cache
 from pathlib import Path
 from uuid import uuid4
 
-from sqlalchemy import Column, MetaData, String, Table, Text, create_engine, delete, select
+from sqlalchemy import Column, MetaData, String, Table, Text, create_engine, delete, select, text
 from app.config.settings import settings
 
 metadata = MetaData()
@@ -23,9 +23,21 @@ def database():
         name = url.removeprefix("sqlite:///")
         if name != ":memory:":
             Path(name).parent.mkdir(parents=True, exist_ok=True)
+    if not (url.startswith("sqlite:///") or url.startswith("postgresql+psycopg://")):
+        raise ValueError("Database URL must use sqlite:/// or postgresql+psycopg://")
+    # pre-ping prevents a stale pooled PostgreSQL connection from surfacing as
+    # an opaque scenario-save failure after an idle hosted deployment.
     engine = create_engine(url, pool_pre_ping=True)
     metadata.create_all(engine)
     return engine
+
+
+def database_health() -> dict[str, str]:
+    """Perform a no-write health check without exposing connection details."""
+    engine = database()
+    with engine.connect() as connection:
+        connection.execute(text("SELECT 1"))
+    return {"dialect": engine.dialect.name, "status": "available"}
 
 def list_scenarios():
     with database().connect() as connection:

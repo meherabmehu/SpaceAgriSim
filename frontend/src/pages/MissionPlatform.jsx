@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import {
   Activity,
   ArrowDownToLine,
@@ -31,7 +31,10 @@ import { useSimulation } from "../hooks/useSimulation.js";
 import { api, downloadReport } from "../services/platformApi.ts";
 import PlatformModules from "./PlatformModules.jsx";
 import { Card, GrowthPlot, number } from "./missionUI.jsx";
-import DigitalTwin3D from "../components/DigitalTwin3D.jsx";
+
+// Keep the greenhouse controls, its WebGL feature check, and Three.js out of
+// the mission shell until a researcher actually opens the greenhouse route.
+const DigitalTwin3D = lazy(() => import("../components/DigitalTwin3D.jsx"));
 
 const NAV = [
   ["dashboard", "Mission control", Orbit],
@@ -567,7 +570,9 @@ export default function MissionPlatform() {
                     dynamics.
                   </p>
                 </div>
-                <DigitalTwin3D result={result} />
+                <Suspense fallback={<section className="module-loading" aria-live="polite">Loading growth chamber…</section>}>
+                  <DigitalTwin3D result={result} />
+                </Suspense>
               </>
             ) : (
               <PlatformModules page={page} {...shared} />

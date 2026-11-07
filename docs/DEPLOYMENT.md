@@ -19,7 +19,7 @@ Docker copies tracked registry/processed/model artifacts. Raw research downloads
 
 ## Vercel frontend and Render API
 
-1. Use the reviewed development branch `feat/scientific-mission-platform`; merge through normal review when ready. The original root `vercel.json` multi-service layout is retained but is not the independently verified route described here.
+1. Promote reviewed commits to `main` through normal review. Use a feature-branch Vercel preview for pre-merge verification; the root `vercel.json` deploys the Vite frontend and FastAPI service together.
 2. Create a Render Blueprint from the repository using `render.yaml`. Its API uses the repository root so `data/` and `ml/` resolve beside `backend/`.
 3. Supply `SPACEAGRISIM_DATABASE_URL` using PostgreSQL with a `postgresql+psycopg://` URL, and `SPACEAGRISIM_CORS_ORIGINS` as a JSON list of exact frontend origins. Set values through the hosting secret UI, never Git.
 4. Create a Vercel Vite project with root directory `frontend`, install command `npm ci`, build command `npm run build`, output `dist`, and build-time variable `VITE_API_BASE_URL=https://YOUR-API.onrender.com/api`.
@@ -66,6 +66,6 @@ Record the Git commit, dataset manifest checksum, model version and provider dep
 
 ## Verification status
 
-Configuration files are reviewable source; they do not prove a live deployment. At initial inspection no `spaceagrisim` Vercel project was found and no hosting credential environment variables were present. Render connectivity exists, but no target workspace was selected/confirmed and no new paid resources were provisioned. Actual validation and deployment outcomes are recorded in `TEST_REPORT.md` and `IMPLEMENTATION_PROGRESS.md` as work completes.
+Configuration files are reviewable source; they do not by themselves prove a live deployment. The Vercel branch-preview results and API smoke checks are recorded in `PRODUCTION_DEPLOYMENT_VERIFICATION.md`. Render connectivity exists, but no target workspace was selected/confirmed and no new paid resources were provisioned. Actual validation and deployment outcomes are recorded in `TEST_REPORT.md`, `IMPLEMENTATION_PROGRESS.md`, and the phase reports as work completes.
 
 The Render Blueprint passed validation against the downloaded public JSON schema (zero errors), and `docker compose config --quiet` passed. The Render CLI is not installed, so platform-aware Blueprint validation was not executed. Docker Desktop's Linux daemon was unavailable (`dockerDesktopLinuxEngine` pipe absent), so container build/start was not executed. These are verification limits, not application pass results.
