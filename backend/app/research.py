@@ -296,6 +296,30 @@ def predict_values(model, values):
     return result, warnings
 
 
+def explanation(model_id):
+    """Load a precomputed explanation for a model, verifying it is of that model.
+
+    Explanations are computed offline (`ml/training/phase10_explain_radiation.py`)
+    rather than on request. Recomputing selection stability per request would mean
+    22 leave-one-group-out selections inside a web handler, and the result would be
+    identical every time, so it belongs in a build step.
+    """
+    if model_id not in MODEL_IDS:
+        raise KeyError(model_id)
+    path = ARTIFACTS / f"{model_id}-explanation.json"
+    if not path.is_file():
+        return None
+    body = path.read_bytes()
+    report = json.loads(body)
+    if report.get("modelId") != model_id:
+        raise ValueError("Explanation belongs to a different model")
+    # The identity check is repeated at read time: an explanation whose residual is
+    # not ~0 is not an explanation of the served arithmetic, whatever it says.
+    if report.get("identityResidual") is None or report["identityResidual"] > 1e-9:
+        raise ValueError("Explanation failed its reconstruction identity check")
+    return report
+
+
 def preview(study_id):
     tables = []
     if study_id == "OSD-655":

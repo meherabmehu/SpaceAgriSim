@@ -99,6 +99,11 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--refresh", action="store_true",
                         help="accept the fresh screenshots as the new baselines")
+    parser.add_argument("--refresh-only", default="", metavar="NAMES",
+                        help=("comma-separated capture names to refresh, leaving every "
+                              "other baseline untouched. A whole-suite refresh would "
+                              "silently accept an unrelated layout change, so refreshing "
+                              "one card should not require re-blessing the dashboard."))
     parser.add_argument("--fresh-dir", default=str(FRESH),
                         help=("directory holding the freshly captured screenshots; "
                               "defaults to the Playwright output tree so the "
@@ -116,12 +121,19 @@ def main() -> int:
               file=sys.stderr)
         return 2
     names = list(ALL_CAPTURES)
-    if args.refresh:
-        for name in names:
+    if args.refresh and args.refresh_only:
+        parser.error("--refresh and --refresh-only are alternatives")
+    if args.refresh or args.refresh_only:
+        wanted = set(ALL_CAPTURES) if args.refresh else {
+            part.strip() for part in args.refresh_only.split(",") if part.strip()}
+        unknown = wanted - set(ALL_CAPTURES)
+        if unknown:
+            parser.error(f"unknown capture(s): {sorted(unknown)}")
+        for name in wanted:
             target = SCREENSHOTS / f"{name}.png"
             target.parent.mkdir(parents=True, exist_ok=True)
             Image.open(fresh_dir / f"{name}.png").save(target)
-        print(f"refreshed {len(names)} baselines")
+        print(f"refreshed {len(wanted)} baselines: {sorted(wanted)}")
     new_baselines = [name for name in ALL_CAPTURES
                      if not (SCREENSHOTS / f"{name}.png").is_file()]
 
@@ -142,7 +154,7 @@ def main() -> int:
         print("         A comparison against a modified baseline proves nothing.")
         print("         Commit the baseline change deliberately, or restore it with")
         print("         git checkout -- docs/screenshots")
-        if not args.refresh:
+        if not (args.refresh or args.refresh_only):
             return 2
 
     results = [compare(SCREENSHOTS / f"{name}.png", fresh_dir / f"{name}.png")

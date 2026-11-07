@@ -68,6 +68,39 @@ test("radiation classifier cards answer and disclose their scope", async ({
   ).toBeTruthy();
 });
 
+test("the explanation is exact, disclosed, and closed until asked for", async ({
+  page,
+}) => {
+  await page.goto("/#predictions");
+  await expect(page.getByText("API connected", { exact: true })).toBeVisible();
+
+  const panel = card(page, CARDS[0].title);
+  // An explanation is of a specific input, so a prediction must exist first.
+  await panel.getByRole("button", { name: /control centroid/i }).click();
+  await expect(panel.getByRole("button", { name: /explain this prediction/i })).toBeVisible();
+  // Closed by default: asking for an explanation is a deliberate act.
+  await expect(panel).not.toContainText(/reconstruction residual/i);
+
+  const response = page.waitForResponse((r) =>
+    r.url().includes(`/api/models/${CARDS[0].model}/explanation`),
+  );
+  await panel.getByRole("button", { name: /explain this prediction/i }).click();
+  expect((await response).status()).toBe(200);
+
+  // The claim that matters: the numbers come from the served weights, not a surrogate.
+  await expect(panel).toContainText(/not a surrogate|shipped weight vectors/i);
+  await expect(panel).toContainText(/reconstruction residual/i);
+  // Stability is part of the explanation, not an appendix to it.
+  await expect(panel).toContainText(/held-out folds/i);
+  await expect(panel).toContainText(/fewer than half the folds/i);
+  // And it repeats its own limits.
+  await expect(panel).toContainText(/not a causal claim|not a biomarker/i);
+
+  // Collapsing restores the resting layout.
+  await panel.getByRole("button", { name: /hide explanation/i }).click();
+  await expect(panel).not.toContainText(/reconstruction residual/i);
+});
+
 test("every class centroid is classified as its own class", async ({ page }) => {
   await page.goto("/#predictions");
   await expect(page.getByText("API connected", { exact: true })).toBeVisible();
