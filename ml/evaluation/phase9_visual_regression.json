@@ -17,10 +17,10 @@
         1569
       ],
       "sameSize": true,
-      "changedPixels": 1,
+      "changedPixels": 0,
       "totalPixels": 2259360,
       "changedPixelRatio": 0.0,
-      "maxChannelDelta": 26,
+      "maxChannelDelta": 4,
       "passed": true,
       "reason": "within tolerance"
     },
@@ -77,7 +77,7 @@
       "changedPixels": 0,
       "totalPixels": 716280,
       "changedPixelRatio": 0.0,
-      "maxChannelDelta": 4,
+      "maxChannelDelta": 1,
       "passed": true,
       "reason": "within tolerance"
     },
@@ -96,7 +96,7 @@
       "changedPixels": 0,
       "totalPixels": 691464,
       "changedPixelRatio": 0.0,
-      "maxChannelDelta": 4,
+      "maxChannelDelta": 3,
       "passed": true,
       "reason": "within tolerance"
     },
@@ -153,7 +153,7 @@
       "changedPixels": 0,
       "totalPixels": 2698240,
       "changedPixelRatio": 0.0,
-      "maxChannelDelta": 13,
+      "maxChannelDelta": 3,
       "passed": true,
       "reason": "within tolerance"
     },
