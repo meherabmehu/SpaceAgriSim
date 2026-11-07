@@ -3,7 +3,7 @@
   "name": "Mizuna harvest \u00b7 exploratory ridge",
   "version": "1.0.0",
   "status": "trained-exploratory",
-  "trainedAt": "2026-11-06T09:01:11.800810+00:00",
+  "trainedAt": "2026-11-07T14:32:42.218887+00:00",
   "task": "Crop-specific fresh harvest mass regression",
   "sourceStudy": "OSD-655",
   "crop": "mizuna",
@@ -19,14 +19,14 @@
   "target": "harvestFreshMassG",
   "unit": "g fresh mass/pillow",
   "metrics": {
-    "MAE": 14.763240546127548,
-    "RMSE": 17.53342364035661,
-    "R2": -0.1532589283000958
+    "MAE": 15.503016407381864,
+    "RMSE": 18.853155340928144,
+    "R2": -0.33340311313596915
   },
   "baselineMetrics": {
-    "MAE": 14.189714285714286,
-    "RMSE": 17.178190389360825,
-    "R2": -0.1070014672952837
+    "MAE": 14.409584415584415,
+    "RMSE": 17.419824540924623,
+    "R2": -0.13836340373596334
   },
   "cohortHoldoutMetrics": {
     "MAE": 13.958276737592117,
@@ -57,7 +57,7 @@
     }
   },
   "interval": {
-    "radius": 27.112066050229103,
+    "radius": 28.23824562603823,
     "kind": "90th percentile absolute outer-CV residual, uncalibrated descriptive range",
     "nominalCoverage": null
   },

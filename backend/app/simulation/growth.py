@@ -34,14 +34,58 @@ from app.simulation.crops import CropProfile
 
 @dataclass(frozen=True)
 class DailyGrowthPoint:
+    """One day of a growth trajectory.
+
+    Harvest-day semantics (Phase 6 clarification)
+    ---------------------------------------------
+    On a harvest day the crop is at peak standing biomass *and* is cut at the
+    end of that same day. Two different accounting cut-offs therefore coexist,
+    and mixing them silently breaks any naive mass-balance check:
+
+        biomass_g              biomass standing on the plant *immediately
+                               before* the day's harvest (the peak)
+        harvested_g            everything harvested *through the end of* this
+                               day, so on a harvest day it already contains
+                               this cycle
+        cumulative_biomass_g   everything produced *up to the start of* this
+                               day's harvest, plus the biomass standing now
+
+    Consequently the identity that always holds is
+
+        cumulative_biomass_g == harvested_through_previous_day_g + biomass_g
+
+    and NOT `cumulative == harvested + biomass`, which over-counts by exactly
+    one cycle's potential harvest on a harvest day. Both cut-offs are exposed
+    explicitly below so callers never have to guess.
+    """
+
     day: int
     cycle: int  # 1-based index of the crop cycle this day belongs to
     day_in_cycle: int
-    biomass_g: float  # standing edible biomass on this day
-    cumulative_biomass_g: float  # standing biomass + everything harvested so far
+    biomass_g: float  # standing edible biomass on this day (pre-harvest)
+    cumulative_biomass_g: float  # produced up to the start of today's harvest + standing now
     growth_fraction: float  # 0..1 position on the logistic curve
     harvested_g: float = 0.0  # edible biomass harvested up to and including this day
     is_harvest_day: bool = False  # the crop reaches maturity and is cut on this day
+    # Harvested total excluding the cut that happens at the end of this day.
+    harvested_through_previous_day_g: float = 0.0
+    # Standing biomass remaining once this day's harvest (if any) has happened.
+    post_harvest_standing_g: float | None = None
+
+    def __post_init__(self) -> None:
+        # Maintain additive defaults without changing any previously emitted value:
+        # constructors that predate these fields keep the old, correct numbers.
+        if self.post_harvest_standing_g is None:
+            object.__setattr__(
+                self, "post_harvest_standing_g",
+                0.0 if self.is_harvest_day else self.biomass_g,
+            )
+
+    @property
+    def mass_balance_residual_g(self) -> float:
+        """Residual of the always-true identity; zero for a healthy trajectory."""
+        return self.cumulative_biomass_g - (
+            self.harvested_through_previous_day_g + self.biomass_g)
 
 
 def logistic_progress(day_in_cycle: int, cycle_length_days: int) -> float:
@@ -111,6 +155,10 @@ def simulate_growth(
                 growth_fraction=fraction,
                 harvested_g=harvests_done * potential_harvest_g,
                 is_harvest_day=is_harvest_day,
+                # harvested_total counts only cycles completed BEFORE this day,
+                # so it is exactly the harvest-through-previous-day cut-off.
+                harvested_through_previous_day_g=harvested_total,
+                post_harvest_standing_g=0.0 if is_harvest_day else standing,
             )
         )
 

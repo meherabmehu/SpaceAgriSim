@@ -1,34 +1,45 @@
 {
   "schemaVersion": 1,
-  "trainedAt": "2026-11-06T09:01:19.358387+00:00",
+  "trainedAt": "2026-11-07T15:03:41.244084+00:00",
   "environment": {
-    "python": "3.12.10",
-    "numpy": "2.5.4",
-    "pandas": "3.1.1",
-    "sklearn": "1.9.1"
+    "python": "3.13.16",
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "sklearn": "1.6.1"
   },
-  "dataVersion": "ee94fff355b07b5de8733924ab64554730e12c1205aa22776b8b2b9a1bf41564",
   "models": [
+    {
+      "id": "lettuce-earth-growth-v1",
+      "artifact": "ml/artifacts/lettuce-earth-growth-v1.json",
+      "sha256": "bdd6dd96b57499e632a7ebfe779c62017d2bd2ac2802bada8af255b37533fbe0"
+    },
     {
       "id": "mizuna-harvest-v1",
       "artifact": "ml/artifacts/mizuna-harvest-v1.json",
-      "sha256": "859ad226a5eb0d1a984437956faba0fca9567a83fd498031f7fe6285992077d1"
+      "sha256": "78029d6d9a93946bdaf50427f697a463a805f3c588a4deb17afb61314cf22f38"
+    },
+    {
+      "id": "mizuna-microbial-load-v1",
+      "artifact": "ml/artifacts/mizuna-microbial-load-v1.json",
+      "sha256": "8c05cd95a4df902300973425e6fbfe4e1534da5a11b4a8aa6c8d99e1448e019f"
     },
     {
       "id": "tomato-flight-response-v1",
       "artifact": "ml/artifacts/tomato-flight-response-v1.json",
-      "sha256": "d6257535d3969d65464254fc2805858350a50e19fd0d00eae2b18b4c6b744772"
+      "sha256": "b1dd72b63130fccc6a334e3de286ae6774152291ce5fe00caf365d74cb10f593"
     },
     {
-      "id": "lettuce-earth-growth-v1",
-      "artifact": "ml/artifacts/lettuce-earth-growth-v1.json",
-      "sha256": "19e2cbf46a00dd7edeccc45e1852901a9c0b17c8786564c0932cfcf86ec827a2"
+      "id": "mizuna-microbial-relative-load-v2",
+      "artifact": "ml/artifacts/mizuna-microbial-relative-load-v2.json",
+      "sha256": "0f6f7452bd9671b6738c2a2d3c12b4cb7e9c2a7ddef75151aa6fcbb20b1f996f",
+      "supersedes": "mizuna-microbial-load-v1"
     }
   ],
+  "dataVersion": "e5a3967ac7c471a2a81ed71e6ac179e8ca01809d199a8739afc9b498b18fdc7c",
   "externalDataVersion": "539e724e1ca68142a96f9f45ba4247e45ba6b120a259e9017d82d01b71e14d04",
   "externalTrainingEnvironment": {
-    "numpy": "2.5.4",
-    "pandas": "3.1.1",
-    "sklearn": "1.9.1"
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "sklearn": "1.6.1"
   }
 }

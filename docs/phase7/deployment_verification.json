@@ -1,0 +1,151 @@
+{
+  "generatedAt": "2026-11-07T15:06:36.276360+00:00",
+  "phase": 7,
+  "purpose": "Verify the PostgreSQL path and the Phase 4 security invariants against a running instance rather than against documentation.",
+  "database": {
+    "configured": true,
+    "dsnHost": "127.0.0.1",
+    "migration": {
+      "tables": [
+        "revoked_tokens",
+        "scenarios",
+        "users"
+      ],
+      "columns": [
+        "configuration",
+        "created_at",
+        "id",
+        "model_version",
+        "name",
+        "owner_id"
+      ]
+    },
+    "storageRoundtrip": {
+      "rowId": "2fd4e69c-57b0-4b30-b58d-d5cdd433bc92",
+      "health": {
+        "dialect": "postgresql",
+        "status": "available"
+      }
+    }
+  },
+  "settings": {
+    "corsOrigins": [
+      "http://localhost:5173",
+      "http://127.0.0.1:5173"
+    ],
+    "authSecretLength": 64,
+    "tokenMinutes": 60,
+    "rateLimitPerMinute": 30,
+    "historyWritesOnVercel": false,
+    "localDatabaseUrl": "sqlite:///.spaceagrisim/scenarios.db"
+  },
+  "orm": {
+    "ormColumns": [
+      "configuration",
+      "created_at",
+      "id",
+      "model_version",
+      "name",
+      "owner_id"
+    ]
+  },
+  "checks": [
+    {
+      "check": "CORS origins are explicit, never a wildcard",
+      "passed": true,
+      "detail": "[\"http://localhost:5173\", \"http://127.0.0.1:5173\"]"
+    },
+    {
+      "check": "wildcard CORS is rejected",
+      "passed": true,
+      "detail": "ValidationError"
+    },
+    {
+      "check": "plaintext non-local CORS origin is rejected",
+      "passed": true,
+      "detail": "ValidationError"
+    },
+    {
+      "check": "auth secret meets the 32-character floor",
+      "passed": true,
+      "detail": "length=64"
+    },
+    {
+      "check": "auth tokens expire within a day",
+      "passed": true,
+      "detail": "60"
+    },
+    {
+      "check": "auth rate limiting is enabled",
+      "passed": true,
+      "detail": "30"
+    },
+    {
+      "check": "history writes are disabled on Vercel",
+      "passed": true,
+      "detail": "False"
+    },
+    {
+      "check": "Vercel default database path is /tmp",
+      "passed": true,
+      "detail": "sqlite:////tmp/spaceagrisim/scenarios.db"
+    },
+    {
+      "check": "history writes are enabled locally",
+      "passed": true,
+      "detail": "True"
+    },
+    {
+      "check": "local default is not a public persistent store",
+      "passed": true,
+      "detail": "sqlite:///.spaceagrisim/scenarios.db"
+    },
+    {
+      "check": "every ORM column appears in the migration",
+      "passed": true,
+      "detail": "missing=[]"
+    },
+    {
+      "check": "migration applies cleanly",
+      "passed": true,
+      "detail": "NOTICE:  column \"owner_id\" of relation \"scenarios\" already exists, skipping"
+    },
+    {
+      "check": "migration creates the three required tables",
+      "passed": true,
+      "detail": "present=['revoked_tokens', 'scenarios', 'users']"
+    },
+    {
+      "check": "scenarios table has every column the ORM writes",
+      "passed": true,
+      "detail": "present=['configuration', 'created_at', 'id', 'model_version', 'name', 'owner_id']"
+    },
+    {
+      "check": "owner/created index exists",
+      "passed": true,
+      "detail": "scenarios_pkey\nscenarios_owner_created_idx"
+    },
+    {
+      "check": "migration is idempotent",
+      "passed": true,
+      "detail": "NOTICE:  relation \"revoked_tokens\" already exists, skipping"
+    },
+    {
+      "check": "scenario write reaches PostgreSQL",
+      "passed": true,
+      "detail": "2fd4e69c-57b0-4b30-b58d-d5cdd433bc92"
+    },
+    {
+      "check": "scenario is readable back",
+      "passed": true,
+      "detail": "1 rows listed"
+    },
+    {
+      "check": "health reports the postgresql dialect",
+      "passed": true,
+      "detail": "{\"dialect\": \"postgresql\", \"status\": \"available\"}"
+    }
+  ],
+  "passed": true,
+  "failures": []
+}

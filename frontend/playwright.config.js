@@ -30,8 +30,10 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command:
-        "..\\backend\\.venv\\Scripts\\python.exe -m uvicorn app.main:app --app-dir ..\\backend --host 127.0.0.1 --port 8000",
+      // Resolve the interpreter cross-platform instead of hard-coding a Windows
+      // venv path, so the suite runs on Linux/macOS CI as well as on Windows.
+      // PYTHON env var wins if the operator needs to point at a specific venv.
+      command: `${process.env.PYTHON || (process.platform === "win32" ? "..\\\\backend\\\\.venv\\\\Scripts\\\\python.exe" : "python3")} -m uvicorn app.main:app --app-dir ../backend --host 127.0.0.1 --port 8000`,
       url: "http://127.0.0.1:8000/api/health",
       reuseExistingServer: !process.env.CI,
       timeout: 60000,

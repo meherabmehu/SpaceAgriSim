@@ -1,0 +1,16 @@
+variable,value,unit,measurementBasis,sourceReport,ntrsId,page,evidenceString,provenanceVerified,note
+stand_transpiration_peak,120.0,L/day,20 m2 stand,NASA TM-102788,19900016137,3,peaked at 120,True,peak near 25 days when ground cover complete
+stand_transpiration_mean,90.0,L/day,20 m2 stand,NASA TM-102788,19900016137,3,averaged about 90,True,growth-cycle average
+stand_transpiration_mean_areal,4.5,L/m2/day,per m2 stand,NASA TM-102788,19900016137,15,4.5 L m -2 day -I,True,authors' own areal conversion of the 90 L/day mean
+stand_photosynthesis_peak,27.0,umol/m2/s,CO2 uptake,NASA TM-102788,19900016137,3,peaked at 27,True,at 25 days after planting
+stand_photosynthesis_mean,15.0,umol/m2/s,CO2 uptake,NASA TM-102788,19900016137,3,averaged 15,True,averaged day 10 to day 84
+dark_respiration_mean,7.2,umol/m2/s,CO2 release,NASA TM-102788,19900016137,3,7.2,True,average over the 4-h dark period (440 ppm rise)
+dark_respiration_peak,13.0,umol/m2/s,CO2 release,NASA TM-102788,19900016137,11,13 umol,True,reached by about 20 days after planting
+net_carbon_fixed_per_day,19.5,mol/day,net CO2,NASA TM-102788,19900016137,12,19.5 moles,True,21.6 mol light-period uptake minus 2.1 mol dark respiration
+net_carbon_fixed_mass,860.0,g/day,net CO2,NASA TM-102788,19900016137,12,860,True,equivalent to about 470 L/day of CO2
+light_compensation_point,190.0,umol/m2/s,stand PPF,NASA TM-102788,19900016137,13,190,True,mean across growth; about 200 umol/m2/s at day 41
+ppf_mean_growth,534.0,umol/m2/s,canopy top,NASA TM-102788,19900016137,7,534,True,averaged 534 +/- 42 umol/m2/s over the study
+ppf_response_lower_bound,60.0,umol/m2/s,stand PPF,NASA TM-102788,19900016137,13,60,True,net CO2 production at 60: below compensation point
+ppf_response_upper_bound,750.0,umol/m2/s,stand PPF,NASA TM-102788,19900016137,13,750,True,highest PPF tested; response linear across 60-750
+total_harvest_biomass,40.0,kg,20 m2 stand,NASA TM-102788,19900016137,12,40 kg,True,harvest result; gas-exchange estimate was 44 kg (10% higher)
+plants_per_area,1500.0,plants/m2,planting density,NASA TM-102788,19900016137,11,1500,True,recorded against the Gerbaud et al. comparison

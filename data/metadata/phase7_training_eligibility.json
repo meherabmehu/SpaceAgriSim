@@ -1,0 +1,314 @@
+{
+  "generatedAt": "2026-11-07T14:59:26.539877+00:00",
+  "phase": 7,
+  "policy": {
+    "deepLearning": {
+      "permitted": false,
+      "reason": "Largest measured target is 123 samples across 35 groups and 2 campaigns. Any neural model would be unidentifiable at this size, and its reported error would be optimistically biased regardless of grouping discipline."
+    },
+    "modelClassesBenchmarked": [
+      "Dummy baseline",
+      "Ridge (linear)",
+      "RandomForest",
+      "HistGradientBoosting"
+    ],
+    "groupingPolicy": "Every CV split is grouped by the biological replicate (tray, pillow or experiment). Splitting samples from one replicate across folds is treated as an invalid evaluation, not a methodological choice.",
+    "transferPolicy": "Held-out-study evaluation is reported for every task where more than one study or campaign exists, even when it is unflattering. A model that beats its baseline within pooled data but fails to transfer is reported as 'experimental', never 'validated'.",
+    "promotionRule": "A model may only be described as validated if it beats its baseline AND has positive R2 on every held-out study AND its interval coverage is within 5 percentage points of nominal."
+  },
+  "existingTasks": [
+    {
+      "taskId": "mizuna-harvest-v1",
+      "target": "harvest fresh mass per pillow (g)",
+      "samples": 14,
+      "groups": 10,
+      "groupingVariable": "pillow (paired numbers kept together)",
+      "eligibility": "statistical",
+      "trainable": true,
+      "trained": true,
+      "reason": "Measured per-sample target, but the harvest-mass definition differs between the two arms (documented in DATA_HARMONIZATION.md H1), so the target is not the same quantity across the data. That is why the registry pins this model at 'baseline-only' and never promotes it.",
+      "evidence": "OSD-655 VEG-04A harvest tables"
+    },
+    {
+      "taskId": "mizuna-microbial-load-v1",
+      "target": "log10(1 + CFU/g) on edible leaf, absolute level",
+      "samples": 123,
+      "groups": 35,
+      "groupingVariable": "pillow (biological replicate)",
+      "eligibility": "statistical",
+      "trainable": true,
+      "trained": true,
+      "reason": "The cleanest measured target in the project (123 leaf samples, 35 pillows, two campaigns), yet still single-crop and two-campaign. Grouped CV beats the baseline inside pooled data; leave-one-experiment-out R2 is negative for both campaigns, so the ABSOLUTE level does not transfer. Phase 7 diagnoses this as an unidentifiable campaign offset rather than a modelling failure and re-scopes the estimand in mizuna-microbial-relative-load-v2.",
+      "evidence": "OSD-780 VEG-04A/B ALSDA plate counts"
+    },
+    {
+      "taskId": "lettuce-earth-growth-v1",
+      "target": "fresh shoot mass per plant (g)",
+      "samples": 1648,
+      "groups": 4,
+      "groupingVariable": "experiment",
+      "eligibility": "statistical",
+      "trainable": true,
+      "trained": true,
+      "reason": "External (WUR) ground data spanning an environmental grid, validated by nested leave-one-experiment-out. Not NASA data and not flight data; Earth-only domain.",
+      "evidence": "WUR lettuce dataset (external, not NASA)"
+    },
+    {
+      "taskId": "tomato-flight-response-v1",
+      "target": "binary flight/ground discrimination from expression",
+      "samples": 36,
+      "groups": 21,
+      "groupingVariable": "sample group",
+      "eligibility": "statistical",
+      "trainable": true,
+      "trained": true,
+      "reason": "Class-balanced and separable in-sample, but 36 samples cannot support a claim about mechanism, and the labels are environment labels rather than measured plant performance. Useful as a discrimination demonstration only.",
+      "evidence": "OSD-... tomato transcript abundance table"
+    }
+  ],
+  "ntrsTargets": [
+    {
+      "taskId": "ntrs-target-1",
+      "target": "biomass time series",
+      "eligibility": "statistical",
+      "measurementStatus": "measured",
+      "trainable": true,
+      "trained": false,
+      "reason": "Seven destructive harvests at seven distinct ages from ONE study. A growth curve can be fitted and its residuals characterised, but the series contains no replicate trays at any single age, so it cannot support a cross-validated predictive model.",
+      "replicates": "n=7 ages, 1 tray per age",
+      "source": [
+        "TM-102784"
+      ]
+    },
+    {
+      "taskId": "ntrs-target-2",
+      "target": "fresh and dry harvest yield",
+      "eligibility": "statistical",
+      "measurementStatus": "measured",
+      "trainable": true,
+      "trained": false,
+      "reason": "16 trays of dry-matter harvest yield from one study, with a documented stress allocation across trays. Tray-level variation can be modelled descriptively; the unit is DRY matter, not fresh weight, so it cannot be converted to the simulator's fresh-weight basis without an assumed water fraction.",
+      "replicates": "16 trays (independent trays, staggered ages 71-75 d)",
+      "source": [
+        "TM-102784"
+      ]
+    },
+    {
+      "taskId": "ntrs-target-3",
+      "target": "water uptake",
+      "eligibility": "plausibility-only",
+      "measurementStatus": "measured",
+      "trainable": false,
+      "trained": false,
+      "reason": "Two independent studies report stand water use, but neither reports per-tray or per-plant replicates, and both are confounded by leakage. The numbers bound the simulator's assumed peak water demand; they do not define a response surface.",
+      "replicates": "2 studies, single stand-level integration each",
+      "source": [
+        ""
+      ]
+    },
+    {
+      "taskId": "ntrs-target-4",
+      "target": "transpiration",
+      "eligibility": "plausibility-only",
+      "measurementStatus": "measured",
+      "trainable": false,
+      "trained": false,
+      "reason": "Peak and cycle-mean rates are printed, and TM-103494 states the whole cycle profile qualitatively (rises to full ground cover, then flat to senescence). No per-day transpiration series is printed anywhere in the recovered corpus, so a temporal response shape cannot be fitted.",
+      "replicates": "stand level only",
+      "source": [
+        ""
+      ]
+    },
+    {
+      "taskId": "ntrs-target-5",
+      "target": "water recovery",
+      "eligibility": "plausibility-only",
+      "measurementStatus": "measured-approximate",
+      "trainable": false,
+      "trained": false,
+      "reason": "A single condensate-versus-added balance, 0.924, over one 74-day cycle in a chamber that leaked 20-40 % of its volume per day. It is the only measured recovery figure recovered and it is reported by the authors as a transpiration proxy, not a closed-loop recovery test. n=1 study.",
+      "replicates": "1 study, 1 balance period",
+      "source": [
+        "",
+        "TM-103494"
+      ]
+    },
+    {
+      "taskId": "ntrs-target-6",
+      "target": "CO2 assimilation",
+      "eligibility": "plausibility-only",
+      "measurementStatus": "measured",
+      "trainable": false,
+      "trained": false,
+      "reason": "Peak, cycle-mean and net daily fixation are all printed, plus a qualitative irradiance response. All are stand-level integrated values from two ground studies; there is no per-sample replication, so only bounds and signs are defensible.",
+      "replicates": "2 studies, stand level",
+      "source": [
+        ""
+      ]
+    },
+    {
+      "taskId": "ntrs-target-7",
+      "target": "O2 evolution",
+      "eligibility": "insufficient",
+      "measurementStatus": "not-measured",
+      "trainable": false,
+      "trained": false,
+      "reason": "Oxygen is never reported as a measured quantity. It appears only in framing statements about what a CELSS must provide. Producing an O2 number would require applying a stoichiometric assumption to the CO2 figures, which converts a measurement into a model output; that is exactly the confusion Phase 7 exists to remove.",
+      "replicates": "none",
+      "source": [
+        "none"
+      ]
+    },
+    {
+      "taskId": "ntrs-target-8",
+      "target": "photosynthetic response to irradiance",
+      "eligibility": "plausibility-only",
+      "measurementStatus": "measured",
+      "trainable": false,
+      "trained": false,
+      "reason": "The response is printed as a described shape with two anchor points - net CO2 production at 60 umol/m2/s, a compensation point near 190-200, and linear increase to the 750 maximum tested. There is no tabulated response curve and no replicate at any irradiance, so only the sign, the linearity claim and the compensation point are usable.",
+      "replicates": "none (described response, two anchor points)",
+      "source": [
+        "",
+        "TM-102788",
+        "TM-103494"
+      ]
+    },
+    {
+      "taskId": "ntrs-target-9",
+      "target": "PPFD and photoperiod response",
+      "eligibility": "insufficient",
+      "measurementStatus": "measured",
+      "trainable": false,
+      "trained": false,
+      "reason": "Two operating points exist (534 umol/m2/s at 20 h and 660 at 24 h in Phase II, 530 at 20 h in Phase IV), and each has a harvest yield. But they come from different system phases with different sealing, nutrient control and, in Phase IV, documented copper deficiency. The two points are therefore confounded with phase, and no photoperiod series exists at constant irradiance. Two confounded points cannot identify a response.",
+      "replicates": "2-3 operating points, none replicated",
+      "source": [
+        ""
+      ]
+    },
+    {
+      "taskId": "ntrs-target-10",
+      "target": "gravity-dependent growth",
+      "eligibility": "insufficient",
+      "measurementStatus": "not-measured",
+      "trainable": false,
+      "trained": false,
+      "reason": "Every recovered report is a ground-based chamber study at 1 g. No microgravity, partial-gravity, clinostat or flight plant-growth measurement exists in the recovered corpus. The simulator's gravity factor therefore remains an assumption and cannot be calibrated.",
+      "replicates": "none",
+      "source": [
+        "none"
+      ]
+    },
+    {
+      "taskId": "ntrs-target-11",
+      "target": "radiation dose-response",
+      "eligibility": "insufficient",
+      "measurementStatus": "not-measured",
+      "trainable": false,
+      "trained": false,
+      "reason": "No radiation dose paired with a plant response was found. 'Radiation' in these reports refers to lamp emission spectra, which is a lighting variable, not a dose. The simulator's radiation-sensitivity coefficients remain unsupported assumptions.",
+      "replicates": "none",
+      "source": [
+        "none"
+      ]
+    },
+    {
+      "taskId": "ntrs-target-12",
+      "target": "measured stress outcomes",
+      "eligibility": "insufficient",
+      "measurementStatus": "measured",
+      "trainable": false,
+      "trained": false,
+      "reason": "Stress is recorded as a binary per-tray allocation with narrative cause (water stress on trays 1, 2, 4, 8; manganese stress on trays 6 and 7). There is no severity score, no measurement of the stressor, and no control arm. This supports a descriptive grouping label and nothing more; using it as a regression target would be manufacturing a label the source never measured.",
+      "replicates": "5 labeled of 16 trays, 1 binary label each",
+      "source": [
+        "TM-102784",
+        "TM-103494"
+      ]
+    }
+  ],
+  "refusedTasks": [
+    {
+      "taskId": "wheat-biomass-time-series",
+      "wouldPredict": "dry mass vs age",
+      "eligibility": "mechanistic",
+      "reason": "7 ages, 1 tray each. A curve can be fitted and its residuals characterised; nothing can be validated out of sample because every age has n = 1.",
+      "alternativeApplied": "Used in Part C as a shape/bound check on the logistic growth curve."
+    },
+    {
+      "taskId": "wheat-harvest-yield",
+      "wouldPredict": "per-tray dry harvest mass",
+      "eligibility": "statistical",
+      "reason": "16 trays from a single study, dry-matter basis, wheat grain. A descriptive model would be learnable but would transfer to nothing: one cultivar, one chamber, one institution, and a different edible organ from the simulator's crops.",
+      "alternativeApplied": "Used in Part C as a dry-matter yield bound."
+    },
+    {
+      "taskId": "wheat-gas-exchange",
+      "wouldPredict": "transpiration / CO2 assimilation rate",
+      "eligibility": "plausibility-only",
+      "reason": "Stand-level integrated values from two studies with no per-sample replication. There are 15 scalar values in total, not a table of observations.",
+      "alternativeApplied": "Used in Part C as bounds and signs only."
+    },
+    {
+      "taskId": "water-recovery",
+      "wouldPredict": "recovered fraction",
+      "eligibility": "plausibility-only",
+      "reason": "One balance from one leaking chamber.",
+      "alternativeApplied": "Recorded as a lower bound with the leak caveat."
+    },
+    {
+      "taskId": "ppfd-photoperiod-response",
+      "wouldPredict": "yield vs irradiance and photoperiod",
+      "eligibility": "insufficient",
+      "reason": "Three operating points confounded with system phase, sealing, nutrient-control maturity and a documented copper deficiency. Fitting a response surface here would produce a confident curve with no identifying variation behind it.",
+      "alternativeApplied": "Nothing applied. The simulator's light response remains an assumption."
+    },
+    {
+      "taskId": "stress-severity",
+      "wouldPredict": "stress outcome",
+      "eligibility": "insufficient",
+      "reason": "Five binary tray labels, no severity, no stressor measurement, no control arm. Training on it would manufacture a label the source never measured.",
+      "alternativeApplied": "Kept as a descriptive grouping variable only."
+    },
+    {
+      "taskId": "o2-evolution",
+      "wouldPredict": "O2 production rate",
+      "eligibility": "insufficient",
+      "reason": "Never measured. Deriving it from CO2 would turn an assumption into a pseudo-measurement.",
+      "alternativeApplied": "Remains a Phase 6 blocked target."
+    },
+    {
+      "taskId": "gravity-response",
+      "wouldPredict": "growth vs gravity level",
+      "eligibility": "insufficient",
+      "reason": "No gravity manipulation exists in the recovered corpus; all studies are 1 g ground chambers.",
+      "alternativeApplied": "Simulator coefficients remain labelled unsupported assumptions."
+    },
+    {
+      "taskId": "radiation-dose-response",
+      "wouldPredict": "growth vs absorbed dose",
+      "eligibility": "insufficient",
+      "reason": "No absorbed-dose measurement paired with any plant response.",
+      "alternativeApplied": "Simulator coefficients remain labelled unsupported assumptions."
+    }
+  ],
+  "summary": {
+    "existingTaskCount": 4,
+    "ntrsTargetCount": 12,
+    "refusedTaskCount": 9,
+    "readyForPredictiveTraining": [],
+    "trainableButConstrained": [
+      "ntrs-target-1",
+      "ntrs-target-2",
+      "mizuna-harvest-v1",
+      "mizuna-microbial-load-v1",
+      "lettuce-earth-growth-v1",
+      "tomato-flight-response-v1"
+    ],
+    "newModelsTrained": [
+      "mizuna-microbial-relative-load-v2"
+    ],
+    "newModelsTrainedReason": "Only one task changed verdict in Phase 7: the microbial task, whose estimand was re-scoped from absolute load to within-campaign relative load because diagnosis showed the campaign offset - not the effect - is what fails to transfer. No NTRS target qualified for training."
+  }
+}

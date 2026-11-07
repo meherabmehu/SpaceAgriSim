@@ -33,22 +33,22 @@
       "pillow-5",
       "pillow-6"
     ],
-    "alpha": 100.0
+    "alpha": 1.0
   },
   {
     "fold": 2,
     "trainGroups": [
       "pillow-1",
       "pillow-11",
-      "pillow-12",
       "pillow-2",
+      "pillow-3",
       "pillow-5",
       "pillow-6",
       "pillow-7",
       "pillow-8"
     ],
     "testGroups": [
-      "pillow-3",
+      "pillow-12",
       "pillow-4"
     ],
     "alpha": 100.0
@@ -58,7 +58,7 @@
     "trainGroups": [
       "pillow-1",
       "pillow-11",
-      "pillow-3",
+      "pillow-12",
       "pillow-4",
       "pillow-5",
       "pillow-6",
@@ -66,8 +66,8 @@
       "pillow-8"
     ],
     "testGroups": [
-      "pillow-12",
-      "pillow-2"
+      "pillow-2",
+      "pillow-3"
     ],
     "alpha": 100.0
   }

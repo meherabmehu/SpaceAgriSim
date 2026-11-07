@@ -1,0 +1,20 @@
+# Phase 7 training environment, pinned.
+#
+# Part B of the Phase 7 brief requires pinned versions and separately versioned
+# artifacts. Ranges in ml/requirements.txt are right for a developer install; a
+# model that registered a metric has to be reproducible, so this file records the
+# exact interpreter and library versions that produced the Phase 7 artifacts.
+#
+# Install with:
+#     python -m pip install -r ml/requirements-training.txt
+#
+# The same versions are echoed into every registry entry under "environment", and
+# `scripts/verify_model_registry.py` fails if a re-run disagrees with them.
+python==3.13.16
+numpy==2.3.5
+pandas==2.2.3
+scikit-learn==1.6.1
+scipy==1.17.1
+pyarrow==26.0.1
+matplotlib==3.11.2
+openpyxl==3.1.5

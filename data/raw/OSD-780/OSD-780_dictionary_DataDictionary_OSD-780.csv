@@ -1,0 +1,7 @@
+﻿assay_name,file,submitted_column_header,transformed_column_header,unit,definition
+Plate Count,Plate Count_VEG 04A-plate counts_OriginalSubmitted.xlsx,Fresh wt,fresh_weight_gram,gram,Measures the fresh weight in grams
+Plate Count,Plate Count_VEG 04A-plate counts_OriginalSubmitted.xlsx,COUNT,colony_count_1,,Raw colony count from plate
+Plate Count,Plate Count_VEG 04A-plate counts_OriginalSubmitted.xlsx,(Blank Cell Next to COUNT ),colony_count_2,,Secondary raw colony count from plate
+Plate Count,Plate Count_VEG 04A-plate counts_OriginalSubmitted.xlsx,/ml,average_colony_count_per_milliliter,per_milliliter,Average number of colonies per milliliter
+Plate Count,Plate Count_VEG 04A-plate counts_OriginalSubmitted.xlsx,cfu/gfw/swab,colony_forming_unit_per_gram_fresh_weight_per_swab,per_gram,Measures colony-forming units per gram of fresh weight per swab
+Plate Count,Plate Count_VEG 04A-plate counts_OriginalSubmitted.xlsx,cfu/swab,colony_forming_units_per_swab,,Measures colony-forming units per swab
