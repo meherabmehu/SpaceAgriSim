@@ -17,6 +17,7 @@ MODEL_IDS = {
     "tomato-flight-response-v1",
     "lettuce-earth-growth-v1",
     "mizuna-microbial-load-v1",
+    "mizuna-microbial-relative-load-v2",
 }
 
 

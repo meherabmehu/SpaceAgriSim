@@ -1,0 +1,96 @@
+{
+  "leaveOneExperimentOut": {
+    "VEG04A": {
+      "baseline": {
+        "MAE": 0.8604959363366536,
+        "RMSE": 0.9746794344808964,
+        "R2": 0.0
+      },
+      "ridge": {
+        "MAE": 0.5979271513841948,
+        "RMSE": 0.7258142669647578,
+        "R2": 0.44546699986359084
+      },
+      "randomForest": {
+        "MAE": 0.5958034448264332,
+        "RMSE": 0.7264819479312075,
+        "R2": 0.44444629403166147
+      },
+      "gradientBoosting": {
+        "MAE": 0.500621813597462,
+        "RMSE": 0.6550818839199108,
+        "R2": 0.5482818161683585
+      },
+      "nTest": 20
+    },
+    "VEG04B": {
+      "baseline": {
+        "MAE": 0.8194087833349978,
+        "RMSE": 0.995133791073302,
+        "R2": 0.0
+      },
+      "ridge": {
+        "MAE": 0.7716792665342875,
+        "RMSE": 0.9243367005132195,
+        "R2": 0.1372252098106519
+      },
+      "randomForest": {
+        "MAE": 0.6245885659375296,
+        "RMSE": 0.7881252525805801,
+        "R2": 0.3727689645413145
+      },
+      "gradientBoosting": {
+        "MAE": 0.8194087833349978,
+        "RMSE": 0.995133791073302,
+        "R2": 0.0
+      },
+      "nTest": 103
+    }
+  },
+  "permutationTest": {
+    "VEG04A": {
+      "observedR2": 0.44444629403166147,
+      "nullMeanR2": -0.1742437130542411,
+      "nullSdR2": 0.20331855561919207,
+      "empiricalPValue": 0.0,
+      "permutations": 200
+    },
+    "VEG04B": {
+      "observedR2": 0.3727689645413145,
+      "nullMeanR2": -0.14919413080990798,
+      "nullSdR2": 0.14286647223689422,
+      "empiricalPValue": 0.0,
+      "permutations": 200
+    }
+  },
+  "measuredEffect": {
+    "VEG04A": {
+      "flightMean": 5.61662668086303,
+      "flightN": 5,
+      "groundMean": 2.5539849355814583,
+      "groundN": 15,
+      "differenceLog10": 3.0626417452815717,
+      "foldDifference": 1155.1589446074104,
+      "campaignMean": 3.3196453719018515,
+      "campaignSd": 1.7256741666158038
+    },
+    "VEG04B": {
+      "flightMean": 3.6146518797314253,
+      "flightN": 31,
+      "groundMean": 0.9754322703681536,
+      "groundN": 72,
+      "differenceLog10": 2.6392196093632716,
+      "foldDifference": 435.73215433630645,
+      "campaignMean": 1.7697605023124392,
+      "campaignSd": 2.0787058250805464
+    },
+    "pooled": {
+      "meanDifferenceLog10": 2.8509306773224217,
+      "minDifferenceLog10": 2.6392196093632716,
+      "maxDifferenceLog10": 3.0626417452815717,
+      "foldDifference": 709.4645132313815,
+      "nCampaigns": 2,
+      "note": "Both campaigns show the same sign and a similar magnitude. This is the quantity that replicates; the campaign's absolute level is what does not, and it is why v2 predicts relative load."
+    }
+  }
+}

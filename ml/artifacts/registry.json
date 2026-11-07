@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "trainedAt": "2026-11-07T14:37:58.924105+00:00",
+  "trainedAt": "2026-11-07T15:03:41.244084+00:00",
   "environment": {
     "python": "3.13.16",
     "numpy": "2.3.5",
@@ -27,6 +27,12 @@
       "id": "tomato-flight-response-v1",
       "artifact": "ml/artifacts/tomato-flight-response-v1.json",
       "sha256": "b1dd72b63130fccc6a334e3de286ae6774152291ce5fe00caf365d74cb10f593"
+    },
+    {
+      "id": "mizuna-microbial-relative-load-v2",
+      "artifact": "ml/artifacts/mizuna-microbial-relative-load-v2.json",
+      "sha256": "0f6f7452bd9671b6738c2a2d3c12b4cb7e9c2a7ddef75151aa6fcbb20b1f996f",
+      "supersedes": "mizuna-microbial-load-v1"
     }
   ],
   "dataVersion": "e5a3967ac7c471a2a81ed71e6ac179e8ca01809d199a8739afc9b498b18fdc7c",

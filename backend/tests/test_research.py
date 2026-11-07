@@ -48,12 +48,14 @@ def test_dataset_search_detail_preview_and_unknown(scientific_client):
 
 def test_model_registry_requires_actual_verified_artifacts(scientific_client):
     models = scientific_client.get("/api/models").json()["models"]
-    # Phase 6 added mizuna-microbial-load-v1 (NASA OSD-780 plate counts), the only
-    # new model the verified NASA data could support.
-    assert len(models) == 4
+    # Phase 6 added mizuna-microbial-load-v1 (NASA OSD-780 plate counts). Phase 7
+    # added mizuna-microbial-relative-load-v2, which supersedes v1's estimand; v1
+    # stays registered and on disk so the Phase 6 claim remains reproducible.
+    assert len(models) == 5
     assert {m["id"] for m in models} == {
         "mizuna-harvest-v1", "tomato-flight-response-v1",
         "lettuce-earth-growth-v1", "mizuna-microbial-load-v1",
+        "mizuna-microbial-relative-load-v2",
     }
     assert all(m["artifactExists"] for m in models)
     for model in models:
@@ -62,6 +64,17 @@ def test_model_registry_requires_actual_verified_artifacts(scientific_client):
         assert model["limitations"]
         assert model["artifactSha256"] and len(model["artifactSha256"]) == 64
         assert model["domain"]
+    v2 = next(m for m in models if m["id"] == "mizuna-microbial-relative-load-v2")
+    assert v2["supersedes"] == "mizuna-microbial-load-v1 (kept, not overwritten)"
+    # The re-scoped estimand is what makes held-out-study transfer positive; the
+    # artifact must carry both the old and the new held-out numbers.
+    assert v2["estimandChange"]["v1HeldOutR2"]["VEG04B"] < 0
+    assert all(v > 0 for v in v2["transferSummary"]["v2HeldOutR2"].values())
+    # Absolute-scale predictions must not be offered without a campaign reference.
+    assert v2["absoluteScaleProtocol"]["required"]
+    assert v2["evidenceStatus"] == "experimental"  # coverage missed nominal
+    assert v2["interval"]["empiricallyCalibrated"] is False
+
     regression = next(m for m in models if m["id"] == "mizuna-harvest-v1")
     assert regression["metrics"]["R2"] < 0  # Honest failed-to-beat-baseline evaluation.
     assert regression["predictionStatus"] == "baseline-only"
@@ -249,5 +262,5 @@ def test_scientific_summary_never_claims_validation(scientific_client):
     assert payload["missionCertified"] is False
     assert payload["validatedModels"] == []
     assert payload["platformMaturity"] == "research-and-education"
-    assert len(payload["models"]) == 4
+    assert len(payload["models"]) == 5
     assert payload["calibration"]["invariantsAllPassed"] is True
