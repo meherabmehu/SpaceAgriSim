@@ -195,6 +195,94 @@ def phase6_report(name):
     return None
 
 
+def phase7_report(name):
+    """Load a Phase 7 evidence artifact, if the analysis has been run.
+
+    Same lookup discipline as phase6_report: served from the committed analysis
+    output, never recomputed at request time.
+    """
+    candidates = [
+        ROOT / "docs" / "phase7" / name,
+        BUNDLE / "phase7" / name,
+    ]
+    for path in candidates:
+        if path.is_file():
+            return read_json(path)
+    return None
+
+
+def measurement_catalog():
+    """The Phase 7 measurement catalog: what NASA measured, and whether it trains.
+
+    Served with a checksum so a consumer can tell whether the catalog it read
+    matches the extraction outputs it was built from.
+    """
+    path = ROOT / "data" / "metadata" / "phase7_measurement_catalog.json"
+    eligibility_path = ROOT / "data" / "metadata" / "phase7_training_eligibility.json"
+    if not path.is_file():
+        return {"status": "not-run", "note": "Run scripts/build_measurement_catalog.py."}
+    payload = read_json(path)
+    body = path.read_bytes()
+    result = {
+        "status": "available",
+        "schemaVersion": 1,
+        "catalogSha256": hashlib.sha256(body).hexdigest(),
+        "summary": payload.get("summary"),
+        "statusVocabulary": payload.get("statusVocabulary"),
+        "eligibilityVocabulary": payload.get("eligibilityVocabulary"),
+        "sources": payload.get("sources"),
+        "targets": payload.get("targets"),
+        "outputChecksums": payload.get("outputs"),
+        "trayAreaDiscrepancy": payload.get("trayAreaDiscrepancy"),
+    }
+    if eligibility_path.is_file():
+        eligibility = read_json(eligibility_path)
+        result["trainingEligibility"] = {
+            "sha256": hashlib.sha256(eligibility_path.read_bytes()).hexdigest(),
+            "summary": eligibility.get("summary"),
+            "policy": eligibility.get("policy"),
+            "refusedTasks": eligibility.get("refusedTasks"),
+        }
+    return result
+
+
+def source_checksums():
+    """Checksums for every Phase 7 evidence input and model artifact."""
+    manifest_path = ROOT / "data" / "metadata" / "phase7_ntrs_checksums.json"
+    documents = []
+    if manifest_path.is_file():
+        for entry in read_json(manifest_path):
+            documents.append({
+                "ntrsId": entry.get("id"), "label": entry.get("label"),
+                "sha256": entry.get("sha256"), "bytes": entry.get("bytes"),
+                "pages": entry.get("pages"), "url": entry.get("url"),
+            })
+    registry = read_json(ARTIFACTS / "registry.json")
+    models = []
+    for item in registry.get("models", []):
+        path = ARTIFACTS / f"{item['id']}.json"
+        verified = False
+        if path.is_file():
+            verified = hashlib.sha256(path.read_bytes()).hexdigest() == item["sha256"]
+        models.append({"id": item["id"], "sha256": item["sha256"],
+                       "supersedes": item.get("supersedes"), "verified": verified})
+    report_path = ROOT / "data" / "metadata" / "ntrs_extraction_report.json"
+    return {
+        "schemaVersion": 1,
+        "algorithm": "SHA-256",
+        "sourceDocuments": documents,
+        "sourceDocumentsNote": (
+            "PDFs are not committed (large and publicly re-downloadable). These "
+            "digests are what make the extraction auditable against the original "
+            "documents."
+        ),
+        "extractionReport": (hashlib.sha256(report_path.read_bytes()).hexdigest()
+                             if report_path.is_file() else None),
+        "modelArtifacts": models,
+        "registryEnvironment": registry.get("environment"),
+    }
+
+
 def calibration():
     """Crop-baseline calibration evidence and simulation invariant results."""
     payload = phase6_report("simulation_calibration.json")
@@ -204,7 +292,7 @@ def calibration():
             "note": "Run scripts/calibrate_simulation.py to generate calibration evidence.",
         }
     invariants = payload.get("invariants", {})
-    return {
+    result = {
         "status": "available",
         "source": payload.get("source"),
         "sourceCaveat": payload.get("sourceCaveat"),
@@ -216,10 +304,34 @@ def calibration():
             "failureCount": len(invariants.get("failures", [])),
         },
     }
+    # Phase 7 calibration is additive: the Phase 6 block above keeps its exact
+    # shape so no existing consumer sees a moved field.
+    phase7 = phase7_report("scientific_calibration.json")
+    if phase7 is not None:
+        result["phase7"] = {
+            "checks": phase7.get("checks", []),
+            "appliedChanges": phase7.get("appliedChanges", []),
+            "declinedChanges": phase7.get("declinedChanges", []),
+            "massBalance": phase7.get("massBalance"),
+            "outputFingerprint": phase7.get("outputFingerprint"),
+            "applyPolicy": phase7.get("applyPolicy"),
+        }
+    return result
 
 
 def evidence_summary():
-    """One place that states what is measured, estimated, assumed or blocked."""
+    """One place that states what is measured, estimated, assumed or blocked.
+
+    Phase 7 restructured this. Phase 6 listed plant physiology targets as
+    "blocked" because OSDR - a genomics archive - had no crop-physiology tables.
+    The measurements exist in NASA Technical Memoranda, so the honest categories
+    are now four, not three:
+
+        measured and trainable      a model exists and transfers
+        measured, not trainable     real numbers, but too few or too confounded
+        assumed                     simulator parameters with no source
+        blocked                     searched for and genuinely absent
+    """
     statuses = {}
     for model_id in sorted(MODEL_IDS):
         try:
@@ -230,6 +342,7 @@ def evidence_summary():
         statuses[model_id] = model.get("evidenceStatus") or (
             "baseline-only" if model_id == "mizuna-harvest-v1" else "experimental")
     return {
+        "schemaVersion": 2,
         "modelEvidenceStatus": statuses,
         "measuredTargets": [
             "OSD-655 VEG-04A harvest mass per pillow (14 usable endpoints; target defined differently per arm)",
@@ -237,24 +350,52 @@ def evidence_summary():
             "OSD-745 VEG-01/03A elemental, phenolic, anthocyanin and ORAC assays",
             "EDEN ISS 2018 per-crop edible fresh mass in kg/m2 (OSD-895; transcribed from the published paper, not a NASA table)",
         ],
+        "measuredNotTrainable": [
+            {"target": "biomass time series", "source": "NASA TM-102784 Table 10 (1989)",
+             "reason": "7 ages, 1 tray per age; a curve can be fitted, nothing validated"},
+            {"target": "harvest dry-matter yield", "source": "NASA TM-102784 Tables 6-7",
+             "reason": "16 trays, one study, wheat grain, dry basis; no transfer population"},
+            {"target": "transpiration", "source": "NASA TM-102788 p.3/15; NASA TM-103494 p.12",
+             "reason": "stand-level integrated values; bounds only, no per-day series"},
+            {"target": "plant water uptake", "source": "NASA TM-102788; NASA TM-103494",
+             "reason": "two studies, both leak-confounded; bounds only"},
+            {"target": "water recovery", "source": "NASA TM-103494 p.12-13",
+             "reason": "one balance (0.924) from a chamber leaking 20-40 %/day; lower bound"},
+            {"target": "CO2 assimilation", "source": "NASA TM-102788 p.3/11/12",
+             "reason": "peak, mean and net fixation are printed; no replication"},
+            {"target": "photosynthetic response to irradiance", "source": "NASA TM-102788 p.13",
+             "reason": "described linear response with two anchor points; no tabulated curve"},
+            {"target": "PPFD and photoperiod response", "source": "NASA TM-102788 p.7; NASA TM-103494 p.9/18",
+             "reason": "2-3 operating points confounded with phase, sealing and copper deficiency"},
+            {"target": "measured stress outcomes", "source": "NASA TM-102784 p.40 footnotes",
+             "reason": "binary per-tray labels, no severity, no control arm"},
+        ],
         "assumedTargets": [
             "gravity, radiation, light-intensity, temperature and humidity response curve shapes",
             "crop growth duration, harvest index, dry-matter fraction and peak water demand",
-            "water recovery efficiency",
+            "water recovery efficiency (checked against a measured lower bound; retained)",
+            "carbon fraction of dry mass (within 20 % of a measured CO2 balance; retained)",
         ],
         "blockedTargets": [
-            "harvest dry mass",
-            "repeated per-day growth observations",
-            "plant water uptake and transpiration",
-            "water recovery fraction",
-            "CO2 assimilation and O2 evolution",
-            "measured PPFD and photoperiod per sample",
-            "radiation dose paired with plant response",
-            "continuous gravity response and plant stress severity labels",
+            "O2 evolution (never measured; deriving it from CO2 would be an assumption)",
+            "continuous gravity response (every recovered report is a 1 g ground chamber)",
+            "radiation dose paired with plant response (all 'radiation' hits are lamp spectra)",
+            "harvest dry mass for lettuce, tomato or radish (the recovered corpus is wheat only)",
         ],
+        "negativeFindingRecord": {
+            "searchEngine": "NASA Technical Reports Server",
+            "queries": 39,
+            "uniqueDocuments": 256,
+            "downloadablePdfs": 110,
+            "reportsExtracted": 3,
+            "note": ("Phase 6 concluded these targets were not measured anywhere; that was "
+                     "wrong as stated. They were published in NASA Technical Memoranda, "
+                     "which OSDR does not index. The corrected claim is narrower: they "
+                     "are measured, and still not trainable."),
+        },
         "note": (
-            "Measured, estimated, assumed and hypothetical quantities are kept in "
-            "separate fields and are never blended into a single number presented "
-            "as a prediction."
+            "Measured, measured-but-not-trainable, assumed and hypothetical quantities "
+            "are kept in separate fields and are never blended into a single number "
+            "presented as a prediction."
         ),
     }

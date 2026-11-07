@@ -249,10 +249,17 @@ def test_science_evidence_separates_measured_from_assumed(scientific_client):
     payload = scientific_client.get("/api/science/evidence").json()
     assert payload["measuredTargets"] and payload["assumedTargets"]
     assert payload["blockedTargets"]
-    # Every blocked target from the Phase 6 brief must be represented.
+    # Phase 7 split the old single "blocked" list in two. Targets recovered from
+    # NASA Technical Memoranda are measured but not trainable; only genuinely
+    # absent ones stay blocked. The categories must not overlap, because that is
+    # how a measured quantity would get quietly re-labelled as missing (or worse,
+    # a missing one presented as measured).
+    measured = " ".join(item["target"] for item in payload["measuredNotTrainable"]).lower()
     blocked = " ".join(payload["blockedTargets"]).lower()
-    for term in ("transpiration", "co2", "radiation", "gravity", "dry mass"):
-        assert term in blocked
+    for term in ("transpiration", "co2 assimilation", "water recovery"):
+        assert term in measured and term not in blocked
+    for term in ("radiation", "gravity", "o2 evolution"):
+        assert term in blocked and term not in measured
     assert payload["modelEvidenceStatus"]["mizuna-harvest-v1"] == "baseline-only"
 
 

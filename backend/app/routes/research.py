@@ -184,6 +184,130 @@ def predict_microbial(request: MicrobialPredictionRequest):
     }
 
 
+class MicrobialRelativePredictionRequest(BaseModel):
+    """Inputs for the Phase 7 re-scoped microbial model.
+
+    Note what is absent: the experiment/campaign identity. After within-campaign
+    standardisation that feature would be collinear with the offset the model
+    deliberately does not attempt to predict.
+    """
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    environment: Literal["flight", "ground"]
+    spectrum: Literal["red", "blue"]
+    sanitised: bool = Field(description="Sampled after sanitisation (clean) or before (unclean)")
+    freshWeightG: float = Field(ge=0, le=50, description="Mass of the tissue subsample weighed for the assay, in grams. NOT harvest biomass.")
+    harvestIndex: int = Field(ge=1, le=5, description="VEG-04B harvest number; 1 for VEG-04A")
+    campaignReference: Literal["VEG04A", "VEG04B"] | None = Field(
+        default=None,
+        description=("Optional. Supplying a campaign reference converts the relative "
+                     "prediction to an absolute log10 CFU/g using that campaign's own "
+                     "measured mean and sd. Without it the response stays relative."))
+
+
+@router.post("/predict/mizuna-microbial-relative-load-v2")
+def predict_microbial_relative(request: MicrobialRelativePredictionRequest):
+    """Phase 7 model: within-campaign relative microbial load.
+
+    Returns a value in within-campaign standard deviations. An absolute log10
+    CFU/g figure is returned ONLY when the caller supplies a campaign reference,
+    because the campaign offset is exactly the quantity Phase 7 showed does not
+    transfer between campaigns.
+    """
+    model = artifact("mizuna-microbial-relative-load-v2")
+    values = [
+        int(request.environment == "flight"),
+        int(request.spectrum == "blue"),
+        int(request.sanitised),
+        request.harvestIndex,
+        math.log10(max(request.freshWeightG, 0.01)),
+    ]
+    value, warnings = research.predict_values(model, values)
+    radius = model["interval"]["radius"]
+    calibrated = bool(model["interval"].get("empiricallyCalibrated", False))
+
+    payload = {
+        "modelId": model["id"],
+        "supersedes": model.get("supersedes"),
+        "prediction": value,
+        "unit": model["unit"],
+        "method": model["method"],
+        "sourceStudy": model["sourceStudy"],
+        "sourceUrl": model["sourceUrl"],
+        "evidenceStatus": model.get("evidenceStatus", "experimental"),
+        "estimandChange": model.get("estimandChange"),
+        "interval": {
+            "low": value - radius,
+            "high": value + radius,
+            "kind": model["interval"]["kind"],
+            "calibrated": calibrated,
+            "empiricalCoverage": model["interval"].get("empiricalCoverage"),
+            "nominalCoverage": model["interval"].get("nominalCoverage"),
+        },
+        "transfer": {
+            "perCampaignR2": (model.get("transferSummary") or {}).get("v2HeldOutR2"),
+            "v1PerCampaignR2": (model.get("transferSummary") or {}).get("v1HeldOutR2"),
+            "permutationTest": (model.get("transferSummary") or {}).get("permutationTest"),
+            "positiveOnEveryHeldOutCampaign": bool(
+                (model.get("evidenceBasis") or {}).get("positiveR2OnEveryHeldOutCampaign", False)),
+        },
+        "measuredEffect": model.get("measuredEffect"),
+        "absoluteScale": {
+            "supplied": request.campaignReference is not None,
+            "protocol": model.get("absoluteScaleProtocol", {}).get("required"),
+            "formula": model.get("absoluteScaleProtocol", {}).get("formula"),
+            "refused": model.get("absoluteScaleProtocol", {}).get("refused"),
+        },
+        "outOfDistribution": bool(warnings),
+        "warnings": warnings + model["limitations"],
+        "inputs": request.model_dump(),
+    }
+    if request.campaignReference is None:
+        payload["absoluteScale"]["note"] = (
+            "No campaign reference supplied, so no absolute log10 CFU/g figure is "
+            "offered. Add campaignReference to get one derived from that campaign's "
+            "own measured baseline."
+        )
+    else:
+        reference = (model.get("absoluteScaleProtocol", {})
+                     .get("campaignReference", {}).get(request.campaignReference, {}))
+        mean, sd = reference.get("mean"), reference.get("sd")
+        if mean is not None and sd is not None:
+            absolute = mean + value * sd
+            payload["absoluteScale"].update({
+                "campaign": request.campaignReference,
+                "campaignMean": mean,
+                "campaignSd": sd,
+                "log10CfuPerG": absolute,
+                "log10CfuPerGRange": [mean + (value - radius) * sd,
+                                      mean + (value + radius) * sd],
+                "caveat": ("Derived from a reference campaign, not predicted for a new "
+                           "one. The interval inherits the model's uncalibrated 90 % "
+                           "residual radius."),
+            })
+        else:
+            payload["absoluteScale"]["note"] = "Campaign reference not present in the artifact."
+    return payload
+
+
+# ---------------------------------------------------------------------------
+# Phase 7: measurement recovery surface
+# ---------------------------------------------------------------------------
+@router.get("/science/measurements")
+def science_measurements():
+    """What NASA actually measured, with status and training eligibility.
+
+    Targets rated `insufficient` are listed as prominently as the measured ones:
+    the point of the catalog is to make an absence as visible as a presence.
+    """
+    return research.measurement_catalog()
+
+
+@router.get("/science/checksums")
+def science_checksums():
+    """SHA-256 for every Phase 7 source document and model artifact."""
+    return research.source_checksums()
+
+
 # ---------------------------------------------------------------------------
 # Phase 6: scientific evidence surface
 # ---------------------------------------------------------------------------
