@@ -117,8 +117,9 @@ def test_checksums_endpoint_verifies_every_model_artifact(client_scientific):
     assert all(len(d["sha256"]) == 64 for d in documents)
     assert all(d["ntrsId"] and d["url"].startswith("https://ntrs.nasa.gov") for d in documents)
     models = payload["modelArtifacts"]
-    # Six artifacts since Phase 8 added the versioned lettuce-earth-growth-v2.
-    assert len(models) == 6
+    # Eight artifacts: Phase 8 added lettuce-earth-growth-v2, Phase 9 added the two
+    # OSD-46 radiation classifiers.
+    assert len(models) == 8
     assert all(m["verified"] for m in models), [m for m in models if not m["verified"]]
 
 

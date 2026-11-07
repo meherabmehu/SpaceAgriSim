@@ -9,7 +9,7 @@ ROOT=Path(__file__).resolve().parents[1]
 def package():
     destination=ROOT/'backend/scientific_data'
     sources=[]
-    for name in ['dataset_manifest.json','download_checksums.json','quality_report.json','external_lettuce.json','phase2_nasa_candidates.json']:
+    for name in ['dataset_manifest.json','download_checksums.json','quality_report.json','external_lettuce.json','phase2_nasa_candidates.json','phase9_nasa_datasets.json']:
         sources.append(ROOT/'data/metadata'/name)
     sources.extend((ROOT/'data/processed').glob('*.csv'))
     sources.extend((ROOT/'data/raw/OSD-745').glob('*TRANSFORMED.csv'))

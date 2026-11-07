@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-07T16:00:48.150888+00:00",
+  "accessPath": "osdr.nasa.gov GEODE API returns HTTP 403 for every study and the GeneLab visualisation site exposes no public JSON API; these files are the same releases served from the NASA OSDR Open Data S3 bucket.",
+  "bucket": "arn:aws:s3:::nasa-osdr (us-west-2), public, no credentials",
+  "license": "NASA OSDR: no restrictions on use; attribution retained",
+  "files": [
+    {
+      "study": "OSD-46",
+      "name": "GLDS-46_array_normalized_expression_probeset_GLmicroarray.csv",
+      "key": "OSD-46/version-6/array/GLDS-46_array_normalized_expression_probeset_GLmicroarray.csv",
+      "bytes": 23794742,
+      "sha256": "f15c4179dbbebdfd39c53ffb906f6251ed1fc3fa3c926efc3c71c4736eefda27",
+      "role": "log2-normalised probeset expression, 22810 probesets x 44 samples",
+      "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-46/version-6/array/GLDS-46_array_normalized_expression_probeset_GLmicroarray.csv",
+      "committed": false
+    },
+    {
+      "study": "OSD-46",
+      "name": "GLDS-46_array_SampleTable_GLmicroarray.csv",
+      "key": "OSD-46/version-6/array/GLDS-46_array_SampleTable_GLmicroarray.csv",
+      "bytes": 4139,
+      "sha256": "0ae05ae0938670bce8e923889093658eac4f9e26537197b9a54d4ad96061532e",
+      "role": "sample to experimental-group assignment, 44 rows",
+      "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-46/version-6/array/GLDS-46_array_SampleTable_GLmicroarray.csv",
+      "committed": true
+    },
+    {
+      "study": "OSD-782",
+      "name": "GLDS-679_rna_seq_RSEM_Unnormalized_Counts_GLbulkRNAseq.csv",
+      "key": "OSD-782/version-2/rna_seq/GLDS-679_rna_seq_RSEM_Unnormalized_Counts_GLbulkRNAseq.csv",
+      "bytes": 4527540,
+      "sha256": "dc98d786d7970f7258aa5474325ff4e9e19ff13b7a6c17e95282a97d924f2f9d",
+      "role": "RSEM unnormalised gene counts, 32833 genes x 36 samples",
+      "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-782/version-2/rna_seq/GLDS-679_rna_seq_RSEM_Unnormalized_Counts_GLbulkRNAseq.csv",
+      "committed": true
+    },
+    {
+      "study": "OSD-782",
+      "name": "GLDS-679_rna_seq_VST_Counts_GLbulkRNAseq.csv",
+      "key": "OSD-782/version-2/rna_seq/GLDS-679_rna_seq_VST_Counts_GLbulkRNAseq.csv",
+      "bytes": 14679817,
+      "sha256": "6f1d41e0d2debeee6abb7cdce04064ee8d8afe41cb8f705c6189b5aff59caee4",
+      "role": "GeneLab variance-stabilising-transformed counts, 23667 genes x 36 samples",
+      "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-782/version-2/rna_seq/GLDS-679_rna_seq_VST_Counts_GLbulkRNAseq.csv",
+      "committed": false
+    },
+    {
+      "study": "OSD-782",
+      "name": "OSD-782_metadata_OSD-782-ISA.zip",
+      "key": "OSD-782/version-2/metadata/OSD-782_metadata_OSD-782-ISA.zip",
+      "bytes": 166136,
+      "sha256": "9564320f24498ddcec0d47895bf697d04113fcdf2277d592663c8b65c83e595c",
+      "role": "ISA-Tab study metadata (sample sheet, assay, investigation)",
+      "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-782/version-2/metadata/OSD-782_metadata_OSD-782-ISA.zip",
+      "committed": true
+    },
+    {
+      "study": "OSD-411",
+      "name": "GLDS-411_rna_seq_RSEM_Unnormalized_Counts_GLbulkRNAseq.csv",
+      "key": "OSD-411/version-4/rna_seq/GLDS-411_rna_seq_RSEM_Unnormalized_Counts_GLbulkRNAseq.csv",
+      "bytes": 8936306,
+      "sha256": "3a0d6c17473db8df6f84afe8af5648946e2ed74d686a9373ca43c71ca4cd954f",
+      "role": "RSEM unnormalised gene counts, 32833 genes x 64 samples",
+      "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-411/version-4/rna_seq/GLDS-411_rna_seq_RSEM_Unnormalized_Counts_GLbulkRNAseq.csv",
+      "committed": false
+    },
+    {
+      "study": "OSD-411",
+      "name": "GLDS-411_metadata_GLDS-411-ISA.zip",
+      "key": "OSD-411/version-2/metadata/GLDS-411_metadata_GLDS-411-ISA.zip",
+      "bytes": 123676,
+      "sha256": "ab6687e01802dfabffa8e891c982846e33bd7a239fe26b51a79c2b20c748870c",
+      "role": "ISA-Tab study metadata (sample sheet, assay, investigation)",
+      "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-411/version-2/metadata/GLDS-411_metadata_GLDS-411-ISA.zip",
+      "committed": true
+    }
+  ],
+  "annotationTables": {
+    "osd46": {
+      "path": "data/processed/osd46_radiation_samples.csv",
+      "samples": 44
+    },
+    "osd782": {
+      "path": "data/processed/osd782_radiation_samples.csv",
+      "samples": 36
+    },
+    "osd411": {
+      "path": "data/processed/osd411_gravity_samples.csv",
+      "samples": 64
+    }
+  },
+  "excluded": {
+    "OSD-480": "3208 objects, 6.2 TB, raw FASTQ only - no processed count matrix published",
+    "OSD-772": "442 objects raw amplicon FASTQ; no taxonomy or OTU table published",
+    "OSD-412": "87 objects raw amplicon FASTQ; no processed abundance table",
+    "OSD-413": "25 objects raw amplicon FASTQ; no processed abundance table",
+    "OSD-414": "21 objects raw amplicon FASTQ; no processed abundance table"
+  }
+}

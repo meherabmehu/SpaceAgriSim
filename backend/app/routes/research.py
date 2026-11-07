@@ -97,6 +97,141 @@ def predict_lettuce_v2(request: LettucePredictionRequest):
     }
 
 
+class TranscriptomicPredictionRequest(BaseModel):
+    """Expression profile for a transcriptomic classifier.
+
+    `expression` must contain exactly the genes listed in the model artifact's
+    `features`. Missing genes are rejected rather than zero-filled: a zero is a
+    plausible measurement value, so silently substituting one would corrupt the
+    prediction while looking like it worked.
+    """
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    expression: dict[str, float] = Field(
+        min_length=1, max_length=400,
+        description="Gene model ID -> expression value, in the units named by the "
+                    "artifact's expressionUnits field.")
+
+
+TRANSCRIPTOMIC_MODELS = {
+    "radiation-quality-osd46-v1": {
+        "labels": {"control": "non-irradiated", "gamma": "100 Gy Cs-137 gamma",
+                   "hze": "30 Gy Fe-56 ion (HZE)"},
+        "caveat": ("Classifies the radiation condition applied before sampling in a "
+                   "ground-based Arabidopsis study. It does not measure absorbed dose, "
+                   "does not predict damage severity, and does not predict yield, "
+                   "biomass or survival."),
+    },
+    "radiation-exposure-osd46-v1": {
+        "labels": {"control": "non-irradiated", "irradiated": "irradiated"},
+        "caveat": ("Separates irradiated from non-irradiated Arabidopsis seedlings. It "
+                   "does not distinguish radiation quality or dose, and the control "
+                   "class is not batch-balanced on the full array set - prefer the "
+                   "batch-controlled evaluation reported in supplementaryEvaluation."),
+    },
+}
+
+
+def _transcriptomic_prediction(model_id: str, request: TranscriptomicPredictionRequest):
+    model = artifact(model_id)
+    expected = model["features"]
+    supplied = request.expression
+    missing = [gene for gene in expected if gene not in supplied]
+    unexpected = [gene for gene in supplied if gene not in model["features"]]
+    if missing or unexpected:
+        raise HTTPException(422, detail={
+            "error": "expression-feature-mismatch",
+            "missingGenes": missing[:20],
+            "missingGeneCount": len(missing),
+            "unexpectedGenes": unexpected[:20],
+            "unexpectedGeneCount": len(unexpected),
+            "requiredGeneCount": len(expected),
+            "note": ("All genes in the artifact feature list must be supplied and no "
+                     "others. Retrieve the full list from GET /api/models and use "
+                     "GET /api/models/{id}/reference-profiles for a labelled synthetic "
+                     "starting point."),
+        })
+    values = [supplied[gene] for gene in expected]
+    probabilities = research.predict_probabilities(model, values)
+    prediction = max(probabilities, key=probabilities.get)
+    warnings = research._domain_warnings(model, values)
+    spec = TRANSCRIPTOMIC_MODELS[model_id]
+    metrics = model.get("metrics", {})
+    return {
+        "modelId": model["id"],
+        "prediction": prediction,
+        "predictionLabel": spec["labels"].get(prediction, prediction),
+        "probabilities": {label: round(p, 6) for label, p in
+                          sorted(probabilities.items(), key=lambda kv: -kv[1])},
+        "classLabels": model["classLabels"],
+        "classDescription": model.get("classDescription", {}),
+        "unit": "class label",
+        "sourceStudy": model["sourceStudy"],
+        "sourceUrl": model["sourceUrl"],
+        "evidenceStatus": model.get("evidenceStatus"),
+        "validation": {
+            "scheme": model.get("validation"),
+            "accuracy": metrics.get("accuracy"),
+            "balancedAccuracy": metrics.get("balancedAccuracy"),
+            "macroF1": metrics.get("macroF1"),
+            "baselineAccuracy": (model.get("baselineMetrics") or {}).get("accuracy"),
+            "permutationPValue": (model.get("permutationTest") or {}).get("pValue"),
+            "samples": model.get("samples"),
+            "biologicalGroups": model.get("groups"),
+        },
+        "batchConfound": (model.get("batchConfound") or {}).get("cramersV"),
+        "interval": {"kind": "none", "calibrated": False,
+                     "note": ("A softmax probability from an uncalibrated linear model "
+                              "is not a confidence interval. It is reported as a "
+                              "relative score between the trained classes only.")},
+        "outOfDomain": bool(warnings),
+        "warnings": warnings + [spec["caveat"]] + model.get("limitations", []),
+        "inputsUsed": len(values),
+    }
+
+
+@router.post("/predict/radiation-quality-osd46-v1")
+def predict_radiation_quality(request: TranscriptomicPredictionRequest):
+    """Radiation quality (control / gamma / HZE) from Arabidopsis expression, OSD-46."""
+    return _transcriptomic_prediction("radiation-quality-osd46-v1", request)
+
+
+@router.post("/predict/radiation-exposure-osd46-v1")
+def predict_radiation_exposure(request: TranscriptomicPredictionRequest):
+    """Irradiated versus non-irradiated from Arabidopsis expression, OSD-46."""
+    return _transcriptomic_prediction("radiation-exposure-osd46-v1", request)
+
+
+@router.get("/models/{model_id}/reference-profiles")
+def reference_profiles(model_id: str):
+    """Per-class mean expression profiles for a transcriptomic model.
+
+    These are **class centroids computed from the NASA training data**, not
+    individual measured specimens, and any prediction made from one is a synthetic
+    demonstration. That is stated in the payload as well as here, because a demo
+    that looks like a real specimen would be exactly the kind of quiet
+    overstatement Phase 8 spent its time removing.
+    """
+    model = artifact(model_id)
+    profiles = model.get("referenceProfiles")
+    if not profiles:
+        raise HTTPException(404, "No reference profiles are stored for this model")
+    spec = TRANSCRIPTOMIC_MODELS.get(model_id, {})
+    return {
+        "modelId": model["id"],
+        "synthetic": True,
+        "label": "synthetic input - class centroid of the training data, not a measured sample",
+        "note": model.get("referenceProfilesNote"),
+        "expressionUnits": model.get("expressionUnits"),
+        "requiredGeneCount": len(model["features"]),
+        "features": model["features"],
+        "classLabels": model["classLabels"],
+        "classDescription": spec.get("labels", {}),
+        "usage": ("profiles[class][i] is the value for features[i]. Build an "
+                  "expression dict by zipping features with a profile."),
+        "profiles": profiles,
+    }
+
+
 def dataset(study_id):
     found = next((d for d in research.manifest()["datasets"] if d["id"] == study_id.upper()), None)
     if found is None:

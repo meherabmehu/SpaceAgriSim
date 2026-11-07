@@ -1,0 +1,37 @@
+sample,organism,ecotype,genotype,organismPart,ionizingRadiation,absorbedDoseGy,hoursAfterTreatment
+GSM7623649,Arabidopsis thaliana,Col-0,Wild Type,rosette,non-irradiated,0,1
+GSM7623650,Arabidopsis thaliana,Col-0,Wild Type,rosette,non-irradiated,0,1
+GSM7623651,Arabidopsis thaliana,Col-0,Wild Type,rosette,non-irradiated,0,1
+GSM7623652,Arabidopsis thaliana,Col-0,Wild Type,rosette,cesium-137 gamma radiation,10,1
+GSM7623653,Arabidopsis thaliana,Col-0,Wild Type,rosette,cesium-137 gamma radiation,10,1
+GSM7623654,Arabidopsis thaliana,Col-0,Wild Type,rosette,cesium-137 gamma radiation,10,1
+GSM7623655,Arabidopsis thaliana,Col-0,Wild Type,rosette,cesium-137 gamma radiation,100,1
+GSM7623656,Arabidopsis thaliana,Col-0,Wild Type,rosette,cesium-137 gamma radiation,100,1
+GSM7623657,Arabidopsis thaliana,Col-0,Wild Type,rosette,cesium-137 gamma radiation,100,1
+GSM7623658,Arabidopsis thaliana,Col-0,Wild Type,rosette,non-irradiated,0,3
+GSM7623659,Arabidopsis thaliana,Col-0,Wild Type,rosette,non-irradiated,0,3
+GSM7623660,Arabidopsis thaliana,Col-0,Wild Type,rosette,non-irradiated,0,3
+GSM7623661,Arabidopsis thaliana,Col-0,Wild Type,rosette,cesium-137 gamma radiation,10,3
+GSM7623662,Arabidopsis thaliana,Col-0,Wild Type,rosette,cesium-137 gamma radiation,10,3
+GSM7623663,Arabidopsis thaliana,Col-0,Wild Type,rosette,cesium-137 gamma radiation,10,3
+GSM7623664,Arabidopsis thaliana,Col-0,Wild Type,rosette,cesium-137 gamma radiation,100,3
+GSM7623665,Arabidopsis thaliana,Col-0,Wild Type,rosette,cesium-137 gamma radiation,100,3
+GSM7623666,Arabidopsis thaliana,Col-0,Wild Type,rosette,cesium-137 gamma radiation,100,3
+GSM7623667,Arabidopsis thaliana,Col-0,Wild Type,rosette,non-irradiated,0,24
+GSM7623668,Arabidopsis thaliana,Col-0,Wild Type,rosette,non-irradiated,0,24
+GSM7623669,Arabidopsis thaliana,Col-0,Wild Type,rosette,non-irradiated,0,24
+GSM7623670,Arabidopsis thaliana,Col-0,Wild Type,rosette,cesium-137 gamma radiation,10,24
+GSM7623671,Arabidopsis thaliana,Col-0,Wild Type,rosette,cesium-137 gamma radiation,10,24
+GSM7623672,Arabidopsis thaliana,Col-0,Wild Type,rosette,cesium-137 gamma radiation,10,24
+GSM7623673,Arabidopsis thaliana,Col-0,Wild Type,rosette,cesium-137 gamma radiation,100,24
+GSM7623674,Arabidopsis thaliana,Col-0,Wild Type,rosette,cesium-137 gamma radiation,100,24
+GSM7623675,Arabidopsis thaliana,Col-0,Wild Type,rosette,cesium-137 gamma radiation,100,24
+GSM7623676,Arabidopsis thaliana,Col-0,Wild Type,rosette,non-irradiated,0,72
+GSM7623677,Arabidopsis thaliana,Col-0,Wild Type,rosette,non-irradiated,0,72
+GSM7623678,Arabidopsis thaliana,Col-0,Wild Type,rosette,non-irradiated,0,72
+GSM7623679,Arabidopsis thaliana,Col-0,Wild Type,rosette,cesium-137 gamma radiation,10,72
+GSM7623680,Arabidopsis thaliana,Col-0,Wild Type,rosette,cesium-137 gamma radiation,10,72
+GSM7623681,Arabidopsis thaliana,Col-0,Wild Type,rosette,cesium-137 gamma radiation,10,72
+GSM7623682,Arabidopsis thaliana,Col-0,Wild Type,rosette,cesium-137 gamma radiation,100,72
+GSM7623683,Arabidopsis thaliana,Col-0,Wild Type,rosette,cesium-137 gamma radiation,100,72
+GSM7623684,Arabidopsis thaliana,Col-0,Wild Type,rosette,cesium-137 gamma radiation,100,72
