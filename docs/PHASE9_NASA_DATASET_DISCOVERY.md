@@ -73,14 +73,22 @@ Result (`data/metadata/phase9_candidate_screen.json`): of 231 usable studies,
 Filename screening alone reported **zero** crop-microbiome candidates, because no
 object key contains the word "lettuce". Reading the ISA study descriptions — which
 the brief requires and which is why they are read — showed that **OSD-267 and
-OSD-269 are ISS-grown red romaine lettuce microbiome studies**. That is a real
-correction to the earlier eligibility verdict, and it is recorded as such rather
-than quietly dropped.
+OSD-269 are ISS-grown red romaine lettuce microbiome studies**.
+
+**What this does and does not correct.** OSD-267 and OSD-269 were already in the
+Phase 8 dataset catalogue, with the note *"Metadata/omics only in this acquisition;
+not eligible for direct crop-yield training"* — which is correct and which this
+phase confirms. The earlier statement that no crop-microbiome **model** was
+buildable was made about OSD-772 and OSD-412/413/414, which publish only raw
+amplicon FASTQ, and that remains true. What the sweep adds is the missing middle:
+OSD-267/269 *do* publish processed taxonomy tables, so the data is richer than the
+raw-only studies suggested, and a compositional analysis is possible even though a
+classifier is not. The correction is therefore to the data inventory, not to the
+modelling verdict.
 
 ## What this changed
 
-The Phase 8-era conclusion "no crop-microbiome data exists" was **wrong on the
-facts**. The corrected statement, supported by
+The refined statement, supported by
 `ml/evaluation/phase9_veg_microbiome_feasibility.json`, is:
 
 > Crop-microbiome data with processed taxonomy tables does exist (OSD-267,

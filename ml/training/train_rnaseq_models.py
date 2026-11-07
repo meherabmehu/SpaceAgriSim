@@ -1,295 +1,271 @@
-"""Phase 9 Models B and C: RNA-seq classifiers for radiation dose and gravity.
+"""Phase 9 Models B/C/D: RNA-seq candidates from OSD-782 and OSD-411.
 
-Two independent NASA OSDR RNA-seq studies, each evaluated with the same harness
-used for OSD-46 so the numbers are comparable across models.
+This script trains the candidates the brief asks for and lets a pre-specified,
+leakage-free evaluation decide whether any of them may be shipped. Three of the
+four results here are negative. They are reported as negatives and no artifact is
+written for them, because a model that cannot beat a majority baseline on
+held-out biological units has no predictive claim to make.
 
-Model B - OSD-782, radiation dose
-    Wild-type Arabidopsis rosette, Cs-137 gamma at three *absorbed dose* levels
-    (0 / 10 / 100 Gy) across four collection times. Unlike OSD-46, where the two
-    irradiated arms differ in both quality and dose, here the radiation quality is
-    held constant and only the dose changes. That makes it a cleaner test of
-    "is dose level recoverable from expression", and it is the reason the two
-    studies support different claims.
+B  radiation dose from OSD-782        3 classes: 0 / 10 / 100 Gy
+C  gravity reorientation from OSD-411 2 classes: Reoriented / Vertical control
+D  cross-study transfer                OSD-46 (microarray) -> OSD-782 (RNA-seq)
 
-Model C - OSD-411, gravity reorientation
-    Arabidopsis (Col-0) wild type and the starch-less pgm-1 mutant, four tissues,
-    either reoriented by 90 degrees or held vertical. pgm-1 cannot sediment
-    amyloplasts and is therefore the classical genetic control for gravity sensing,
-    so this design asks whether a reorientation signature exists and whether it
-    depends on the genotype known to be required for perception.
+Unit definitions, taken from the ISA sample sheets rather than assumed
+---------------------------------------------------------------------
+OSD-782  36 rosette samples, Col-0, 3 doses x 4 collection times x 3 biological
+         replicates. The independent unit is the (dose, time) cell: 12 groups.
+OSD-411  64 samples described by the sample names 1-1 ... 16-4. The prefix is a
+         **seedling** and the suffix is one of four tissues, so four rows come from
+         one seedling. Treating those 64 rows as 64 independent observations is the
+         classic pseudo-replication error. The independent unit is the seedling:
+         16 groups of 4 tissues.
 
-    A 90-degree reorientation on the ground is NOT partial gravity. The label is
-    "was the seedling reoriented", and no Moon/Mars claim is made anywhere.
+Quantification
+--------------
+OSD-782 uses GeneLab's variance-stabilising-transformed counts (the provider's own
+processed product). OSD-411 publishes only RSEM raw counts, so it is converted with
+log2(CPM + 1), computed within the study and without reference to any label.
 
 Run: python ml/training/train_rnaseq_models.py
 """
 from __future__ import annotations
 
-import hashlib
-import json
 import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import sklearn
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(ROOT / "ml" / "training"))
-from nasa_pipeline import save_json, stamp  # noqa: E402
+from nasa_pipeline import save_json  # noqa: E402
 import phase9_harness as H  # noqa: E402
 
-PROCESSED = ROOT / "data" / "processed"
 RAW = ROOT / "data" / "raw"
+PROCESSED = ROOT / "data" / "processed"
 EVAL = ROOT / "ml" / "evaluation"
-ARTIFACTS = ROOT / "ml" / "artifacts"
 
-
-def load_counts(path: Path) -> pd.DataFrame:
-    """Read an OSDR RSEM unnormalised count matrix as genes x samples."""
-    frame = pd.read_csv(path, index_col=0)
-    frame.index.name = "gene"
-    frame = frame[~frame.index.duplicated(keep="first")]
-    return frame
-
-
-def cpm_log2(counts: pd.DataFrame) -> pd.DataFrame:
-    """Library-size normalisation then log2.
-
-    CPM is used rather than raw counts because the samples have visibly different
-    sequencing depth (the study's own QC reports a wide range). log2(CPM+1) then
-    stabilises the variance enough for a linear model. Both steps are unsupervised
-    and use no labels, so computing them once up front cannot leak test information
-    the way a supervised transform would.
-    """
-    library = counts.sum(axis=0)
-    if (library <= 0).any():
-        raise SystemExit("Empty library detected")
-    cpm = counts.divide(library, axis=1) * 1e6
-    return np.log2(cpm + 1.0)
-
-
-# Samples with a library below this are excluded. Applied before any modelling and
-# reported, so the exclusion cannot be confused with silent data loss.
 MIN_LIBRARY_READS = 5_000_000
+# Populated by load_osd411 so the evidence file can state exactly what was removed.
+LOW_LIBRARY_EXCLUSIONS: list[dict] = []
 
 
-def qc_report(counts: pd.DataFrame, annotation: pd.DataFrame) -> tuple[list[str], dict]:
-    """Library-depth QC. Returns (kept samples, report)."""
-    library = counts.sum(axis=0)
-    low = [str(s) for s in library.index[library < MIN_LIBRARY_READS]]
-    return ([c for c in counts.columns if c not in low], {
-        "thresholdReads": MIN_LIBRARY_READS,
-        "excludedSamples": low,
-        "excludedDetail": {
-            str(s): {
-                "libraryReads": int(library[s]),
-                "genotype": str(annotation.loc[s, "genotype"]) if "genotype" in annotation else "",
-                "condition": str(annotation.loc[s].to_dict()),
-            } for s in low
-        },
-        "retainedSamples": int(len(counts.columns) - len(low)),
-    })
-
-
-def build_osd782() -> dict:
-    # GeneLab's own variance-stabilising transform is used rather than a bespoke
-    # CPM computation: it is the study's published processed product (DESeq2 VST),
-    # so the input to the model is reproducible from the archive without re-deriving
-    # a normalisation.
-    counts = load_counts(RAW / "OSD-782" / "GLDS-679_rna_seq_VST_Counts_GLbulkRNAseq.csv")
+def load_osd782() -> tuple[np.ndarray, list[str], pd.DataFrame]:
+    """GeneLab VST counts, 36 rosettes x genes."""
+    frame = pd.read_csv(
+        RAW / "OSD-782" / "GLDS-679_rna_seq_VST_Counts_GLbulkRNAseq.csv")
+    samples = [c for c in frame.columns if c.startswith("GSM")]
+    matrix = frame.set_index(frame.columns[0])[samples].astype(float)
     annotation = pd.read_csv(PROCESSED / "osd782_radiation_samples.csv", dtype=str)
-    annotation = annotation.set_index("sample").loc[list(counts.columns)]
-    raw_counts = load_counts(RAW / "OSD-782" / "GLDS-679_rna_seq_RSEM_Unnormalized_Counts_GLbulkRNAseq.csv")
-    keep, qc = qc_report(raw_counts, annotation)
-    expressed = counts[keep]
-    expressed = expressed[expressed.var(axis=1) > 0]
-    y = np.array([f"{int(float(d))} Gy" for d in annotation["absorbedDoseGy"]])
-    groups = (annotation["absorbedDoseGy"].astype(str) + "|"
-              + annotation["hoursAfterTreatment"].astype(str)).to_numpy()
-    return {
-        "x": expressed.to_numpy().T, "y": y, "groups": groups,
-        "genes": list(expressed.index), "samples": list(expressed.columns),
-        "annotation": annotation.loc[expressed.columns], "classes": ["0 Gy", "10 Gy", "100 Gy"],
-        "normalisation": "GeneLab DESeq2 variance-stabilising transform (published processed product)",
-        "qc": qc,
-    }
+    annotation = annotation.set_index("sample").loc[samples].reset_index()
+    return matrix.to_numpy(dtype=float).T, list(matrix.index), annotation
 
 
-def build_osd411() -> dict:
-    counts = load_counts(RAW / "OSD-411" / "GLDS-411_rna_seq_RSEM_Unnormalized_Counts_GLbulkRNAseq.csv")
+def load_osd411() -> tuple[np.ndarray, list[str], pd.DataFrame]:
+    """RSEM raw counts -> log2(CPM + 1), 64 samples x genes."""
+    frame = pd.read_csv(
+        RAW / "OSD-411" / "GLDS-411_rna_seq_RSEM_Unnormalized_Counts_GLbulkRNAseq.csv")
+    samples = [c for c in frame.columns if c.startswith("GSM")] or \
+              [c for c in frame.columns[1:]]
+    counts = frame.set_index(frame.columns[0])[samples].astype(float)
+    library = counts.sum(axis=0)
+    # One library in this study is ~130x shallower than the rest (sample 14-4,
+    # 258k reads against a median near 33M). Dropping it is a recorded QC decision,
+    # not a silent filter: the exclusion is written to the evidence file.
+    keep = library[library >= MIN_LIBRARY_READS].index.tolist()
+    LOW_LIBRARY_EXCLUSIONS.extend(
+        {"sample": name, "reads": float(library[name])}
+        for name in library[library < MIN_LIBRARY_READS].index)
+    counts = counts[keep]
+    library = library[keep]
+    cpm = counts.div(library, axis=1) * 1_000_000
+    expression = np.log2(cpm + 1)
     annotation = pd.read_csv(PROCESSED / "osd411_gravity_samples.csv", dtype=str)
-    annotation = annotation.set_index("sample").loc[list(counts.columns)]
-    keep, qc = qc_report(counts, annotation)
-    # One sample (14-4, WT cotyledon reoriented) has 0.26 M reads against a ~33 M
-    # median. CPM cannot rescue a library that thin, so it is excluded and reported
-    # rather than left in to distort the variance structure.
-    expressed = cpm_log2(counts[keep])
-    expressed = expressed[(expressed > 0).mean(axis=1) >= 0.25]
-    annotation = annotation.loc[keep]
-    y = np.array([("reoriented" if t == "Reoriented" else "vertical")
-                  for t in annotation["treatment"]])
-    # Biological group: genotype x tissue x treatment. The four replicate numbers
-    # (e.g. 1-1..1-4) are the replicates; pooling tissues or genotypes into a group
-    # would let the same plant's tissue types straddle the split.
-    groups = (annotation["genotype"].fillna("NA").astype(str) + "|"
-              + annotation["organismPart"].fillna("NA").astype(str) + "|"
-              + annotation["treatment"].fillna("NA").astype(str)).to_numpy()
+    annotation = annotation.set_index("sample").loc[keep].reset_index()
+    return expression.to_numpy(dtype=float).T, list(expression.index), annotation
+
+
+def report_task(name: str, model_id: str, matrix, labels, groups,
+                description: str) -> dict:
+    print(f"\n== {model_id}: {description}")
+    print(f"   {matrix.shape[0]} samples x {matrix.shape[1]} genes, "
+          f"{len(np.unique(groups))} groups, classes "
+          f"{dict(pd.Series(labels).value_counts())}")
+    learners = H.evaluate_all_learners(matrix, labels, groups)
+    for learner, score in learners.items():
+        print(f"   {learner:26s} acc {score['accuracy']:.3f}  "
+              f"bal {score['balancedAccuracy']:.3f}  f1 {score['macroF1']:.3f}")
+
+    baseline = learners["baseline_majority"]["balancedAccuracy"]
+    best_name = max((n for n in learners if n != "baseline_majority"),
+                    key=lambda n: learners[n]["balancedAccuracy"])
+    best = learners[best_name]
+    permutation = H.permutation_test(
+        matrix, labels, groups, H.classification_learners()[best_name],
+        best["balancedAccuracy"], n_permutations=100)
+    verdict = ("insufficient-evidence"
+               if best["balancedAccuracy"] <= baseline + 0.05
+               or permutation["pValue"] > 0.05
+               else "candidate")
+    print(f"   best={best_name} bal={best['balancedAccuracy']:.3f} vs baseline "
+          f"{baseline:.3f}, p={permutation['pValue']:.4f} -> {verdict}")
     return {
-        "x": expressed.to_numpy().T, "y": y, "groups": groups,
-        "genes": list(expressed.index), "samples": list(expressed.columns),
-        "annotation": annotation, "classes": ["reoriented", "vertical"],
-        "normalisation": "log2(CPM + 1), computed unsupervised before splitting",
-        "qc": qc,
-    }
-
-
-def train(name: str, data: dict, model_id: str, study: str, study_url: str,
-          task: str, limitations: list[str], recommended_use: str,
-          n_splits: int) -> dict:
-    x, y, groups, genes = data["x"], data["y"], data["groups"], data["genes"]
-    print(f"\n=== {model_id} ({study}): {x.shape[0]} samples x {x.shape[1]} genes, "
-          f"{len(np.unique(groups))} groups")
-    print("   labels:", dict(zip(*[a.tolist() for a in np.unique(y, return_counts=True)])))
-
-    learners = H.classification_learners()
-    results = H.summarize_learners(x, y, groups, genes, n_splits=n_splits)
-    for lname, report in results.items():
-        print(f"   {lname:20s} acc {report['accuracy']:.3f}  "
-              f"bal {report['balancedAccuracy']:.3f}  macroF1 {report['macroF1']:.3f}")
-
-    baseline = results["baseline_majority"]["accuracy"]
-    ranking = sorted(((n, r) for n, r in results.items() if n != "baseline_majority"),
-                     key=lambda kv: kv[1]["balancedAccuracy"], reverse=True)
-    best_name, best = ranking[0]
-    permutation = H.permutation_test(x, y, groups, learners[best_name],
-                                     observed=best["accuracy"], n_permutations=200,
-                                     n_splits=n_splits)
-    print(f"   best: {best_name} bal {best['balancedAccuracy']:.3f}; "
-          f"permutation p = {permutation['pValue']:.4f}")
-
-    beats = best["balancedAccuracy"] > results["baseline_majority"]["balancedAccuracy"]
-    significant = permutation["pValue"] <= 0.05
-    status = "experimental" if (beats and significant) else "insufficient-evidence"
-
-    chosen = H.select_features(x, y, genes)
-    final = learners[best_name]().fit(x[:, chosen], y)
-    evaluator = H.extract_linear_evaluator(final, [genes[i] for i in chosen])
-
-    artifact = {
-        "id": model_id,
-        "name": name,
-        "version": "1.0.0",
-        "trainedAt": stamp(),
-        "sourceStudy": study,
-        "sourceUrl": study_url,
-        "sourceType": "NASA OSDR bulk RNA-seq (GeneLab)",
-        "organism": "Arabidopsis thaliana",
-        "platform": "Illumina bulk RNA-seq, RSEM unnormalised gene counts",
-        "task": task,
-        "classLabels": [str(c) for c in np.unique(y)],
-        "samples": int(x.shape[0]),
+        "task": name,
+        "modelId": model_id,
+        "description": description,
+        "samples": int(matrix.shape[0]),
+        "genes": int(matrix.shape[1]),
         "groups": int(len(np.unique(groups))),
-        "genesAvailable": int(x.shape[1]),
-        "genesSelected": len(chosen),
-        "features": [genes[i] for i in chosen],
-        "normalisation": data.get("normalisation", "log2(CPM + 1)"),
-        "qualityControl": data.get("qc"),
-        "method": f"{best_name} with in-fold ANOVA gene selection",
-        "evidenceStatus": status,
-        "metrics": best,
-        "baselineMetrics": results["baseline_majority"],
-        "allLearners": {n: {k: r[k] for k in ("accuracy", "balancedAccuracy", "macroF1",
-                                              "perGroupRecall")}
-                        for n, r in results.items()},
-        "permutationTest": permutation,
-        "beatsBaseline": bool(beats),
-        "validation": (f"Stratified group CV ({n_splits} folds) over "
-                       f"{len(np.unique(groups))} biological groups with in-fold gene "
-                       "selection. No independent study is used here."),
-        "seed": H.SEED,
-        "environment": {"python": sys.version.split()[0], "numpy": np.__version__,
-                        "pandas": pd.__version__, "sklearn": sklearn.__version__},
-        "evaluator": evaluator,
-        "domain": {
-            "note": ("Inputs are log2(CPM+1) values for the genes listed in 'features'. "
-                     "All of them must be supplied."),
-            "expressionRange": {"min": float(x[:, chosen].min()), "max": float(x[:, chosen].max())},
-        },
-        "limitations": limitations,
-        "recommendedUse": recommended_use,
+        "classCounts": {str(k): int(v) for k, v in pd.Series(labels).value_counts().items()},
+        "learners": learners,
+        "bestLearner": best_name,
+        "baselineBalancedAccuracy": baseline,
+        "permutation": permutation,
+        "verdict": verdict,
     }
 
-    body = json.dumps(artifact, separators=(",", ":"), allow_nan=False)
-    (ARTIFACTS / f"{model_id}.json").write_text(body + "\n", encoding="utf-8")
-    digest = hashlib.sha256((body + "\n").encode()).hexdigest()
 
-    save_json(EVAL / f"phase9_{study.lower().replace('-', '')}.json", {
-        "phase": 9, "modelId": model_id, "study": study,
-        "samples": int(x.shape[0]), "groups": int(len(np.unique(groups))),
-        "learners": results, "best": best_name, "permutationTest": permutation,
-        "evidenceStatus": status, "artifactSha256": digest,
-    })
-    print(f"   wrote {model_id}.json ({len(body):,} B) status={status}")
+def cross_study() -> dict:
+    """D: does an OSD-46 microarray classifier transfer to OSD-782 RNA-seq?
 
-    # A model that failed to beat its baseline under the pre-specified scheme is
-    # NOT registered. Keeping it out of the registry is the exclusion the brief
-    # asks for: the artifact and its evaluation remain on disk as evidence of the
-    # negative result, but no prediction endpoint is exposed for it.
-    if status != "experimental":
-        print(f"   NOT REGISTERED: status '{status}' - evidence retained only, "
-              f"no prediction endpoint exposed")
-        return artifact
+    Both studies are Arabidopsis thaliana and both use TAIR gene models, so the
+    feature spaces can be intersected. Platforms and ecotypes differ (Ws on ATH1
+    versus Col-0 on Illumina), which is exactly the difficulty being measured.
 
-    registry_path = ARTIFACTS / "registry.json"
-    registry = json.loads(registry_path.read_text(encoding="utf-8"))
-    registry["models"] = [m for m in registry["models"] if m["id"] != model_id]
-    registry["models"].append({"id": model_id,
-                               "artifact": f"ml/artifacts/{model_id}.json",
-                               "sha256": digest})
-    registry["trainedAt"] = stamp()
-    registry_path.write_text(json.dumps(registry, indent=1) + "\n", encoding="utf-8")
-    return artifact
+    Each study is standardised per gene on its own samples. That step uses no
+    labels, so it cannot leak, and it is necessary because raw microarray log2
+    intensities and VST counts are not on a comparable scale.
+
+    Balanced accuracy is the metric that matters here: the test set is 12 control
+    and 24 irradiated, so a classifier that always answers "irradiated" scores
+    0.667 raw accuracy while being completely uninformative.
+    """
+    a_matrix, a_genes, a_annotation = load_reference_osd46()
+    b_matrix, b_genes, b_annotation = load_osd782()
+
+    shared = sorted(set(a_genes) & set(b_genes))
+    a_index = [a_genes.index(g) for g in shared]
+    b_index = [b_genes.index(g) for g in shared]
+    a = a_matrix[:, a_index]
+    b = b_matrix[:, b_index]
+
+    def zscore(matrix):
+        mean = matrix.mean(axis=0)
+        sd = matrix.std(axis=0, ddof=1)
+        sd[sd == 0] = 1.0
+        return (matrix - mean) / sd
+
+    a, b = zscore(a), zscore(b)
+    a_labels = np.where(a_annotation["radiation"] == "non-irradiated",
+                        "control", "irradiated")
+    b_labels = np.where(b_annotation["ionizingRadiation"] == "non-irradiated",
+                        "control", "irradiated")
+
+    # Select genes on the training study only, using in-study ANOVA.
+    chosen = H.select_features(a, a_labels, n_features=500,
+                               variance_preselection=False)
+    model = H.classification_learners()["logistic_l2"]()
+    model.fit(a[:, chosen], a_labels)
+    predicted = model.predict(b[:, chosen])
+
+    from sklearn.metrics import accuracy_score, balanced_accuracy_score, confusion_matrix
+    result = {
+        "task": "cross-study transfer, irradiated vs control",
+        "trainStudy": "OSD-46 (Affymetrix ATH1, Wassilewskija)",
+        "testStudy": "OSD-782 (Illumina RNA-seq, Col-0)",
+        "sharedGenes": len(shared),
+        "genesUsed": int(len(chosen)),
+        "trainSamples": int(len(a_labels)),
+        "testSamples": int(len(b_labels)),
+        "harmonisation": "per-gene z-score within each study (no labels used)",
+        "accuracy": float(accuracy_score(b_labels, predicted)),
+        "balancedAccuracy": float(balanced_accuracy_score(b_labels, predicted)),
+        "confusionMatrix": confusion_matrix(
+            b_labels, predicted, labels=["control", "irradiated"]).tolist(),
+        "classLabels": ["control", "irradiated"],
+        "predictionDistribution": {str(k): int(v)
+                                   for k, v in pd.Series(predicted).value_counts().items()},
+        "majorityClassRate": float(max(pd.Series(b_labels).value_counts()) / len(b_labels)),
+    }
+    collapsed = set(result["predictionDistribution"]) == {"irradiated"}
+    result["verdict"] = ("transfer-failed-collapsed-to-majority" if collapsed
+                         else "transfers-with-signal" if result["balancedAccuracy"] > 0.7
+                         else "transfer-weak")
+    result["interpretation"] = (
+        "Raw accuracy looks respectable because the test set is majority "
+        "irradiated, but balanced accuracy of 0.5 with a single predicted class "
+        "means the classifier learned nothing transferable. Reporting the accuracy "
+        "alone would have been a false positive."
+        if collapsed else
+        "The classifier predicts both classes on the held-out study.")
+    print(f"\n== cross-study transfer: {len(shared)} shared genes, "
+          f"{len(chosen)} used")
+    print(f"   acc {result['accuracy']:.3f}  bal {result['balancedAccuracy']:.3f}  "
+          f"predicted {result['predictionDistribution']} -> {result['verdict']}")
+    return result
 
 
-def main() -> None:
-    train(
-        name="Arabidopsis radiation dose classifier (OSD-782)",
-        data=build_osd782(), model_id="radiation-dose-osd782-v1", study="OSD-782",
-        study_url="https://osdr.nasa.gov/bio/repo/data/studies/OSD-782",
-        task="Three-class absorbed-dose classification (0 / 10 / 100 Gy) from rosette expression",
-        limitations=[
-            "Ground irradiation of Arabidopsis rosette tissue, not spaceflight and not a crop.",
-            "Wild-type only; no genotype contrast is available in this study.",
-            "Three discrete dose levels (0, 10, 100 Gy); this is NOT a continuous dose-response model and cannot interpolate between levels.",
-            "Gamma only: no HZE arm, so nothing here transfers to heavy-ion exposure.",
-            "Doses are far above any realistic habitat chronic exposure; this is acute high-dose biology.",
-            "Predicts the applied dose class, not damage severity, survival, yield or biomass.",
-        ],
-        recommended_use=("Demonstrating that acute gamma dose level is recoverable from a "
-                         "rosette expression profile across held-out biological groups."),
-        n_splits=4,
-    )
-    train(
-        name="Arabidopsis gravity reorientation classifier (OSD-411)",
-        data=build_osd411(), model_id="gravity-reorientation-osd411-v1", study="OSD-411",
-        study_url="https://osdr.nasa.gov/bio/repo/data/studies/OSD-411",
-        task="Binary reoriented-versus-vertical classification across four tissues",
-        limitations=[
-            "90-degree ground reorientation is NOT partial gravity; no Moon or Mars inference is supported.",
-            "Ground study using a custom rotation device; no spaceflight microgravity data in this study.",
-            "Two genotypes only (Col-0 wild type and the starch-less pgm-1 mutant).",
-            "Four tissues are pooled in the label; the model does not identify tissue-specific mechanisms.",
-            "Predicts the applied reorientation treatment, not gravitropic curvature, growth rate or yield.",
-            "A classifier separating reoriented from vertical tissue may be reading the handling/rotation procedure as much as the gravity response itself.",
-        ],
-        recommended_use=("Testing whether a reorientation molecular signature is recoverable "
-                         "in held-out genotype x tissue groups, and whether it persists in the "
-                         "pgm-1 perception mutant."),
-        n_splits=4,
-    )
+def load_reference_osd46():
+    from train_radiation_osd46 import load
+    return load()
+
+
+def main() -> int:
+    results = []
+
+    b_matrix, b_genes, b_annotation = load_osd782()
+    b_groups = (b_annotation["absorbedDoseGy"].astype(str) + "|"
+                + b_annotation["hoursAfterTreatment"].astype(str)).to_numpy()
+    b_labels = (b_annotation["absorbedDoseGy"].astype(str) + " Gy").to_numpy()
+    results.append(report_task(
+        "B", "radiation-dose-osd782-v1", b_matrix, b_labels, b_groups,
+        "absorbed dose (0 / 10 / 100 Gy) from Arabidopsis rosette RNA-seq"))
+
+    c_matrix, c_genes, c_annotation = load_osd411()
+    seedling = c_annotation["sample"].str.split("-").str[0]
+    c_groups = (c_annotation["genotype"].astype(str) + "|"
+                + c_annotation["treatment"].astype(str) + "|" + seedling).to_numpy()
+    c_labels = np.where(c_annotation["treatment"].str.lower().str.startswith("reorient"),
+                        "reoriented", "vertical")
+    results.append(report_task(
+        "C", "gravity-reorientation-osd411-v1", c_matrix, c_labels, c_groups,
+        "90-degree reorientation vs vertical control, grouped by seedling"))
+
+    results.append(cross_study())
+
+    payload = {
+        "phase": 9,
+        "seed": H.SEED,
+        "unitDefinitions": {
+            "OSD-782": ("independent unit = (dose, collection time) cell, 12 groups; "
+                        "the 3 replicates within a cell are biological replicates"),
+            "OSD-411": ("independent unit = seedling, derived from the sample-name "
+                        "prefix 1..16; the four tissues of a seedling are repeated "
+                        "measures and are never split across folds"),
+        },
+        "quantification": {
+            "OSD-782": "GeneLab VST counts (provider processed)",
+            "OSD-411": f"log2(CPM + 1) from RSEM raw counts, min library {MIN_LIBRARY_READS:,} reads",
+        },
+        "qcExclusions": {
+            "OSD-411": {
+                "rule": f"library size below {MIN_LIBRARY_READS:,} reads",
+                "dropped": LOW_LIBRARY_EXCLUSIONS,
+                "note": ("A library two orders of magnitude shallower than the rest "
+                         "yields unreliable relative abundances. Removed before any "
+                         "label was inspected, and the removal is recorded here."),
+            }
+        },
+        "results": results,
+    }
+    EVAL.mkdir(parents=True, exist_ok=True)
+    save_json(EVAL / "phase9_rnaseq_candidates.json", payload)
+    shippable = [r for r in results if r.get("verdict") == "candidate"]
+    print(f"\nwrote ml/evaluation/phase9_rnaseq_candidates.json")
+    print(f"shippable candidates: {[r['modelId'] for r in shippable] or 'none'}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

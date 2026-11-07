@@ -1,16 +1,20 @@
 {
-  "phase": 9,
   "study": "OSD-46",
-  "samples": 44,
-  "genes": 22560,
-  "groups": 22,
-  "validationScheme": "leave-one-biological-group-out",
-  "models": [
-    {
+  "phase": 9,
+  "seed": 20261107,
+  "arrays": 44,
+  "genes": 21267,
+  "biologicalGroups": 22,
+  "unitNote": "Two replicate arrays per group are biological replicates and are never split across folds.",
+  "tasks": {
+    "quality": {
       "modelId": "radiation-quality-osd46-v1",
-      "study": "OSD-46",
-      "samples": 44,
-      "groups": 22,
+      "description": "radiation quality (control / 100 Gy gamma / 30 Gy Fe-56)",
+      "classLabels": [
+        "control",
+        "gamma",
+        "hze"
+      ],
       "learners": {
         "baseline_majority": {
           "accuracy": 0.0,
@@ -40,36 +44,11 @@
             "gamma",
             "hze"
           ],
-          "perGroupRecall": {
+          "perClassRecall": {
             "control": 0.0,
             "gamma": 0.0,
             "hze": 0.0
           },
-          "genesPerFold": [
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150
-          ],
-          "genesSharedAcrossFolds": 74,
           "singleClassHeldOutGroups": [
             "hze",
             "hze",
@@ -94,13 +73,14 @@
             "control",
             "control"
           ],
+          "genesSharedAcrossFolds": 75,
           "validationScheme": "leave-one-biological-group-out",
           "bootstrapCi": {
-            "metric": "accuracy",
+            "metric": "balancedAccuracy",
             "lower": 0.0,
             "upper": 0.0,
             "confidence": 0.95,
-            "method": "stratified percentile bootstrap over held-out samples"
+            "method": "stratified percentile bootstrap over held-out predictions"
           }
         },
         "logistic_l2": {
@@ -131,36 +111,11 @@
             "gamma",
             "hze"
           ],
-          "perGroupRecall": {
+          "perClassRecall": {
             "control": 0.75,
             "gamma": 1.0,
             "hze": 0.9444444444444444
           },
-          "genesPerFold": [
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150
-          ],
-          "genesSharedAcrossFolds": 74,
           "singleClassHeldOutGroups": [
             "hze",
             "hze",
@@ -185,13 +140,14 @@
             "control",
             "control"
           ],
+          "genesSharedAcrossFolds": 75,
           "validationScheme": "leave-one-biological-group-out",
           "bootstrapCi": {
-            "metric": "accuracy",
-            "lower": 0.8636363636363636,
+            "metric": "balancedAccuracy",
+            "lower": 0.7916666666666666,
             "upper": 1.0,
             "confidence": 0.95,
-            "method": "stratified percentile bootstrap over held-out samples"
+            "method": "stratified percentile bootstrap over held-out predictions"
           }
         },
         "logistic_l1": {
@@ -222,36 +178,11 @@
             "gamma",
             "hze"
           ],
-          "perGroupRecall": {
+          "perClassRecall": {
             "control": 0.0,
             "gamma": 1.0,
             "hze": 0.9444444444444444
           },
-          "genesPerFold": [
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150
-          ],
-          "genesSharedAcrossFolds": 74,
           "singleClassHeldOutGroups": [
             "hze",
             "hze",
@@ -276,26 +207,27 @@
             "control",
             "control"
           ],
+          "genesSharedAcrossFolds": 75,
           "validationScheme": "leave-one-biological-group-out",
           "bootstrapCi": {
-            "metric": "accuracy",
-            "lower": 0.75,
-            "upper": 0.8181818181818182,
+            "metric": "balancedAccuracy",
+            "lower": 0.6111111111111112,
+            "upper": 0.6666666666666666,
             "confidence": 0.95,
-            "method": "stratified percentile bootstrap over held-out samples"
+            "method": "stratified percentile bootstrap over held-out predictions"
           }
         },
         "random_forest": {
           "accuracy": 0.9318181818181818,
-          "balancedAccuracy": 0.875,
-          "macroF1": 0.8974358974358975,
+          "balancedAccuracy": 0.8981481481481483,
+          "macroF1": 0.9063063063063064,
           "nSamples": 44,
           "nGroups": 22,
           "confusionMatrix": [
             [
-              5,
+              6,
               0,
-              3
+              2
             ],
             [
               0,
@@ -303,9 +235,9 @@
               0
             ],
             [
+              1,
               0,
-              0,
-              18
+              17
             ]
           ],
           "classLabels": [
@@ -313,36 +245,11 @@
             "gamma",
             "hze"
           ],
-          "perGroupRecall": {
-            "control": 0.625,
+          "perClassRecall": {
+            "control": 0.75,
             "gamma": 1.0,
-            "hze": 1.0
+            "hze": 0.9444444444444444
           },
-          "genesPerFold": [
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150
-          ],
-          "genesSharedAcrossFolds": 74,
           "singleClassHeldOutGroups": [
             "hze",
             "hze",
@@ -367,16 +274,17 @@
             "control",
             "control"
           ],
+          "genesSharedAcrossFolds": 75,
           "validationScheme": "leave-one-biological-group-out",
           "bootstrapCi": {
-            "metric": "accuracy",
-            "lower": 0.8636363636363636,
-            "upper": 0.9772727272727273,
+            "metric": "balancedAccuracy",
+            "lower": 0.7777777777777778,
+            "upper": 1.0,
             "confidence": 0.95,
-            "method": "stratified percentile bootstrap over held-out samples"
+            "method": "stratified percentile bootstrap over held-out predictions"
           }
         },
-        "gradient_boosting": {
+        "hist_gradient_boosting": {
           "accuracy": 0.8636363636363636,
           "balancedAccuracy": 0.8425925925925926,
           "macroF1": 0.8339118741595523,
@@ -404,36 +312,11 @@
             "gamma",
             "hze"
           ],
-          "perGroupRecall": {
+          "perClassRecall": {
             "control": 0.75,
             "gamma": 1.0,
             "hze": 0.7777777777777778
           },
-          "genesPerFold": [
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150
-          ],
-          "genesSharedAcrossFolds": 74,
           "singleClassHeldOutGroups": [
             "hze",
             "hze",
@@ -458,58 +341,39 @@
             "control",
             "control"
           ],
+          "genesSharedAcrossFolds": 75,
           "validationScheme": "leave-one-biological-group-out",
           "bootstrapCi": {
-            "metric": "accuracy",
-            "lower": 0.75,
-            "upper": 0.9545454545454546,
+            "metric": "balancedAccuracy",
+            "lower": 0.7129629629629629,
+            "upper": 0.9444444444444445,
             "confidence": 0.95,
-            "method": "stratified percentile bootstrap over held-out samples"
+            "method": "stratified percentile bootstrap over held-out predictions"
           }
         }
       },
-      "bestOverall": "logistic_l2",
-      "shipped": "logistic_l2",
-      "permutationTest": {
-        "observedAccuracy": 0.9318181818181818,
+      "bestLearner": "logistic_l2",
+      "baselineBalancedAccuracy": 0.0,
+      "improvementOverBaseline": 0.8981481481481483,
+      "permutation": {
+        "observedBalancedAccuracy": 0.8981481481481483,
         "nPermutations": 100,
-        "nullMean": 0.3179545454545455,
-        "nullP95": 0.5,
+        "nullMean": 0.3047685185185185,
+        "nullP95": 0.49074074074074076,
         "pValue": 0.009900990099009901,
         "correction": "finite-sample corrected: (1 + #{null >= observed}) / (1 + B)",
+        "unit": "labels permuted between biological groups",
         "scheme": "labels permuted between biological groups"
       },
-      "batchConfound": {
-        "cramersV": 0.5055,
-        "chiSquare": 22.489,
-        "contingency": {
-          "0706A-10": {
-            "control": 4,
-            "gamma": 0,
-            "hze": 0
-          },
-          "0806A-10": {
-            "control": 4,
-            "gamma": 8,
-            "hze": 8
-          },
-          "1006A-03": {
-            "control": 0,
-            "gamma": 10,
-            "hze": 10
-          }
-        },
-        "interpretation": "strong association - batch is a plausible alternative explanation"
-      },
-      "evidenceStatus": "experimental",
-      "supplementaryEvaluation": null,
-      "artifactSha256": "bdb50142a7e74a184e64719343c2d9fddca6c5f3c668246554adb8e9ca1475c1"
+      "beatsBaseline": true
     },
-    {
+    "exposure": {
       "modelId": "radiation-exposure-osd46-v1",
-      "study": "OSD-46",
-      "samples": 44,
-      "groups": 22,
+      "description": "radiation exposure (control / irradiated)",
+      "classLabels": [
+        "control",
+        "irradiated"
+      ],
       "learners": {
         "baseline_majority": {
           "accuracy": 0.8181818181818182,
@@ -531,35 +395,10 @@
             "control",
             "irradiated"
           ],
-          "perGroupRecall": {
+          "perClassRecall": {
             "control": 0.0,
             "irradiated": 1.0
           },
-          "genesPerFold": [
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150
-          ],
-          "genesSharedAcrossFolds": 95,
           "singleClassHeldOutGroups": [
             "irradiated",
             "irradiated",
@@ -584,13 +423,14 @@
             "control",
             "control"
           ],
+          "genesSharedAcrossFolds": 95,
           "validationScheme": "leave-one-biological-group-out",
           "bootstrapCi": {
-            "metric": "accuracy",
-            "lower": 0.8181818181818182,
-            "upper": 0.8181818181818182,
+            "metric": "balancedAccuracy",
+            "lower": 0.5,
+            "upper": 0.5,
             "confidence": 0.95,
-            "method": "stratified percentile bootstrap over held-out samples"
+            "method": "stratified percentile bootstrap over held-out predictions"
           }
         },
         "logistic_l2": {
@@ -613,35 +453,10 @@
             "control",
             "irradiated"
           ],
-          "perGroupRecall": {
+          "perClassRecall": {
             "control": 0.875,
             "irradiated": 0.9444444444444444
           },
-          "genesPerFold": [
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150
-          ],
-          "genesSharedAcrossFolds": 95,
           "singleClassHeldOutGroups": [
             "irradiated",
             "irradiated",
@@ -666,13 +481,14 @@
             "control",
             "control"
           ],
+          "genesSharedAcrossFolds": 95,
           "validationScheme": "leave-one-biological-group-out",
           "bootstrapCi": {
-            "metric": "accuracy",
-            "lower": 0.8409090909090909,
+            "metric": "balancedAccuracy",
+            "lower": 0.7708333333333333,
             "upper": 1.0,
             "confidence": 0.95,
-            "method": "stratified percentile bootstrap over held-out samples"
+            "method": "stratified percentile bootstrap over held-out predictions"
           }
         },
         "logistic_l1": {
@@ -695,35 +511,10 @@
             "control",
             "irradiated"
           ],
-          "perGroupRecall": {
+          "perClassRecall": {
             "control": 0.0,
             "irradiated": 0.9444444444444444
           },
-          "genesPerFold": [
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150
-          ],
-          "genesSharedAcrossFolds": 95,
           "singleClassHeldOutGroups": [
             "irradiated",
             "irradiated",
@@ -748,13 +539,14 @@
             "control",
             "control"
           ],
+          "genesSharedAcrossFolds": 95,
           "validationScheme": "leave-one-biological-group-out",
           "bootstrapCi": {
-            "metric": "accuracy",
-            "lower": 0.7045454545454546,
-            "upper": 0.8181818181818182,
+            "metric": "balancedAccuracy",
+            "lower": 0.4305555555555556,
+            "upper": 0.5,
             "confidence": 0.95,
-            "method": "stratified percentile bootstrap over held-out samples"
+            "method": "stratified percentile bootstrap over held-out predictions"
           }
         },
         "random_forest": {
@@ -777,35 +569,10 @@
             "control",
             "irradiated"
           ],
-          "perGroupRecall": {
+          "perClassRecall": {
             "control": 0.875,
             "irradiated": 0.9444444444444444
           },
-          "genesPerFold": [
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150
-          ],
-          "genesSharedAcrossFolds": 95,
           "singleClassHeldOutGroups": [
             "irradiated",
             "irradiated",
@@ -830,16 +597,17 @@
             "control",
             "control"
           ],
+          "genesSharedAcrossFolds": 95,
           "validationScheme": "leave-one-biological-group-out",
           "bootstrapCi": {
-            "metric": "accuracy",
-            "lower": 0.8409090909090909,
+            "metric": "balancedAccuracy",
+            "lower": 0.7708333333333333,
             "upper": 1.0,
             "confidence": 0.95,
-            "method": "stratified percentile bootstrap over held-out samples"
+            "method": "stratified percentile bootstrap over held-out predictions"
           }
         },
-        "gradient_boosting": {
+        "hist_gradient_boosting": {
           "accuracy": 0.9545454545454546,
           "balancedAccuracy": 0.9236111111111112,
           "macroF1": 0.9236111111111112,
@@ -859,35 +627,10 @@
             "control",
             "irradiated"
           ],
-          "perGroupRecall": {
+          "perClassRecall": {
             "control": 0.875,
             "irradiated": 0.9722222222222222
           },
-          "genesPerFold": [
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150,
-            150
-          ],
-          "genesSharedAcrossFolds": 95,
           "singleClassHeldOutGroups": [
             "irradiated",
             "irradiated",
@@ -912,104 +655,43 @@
             "control",
             "control"
           ],
+          "genesSharedAcrossFolds": 95,
           "validationScheme": "leave-one-biological-group-out",
           "bootstrapCi": {
-            "metric": "accuracy",
-            "lower": 0.8863636363636364,
+            "metric": "balancedAccuracy",
+            "lower": 0.7847222222222222,
             "upper": 1.0,
             "confidence": 0.95,
-            "method": "stratified percentile bootstrap over held-out samples"
+            "method": "stratified percentile bootstrap over held-out predictions"
           }
         }
       },
-      "bestOverall": "gradient_boosting",
-      "shipped": "logistic_l2",
-      "permutationTest": {
-        "observedAccuracy": 0.9318181818181818,
+      "bestLearner": "hist_gradient_boosting",
+      "baselineBalancedAccuracy": 0.5,
+      "improvementOverBaseline": 0.42361111111111116,
+      "permutation": {
+        "observedBalancedAccuracy": 0.9236111111111112,
         "nPermutations": 100,
-        "nullMean": 0.705,
-        "nullP95": 0.8193181818181818,
+        "nullMean": 0.49159722222222224,
+        "nullP95": 0.723611111111111,
         "pValue": 0.009900990099009901,
         "correction": "finite-sample corrected: (1 + #{null >= observed}) / (1 + B)",
+        "unit": "labels permuted between biological groups",
         "scheme": "labels permuted between biological groups"
       },
-      "batchConfound": {
-        "cramersV": 0.7149,
-        "chiSquare": 22.489,
-        "contingency": {
-          "0706A-10": {
-            "control": 4,
-            "irradiated": 0
-          },
-          "0806A-10": {
-            "control": 4,
-            "irradiated": 16
-          },
-          "1006A-03": {
-            "control": 0,
-            "irradiated": 20
-          }
-        },
-        "interpretation": "strong association - batch is a plausible alternative explanation"
-      },
-      "evidenceStatus": "experimental",
-      "supplementaryEvaluation": {
-        "name": "batch-controlled irradiated-vs-control",
-        "rationale": "Controls never appear on array batch 1006A-03, so on the full dataset condition and array batch are associated (Cramer's V 0.7149). Restricting to batch 0806A-10, which contains all three conditions, removes that confound by construction.",
-        "arraysUsed": 20,
-        "batch": "0806A-10",
-        "groups": 10,
-        "learners": {
-          "baseline_majority": {
-            "accuracy": 0.8,
-            "balancedAccuracy": 0.5,
-            "macroF1": 0.4444444444444444,
-            "perGroupRecall": {
-              "control": 0.0,
-              "irradiated": 1.0
-            }
-          },
-          "logistic_l2": {
-            "accuracy": 0.95,
-            "balancedAccuracy": 0.96875,
-            "macroF1": 0.9283154121863799,
-            "perGroupRecall": {
-              "control": 1.0,
-              "irradiated": 0.9375
-            }
-          },
-          "logistic_l1": {
-            "accuracy": 0.2,
-            "balancedAccuracy": 0.5,
-            "macroF1": 0.16666666666666666,
-            "perGroupRecall": {
-              "control": 1.0,
-              "irradiated": 0.0
-            }
-          },
-          "random_forest": {
-            "accuracy": 0.9,
-            "balancedAccuracy": 0.75,
-            "macroF1": 0.803921568627451,
-            "perGroupRecall": {
-              "control": 0.5,
-              "irradiated": 1.0
-            }
-          },
-          "gradient_boosting": {
-            "accuracy": 0.8,
-            "balancedAccuracy": 0.5,
-            "macroF1": 0.4444444444444444,
-            "perGroupRecall": {
-              "control": 0.0,
-              "irradiated": 1.0
-            }
-          }
-        },
-        "best": "logistic_l2",
-        "bestBalancedAccuracy": 0.96875
-      },
-      "artifactSha256": "23a9f595ebd1d74d6bdb2657ddc43f22ae7f5e2fa067f55ee0b10d4ddb9bd093"
+      "beatsBaseline": true
     }
-  ]
+  },
+  "artifacts": {
+    "radiation-quality-osd46-v1": {
+      "artifact": "ml/artifacts/radiation-quality-osd46-v1.json",
+      "sha256": "2a0bdec65c1b37610f79fcf0082c8b5368adaf45685db2eac05b203799c146d9",
+      "size": 66718
+    },
+    "radiation-exposure-osd46-v1": {
+      "artifact": "ml/artifacts/radiation-exposure-osd46-v1.json",
+      "sha256": "37003a6959c6032e559ddea3e1eaf07839052b5466f6aa0ded2c3f15c03aa8aa",
+      "size": 56064
+    }
+  }
 }

@@ -1,0 +1,656 @@
+{
+  "phase": 9,
+  "seed": 20261107,
+  "unitDefinitions": {
+    "OSD-782": "independent unit = (dose, collection time) cell, 12 groups; the 3 replicates within a cell are biological replicates",
+    "OSD-411": "independent unit = seedling, derived from the sample-name prefix 1..16; the four tissues of a seedling are repeated measures and are never split across folds"
+  },
+  "quantification": {
+    "OSD-782": "GeneLab VST counts (provider processed)",
+    "OSD-411": "log2(CPM + 1) from RSEM raw counts, min library 5,000,000 reads"
+  },
+  "qcExclusions": {
+    "OSD-411": {
+      "rule": "library size below 5,000,000 reads",
+      "dropped": [
+        {
+          "sample": "14-4",
+          "reads": 258458.92
+        }
+      ],
+      "note": "A library two orders of magnitude shallower than the rest yields unreliable relative abundances. Removed before any label was inspected, and the removal is recorded here."
+    }
+  },
+  "results": [
+    {
+      "task": "B",
+      "modelId": "radiation-dose-osd782-v1",
+      "description": "absorbed dose (0 / 10 / 100 Gy) from Arabidopsis rosette RNA-seq",
+      "samples": 36,
+      "genes": 23667,
+      "groups": 12,
+      "classCounts": {
+        "0 Gy": 12,
+        "10 Gy": 12,
+        "100 Gy": 12
+      },
+      "learners": {
+        "baseline_majority": {
+          "accuracy": 0.0,
+          "balancedAccuracy": 0.0,
+          "macroF1": 0.0,
+          "nSamples": 36,
+          "nGroups": 12,
+          "confusionMatrix": [
+            [
+              0,
+              12,
+              0
+            ],
+            [
+              12,
+              0,
+              0
+            ],
+            [
+              12,
+              0,
+              0
+            ]
+          ],
+          "classLabels": [
+            "0 Gy",
+            "10 Gy",
+            "100 Gy"
+          ],
+          "perClassRecall": {
+            "0 Gy": 0.0,
+            "10 Gy": 0.0,
+            "100 Gy": 0.0
+          },
+          "singleClassHeldOutGroups": [
+            "0 Gy",
+            "0 Gy",
+            "0 Gy",
+            "0 Gy",
+            "100 Gy",
+            "100 Gy",
+            "100 Gy",
+            "100 Gy",
+            "10 Gy",
+            "10 Gy",
+            "10 Gy",
+            "10 Gy"
+          ],
+          "genesSharedAcrossFolds": 37,
+          "validationScheme": "leave-one-biological-group-out",
+          "bootstrapCi": {
+            "metric": "balancedAccuracy",
+            "lower": 0.0,
+            "upper": 0.0,
+            "confidence": 0.95,
+            "method": "stratified percentile bootstrap over held-out predictions"
+          }
+        },
+        "logistic_l2": {
+          "accuracy": 0.16666666666666666,
+          "balancedAccuracy": 0.16666666666666666,
+          "macroF1": 0.169994879672299,
+          "nSamples": 36,
+          "nGroups": 12,
+          "confusionMatrix": [
+            [
+              4,
+              2,
+              6
+            ],
+            [
+              1,
+              0,
+              11
+            ],
+            [
+              4,
+              6,
+              2
+            ]
+          ],
+          "classLabels": [
+            "0 Gy",
+            "10 Gy",
+            "100 Gy"
+          ],
+          "perClassRecall": {
+            "0 Gy": 0.3333333333333333,
+            "10 Gy": 0.0,
+            "100 Gy": 0.16666666666666666
+          },
+          "singleClassHeldOutGroups": [
+            "0 Gy",
+            "0 Gy",
+            "0 Gy",
+            "0 Gy",
+            "100 Gy",
+            "100 Gy",
+            "100 Gy",
+            "100 Gy",
+            "10 Gy",
+            "10 Gy",
+            "10 Gy",
+            "10 Gy"
+          ],
+          "genesSharedAcrossFolds": 37,
+          "validationScheme": "leave-one-biological-group-out",
+          "bootstrapCi": {
+            "metric": "balancedAccuracy",
+            "lower": 0.05555555555555555,
+            "upper": 0.2777777777777778,
+            "confidence": 0.95,
+            "method": "stratified percentile bootstrap over held-out predictions"
+          }
+        },
+        "logistic_l1": {
+          "accuracy": 0.3611111111111111,
+          "balancedAccuracy": 0.36111111111111116,
+          "macroF1": 0.2904761904761905,
+          "nSamples": 36,
+          "nGroups": 12,
+          "confusionMatrix": [
+            [
+              10,
+              0,
+              2
+            ],
+            [
+              6,
+              3,
+              3
+            ],
+            [
+              7,
+              5,
+              0
+            ]
+          ],
+          "classLabels": [
+            "0 Gy",
+            "10 Gy",
+            "100 Gy"
+          ],
+          "perClassRecall": {
+            "0 Gy": 0.8333333333333334,
+            "10 Gy": 0.25,
+            "100 Gy": 0.0
+          },
+          "singleClassHeldOutGroups": [
+            "0 Gy",
+            "0 Gy",
+            "0 Gy",
+            "0 Gy",
+            "100 Gy",
+            "100 Gy",
+            "100 Gy",
+            "100 Gy",
+            "10 Gy",
+            "10 Gy",
+            "10 Gy",
+            "10 Gy"
+          ],
+          "genesSharedAcrossFolds": 37,
+          "validationScheme": "leave-one-biological-group-out",
+          "bootstrapCi": {
+            "metric": "balancedAccuracy",
+            "lower": 0.25,
+            "upper": 0.47222222222222227,
+            "confidence": 0.95,
+            "method": "stratified percentile bootstrap over held-out predictions"
+          }
+        },
+        "random_forest": {
+          "accuracy": 0.08333333333333333,
+          "balancedAccuracy": 0.08333333333333333,
+          "macroF1": 0.08695652173913043,
+          "nSamples": 36,
+          "nGroups": 12,
+          "confusionMatrix": [
+            [
+              3,
+              2,
+              7
+            ],
+            [
+              4,
+              0,
+              8
+            ],
+            [
+              4,
+              8,
+              0
+            ]
+          ],
+          "classLabels": [
+            "0 Gy",
+            "10 Gy",
+            "100 Gy"
+          ],
+          "perClassRecall": {
+            "0 Gy": 0.25,
+            "10 Gy": 0.0,
+            "100 Gy": 0.0
+          },
+          "singleClassHeldOutGroups": [
+            "0 Gy",
+            "0 Gy",
+            "0 Gy",
+            "0 Gy",
+            "100 Gy",
+            "100 Gy",
+            "100 Gy",
+            "100 Gy",
+            "10 Gy",
+            "10 Gy",
+            "10 Gy",
+            "10 Gy"
+          ],
+          "genesSharedAcrossFolds": 37,
+          "validationScheme": "leave-one-biological-group-out",
+          "bootstrapCi": {
+            "metric": "balancedAccuracy",
+            "lower": 0.027083333333333372,
+            "upper": 0.16666666666666666,
+            "confidence": 0.95,
+            "method": "stratified percentile bootstrap over held-out predictions"
+          }
+        },
+        "hist_gradient_boosting": {
+          "accuracy": 0.0,
+          "balancedAccuracy": 0.0,
+          "macroF1": 0.0,
+          "nSamples": 36,
+          "nGroups": 12,
+          "confusionMatrix": [
+            [
+              0,
+              12,
+              0
+            ],
+            [
+              12,
+              0,
+              0
+            ],
+            [
+              12,
+              0,
+              0
+            ]
+          ],
+          "classLabels": [
+            "0 Gy",
+            "10 Gy",
+            "100 Gy"
+          ],
+          "perClassRecall": {
+            "0 Gy": 0.0,
+            "10 Gy": 0.0,
+            "100 Gy": 0.0
+          },
+          "singleClassHeldOutGroups": [
+            "0 Gy",
+            "0 Gy",
+            "0 Gy",
+            "0 Gy",
+            "100 Gy",
+            "100 Gy",
+            "100 Gy",
+            "100 Gy",
+            "10 Gy",
+            "10 Gy",
+            "10 Gy",
+            "10 Gy"
+          ],
+          "genesSharedAcrossFolds": 37,
+          "validationScheme": "leave-one-biological-group-out",
+          "bootstrapCi": {
+            "metric": "balancedAccuracy",
+            "lower": 0.0,
+            "upper": 0.0,
+            "confidence": 0.95,
+            "method": "stratified percentile bootstrap over held-out predictions"
+          }
+        }
+      },
+      "bestLearner": "logistic_l1",
+      "baselineBalancedAccuracy": 0.0,
+      "permutation": {
+        "observedBalancedAccuracy": 0.36111111111111116,
+        "nPermutations": 100,
+        "nullMean": 0.27194444444444443,
+        "nullP95": 0.5555555555555555,
+        "pValue": 0.24752475247524752,
+        "correction": "finite-sample corrected: (1 + #{null >= observed}) / (1 + B)",
+        "unit": "labels permuted between biological groups"
+      },
+      "verdict": "insufficient-evidence"
+    },
+    {
+      "task": "C",
+      "modelId": "gravity-reorientation-osd411-v1",
+      "description": "90-degree reorientation vs vertical control, grouped by seedling",
+      "samples": 63,
+      "genes": 32833,
+      "groups": 16,
+      "classCounts": {
+        "vertical": 32,
+        "reoriented": 31
+      },
+      "learners": {
+        "baseline_majority": {
+          "accuracy": 0.0,
+          "balancedAccuracy": 0.0,
+          "macroF1": 0.0,
+          "nSamples": 63,
+          "nGroups": 16,
+          "confusionMatrix": [
+            [
+              0,
+              31
+            ],
+            [
+              32,
+              0
+            ]
+          ],
+          "classLabels": [
+            "reoriented",
+            "vertical"
+          ],
+          "perClassRecall": {
+            "reoriented": 0.0,
+            "vertical": 0.0
+          },
+          "singleClassHeldOutGroups": [
+            "reoriented",
+            "reoriented",
+            "reoriented",
+            "reoriented",
+            "vertical",
+            "vertical",
+            "vertical",
+            "vertical",
+            "reoriented",
+            "reoriented",
+            "reoriented",
+            "reoriented",
+            "vertical",
+            "vertical",
+            "vertical",
+            "vertical"
+          ],
+          "genesSharedAcrossFolds": 20,
+          "validationScheme": "leave-one-biological-group-out",
+          "bootstrapCi": {
+            "metric": "balancedAccuracy",
+            "lower": 0.0,
+            "upper": 0.0,
+            "confidence": 0.95,
+            "method": "stratified percentile bootstrap over held-out predictions"
+          }
+        },
+        "logistic_l2": {
+          "accuracy": 0.2857142857142857,
+          "balancedAccuracy": 0.2867943548387097,
+          "macroF1": 0.2828231722742221,
+          "nSamples": 63,
+          "nGroups": 16,
+          "confusionMatrix": [
+            [
+              11,
+              20
+            ],
+            [
+              25,
+              7
+            ]
+          ],
+          "classLabels": [
+            "reoriented",
+            "vertical"
+          ],
+          "perClassRecall": {
+            "reoriented": 0.3548387096774194,
+            "vertical": 0.21875
+          },
+          "singleClassHeldOutGroups": [
+            "reoriented",
+            "reoriented",
+            "reoriented",
+            "reoriented",
+            "vertical",
+            "vertical",
+            "vertical",
+            "vertical",
+            "reoriented",
+            "reoriented",
+            "reoriented",
+            "reoriented",
+            "vertical",
+            "vertical",
+            "vertical",
+            "vertical"
+          ],
+          "genesSharedAcrossFolds": 20,
+          "validationScheme": "leave-one-biological-group-out",
+          "bootstrapCi": {
+            "metric": "balancedAccuracy",
+            "lower": 0.17540322580645162,
+            "upper": 0.39868951612903225,
+            "confidence": 0.95,
+            "method": "stratified percentile bootstrap over held-out predictions"
+          }
+        },
+        "logistic_l1": {
+          "accuracy": 0.49206349206349204,
+          "balancedAccuracy": 0.5,
+          "macroF1": 0.32978723404255317,
+          "nSamples": 63,
+          "nGroups": 16,
+          "confusionMatrix": [
+            [
+              31,
+              0
+            ],
+            [
+              32,
+              0
+            ]
+          ],
+          "classLabels": [
+            "reoriented",
+            "vertical"
+          ],
+          "perClassRecall": {
+            "reoriented": 1.0,
+            "vertical": 0.0
+          },
+          "singleClassHeldOutGroups": [
+            "reoriented",
+            "reoriented",
+            "reoriented",
+            "reoriented",
+            "vertical",
+            "vertical",
+            "vertical",
+            "vertical",
+            "reoriented",
+            "reoriented",
+            "reoriented",
+            "reoriented",
+            "vertical",
+            "vertical",
+            "vertical",
+            "vertical"
+          ],
+          "genesSharedAcrossFolds": 20,
+          "validationScheme": "leave-one-biological-group-out",
+          "bootstrapCi": {
+            "metric": "balancedAccuracy",
+            "lower": 0.5,
+            "upper": 0.5,
+            "confidence": 0.95,
+            "method": "stratified percentile bootstrap over held-out predictions"
+          }
+        },
+        "random_forest": {
+          "accuracy": 0.19047619047619047,
+          "balancedAccuracy": 0.18951612903225806,
+          "macroF1": 0.1871995952441184,
+          "nSamples": 63,
+          "nGroups": 16,
+          "confusionMatrix": [
+            [
+              4,
+              27
+            ],
+            [
+              24,
+              8
+            ]
+          ],
+          "classLabels": [
+            "reoriented",
+            "vertical"
+          ],
+          "perClassRecall": {
+            "reoriented": 0.12903225806451613,
+            "vertical": 0.25
+          },
+          "singleClassHeldOutGroups": [
+            "reoriented",
+            "reoriented",
+            "reoriented",
+            "reoriented",
+            "vertical",
+            "vertical",
+            "vertical",
+            "vertical",
+            "reoriented",
+            "reoriented",
+            "reoriented",
+            "reoriented",
+            "vertical",
+            "vertical",
+            "vertical",
+            "vertical"
+          ],
+          "genesSharedAcrossFolds": 20,
+          "validationScheme": "leave-one-biological-group-out",
+          "bootstrapCi": {
+            "metric": "balancedAccuracy",
+            "lower": 0.09475806451612903,
+            "upper": 0.2842741935483871,
+            "confidence": 0.95,
+            "method": "stratified percentile bootstrap over held-out predictions"
+          }
+        },
+        "hist_gradient_boosting": {
+          "accuracy": 0.2698412698412698,
+          "balancedAccuracy": 0.2701612903225806,
+          "macroF1": 0.2696572580645161,
+          "nSamples": 63,
+          "nGroups": 16,
+          "confusionMatrix": [
+            [
+              9,
+              22
+            ],
+            [
+              24,
+              8
+            ]
+          ],
+          "classLabels": [
+            "reoriented",
+            "vertical"
+          ],
+          "perClassRecall": {
+            "reoriented": 0.2903225806451613,
+            "vertical": 0.25
+          },
+          "singleClassHeldOutGroups": [
+            "reoriented",
+            "reoriented",
+            "reoriented",
+            "reoriented",
+            "vertical",
+            "vertical",
+            "vertical",
+            "vertical",
+            "reoriented",
+            "reoriented",
+            "reoriented",
+            "reoriented",
+            "vertical",
+            "vertical",
+            "vertical",
+            "vertical"
+          ],
+          "genesSharedAcrossFolds": 20,
+          "validationScheme": "leave-one-biological-group-out",
+          "bootstrapCi": {
+            "metric": "balancedAccuracy",
+            "lower": 0.15877016129032256,
+            "upper": 0.3805443548387097,
+            "confidence": 0.95,
+            "method": "stratified percentile bootstrap over held-out predictions"
+          }
+        }
+      },
+      "bestLearner": "logistic_l1",
+      "baselineBalancedAccuracy": 0.0,
+      "permutation": {
+        "observedBalancedAccuracy": 0.5,
+        "nPermutations": 100,
+        "nullMean": 0.48220262096774197,
+        "nullP95": 0.683392137096774,
+        "pValue": 0.693069306930693,
+        "correction": "finite-sample corrected: (1 + #{null >= observed}) / (1 + B)",
+        "unit": "labels permuted between biological groups"
+      },
+      "verdict": "insufficient-evidence"
+    },
+    {
+      "task": "cross-study transfer, irradiated vs control",
+      "trainStudy": "OSD-46 (Affymetrix ATH1, Wassilewskija)",
+      "testStudy": "OSD-782 (Illumina RNA-seq, Col-0)",
+      "sharedGenes": 17997,
+      "genesUsed": 500,
+      "trainSamples": 44,
+      "testSamples": 36,
+      "harmonisation": "per-gene z-score within each study (no labels used)",
+      "accuracy": 0.6666666666666666,
+      "balancedAccuracy": 0.5,
+      "confusionMatrix": [
+        [
+          0,
+          12
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "classLabels": [
+        "control",
+        "irradiated"
+      ],
+      "predictionDistribution": {
+        "irradiated": 36
+      },
+      "majorityClassRate": 0.6666666666666666,
+      "verdict": "transfer-failed-collapsed-to-majority",
+      "interpretation": "Raw accuracy looks respectable because the test set is majority irradiated, but balanced accuracy of 0.5 with a single predicted class means the classifier learned nothing transferable. Reporting the accuracy alone would have been a false positive."
+    }
+  ]
+}

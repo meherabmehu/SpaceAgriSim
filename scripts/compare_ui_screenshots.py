@@ -32,7 +32,15 @@ import numpy as np
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
-SHOTS = ROOT / "docs" / "screenshots"
+# BASELINE holds the committed reference images and must never be written to by a
+# capture run. FRESH holds what the Playwright suite just rendered.
+#
+# These used to be the same directory, which made the comparison vacuous: the
+# capture step overwrote the baseline and every diff came out at zero. Captures
+# now go to the gitignored test-results tree.
+BASELINE = ROOT / "docs" / "screenshots"
+FRESH = ROOT / "frontend" / "test-results" / "screenshots"
+SHOTS = BASELINE  # kept for the baseline lookups below
 OUT = ROOT / "docs" / "phase7" / "ui_preservation.json"
 PIXEL_THRESHOLD = 16  # summed RGB difference treated as a changed pixel
 
@@ -160,6 +168,26 @@ def diff_image(baseline_path: Path, current_path: Path) -> dict:
     return entry
 
 
+PASSING_VERDICTS = ("ui-unchanged", "ui-extended-layout-preserved")
+
+
+def _verdict(sources_identical: bool, layout_changed: list[str]) -> str:
+    """Three outcomes, because two would force a false statement.
+
+    A phase that adds a component cannot leave the frontend source tree
+    byte-identical, and pretending otherwise would make the honest answer always
+    "changed". What must hold is that no existing layout moved, which is what the
+    structural comparison measures. So:
+
+    * sources identical and no layout change      -> ui-unchanged
+    * sources changed but no layout change        -> ui-extended-layout-preserved
+    * any layout difference                       -> ui-changed (a regression)
+    """
+    if layout_changed:
+        return "ui-changed"
+    return "ui-unchanged" if sources_identical else "ui-extended-layout-preserved"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--baseline", default="b4890e9")
@@ -182,10 +210,13 @@ def main() -> int:
 
     run_result = {"skipped": True} if args.skip_capture else capture()
     comparisons = {}
+    missing = []
     for name, baseline_path in baselines.items():
-        current = SHOTS / f"{name}.png"
+        current = FRESH / f"{name}.png"
         if current.is_file():
             comparisons[name] = diff_image(baseline_path, current)
+        else:
+            missing.append(name)
 
     layout_changed = [k for k, v in comparisons.items()
                       if v.get("classification") in ("layout-difference", "inspect-manually")]
@@ -201,8 +232,7 @@ def main() -> int:
         "playwright": run_result,
         "screenshotComparison": comparisons,
         "layoutRegressions": layout_changed,
-        "verdict": ("ui-unchanged" if source["identical"] and not layout_changed
-                    else "ui-changed"),
+        "verdict": _verdict(source["identical"], layout_changed),
         "note": (
             "Residual pixel differences are font rasterisation. The CSS requests "
             "Inter / Segoe UI with no bundled webfont, so the capturing machine's "
@@ -217,6 +247,11 @@ def main() -> int:
     }
     OUT.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n")
 
+    if missing:
+        print(f"no fresh capture for {missing} - run the Playwright suite, or drop "
+              f"--skip-capture", file=sys.stderr)
+        return 2
+
     print(f"frontend source changes vs {args.baseline}: {source['changedFileCount']}")
     for name, entry in comparisons.items():
         structure = entry["structure"]
@@ -225,7 +260,7 @@ def main() -> int:
               f"changed={entry.get('changedPercent')}%")
     print(f"verdict: {payload['verdict']}")
     print(f"written: {OUT.relative_to(ROOT)}")
-    return 0 if payload["verdict"] == "ui-unchanged" else 1
+    return 0 if payload["verdict"] in ("ui-unchanged", "ui-extended-layout-preserved") else 1
 
 
 if __name__ == "__main__":

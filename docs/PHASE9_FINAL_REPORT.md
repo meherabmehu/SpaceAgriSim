@@ -32,14 +32,22 @@ return 404 from the API.
 
 ## Discovery correction
 
-The Phase 8-era conclusion *"no crop-microbiome data is usable"* was **wrong**. A
-systematic sweep of 587 OSDR studies found 231 with processed matrices; screening
+A systematic sweep of 587 OSDR studies found 231 with processed matrices; screening
 those found six with processed taxonomic tables, including **OSD-267 (VEG-01A)** and
 **OSD-269 (VEG-03A)** — ISS-grown red romaine lettuce microbiome studies.
 
-The corrected claim is narrower and evidence-backed: the data exists, but **cannot
-support a classifier** (VEG-01A has 2 flight leaf plants; leaf and root are repeated
-measures per plant; pooling missions confounds mission with condition). A descriptive
+**The inventory needed correcting; the modelling verdict did not.** An earlier draft
+of this section called the Phase 8 conclusion "wrong". Checking the Phase 8 catalogue
+showed that is too strong: OSD-267 and OSD-269 were already listed there, with the
+note *"Metadata/omics only in this acquisition; not eligible for direct crop-yield
+training"* — which is correct and which this phase confirms. The statement that no
+crop-microbiome model was buildable referred to OSD-772 and OSD-412/413/414, which
+publish only raw amplicon FASTQ, and that remains true.
+
+What the sweep adds is the missing middle ground: these two studies publish processed
+taxonomy tables, so compositional analysis is possible where prediction is not. And
+it is not: VEG-01A has 2 flight leaf plants, leaf and root are repeated measures per
+plant, and pooling the two missions confounds mission with condition. A descriptive
 CLR analysis with a 5000-permutation test finds **no detectable flight effect**
 (p = 0.904 and 0.794). No model was registered for it.
 

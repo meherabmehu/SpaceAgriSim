@@ -17,10 +17,10 @@
         1569
       ],
       "sameSize": true,
-      "changedPixels": 0,
+      "changedPixels": 36,
       "totalPixels": 2259360,
-      "changedPixelRatio": 0.0,
-      "maxChannelDelta": 4,
+      "changedPixelRatio": 1.6e-05,
+      "maxChannelDelta": 195,
       "passed": true,
       "reason": "within tolerance"
     },
@@ -36,10 +36,10 @@
         2290
       ],
       "sameSize": true,
-      "changedPixels": 26,
+      "changedPixels": 34,
       "totalPixels": 1877800,
-      "changedPixelRatio": 1.4e-05,
-      "maxChannelDelta": 42,
+      "changedPixelRatio": 1.8e-05,
+      "maxChannelDelta": 194,
       "passed": true,
       "reason": "within tolerance"
     },
@@ -55,10 +55,10 @@
         6032
       ],
       "sameSize": true,
-      "changedPixels": 0,
+      "changedPixels": 176,
       "totalPixels": 6526624,
-      "changedPixelRatio": 0.0,
-      "maxChannelDelta": 0,
+      "changedPixelRatio": 2.7e-05,
+      "maxChannelDelta": 194,
       "passed": true,
       "reason": "within tolerance"
     },
@@ -93,10 +93,10 @@
         613
       ],
       "sameSize": true,
-      "changedPixels": 0,
+      "changedPixels": 1325,
       "totalPixels": 691464,
-      "changedPixelRatio": 0.0,
-      "maxChannelDelta": 3,
+      "changedPixelRatio": 0.001916,
+      "maxChannelDelta": 193,
       "passed": true,
       "reason": "within tolerance"
     },
@@ -115,7 +115,7 @@
       "changedPixels": 0,
       "totalPixels": 446020,
       "changedPixelRatio": 0.0,
-      "maxChannelDelta": 3,
+      "maxChannelDelta": 1,
       "passed": true,
       "reason": "within tolerance"
     },
@@ -131,10 +131,10 @@
         746
       ],
       "sameSize": true,
-      "changedPixels": 0,
+      "changedPixels": 1266,
       "totalPixels": 432680,
-      "changedPixelRatio": 0.0,
-      "maxChannelDelta": 0,
+      "changedPixelRatio": 0.002926,
+      "maxChannelDelta": 193,
       "passed": true,
       "reason": "within tolerance"
     },
@@ -153,7 +153,7 @@
       "changedPixels": 0,
       "totalPixels": 2698240,
       "changedPixelRatio": 0.0,
-      "maxChannelDelta": 3,
+      "maxChannelDelta": 0,
       "passed": true,
       "reason": "within tolerance"
     },
@@ -169,10 +169,10 @@
         2531
       ],
       "sameSize": true,
-      "changedPixels": 0,
+      "changedPixels": 7431,
       "totalPixels": 2510752,
-      "changedPixelRatio": 0.0,
-      "maxChannelDelta": 3,
+      "changedPixelRatio": 0.00296,
+      "maxChannelDelta": 193,
       "passed": true,
       "reason": "within tolerance"
     }

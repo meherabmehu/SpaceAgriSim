@@ -72,6 +72,13 @@ FILES = [
         "role": "sample to experimental-group assignment, 44 rows",
     },
     {
+        "study": "OSD-46", "name": "OSD-46_metadata_OSD-46-ISA.zip",
+        "key": "OSD-46/version-6/metadata/OSD-46_metadata_OSD-46-ISA.zip",
+        "bytes": 76_123,
+        "sha256": "bf478a09853f644bbb7413d6a70c2a0a5c69cc2c44e83f07ab2557f0d200eb71",
+        "role": "ISA-Tab study metadata: title, description, six factors incl. absorbed dose",
+    },
+    {
         "study": "OSD-782", "name": "GLDS-679_rna_seq_RSEM_Unnormalized_Counts_GLbulkRNAseq.csv",
         "key": "OSD-782/version-2/rna_seq/GLDS-679_rna_seq_RSEM_Unnormalized_Counts_GLbulkRNAseq.csv",
         "bytes": 4_527_540,

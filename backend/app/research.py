@@ -46,8 +46,8 @@ def coverage():
             ("Plant growth", "NASA data available only as aggregated experimental results", "NASA BPC literature; external WUR lettuce endpoints (not NASA)", "Assumption-based habitat simulator; separate external Earth-only model", "No matched space-habitat growth time series acquired for lettuce/tomato/radish."),
             ("Biomass", "Direct NASA training data available", "OSD-655 VEG04A", "Exploratory mizuna regression only", "14 harvested pillow endpoints; retrospective irrigation input."),
             ("Harvest yield", "Direct NASA training data available", "OSD-655 VEG04A", "Exploratory mizuna regression only", "No transfer to lettuce/tomato/radish."),
-            ("Gravity effects", "NASA data available but requiring processing", "OSD-436, OSD-7, OSD-120", "Heuristic simulator factor", "Molecular responses cannot calibrate edible-yield gravity factors."),
-            ("Radiation effects", "No suitable NASA dataset identified", "No matched plant-specific dose/outcome dataset acquired", "Heuristic simulator factor", "ISS telemetry is not plant-specific dose; no RadLab pairing performed."),
+            ("Gravity effects", "NASA data available but no molecular model passed validation", "OSD-436, OSD-7, OSD-120; OSD-411 reorientation tested and rejected", "Heuristic simulator factor", "Molecular responses cannot calibrate edible-yield gravity factors; a 90-degree ground reorientation is not partial gravity."),
+            ("Radiation effects", "NASA molecular data available and modelled", "OSD-46 (Arabidopsis, gamma vs Fe-56), OSD-782 (dose, evaluated and rejected)", "Molecular-response classification; the habitat simulator still uses a heuristic factor", "Classifiers identify the applied condition, not absorbed dose, damage severity or yield; dose prediction failed validation and is not served."),
             ("Water consumption", "NASA data available but requiring processing", "OSD-655 irrigation supplements", "Canopy-based water estimate", "Logs measure irrigation supplied, not transpiration/demand."),
             ("Water recovery", "NASA research exists but raw measurements are unavailable", "NASA BPC/CELSS literature", "User-configured loop efficiency", "Recovery fraction is a scenario assumption, not learned."),
             ("Light intensity", "NASA data available only as aggregated experimental results", "NASA BPC studies", "Assumed PPFD response", "No independently calibrated PPFD-to-yield surface."),
@@ -56,7 +56,7 @@ def coverage():
             ("Oxygen production", "NASA research exists but raw measurements are unavailable", "Photosynthetic mass balance", "Stoichiometric estimate", "Respiration and ecosystem gas fluxes not independently validated."),
             ("Temperature", "NASA data available but requiring processing", "OSDR growth protocol metadata", "Assumed thermal response", "Protocol setpoints are not paired response labels."),
             ("Humidity", "NASA data available but requiring processing", "OSDR growth protocol metadata", "VPD-based scenario estimate", "No fitted crop humidity-response model."),
-            ("Plant stress", "NASA data available but requiring processing", "OSD-767 transcriptome", "Molecular flight-context classification only", "Flight label is not disease or stress severity."),
+            ("Plant stress", "NASA molecular data available and modelled for radiation", "OSD-767 transcriptome; OSD-46 radiation response", "Molecular classification of experimental condition", "The labels are applied treatment or experiment context, not disease, stress severity or yield loss."),
             ("Environmental optimization", "No suitable NASA dataset identified", "Simulator objective functions", "Constrained scenario optimization", "Recommendations optimize assumed equations, not real spacecraft safety."),
         ]
     ]
@@ -305,6 +305,30 @@ def preview(study_id):
     elif study_id == "OSD-745":
         files = sorted((DATA / "raw" / study_id).glob("*TRANSFORMED.csv"))
         targets = [(p, "NASA-transformed nutritional assay; column headers state units. Not a yield table.", {}) for p in files]
+    elif study_id == "OSD-46":
+        # Design tables only: this study's measurements are microarray
+        # intensities for 22,560 probes, which are not a browsable row set.
+        targets = [
+            ("osd46_radiation_samples.csv",
+             "Sample-to-condition assignment for the 44 arrays. Condition, dose and "
+             "collection time are design factors, not measured outcomes.", {}),
+            ("osd46_array_batch.csv",
+             "Array batch assignment. Controls are not balanced across batches, so this "
+             "table is what the batch-controlled evaluation is checked against.", {}),
+        ]
+    elif study_id == "OSD-782":
+        targets = [
+            ("osd782_radiation_samples.csv",
+             "Sample-to-condition assignment for the 36 libraries. Condition and dose are "
+             "design factors; the transcriptome is the measurement.", {}),
+        ]
+    elif study_id == "OSD-411":
+        targets = [
+            ("osd411_gravity_samples.csv",
+             "Sample-to-condition assignment for 64 libraries from 16 seedlings. A 90 "
+             "degree ground reorientation is not partial gravity, and the 64 libraries "
+             "are not 64 independent plants.", {}),
+        ]
     elif study_id == "OSD-895":
         targets = [("eden_iss_2018_biomass_summary.csv", "EDEN ISS terrestrial-analogue crop/cycle summaries. Values are not independent plant-level replicates and are not a general yield-training table.", {"harvestAgeDays": "days", "meanEdibleFreshweightKgM2": "kg/m2", "edibleFreshweightRangeGm2": "g/m2", "abovegroundDryBiomassGm2": "g/m2", "belowgroundDryBiomassGm2": "g/m2"})]
     else:
