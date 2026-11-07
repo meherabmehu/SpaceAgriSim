@@ -58,7 +58,13 @@ def coverage():
     ]
 
 
-@lru_cache(maxsize=4)
+# The cache size must be at least the number of registered models. Phase 7 raised
+# the registry from four models to five while this decorator stayed at maxsize=4,
+# so every GET /api/models pass produced misses=5, currsize=4 and evicted an entry
+# it had just loaded - zero reuse, and ~1 MB of artifacts re-read and re-hashed per
+# request. Deriving the size from MODEL_IDS means adding a model can never silently
+# reintroduce the thrash; backend/tests/test_phase8_performance.py asserts it.
+@lru_cache(maxsize=len(MODEL_IDS))
 def load_model(model_id):
     if model_id not in MODEL_IDS:
         raise KeyError(model_id)

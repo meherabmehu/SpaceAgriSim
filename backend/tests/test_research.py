@@ -178,24 +178,44 @@ def test_microbial_model_is_registered_with_honest_evidence(scientific_client):
     assert any("not harvest biomass" in note.lower() for note in model["limitations"])
 
 
-def test_microbial_prediction_contract(scientific_client):
+def test_absolute_microbial_prediction_is_retired(scientific_client):
+    """Phase 8 retires the absolute-load prediction; the evidence must survive.
+
+    The Phase 6 endpoint answered 200 with a number that its own leave-one-
+    experiment-out evaluation showed to be worse than the training mean on both
+    held-out campaigns. Phase 8 policy is that such a surface must not answer with
+    a prediction, so it now returns 410 Gone and states why. The artifact itself
+    stays registered so the Phase 6/7 result remains reproducible.
+    """
     base = {
         "experiment": "VEG04B", "environment": "flight", "spectrum": "red",
         "sanitised": True, "freshWeightG": 5.4, "harvestIndex": 1,
     }
     result = scientific_client.post("/api/predict/mizuna-microbial-load-v1", json=base)
-    assert result.status_code == 200
-    body = result.json()
-    assert body["unit"] == "log10 CFU/g fresh weight"
-    assert body["evidenceStatus"] == "experimental"
-    assert body["interval"]["low"] <= body["prediction"] <= body["interval"]["high"]
-    assert body["interval"]["calibrated"] is False
-    assert body["crossExperimentGeneralisation"]["transfers"] is False
-    assert body["outOfDistribution"] is False
-    # Flight is measured to be higher than ground, so the sign must be positive.
-    ground = scientific_client.post(
-        "/api/predict/mizuna-microbial-load-v1", json=base | {"environment": "ground"})
-    assert body["prediction"] > ground.json()["prediction"]
+    assert result.status_code == 410
+    detail = result.json()["detail"]
+    assert detail["error"] == "retired-prediction"
+    assert detail["modelId"] == "mizuna-microbial-load-v1"
+    assert detail["evidence"]["transfersToHeldOutExperiment"] is False
+    # Both held-out campaigns must still be reported as failing to transfer.
+    r2 = detail["evidence"]["leaveOneExperimentOutR2"]
+    assert set(r2) == {"VEG04A", "VEG04B"}
+    assert all(value < 0 for value in r2.values())
+    assert detail["replacement"] == "/api/predict/mizuna-microbial-relative-load-v2"
+    # No predicted number may be present anywhere in the retired response.
+    assert "prediction" not in result.json()["detail"]
+
+    # The artifact is retained, not deleted.
+    models = {m["id"]: m for m in scientific_client.get("/api/models").json()["models"]}
+    assert models["mizuna-microbial-load-v1"]["artifactExists"] is True
+
+
+def test_retired_endpoint_is_documented_as_deprecated(scientific_client):
+    """A caller reading OpenAPI must be told the endpoint is withdrawn."""
+    schema = scientific_client.get("/openapi.json").json()
+    operation = schema["paths"]["/api/predict/mizuna-microbial-load-v1"]["post"]
+    assert operation["deprecated"] is True
+    assert "410" in operation["responses"]
 
 
 def test_microbial_prediction_rejects_invalid_input(scientific_client):
@@ -218,11 +238,11 @@ def test_microbial_prediction_rejects_invalid_input(scientific_client):
         json=base | {"gravity": 0.38}).status_code == 422
 
 
-def test_microbial_prediction_flags_out_of_domain(scientific_client):
+def test_relative_microbial_model_flags_out_of_domain(scientific_client):
     """An assay subsample far above the measured range must raise the flag."""
-    body = scientific_client.post("/api/predict/mizuna-microbial-load-v1", json={
-        "experiment": "VEG04A", "environment": "ground", "spectrum": "blue",
-        "sanitised": True, "freshWeightG": 40.0, "harvestIndex": 1,
+    body = scientific_client.post("/api/predict/mizuna-microbial-relative-load-v2", json={
+        "environment": "ground", "spectrum": "blue", "sanitised": True,
+        "freshWeightG": 40.0, "harvestIndex": 1,
     }).json()
     assert body["outOfDistribution"] is True
     assert any("outside observed training range" in w for w in body["warnings"])
