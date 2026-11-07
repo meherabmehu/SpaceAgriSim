@@ -131,5 +131,11 @@ sentence mentioning yield on the served cards is a negation.
 
 ## Merge status
 
-Recorded in the commit history on `main`. The exact merge commit is stated in the
-session record and verifiable with `git log --oneline --merges -1`.
+Merged into `main` with `--no-ff` as commit **`8a90d48`**, whose parents are
+`9669553` (the previous `main`) and `93465aa` (the Phase 9 tip), and pushed to
+`origin/main`. Verified by re-reading the remote: `origin/main` resolves to
+`8a90d48`, and `git branch -r --contains 8a90d48` lists `origin/main`.
+
+All gates were run on the merged tree, not only on the feature branch: 253 backend
+tests, 24 browser tests across three viewports, lint, typecheck, build and the
+visual regression comparison.
