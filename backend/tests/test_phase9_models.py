@@ -418,3 +418,24 @@ def test_phase9_previews_expose_design_tables_and_say_so():
     # Guards the two claims this study invites: partial gravity and 64 plants.
     assert "not partial gravity" in osd411_note
     assert "not 64 independent plants" in osd411_note
+
+
+def test_catalogued_sample_counts_state_what_they_count():
+    """A sample count without a definition is a number waiting to be misread, and
+    OSD-780 is the trap: three files, two measured assay tables, no per-plant rows."""
+    catalogue = {entry["id"]: entry for entry in research.manifest()["datasets"]}
+
+    osd780 = catalogue["OSD-780"]
+    assert osd780["fileCount"] == 3
+    assert osd780["sampleCount"] == 2, "2 assay tables, the third file is a dictionary"
+    assert "assay tables" in osd780["sampleCountDefinition"]
+
+    # OSD-411: the 64 libraries come from 16 seedlings, and the definition must say so.
+    osd411 = catalogue["OSD-411"]
+    assert osd411["sampleCount"] == 64
+    assert "16 seedlings" in osd411["sampleCountDefinition"]
+
+    # Scoped to the studies this phase catalogued: the older entries predate the
+    # field, and retrofitting them is a separate refactor, not a Phase 9 claim.
+    for study in ("OSD-46", "OSD-782", "OSD-411", "OSD-780", "OSD-267", "OSD-269"):
+        assert catalogue[study].get("sampleCountDefinition"), f"{study} count undefined"
