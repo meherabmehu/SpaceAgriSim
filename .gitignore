@@ -39,6 +39,12 @@ npm-debug.log*
 .spaceagrisim/
 frontend/playwright-report/
 frontend/test-results/
+test-results/
+
+# --- Large regenerable metadata cache (Phase 10 gravity scan) ---
+# 231 ISA metadata payloads, 67 MB. Regenerate with
+#   python ml/training/phase10_gravity_recovery.py
+data/metadata/osdr_study_metadata/
 backend/scientific_data/
 
 # --- Phase 9 raw NASA downloads (provenance, not source) ---
