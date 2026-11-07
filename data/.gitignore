@@ -4,3 +4,7 @@ metadata/OSD-*_files.json
 raw/OSD-767/
 interim/
 processed/*.parquet
+
+# Phase 7: NASA NTRS report PDFs are large and publicly re-downloadable.
+# The acquisition script and checksum manifest are committed instead.
+raw/ntrs/

@@ -1,0 +1,127 @@
+{
+  "generatedAt": "2026-11-07T14:55:00.231572+00:00",
+  "source": "NASA Technical Reports Server (NTRS)",
+  "reports": {
+    "19900009537": {
+      "label": "NASA TM-102784",
+      "title": "Continuous Hydroponic Wheat Production Using a Recirculating System",
+      "tables": [
+        "Table 6 (p.40)",
+        "Table 7 (p.41)",
+        "Table 9 (p.43)",
+        "Table 10 (p.43)"
+      ]
+    },
+    "19900016137": {
+      "label": "NASA TM-102788",
+      "title": "Carbon Dioxide and Water Exchange Rates by a Wheat Crop in NASA's Biomass Production Chamber",
+      "tables": [
+        "measured statements, pages recorded per variable"
+      ]
+    }
+  },
+  "validation": {
+    "aggregatesRecomputed": [
+      "ageDays",
+      "heightMm",
+      "totalBiomassG",
+      "totalHeads",
+      "totalMassG",
+      "totalPlants",
+      "totalSeeds",
+      "totalSpikelets"
+    ],
+    "derivedColumnsRecomputed": true,
+    "crossTableChecks": "Table 9 root dry mass reconciles with Table 10 total dry mass",
+    "provenanceChecks": 7,
+    "allPassed": true,
+    "failures": []
+  },
+  "ocrCorrection": {
+    "report": "NASA TM-102784",
+    "table": "Table 6",
+    "row": "tray 7, total biomass",
+    "textLayerValue": 451,
+    "acceptedValue": 231,
+    "derivation": "Two independent published checks. (1) The report's own 16-tray mean total biomass is 371 g; the extracted values average 371.0 g only when tray 7 is 231 (with 451 the mean is 384.75 g). (2) The report's own edible biomass index for tray 7 is 16 %; 35.86 g seed / 231 g = 15.5 %, whereas 35.86 / 451 = 8.0 %. The printed STD of 96 g also matches only with 231."
+  },
+  "sourceInconsistencies": [
+    {
+      "table": "harvest",
+      "row": 9,
+      "column": "derivedPlants",
+      "explanation": "Tray 9 totalPlants=216 is consistent with the report's published 16-tray plant mean (271) but NOT with its own published seeds/plant (14.2) and mass/plant (0.34), which require 326 plants. The document is internally contradictory for this row. Primary measurements are retained; the two derived columns are excluded from validation and flagged."
+    },
+    {
+      "table": "harvest",
+      "row": 11,
+      "column": "edibleBiomassIndexPct",
+      "explanation": "Published EBI 37% vs 38.6% recomputed (146.65/380). A 1.6 pp discrepancy. Total biomass 380 g is retained because it reproduces the published 371 g mean exactly; the EBI figure appears mis-rounded in the source."
+    },
+    {
+      "table": "growth",
+      "row": 24,
+      "column": "pctRoot",
+      "explanation": "Published %root 22.0 vs 22.95 recomputed (4.82/21). A 0.95 pp discrepancy in the oldest destructive harvest; dry mass 21 g is retained because it reproduces the published DW/plant of 0.07 g."
+    }
+  ],
+  "perM3HeightAssumption": {
+    "table7Factor": 1.9,
+    "table10Factor": 2.6,
+    "note": "The same report converts per-m2 to per-m3 with two different assumed canopy heights (0.526 m in Table 7, 0.385 m in Table 10). Both observed factors are validated as published and the inconsistency is recorded rather than reconciled."
+  },
+  "trayArea": {
+    "authorStated": 0.24,
+    "impliedByPublishedColumns": 0.238,
+    "note": "Authors state 0.24 m2; their seed-mass-per-m2 column implies ~0.238 m2. The discrepancy is recorded rather than smoothed over."
+  },
+  "counts": {
+    "harvestTrays": 16,
+    "growthAges": 7,
+    "measuredVariables": 15
+  },
+  "provenance": [
+    {
+      "table": "6",
+      "page": 40,
+      "value": "138.68",
+      "found": true
+    },
+    {
+      "table": "6",
+      "page": 40,
+      "value": "192.41",
+      "found": true
+    },
+    {
+      "table": "6",
+      "page": 40,
+      "value": "236.59",
+      "found": true
+    },
+    {
+      "table": "6",
+      "page": 40,
+      "value": "103.48",
+      "found": true
+    },
+    {
+      "table": "10",
+      "page": 43,
+      "value": "1211",
+      "found": true
+    },
+    {
+      "table": "10",
+      "page": 43,
+      "value": "1325",
+      "found": true
+    },
+    {
+      "table": "10",
+      "page": 43,
+      "value": "1008",
+      "found": true
+    }
+  ]
+}
