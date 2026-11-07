@@ -1,68 +1,77 @@
-# Phase 10 — NASA dataset evaluation
+# Phase 10 — NASA dataset expansion
 
-Phase 10 did **not** acquire new NASA datasets, and this document explains that
-decision with the evidence rather than leaving it as an omission.
+Phase 10 added **one** dataset, and the way it found it is the point: Phase 9 had
+concluded that no plant study with processed expression and a real partial-gravity
+manipulation existed, on the evidence of a single study (OSD-480, raw FASTQ only).
 
-## What already exists
+That conclusion was drawn from one deposit rather than from a search. Phase 10 ran the
+search.
 
-Phase 9 swept every OSDR identifier from OSD-1 to OSD-900:
+## The scan
 
-| Verdict | Studies |
+Every study the Phase 9 sweep classified as having a usable processed matrix — **231**
+of 587 — had its ISA metadata fetched from the OSDR API and scanned for any vocabulary
+that could name a non-1 g acceleration: partial or fractional gravity, centrifuge,
+clinostat, random positioning, explicit g values, lunar/Mars.
+
+| Step | Result |
 | --- | --- |
-| usable processed matrix | **231** |
-| rejected — no expression data | 209 |
-| rejected — raw sequencing only | 115 |
-| rejected — raw amplicon only | 32 |
-| **found in range** | **587** |
+| studies with usable processed matrix | 231 |
+| metadata retrieved | **231 / 231** |
+| keyword candidates | 22 |
+| graded-gravity **plant** studies with processed RNA-seq | **2** |
 
-Of those 231, six publish a processed taxonomic table, and the plant-relevant ones
-were evaluated. The catalogue now lists **17 datasets** (18 through the API, which
-also surfaces the external Earth lettuce source), including the four Phase 9 added:
-OSD-46, OSD-782, OSD-411 and OSD-780.
+Patterns were deliberately loose. Missing a study was the expensive error; listing
+extra candidates only costs review time. All 22 candidates, their titles, matched
+patterns and factor tables are recorded in
+`ml/evaluation/phase10_gravity_recovery.json`.
 
-## Why Phase 10 added none
+## What was added
 
-The Phase 10 mission is model improvement, and every weak model here is limited by
-**evidence**, not by an unfilled data slot. Re-examining the 231 usable studies
-against the specific gaps the audit found gives no candidate:
+**OSD-314** — *Adaptive response of Arabidopsis seedlings in microgravity and Mars
+reduced gravity environment is enhanced by red light photostimulation.*
 
-| Gap found in the audit | What would close it | Available in OSDR? |
+Arabidopsis thaliana Col-0 on the ISS, with a subset **centrifuged to 0.34 g in
+orbit**, alongside microgravity samples and a 1 g ground control, every gravity level
+crossed against red-light and dark treatments. 17 libraries.
+
+It is the first dataset in this catalogue whose gravity label is a **gravity level**
+rather than a reorientation direction. Acquisition is pinned by byte length and
+SHA-256 in `scripts/acquire_phase10_osd314.py`, and the catalogue entry carries its
+own limitations, including that 1 g samples are ground controls while 0 g and 0.34 g
+samples are in orbit.
+
+What it did and did not support is in `PHASE10_DOSE_GRAVITY_RECOVERY.md`: a
+within-flight 0 g versus 0.34 g contrast reaching balanced accuracy 1.000 (p = 0.0055),
+corroborated by the deposit's own 8,478–13,504 differentially expressed genes, and
+**no model**, because 17 libraries in one mission cannot support one.
+
+Catalogue: **17 → 18** NASA datasets.
+
+## The second candidate, named but not analysed
+
+**OSD-346** — Arabidopsis phyA/phyB under fractional gravity from 0 to 0.64 g, with
+eight gravity levels. Its expression is deposited as 26 per-sample RSEM files rather
+than one matrix, so merging it requires parsing its factor table first. Doing that
+badly would risk exactly the label error this phase is about, so it is the declared
+next action rather than a half-done addition.
+
+## Why nothing else was added
+
+Every remaining weak model is limited by evidence that no available study supplies:
+
+| Gap | What would close it | Available? |
 | --- | --- | --- |
-| Mizuna harvest: 14 endpoints, 1 experiment | more harvests with paired conditions **in the same design** | no — merging separate experiments would confound experiment with treatment, which is the defect the audit already rejected |
-| Lettuce growth: 4 experiments | a 5th and 6th independent greenhouse experiment | no NASA source; the data is external (WUR/4TU) and Earth-only |
-| Radiation dose: confounded with processing order | a dose study with randomised processing order | not in the 231; OSD-782 is the only plant dose series with a processed matrix |
-| Gravity: 90° reorientation ≠ gravity level | a real partial-gravity plant study with processed expression | no — OSD-480 is 6.2 TB of raw FASTQ with no processed matrix |
-| Cross-study transfer target | a second radiation study whose **own** contrast is learnable | OSD-782 fails its own within-study test (0.438, CI 0.300–0.591) |
+| Mizuna harvest: 14 endpoints, 1 experiment | more harvests **inside the same design** | no — merging experiments confounds experiment with treatment |
+| Lettuce growth: 4 experiments | a 5th and 6th independent greenhouse experiment | no NASA source; the data is external and Earth-only |
+| Radiation dose at fine resolution | randomised processing order, not just more doses | no — each (dose, timepoint) cell is one sequencing batch |
 | Microbial absolute load across campaigns | a third campaign with baseline samples | only VEG-04A and VEG-04B exist |
+| Cross-study transfer target | a second radiation study whose own contrast survives an unseen (dose, timepoint) cell | OSD-782 does not; no other processed radiation RNA-seq study exists in the 231 |
 
-## What Phase 10 did with the data it has
+## The lesson recorded here
 
-Rather than acquire data that would not change a conclusion, Phase 10 used the
-existing studies more rigorously:
-
-1. **Reuse of the deployed pipeline.** The explanation, stability and cross-study
-   scripts import the *training* loader and selection function instead of copying
-   them. Phase 9 had a bug caused by a duplicated group key, so the duplication is
-   removed rather than repeated.
-2. **A within-study reference for the transfer study**, which turned a negative into
-   a correctly scoped negative. That required no new data, only a measurement nobody
-   had made.
-3. **Group-level conformal calibration** on the 35 pillows and 4 experiments already
-   present, which fixed an interval defect without a single new observation.
-
-## The OSD-480 question, explicitly
-
-OSD-480 is the obvious gravity candidate and is **not** pursued. It is 3,208 objects
-and 6.2 TB of raw FASTQ with no processed matrix. Running an alignment and
-quantification pipeline would (a) be unreproducible from this repository, (b) take
-days of compute, and (c) produce numbers no reviewer could check. The brief asks for a
-justified resource plan before that work; the justification does not exist while the
-scientific question (partial gravity) still cannot be answered by a ground
-reorientation study of any size.
-
-## Conclusion
-
-The honest Phase 10 dataset statement is that **the corpus was already exhausted for
-these questions in Phase 9**, and the marginal value of another study is zero until a
-study arrives that fills a specific gap listed above. Fabricating progress by adding
-an unrelated dataset would inflate the catalogue without improving a single model.
+An inventory is not a search. Phase 9's dataset conclusion was stated as a fact about
+NASA's holdings and was based on one study's file listing; the correct version took an
+API request per study and 15 minutes. The scan is now a script
+(`ml/training/phase10_gravity_recovery.py`), so the next such claim can be re-checked
+rather than re-asserted.

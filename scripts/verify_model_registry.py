@@ -70,8 +70,14 @@ def main() -> int:
               f"{digest[:12]} vs recorded {item['sha256'][:12]}")
 
     # 2. No orphan artifacts: everything on disk is accounted for.
+    #
+    # Explanation files live beside their models (ml/artifacts/<id>-explanation.json)
+    # rather than inside them, so a model checksum keeps meaning "the trained model".
+    # They are not models and must be excluded here, or every explained model looks
+    # like an orphan.
     registered_ids = {item["id"] for item in models}
     on_disk = {p.stem for p in ARTIFACTS.glob("*.json")} - {"registry", "tomato_example"}
+    on_disk = {stem for stem in on_disk if not stem.endswith("-explanation")}
     orphans = sorted(on_disk - registered_ids)
     check("no unregistered model artifacts", not orphans, f"orphans={orphans}")
 

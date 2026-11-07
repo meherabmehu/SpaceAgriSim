@@ -1,7 +1,8 @@
 # Phase 10 — final report
 
-Branch `feat/phase10-advanced-nasa-ai`, six commits on top of `05f6950`.
+Branch `feat/phase10-advanced-nasa-ai`, ten commits on top of `05f6950`.
 **Registry: 8 models, no additions, no removals, no status changes.**
+**Catalogue: 18 NASA datasets, one new (OSD-314).**
 
 The phase had one throughline: Phase 9 shipped models whose *claims* were less
 rigorous than their *fits*. Every number in the registry was measured; what was
@@ -81,38 +82,104 @@ predictor. Every registry status byte is identical to Phase 9, and a test assert
 
 Detail: `PHASE10_WEAK_MODEL_AUDIT.md`, `PHASE10_MODEL_IMPROVEMENTS.md`.
 
-## 4. The cross-study negative was over-attributed — corrected
+## 4. The cross-study negative: over-attributed, then over-corrected, then measured
 
 Four label-free harmonisations (z-score, rank, quantile-map, training-only pathway
 modules) all collapse to the majority class: accuracy 0.667, balanced 0.500, control
 recall 0.00.
 
-But the within-study reference changes what that means. **OSD-782's own
-leave-one-group-out balanced accuracy is 0.438, 95 % CI [0.300, 0.591]** — it spans
-chance. The target study's own irradiated-vs-control contrast is not learnable by
-this pipeline, so the transfer experiment **cannot distinguish a harmonisation
-failure from an absent signal**.
+The within-study reference then decided what that means — and it turned out to depend
+on the protocol, which is why it is reported both ways:
 
-The Phase 9 conclusion as written implied harmonisation was the obstacle. It is not
-supported. The accurate statement is that transfer fails under every harmonisation
-tried, and the experiment is *inconclusive about harmonisation*. What would settle it
-is a target study whose own contrast is learnable — that is now the stated
-requirement, and it is a more useful output than a rescued hyperparameter.
+| Within-OSD-782 reference | Balanced accuracy | Interval / p |
+| --- | --- | --- |
+| hold out (dose, timepoint) cells | 0.438 | [0.300, 0.591] |
+| hold out whole timepoints | **0.812** | p = 0.001 |
 
-Detail: `PHASE10_CROSS_STUDY_VALIDATION.md`.
+The target is **not** signal-free. It carries a contrast that generalises across
+timepoints and does not survive an unseen (dose, timepoint) cell — each of the 12 cells
+is one sequencing batch, so a cell-held-out fold also demands batch generalisation,
+which is exactly what a cross-study transfer faces.
 
-## 5. No new datasets, and the reason is specific
+Getting to this took two corrections in one phase. Phase 9 implied harmonisation was
+the obstacle; the first Phase 10 reading said the target had no signal at all. Both
+were single-protocol conclusions. The evidence supports a narrower one: transfer fails,
+harmonisation stays implicated, and it is **not proven** to be the cause because
+harmonisation cannot be separated from the target's cell-level batch structure. That
+distinction is the most honest sentence 36 libraries can support, and the measurement
+that would settle it is named.
 
-Phase 9's sweep of OSD-1…900 found 587 studies, 231 with usable processed matrices.
-Phase 10 added none, because each weak model is blocked on a specific missing
-observation and **nothing in those 231 supplies it**: mizuna needs harvests inside one
-design (merging experiments confounds experiment with treatment), lettuce needs a 5th
-and 6th greenhouse experiment (none exist at NASA), dose needs randomised processing
-order, gravity needs a real partial-gravity study with processed expression (OSD-480
-is 6.2 TB of raw FASTQ and no matrix), and transfer needs a learnable target. Adding
-an unrelated dataset would inflate the catalogue without improving a model.
+Detail: `PHASE10_CROSS_STUDY_VALIDATION.md`, `PHASE10_DOSE_GRAVITY_RECOVERY.md`.
 
-Detail: `PHASE10_NASA_DATASET_EXPANSION.md`.
+## 5. One dataset added, found by searching instead of asserting
+
+Phase 9 concluded that no plant study with processed expression and a real partial
+gravity manipulation existed, based on one study (OSD-480, raw FASTQ only). That was an
+inference from a single deposit, not a search.
+
+Phase 10 fetched the ISA metadata of all **231** studies with a usable processed matrix
+and scanned it for any vocabulary naming a non-1 g acceleration: 231/231 retrieved, 22
+candidates, and **two graded-gravity plant experiments with processed RNA-seq**, of which
+one is now catalogued.
+
+**OSD-314** — Arabidopsis on the ISS, a subset centrifuged to **0.34 g in orbit**,
+microgravity and a 1 g ground control, every level crossed with red light and dark.
+17 libraries. It is the first dataset here whose gravity label is a gravity level rather
+than a reorientation direction. Acquisition is pinned by byte length and SHA-256.
+
+What it supported is in section 6; what it did not is that no model is served from it.
+
+**OSD-346** (eight gravity levels, 0–0.64 g) is the named replication and is
+deliberately unstarted: its expression is 26 per-sample files and merging them without
+its factor table would risk exactly the label error this phase is about.
+
+Detail: `PHASE10_NASA_DATASET_EXPANSION.md`, `PHASE10_DOSE_GRAVITY_RECOVERY.md`.
+
+## 6. Dose and gravity: both exclusions stand, both explanations were wrong
+
+**Dose.** The `absorbedDoseGy` label is valid (0 / 10 / 100 Gy, full factorial against
+four timepoints). Phase 9's note that dose was "confounded with processing order" is
+partly right — each (dose, timepoint) cell is one sequencing batch — but that makes the
+label harder to evaluate, not unusable.
+
+| Protocol on the same 36 libraries | Balanced accuracy | p |
+| --- | --- | --- |
+| hold out one (dose, timepoint) cell | **0.111** (worse than chance) | — |
+| hold out one whole timepoint | **0.611** | 0.0005 |
+| hold out one whole timepoint, ordinal | ρ = 0.197, monotone | 0.0155 |
+
+The dose gradient is recoverable when the split matches the design. The cell-held-out
+protocol returns *below* chance, which is what a split measuring batch membership looks
+like. Nothing is promoted: 36 libraries in one genotype cannot support a dose predictor,
+so the exclusion stands on better evidence than it did.
+
+**Gravity.** OSD-411 remains excluded — every sample is at 1 g, and 90° reorientation is
+not a gravity level. OSD-314 is different: the within-flight 0 g versus 0.34 g contrast
+reaches balanced accuracy **1.000** (p = 0.0055) on held-out light treatments,
+corroborated by the deposit's own **8,478–13,504** differentially expressed genes. It is
+not served — 17 libraries, one mission, two folds, no sequencing-run identifier in the
+deposit, and 0.34 g is neither Moon nor Mars gravity.
+
+**The binary contrast, under both protocols** (this is what corrected section 4):
+
+| Protocol | Balanced accuracy | Interval / p |
+| --- | --- | --- |
+| hold out (dose, timepoint) cell | 0.563 | group bootstrap [0.386, 0.729] |
+| hold out whole timepoint | **0.813** | p = 0.0005 |
+
+## 7. The registry now proves it says only what its artifacts support
+
+`ml/training/phase10_registry_api_audit.py` checks, for every model, that the artifact
+exists, its digest matches, every claimed metric equals the artifact's, no excluded
+candidate is served, no stated coverage falls short by more than 0.05, no explanation is
+inexact, no model cites an uncatalogued study, and the API serves exactly the registry.
+
+Result: **8 models, 0 findings.** It found two real gaps, both since fixed: the radiation
+entries did not advertise the explanation capability they have, and
+`verify_model_registry.py` had been counting explanation files as orphan models since the
+XAI commit (40/40 checks now pass). Neither fix moved a metric, a radius or a status.
+
+Detail: `PHASE10_REGISTRY_API.md`.
 
 ## Verification
 
@@ -120,12 +187,14 @@ Every gate below was run on the merged state, not asserted:
 
 | Gate | Result |
 | --- | --- |
-| Backend suite | **279 passed** |
+| Backend suite | **288 passed** |
 | Playwright (3 viewports) | **27 passed** |
 | Visual regression | **9/9 within tolerance** (mission 0.002–0.004 %, radiation 0.000 %) |
 | ESLint / `tsc --noEmit` / production build | clean / clean / ✓ |
 | Demo script (`scripts/demo_phase9.sh`) | runs end to end, live API included |
 | Determinism | conformal slice re-run in test |
+| Registry integrity | `verify_model_registry.py` **40/40**, API audit **0 findings** |
+| Demo | `scripts/demo_phase9.sh` runs the phase end to end in **6 s** |
 
 **UI preservation.** The only visual addition is the explanation block, appended at
 the **end** of the radiation card — after the source link — so the change is additive.
@@ -147,11 +216,22 @@ deployed, and none of this is a production verification.
 
 ## What Phase 11 should do
 
-1. **Find a transfer target whose own contrast reproduces.** Every conclusion about
-   harmonisation is blocked on this.
-2. **Run OSD-480 end to end**, or state permanently that it is out of scope. The
-   partial-gravity question stays unanswerable until it is.
-3. **Get a third microbial campaign**, which is the only thing that turns a two-campaign
+1. **Analyse OSD-346.** Eight gravity levels, 0–0.64 g, phyA/phyB, blue light. It is the
+   replication the OSD-314 result needs, and it is the only thing that can turn a
+   17-library observation into a graded-gravity finding.
+2. **Get a transfer target whose contrast survives an unseen cell.** OSD-782's does not,
+   so every conclusion about harmonisation stays blocked.
+3. **Ask for OSD-314's sequencing run identifiers.** The batch question cannot be
+   answered from the deposit, and it is one email rather than one analysis.
+4. **Get a third microbial campaign**, which is the only thing that turns a two-campaign
    calibration into a predictive interval.
-4. **Stop re-tuning `mizuna-harvest-v1`.** It has 14 rows and one experiment. Collect
+5. **Stop re-tuning `mizuna-harvest-v1`.** It has 14 rows and one experiment. Collect
    harvests, not hyperparameters.
+
+## Documents
+
+`PHASE10_BASELINE.md`, `PHASE10_UNCERTAINTY.md`, `PHASE10_EXPLAINABLE_AI.md`,
+`PHASE10_WEAK_MODEL_AUDIT.md`, `PHASE10_CROSS_STUDY_VALIDATION.md`,
+`PHASE10_DOSE_GRAVITY_RECOVERY.md`, `PHASE10_NASA_DATASET_EXPANSION.md`,
+`PHASE10_MODEL_IMPROVEMENTS.md`, `PHASE10_REGISTRY_API.md`,
+`PHASE10_COMPETITION_DEMO.md`, and this report.

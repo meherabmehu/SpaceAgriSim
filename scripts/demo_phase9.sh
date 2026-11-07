@@ -75,7 +75,7 @@ step "4/6 Verify registry checksums and run the scientific test suite"
 python3 scripts/package_runtime_data.py
 ( cd backend && python3 -m pytest -q tests/test_phase9_models.py )
 
-step "5/6 Show the interval calibration and the two negative results"
+step "5/6 Show the interval calibration, the corrected transfer reading, and the recovered signals"
 python3 - <<'PY'
 import json
 from pathlib import Path
@@ -102,10 +102,29 @@ for model_id, choice in decision["decisions"].items():
 
 transfer = json.loads(Path("ml/evaluation/phase10_cross_study.json").read_text())
 reference = transfer["withinStudyReference"]
-print(f"  cross-study: {transfer['verdict']}; but OSD-782's own within-study balanced "
-      f"accuracy is {reference['balancedAccuracy']:.3f} "
-      f"(95% CI {reference['bootstrapCi95'][0]:.2f}-{reference['bootstrapCi95'][1]:.2f}), "
-      f"so the negative is inconclusive about harmonisation")
+matched = reference["protocolSensitivity"]["timepointHeldOut"]
+print(f"  cross-study: {transfer['verdict']}; the target's own contrast is "
+      f"{reference['balancedAccuracy']:.3f} with cells held out "
+      f"(95% CI {reference['bootstrapCi95'][0]:.2f}-{reference['bootstrapCi95'][1]:.2f}) "
+      f"and {matched:.3f} with timepoints held out, so the negative is about "
+      f"transfer, not about the absence of signal")
+
+# Phase 10: the two Phase 9 exclusions, re-measured with protocols matched to design.
+dose = json.loads(Path("ml/evaluation/phase10_dose_recovery.json").read_text())
+protocols = dose["protocols"]
+print(f"  dose labels: valid ({dose['labelsAvailable']['values']} Gy), and the answer "
+      f"depends on the split:")
+print(f"    hold out (dose,timepoint) cell -> balanced {protocols['A_cellHeldOut']['balancedAccuracy']:.3f}"
+      f"   hold out whole timepoint -> {protocols['B_timepointHeldOut']['balancedAccuracy']:.3f}"
+      f" (p={protocols['B_timepointHeldOut']['permutation']['pCorrected']})")
+
+gravity = json.loads(Path("ml/evaluation/phase10_partial_gravity.json").read_text())
+primary = gravity["primaryContrast"]
+print(f"  partial gravity, OSD-314 at {gravity['design']['gravityLevelsG']} g in orbit:")
+print(f"    uG vs 0.34 g inside flight -> balanced {primary['balancedAccuracy']:.3f} "
+      f"(p={primary['permutation']['pCorrected']}), corroborated by "
+      f"{min(gravity['corroboration']['withinFlightContrasts'].values())} DE genes; "
+      f"not served, because n=17 in one mission")
 PY
 
 if [ "$SERVER" -eq 1 ]; then

@@ -56,21 +56,39 @@ With four experiments a 0.01 R² difference is one experiment's worth of noise.
 to confirm it searches noise. The model's limitation is label meaning (flight context,
 not stress or yield), which tuning cannot address.
 
-### Radiation dose (OSD-782) and gravity (OSD-411) — exclusions retained
+### Radiation dose (OSD-782) — exclusion retained, reasoning corrected
 
-Both were re-examined in Phase 9 and re-measured in Phase 10 through the cross-study
-work. Neither reaches a defensible baseline:
+Phase 9 excluded the dose model at balanced accuracy 0.361 (p = 0.2475) because the
+dose label was described as confounded with processing order. The label is in fact
+**valid** — 0 / 10 / 100 Gy, full factorial against four timepoints — and the
+confound is narrower: each (dose, timepoint) cell is one sequencing batch.
 
-| Candidate | Balanced accuracy | Permutation p | Status |
-| --- | --- | --- | --- |
-| dose, 3-class (chance 0.333) | 0.361 | 0.2475 | excluded, artifact retained |
-| gravity reorientation | 0.500 | 0.6931 | excluded, artifact retained |
+Re-measured under three protocols on the same 36 libraries:
 
-A new finding strengthens the dose exclusion rather than overturning it: OSD-782's own
-**binary** irradiated-vs-control contrast is also at chance (0.438, 95 % CI
-0.300–0.591). A study whose simplest contrast does not reproduce cannot support a
-finer three-level dose model, so the structural explanation and the measured one now
-agree.
+| Protocol | Balanced accuracy | p |
+| --- | --- | --- |
+| hold out one (dose, timepoint) cell | 0.111 | — |
+| hold out one whole timepoint | 0.611 | 0.0005 |
+| hold out one whole timepoint, ordinal (Spearman) | ρ = 0.197, monotone | 0.0155 |
+
+The dose gradient **is** recoverable when the split matches the design, and the
+cell-level protocol returns below chance — which is what a split measuring batch
+membership looks like. Nothing is promoted: 36 libraries in one genotype and one
+laboratory cannot support a dose predictor, and the Phase 9 exclusion stands on that
+ground rather than on the label.
+
+### Gravity (OSD-411) — exclusion retained, and a real study found
+
+The OSD-411 exclusion is correct: 90° reorientation at 1 g is not a gravity level, and
+every sample is at 1 g. What was wrong was the wider claim that no partial-gravity plant
+study with processed expression exists. A metadata scan of all 231 usable studies found
+**OSD-314**, which centrifuges Arabidopsis to 0.34 g in orbit.
+
+The within-flight 0 g versus 0.34 g contrast reaches balanced accuracy **1.000**
+(p = 0.0055) on held-out light treatments, corroborated by the study's own 8,478–13,504
+differentially expressed genes. It is still **not served**: 17 libraries, one genotype,
+one mission, two folds, no sequencing-run identifier in the deposit, and 0.34 g is
+neither Moon nor Mars gravity. Detail: `PHASE10_DOSE_GRAVITY_RECOVERY.md`.
 
 ### Cross-study harmonisation — four attempts, none adopted
 
@@ -80,7 +98,10 @@ z-score, rank, quantile-map and pathway modules all collapse to one class. See
 
 ## What did not change
 
-- **Registry: 8 models.** No additions, no removals, no status changes.
+- **Registry: 8 models.** No additions, no removals, no status changes. The two
+  radiation entries gained a `phase10.explanationAvailable` field describing a
+  capability that already existed; no metric, interval radius or status moved.
+- **Catalogue: 18 datasets.** OSD-314 was added with its limitations attached.
 - **No artifact was overwritten.** Intervals and explanations were added as fields;
   the fitted parameters, checksums of the model itself, and every metric are
   untouched apart from the interval block.
@@ -90,11 +111,16 @@ z-score, rank, quantile-map and pathway modules all collapse to one class. See
 ## Reproducing
 
 ```bash
+python scripts/acquire_phase10_osd314.py          # verified OSD-314 acquisition
 python ml/training/phase10_conformal_study.py     # measures coverage
 python ml/training/phase10_patch_uncertainty.py   # fits the adopted radii
 python ml/training/phase10_explain_radiation.py   # explanations + stability
 python ml/training/phase10_weak_model_audit.py    # the audit table
 python ml/training/phase10_cross_study.py         # harmonisation comparison
+python ml/training/phase10_dose_recovery.py       # dose, three protocols
+python ml/training/phase10_partial_gravity_osd314.py  # graded-gravity analysis
+python ml/training/phase10_gravity_recovery.py    # metadata scan over 231 studies
+python ml/training/phase10_registry_api_audit.py  # registry vs artifacts
 ```
 
 Each is deterministic. The conformal study pins `n_jobs=1` because it was not, and a

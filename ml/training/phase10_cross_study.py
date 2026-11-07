@@ -213,6 +213,62 @@ def within_study(test_x, test_y, test_groups, k=150):
     }
 
 
+def within_study_timepoint_held_out(k=150):
+    """The same target contrast under a protocol matched to OSD-782's design.
+
+    The reference above holds out (dose, timepoint) cells, which is the
+    transfer-analogous condition but a hard one: each cell is a single sequencing
+    batch, so the fold also asks the model to generalise across a batch. Holding out
+    whole timepoints preserves all three doses in training and tests the question
+    "does this study carry an irradiated-versus-control signal at all?".
+
+    Both numbers are reported, because they answer different questions and only
+    together do they support a claim. Computed by `phase10_dose_recovery.fit_fold`
+    so there is one selection and fitting path, not two.
+    """
+    from phase10_dose_recovery import fit_fold, load as load_dose
+    from sklearn.metrics import balanced_accuracy_score as score
+    from sklearn.model_selection import LeaveOneGroupOut as logo
+
+    expression, dose, hours, _, _ = load_dose()
+    binary = np.where(dose == 0.0, "control", "irradiated")
+    predicted = np.empty(len(dose), dtype=object)
+    for train_index, test_index in logo().split(expression, binary, hours):
+        assert not set(hours[train_index]) & set(hours[test_index]), "timepoint leak"
+        predicted[test_index], _ = fit_fold(expression, binary, train_index, test_index, k)
+    generator = np.random.default_rng(SEED + 7)
+    scores = []
+    for _ in range(2000):
+        shuffled = binary.copy()
+        for level in np.unique(hours):
+            rows = np.flatnonzero(hours == level)
+            shuffled[rows] = generator.permutation(shuffled[rows])
+        scores.append(score(shuffled, predicted))
+    observed = float(score(binary, predicted))
+    exceed = int((np.array(scores) >= observed).sum())
+    return {
+        "scheme": "leave-one-timepoint-out within OSD-782 (design-matched)",
+        "balancedAccuracy": round(observed, 4),
+        "recallControl": round(float((predicted[binary == "control"] == "control").mean()), 4),
+        "recallIrradiated": round(
+            float((predicted[binary == "irradiated"] == "irradiated").mean()), 4),
+        "permutation": {
+            "scheme": "labels permuted within timepoint (design-preserving null)",
+            "permutations": 2000,
+            "exceedances": exceed,
+            "pCorrected": round((exceed + 1) / 2001, 5),
+        },
+        "practicalMeaning": (
+            "Under the design-matched protocol the target contrast is learnable, so "
+            "OSD-782 does carry an irradiated-versus-control signal. The cell-held-out "
+            "reference is lower because each cell is one sequencing batch and holding a "
+            "cell out also asks for generalization across a batch. A cross-study transfer "
+            "faces the harder condition, so the transfer negative stands; what has to "
+            "change is the phrase 'the target has no signal', which is now known to be "
+            "false."),
+    }
+
+
 def main() -> int:
     train_x, train_label, _, test_x, test_label, test_groups = load_pair()
     train, test, genes = common_genes(train_x, test_x)
@@ -236,6 +292,22 @@ def main() -> int:
     reference = within_study(test, test_label, test_groups)
     print(f"  within-OSD-782 reference: acc {reference['accuracy']:.3f} "
           f"bal {reference['balancedAccuracy']:.3f}")
+    matched = within_study_timepoint_held_out()
+    print(f"  within-OSD-782, timepoints held out: bal {matched['balancedAccuracy']:.3f} "
+          f"(p={matched['permutation']['pCorrected']})")
+    reference["protocolSensitivity"] = {
+        "cellHeldOut": reference["balancedAccuracy"],
+        "timepointHeldOut": matched["balancedAccuracy"],
+        "designMatched": matched,
+        "statement": (
+            "Two within-study references differ by protocol. Held-out cells give "
+            f"{reference['balancedAccuracy']:.3f} (interval spans chance); held-out "
+            f"timepoints give {matched['balancedAccuracy']:.3f} "
+            f"(p={matched['permutation']['pCorrected']}). The target study does carry a "
+            "learnable contrast; it does not survive generalization to an unseen "
+            "(dose, timepoint) cell, which is the closer analogue of a cross-study "
+            "transfer. Both numbers are required to make either claim."),
+    }
 
     # Same rule as Phase 9: a harmonisation counts only if it recovers both classes.
     adopted = [name for name, value in results.items()
@@ -277,8 +349,10 @@ def main() -> int:
     print(f"\nverdict: {report['verdict']}")
     print(f"within-study reference balanced accuracy {reference['balancedAccuracy']:.3f}")
     if reference["balancedAccuracy"] <= 0.6:
-        print("note: the contrast is not strongly learnable within OSD-782 either, so this "
-              "study cannot serve as a clean transfer target")
+        print(f"note: held-out cells give {reference['balancedAccuracy']:.3f} but held-out "
+              f"timepoints give {matched['balancedAccuracy']:.3f}, so the target does carry "
+              "a learnable contrast that does not survive an unseen (dose, timepoint) cell. "
+              "The transfer negative stands; 'the target has no signal' does not.")
     return 0
 
 
