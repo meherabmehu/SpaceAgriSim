@@ -1,0 +1,139 @@
+#!/usr/bin/env bash
+# Phase 9 reproducible demo.
+#
+# Verifies provenance, retrains both served models from the pinned NASA files,
+# checks that the metrics match what the documentation claims, and shows a live
+# prediction through the API.
+#
+# Every step is idempotent. Nothing here deploys anything.
+#
+# Usage:
+#   scripts/demo_phase9.sh              # full run (retrains, ~6 minutes)
+#   scripts/demo_phase9.sh --fast       # skip retraining, check the committed state
+#   scripts/demo_phase9.sh --no-server  # skip the live API section
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+ROOT="$PWD"
+FAST=0
+SERVER=1
+for argument in "$@"; do
+  case "$argument" in
+    --fast) FAST=1 ;;
+    --no-server) SERVER=0 ;;
+    *) echo "unknown option: $argument" >&2; exit 2 ;;
+  esac
+done
+
+step() { printf '\n\033[1m== %s\033[0m\n' "$1"; }
+
+step "1/6 Verify every NASA source file by checksum"
+python3 scripts/acquire_phase9.py
+echo "Every file above was matched against a pinned SHA-256."
+
+if [ "$FAST" -eq 0 ]; then
+  step "2/6 Retrain both served models (deterministic, seed 20261107)"
+  python3 ml/training/train_radiation_osd46.py
+else
+  step "2/6 Skipped retraining (--fast); using the committed artifacts"
+fi
+
+step "3/6 Assert the documented metrics still hold"
+python3 - <<'PY'
+import json, sys
+from pathlib import Path
+
+report = json.loads(Path("ml/evaluation/phase9_osd46_radiation.json").read_text())
+# These are the SHIPPED learner's numbers, not the best learner's: the artifact
+# serialises the best *linear* family because tree ensembles cannot be exported to
+# the dependency-free evaluator. For exposure that means logistic_l2 (0.910) ships
+# even though gradient boosting scored higher (0.924) in evaluation.
+expected = {
+    "quality": {"learner": "logistic_l2", "balancedAccuracy": 0.898, "pValue": 0.0099, "groups": 22},
+    "exposure": {"learner": "logistic_l2", "balancedAccuracy": 0.910, "pValue": 0.0099, "groups": 22},
+}
+failures = []
+for task, want in expected.items():
+    got = report["tasks"][task]
+    bal = got["learners"][want["learner"]]["balancedAccuracy"]
+    p = got["permutation"]["pValue"]
+    if abs(bal - want["balancedAccuracy"]) > 0.002:
+        failures.append(f"{task}: balanced accuracy {bal:.4f} != {want['balancedAccuracy']}")
+    if abs(p - want["pValue"]) > 1e-4:
+        failures.append(f"{task}: permutation p {p} != {want['pValue']}")
+    if report["biologicalGroups"] != want["groups"]:
+        failures.append(f"{task}: {report['biologicalGroups']} groups != {want['groups']}")
+    print(f"  {task:9s} shipped {want['learner']} balanced {bal:.3f}  "
+          f"p={p:.4f}  groups={report['biologicalGroups']}")
+if failures:
+    print("\n".join(failures), file=sys.stderr)
+    raise SystemExit("documented metrics did not reproduce")
+print("  metrics match the documentation")
+PY
+
+step "4/6 Verify registry checksums and run the scientific test suite"
+python3 scripts/package_runtime_data.py
+( cd backend && python3 -m pytest -q tests/test_phase9_models.py )
+
+step "5/6 Show the two negative results, which are part of the record"
+python3 - <<'PY'
+import json
+from pathlib import Path
+r = json.loads(Path("ml/evaluation/phase9_rnaseq_candidates.json").read_text())
+for result in r["results"]:
+    if "bestLearner" in result:
+        best = result["learners"][result["bestLearner"]]["balancedAccuracy"]
+        print(f"  {result['modelId']:32s} balanced {best:.3f}  "
+              f"p={result['permutation']['pValue']:.4f}  -> {result['verdict']}")
+    else:
+        print(f"  {result['task']:32s} balanced {result['balancedAccuracy']:.3f}  "
+              f"-> {result['verdict']} (accuracy {result['accuracy']:.3f} is misleading)")
+excluded = sorted(p.stem for p in Path("ml/evaluation/excluded").glob("*.json"))
+print(f"  excluded from the registry: {', '.join(excluded)}")
+PY
+
+if [ "$SERVER" -eq 1 ]; then
+  step "6/6 Live prediction through the API"
+  ( cd backend && python3 -m uvicorn app.main:app --port 8011 --log-level warning ) &
+  SERVER_PID=$!
+  trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+  for _ in $(seq 1 40); do
+    curl -sf http://127.0.0.1:8011/api/health > /dev/null && break
+    sleep 0.5
+  done
+  python3 - <<'PY'
+import json, urllib.request
+
+base = "http://127.0.0.1:8011/api"
+
+def post(path, payload):
+    request = urllib.request.Request(
+        base + path, data=json.dumps(payload).encode(),
+        headers={"Content-Type": "application/json"})
+    return json.loads(urllib.request.urlopen(request).read())
+
+model = "radiation-quality-osd46-v1"
+profiles = json.loads(urllib.request.urlopen(
+    f"{base}/models/{model}/reference-profiles").read())
+print(f"  {profiles['label']}")
+for label in profiles["classLabels"]:
+    expression = dict(zip(profiles["features"], profiles["profiles"][label]))
+    answer = post(f"/predict/{model}", {"expression": expression})
+    probabilities = ", ".join(f"{k} {v:.2f}" for k, v in answer["probabilities"].items())
+    print(f"  {label:8s} centroid -> {answer['prediction']:8s} ({probabilities})")
+
+# The API must refuse a partial gene vector rather than invent values.
+partial = {profiles["features"][0]: 1.0}
+try:
+    post(f"/predict/{model}", {"expression": partial})
+    raise SystemExit("FAILED: a partial expression vector was accepted")
+except urllib.error.HTTPError as error:
+    detail = json.loads(error.read())["detail"]
+    print(f"  partial vector -> HTTP {error.code} "
+          f"({detail['error']}, missing {detail['missingGeneCount']} genes)")
+PY
+else
+  step "6/6 Skipped the live API section (--no-server)"
+fi
+
+printf '\n\033[1mPhase 9 demo complete.\033[0m Two models served, four negatives documented.\n'
