@@ -1,58 +1,49 @@
-"""Phase 9 shared evaluation harness for transcriptomic classifiers.
+"""Phase 9 shared harness: group-held-out cross-validation with in-fold selection.
 
-Every model in Phase 9 is evaluated through this module so that the anti-leakage
-rules are enforced in one place rather than re-implemented (and re-broken) per
-script.
+Design decisions that matter, and why
+------------------------------------
+1. **Leave-one-group-out, not stratified k-fold.** Every group here is a complete
+   experimental condition (a genotype x treatment x timepoint cell, or a single
+   seedling). Stratified k-fold splits *group members* across folds in ways that
+   silently leak: on OSD-411 it produced a fold whose entire test set was one
+   class, and a model that never saw a tissue type in training. LOGO is
+   deterministic, gives every group the same treatment, and cannot leak.
 
-The rules this encodes
-----------------------
-1.  **Group-aware splitting.** Samples are split by their *biological group*
-    (a distinct genotype x treatment x timepoint combination), never by sample.
-    The two or three replicate arrays inside a group are technical/biological
-    siblings measured together; letting one land in train and another in test is
-    the standard way to manufacture a high accuracy that means nothing.
-2.  **Feature selection inside the fold.** High-variance/ANOVA filtering and any
-    supervised gene ranking happen *after* the split, on training samples only.
-    Selecting genes on all 44 samples and then cross-validating would leak the
-    test labels into the feature set through the selection statistic.
-3.  **Baseline on identical folds.** The majority/mean baseline sees exactly the
-    same splits, so "beats baseline" is a like-for-like statement.
-4.  **Finite-sample corrected permutation p-values.** Reporting `p = 0.0` from a
-    permutation test is never correct: with B permutations the smallest
-    attainable value is 1/(B+1). This module reports
-    `p = (1 + #{null >= observed}) / (1 + B)`.
-5.  **Per-group metrics.** Pooled accuracy can hide a class that is never
-    predicted. Per-group recall is always returned alongside the pooled number.
+2. **Feature selection inside the fold.** Filtering genes on the pooled matrix
+   lets held-out groups influence the feature set. Every selection step here is
+   fitted on the training rows of one fold only.
+
+3. **Permutation at the group level.** Labels are permuted between groups, not
+   between samples, because the group is the independent unit. Permuting samples
+   would break the within-group correlation and produce a null that is too narrow,
+   i.e. p-values that are too small.
+
+4. **Permutation p-values are finite-sample corrected**: (1 + #{null >= observed})
+   / (1 + B). With B permutations the smallest attainable p-value is 1/(B+1), and
+   no honest implementation can report zero.
 """
 from __future__ import annotations
 
 import numpy as np
-import pandas as pd
-
 from sklearn.dummy import DummyClassifier
-from sklearn.ensemble import RandomForestClassifier, HistGradientBoostingClassifier
+from sklearn.ensemble import HistGradientBoostingClassifier, RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import (accuracy_score, balanced_accuracy_score, confusion_matrix,
-                             f1_score)
+from sklearn.metrics import accuracy_score, balanced_accuracy_score, confusion_matrix, f1_score
 from sklearn.model_selection import LeaveOneGroupOut
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-SEED = 42
-
-# Gene filtering is part of the model, not of the data, precisely so that it can
-# be fitted inside a fold.
-MIN_EXPRESSION_FRACTION = 0.20   # gene must be detected in >= 20 % of training samples
-TOP_VARIABLE_GENES = 1000        # variance preselection, fitted per fold
-TOP_ANOVA_GENES = 150            # supervised selection, fitted per fold
+SEED = 20261107
+TOP_VARIABLE_GENES = 1000
+TOP_ANOVA_GENES = 150
+MIN_EXPRESSION_FRACTION = 0.2
 
 
 def classification_learners() -> dict:
-    """The four model families required by the Phase 9 brief, plus one baseline.
+    """Five families, including the mandatory majority baseline.
 
-    No deep learning: the largest task here has 64 samples over 16 groups, where a
-    neural network would have far more parameters than independent observations
-    and could not be identified.
+    No deep learning: the largest task here has 44 samples over 22 groups, where a
+    network would have more parameters than independent observations.
     """
     return {
         "baseline_majority": lambda: DummyClassifier(strategy="most_frequent"),
@@ -66,294 +57,264 @@ def classification_learners() -> dict:
                                          solver="liblinear", random_state=SEED)),
         ]),
         "random_forest": lambda: RandomForestClassifier(
-            n_estimators=400, min_samples_leaf=1, random_state=SEED, n_jobs=-1),
-        "gradient_boosting": lambda: HistGradientBoostingClassifier(
+            n_estimators=300, min_samples_leaf=1, random_state=SEED, n_jobs=-1),
+        "hist_gradient_boosting": lambda: HistGradientBoostingClassifier(
             max_iter=200, learning_rate=0.06, max_leaf_nodes=7, random_state=SEED),
     }
 
 
-def select_features(x_train: np.ndarray, y_train: np.ndarray,
-                    column_names: list[str], variance_preselection: bool = True) -> np.ndarray:
-    """Fold-internal gene selection. Returns indices into the full gene axis.
+def _anova_f(matrix: np.ndarray, labels: np.ndarray) -> np.ndarray:
+    """One-way ANOVA F statistic per column."""
+    classes = np.unique(labels)
+    overall = matrix.mean(axis=0)
+    between = np.zeros(matrix.shape[1])
+    within = np.zeros(matrix.shape[1])
+    for label in classes:
+        block = matrix[labels == label]
+        if block.shape[0] == 0:
+            continue
+        between += block.shape[0] * (block.mean(axis=0) - overall) ** 2
+        within += ((block - block.mean(axis=0)) ** 2).sum(axis=0)
+    dof_between = max(len(classes) - 1, 1)
+    dof_within = max(matrix.shape[0] - len(classes), 1)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        return (between / dof_between) / (within / dof_within)
 
-    Two stages, both fitted only on training data:
-      1. drop genes that are unexpressed or flat across the training samples;
-      2. keep the most variable, then rank the survivors by one-way ANOVA F on the
-         training labels.
+
+def select_features(matrix: np.ndarray, labels: np.ndarray,
+                    n_features: int = TOP_ANOVA_GENES,
+                    variance_preselection: bool = True) -> np.ndarray:
+    """Fold-internal gene selection. Returns indices into the gene axis.
+
+    Stage 1 removes genes that are undetected or flat in the training rows.
+    Stage 2 keeps the most variable survivors (unsupervised, training-only).
+    Stage 3 ranks by ANOVA F on the training labels.
+
+    `variance_preselection` exists because stage 2 is meaningless on data that has
+    already been standardised per gene: every variance is exactly 1, so "most
+    variable" becomes an arbitrary tie-break. That failure mode produced a
+    convincing false negative during Phase 9, so it is now an explicit choice
+    rather than a silent default.
     """
-    # Stage 1: detection filter.
-    detected = (x_train > 0).mean(axis=0) >= MIN_EXPRESSION_FRACTION
-    variance = x_train.var(axis=0)
+    detected = (matrix > 0).mean(axis=0) >= MIN_EXPRESSION_FRACTION
+    variance = matrix.var(axis=0)
     keep = np.flatnonzero(detected & (variance > 0))
     if keep.size == 0:
         raise ValueError("No genes survived the detection filter")
-
-    # Stage 2a: variance preselection (unsupervised, still training-only).
-    #
-    # This stage silently degenerates if the input has already been z-scored per
-    # gene, because then every gene has variance exactly 1 and the "most variable"
-    # genes become an arbitrary tie-break. That failure mode was observed during
-    # Phase 9 on a cross-study z-scored matrix and produced a convincing-looking
-    # negative result that was actually a pipeline artefact. The guard below turns
-    # it into a loud error instead.
     if variance_preselection and keep.size > TOP_VARIABLE_GENES:
         spread = variance[keep]
         if spread.max() > 0 and (spread.max() - spread.min()) / spread.max() < 1e-6:
             raise ValueError(
-                "Gene variances are degenerate (all equal); variance preselection "
-                "would pick arbitrary features. Pass raw-scale data, or disable the "
-                "variance stage for already-standardised input.")
-        order = np.argsort(variance[keep])[::-1][:TOP_VARIABLE_GENES]
-        keep = keep[order]
-
-    # Stage 2b: supervised selection on training labels only.
-    scores = _anova_f(x_train[:, keep], y_train)
-    if np.all(~np.isfinite(scores)):
+                "Gene variances are degenerate; variance preselection would choose "
+                "arbitrary genes. Pass raw-scale data or set "
+                "variance_preselection=False.")
+        keep = keep[np.argsort(variance[keep])[::-1][:TOP_VARIABLE_GENES]]
+    scores = _anova_f(matrix[:, keep], labels)
+    if not np.any(np.isfinite(scores)):
         return keep
     scores = np.nan_to_num(scores, nan=-np.inf)
-    rank = np.argsort(scores)[::-1][:TOP_ANOVA_GENES]
-    return keep[rank]
+    return keep[np.argsort(scores)[::-1][:n_features]]
 
 
-def _anova_f(x: np.ndarray, y: np.ndarray) -> np.ndarray:
-    """One-way ANOVA F statistic per column, implemented without sklearn's selector
-    so the call stays explicit about what it is doing and when."""
-    classes = np.unique(y)
-    overall_mean = x.mean(axis=0)
-    between = np.zeros(x.shape[1])
-    within = np.zeros(x.shape[1])
-    for label in classes:
-        block = x[y == label]
-        if block.shape[0] == 0:
-            continue
-        between += block.shape[0] * (block.mean(axis=0) - overall_mean) ** 2
-        within += ((block - block.mean(axis=0)) ** 2).sum(axis=0)
-    dof_between = max(len(classes) - 1, 1)
-    dof_within = max(x.shape[0] - len(classes), 1)
-    denominator = (within / dof_within)
-    with np.errstate(divide="ignore", invalid="ignore"):
-        f = (between / dof_between) / denominator
-    return f
+def warn_on_fold_imbalance(labels: np.ndarray, groups: np.ndarray) -> list[str]:
+    """Held-out groups that contain a single class.
 
-
-def warn_on_fold_imbalance(y: np.ndarray, groups: np.ndarray) -> list[str]:
-    """Report held-out folds that contain only one class.
-
-    This is not an error - a held-out biological group genuinely has one condition -
-    but it must be *stated*, because a fold whose test set is single-class turns the
-    pooled accuracy into a sensitive measure and can look like a catastrophic failure
-    when a model simply guesses the other class.
+    These are not errors under LOGO when a group is one experimental condition,
+    but the count is reported so a reader can see how much of the estimate comes
+    from conditions the training folds never contained.
     """
-    notes = []
-    for group in np.unique(groups):
-        labels = np.unique(y[groups == group])
-        if len(labels) == 1:
-            notes.append(str(labels[0]))
-    return notes
+    return [str(labels[groups == group][0]) for group in np.unique(groups)]
 
 
-def grouped_cv_score(x: np.ndarray, y: np.ndarray, groups: np.ndarray,
-                     learner, n_splits: int | None = None,
-                     column_names: list[str] | None = None,
-                     seed: int = SEED) -> dict:
-    """Leave-one-group-out CV with in-fold gene selection.
-
-    Leave-one-group-out is used rather than a k-fold partition because with these
-    designs every group belongs to exactly one class, and StratifiedGroupKFold
-    cannot balance class membership across folds when the group determines the
-    label. Measured on OSD-411 it produced a fold whose entire test set was
-    'vertical', which drove the random forest to a pooled accuracy of 0.000 - a
-    number that reads as a model failure but is an artefact of the fold partition.
-
-    Leave-one-group-out is deterministic, gives every group the same treatment, and
-    guarantees every training fold contains all classes whenever the study has at
-    least two groups per class. The price is more fits, which is affordable here.
-    """
-    column_names = column_names or [f"g{i}" for i in range(x.shape[1])]
-    n_groups = len(np.unique(groups))
+def grouped_cv_score(matrix, labels, groups, learner, n_features=TOP_ANOVA_GENES,
+                     variance_preselection=True, seed=SEED) -> dict:
+    """Leave-one-group-out CV. Every returned metric is out-of-fold."""
     splitter = LeaveOneGroupOut()
-
-    prediction = np.empty(len(y), dtype=object)
-    filled = np.zeros(len(y), dtype=bool)
+    prediction = np.empty(len(labels), dtype=object)
+    filled = np.zeros(len(labels), dtype=bool)
     selected_per_fold = []
 
-    for train_idx, test_idx in splitter.split(x, y, groups):
+    for train_idx, test_idx in splitter.split(matrix, labels, groups):
         if set(groups[train_idx]) & set(groups[test_idx]):
             raise AssertionError("Group leakage between train and test")
-        chosen = select_features(x[train_idx], y[train_idx], column_names)
-        selected_per_fold.append(set(column_names[i] for i in chosen))
+        chosen = select_features(matrix[train_idx], labels[train_idx], n_features,
+                                 variance_preselection)
+        selected_per_fold.append(set(chosen.tolist()))
         model = learner()
-        model.fit(x[np.ix_(train_idx, chosen)], y[train_idx])
-        prediction[test_idx] = model.predict(x[np.ix_(test_idx, chosen)])
+        model.fit(matrix[np.ix_(train_idx, chosen)], labels[train_idx])
+        prediction[test_idx] = model.predict(matrix[np.ix_(test_idx, chosen)])
         filled[test_idx] = True
 
     if not filled.all():
         raise AssertionError("Some samples were never held out")
 
-    labels = np.unique(y)
-    report = {
-        "accuracy": float(accuracy_score(y, prediction)),
-        "balancedAccuracy": float(balanced_accuracy_score(y, prediction)),
-        "macroF1": float(f1_score(y, prediction, average="macro")),
-        "nSamples": int(len(y)),
-        "nGroups": int(n_groups),
-        "confusionMatrix": confusion_matrix(y, prediction, labels=labels).tolist(),
-        "classLabels": [str(label) for label in labels],
-        "perGroupRecall": {
-            str(label): float((prediction[y == label] == label).mean()) for label in labels
-        },
-        "genesPerFold": [len(s) for s in selected_per_fold],
+    classes = np.unique(labels)
+    return {
+        "accuracy": float(accuracy_score(labels, prediction)),
+        "balancedAccuracy": float(balanced_accuracy_score(labels, prediction)),
+        "macroF1": float(f1_score(labels, prediction, average="macro")),
+        "nSamples": int(len(labels)),
+        "nGroups": int(len(np.unique(groups))),
+        "confusionMatrix": confusion_matrix(labels, prediction, labels=classes).tolist(),
+        "classLabels": [str(c) for c in classes],
+        "perClassRecall": {str(c): float((prediction[labels == c] == c).mean())
+                           for c in classes},
+        "singleClassHeldOutGroups": warn_on_fold_imbalance(labels, groups),
         "genesSharedAcrossFolds": len(set.intersection(*selected_per_fold))
         if selected_per_fold else 0,
-        "singleClassHeldOutGroups": warn_on_fold_imbalance(y, groups),
         "validationScheme": "leave-one-biological-group-out",
+        "bootstrapCi": bootstrap_ci(labels, prediction, seed=seed),
+        "prediction": prediction,
     }
-    report["bootstrapCi"] = bootstrap_ci(y, prediction, seed=seed)
-    return report
 
 
-def bootstrap_ci(y: np.ndarray, prediction: np.ndarray, seed: int = SEED,
-                 n_boot: int = 2000) -> dict:
-    """Percentile bootstrap over samples, stratified by true class.
-
-    Reported because a held-out accuracy from 44 samples is a point estimate with a
-    very wide interval, and quoting the point alone would overstate certainty.
-    """
-    rng = np.random.default_rng(seed)
-    labels = np.unique(y)
+def bootstrap_ci(labels, prediction, n_resamples=2000, seed=SEED) -> dict:
+    """Stratified percentile bootstrap over held-out predictions."""
+    generator = np.random.default_rng(seed)
+    classes = np.unique(labels)
     scores = []
-    for _ in range(n_boot):
-        indices = []
-        for label in labels:
-            pool = np.flatnonzero(y == label)
-            indices.extend(rng.choice(pool, size=pool.size, replace=True))
-        indices = np.array(indices)
-        scores.append(accuracy_score(y[indices], prediction[indices]))
-    return {
-        "metric": "accuracy",
-        "lower": float(np.quantile(scores, 0.025)),
-        "upper": float(np.quantile(scores, 0.975)),
-        "confidence": 0.95,
-        "method": "stratified percentile bootstrap over held-out samples",
-    }
+    for _ in range(n_resamples):
+        picks = []
+        for label in classes:
+            members = np.flatnonzero(labels == label)
+            picks.append(generator.choice(members, size=len(members), replace=True))
+        index = np.concatenate(picks)
+        scores.append(balanced_accuracy_score(labels[index], prediction[index]))
+    return {"metric": "balancedAccuracy",
+            "lower": float(np.percentile(scores, 2.5)),
+            "upper": float(np.percentile(scores, 97.5)),
+            "confidence": 0.95,
+            "method": "stratified percentile bootstrap over held-out predictions"}
 
 
-def permutation_test(x: np.ndarray, y: np.ndarray, groups: np.ndarray, learner,
-                     observed: float, n_permutations: int = 100,
-                     seed: int = SEED, n_splits: int | None = None) -> dict:
-    """Label-permutation null for the held-out accuracy.
+def permutation_test(matrix, labels, groups, learner, observed,
+                     n_permutations=100, n_features=TOP_ANOVA_GENES,
+                     variance_preselection=True, seed=SEED) -> dict:
+    """Null distribution from permuting labels BETWEEN GROUPS.
 
-    Labels are permuted **between groups, not between samples**, because the group
-    is the exchangeable unit: shuffling individual replicates would break the
-    within-group concordance that the real data has and make the null too easy to
-    beat.
-
-    The p-value uses the finite-sample correction of Phipson & Smyth (2010):
-        p = (1 + #{null >= observed}) / (1 + n_permutations)
-    and is therefore never exactly zero.
+    The group is the independent unit, so the labels travel with the group. This
+    preserves the within-group correlation structure and therefore gives an honest
+    null: permuting samples instead would understate the null spread.
     """
-    rng = np.random.default_rng(seed)
+    generator = np.random.default_rng(seed)
     unique_groups = np.unique(groups)
-    # Group-level labels: all samples in a group must share a label for this to be
-    # a valid permutation scheme.
-    group_label = {}
-    for group in unique_groups:
-        labels = np.unique(y[groups == group])
-        if len(labels) != 1:
-            raise ValueError(f"Group {group} spans multiple labels: {labels}")
-        group_label[group] = labels[0]
-
+    group_label = {group: labels[groups == group][0] for group in unique_groups}
     null = []
     for _ in range(n_permutations):
-        shuffled = dict(zip(unique_groups, rng.permutation(
-            [group_label[g] for g in unique_groups])))
-        permuted = np.array([shuffled[g] for g in groups])
-        try:
-            score = grouped_cv_score(x, permuted, groups, learner,
-                                     seed=int(rng.integers(1_000_000)))["accuracy"]
-        except (ValueError, AssertionError):
+        shuffled = generator.permutation(unique_groups)
+        mapping = {original: group_label[donor]
+                   for original, donor in zip(unique_groups, shuffled)}
+        permuted = np.array([mapping[group] for group in groups], dtype=object)
+        if len(np.unique(permuted)) < len(np.unique(labels)):
             continue
+        score = grouped_cv_score(matrix, permuted, groups, learner,
+                                 n_features=n_features,
+                                 variance_preselection=variance_preselection,
+                                 seed=seed)["balancedAccuracy"]
         null.append(score)
-
     null = np.array(null)
-    at_least = int((null >= observed).sum())
+    exceed = int((null >= observed).sum())
     return {
-        "observedAccuracy": float(observed),
+        "observedBalancedAccuracy": float(observed),
         "nPermutations": int(len(null)),
-        "nullMean": float(null.mean()) if null.size else None,
-        "nullP95": float(np.quantile(null, 0.95)) if null.size else None,
-        "pValue": (1 + at_least) / (1 + len(null)),
+        "nullMean": float(null.mean()) if len(null) else None,
+        "nullP95": float(np.percentile(null, 95)) if len(null) else None,
+        "pValue": (1 + exceed) / (1 + len(null)),
         "correction": "finite-sample corrected: (1 + #{null >= observed}) / (1 + B)",
+        "unit": "labels permuted between biological groups",
         "scheme": "labels permuted between biological groups",
     }
 
 
-def summarize_learners(x, y, groups, column_names, n_splits=None, seed=SEED) -> dict:
+def evaluate_all_learners(matrix, labels, groups, n_features=TOP_ANOVA_GENES,
+                          variance_preselection=True, seed=SEED) -> dict:
     results = {}
     for name, factory in classification_learners().items():
-        results[name] = grouped_cv_score(x, y, groups, factory, n_splits=n_splits,
-                                         column_names=column_names, seed=seed)
+        score = grouped_cv_score(matrix, labels, groups, factory, n_features,
+                                 variance_preselection, seed)
+        score.pop("prediction", None)
+        results[name] = score
     return results
 
 
-def extract_linear_evaluator(fitted_model, feature_names: list[str]) -> dict:
-    """Convert a fitted (possibly pipelined) linear classifier to a JSON evaluator.
+def extract_linear_evaluator(model, feature_names: list[str]) -> dict:
+    """Serialise a fitted linear classifier into a dependency-free scorer.
 
-    Binary and multiclass need different treatment, and getting it wrong is silent:
+    The runtime must evaluate a model without sklearn, so the arithmetic is stored
+    explicitly: standardise with the training mean and scale, apply the coefficient
+    matrix, then softmax. Keeping it explicit also means a reviewer can check the
+    served arithmetic by hand.
 
-    * Multiclass (`coef_` shape (k, n)) - one coefficient row and one intercept per
-      class, used directly.
-    * Binary (`coef_` shape (1, n)) - sklearn stores a single row describing the
-      decision function, with `classes_[1]` on the positive side. Storing that same
-      row under both class labels, which is what a naive loop does, gives both
-      classes identical scores and the model can never disagree with itself. The
-      correct softmax-equivalent encoding fixes `classes_[0]` at score zero and
-      puts the decision function on `classes_[1]`, which reproduces the sigmoid.
+    Two traps are handled here, both of which produced wrong answers during Phase 9:
+
+    * A **binary** logistic model stores a single coefficient row. Writing that row
+      under both class labels makes the two classes score identically, so the model
+      can never disagree with itself. The binary case is therefore expanded to two
+      rows: zeros for class 0 and the decision function for class 1.
+    * The scaler must not be looked up by the literal step name "scale".
+      `named_steps` returns None on a miss instead of raising, so a renamed step
+      would silently skip standardisation. It is detected by fitted attributes.
     """
-    steps = getattr(fitted_model, "named_steps", None)
-    if steps:
-        values = list(steps.values())
-        linear = values[-1]
-        # Find the scaler by capability, not by step name. Looking it up by the
-        # literal name "scale" silently yields None for any pipeline that names the
-        # step differently, and a missing scaler does not raise - it produces a model
-        # whose standardisation is the identity, which is wrong but plausible-looking.
-        scalers = [step for step in values
-                   if hasattr(step, "mean_") and hasattr(step, "scale_")]
-        if len(scalers) > 1:
-            raise ValueError("Ambiguous pipeline: more than one fitted scaler")
-        scaler = scalers[0] if scalers else None
-        if scaler is None and len(values) > 1:
+    from sklearn.pipeline import Pipeline
+
+    scaler = None
+    estimator = model
+    if isinstance(model, Pipeline):
+        for _, step in model.steps[:-1]:
+            if hasattr(step, "mean_") and hasattr(step, "scale_"):
+                scaler = step
+                break
+        if scaler is None:
             raise ValueError(
-                "Pipeline has transformers but no fitted scaler was found; refusing "
-                "to emit an evaluator that silently skips standardisation")
-    else:
-        linear, scaler = fitted_model, None
-    if not hasattr(linear, "coef_"):
-        raise ValueError("Not a linear model")
-    width = len(feature_names)
-    classes = [str(c) for c in linear.classes_]
-    coefficients = np.atleast_2d(linear.coef_)
-    intercepts = np.atleast_1d(linear.intercept_)
+                "No fitted scaler found in the pipeline; refusing to emit an "
+                "evaluator that would silently skip standardisation")
+        estimator = model.steps[-1][1]
+
+    coefficients = np.atleast_2d(np.asarray(estimator.coef_, dtype=float))
+    intercept = np.atleast_1d(np.asarray(estimator.intercept_, dtype=float))
+    classes = [str(c) for c in estimator.classes_]
+
     if coefficients.shape[0] == 1 and len(classes) == 2:
-        per_class = {
-            classes[0]: [0.0] * width,
-            classes[1]: [float(v) for v in coefficients[0]],
-        }
-        per_intercept = [0.0, float(intercepts[0])]
-    elif coefficients.shape[0] == len(classes):
-        per_class = {label: [float(v) for v in coefficients[i]]
-                     for i, label in enumerate(classes)}
-        per_intercept = [float(v) for v in intercepts]
-    else:
+        # Binary: class 0 gets the zero row so the decision function lands on
+        # class 1. Both rows must exist or the classes are indistinguishable.
+        coefficients = np.vstack([np.zeros_like(coefficients[0]), coefficients[0]])
+        intercept = np.concatenate([[-intercept[0] * 0.0], intercept])
+    if coefficients.shape[0] != len(classes):
         raise ValueError(
-            f"Coefficient shape {coefficients.shape} does not match {len(classes)} classes")
+            f"Coefficient rows ({coefficients.shape[0]}) do not match classes "
+            f"({len(classes)})")
+    if len(intercept) != len(classes):
+        raise ValueError("Intercept length does not match class count")
+    if not np.all(np.isfinite(coefficients)) or not np.all(np.isfinite(intercept)):
+        raise ValueError("Unsafe non-finite model artifact")
+
     return {
         "kind": "linear-softmax",
         "features": list(feature_names),
         "classes": classes,
-        "mean": [float(v) for v in scaler.mean_] if scaler is not None else [0.0] * width,
-        "scale": [float(v) for v in scaler.scale_] if scaler is not None else [1.0] * width,
-        "coefficients": per_class,
-        "intercept": per_intercept,
+        "mean": [float(v) for v in scaler.mean_],
+        "scale": [float(v) for v in scaler.scale_],
+        "coefficients": {label: [float(v) for v in row]
+                         for label, row in zip(classes, coefficients)},
+        "intercept": [float(v) for v in intercept],
     }
+
+
+def softmax_probabilities(evaluator: dict, values: list[float]) -> dict:
+    """Reference implementation of the served arithmetic, used by tests."""
+    features = evaluator["features"]
+    if len(values) != len(features):
+        raise ValueError(f"Expected {len(features)} features, got {len(values)}")
+    standardised = [
+        (float(value) - mean) / (scale if scale else 1.0)
+        for value, mean, scale in zip(values, evaluator["mean"], evaluator["scale"])
+    ]
+    scores = {}
+    for label in evaluator["classes"]:
+        coefficients = evaluator["coefficients"][label]
+        scores[label] = sum(c * x for c, x in zip(coefficients, standardised)) \
+            + evaluator["intercept"][evaluator["classes"].index(label)]
+    peak = max(scores.values())
+    exponentiated = {label: np.exp(score - peak) for label, score in scores.items()}
+    total = sum(exponentiated.values())
+    return {label: float(value / total) for label, value in exponentiated.items()}

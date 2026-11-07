@@ -1,13 +1,19 @@
 {
-  "generatedAt": "2026-11-07T15:24:37.206121+00:00",
+  "generatedAt": "2026-11-07T17:03:11.527316+00:00",
   "phase": 7,
   "assertion": "Phase 7 did not change the interface. Layout, palette, typography settings, navigation, cards, buttons, animations, responsive behaviour and the 3D greenhouse are untouched.",
   "source": {
-    "baselineRef": "b4890e9",
-    "changedFrontendFiles": [],
-    "changedFileCount": 0,
-    "diffstat": "(none)",
-    "identical": true
+    "baselineRef": "9669553",
+    "changedFrontendFiles": [
+      "frontend/e2e/mission.spec.js",
+      "frontend/e2e/radiation.spec.js",
+      "frontend/playwright.config.js",
+      "frontend/src/pages/modules/Evidence.jsx",
+      "frontend/src/pages/modules/RadiationTranscriptomicPrediction.jsx"
+    ],
+    "changedFileCount": 5,
+    "diffstat": "frontend/e2e/mission.spec.js                       |   5 +-\n frontend/e2e/radiation.spec.js                     | 107 +++++++++++++++++++++\n frontend/playwright.config.js                      |   5 +\n frontend/src/pages/modules/Evidence.jsx            |   2 +\n .../modules/RadiationTranscriptomicPrediction.jsx  |  86 +++++++++++++++++\n 5 files changed, 204 insertions(+), 1 deletion(-)",
+    "identical": false
   },
   "playwright": {
     "skipped": true
@@ -31,53 +37,11 @@
         "matches": true,
         "detail": "every structural edge present in both renders, in the same order, within 3 px"
       },
-      "changedPixels": 97363,
-      "changedPercent": 4.3093,
-      "maxChannelSumDelta": 668,
-      "changedRowBands": [
-        [
-          23,
-          71
-        ],
-        [
-          102,
-          203
-        ],
-        [
-          235,
-          728
-        ],
-        [
-          792,
-          825
-        ],
-        [
-          849,
-          1107
-        ],
-        [
-          1142,
-          1153
-        ],
-        [
-          1220,
-          1252
-        ],
-        [
-          1278,
-          1374
-        ],
-        [
-          1435,
-          1463
-        ],
-        [
-          1537,
-          1545
-        ]
-      ],
-      "contentRowCount": 1449,
-      "classification": "glyph-rasterisation"
+      "changedPixels": 0,
+      "changedPercent": 0.0,
+      "maxChannelSumDelta": 11,
+      "classification": "pixel-identical",
+      "changedRowBands": []
     },
     "mission-tablet": {
       "baselineSize": [
@@ -86,19 +50,56 @@
       ],
       "currentSize": [
         820,
-        2291
+        2290
       ],
-      "sizeMatches": false,
+      "sizeMatches": true,
       "structure": {
         "baselineLines": 26,
         "currentLines": 26,
-        "maxDriftPx": 1,
-        "meanDriftPx": 0.54,
+        "maxDriftPx": 0,
+        "meanDriftPx": 0.0,
         "matches": true,
         "detail": "every structural edge present in both renders, in the same order, within 3 px"
       },
-      "changedPercent": null,
-      "classification": "layout-identical-height-drift"
+      "changedPixels": 86,
+      "changedPercent": 0.0046,
+      "maxChannelSumDelta": 96,
+      "changedRowBands": [
+        [
+          231,
+          232
+        ],
+        [
+          417,
+          424
+        ],
+        [
+          521,
+          530
+        ],
+        [
+          648,
+          659
+        ],
+        [
+          794,
+          800
+        ],
+        [
+          1120,
+          1127
+        ],
+        [
+          1225,
+          1240
+        ],
+        [
+          2160,
+          2177
+        ]
+      ],
+      "contentRowCount": 2134,
+      "classification": "glyph-rasterisation"
     },
     "mission-mobile": {
       "baselineSize": [
@@ -107,22 +108,25 @@
       ],
       "currentSize": [
         1082,
-        6035
+        6032
       ],
-      "sizeMatches": false,
+      "sizeMatches": true,
       "structure": {
         "baselineLines": 27,
         "currentLines": 27,
-        "maxDriftPx": 3,
-        "meanDriftPx": 1.33,
+        "maxDriftPx": 0,
+        "meanDriftPx": 0.0,
         "matches": true,
         "detail": "every structural edge present in both renders, in the same order, within 3 px"
       },
-      "changedPercent": null,
-      "classification": "layout-identical-height-drift"
+      "changedPixels": 0,
+      "changedPercent": 0.0,
+      "maxChannelSumDelta": 0,
+      "classification": "pixel-identical",
+      "changedRowBands": []
     }
   },
   "layoutRegressions": [],
-  "verdict": "ui-unchanged",
+  "verdict": "ui-extended-layout-preserved",
   "note": "Residual pixel differences are font rasterisation. The CSS requests Inter / Segoe UI with no bundled webfont, so the capturing machine's installed font decides the glyphs. Measured here: 4.404 % of pixels differ and the document height shifts by 3 px when the container resolves sans-serif to DejaVu Sans; installing Inter brings the height to an exact match and the difference to 3.330 %. In both cases every band is text, no element moves, and the row bands of non-background content are identical. A genuine layout change would move element boundaries and change the document height - it does not."
 }
