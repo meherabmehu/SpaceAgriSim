@@ -392,3 +392,29 @@ def test_harness_reference_evaluator_matches_the_served_evaluator():
             served = research.predict_probabilities(model, values)
             for label, probability in mine.items():
                 assert abs(probability - served[label]) < 1e-12
+
+
+def test_phase9_previews_expose_design_tables_and_say_so():
+    """A preview is a promise that the rows are real. For the Phase 9 studies the
+    real, browsable rows are sample-to-condition assignments, not outcomes, so the
+    preview must say which it is showing."""
+    expected = {
+        "OSD-46": {"osd46_radiation_samples.csv": 44, "osd46_array_batch.csv": 44},
+        "OSD-782": {"osd782_radiation_samples.csv": 36},
+        "OSD-411": {"osd411_gravity_samples.csv": 64},
+    }
+    for study, tables in expected.items():
+        preview = research.preview(study)
+        found = {table["name"]: table["rowCount"] for table in preview["tables"]}
+        assert found == tables, f"{study} preview mismatch: {found}"
+        for table in preview["tables"]:
+            assert table["columns"], f"{study}/{table['name']} has no header"
+            assert table["note"].strip(), f"{study}/{table['name']} has no caveat"
+
+    osd46_note = " ".join(table["note"] for table in research.preview("OSD-46")["tables"])
+    assert "design factors, not measured outcomes" in osd46_note
+
+    osd411_note = research.preview("OSD-411")["tables"][0]["note"]
+    # Guards the two claims this study invites: partial gravity and 64 plants.
+    assert "not partial gravity" in osd411_note
+    assert "not 64 independent plants" in osd411_note

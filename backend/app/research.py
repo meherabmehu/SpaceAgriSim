@@ -305,6 +305,30 @@ def preview(study_id):
     elif study_id == "OSD-745":
         files = sorted((DATA / "raw" / study_id).glob("*TRANSFORMED.csv"))
         targets = [(p, "NASA-transformed nutritional assay; column headers state units. Not a yield table.", {}) for p in files]
+    elif study_id == "OSD-46":
+        # Design tables only: this study's measurements are microarray
+        # intensities for 22,560 probes, which are not a browsable row set.
+        targets = [
+            ("osd46_radiation_samples.csv",
+             "Sample-to-condition assignment for the 44 arrays. Condition, dose and "
+             "collection time are design factors, not measured outcomes.", {}),
+            ("osd46_array_batch.csv",
+             "Array batch assignment. Controls are not balanced across batches, so this "
+             "table is what the batch-controlled evaluation is checked against.", {}),
+        ]
+    elif study_id == "OSD-782":
+        targets = [
+            ("osd782_radiation_samples.csv",
+             "Sample-to-condition assignment for the 36 libraries. Condition and dose are "
+             "design factors; the transcriptome is the measurement.", {}),
+        ]
+    elif study_id == "OSD-411":
+        targets = [
+            ("osd411_gravity_samples.csv",
+             "Sample-to-condition assignment for 64 libraries from 16 seedlings. A 90 "
+             "degree ground reorientation is not partial gravity, and the 64 libraries "
+             "are not 64 independent plants.", {}),
+        ]
     elif study_id == "OSD-895":
         targets = [("eden_iss_2018_biomass_summary.csv", "EDEN ISS terrestrial-analogue crop/cycle summaries. Values are not independent plant-level replicates and are not a general yield-training table.", {"harvestAgeDays": "days", "meanEdibleFreshweightKgM2": "kg/m2", "edibleFreshweightRangeGm2": "g/m2", "abovegroundDryBiomassGm2": "g/m2", "belowgroundDryBiomassGm2": "g/m2"})]
     else:
