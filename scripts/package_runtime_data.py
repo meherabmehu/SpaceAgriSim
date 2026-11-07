@@ -18,12 +18,25 @@ def package():
     for item in registry['models']:
         if hashlib.sha256((ROOT/item['artifact']).read_bytes()).hexdigest()!=item['sha256']:
             raise ValueError('Model checksum verification failed: '+item['id'])
+    # Phase 6 scientific-evidence artifacts. These back /api/science/calibration,
+    # /api/science/evidence and /api/scientific-summary. They are placed at
+    # scientific_data/phase6/ so app.research.phase6_report() resolves them via
+    # its BUNDLE/"phase6" lookup on serverless deployments.
+    phase6 = sorted((ROOT/'docs/phase6').glob('*.json'))
+    if not phase6:
+        raise ValueError('Phase 6 evidence artifacts are missing; run the analysis scripts')
+    paired=[]  # (source, target)
     for source in sources:
         if not source.is_file() or source.stat().st_size>2_000_000:
             raise ValueError('Missing or oversized runtime asset: '+str(source))
-        target=destination/source.relative_to(ROOT)
+        paired.append((source, destination/source.relative_to(ROOT)))
+    for source in phase6:
+        if not source.is_file() or source.stat().st_size>2_000_000:
+            raise ValueError('Missing or oversized Phase 6 artifact: '+str(source))
+        paired.append((source, destination/'phase6'/source.name))
+    for source, target in paired:
         target.parent.mkdir(parents=True,exist_ok=True)
         shutil.copyfile(source,target)
-    print(f'Packaged {len(sources)} verified inference/preview assets; no training executed.')
+    print(f'Packaged {len(paired)} verified inference/preview assets; no training executed.')
 
 if __name__=='__main__':package()
