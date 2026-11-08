@@ -13,9 +13,8 @@ code rather than promised in prose.
 | Branch | `feat/phase12-ai-platform-completion` |
 | Feature branch HEAD | `c78e7a2` (`docs/phase12-ai-platform-completion`) |
 | Feature commits | 7 (`d2e7f4b` baseline doc … `c78e7a2` docs) |
-| Merge commit | **`5ccdf08`** — `Merge Phase 12: evidence-grounded AI, scientific workflows, and dataset independence` |
-| Remote `main` HEAD | **`1b07d12576664207df4020cd59be1908458365da`** (`git ls-remote`, after this report was itself committed) |
-| Merge commit (pre-report) | `5ccdf08`, whose tree was verified identical in a fresh clone |
+| Merge commit | **`5ccdf08`** — `Merge Phase 12: evidence-grounded AI, scientific workflows, and dataset independence`, verified from a fresh clone |
+| Remote `main` HEAD | read it back yourself: `git ls-remote origin refs/heads/main` (it advances with each documentation commit; at the time of writing it was `b2e18d7`) |
 | Push type | fast-forward `7957a05..5ccdf08`; **no force-push** |
 | Branch-protection bypass | none |
 | Remote tree equals local tree | yes (`HEAD^{tree}` identical in a fresh `--depth 1` clone) |
