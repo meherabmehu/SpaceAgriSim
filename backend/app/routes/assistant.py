@@ -13,28 +13,44 @@ rather than a question.
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from app import assistant as assistant_module
-from app import evidence
+from app import evidence, llm
 from app.auth import current_user
 
 router = APIRouter(tags=["assistant"])
 
 
 class AskRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     question: str = Field(min_length=1, max_length=evidence.MAX_QUESTION_CHARS)
     maxClaims: int = Field(default=5, ge=1, le=8)
+    # Follow-up support: the previous questions, newest last. Only the entity names are borrowed
+    # (see reasoning.resolve_followup), so a pronoun-led question keeps its own wording, and the
+    # list is bounded so it cannot be used to smuggle a document into the retrieval query.
+    context: list[str] = Field(default_factory=list, max_length=2)
+    # Narration is opt-in per request and absent by default, so the deterministic answer is the
+    # response unless the caller asks for prose. It can only restate claims that already exist.
+    explain: bool = False
 
 
 @router.post("/assistant/ask")
 def ask(request: AskRequest):
     """Answer a question from verified repository evidence, with mandatory citations."""
+    for previous in request.context:
+        if len(previous) > evidence.MAX_QUESTION_CHARS:
+            raise HTTPException(422, "Each context question is limited to "
+                                     f"{evidence.MAX_QUESTION_CHARS} characters")
     try:
-        result = assistant_module.answer(request.question, max_claims=request.maxClaims)
+        result = assistant_module.answer(request.question, max_claims=request.maxClaims,
+                                         context=request.context)
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from exc
-    return result.render()
+    payload = result.render()
+    if request.explain:
+        payload["explanation"] = llm.explain(payload, request.question)
+    return payload
 
 
 @router.get("/assistant/suggestions")
@@ -65,13 +81,35 @@ def evidence_detail(passage_id: str):
     }
 
 
+@router.get("/assistant/provider")
+def assistant_provider():
+    """Whether optional narration is configured. Booleans only - never a key, never a token."""
+    config = llm.LLMConfig.from_env()
+    return {
+        "config": config.describe(),
+        "guards": {
+            "evidenceOnly": True,
+            "citationMarkersPerSentence": True,
+            "accessionsValidated": True,
+            "quantitiesValidated": True,
+            "forbiddenAssertionsBlocked": True,
+            "deterministicFallback": True,
+        },
+        "note": ("A provider may only restate retrieved claims. Its output is rejected and the "
+                 "deterministic summary returned if it names an accession or quantity that is "
+                 "not in the citations, omits a citation marker, or asserts a validated yield. "
+                 "The disabled default is the configuration that was benchmarked."),
+    }
+
+
 @router.get("/assistant/health")
 def assistant_health():
     stats = evidence.stats()
+    config = llm.LLMConfig.from_env()
     return {
         "status": "ready",
         "mode": "deterministic-extractive",
-        "externalModelConfigured": False,
+        "externalModelConfigured": config.enabled,
         "passages": stats["passages"],
         "quarantined": stats["quarantined"],
         "note": ("The assistant answers without any external language model. An optional "
