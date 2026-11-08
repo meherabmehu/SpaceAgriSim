@@ -39,11 +39,23 @@ def issue_token(user: dict) -> dict[str, str | int]:
     now = datetime.now(timezone.utc)
     expires = now + timedelta(minutes=settings.auth_token_minutes)
     jti = uuid4().hex
-    token = jwt.encode({"sub": user["id"], "email": user["email"], "jti": jti,
-                        "iat": now, "exp": expires}, settings.resolved_auth_secret,
-                       algorithm="HS256")
+    claims = {"sub": user["id"], "email": user["email"], "jti": jti,
+              "iat": now, "exp": expires}
+    # Phase 19: tokens issued before a password change stop verifying, without needing a
+    # server-side session table. `pwd` carries the moment the current password was set.
+    changed_at = user.get("password_changed_at")
+    if changed_at:
+        claims["pwd"] = changed_at
+    token = jwt.encode(claims, settings.resolved_auth_secret, algorithm="HS256")
     return {"accessToken": token, "tokenType": "bearer", "expiresIn": settings.auth_token_minutes * 60,
             "expiresAt": expires.isoformat()}
+
+
+def _password_stamp_matches(payload: dict, user: dict) -> bool:
+    """A token remains valid only if it was issued after the current password was set."""
+    current = user.get("password_changed_at") or ""
+    claimed = payload.get("pwd") or ""
+    return str(claimed) == str(current)
 
 
 def optional_user(credentials: HTTPAuthorizationCredentials | None = Depends(bearer)) -> dict | None:
@@ -83,6 +95,9 @@ def current_user(credentials: HTTPAuthorizationCredentials | None = Depends(bear
     user = storage.find_user_by_email(str(payload.get("email", "")))
     if not user or user["id"] != payload["sub"] or user["disabled"]:
         raise HTTPException(401, "Authentication is no longer valid", headers={"WWW-Authenticate": "Bearer"})
+    if not _password_stamp_matches(payload, user):
+        raise HTTPException(401, "This session was invalidated by a password change",
+                            headers={"WWW-Authenticate": "Bearer"})
     user["token_jti"] = payload["jti"]
     user["token_expires_at"] = datetime.fromtimestamp(payload["exp"], timezone.utc).isoformat()
     return user

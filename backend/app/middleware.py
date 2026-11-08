@@ -1,4 +1,11 @@
-"""Small per-process request guard; edge-level distributed limits remain a deployment concern."""
+"""Per-process request guard.
+
+The budgets are per client address per minute, so the correctness of the address matters as much
+as the budget: behind a managed gateway every request arrives from the proxy, and counting those
+together would let one caller spend the entire allowance. `trusted_proxy_hops` decides whether the
+forwarding chain is believed. It defaults to 0 because an unconfigured service that believes a
+client-supplied X-Forwarded-For can be given a fresh budget on every request.
+"""
 from collections import defaultdict, deque
 from time import monotonic
 import logging
@@ -10,6 +17,32 @@ from app.config.settings import settings
 from app.observability import record
 
 logger = logging.getLogger("uvicorn.error")
+
+HEADER = b"x-forwarded-for"
+
+
+def _client_address(scope) -> str:
+    """The address the request budget is charged to.
+
+    With `trusted_proxy_hops` set, the entry that many places from the right of X-Forwarded-For is
+    used: each trusted proxy appends the address it saw, so the rightmost entries are the ones the
+    operator can vouch for. Anything further left is caller-supplied and ignored.
+    """
+    direct = (scope.get("client") or ("unknown", 0))[0]
+    hops = getattr(settings, "trusted_proxy_hops", 0)
+    if hops <= 0:
+        return direct
+    header = ""
+    for name, value in scope.get("headers") or ():
+        if name.lower() == HEADER:
+            header = value.decode("latin-1")
+            break
+    if not header:
+        return direct
+    chain = [part.strip() for part in header.split(",") if part.strip()]
+    if len(chain) < hops:
+        return direct
+    return chain[-hops]
 
 
 class RequestGuard:
@@ -27,7 +60,7 @@ class RequestGuard:
         if scope["type"]!="http":
             return await self.app(scope,receive,send)
         start=monotonic()
-        address=(scope.get("client") or ("unknown",0))[0]
+        address=_client_address(scope)
         path=scope.get("path","")
         bucket="auth" if "/auth/" in path else ("optimize" if path.endswith("/optimize") else "general")
         key=(address,bucket)

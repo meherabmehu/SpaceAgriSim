@@ -16,7 +16,7 @@ from reportlab.pdfgen import canvas
 
 from app.models.simulation import SimulationRequest
 from app.routes.simulation import simulate
-from app import storage
+from app import mailer, storage
 from app.config.settings import settings
 from app.auth import current_user
 
@@ -146,6 +146,72 @@ def save_scenario(request: SaveScenario, user: dict = Depends(current_user)):
     return row
 
 
+# ---------------------------------------------------------------------------------------------
+# Share links (Phase 19)
+#
+# A share link is read-only and deliberately one-way: it exposes the saved configuration and the
+# numbers that configuration reproduces, never the owner's address or the rest of their history.
+# Links are capped per scenario, expire, and can be revoked wholesale.
+# ---------------------------------------------------------------------------------------------
+
+SHARE_DISCLAIMER = ("Read-only shared scenario. Exploratory mathematical estimates; not "
+                    "independently calibrated or NASA validated.")
+
+
+@router.post("/scenarios/{scenario_id}/share", status_code=201)
+def share_scenario(scenario_id: str, user: dict = Depends(current_user)):
+    try:
+        token = storage.create_share_link(scenario_id, user["id"], settings.share_link_days)
+    except storage.ShareLimitReached as exc:
+        raise HTTPException(409, f"This scenario already has {exc.limit} active share links; "
+                                 "revoke them before creating another") from exc
+    except Exception as exc:
+        logger.exception("Share link creation unavailable")
+        raise HTTPException(503, "Share links unavailable; check database configuration") from exc
+    if token is None:
+        # Same answer for "does not exist" and "belongs to someone else".
+        raise HTTPException(404, "Scenario not found")
+    storage.record_activity(user["id"], "share-link-created")
+    return {"token": token, "url": f"/shared/{token}", "expiresInDays": settings.share_link_days,
+            "scope": "read-only; no account data", "disclaimer": SHARE_DISCLAIMER}
+
+
+@router.delete("/scenarios/{scenario_id}/share")
+def unshare_scenario(scenario_id: str, user: dict = Depends(current_user)):
+    try:
+        revoked = storage.revoke_share_links(scenario_id, user["id"])
+    except Exception as exc:
+        logger.exception("Share link revocation unavailable")
+        raise HTTPException(503, "Share links unavailable; check database configuration") from exc
+    if not revoked:
+        raise HTTPException(404, "No active share links for this scenario")
+    storage.record_activity(user["id"], "share-link-revoked")
+    return {"revoked": revoked}
+
+
+@router.get("/shared/{token}")
+def shared_scenario(token: str):
+    """Public, unauthenticated, read-only view of one shared scenario."""
+    if not 16 <= len(token) <= 200:
+        raise HTTPException(404, "Shared scenario not found")
+    try:
+        row = storage.resolve_share_link(token)
+    except Exception as exc:
+        logger.exception("Shared scenario lookup unavailable")
+        raise HTTPException(503, "Share links unavailable; check database configuration") from exc
+    if row is None:
+        raise HTTPException(404, "Shared scenario not found or no longer available")
+    configuration = json.loads(row["configuration"])
+    return {"name": row["name"], "configuration": configuration,
+            "createdAt": row["created_at"], "modelVersion": row["model_version"],
+            "expiresAt": row["expires_at"],
+            # Reproduced from the stored configuration rather than stored alongside it, so a
+            # shared page always shows what the current model produces for that input.
+            "result": run(SimulationRequest(**configuration)),
+            "scope": "public read-only share", "disclaimer": SHARE_DISCLAIMER,
+            "limitations": LIMITATIONS}
+
+
 @router.get("/ready")
 def readiness():
     try:
@@ -154,6 +220,15 @@ def readiness():
         logger.exception("Readiness database check failed")
         raise HTTPException(503,"Database unavailable") from exc
     return {"status":"ready","simulation":"available","database":database_status["status"],"databaseDialect":database_status["dialect"],
+            # Phase 19: an operator can see from /ready whether saved data survives a restart and
+            # whether account email can actually be delivered, instead of finding out from a user.
+            "storage":storage.storage_durability(),
+            "emailDelivery":mailer.delivery_mode(),
+            "shareLinks":settings.max_share_links_per_scenario > 0,
+            # Which address the request budget is charged to. "socket" behind a gateway means
+            # every caller shares one budget; set SPACEAGRISIM_TRUSTED_PROXY_HOPS after checking
+            # the forwarding chain on the actual platform.
+            "rateLimitIdentity":("forwarded" if settings.trusted_proxy_hops else "socket"),
             "scientificValidation":"uncalibrated mathematical estimates"}
 
 
