@@ -104,7 +104,7 @@ class Passage:
     """One citable unit of evidence."""
     id: str
     source_id: str
-    kind: str                 # dataset | model | classification | evaluation | methodology
+    kind: str                 # dataset | model | classification | evaluation | methodology | literature
     title: str
     text: str
     accession: str | None = None
@@ -489,13 +489,81 @@ def _methodology_passages(quarantine: list) -> list[Passage]:
     return passages
 
 
+
+LITERATURE = Path(__file__).resolve().parents[2] / "data" / "literature" / "ntrs_bpc.json"
+
+# A NASA technical report page is quoted as evidence with its page number. It is measured data
+# in the everyday sense — somebody measured a canopy — but it is a *literature* measurement:
+# ground-based, one chamber, one cultivar, one campaign, and not a Moon or Mars result. Every
+# passage repeats those boundaries so the assistant cannot borrow it for a space claim.
+LITERATURE_LIMITS = [
+    "Ground-based closed chamber at Kennedy Space Center; not a Moon, Mars or ISS measurement.",
+    "One chamber, one cultivar and one campaign: not a transferable response surface.",
+    "Quoted from a scanned NASA technical report; table cells are not machine-parsed, so a "
+    "number must be read on the cited page.",
+]
+
+
+def _literature_passages(quarantine: list) -> list[Passage]:
+    if not LITERATURE.is_file():
+        return []
+    payload = _read_json(LITERATURE)
+    passages: list[Passage] = []
+    for record_id, report in (payload.get("reports") or {}).items():
+        label = report.get("label") or record_id
+        title = report.get("title") or record_id
+        abstract = (report.get("abstract") or "").strip()
+        if abstract:
+            text = (
+                f"{label} ({record_id}) — {title}. NASA technical report abstract: {abstract} "
+                f"These are ground-based closed-chamber measurements of a crop canopy in the "
+                f"NASA Biomass Production Chamber, not measurements made on the Moon, on Mars "
+                f"or on the International Space Station.")
+            verdict = screen(text)
+            if verdict["safe"]:
+                passages.append(Passage(
+                    id=f"literature::{record_id}::abstract",
+                    source_id=f"NTRS-{record_id}", kind="literature",
+                    title=f"{label} abstract — {title}",
+                    text=text, url=report.get("url"), measured=True,
+                    local_ref=f"data/literature/ntrs_bpc.json#{record_id}",
+                    limitations=LITERATURE_LIMITS + [report.get("whyItMatters") or ""]))
+            else:
+                quarantine.append({"sourceId": f"NTRS-{record_id}", "kind": "literature",
+                                   "injection": verdict["injection"],
+                                   "secrets": verdict["secrets"]})
+        for page in report.get("measurementPages") or []:
+            excerpt = (page.get("excerpt") or "").strip()
+            if not excerpt:
+                continue
+            terms = ", ".join(page.get("terms") or [])
+            text = (
+                f"{label} ({record_id}), page {page['page']} — {title}. "
+                f"Measurement language on this page: {terms}. Quoted text: {excerpt}")
+            verdict = screen(text)
+            if not verdict["safe"]:
+                quarantine.append({"sourceId": f"NTRS-{record_id}", "kind": "literature",
+                                   "injection": verdict["injection"],
+                                   "secrets": verdict["secrets"]})
+                continue
+            passages.append(Passage(
+                id=f"literature::{record_id}::p{page['page']}",
+                source_id=f"NTRS-{record_id}", kind="literature",
+                title=f"{label} p.{page['page']} — {title}",
+                text=text, url=f"{report.get('url')}#page={page['page']}", measured=True,
+                local_ref=f"data/literature/ntrs_bpc.json#{record_id}:p{page['page']}",
+                limitations=LITERATURE_LIMITS))
+    return passages
+
+
 @lru_cache(maxsize=1)
 def corpus() -> dict:
     """Build the index once per process. Returns passages, idf and quarantine log."""
     quarantine: list = []
     passages = (_dataset_passages(quarantine) + _model_passages(quarantine)
                 + _evaluation_passages(quarantine)
-                + _methodology_passages(quarantine))
+                + _methodology_passages(quarantine)
+                + _literature_passages(quarantine))
     # Attach duplicate-safeguard context to dataset passages.
     for passage in passages:
         if passage.kind != "dataset":
@@ -614,6 +682,7 @@ KIND_LABELS = {
     "model": "models",
     "methodology": "methodology",
     "classification": "classifications",
+    "literature": "literature",
 }
 
 

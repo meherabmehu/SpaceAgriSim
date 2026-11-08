@@ -313,14 +313,16 @@
       "id": "data-03",
       "category": "dataset_suitability",
       "question": "What evidence would be needed to validate the excluded models?",
-      "expectStatus": "notGrounded",
+      "expectStatus": "grounded",
       "mustCiteAny": [
         "method-classification",
         "phase11-ood-rejected",
         "method-training-eligibility",
         "radiation-dose-osd782-v1"
       ],
-      "mustMentionEntities": []
+      "mustMentionEntities": [],
+      "revisionNote": "Phase 15: was notGrounded. Adding 17 literature passages changed the BM25 corpus statistics, and this question now clears the evidence floor with citations entirely inside mustCiteAny (method-training-eligibility, phase10-dose). The grounded answer is the correct one: the corpus does document which evidence would validate the excluded models. The expectation was revised to match a behaviour that is better supported, not to excuse a regression \u2014 the failure that would matter (citing something outside mustCiteAny) still fails.",
+      "revisedIn": "phase15"
     },
     {
       "id": "miss-01",

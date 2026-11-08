@@ -1,0 +1,271 @@
+{
+  "reports": {
+    "19900016137": {
+      "id": "19900016137",
+      "title": "Carbon dioxide and water exchange rates by a wheat crop in NASA's biomass production chamber: Results from an 86-day study (January to April 1989)",
+      "abstract": "Gas exchange measurements were taken for a 20 sq m wheat stand grown from seed to harvest in NASA's Biomass Production Chamber. Respiration of the wheat stand caused the CO2 concentrations to rise an average of 440 ppm during the 4-h dark period each day, or 7.2 umol/sq m/sec. Dark period respiration was sensitive to temperature changes and could be increased 70 to 75 percent by raising the temperature from 16 C to 24 C. Stand photosynthesis (measured from the rate of CO2 drawdown immediately after the lights came on each day) peaked at 27 umol/sq m/sec at 25 days after planting and averaged 15 umol/sq m/sec throughout the study. By combining the average light period photosynthesis and average dark period respiration, a net of 860 g or 470 liters of CO2 were fixed per day. Stand photosynthetic rates showed a linear increase with increasing irradiance (750 umol/sq m/sec PPF the highest level tested), with an average light compensation point after day 30 of 190 umol/sq m/sec. Stand photosynthesis decreased slightly when CO2 levels were decreased from 2200 to 800 ppm, but dropped sharply when CO2 was decreased below 700 to 800 ppm. Water production from stand transpiration peaked at 120 L/day near 25 days and averaged about 90 L/day, or 4.5 L/sq m/day throughout the study.",
+      "stiType": "TECHNICAL_MEMORANDUM",
+      "publications": [
+        {
+          "submissionId": 19900016137,
+          "id": "c15828a7860542519222ffc05cfeddab",
+          "publicationDate": "1990-01-01T00:00:00.0000000+00:00"
+        }
+      ],
+      "url": "https://ntrs.nasa.gov/citations/19900016137",
+      "pdfUrl": "https://ntrs.nasa.gov/api/citations/19900016137/downloads/19900016137.pdf",
+      "label": "TM 102788",
+      "focus": "wheat",
+      "whyItMatters": "86-day closed-chamber wheat study reporting daily CO2 exchange and water exchange rates in the NASA Biomass Production Chamber \u2014 the measurement type the simulator assumes rather than measures.",
+      "pages": 32,
+      "measurementPages": [
+        {
+          "page": 3,
+          "terms": [
+            "biomass",
+            "transpiration"
+          ],
+          "decimalValues": 2,
+          "plainNumbers": 39,
+          "excerpt": "ABSTRACT Gas exchange measurements were taken for a 20 m 2 wheat stand grown from seed to harvest in NASA's Biomass Production Chamber. Respiration of the wheat stand caused the CO 2 concentrations to rise an average of 440 ppm during the 4-h dark period each day, or 7.2 umol m -2 s -I. Dark period respiration was sensitive to temperature changes and could be increased 70-75% by raising the temperature from 16\u00b0C to 24\u00b0C. Stand photosynthesis (measured from the rate of CO 2 drawdown immediately after the lights came on each day) peaked at 27 umol m -2 s -I at 25 days after planting and averaged 15 umol m -2 s -I throughout the study. By combining the average light period photosynthesis and average dark period respiration, a net of 860 g or 470 liters of CO 2 were fixed per day. Stand photosynthetic rates showed a linear increase with increasing irradiance (750 umol m -2 s -I PPF the highest level tested), with an average light compensation point after day 30 of 190 umol m -2 s -I. Stand photosynthesis decreased slightly when CO 2 levels were decreased from 2200 to 800 ppm, but dropped sharply when CO 2 was decreased below 700-800 ppm. Water produc- tion from stand transpiration peaked at 120 L day -I near 25 days and averaged about 90 L day -1 , or 4.5 L m -2 day -I throughout the study. INTRODUCTION An important objective for NASA's Controlled Ecological Life Support System (CE"
+        },
+        {
+          "page": 4,
+          "terms": [
+            "biomass",
+            "transpiration"
+          ],
+          "decimalValues": 4,
+          "plainNumbers": 24,
+          "excerpt": "2 in a CELSS would be used to provide food, water, and oxygen for humans, while removing carbon dioxide (CO2) (MacElroy and Bredt, 1985). Exchange rates of carbon _ and water are especially important and photosynthesis is thus the focal event in the plant growing portion of a CELSS. Carbon dioxide is the primary gaseous constituent used by plants in building sugars for metablolic needs, while large water fluxes through the biomass from transpiration are a result of the plants' need to maintain open stomata (leaf pores) to sustain CO 2 uptake (Coombs et al., 1985) . Traditionally, closed atmospheric studies of plant growth have been limited to small-sized chambers (Dutton et al., 1988; Knight et al., 1988). However, with the construction of the Biomass Production Chamber (BPC) at the Kennedy Space Center, FL, closed system studies of atmospheric mass flow are now possible for large plant stands. The BPC is a two-storied cylindrical steel chamber (7.5 m high and 3.6 m diameter), which has been fitted with electric lighting, air handling, and nutrient solu- tion delivery systems to sustain plant growth. The current con- figuration includes 64 0.25-m 2 hydroponic trays for growing the plants. When the gaps between the trays are included, ap- proximately 20 m 2 can be covered by plants. Total chamber volume, including the air handling systems has been calculated to be 112.6 m 3 with"
+        },
+        {
+          "page": 9,
+          "terms": [
+            "condensat",
+            "transpiration"
+          ],
+          "decimalValues": 0,
+          "plainNumbers": 19,
+          "excerpt": "Plant stand transpiration was determined by measuring the condensate produced from the \"cold\" coils of the air heat exchange system. Condensate tank volumes for both the upper and lower air handling systems were recorded each day and then emptied. Calculations for both CO 2 and water fluxes assumed a plant stand area of 20 m 2. All the data presented are based on the dynamic responses of the crop in the BPC and hence have not been evaluated statistically. RESULTS AND DISCUSSION Backqround assumptions. It is well known that CO 2 concentra- tions have profound effects on the rate of photosynthesis and the degree of stomatal opening of plant leaves (Acock and Allen, 1985; Coombs et al., 1985). Because closed gas exchange systems use a change in CO 2 concentration over time to calculate photosynthesis, the drawdowns must be taken across a range where the changing CO 2 itself does not impose a significant effect. To study this, at 25 days after planting the CO 2 level was raised to approximately 2200 ppm and then allowed to draw down to near the compensation point (point where no net CO 2 uptake occurs). As shown in Fig. 2, the rate (slope) of the drawdown remained relatively constant from 2200 ppm down to approximately 800 ppm. Below this level, the rate of the CO 2 drawdown decreased, indicating an increasingly slower photosynthetic rate at the lower CO 2 concentrations. A compari"
+        },
+        {
+          "page": 12,
+          "terms": [
+            "biomass",
+            "yield"
+          ],
+          "decimalValues": 5,
+          "plainNumbers": 35,
+          "excerpt": "10 The average photosynthetic rate across the life cycle for the wheat crop was approximately 15 umol CO 2 m -2 s -I (this was averaged from day i0 through day 84; Fig. 4). This equals about 21.6 moles CO 2 fixed during the 20-h light period; after subtracting 2.1 moles respired during the 4-h dark period, a net of 19.5 moles CO 2 was fixed per day (about 860 g or 470 liters per day). Assuming most of the plant biomass is carbohydrate, if the mass of CO 2 fixed X 0.68 = mass of carbohydrate produced (Charles Edwards et al., 1986), then 860 X 0.68 = 585 g carbohydrate per day X 75 days = about 44 kg of biomass from the crop (75 days for days 10 through 84). Harvest results showed that about 40 kg of total biomass were produced. Thus the estimate of biomass from photosynthesis was approximately 10% higher than the actual yield. Several factors may contribute to this overestimate, including: the 5 to 10% chamber leak rate, which would tend to overestimate photosynthesis and underestimate dark respiration; and the possibility that photosynthesis was slightly higher early in the day when rates were measured, as observed in some studies at Utah State (B. Bugbee, personal communication). In addition, losses of biomass due to respiration prior to harvest (during the last three days) and during oven drying would cause the actual yield data to be lower than gas exchange predictions made "
+        },
+        {
+          "page": 14,
+          "terms": [
+            "biomass",
+            "condensat",
+            "transpiration"
+          ],
+          "decimalValues": 2,
+          "plainNumbers": 33,
+          "excerpt": "12 leaves, roots, stems, and microorganisms in the nutrient solution. Stand light compensation points as high as 500 to 600 umol m -2 s -I have been measured with high density wheat stands grown at high irradiance (B.G. Bugbee, 1990). Thus compensation points for entire stands appear to be greatly influenced by the lighting during development, which affects total shoot biomass and thus dark respiration. As noted earlier, lowering the PPF from 695 to 480 umol m -2 s -I on day 28 caused net photosynthesis to drop from 24.7 to 15.3 umol m -2 s -1. Such a large decrease (38%) in net photosynthesis is somewhat surprising when viewed in terms of the absolute decrease in PPF (30%). However, if the the PPF difference is normalized for the stand light compensation point (180 umol m -2 s -1 at that time), then the change might be interpreted as [(695-180) - (480-180)] / (695-180), or a 42% drop in PPF above the compensation point, which agrees more closely with the decrease in net photosynthesis. Water Exchanue A comparison of condensate production and the water added to the nutrient solution through time is shown in Fig. 10. Prior to 12 days, extra water was added to the atmosphere from supplemental humidification and more condensate was produced than water added to the nutrient solutions. After this point, condensate directly related to water transpired from the wheat stand. As with st"
+        },
+        {
+          "page": 31,
+          "terms": [
+            "biomass",
+            "transpiration"
+          ],
+          "decimalValues": 2,
+          "plainNumbers": 66,
+          "excerpt": "Report Documentation Page 1. Report No. TM 102788 2. Government Accession No. 4. Title and Subtitle Carbon Dioxide and Water Exchange Rates by a Wheat Crop in NASArs Biomass Production Chamber: Results from an 86-day Study 7. Author(s) Wheeler, R.M. and J.C. Sager 9. Performing Organization Name and Address The Bionetics Corp. (RMW), BIO-3 NASA Biomedical Operations and Research (JCS), MD/RES Kennedy Space Center, FL 32899 3. Recipient's Catalog No. 5. Report Date March 1990 6. Performing Organization Code BIO-3 8. Performing Organization Report No. 10. Work Unit No, 11. Contract or Grant No. 12. Sponsoring Agency Name and Address NASA/John F. Kennedy Space Center, FL 32899 13. Type of Report and Period Covered 14. Sponsoring Agency Code D/RES 15. Supplementary Notes 16. Abstract Gas exchange measurements were taken for a 20 m 2 wheat stand grown from seed to harvest in NASA's Biomass Production Chamber. Respiration of the wheat stand caused the CO 2 concentrations to rise an average of 440 ppm during the 4-h dark period each day, or 7.2 umol m-2 s-I. Dark period respiration was sensitive to temperature changes and could be increased 70-75% by raising the temperature from 16\u00b0C to 24\u00b0C. Stand photosynthesis (measured from the rate of CO drawdown immedi- ately after the lights came on each day) peaked at 27 umol m -2 s -_ at 25 days after planting and averaged 15 umol m-2 s-I thr"
+        }
+      ],
+      "pin": {
+        "file": "data/raw/NTRS/19900016137.pdf",
+        "bytes": 942058,
+        "sha256": "8fb89d98b3510c4a3bd5b1594d998efb8c04d84366e1b40419e59e21865b5e12",
+        "url": "https://ntrs.nasa.gov/api/citations/19900016137/downloads/19900016137.pdf"
+      },
+      "extractedAt": "2026-11-08T18:04:23.499475+00:00",
+      "extractionNote": "Scanned typescript. Page text is extracted verbatim; table cells are not parsed into a numeric series, because mis-columned OCR would invent values that are not on the page. Each excerpt is quoted with its page number."
+    },
+    "19910010713": {
+      "id": "19910010713",
+      "title": "Carbon dioxide and water exchange of a soybean stand grown in the biomass production chamber",
+      "abstract": "Soybean plants were grown under metal halide lamps in NASA's biomass production chamber (BPC). Experiments were conducted to determine whole stand rates of carbon dioxide exchange and transpiration as influenced by time of day, CO2 concentration, irradiance, and temperature. Plants were grown at a population of 24 plants/sq m, a daily cycle of 12 hr light/12 hr dark, and average temperature regime of 26 C light/20 C dark, and a CO2 concentration enriched and maintained at 1000 ppm during the photoperiod. A distinct diurnal pattern in the rate of stand transpiration was measured at both ambient and enriched (1000 ppm) concentration of CO2. Data generated in this study represent true whole stand responses to key developmental and environmental variables and will be valuable in database construction for future working CELSS. Crop growth studies in the BPC were conducted with a high degree of environmental control, gas tightness during growth, and have used large plant stands. These characteristics have placed it in a unique position internationally as a research tool and as a preprototype subcomponent to a fully integrated CELSS. The results from the experiments are presented.",
+      "stiType": "CONFERENCE_PAPER",
+      "publications": [
+        {
+          "submissionId": 19910010713,
+          "id": "1ca97c08001f4c7499ac217101f89617",
+          "publicationName": "NASA, John F. Kennedy Space Center, Research Reports: 1990 NASA(ASEE Summer Faculty Fellowship Program",
+          "publicationDate": "1990-09-01T00:00:00.0000000+00:00"
+        }
+      ],
+      "url": "https://ntrs.nasa.gov/citations/19910010713",
+      "pdfUrl": "https://ntrs.nasa.gov/api/citations/19910010713/downloads/19910010713.pdf",
+      "label": "N91-20026",
+      "focus": "soybean",
+      "whyItMatters": "CO2 and water exchange of a soybean stand in the same chamber, so a second crop and a second canopy geometry exist for comparison.",
+      "pages": 27,
+      "measurementPages": [
+        {
+          "page": 3,
+          "terms": [
+            "biomass",
+            "transpiration"
+          ],
+          "decimalValues": 1,
+          "plainNumbers": 29,
+          "excerpt": "ABSTRACT Soybean (GlycIDe max I. Merr. cv. McCall) plants were grown under metal halide lamps in NASA's Biomass Production Chamber. Experiments were conducted to determine whole stand rates of carbon dioxide exchange and transpiration as influenced by time of day, CO 2 conc, irradiance, _nd temperature. Plants were grown at a population of 24 plants/m _, a daily cycle of 12 hour light/12 hour dark, an average temperature regime of 26 C light/20 C dark, and a CO 2 conc enriched and maintained at i000 ppm during the photoperiod. A distinct diurnal pattern in the rate of stand transpiration was measured at both ambient and enriched (i000 ppm) conc of CO 2. Transpiration rates declined during the photoperiod, dropped to about 30 % of maximum in the dark, and then increased during the dark period. Water loss increased by a factor of 1.2 when CO 2 was reduced to the ambient level (about 370 ppm). No distinct diurnal rhythm in CER was measured suggesting that rates of NP obtained from early photoperiod drawdowns of CO_ are representative for characerizing carbon assimilation during growth and development of a soybean stand. Carbon dioxide did not saturate photosynthesis in the range of conc used (up to 1200 ppm). Whole stand CCP values of 66 and 85 ppm were measured at 2 developmental stages. CER increased linearly with increasing irradiance up to the maximum attainable with the MH la"
+        },
+        {
+          "page": 9,
+          "terms": [
+            "condensat",
+            "transpiration"
+          ],
+          "decimalValues": 4,
+          "plainNumbers": 20,
+          "excerpt": "\\_ i / Additional detail on production techniques including the composition of the nutrient solution, system configurations, and manipulations can be found in Wheeler et al. (9). 2.2 GAS EXCHANGE RATE CALCULATIONS Rates of net photosynthesis (NP) and dark period respiration (DPR) were calculated daily by computing the slopes of the lines fit by linear regression from the changes in CO x concentration occurring in the BPC atmosphere following the t_ansitions from lights on and off (Figure i). Since the dark period respiration led to a CO x conc in excess of the I000 ppm setpoint and no scrubbing device was used, it continued to increase throughout the entire 12 hour dark period. Data points from the first 15 to 30 minutes following a lights on or off transition were not used because there were concomitant changes in temperature which led to changes in the pressure of the BPC atmosphere. These pressure events were transient, but enough to cause mass flow of gases into or out of the BPC depending upon the direction of the total pressure gradient (into the BPC when temperature was decreased). For DPR rates, data from the remainder of the period was used and for NP rates data up to the first injection of CO 2 was used. Calculations were based on a chamber volume of 112,060 liters and a growth area of 20 m 2. Application of the ideal gas law was made to correct the volume for differe"
+        },
+        {
+          "page": 11,
+          "terms": [
+            "condensat",
+            "transpiration"
+          ],
+          "decimalValues": 5,
+          "plainNumbers": 42,
+          "excerpt": "\\ _J 2.4.3 EFFECT OF TEMPERATURE Temperature setpoints for the light/dark portions of the daily cycle were varied in two separate experiments to provide for 3 different temperatures for each half of the daily cycle. In the first experiment, the light/dark temperature regimes were as follows: 22/18 (day 35), 26/22 (day 36), and 30/26 (day 37). In the second experiment, the order was varied and light/dark regimes were 26/18, 22/22, 26/26, and 30/22 (days 41-44). All temperature and relative humidity readings logged during the different regimes were retrieved and averages across the 4 levels and all times calculated. The actual temperatures and relative humidity values were used to Caiculate a vapor pressure deficit (VPD) which is the water vapor gradient between the intercellular spaces of the leaf and the BPC atmosphere. The intercellular spaces were assumed to be at saturation. Therefore, the VPD was calculated as the difference between the saturation vapor pressure at a given temperature and the actual vapor pressure (obtained from the product of the relative humidity and the saturation vapor pressure). III. RESULTS AND DISCUSSION 3.1 DIURNAL GAS EXCHANGE RATES The CO 2 exchange rate during the photgperiod 50 days after planting was between 25 and 30 umol/mZ/s (Figure 2). The first point was acquired from early photoperiod CO 2 drawdown data while the subsequent 3 points were "
+        },
+        {
+          "page": 12,
+          "terms": [
+            "biomass",
+            "transpiration"
+          ],
+          "decimalValues": 1,
+          "plainNumbers": 23,
+          "excerpt": "one-third of that which occurred at the beginning of the photoperiod. Nevertheless, this represents a substantial rate of water loss during a period when most plants under field conditions have greatly diminished stomatal conductances (7). The data suggest a fairly clear diurnal pattern of transpiration presumably controlled by a rhythm in the degree of stomatal aperture. There does not, however, appear to be as much of an effect of this rhythm on CER, which is in agreement with previous findings in a growth chamber study (i0). Daily measurements of NP and DPR enabled a continuous tracking of gas exchange with growth and development (Figure 3). After 3 weeks from planting the stand was developed sufficiently to observe distinct patterns of CO 2 conc increases and decreases due to DPR and NP, respectively. TEe rate 9f NP increased from 15 umol/m_/s at 3 weeks to about 25 umol/mZ/s after 4 weeks at which time it leveled off. Following pod set and during the early stages of pod fill, the rate of NP declined slowly (after 50 days). The rate of DPR also increased early in development, but not to as great an extent as the rate of NP. since each portion of the daily cycle was 12 hours in duration, the net assimilation of CO 2 was simply calculated by difference. The lack of smoothness in the data is explained by light, CO 2 drawdown, and temperature experiments conducted at various ti"
+        },
+        {
+          "page": 16,
+          "terms": [
+            "biomass",
+            "transpiration"
+          ],
+          "decimalValues": 0,
+          "plainNumbers": 27,
+          "excerpt": "plant canopy responds. Compared to studies on single leaves and plants, the whole stand gas exchange studies have led to values for carbon dioxide compensation points, light compensation points, and dark transpiration rates generally higher than those reported previously. The gas exchange database gathered using the BPC will also enable mass budget analyses not previously possible with other growth chambers. V. REFERENCES I. Prince, R.P., W.M. Knott, J.C. Sager, and S.E. Hilding. 1987. Design and performance of the KSC Biomass Production Chamber. Soc. Auto. Engin. Tech. Paper Ser. No. 871437. 2. Sager, J.C., C.R. Hargrove, R.P. Prince, and W.M. Knott. 1988. CELSS atmospheric control system. Amer. Soc. Agric. Eng. Paper No. 88-4018. 3. Wheeler, R.M., C.L. Mackowiak, T.W. Dreschel, J.C. Sager, R.P. Prince, W.M. Knott, C.R. Hinkle, and R.F. Strayer. 1990. System development and early biological tests in NASA's biomass production chamber. NASA Technical Memorandum 103495. 4. Wheeler, R.M. and J.C. Sager. 1990 Carbon dioxide and water exchange rates by a wheat crop in NASA's biomass production chamber: results from an 86-day study (January to April 1989). NASA Technical Memorandum TM 102788. 5. Corey, Kenneth A. 1989. Dynamics of carbon dioxide exchange of a wheat community grown in a semi-closed environment. NASA/ASEE Summer Faculty Fellowhip Program: 1989 Research Reports. ed. E.R"
+        },
+        {
+          "page": 17,
+          "terms": [
+            "biomass",
+            "transpiration",
+            "yield"
+          ],
+          "decimalValues": 0,
+          "plainNumbers": 36,
+          "excerpt": "9. Wheeler, R.M., C.L. Mackowiak, and J.C. Sager. 1990. Growth of soybeans in NASA's biomass production chamber using metal halide lighting: a protocol for a biomass (plant) production study. NASA Technical publication BSB901. I0. Wheeler, R.M., C.L. Mackowiak, J.C. Sager and W.M. Knott. 1990 Effects of atmospheric CO2 on photosynthetic characteristics of soybean leaves. Controlled Ecological Llfe Support Systems: CELSS '89 Workshop. NASA Technical Memorandum 102277. pp 93-105. II. Halvelka, U.D., R.C. Ack-_S_, MTGJ]_oyle, and V.A. Wittenbach. 1984. Carbon dioxide enrichment effects on soybean physiology. I: Effects of long-term CO 2 exposure. Crop Science 24: 1146-1150. 12. Jones, Pierce, L.H. Allen, Jr., J.W. Jones, K.J. Boote, and W.J. Campbell. 1984. Soybean canopy growth, photosynthesis, and transpiration responses to whole-season carbon dioxide enrichment. Agronomy Journal. 76:633-637. 13. Sionit, N., B.R. Strain, and E.P. Flint. 1987. Interaction of temperature and CO2 enrichment on soybean: photosynthesis and seed yield. Can. J. Plant Sci. 67:629-636. 14. Fonteno, W.C., E.L. McWilliams. 1978. Sci. 102:52-56. _ _ J. Am. Soc. Hort. 15. Mackowiak, C.L., R.M. W_he_Zer, W. Lowery and J.C. Sager. Effects of elevated atmospheric carbon dioxide concentrations on water and acid requirements of soybeans grown in a recirculating hydroponic system. Controlled Ecological Life Suppor"
+        }
+      ],
+      "pin": {
+        "file": "data/raw/NTRS/19910010713.pdf",
+        "bytes": 1125961,
+        "sha256": "907b69c40b61ae3a062b87f2ac3457b6ee12b254cbb7e53a6c48ee12a6994498",
+        "url": "https://ntrs.nasa.gov/api/citations/19910010713/downloads/19910010713.pdf"
+      },
+      "extractedAt": "2026-11-08T18:04:23.741268+00:00",
+      "extractionNote": "Scanned typescript. Page text is extracted verbatim; table cells are not parsed into a numeric series, because mis-columned OCR would invent values that are not on the page. Each excerpt is quoted with its page number."
+    },
+    "19900007373": {
+      "id": "19900007373",
+      "title": "Dynamics of carbon dioxide exchange of a wheat community grown in a semi-closed environment",
+      "abstract": "A wheat (Triticum aestivum Yecora Rojo) community was grown in the semi-closed conditions of the NASA/KSC Biomass Production Chamber (BPC). Experiments were conducted to determine whole community carbon dioxide exchange rates as influenced by growth and development, carbon dioxide concentration, time within the photoperiod, irradiance, and temperature. Plants were grown at a population of about 1500 per sq meter using a 20 hour light/4 hour dark daily regime. Light was supplied by HPS vapor lamps and irradiance was maintained in the range of 590 to 675 mu mol per sq meter. The temperature regime was 20 C light/16 C dark and nutrients were supplied hydroponically as a thin film. Fractional interception of PPF by the community increased rapidly during growth reaching a maximum of 0.96, 24 days after planting. This time corresponded to canopy closure and maximum rates of net photosynthesis (NP). Net daily CO2 utilization rates were calculated to day 48 and a 4th order regression equation integrated to obtain total moles of CO2 fixed by the community. This procedure may be useful for monitoring and prediction of biomass yields in a closed ecology life support system (CELSS).",
+      "stiType": "CONFERENCE_PAPER",
+      "publications": [
+        {
+          "submissionId": 19900007373,
+          "id": "1c74316e20af40de89f18bb583fda5bb",
+          "publicationName": "University of Central Florida, NASA(ASEE Summer Faculty Fellowship Program",
+          "publicationDate": "1989-10-01T00:00:00.0000000+00:00"
+        }
+      ],
+      "url": "https://ntrs.nasa.gov/citations/19900007373",
+      "pdfUrl": "https://ntrs.nasa.gov/api/citations/19900007373/downloads/19900007373.pdf",
+      "label": "N90-16689",
+      "focus": "wheat",
+      "whyItMatters": "Dynamics of CO2 exchange of a wheat community in a semi-closed environment: how the exchange rate moves across the growth cycle, not just its final value.",
+      "pages": 28,
+      "measurementPages": [
+        {
+          "page": 4,
+          "terms": [
+            "biomass",
+            "condensat",
+            "yield"
+          ],
+          "decimalValues": 1,
+          "plainNumbers": 32,
+          "excerpt": "ABSTRACT A wheat (_ritic_ aestivum 'Yecora Rojo') community was grown in the semi-closed con-ditions of the _KSC Biomass Productlon Chamber (BPC). Experiments were conducted to determine whole community carbon dioxide exchange rates as influenoed by growth and development, carbon dioxide concentration, time within the photoperiod, irradiance, a_d temperature. Plants were grown at a population of about 1500/m z using a 20 hour light/4 hour dark daily regime. Light was supplied by HPS vapor lamps and irradiance was malntained in the range of 590 to 675 _nuol/m2/s. The temperature regime was 20 C light/16 C dark and nutrients were supplied hydroponically as a thin film. Fractional interception of PPF by the community increased rapidly during growth reaching a maximum of 0.96, 24 days after planting. This time corresponded to canopy closure and maximum rates of net photosynthesis (NP). Net daily CO 2 utilization rates were calculated to day 48 and a 4th order regression equation integrated to obtain total moles of CO 2 fixed by the community. This procedure may be useful for monitoring and prediction of biomass yields in a CELSS. Results of 5, 1-hour photosynthetic drawdowns of CO 2 during the photoperiod and from the data log of mass flow injections of CO 2 into the chamber indicated a constant rate of NP during the photoperiod. Net photosynthesis appeared to be relatively linear "
+        },
+        {
+          "page": 14,
+          "terms": [
+            "biomass",
+            "yield"
+          ],
+          "decimalValues": 8,
+          "plainNumbers": 63,
+          "excerpt": "the range of 30 to 35 ):mol/m2/s for about 3 weeks, followed by a gradual downward trend up to day 48 (Figure 3-2). Rates of NP reported herein from whole community CO 2 drawdowns are comparable to those reported for single leaf blades (11). The trend fo_ _ _ rates of dark respiration early in development was similar to that observed for rates of NP. After 2 weeks the rate of DR remained relatively constant. During the interval of days 6 to 14, day-to-day variability in rates of NP and DR were low. Subsequent fluctuations in the daily rates are attributable to the conduct of temperature experiments (days 22-24 and days 42- 44), changes in canopy geometry (growth) with respect to lighting, and periodic adjustments in lamp output to maintain a relatively uniform level of canopy top irradiance throughout growth. Maximum daily rates of CO 2 utilization (35 mol/_/day) occurred between 3 and 4 weeks after planting (Figure 3-3). The equation fit to the data in figure 3-3 is: Y -39.912 + 10.129 X 0.496 X 2 + 0.010331 X 3 0 000079541 X 4 R2 : 0.881. This equation can be integrated to obtain the total moles of CO 2 fixed by the entire wheat community. Solving the definite integral of the above equation between days 6 and 48 yields a total CO_ fixed of 1,202 moles or 52.9 kg. Ass_g that 1 mole of CO 2 y_elds 1 mole of CH20, then 52.9 kg of CO 2 should yield 36.1 kg of carbohydrate (12). U"
+        }
+      ],
+      "pin": {
+        "file": "data/raw/NTRS/19900007373.pdf",
+        "bytes": 1022527,
+        "sha256": "a3b788893697d4f3aaf94dc129f2b0245ddc4d0886a39012cc970ee4d638e9cd",
+        "url": "https://ntrs.nasa.gov/api/citations/19900007373/downloads/19900007373.pdf"
+      },
+      "extractedAt": "2026-11-08T18:04:23.983227+00:00",
+      "extractionNote": "Scanned typescript. Page text is extracted verbatim; table cells are not parsed into a numeric series, because mis-columned OCR would invent values that are not on the page. Each excerpt is quoted with its page number."
+    }
+  },
+  "pins": {
+    "19900016137": {
+      "file": "data/raw/NTRS/19900016137.pdf",
+      "bytes": 942058,
+      "sha256": "8fb89d98b3510c4a3bd5b1594d998efb8c04d84366e1b40419e59e21865b5e12",
+      "url": "https://ntrs.nasa.gov/api/citations/19900016137/downloads/19900016137.pdf",
+      "pinnedAt": "2026-11-08T18:04:14.211202+00:00"
+    },
+    "19910010713": {
+      "file": "data/raw/NTRS/19910010713.pdf",
+      "bytes": 1125961,
+      "sha256": "907b69c40b61ae3a062b87f2ac3457b6ee12b254cbb7e53a6c48ee12a6994498",
+      "url": "https://ntrs.nasa.gov/api/citations/19910010713/downloads/19910010713.pdf",
+      "pinnedAt": "2026-11-08T18:04:15.064777+00:00"
+    },
+    "19900007373": {
+      "file": "data/raw/NTRS/19900007373.pdf",
+      "bytes": 1022527,
+      "sha256": "a3b788893697d4f3aaf94dc129f2b0245ddc4d0886a39012cc970ee4d638e9cd",
+      "url": "https://ntrs.nasa.gov/api/citations/19900007373/downloads/19900007373.pdf",
+      "pinnedAt": "2026-11-08T18:04:15.771540+00:00"
+    }
+  },
+  "discovery": {
+    "endpoint": "https://ntrs.nasa.gov/api/citations/search",
+    "queries": [
+      "Biomass Production Chamber gas exchange",
+      "CELSS crop water use transpiration condensate",
+      "wheat canopy photosynthesis CELSS daily",
+      "controlled ecological life support system crop yield data",
+      "BPC wheat study yield biomass NASA Kennedy"
+    ],
+    "selectionRule": "Reports were kept when the full text was downloadable from NTRS and the text reports CO2 and/or water exchange for a crop canopy grown in the NASA BPC. Record 20040090219 describes the ideal dataset (daily nutrient, water and CO2 data for wheat) but NTRS publishes no downloadable file for it, so it is cited as a reference only and not acquired. Nothing was reconstructed from its abstract.",
+    "recordedAt": "2026-11-08T18:04:23.983261+00:00"
+  }
+}
