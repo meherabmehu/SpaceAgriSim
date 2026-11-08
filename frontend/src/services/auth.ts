@@ -1,7 +1,17 @@
 const base = import.meta.env.VITE_API_BASE_URL || "/api";
 const KEY = "spaceagrisim.auth";
 
-export type Session = { accessToken: string; expiresAt: string; user: { id: string; email: string } };
+export type Session = {
+  accessToken: string;
+  expiresAt: string;
+  user: {
+    id: string;
+    email: string;
+    // Phase 19: recorded server-side; older stored sessions simply omit it.
+    emailVerified?: boolean;
+    createdAt?: string;
+  };
+};
 
 export function readSession(): Session | null {
   try {
