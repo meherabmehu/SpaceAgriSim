@@ -66,6 +66,9 @@ export function ResearchAssistant() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [suggestionList, setSuggestionList] = useState([]);
+  // One request drives both the retrieval label and the corpus boundary card, so the
+  // passage count on screen can never disagree with the corpus actually being searched.
+  const corpus = useResource("/assistant/corpus");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -118,7 +121,11 @@ export function ResearchAssistant() {
 
       <Card
         title="Ask the evidence"
-        label="RETRIEVAL OVER 46 VERIFIED PASSAGES"
+        label={
+          corpus.data
+            ? `RETRIEVAL OVER ${corpus.data.passages} VERIFIED PASSAGES`
+            : "RETRIEVAL OVER VERIFIED PASSAGES"
+        }
         action={<BookOpenCheck size={18} className="accent" />}
       >
         <div className="search-row">
@@ -254,14 +261,14 @@ export function ResearchAssistant() {
           are never treated as instructions. If a passage was quarantined, it is
           unavailable to answers.
         </p>
-        <CorpusStatus />
+        <CorpusStatus corpus={corpus} />
       </Card>
     </>
   );
 }
 
-function CorpusStatus() {
-  const state = useResource("/assistant/corpus");
+function CorpusStatus({ corpus }) {
+  const state = corpus;
   return (
     <>
       <RequestState state={state} />
