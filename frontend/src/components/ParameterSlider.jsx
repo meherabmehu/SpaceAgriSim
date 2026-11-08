@@ -44,7 +44,7 @@ export default function ParameterSlider({
         </label>
         <div className="flex items-center gap-2">
           {flag && (
-            <span className={`font-mono text-[10px] tracking-wider ${flag.tone === 'warn' ? 'text-warn' : 'text-slate-500'}`}>
+            <span className={`font-mono text-[14px] tracking-wider ${flag.tone === 'warn' ? 'text-warn' : 'text-slate-500'}`}>
               {flag.text}
             </span>
           )}
@@ -82,7 +82,7 @@ export default function ParameterSlider({
       )}
 
       {hint && (
-        <p id={hintId} className="text-[11px] leading-snug text-slate-500">
+        <p id={hintId} className="text-[13px] leading-snug text-slate-500">
           {hint}
         </p>
       )}

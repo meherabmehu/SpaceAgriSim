@@ -22,7 +22,7 @@ export default function SegmentedToggle({ options, value, onChange, ariaLabel })
             aria-checked={selected}
             tabIndex={radioTabIndex(selected)}
             onClick={() => onChange(option.value)}
-            className={`whitespace-nowrap rounded px-2.5 py-1 text-[11px] font-medium transition-colors ${
+            className={`whitespace-nowrap rounded px-2.5 py-1 text-[13px] font-medium transition-colors ${
               selected ? 'bg-accent/15 text-accent' : 'text-slate-400 hover:text-slate-200'
             }`}
           >

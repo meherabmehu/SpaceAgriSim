@@ -16,7 +16,7 @@ export default function ScenarioSelector({ presets, value, step, note, onSelect 
             title={tooltip}
             aria-pressed={active}
             onClick={() => onSelect(preset.value)}
-            className={`rounded border px-2 py-0.5 font-mono text-[10px] tracking-wide transition-colors ${
+            className={`rounded border px-2 py-0.5 font-mono text-[14px] tracking-wide transition-colors ${
               active
                 ? 'border-accent/60 bg-accent/10 text-accent'
                 : 'border-line-strong text-slate-400 hover:border-slate-500 hover:text-slate-200'
@@ -27,7 +27,7 @@ export default function ScenarioSelector({ presets, value, step, note, onSelect 
         )
       })}
       {note && (
-        <span className="ml-auto cursor-help font-mono text-[10px] text-slate-500" title={note} aria-label={note}>
+        <span className="ml-auto cursor-help font-mono text-[14px] text-slate-500" title={note} aria-label={note}>
           assumed
         </span>
       )}

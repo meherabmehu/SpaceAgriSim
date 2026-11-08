@@ -36,7 +36,7 @@ export default function MissionControls({ config, params, onChange, onReset, isL
           <button
             type="button"
             onClick={onReset}
-            className="rounded border border-line-strong px-2.5 py-1 font-mono text-[10px] tracking-wider text-slate-300 transition-colors hover:border-accent/60 hover:text-accent"
+            className="rounded border border-line-strong px-2.5 py-1 font-mono text-[14px] tracking-wider text-slate-300 transition-colors hover:border-accent/60 hover:text-accent"
           >
             RESET
           </button>
@@ -45,7 +45,7 @@ export default function MissionControls({ config, params, onChange, onReset, isL
             onClick={() => setOpenOnMobile((v) => !v)}
             aria-expanded={openOnMobile}
             aria-controls="mission-controls-body"
-            className="rounded border border-line-strong px-2.5 py-1 font-mono text-[10px] tracking-wider text-slate-300 transition-colors hover:border-accent/60 hover:text-accent lg:hidden"
+            className="rounded border border-line-strong px-2.5 py-1 font-mono text-[14px] tracking-wider text-slate-300 transition-colors hover:border-accent/60 hover:text-accent lg:hidden"
           >
             {openOnMobile ? 'HIDE' : 'ADJUST'}
           </button>
@@ -53,7 +53,7 @@ export default function MissionControls({ config, params, onChange, onReset, isL
       }
     >
       {/* compact summary shown on small screens while the controls are collapsed */}
-      <div className={`px-4 py-3 font-mono text-[11px] text-slate-400 lg:hidden ${openOnMobile ? 'hidden' : ''}`}>
+      <div className={`px-4 py-3 font-mono text-[13px] text-slate-400 lg:hidden ${openOnMobile ? 'hidden' : ''}`}>
         {crop?.name} · {params.gravity} g · {params.radiation} mGy/day · {params.waterAvailability}% water · {params.lightHours} h ·{' '}
         {params.co2Level} ppm · {params.growingArea} m² · {params.simulationDays} d
       </div>
@@ -137,7 +137,7 @@ export default function MissionControls({ config, params, onChange, onReset, isL
             cycleLengthDays={crop?.growthDurationDays}
             onChange={(days) => onChange('simulationDays', days)}
           />
-          <p className="font-mono text-[10px] tracking-wider text-slate-500" aria-live="polite">
+          <p className="font-mono text-[14px] tracking-wider text-slate-500" aria-live="polite">
             {isLoading ? 'SIMULATING…' : 'MODEL IN SYNC WITH CONTROLS'}
           </p>
         </ControlGroup>

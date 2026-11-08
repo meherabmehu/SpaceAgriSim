@@ -43,7 +43,7 @@ export default function ImpactBreakdown({ impact, spaceCombined, earthCombined }
           </span>
         </div>
         {spaceCombined != null && earthCombined != null && (
-          <p className="mt-1 font-mono text-[11px] leading-snug tabular-nums text-slate-400">
+          <p className="mt-1 font-mono text-[13px] leading-snug tabular-nums text-slate-400">
             space {formatFactor(spaceCombined)} ÷ Earth run {formatFactor(earthCombined)} = {formatFactor(spaceCombined / earthCombined)} of reference growth →{' '}
             {formatPercent((spaceCombined / earthCombined) * 100, { digits: 0 })} of Earth
           </p>
@@ -72,7 +72,7 @@ function ImpactRow({ factor }) {
     <li className="grid grid-cols-[4rem_minmax(0,1fr)_9rem] items-center gap-2 sm:grid-cols-[6.5rem_minmax(0,1fr)_11rem]">
       <div className="min-w-0">
         <p className="truncate text-xs text-slate-200">{label}</p>
-        <p className="truncate font-mono text-[10px] text-slate-500">{formatFactor(factor.spaceFactor)}</p>
+        <p className="truncate font-mono text-[14px] text-slate-500">{formatFactor(factor.spaceFactor)}</p>
       </div>
       <div className="relative h-4 min-w-0 rounded-sm bg-space-800" aria-hidden="true">
         <span className="absolute left-1/2 top-0 h-full w-px bg-line-strong" />
@@ -81,7 +81,7 @@ function ImpactRow({ factor }) {
           style={negative ? { right: '50%', width: `${width}%` } : { left: '50%', width: `${width}%` }}
         />
         {Math.abs(effect) > SCALE_MAX && (
-          <span className={`absolute top-0 font-mono text-[9px] leading-4 ${textColor} ${negative ? 'left-0' : 'right-0'}`}>
+          <span className={`absolute top-0 font-mono text-[13px] leading-4 ${textColor} ${negative ? 'left-0' : 'right-0'}`}>
             {negative ? '◂' : '▸'}
           </span>
         )}
@@ -90,7 +90,7 @@ function ImpactRow({ factor }) {
         <p className={`font-mono text-xs font-semibold leading-tight tabular-nums ${textColor}`}>
           {formatPercent(effect, { signed: true, digits: 0 })} <span className="font-normal">{effectLabel}</span>
         </p>
-        <p className="font-mono text-[10px] leading-tight tabular-nums text-slate-500" title="Percentage points of the Earth-vs-space difference this driver explains">
+        <p className="font-mono text-[14px] leading-tight tabular-nums text-slate-500" title="Percentage points of the Earth-vs-space difference this driver explains">
           {gapLabel}
         </p>
       </div>

@@ -54,14 +54,14 @@ export default function MetricSummary({ result, isLoading }) {
             </dl>
           )}
           {r && !comparisonDefined && <p className="mt-3 font-mono text-xs text-slate-500">Earth reference produced no biomass · comparison not defined</p>}
-          <p className="mt-2 text-[11px] text-slate-500">
+          <p className="mt-2 text-[13px] text-slate-500">
             {r ? `${formatNumber(r.growthRate, 1)} g/day average · ${formatNumber(r.inputs.growingArea, 1)} m² growing area` : 'Waiting for the first simulation…'}
           </p>
 
           {noHarvest && !zeroOutput && (
             <div className="mt-3 flex items-start gap-2 rounded border border-warn/40 bg-warn/5 px-3 py-2" role="note">
               <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-warn" aria-hidden="true" />
-              <p className="text-[11px] leading-snug text-warn/90">
+              <p className="text-[13px] leading-snug text-warn/90">
                 <span className="font-mono tracking-wider">NO HARVEST WITHIN SIMULATION WINDOW</span>
                 <span className="text-warn/70">
                   {' '}— simulation ends {formatDay(days)}, {cropName} harvest cycle {formatDay(harvest.cycleLengthDays)}. The biomass above is still growing and has not been harvested.
@@ -72,7 +72,7 @@ export default function MetricSummary({ result, isLoading }) {
           {zeroOutput && (
             <div className="mt-3 flex items-start gap-2 rounded border border-danger/40 bg-danger/5 px-3 py-2" role="note">
               <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-danger" aria-hidden="true" />
-              <p className="text-[11px] leading-snug text-danger/90">
+              <p className="text-[13px] leading-snug text-danger/90">
                 <span className="font-mono tracking-wider">NO GROWTH</span>
                 <span className="text-danger/70"> — at least one driver (water, light or area) is zero, so the crop produces nothing.</span>
               </p>
@@ -167,7 +167,7 @@ export default function MetricSummary({ result, isLoading }) {
           isLoading={isLoading}
         />
       </div>
-      <p className="border-t border-line px-4 py-2 text-[10px] leading-snug text-slate-500 sm:px-5">
+      <p className="border-t border-line px-4 py-2 text-[14px] leading-snug text-slate-500 sm:px-5">
         Crew-day figures are an equivalent reference only; crew metabolism and the full atmospheric balance are not modeled.
         Water recovery uses an assumed closed-loop efficiency.
       </p>
@@ -189,7 +189,7 @@ function HarvestCell({ label, value, note, tone, isLoading }) {
     <div className="min-w-0 rounded-md border border-line bg-space-800/50 px-3 py-2">
       <dt className="label-tech leading-tight">{label}</dt>
       <dd className={`mt-0.5 font-mono text-base font-semibold tabular-nums transition-opacity ${tone} ${isLoading ? 'opacity-60' : ''}`}>{value}</dd>
-      {note && <dd className="text-[10px] leading-snug text-slate-500">{note}</dd>}
+      {note && <dd className="text-[14px] leading-snug text-slate-500">{note}</dd>}
     </div>
   )
 }

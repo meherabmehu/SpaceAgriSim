@@ -24,7 +24,7 @@ export default function MissionTimeline({ harvest }) {
     <div aria-label="Mission timeline" role="group">
       <div className="flex items-baseline justify-between">
         <p className="label-tech">Mission timeline</p>
-        <p className="font-mono text-[10px] text-slate-500">
+        <p className="font-mono text-[14px] text-slate-500">
           {harvest.cycleLengthDays}-day cycle · window {formatDay(end)}
         </p>
       </div>
@@ -48,7 +48,7 @@ export default function MissionTimeline({ harvest }) {
             <div key={`${e.kind}-${e.day}`} className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2" style={{ left: pos(e.day) }}>
               <span className={`block h-2.5 w-2.5 rounded-full ${dot}`} aria-hidden="true" />
               <span
-                className={`absolute whitespace-nowrap font-mono text-[10px] leading-tight ${align} ${above ? 'bottom-4' : 'top-4'} ${
+                className={`absolute whitespace-nowrap font-mono text-[14px] leading-tight ${align} ${above ? 'bottom-4' : 'top-4'} ${
                   e.kind === 'next' ? 'text-slate-500' : 'text-slate-300'
                 }`}
               >

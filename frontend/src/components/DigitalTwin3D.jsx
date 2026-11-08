@@ -99,7 +99,7 @@ export default function DigitalTwin3D({ result }) {
           role="switch"
           aria-checked={enabled}
           onClick={toggle}
-          className={`rounded border px-2.5 py-1 font-mono text-[10px] tracking-wider transition-colors ${
+          className={`rounded border px-2.5 py-1 font-mono text-[14px] tracking-wider transition-colors ${
             enabled ? 'border-accent/60 bg-accent/10 text-accent' : 'border-line-strong text-slate-300 hover:border-accent/60 hover:text-accent'
           }`}
         >
@@ -117,7 +117,7 @@ export default function DigitalTwin3D({ result }) {
           )}
           {state && enabled && !canRender3D && (
             <div className="absolute inset-0 flex flex-col">
-              <p className="border-b border-line bg-space-800/60 px-3 py-1.5 font-mono text-[10px] tracking-wider text-warn">
+              <p className="border-b border-line bg-space-800/60 px-3 py-1.5 font-mono text-[14px] tracking-wider text-warn">
                 {renderError ? '3D RENDERER FAILED' : 'WEBGL UNAVAILABLE'} · SHOWING 2D SCHEMATIC
               </p>
               <div className="relative flex-1">
@@ -132,14 +132,14 @@ export default function DigitalTwin3D({ result }) {
                   <GrowthChamberScene state={state} reduced={reducedMotion} paused={!inView} onInspect={setSelected} />
                 </Suspense>
               </SceneErrorBoundary>
-              <div className="pointer-events-none absolute left-3 top-3 rounded border border-line bg-space-950/70 px-2 py-1 font-mono text-[10px] tracking-wider text-slate-300">
+              <div className="pointer-events-none absolute left-3 top-3 rounded border border-line bg-space-950/70 px-2 py-1 font-mono text-[14px] tracking-wider text-slate-300">
                 {formatDay(state.day)} · {harvestCaption(state)}
               </div>
               <StatusTags state={state} />
             </div>
           )}
           {state && (
-            <p className="pointer-events-none absolute bottom-2 right-3 font-mono text-[9px] tracking-wider text-slate-500">
+            <p className="pointer-events-none absolute bottom-2 right-3 font-mono text-[13px] tracking-wider text-slate-500">
               VISUALIZATION DRIVEN BY SIMULATION OUTPUTS
             </p>
           )}
@@ -159,10 +159,10 @@ export default function DigitalTwin3D({ result }) {
           }</p>}
           <ul className="mt-2 space-y-2">
             {LEGEND.map((item) => (
-              <li key={item.key} className="flex items-start gap-2 text-[11px]">
+              <li key={item.key} className="flex items-start gap-2 text-[13px]">
                 <span className="mt-1 h-2 w-2 shrink-0 rounded-sm" style={{ background: item.color }} aria-hidden="true" />
                 <span className="min-w-0">
-                  <span className="font-mono text-[10px] tracking-wider text-slate-300">{item.label.toUpperCase()}</span>
+                  <span className="font-mono text-[14px] tracking-wider text-slate-300">{item.label.toUpperCase()}</span>
                   <br />
                   <span className="text-slate-500">{state ? item.read(state) : '–'}</span>
                 </span>
@@ -170,7 +170,7 @@ export default function DigitalTwin3D({ result }) {
             ))}
           </ul>
           {state && (
-            <p className="mt-3 border-t border-line pt-2 text-[10px] leading-snug text-slate-500">
+            <p className="mt-3 border-t border-line pt-2 text-[14px] leading-snug text-slate-500">
               Plant size follows standing biomass ({formatMass(result.harvest.standingBiomass)}); leaf colour follows the space-vs-Earth ratio (
               {formatPercent(result.comparison.spaceGrowthPercentage, { digits: 0 })}). Panels, water lines and indicators mirror the control settings.
             </p>
@@ -199,7 +199,7 @@ function StatusTags({ state }) {
   return (
     <div className="pointer-events-none absolute right-3 top-3 flex flex-col items-end gap-1">
       {tags.map((tag) => (
-        <span key={tag} className="rounded border border-warn/50 bg-space-950/70 px-2 py-0.5 font-mono text-[10px] tracking-wider text-warn">
+        <span key={tag} className="rounded border border-warn/50 bg-space-950/70 px-2 py-0.5 font-mono text-[14px] tracking-wider text-warn">
           {tag}
         </span>
       ))}
@@ -211,7 +211,7 @@ function Placeholder({ text, children }) {
   return (
     <div className="absolute inset-0 flex flex-col">
       {children ? <div className="relative flex-1">{children}</div> : null}
-      <p className={`${children ? 'border-t border-line bg-space-800/60' : 'm-auto'} px-3 py-1.5 font-mono text-[10px] tracking-wider text-slate-500`}>
+      <p className={`${children ? 'border-t border-line bg-space-800/60' : 'm-auto'} px-3 py-1.5 font-mono text-[14px] tracking-wider text-slate-500`}>
         {text}
       </p>
     </div>

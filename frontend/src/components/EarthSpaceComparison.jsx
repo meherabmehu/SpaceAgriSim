@@ -37,7 +37,7 @@ export default function EarthSpaceComparison({ result, mode, onModeChange }) {
         <div className="flex h-40 items-center justify-center text-sm text-slate-500">Waiting for simulation…</div>
       ) : (
         <div className="space-y-5">
-          <p className="text-[11px] leading-snug text-slate-400">{MODE_HELP[mode]}</p>
+          <p className="text-[13px] leading-snug text-slate-400">{MODE_HELP[mode]}</p>
           <div className="space-y-2">
             <YieldBar label="Earth reference" value={c.earthYield} max={maxYield} color="bg-earth/70" textColor="text-earth" />
             <YieldBar label="Space scenario" value={c.spaceYield} max={maxYield} color="bg-growth/80" textColor="text-growth" />
@@ -56,7 +56,7 @@ export default function EarthSpaceComparison({ result, mode, onModeChange }) {
             <div>
               <p className="label-tech mb-2">Model factor effects · space scenario</p>
               <ImpactBreakdown impact={c.impact} spaceCombined={result.space?.factors?.combined} earthCombined={result.earth?.factors?.combined} />
-              <p className="mt-2 text-[10px] leading-snug text-slate-500">
+              <p className="mt-2 text-[14px] leading-snug text-slate-500">
                 Bars show each driver’s modelled effect on growth relative to reference conditions (1 g, background radiation, full water,
                 optimal light, ambient CO₂) — assumed Phase 1 response curves, not measured values. The small figure is how many percentage points of the Earth‑vs‑space gap it explains once the
                 earlier drivers are applied (gravity → radiation → water → light → CO₂); those points add up exactly to the combined
@@ -65,7 +65,7 @@ export default function EarthSpaceComparison({ result, mode, onModeChange }) {
               </p>
             </div>
           ) : (
-            <p className="rounded border border-line bg-space-800/60 px-3 py-2 text-[11px] text-slate-400">
+            <p className="rounded border border-line bg-space-800/60 px-3 py-2 text-[13px] text-slate-400">
               With no Earth biomass there is no gap to decompose. Raise water, light or growing area above zero to compare.
             </p>
           )}

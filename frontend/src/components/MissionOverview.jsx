@@ -55,7 +55,7 @@ export default function MissionOverview({ params, config, result }) {
             <div key={cell.label} className="bg-space-900/90 px-3 py-2 min-w-[7.5rem]">
               <dt className="label-tech">{cell.label}</dt>
               <dd className="mt-0.5 truncate text-sm font-semibold text-slate-100">{cell.value}</dd>
-              {cell.detail && <dd className="truncate font-mono text-[10px] text-slate-500">{cell.detail}</dd>}
+              {cell.detail && <dd className="truncate font-mono text-[14px] text-slate-500">{cell.detail}</dd>}
             </div>
           ))}
         </dl>

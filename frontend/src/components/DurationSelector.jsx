@@ -38,7 +38,7 @@ export default function DurationSelector({ options, value, cycleLengthDays, onCh
         })}
       </div>
       {cycleLengthDays && (
-        <p className={`mt-1.5 text-[11px] leading-snug ${noHarvest ? 'text-warn/90' : 'text-slate-500'}`}>
+        <p className={`mt-1.5 text-[13px] leading-snug ${noHarvest ? 'text-warn/90' : 'text-slate-500'}`}>
           {noHarvest
             ? `Shorter than the ${cycleLengthDays}-day crop cycle: no harvest inside the window, results show standing biomass.`
             : `${cycles} full ${cycles === 1 ? 'harvest' : 'harvests'} inside the window (${cycleLengthDays}-day cycle).`}

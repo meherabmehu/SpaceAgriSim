@@ -31,7 +31,7 @@ export default function CropSelector({ crops, value, onChange }) {
             }`}
           >
             <span className={`text-sm font-semibold ${selected ? 'text-growth' : 'text-slate-200'}`}>{crop.name}</span>
-            <span className="mt-0.5 font-mono text-[10px] text-slate-500">{crop.growthDurationDays}-day cycle</span>
+            <span className="mt-0.5 font-mono text-[14px] text-slate-500">{crop.growthDurationDays}-day cycle</span>
           </button>
         )
       })}

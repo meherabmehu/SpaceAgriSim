@@ -36,7 +36,7 @@ export default function LifeSupportPanel({ result }) {
               <h3 id="water-loop-title" className="label-tech !text-water">
                 Water loop
               </h3>
-              <p className="font-mono text-[10px] tabular-nums text-slate-500">
+              <p className="font-mono text-[14px] tabular-nums text-slate-500">
                 demand {formatVolume(water.demand)} · supplied {formatVolume(water.supplied)} ·{' '}
                 <span className={water.deficit > 0 ? 'text-warn' : ''}>deficit {formatVolume(water.deficit)}</span> · est. recovery{' '}
                 {formatVolume(water.recovered)} ({formatNumber(water.recoveryEfficiency * 100, 0)}% assumed)
@@ -44,12 +44,12 @@ export default function LifeSupportPanel({ result }) {
             </div>
             <WaterLoopChart data={result.dailyLifeSupportData} mode={mode} />
             {water.deficit > 0 ? (
-              <p className="mt-1 text-[11px] text-warn/90">
+              <p className="mt-1 text-[13px] text-warn/90">
                 {formatPercent(water.deficitPercent, { digits: 0 })} of the canopy’s demand is unmet. The shortage is already reflected in
                 the growth curve through the water factor.
               </p>
             ) : (
-              <p className="mt-1 text-[11px] text-slate-500">Demand is fully met; net make-up water after recovery is {formatVolume(water.netConsumed)}.</p>
+              <p className="mt-1 text-[13px] text-slate-500">Demand is fully met; net make-up water after recovery is {formatVolume(water.netConsumed)}.</p>
             )}
           </section>
 
@@ -58,13 +58,13 @@ export default function LifeSupportPanel({ result }) {
               <h3 id="atmosphere-title" className="label-tech !text-o2">
                 Atmosphere
               </h3>
-              <p className="font-mono text-[10px] tabular-nums text-slate-500">
+              <p className="font-mono text-[14px] tabular-nums text-slate-500">
                 CO₂ removed {formatMass(result.co2Removed)} · O₂ produced {formatMass(result.estimatedOxygenProduced)} · ≈{' '}
                 {formatNumber(ls.crewO2DaysSupported, 1)} crew-days O₂ · reference equivalent
               </p>
             </div>
             <AtmosphereChart data={result.dailyLifeSupportData} mode={mode} />
-            <p className="mt-1 text-[11px] text-slate-500">
+            <p className="mt-1 text-[13px] text-slate-500">
               Gas exchange is derived from daily biomass gain. Crew-day figures are an equivalent reference only; crew metabolism and the
               full atmospheric balance are not modeled.
             </p>

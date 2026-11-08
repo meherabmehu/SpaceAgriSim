@@ -25,9 +25,9 @@ export default function MetricCard({ label, value, unit, note, noteTone = 'muted
       <p className="label-tech truncate">{label}</p>
       <p className={`mt-1 flex items-baseline gap-1 transition-opacity ${isLoading ? 'opacity-60' : ''}`}>
         <span className={`font-mono font-semibold tabular-nums ${valueSize} ${TONES[tone] ?? TONES.neutral}`}>{value}</span>
-        {unit && <span className="text-[11px] text-slate-500">{unit}</span>}
+        {unit && <span className="text-[13px] text-slate-500">{unit}</span>}
       </p>
-      {note && <p className={`mt-0.5 text-[11px] leading-snug ${TONES[noteTone] ?? TONES.muted}`}>{note}</p>}
+      {note && <p className={`mt-0.5 text-[13px] leading-snug ${TONES[noteTone] ?? TONES.muted}`}>{note}</p>}
     </article>
   )
 }

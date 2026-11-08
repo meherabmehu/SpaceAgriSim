@@ -25,7 +25,7 @@ export default function MissionInsight({ result, params, config, baseline, onPin
             <button
               type="button"
               onClick={onClearBaseline}
-              className="rounded border border-line-strong px-2.5 py-1 font-mono text-[10px] tracking-wider text-slate-400 transition-colors hover:text-slate-200"
+              className="rounded border border-line-strong px-2.5 py-1 font-mono text-[14px] tracking-wider text-slate-400 transition-colors hover:text-slate-200"
             >
               CLEAR
             </button>
@@ -34,7 +34,7 @@ export default function MissionInsight({ result, params, config, baseline, onPin
             type="button"
             onClick={onPinBaseline}
             disabled={!result}
-            className="rounded border border-accent/50 px-2.5 py-1 font-mono text-[10px] tracking-wider text-accent transition-colors hover:bg-accent/10 disabled:opacity-40"
+            className="rounded border border-accent/50 px-2.5 py-1 font-mono text-[14px] tracking-wider text-accent transition-colors hover:bg-accent/10 disabled:opacity-40"
             title="Pin the current scenario as the baseline, then change one parameter to see what it does"
           >
             {hasBaseline ? 'RE-PIN BASELINE' : 'PIN AS BASELINE'}
@@ -48,21 +48,21 @@ export default function MissionInsight({ result, params, config, baseline, onPin
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <p className="label-tech">What changed?</p>
           {hasBaseline && changed.length > 0 && (
-            <p className="font-mono text-[10px] text-slate-500">
+            <p className="font-mono text-[14px] text-slate-500">
               {changed.map((c) => `${c.label} ${c.from} → ${c.to}`).join(' · ')}
             </p>
           )}
         </div>
 
         {!hasBaseline && (
-          <p className="mt-1 text-[11px] leading-snug text-slate-500">
+          <p className="mt-1 text-[13px] leading-snug text-slate-500">
             Pin the current scenario, then change a single parameter. The table shows how biomass, O₂, CO₂ removal and the water loop
             respond relative to the pinned baseline.
           </p>
         )}
 
         {hasBaseline && changed.length === 0 && (
-          <p className="mt-1 text-[11px] text-slate-500">Baseline pinned. Move any control to compare against it.</p>
+          <p className="mt-1 text-[13px] text-slate-500">Baseline pinned. Move any control to compare against it.</p>
         )}
 
         {hasBaseline && changed.length > 0 && (

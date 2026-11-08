@@ -38,7 +38,7 @@ export default function SystemStatus({ isLoading, error, hasResult, compact = fa
 
 function StatusItem({ dot, text, short, tone }) {
   return (
-    <span className={`inline-flex items-center gap-1.5 whitespace-nowrap font-mono text-[10px] tracking-[0.14em] ${tone}`}>
+    <span className={`inline-flex items-center gap-1.5 whitespace-nowrap font-mono text-[14px] tracking-[0.14em] ${tone}`}>
       <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${dot}`} aria-hidden="true" />
       <span className="hidden md:inline">{text}</span>
       <span className="md:hidden">{short}</span>
