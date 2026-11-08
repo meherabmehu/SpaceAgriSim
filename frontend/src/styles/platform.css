@@ -1728,3 +1728,89 @@
   line-height: 1.8;
   color: #8a9fa9;
 }
+
+/* Phase 13: the scientific workflow module. Same card, pill and field vocabulary as every
+   other module; only the step framing and the model chooser are new. */
+.workflow-timeline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  list-style: none;
+  margin: 1rem 0 1.5rem;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid var(--line, rgba(148, 163, 184, 0.24));
+  border-radius: 14px;
+}
+.workflow-timeline li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.workflow-timeline .timeline-node,
+.step-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(74, 222, 128, 0.16);
+  color: inherit;
+}
+.mission-card + .mission-card,
+.workflow-timeline + .mission-card {
+  margin-top: 20px;
+}
+.workflow-step + .workflow-step {
+  margin-top: 1.25rem;
+}
+.step-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+.step-heading h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+.step-heading p {
+  margin: 0.15rem 0 0;
+}
+.model-choice {
+  text-align: left;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--line, rgba(148, 163, 184, 0.24));
+  border-radius: 14px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.model-choice.selected {
+  border-color: rgba(74, 222, 128, 0.65);
+  box-shadow: 0 0 0 1px rgba(74, 222, 128, 0.35) inset;
+}
+.model-choice:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.pill-ok {
+  background: rgba(74, 222, 128, 0.18);
+}
+.pill-warn {
+  background: rgba(251, 191, 36, 0.18);
+}
+.pill-danger {
+  background: rgba(248, 113, 113, 0.18);
+}
+.field input[type="number"] {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border-radius: 10px;
+  border: 1px solid var(--line, rgba(148, 163, 184, 0.24));
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}

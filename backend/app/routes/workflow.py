@@ -20,6 +20,8 @@ from app.config.settings import settings
 
 router = APIRouter(tags=["workflow"])
 
+# Per-payload ceiling. The per-account quotas in storage are separate and larger; this one exists
+# so a single request cannot be used to burn a whole account's allowance in one insert.
 MAX_ANALYSIS_BYTES = 200_000
 
 
@@ -94,10 +96,17 @@ def _run(request: RunRequest, owner: dict | None):
 
     if request.save and owner is not None:
         payload = json.dumps(result, sort_keys=True)
-        if len(payload) > MAX_ANALYSIS_BYTES:
+        if len(payload.encode("utf-8")) > min(MAX_ANALYSIS_BYTES, settings.max_analysis_bytes):
             raise HTTPException(413, "Analysis payload is too large to save")
         title = (request.title or f"{request.modelId} analysis")[:120]
-        row = storage.save_analysis(owner["id"], request.modelId, title, payload)
+        try:
+            row = storage.save_analysis(owner["id"], request.modelId, title, payload)
+        except storage.AnalysisQuotaExceeded as error:
+            # 413 for a payload that can never be stored, 409 when the account's current state is
+            # what refuses the request: the request itself is valid in the second case.
+            status = 413 if error.code == "payload-too-large" else 409
+            raise HTTPException(status, {"error": error.code, "message": error.message,
+                                         **error.detail}) from error
         result["saved"] = {"id": row["id"], "title": title,
                            "createdAt": row["created_at"]}
     else:
@@ -112,12 +121,34 @@ def workflow_run_and_save(request: RunRequest, user: dict = Depends(current_user
 
 
 @router.get("/analyses")
-def list_analyses(user: dict = Depends(current_user)):
-    rows = storage.list_analyses(user["id"])
+def list_analyses(limit: int | None = None, offset: int = 0,
+                  user: dict = Depends(current_user)):
+    """One page of the caller's saved analyses, newest first.
+
+    Pagination is mandatory rather than optional because the list is unbounded in principle: an
+    account that has saved for months should not be answered with every row in one response.
+    """
+    try:
+        storage.purge_expired_analyses()
+        rows, total, page = storage.list_analyses(user["id"], limit=limit, offset=offset)
+    except Exception as exc:
+        raise HTTPException(503, "Saved analyses unavailable") from exc
     return {"analyses": [{"id": row["id"], "title": row["title"],
                           "modelId": row["model_id"], "createdAt": row["created_at"]}
                          for row in rows],
+            "pagination": page,
+            "usage": storage.analysis_usage(user["id"]),
             "note": "Only analyses belonging to the authenticated account are returned."}
+
+
+@router.delete("/analyses")
+def delete_all_analyses(user: dict = Depends(current_user)):
+    """Retention: let an account erase its own saved analyses. Never touches another account."""
+    try:
+        removed = storage.delete_all_analyses(user["id"])
+    except Exception as exc:
+        raise HTTPException(503, "Saved analyses unavailable") from exc
+    return {"deleted": removed, "scope": "authenticated account only"}
 
 
 @router.get("/analyses/{analysis_id}")
