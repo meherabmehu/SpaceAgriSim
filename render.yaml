@@ -1,21 +1,79 @@
-# Reviewed against https://render.com/docs/blueprint-spec on 2026-11-06.
-# API only. Configure Vercel's VITE_API_BASE_URL with this service's public URL.
-# Supply a PostgreSQL URL and exact frontend origins during Blueprint setup.
+# Render Blueprint — API (Python) + web client (static site).
+# Reviewed against https://render.com/docs/blueprint-spec on 2026-11-07.
+#
+# Three settings have to agree with each other, and none of them fails at build time:
+#   1. the static site's build-time VITE_API_BASE_URL,
+#   2. the API's SPACEAGRISIM_CORS_ORIGINS (the static site's exact origin),
+#   3. the SPA rewrite /* -> /index.html.
+# Change one without the others and you get a CORS error, a blank screen, or a 404 on refresh.
 services:
   - type: web
     name: spaceagrisim-api
     runtime: python
     plan: free
+    region: singapore
     repo: https://github.com/meherabmehu/SpaceAgriSim
     branch: main
     buildCommand: pip install -r backend/requirements.txt
+    # --workers 1 keeps the in-process rate limiter and the SQLite path coherent. Multi-worker
+    # would need a shared limiter and a real database; see docs/PHASE13_PRODUCTION_READINESS.md.
     startCommand: uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port $PORT --workers 1 --timeout-graceful-shutdown 25
     healthCheckPath: /api/ready
     autoDeployTrigger: 'off'
     envVars:
+      # Phase 13: production refuses to start without a real secret, and an ephemeral one would
+      # log every user out on each restart — which on a free instance happens on every wake from
+      # the 15-minute idle spin-down. generateValue writes one durable value and keeps it.
+      - key: SPACEAGRISIM_ENVIRONMENT
+        value: production
+      - key: SPACEAGRISIM_AUTH_SECRET
+        generateValue: true
+      # Free web services have an ephemeral filesystem, so a SQLite file is lost on every
+      # redeploy, restart and spin-down. Supply the Internal Database URL of a Render Postgres
+      # instance here (postgresql+psycopg://...), not the external one.
       - key: SPACEAGRISIM_DATABASE_URL
         sync: false
+      # The static site's exact origin, as a JSON list, e.g.
+      # ["https://spaceagrisim-web.onrender.com"] — wildcards are rejected by the app.
       - key: SPACEAGRISIM_CORS_ORIGINS
         sync: false
+      # Scenario history writes. Left true here because the database above is durable; if you
+      # deploy without Postgres, set this to false so scenario saves fail loudly instead of
+      # disappearing on the next spin-down.
       - key: SPACEAGRISIM_HISTORY_WRITES_ENABLED
-        value: 'false'
+        value: 'true'
+
+  - type: web
+    runtime: static
+    name: spaceagrisim-web
+    plan: free
+    repo: https://github.com/meherabmehu/SpaceAgriSim
+    branch: main
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: ./frontend/dist
+    autoDeployTrigger: 'off'
+    envVars:
+      # Baked into the bundle at BUILD time, not read at runtime. Changing it requires a rebuild,
+      # not a restart — the single most common "I changed the variable and nothing happened"
+      # mistake on a static site.
+      #
+      # Must be the FULL origin including scheme and the /api suffix:
+      #   https://spaceagrisim-api.onrender.com/api
+      # It cannot be derived with fromService: that yields a bare host, and the client concatenates
+      # this value directly with a path, so a scheme-less value silently produces relative URLs
+      # that call the static host instead of the API.
+      - key: VITE_API_BASE_URL
+        sync: false
+      - key: NODE_VERSION
+        value: '22'
+    # Vite 7 needs Node 20+; without NODE_VERSION Render may pick an older default.
+    routes:
+      # The app is hash-routed, so deep links survive without this, but the rewrite keeps
+      # /index.html the answer for any unknown path instead of a static-host 404.
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
