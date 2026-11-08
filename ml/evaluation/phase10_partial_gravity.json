@@ -96,5 +96,5 @@
     "the only honest split yields two folds",
     "a model trained on this would not be a predictor of partial gravity in general, and serving it as one would repeat the OSD-411 mistake with better labels"
   ],
-  "nextAction": "OSD-346 (Arabidopsis phyA/phyB, fractional gravity 0-0.64 g under blue light) is the obvious replication: it has eight gravity levels and per-sample RSEM gene results. It was not analysed here because its expression is deposited as 26 per-sample files rather than one matrix, and merging them without its own factor table would risk the exact label error this phase is about."
+  "nextAction": "Done in Phase 10: OSD-346 was analysed as the replication. It does not reproduce this contrast (see ml/evaluation/phase10_partial_gravity_replication.json), so the 1.000 reported here must be read as one experiment rather than as a stable property of plant transcriptomes. A servable gravity predictor would need a third mission."
 }

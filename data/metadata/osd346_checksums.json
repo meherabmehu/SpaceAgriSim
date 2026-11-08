@@ -1,0 +1,155 @@
+{
+  "study": "OSD-346",
+  "version": 5,
+  "source": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-346/version-5",
+  "files": {
+    "GLDS-346_rna_seq_Athaliana_PhyA_Sample_112_0G.genes.results": {
+      "sha256": "b102c34fe0e6dd32a36d7b8fbb2ebece833ba457439789970c6468c6c9e89e40",
+      "bytes": 2028439
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyA_Sample_115_0G.genes.results": {
+      "sha256": "7aebf0306486e1e1f2590818203cc92bacf957bd2ab88320902573f1e379b8d2",
+      "bytes": 2031194
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyA_Sample_117_0G.genes.results": {
+      "sha256": "47247178d458d8030d038a4614eb31323a163fd63973c8baa506269c265fa880",
+      "bytes": 2025494
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyA_Sample_119_0G.genes.results": {
+      "sha256": "1b8d53fa21c29e2af563e819ab5e14448ac096559930859900526bbd914bfbff",
+      "bytes": 2026506
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyA_Sample_132_0-08G.genes.results": {
+      "sha256": "9235f69329fc1c35b37de0aab8070e548850a2d405c02a545eac53f84959f9b6",
+      "bytes": 2020688
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyA_Sample_134_0-11G.genes.results": {
+      "sha256": "1553d346d100666eebce584ddb8c8b12e29560b25cea215563ac9865ca98dd90",
+      "bytes": 2022882
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyA_Sample_137_0-08G.genes.results": {
+      "sha256": "d8f9509ab4943afe29d6969289edd79e98d360042a518c253f5374a6265bc4e0",
+      "bytes": 2022897
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyA_Sample_140_0-13G.genes.results": {
+      "sha256": "a5d9276baafbe32de21fd3d4f509086a97b0c0784a160edfebae4e6f1a72428d",
+      "bytes": 2025321
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyA_Sample_152_0-25G.genes.results": {
+      "sha256": "bb159e6b6476a2e73a6645f7c3a3f6cfcd646090cbfa05195b8a067c8547eac6",
+      "bytes": 2023650
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyA_Sample_155_0-39G.genes.results": {
+      "sha256": "1f43eab91e8a0fe589edb4dfa56ab08cb1e7da51620a0abc85b6374c0ff20ac5",
+      "bytes": 2032122
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyA_Sample_157_0-25G.genes.results": {
+      "sha256": "377e8355d9ad20f8bbd978495037a5b0db5d91ae26c4f61c75fba5aa66fe2926",
+      "bytes": 2025048
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyA_Sample_159_0-34G.genes.results": {
+      "sha256": "04b1a4b6c73cbf7e6383ac0f1a2252bb4f3d4d8d6a3c9d2174f80434f41baf89",
+      "bytes": 2023837
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyA_Sample_172_0-64G.genes.results": {
+      "sha256": "8a7cd83d8f003948fe559af43c70148b2a3e1e40d4596accb47b11952081cb5a",
+      "bytes": 2022267
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyA_Sample_174_0-88G.genes.results": {
+      "sha256": "5ce3857a2325279c2737fb0c3405454f9aa059a7f36369e8d4022fca7bb147ee",
+      "bytes": 2022509
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyA_Sample_177_0-64G.genes.results": {
+      "sha256": "91bf1c6f5bde5c045a1fe896880923799c3a903dd22cb57722a548074d1f53b9",
+      "bytes": 2022950
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyA_Sample_180_1G.genes.results": {
+      "sha256": "9dbb4f9ec263a3e8861b6d331d6dc2ca5c2186e8322d48533c98489a0a9d4232",
+      "bytes": 2022032
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyA_Sample_212_0-42G.genes.results": {
+      "sha256": "3333e601d7672204f5ec57bac1aa4f3c607348468e8c1756ef97e666c37debd3",
+      "bytes": 2028778
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyA_Sample_215_0-65G.genes.results": {
+      "sha256": "c4b3ca3325bc959dd759832e6b71323fb29d6684e53d97cd98d141881f7e7c00",
+      "bytes": 2030796
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyA_Sample_217_0-42G.genes.results": {
+      "sha256": "1d8bb4f21d2b4d1052ac8880ffc4199da68cd448a08c68a397969c6e2b2f896c",
+      "bytes": 2030634
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyA_Sample_219_0-58G.genes.results": {
+      "sha256": "32c54c21358d61982f0feb6ed33eaee8c354864590d588e09190889056d6b890",
+      "bytes": 2026106
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyA_Sample_232_0-68G.genes.results": {
+      "sha256": "0f35bc1f07037eeecc75ba5770643e582b69b663112de561c8cf09e9c3cdf6a7",
+      "bytes": 2027099
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyA_Sample_234_0-92G.genes.results": {
+      "sha256": "481c6e986eca45f13c167c9073c8c521ea11458aaf1e0f7bc20757fd487bc254",
+      "bytes": 2020848
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyA_Sample_237_0-68G.genes.results": {
+      "sha256": "df5737f9d3eb59a1267fb7eb08796d110063534b836e551d917dce2cdde2b572",
+      "bytes": 2026461
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyA_Sample_240_1-05G.genes.results": {
+      "sha256": "35222585e98c469ed4a0dc843e139bfa7d9537e7b6960f289b2fc4c3ed0d2e92",
+      "bytes": 2031935
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyB_Sample_113_0G.genes.results": {
+      "sha256": "68a6a334a80a16c3bcc973f2c49872d199ba93f207105ef3d356d12f4a848649",
+      "bytes": 2026360
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyB_Sample_118_0G.genes.results": {
+      "sha256": "5ee9ec4ef9154c0c4a889e7e5c1319ecab93dd058abd1ec149cc15fdf4eb0438",
+      "bytes": 2025014
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyB_Sample_133_0-1G.genes.results": {
+      "sha256": "fa8d23ae743c352c1d9f9310a848faa82762553146c68e1b7e2eb2ba73e22432",
+      "bytes": 2024806
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyB_Sample_138_0-1G.genes.results": {
+      "sha256": "675bd1cc72acb84e39cadc3991d408b5b964dece89d0b0b6a1236fe90d118437",
+      "bytes": 2021816
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyB_Sample_153_0-3G.genes.results": {
+      "sha256": "14c98228100eb3dd1d43d37faa20ea2f0bb84a4b552eb418731db001186cfc74",
+      "bytes": 2027997
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyB_Sample_158_0-3G.genes.results": {
+      "sha256": "901e37d8b988e6389438fdb5035034fefde79854aeaebf12abf886b228e2145e",
+      "bytes": 2028091
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyB_Sample_173_0-76G.genes.results": {
+      "sha256": "ac64a837fe64651ffb42eb7560d9c896765d209966dede9c434941d8d22f73bf",
+      "bytes": 2030800
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyB_Sample_178_0-76G.genes.results": {
+      "sha256": "b4e5bc5d8222a7aef48db7d051a052b0857f14f3a13edb0dc2fd66934eadd1fb",
+      "bytes": 2024660
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyB_Sample_213_0-5G.genes.results": {
+      "sha256": "5f9ace95f84b664484041322c62717554d54262eb9822ac359672fd959035bf9",
+      "bytes": 2036588
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyB_Sample_218_0-5G.genes.results": {
+      "sha256": "8bd42cef7eb2494b8f1c871ab2f0582dfff4237ddd723575a3db5d8c0013a180",
+      "bytes": 2023112
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyB_Sample_233_0-8G.genes.results": {
+      "sha256": "8d63d5686e8994e3d7cb700510bc7430295b50ba9175012448f4995472eddede",
+      "bytes": 2022709
+    },
+    "GLDS-346_rna_seq_Athaliana_PhyB_Sample_238_0-8G.genes.results": {
+      "sha256": "bc388e4e3205ef57f7254de95da777eaf3142f35dd63ae40db6fe2a71f23b2f9",
+      "bytes": 2030403
+    },
+    "OSD-346_metadata_OSD-346-ISA.zip": {
+      "sha256": "bf6bc59f81535f1026f29faa7cc6f0768756f794828f6fea2c274aa60c507f61",
+      "bytes": 185388
+    }
+  }
+}

@@ -2,7 +2,7 @@
 
 Branch `feat/phase10-advanced-nasa-ai`, ten commits on top of `05f6950`.
 **Registry: 8 models, no additions, no removals, no status changes.**
-**Catalogue: 18 NASA datasets, one new (OSD-314).**
+**Catalogue: 19 NASA datasets, two new (OSD-314, OSD-346).**
 
 The phase had one throughline: Phase 9 shipped models whose *claims* were less
 rigorous than their *fits*. Every number in the registry was measured; what was
@@ -111,7 +111,7 @@ that would settle it is named.
 
 Detail: `PHASE10_CROSS_STUDY_VALIDATION.md`, `PHASE10_DOSE_GRAVITY_RECOVERY.md`.
 
-## 5. One dataset added, found by searching instead of asserting
+## 5. Two datasets added, found by searching instead of asserting
 
 Phase 9 concluded that no plant study with processed expression and a real partial
 gravity manipulation existed, based on one study (OSD-480, raw FASTQ only). That was an
@@ -119,8 +119,8 @@ inference from a single deposit, not a search.
 
 Phase 10 fetched the ISA metadata of all **231** studies with a usable processed matrix
 and scanned it for any vocabulary naming a non-1 g acceleration: 231/231 retrieved, 22
-candidates, and **two graded-gravity plant experiments with processed RNA-seq**, of which
-one is now catalogued.
+candidates, and **two graded-gravity plant experiments with processed RNA-seq**, both now
+catalogued.
 
 **OSD-314** — Arabidopsis on the ISS, a subset centrifuged to **0.34 g in orbit**,
 microgravity and a 1 g ground control, every level crossed with red light and dark.
@@ -129,9 +129,9 @@ than a reorientation direction. Acquisition is pinned by byte length and SHA-256
 
 What it supported is in section 6; what it did not is that no model is served from it.
 
-**OSD-346** (eight gravity levels, 0–0.64 g) is the named replication and is
-deliberately unstarted: its expression is 26 per-sample files and merging them without
-its factor table would risk exactly the label error this phase is about.
+**OSD-346** (six commanded levels, 0–1 g, phytochrome mutants, all in flight) was then
+built and analysed as the independent test. See section 7 — it does not reproduce the
+OSD-314 headline.
 
 Detail: `PHASE10_NASA_DATASET_EXPANSION.md`, `PHASE10_DOSE_GRAVITY_RECOVERY.md`.
 
@@ -167,7 +167,35 @@ deposit, and 0.34 g is neither Moon nor Mars gravity.
 | hold out (dose, timepoint) cell | 0.563 | group bootstrap [0.386, 0.729] |
 | hold out whole timepoint | **0.813** | p = 0.0005 |
 
-## 7. The registry now proves it says only what its artifacts support
+## 7. The partial-gravity headline does not replicate
+
+OSD-346 is the independent check: a different mission, phytochrome-mutant genotypes,
+blue light, six commanded gravity levels 0–1 g, **every library a flight sample** so
+there is no flight confound at any level, and two light treatments that each carry the
+full gravity series so the same held-out-treatment split is available.
+
+| Analysis | Result |
+| --- | --- |
+| 0 g vs 0.25–0.38 g, held-out treatment | 0.500, **collapsed**, permutation null degenerate |
+| 0 g vs all partial 0.1–0.38 g | 0.450, p = 1.00 (non-degenerate null) |
+| 0 g vs 0.1 g | 0.875, p = 0.085 (underpowered) |
+| graded ridge on realised g, 0–1 g | **ρ = 0.571, p = 0.0015**, not monotone, MAE 0.21 g |
+| rank separation at each level | significant at 0.64/0.65 g (p = 0.029); not at 0.1/0.25/0.38 g |
+| phyA-trained classifier on phyB | 0.667 |
+
+A graded signal exists in OSD-346 and is statistically clear, but it emerges at **0.6 g
+and above**, and the sharp microgravity-versus-0.34 g distinction is absent in every
+framing tried. OSD-314's 1.000 is therefore **one experiment's finding, not a property
+of plant transcriptomes** — plausibly specific to wild-type plants, to red-light/dark
+treatments, or to that mission's batch structure, which cannot be separated with 36
+libraries.
+
+One methodological catch worth recording: a classifier that collapses to a single class
+makes the permutation null a point mass, so the resulting p-value of 1.0 means
+"uninformative", not "no effect". The script now detects a degenerate null and labels
+it, rather than letting a power failure masquerade as evidence of absence.
+
+## 8. The registry now proves it says only what its artifacts support
 
 `ml/training/phase10_registry_api_audit.py` checks, for every model, that the artifact
 exists, its digest matches, every claimed metric equals the artifact's, no excluded
@@ -187,7 +215,7 @@ Every gate below was run on the merged state, not asserted:
 
 | Gate | Result |
 | --- | --- |
-| Backend suite | **288 passed** |
+| Backend suite | **291 passed** (including the PostgreSQL round-trip) |
 | Playwright (3 viewports) | **27 passed** |
 | Visual regression | **9/9 within tolerance** (mission 0.002–0.004 %, radiation 0.000 %) |
 | ESLint / `tsc --noEmit` / production build | clean / clean / ✓ |
@@ -216,13 +244,14 @@ deployed, and none of this is a production verification.
 
 ## What Phase 11 should do
 
-1. **Analyse OSD-346.** Eight gravity levels, 0–0.64 g, phyA/phyB, blue light. It is the
-   replication the OSD-314 result needs, and it is the only thing that can turn a
-   17-library observation into a graded-gravity finding.
+1. **Explain why OSD-314 and OSD-346 disagree.** The candidates are genotype
+   (wild type vs phytochrome mutants), light spectrum, and batch structure; only a third
+   mission with wild-type plants and a sequencing-run identifier can separate them.
 2. **Get a transfer target whose contrast survives an unseen cell.** OSD-782's does not,
    so every conclusion about harmonisation stays blocked.
-3. **Ask for OSD-314's sequencing run identifiers.** The batch question cannot be
-   answered from the deposit, and it is one email rather than one analysis.
+3. **Ask both missions for sequencing run identifiers.** The batch question cannot be
+   answered from either deposit, and it is the leading candidate explanation for why a
+   perfect separation in one study is absent in the other.
 4. **Get a third microbial campaign**, which is the only thing that turns a two-campaign
    calibration into a predictive interval.
 5. **Stop re-tuning `mizuna-harvest-v1`.** It has 14 rows and one experiment. Collect

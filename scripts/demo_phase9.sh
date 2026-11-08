@@ -118,13 +118,24 @@ print(f"    hold out (dose,timepoint) cell -> balanced {protocols['A_cellHeldOut
       f"   hold out whole timepoint -> {protocols['B_timepointHeldOut']['balancedAccuracy']:.3f}"
       f" (p={protocols['B_timepointHeldOut']['permutation']['pCorrected']})")
 
+replication = json.loads(
+    Path("ml/evaluation/phase10_partial_gravity_replication.json").read_text())
+p1 = replication["P1_binaryReplication"]
+graded = replication["P2_gradedRegression"]
+print(f"  OSD-346 replication: 0 g vs 0.25-0.38 g -> balanced "
+      f"{p1['balancedAccuracy']:.3f}"
+      f"{' (collapsed, null degenerate)' if p1['permutation']['degenerate'] else ''}; "
+      f"graded 0-1 g rho {graded['correlation']['observedSpearman']:.3f} "
+      f"(p={graded['correlation']['pCorrected']}) -> replicated "
+      f"{replication['replicated']}")
+
 gravity = json.loads(Path("ml/evaluation/phase10_partial_gravity.json").read_text())
 primary = gravity["primaryContrast"]
 print(f"  partial gravity, OSD-314 at {gravity['design']['gravityLevelsG']} g in orbit:")
 print(f"    uG vs 0.34 g inside flight -> balanced {primary['balancedAccuracy']:.3f} "
       f"(p={primary['permutation']['pCorrected']}), corroborated by "
       f"{min(gravity['corroboration']['withinFlightContrasts'].values())} DE genes; "
-      f"not served, because n=17 in one mission")
+      f"not served, because n=17 in one mission; not replicated in OSD-346")
 PY
 
 if [ "$SERVER" -eq 1 ]; then

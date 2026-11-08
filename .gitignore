@@ -45,6 +45,11 @@ test-results/
 # 231 ISA metadata payloads, 67 MB. Regenerate with
 #   python ml/training/phase10_gravity_recovery.py
 data/metadata/osdr_study_metadata/
+
+# --- Phase 10 OSD-346 raw per-sample quantifications (73 MB) ---
+# Their SHA-256 digests are committed in data/metadata/osd346_checksums.json, and
+# scripts/acquire_phase10_osd346.py rebuilds data/derived/ from the bucket.
+data/raw/OSD-346/
 backend/scientific_data/
 
 # --- Phase 9 raw NASA downloads (provenance, not source) ---
