@@ -27,18 +27,27 @@ done
 
 step() { printf '\n\033[1m== %s\033[0m\n' "$1"; }
 
-step "1/6 Verify every NASA source file by checksum"
+step "1/7 Verify every NASA source file by checksum"
 python3 scripts/acquire_phase9.py
 echo "Every file above was matched against a pinned SHA-256."
 
 if [ "$FAST" -eq 0 ]; then
-  step "2/6 Retrain both served models (deterministic, seed 20261107)"
+  step "2/7 Retrain both served models (deterministic, seed 20261107)"
+  # Order matters. Retraining regenerates the artifacts, the Phase 10 explanation step
+  # re-attaches the explanation metadata that training alone does not write, and the
+  # registry is rebuilt last so its checksums describe the files that now exist. Skipping
+  # the middle step and then verifying checksums is what made the full demo fail before
+  # Phase 11: every metric reproduced, and the gate still refused the artifacts.
   python3 ml/training/train_radiation_osd46.py
+  python3 ml/training/phase10_explain_radiation.py
+  python3 scripts/build_registry.py
+  echo "Artifacts and registry regenerated. Only trainedAt/generatedAt and the checksums"
+  echo "change; every metric is bit-identical, which step 3 asserts next."
 else
-  step "2/6 Skipped retraining (--fast); using the committed artifacts"
+  step "2/7 Skipped retraining (--fast); using the committed artifacts"
 fi
 
-step "3/6 Assert the documented metrics still hold"
+step "3/7 Assert the documented metrics still hold"
 python3 - <<'PY'
 import json, sys
 from pathlib import Path
@@ -71,11 +80,11 @@ if failures:
 print("  metrics match the documentation")
 PY
 
-step "4/6 Verify registry checksums and run the scientific test suite"
+step "4/7 Verify registry checksums and run the scientific test suite"
 python3 scripts/package_runtime_data.py
 ( cd backend && python3 -m pytest -q tests/test_phase9_models.py )
 
-step "5/6 Show the interval calibration, the corrected transfer reading, and the recovered signals"
+step "5/7 Show the interval calibration, the corrected transfer reading, and the recovered signals"
 python3 - <<'PY'
 import json
 from pathlib import Path
@@ -138,8 +147,79 @@ print(f"    uG vs 0.34 g inside flight -> balanced {primary['balancedAccuracy']:
       f"not served, because n=17 in one mission; not replicated in OSD-346")
 PY
 
+step "6/7 Phase 11 evidence, including the results that are negative on purpose"
+python3 - <<'PY'
+import json
+from pathlib import Path
+
+root = Path("ml/evaluation")
+
+
+def load(name):
+    return json.loads((root / name).read_text())
+
+
+gravity = load("phase11_gravity_batch.json")
+print(f"  OSD-346 gravity: {gravity['conclusion']}")
+print(f"    signal survives removing the flight run: {gravity['signalSurvivesRunRemoval']}")
+
+discovery = load("phase11_dataset_discovery.json")
+microbial = discovery["questions"]["microbial"]
+harvest = discovery["questions"]["harvest"]
+corpus = discovery["corpus"]
+print(f"  dataset sweep: {corpus['scanned']} of "
+      f"{corpus['studiesWithUsableProcessedMatrix']} studies with a usable matrix, "
+      f"{len(corpus['unavailableMetadata'])} metadata failures")
+print(f"    harvest or biomass candidates: {harvest['candidatesNotYetCatalogued']} "
+      f"(zero, so the mizuna harvest gap cannot be closed with more rows from this corpus)")
+print(f"    new microbial candidates: {microbial['candidatesNotYetCatalogued']}, "
+      f"none a crop load campaign")
+
+audit = load("phase11_duplicate_audit.json")
+proof = audit["numericProof"]
+duplicate = next(row for row in audit["duplicates"]
+                 if row["classification"] == "duplicate-measurement")
+print(f"    {duplicate['studies'][0]} is a second deposit of {duplicate['studies'][1]}: "
+      f"{proof['arraysCompared']} arrays, {proof['probesetsCompared']} probesets, "
+      f"minimum r {proof['minimumCorrelation']:.6f}, "
+      f"maximum |diff| {proof['maximumAbsoluteDifference']}")
+print(f"    overlaps checked: {audit['studiesChecked']} studies, "
+      f"{len(audit['duplicates'])} paired overlaps classified, "
+      f"{len(audit['overlaps'])} further overlaps")
+
+radiation = load("phase11_radiation_validation.json")
+for model_id, model in radiation["models"].items():
+    nested = model["nestedSelection"]
+    print(f"  {model_id}: shipped {model['fidelity']['phase9CommittedBalancedAccuracy']:.4f} "
+          f"reproduced exactly -> nested re-selection "
+          f"{nested['nestedBalancedAccuracy']:.4f} "
+          f"(delta {nested['deltaVersusShipped']:+.4f}), promoted {model['anyPromoted']}")
+
+dose = load("phase11_dose_generalization.json")
+print(f"  OSD-782 dose: {dose['verdict']}")
+print(f"    within-timepoint rho "
+      f"{dose['P1_withinTimepointRanking']['meanWithinTimepointSpearman']:+.4f} "
+      f"(p={dose['P1_withinTimepointRanking']['permutation']['pCorrected']}), "
+      f"sign flips at 3 h")
+
+campaigns = load("phase11_microbial_campaigns.json")
+pooled = campaigns["S4_randomEffects"]
+print(f"  microbial flight effect: pooled {pooled['pooledEffect']:+.3f} "
+      f"(95% CI {pooled['ci95'][0]:+.3f} to {pooled['ci95'][1]:+.3f}), "
+      f"prediction interval for a NEW campaign {pooled['predictionInterval95'][0]:+.3f} to "
+      f"{pooled['predictionInterval95'][1]:+.3f} - it includes zero, on purpose")
+
+ood = load("phase11_ood_uncertainty.json")
+print(f"  OOD novelty score: {ood['verdict']}")
+for name, block in ood["scores"].items():
+    print(f"    {name:34s} passes {block['controlsPassed']} of 3 controls "
+          f"(duplicate AUC {block['control1_duplicate']['auc']:.3f}, "
+          f"platform shift AUC {block['control2_platformShift']['auc']:.3f})")
+print(f"    threshold validated: {ood['thresholdValidated']}")
+PY
+
 if [ "$SERVER" -eq 1 ]; then
-  step "6/6 Live prediction through the API"
+  step "7/7 Live prediction through the API"
   ( cd backend && python3 -m uvicorn app.main:app --port 8011 --log-level warning ) &
   SERVER_PID=$!
   trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
@@ -198,7 +278,7 @@ except urllib.error.HTTPError as error:
     print(f"  lettuce explanation -> HTTP {error.code} (no valid method, no stub)")
 PY
 else
-  step "6/6 Skipped the live API section (--no-server)"
+  step "7/7 Skipped the live API section (--no-server)"
 fi
 
 printf '\n\033[1mDemo complete.\033[0m Two models served with exact explanations, four negatives documented, intervals calibrated on held-out groups.\n'
