@@ -3,9 +3,14 @@
 **Merge commit on `main`: `b566a8c`** (`--no-ff`, from
 `feat/phase13-final-ai-and-competition-readiness`, base `4a09de3`).
 
-**Remote `main` HEAD: `4a09de38bfce666d17e3c4f33821f0dc60b7837c` — unchanged.**
+**Remote `main` HEAD: `5ccb0cb102682f59898f407debda3c79c5356509` — verified by `git ls-remote` and by a
+fresh `--depth 1` clone, which checks out this commit and passes the suite (535 passed, 1 skipped,
+after `scripts/package_runtime_data.py`).**
 
-> **The merge is local, not pushed.** The push was attempted and refused
+> **Pushed.** The merge and the Phase 13 branch are on the remote (`4a09de3..5ccb0cb`). Earlier
+> attempts failed for lack of a credential in this environment; the push completed once the owner
+> supplied one. A normal fast-forward was used — no force-push and no protection bypass, since none
+> was needed and forcing could only risk remote history. The push was attempted and refused
 > (`remote: No anonymous write access`). No credential was available to this environment, the
 > exposed Phase 12 token was deliberately not used, and the token was not revoked from here. See
 > §7. Everything else in this report was executed and verified locally.
