@@ -83,3 +83,19 @@ def test_ground_chamber_data_does_not_enable_a_space_yield_answer(client, questi
     assert body["status"] == "insufficient"
     assert body["claims"] == []
     assert body["citations"] == []
+
+
+def test_the_literature_file_is_inside_the_runtime_bundle():
+    """A repo-root-only path passes locally and silently empties the corpus in production.
+
+    The serverless bundle carries data/ under backend/scientific_data and the corpus resolves
+    everything through BUNDLE when it exists. This asserts the packaged copy is the one the
+    application reads, so a missing package step fails here instead of on the deployed site.
+    """
+    from app import evidence as evidence_module
+
+    assert evidence_module.LITERATURE.is_file()
+    if evidence_module.BUNDLE.exists():
+        assert evidence_module.BUNDLE in evidence_module.LITERATURE.parents, (
+            "the literature file must be packaged into backend/scientific_data, "
+            f"not read from {evidence_module.LITERATURE}")

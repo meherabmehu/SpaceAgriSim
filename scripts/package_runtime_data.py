@@ -13,6 +13,13 @@ def package():
         sources.append(ROOT/'data/metadata'/name)
     sources.extend((ROOT/'data/processed').glob('*.csv'))
     sources.extend((ROOT/'data/raw/OSD-745').glob('*TRANSFORMED.csv'))
+    # Phase 15: NASA BPC measurement excerpts acquired from NTRS. The evidence corpus reads
+    # these from the bundle, so leaving them out of the package empties the literature passages
+    # in production while everything still passes locally.
+    literature=sorted((ROOT/'data/literature').glob('*.json'))
+    if not literature:
+        raise ValueError('Phase 15 literature artifacts are missing; run acquire_ntrs_bpc_measurements.py')
+    sources.extend(literature)
     sources.extend((ROOT/'ml/artifacts').glob('*.json'))
     registry=json.loads((ROOT/'ml/artifacts/registry.json').read_text())
     for item in registry['models']:

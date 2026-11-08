@@ -490,7 +490,10 @@ def _methodology_passages(quarantine: list) -> list[Passage]:
 
 
 
-LITERATURE = Path(__file__).resolve().parents[2] / "data" / "literature" / "ntrs_bpc.json"
+# Resolved like every other runtime asset: the serverless bundle carries data/ under
+# backend/scientific_data, so a repo-root-only path silently produced an empty corpus in
+# production while passing locally.
+LITERATURE = DATA / "literature" / "ntrs_bpc.json"
 
 # A NASA technical report page is quoted as evidence with its page number. It is measured data
 # in the everyday sense — somebody measured a canopy — but it is a *literature* measurement:
