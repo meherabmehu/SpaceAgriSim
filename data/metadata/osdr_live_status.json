@@ -1,0 +1,1028 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-08T20:00:02.030728+00:00",
+  "source": "https://nasa-osdr.s3.us-west-2.amazonaws.com (public OSDR bucket)",
+  "method": "HEAD each pinned file URL, compare the served byte count with the pinned count, and list the study's published version directories. File bytes are not re-downloaded unless --verify-local is used.",
+  "scope": "verifies availability, byte count and published version, not scientific interpretation",
+  "sampling": "up to --max-files-per-study files per study, pinned-and-hashed files first; filesChecked/filesTotal are recorded per study",
+  "studiesChecked": 24,
+  "verdictCounts": {
+    "newer-version-available": 4,
+    "unchanged": 14,
+    "version-only": 6
+  },
+  "verifyLocal": false,
+  "manifestGeneratedAt": "2026-11-08T17:44:41.358011+00:00",
+  "studies": [
+    {
+      "id": "OSD-7",
+      "pinnedVersion": 6,
+      "versionsPublished": [
+        4,
+        5,
+        6
+      ],
+      "latestVersion": 6,
+      "verdict": "unchanged",
+      "filesTotal": 46,
+      "filesChecked": 3,
+      "files": [
+        {
+          "name": "OSD-7_metadata_OSD-7-ISA.zip",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 74028,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        },
+        {
+          "name": "GLDS-7_array_software_versions_GLmicroarray.md",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 1709,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        },
+        {
+          "name": "GLDS-7_array_nextflow_processing_info_GLmicroarray.txt",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 2535,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        }
+      ]
+    },
+    {
+      "id": "OSD-46",
+      "pinnedVersion": 6,
+      "versionsPublished": [
+        4,
+        5,
+        6
+      ],
+      "latestVersion": 6,
+      "verdict": "unchanged",
+      "filesTotal": 3,
+      "filesChecked": 3,
+      "files": [
+        {
+          "name": "GLDS-46_array_normalized_expression_probeset_GLmicroarray.csv",
+          "checked": true,
+          "reachable": true,
+          "status": 200,
+          "bytes": 23794742,
+          "lastModified": "Tue, 11 Feb 2025 23:30:14 GMT",
+          "redirects": [],
+          "bytesMatch": true
+        },
+        {
+          "name": "GLDS-46_array_SampleTable_GLmicroarray.csv",
+          "checked": true,
+          "reachable": true,
+          "status": 200,
+          "bytes": 4139,
+          "lastModified": "Tue, 11 Feb 2025 23:30:19 GMT",
+          "redirects": [],
+          "bytesMatch": true
+        },
+        {
+          "name": "OSD-46_metadata_OSD-46-ISA.zip",
+          "checked": true,
+          "reachable": true,
+          "status": 200,
+          "bytes": 76123,
+          "lastModified": "Tue, 11 Feb 2025 23:30:09 GMT",
+          "redirects": [],
+          "bytesMatch": true
+        }
+      ]
+    },
+    {
+      "id": "OSD-59",
+      "pinnedVersion": 5,
+      "versionsPublished": [
+        5
+      ],
+      "latestVersion": 5,
+      "verdict": "version-only",
+      "filesTotal": 1,
+      "filesChecked": 1,
+      "files": [
+        {
+          "name": "GLDS-59_metadata_GLDS-59-ISA.zip",
+          "checked": false,
+          "reason": "no pinned download URL in the manifest"
+        }
+      ]
+    },
+    {
+      "id": "OSD-120",
+      "pinnedVersion": 14,
+      "versionsPublished": [
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "latestVersion": 20,
+      "verdict": "newer-version-available",
+      "filesTotal": 851,
+      "filesChecked": 3,
+      "files": [
+        {
+          "name": "OSD-120_metadata_OSD-120-ISA.zip",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 264869,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        },
+        {
+          "name": "GLDS-120_rna_seq_Atha_Ws_root_FLT_dark_Rep3_GSM2493791_Day13_R1_GLbulkRNAseq_trimming_report.txt",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 3631,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        },
+        {
+          "name": "GLDS-120_rna_seq_Atha_Col-0_root_GC_Alight_Rep2_GSM2493760_Day13_GLbulkRNAseq_R1_raw.fastq.gz",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 1458229666,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        }
+      ]
+    },
+    {
+      "id": "OSD-267",
+      "pinnedVersion": 8,
+      "versionsPublished": [
+        3,
+        4,
+        5,
+        7
+      ],
+      "latestVersion": 7,
+      "verdict": "unchanged",
+      "filesTotal": 214,
+      "filesChecked": 3,
+      "files": [
+        {
+          "name": "OSD-267_metadata_OSD-267-ISA.zip",
+          "checked": true,
+          "reachable": true,
+          "status": 200,
+          "bytes": 101415,
+          "lastModified": "Wed, 17 Dec 2025 21:03:13 GMT",
+          "redirects": [],
+          "bytesMatch": true
+        },
+        {
+          "name": "GLDS-267_GAmplicon_SampleTable_16S_GLAmpSeq.csv",
+          "checked": true,
+          "reachable": true,
+          "status": 200,
+          "bytes": 473,
+          "lastModified": "Wed, 17 Dec 2025 21:03:30 GMT",
+          "redirects": [],
+          "bytesMatch": true
+        },
+        {
+          "name": "GLDS-267_GAmplicon_16S-taxonomy-and-counts.tsv",
+          "checked": true,
+          "reachable": true,
+          "status": 200,
+          "bytes": 15821,
+          "lastModified": "Tue, 09 Apr 2024 03:01:08 GMT",
+          "redirects": [],
+          "bytesMatch": true
+        }
+      ]
+    },
+    {
+      "id": "OSD-268",
+      "pinnedVersion": 6,
+      "versionsPublished": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "latestVersion": 5,
+      "verdict": "unchanged",
+      "filesTotal": 196,
+      "filesChecked": 3,
+      "files": [
+        {
+          "name": "OSD-268_metadata_OSD-268-ISA.zip",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 70697,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        },
+        {
+          "name": "GLDS-268_Amplicon_V01B_ITS_GroundPlantF_Leaf_S21_L001_R2_001.fastq.gz",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 1526412,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        },
+        {
+          "name": "GLDS-268_Amplicon_V01B_ITS_GroundPlantF_Leaf_S21_L001_R1_001.fastq.gz",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 1695088,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        }
+      ]
+    },
+    {
+      "id": "OSD-269",
+      "pinnedVersion": 6,
+      "versionsPublished": [
+        3,
+        4,
+        5
+      ],
+      "latestVersion": 5,
+      "verdict": "unchanged",
+      "filesTotal": 106,
+      "filesChecked": 3,
+      "files": [
+        {
+          "name": "OSD-269_metadata_OSD-269-ISA.zip",
+          "checked": true,
+          "reachable": true,
+          "status": 200,
+          "bytes": 62785,
+          "lastModified": "Wed, 12 Feb 2025 03:15:56 GMT",
+          "redirects": [],
+          "bytesMatch": true
+        },
+        {
+          "name": "GLDS-269_GAmplicon_taxonomy-and-counts.tsv",
+          "checked": true,
+          "reachable": true,
+          "status": 200,
+          "bytes": 24144,
+          "lastModified": "Tue, 09 Apr 2024 03:05:45 GMT",
+          "redirects": [],
+          "bytesMatch": true
+        },
+        {
+          "name": "GLDS-269_Amplicon_V03A-Ground_Root_B_S40_L001_R2_raw.fastq.gz",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 27477021,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        }
+      ]
+    },
+    {
+      "id": "OSD-314",
+      "pinnedVersion": 6,
+      "versionsPublished": [
+        4,
+        5,
+        6
+      ],
+      "latestVersion": 6,
+      "verdict": "version-only",
+      "filesTotal": 7,
+      "filesChecked": 3,
+      "files": [
+        {
+          "name": "GLDS-314_rna_seq_Normalized_Counts.csv",
+          "checked": false,
+          "reason": "no pinned download URL in the manifest"
+        },
+        {
+          "name": "GLDS-314_rna_seq_RSEM_Unnormalized_Counts.csv",
+          "checked": false,
+          "reason": "no pinned download URL in the manifest"
+        },
+        {
+          "name": "GLDS-314_rna_seq_SampleTable_GLbulkRNAseq.csv",
+          "checked": false,
+          "reason": "no pinned download URL in the manifest"
+        }
+      ]
+    },
+    {
+      "id": "OSD-346",
+      "pinnedVersion": 5,
+      "versionsPublished": [
+        5,
+        6,
+        7
+      ],
+      "latestVersion": 7,
+      "verdict": "newer-version-available",
+      "filesTotal": 37,
+      "filesChecked": 3,
+      "files": [
+        {
+          "name": "GLDS-346_rna_seq_Athaliana_PhyA_Sample_112_0G.genes.results",
+          "checked": false,
+          "reason": "no pinned download URL in the manifest"
+        },
+        {
+          "name": "GLDS-346_rna_seq_Athaliana_PhyA_Sample_115_0G.genes.results",
+          "checked": false,
+          "reason": "no pinned download URL in the manifest"
+        },
+        {
+          "name": "GLDS-346_rna_seq_Athaliana_PhyA_Sample_117_0G.genes.results",
+          "checked": false,
+          "reason": "no pinned download URL in the manifest"
+        }
+      ]
+    },
+    {
+      "id": "OSD-375",
+      "pinnedVersion": 2,
+      "versionsPublished": [
+        2
+      ],
+      "latestVersion": 2,
+      "verdict": "unchanged",
+      "filesTotal": 99,
+      "filesChecked": 3,
+      "files": [
+        {
+          "name": "OSD-375_metadata_OSD-375-ISA.zip",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 144901,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        },
+        {
+          "name": "GLDS-375_rna-seq_GC9-1S_S11_L002_R2_001.fastq.gz",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 1557792472,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        },
+        {
+          "name": "GLDS-375_rna-seq_GC9-1S_S11_L002_R1_001.fastq.gz",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 1471862261,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        }
+      ]
+    },
+    {
+      "id": "OSD-386",
+      "pinnedVersion": 4,
+      "versionsPublished": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "latestVersion": 4,
+      "verdict": "version-only",
+      "filesTotal": 1,
+      "filesChecked": 1,
+      "files": [
+        {
+          "name": "OSD-386_metadata_OSD-386-ISA.zip",
+          "checked": false,
+          "reason": "no pinned download URL in the manifest"
+        }
+      ]
+    },
+    {
+      "id": "OSD-411",
+      "pinnedVersion": 4,
+      "versionsPublished": [
+        2,
+        4,
+        5
+      ],
+      "latestVersion": 5,
+      "verdict": "newer-version-available",
+      "filesTotal": 2,
+      "filesChecked": 2,
+      "files": [
+        {
+          "name": "GLDS-411_rna_seq_RSEM_Unnormalized_Counts_GLbulkRNAseq.csv",
+          "checked": true,
+          "reachable": true,
+          "status": 200,
+          "bytes": 8936306,
+          "lastModified": "Tue, 28 May 2024 21:39:32 GMT",
+          "redirects": [],
+          "bytesMatch": true
+        },
+        {
+          "name": "GLDS-411_metadata_GLDS-411-ISA.zip",
+          "checked": true,
+          "reachable": true,
+          "status": 200,
+          "bytes": 123676,
+          "lastModified": "Tue, 09 Apr 2024 03:06:43 GMT",
+          "redirects": [],
+          "bytesMatch": true
+        }
+      ]
+    },
+    {
+      "id": "OSD-436",
+      "pinnedVersion": 3,
+      "versionsPublished": [
+        2,
+        3
+      ],
+      "latestVersion": 3,
+      "verdict": "unchanged",
+      "filesTotal": 22,
+      "filesChecked": 3,
+      "files": [
+        {
+          "name": "OSD-436_metadata_GLDS-436-ISA.zip",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 45594,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        },
+        {
+          "name": "GLDS-436_microarray_GSM4848957_12799_Ferl_P-1.1_AraGene-1_0-st_.CEL.gz",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 4183403,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        },
+        {
+          "name": "GLDS-436_microarray_GSM4848958_12800_Ferl_P-1.2_AraGene-1_0-st_.CEL.gz",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 4306629,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        }
+      ]
+    },
+    {
+      "id": "OSD-625",
+      "pinnedVersion": 1,
+      "versionsPublished": [
+        1
+      ],
+      "latestVersion": 1,
+      "verdict": "unchanged",
+      "filesTotal": 19,
+      "filesChecked": 3,
+      "files": [
+        {
+          "name": "OSD-625_metadata_OSD-625-ISA.zip",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 44893,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        },
+        {
+          "name": "GLDS-648_TargetCCSEM-seq_SRS13753919_raw.fastq.gz",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 10406828,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        },
+        {
+          "name": "GLDS-648_TargetCCSEM-seq_SRS13753918_raw.fastq.gz",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 9018639,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        }
+      ]
+    },
+    {
+      "id": "OSD-655",
+      "pinnedVersion": 2,
+      "versionsPublished": [
+        1
+      ],
+      "latestVersion": 1,
+      "verdict": "unchanged",
+      "filesTotal": 22,
+      "filesChecked": 3,
+      "files": [
+        {
+          "name": "OSD-655_dictionary_DataDictionary_OSD-655.csv",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 3664,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        },
+        {
+          "name": "LSDS-63_InductivelyCoupledPlasmaOpticalEmissionSpectroscopy_Bunchek2024_ICPOES_TRANSFORMED.csv",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 4462,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        },
+        {
+          "name": "OSD-655_metadata_OSD-655-ISA.zip",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 192836,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        }
+      ]
+    },
+    {
+      "id": "OSD-670",
+      "pinnedVersion": 3,
+      "versionsPublished": [
+        1,
+        2,
+        3
+      ],
+      "latestVersion": 3,
+      "verdict": "version-only",
+      "filesTotal": 1,
+      "filesChecked": 1,
+      "files": [
+        {
+          "name": "OSD-670_metadata_OSD-670-ISA.zip",
+          "checked": false,
+          "reason": "no pinned download URL in the manifest"
+        }
+      ]
+    },
+    {
+      "id": "OSD-723",
+      "pinnedVersion": 1,
+      "versionsPublished": [
+        1
+      ],
+      "latestVersion": 1,
+      "verdict": "version-only",
+      "filesTotal": 1,
+      "filesChecked": 1,
+      "files": [
+        {
+          "name": "OSD-723_metadata_OSD-723-ISA.zip",
+          "checked": false,
+          "reason": "no pinned download URL in the manifest"
+        }
+      ]
+    },
+    {
+      "id": "OSD-745",
+      "pinnedVersion": 1,
+      "versionsPublished": [
+        1
+      ],
+      "latestVersion": 1,
+      "verdict": "unchanged",
+      "filesTotal": 55,
+      "filesChecked": 3,
+      "files": [
+        {
+          "name": "OSD-745_metadata_OSD-745-ISA.zip",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 226568,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        },
+        {
+          "name": "LSDS-109_Anthocyanin Content_Elemental-Phenolic-Anthocyanin-ORAC-VEG-03A.csv",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 1528,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        },
+        {
+          "name": "LSDS-109_Anthocyanin Content_Elemental-Phenolic-Anthocyanin-ORAC-VEG-01B.csv",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 2136,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        }
+      ]
+    },
+    {
+      "id": "OSD-766",
+      "pinnedVersion": 1,
+      "versionsPublished": [
+        1
+      ],
+      "latestVersion": 1,
+      "verdict": "unchanged",
+      "filesTotal": 571,
+      "filesChecked": 3,
+      "files": [
+        {
+          "name": "OSD-766_metadata_OSD-766-ISA.zip",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 412157,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        },
+        {
+          "name": "GLDS-672_GAmplicon_raw_multiqc_GLAmpSeq-16S_report.zip",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 2309976,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        },
+        {
+          "name": "GLDS-672_Amplicon_raw_md5sum_GLAmpSeq-16S.txt",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 27658,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        }
+      ]
+    },
+    {
+      "id": "OSD-767",
+      "pinnedVersion": 2,
+      "versionsPublished": [
+        1,
+        2
+      ],
+      "latestVersion": 2,
+      "verdict": "unchanged",
+      "filesTotal": 638,
+      "filesChecked": 3,
+      "files": [
+        {
+          "name": "OSD-767_metadata_OSD-767-ISA.zip",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 170403,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        },
+        {
+          "name": "GLDS-709_rna_seq_software_versions_GLbulkRNAseq.md",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 3051,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        },
+        {
+          "name": "GLDS-709_rna_seq_processing_info_GLbulkRNAseq.zip",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 15341,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        }
+      ]
+    },
+    {
+      "id": "OSD-773",
+      "pinnedVersion": 2,
+      "versionsPublished": [
+        1,
+        2
+      ],
+      "latestVersion": 2,
+      "verdict": "unchanged",
+      "filesTotal": 315,
+      "filesChecked": 3,
+      "files": [
+        {
+          "name": "OSD-773_metadata_OSD-773-ISA.zip",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 246838,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        },
+        {
+          "name": "GLDS-676_Amplicon_H4-9-Tom-Wick_S68_L001_R2_raw.fastq.gz",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 29807407,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        },
+        {
+          "name": "GLDS-676_Amplicon_H4-9-Tom-Wick_S68_L001_R1_raw.fastq.gz",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 25652804,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        }
+      ]
+    },
+    {
+      "id": "OSD-780",
+      "pinnedVersion": null,
+      "versionsPublished": [
+        1
+      ],
+      "latestVersion": 1,
+      "verdict": "unchanged",
+      "filesTotal": 3,
+      "filesChecked": 3,
+      "files": [
+        {
+          "name": "LSDS-128_Plate Count_Aerobic_Plate_Count_TRANSFORMED.csv",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 11708,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        },
+        {
+          "name": "LSDS-128_Plate Count_Yeast_Mold_Plate_Count_Transformed.csv",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 9106,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        },
+        {
+          "name": "OSD-780_dictionary_DataDictionary_OSD-780.csv",
+          "checked": true,
+          "reachable": true,
+          "status": 206,
+          "bytes": 1012,
+          "lastModified": null,
+          "redirects": [
+            302
+          ],
+          "method": "ranged GET",
+          "bytesMatch": true
+        }
+      ]
+    },
+    {
+      "id": "OSD-782",
+      "pinnedVersion": 2,
+      "versionsPublished": [
+        1,
+        2,
+        3
+      ],
+      "latestVersion": 3,
+      "verdict": "newer-version-available",
+      "filesTotal": 3,
+      "filesChecked": 3,
+      "files": [
+        {
+          "name": "GLDS-679_rna_seq_RSEM_Unnormalized_Counts_GLbulkRNAseq.csv",
+          "checked": true,
+          "reachable": true,
+          "status": 200,
+          "bytes": 4527540,
+          "lastModified": "Wed, 17 Dec 2025 19:30:51 GMT",
+          "redirects": [],
+          "bytesMatch": true
+        },
+        {
+          "name": "GLDS-679_rna_seq_VST_Counts_GLbulkRNAseq.csv",
+          "checked": true,
+          "reachable": true,
+          "status": 200,
+          "bytes": 14679817,
+          "lastModified": "Wed, 17 Dec 2025 19:31:13 GMT",
+          "redirects": [],
+          "bytesMatch": true
+        },
+        {
+          "name": "OSD-782_metadata_OSD-782-ISA.zip",
+          "checked": true,
+          "reachable": true,
+          "status": 200,
+          "bytes": 166136,
+          "lastModified": "Wed, 17 Dec 2025 19:20:34 GMT",
+          "redirects": [],
+          "bytesMatch": true
+        }
+      ]
+    },
+    {
+      "id": "OSD-856",
+      "pinnedVersion": 1,
+      "versionsPublished": [
+        1
+      ],
+      "latestVersion": 1,
+      "verdict": "version-only",
+      "filesTotal": 1,
+      "filesChecked": 1,
+      "files": [
+        {
+          "name": "OSD-856_metadata_OSD-856-ISA.zip",
+          "checked": false,
+          "reason": "no pinned download URL in the manifest"
+        }
+      ]
+    }
+  ]
+}

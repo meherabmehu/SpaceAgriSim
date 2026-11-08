@@ -1909,3 +1909,69 @@
   font-size: 0.75rem;
   color: rgba(148, 163, 184, 0.95);
 }
+
+/* ---------------------------------------------------------------- Phase 19: benchmarks & registry */
+.bench-grid {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.4rem 0 0.6rem;
+}
+.bench-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 0.6fr));
+  gap: 0.5rem;
+  align-items: baseline;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+  padding-bottom: 0.3rem;
+  font-variant-numeric: tabular-nums;
+}
+.bench-row span {
+  font-size: 0.82rem;
+}
+.bench-row em,
+.bench-row small {
+  font-style: normal;
+  font-size: 0.78rem;
+  color: rgba(148, 163, 184, 0.95);
+}
+.bench-legend {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 0.6fr));
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(148, 163, 184, 0.9);
+  margin-bottom: 0.6rem;
+}
+.reading-list {
+  margin: 0 0 0.6rem;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+.table-scroll {
+  overflow-x: auto;
+}
+.compare-table {
+  min-width: 780px;
+}
+.compare-table td.wrap {
+  min-width: 12rem;
+  white-space: normal;
+  font-size: 0.8rem;
+}
+.compare-table td p {
+  margin: 0.15rem 0 0;
+  font-size: 0.72rem;
+}
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (max-width: 640px) {
+  .bench-row,
+  .bench-legend {
+    grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 0.7fr));
+  }
+}

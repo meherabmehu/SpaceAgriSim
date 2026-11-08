@@ -6,7 +6,7 @@ from typing import Literal
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
-from app import research, science_classification
+from app import benchmarks, research, science_classification
 
 router = APIRouter(tags=["scientific data and models"])
 
@@ -316,6 +316,18 @@ def datasets(q: str = ""):
     registered = research.manifest()
     return {"datasets": list(_dataset_rows(q)), "source": registered.get("source"),
             "generatedAt": registered.get("generatedAt"), "coverage": research.coverage()}
+
+
+@router.get("/benchmarks")
+def benchmark_panel():
+    """Measured NASA anchors held against the simulator, with the caveats attached."""
+    return benchmarks.payload()
+
+
+@router.get("/datasets/live-status")
+def dataset_live_status():
+    """When the pinned OSDR files were last re-checked against the live repository."""
+    return research.osdr_live_status()
 
 
 @router.get("/datasets/{study_id}/preview")

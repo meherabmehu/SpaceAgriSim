@@ -4,6 +4,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+from datetime import datetime, timezone
 import math
 from functools import lru_cache
 from pathlib import Path
@@ -31,6 +32,33 @@ MODEL_IDS = {
 
 def read_json(path):
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def osdr_live_status() -> dict:
+    """The last recorded re-sync of the pinned OSDR files, or a truthful "never run" answer.
+
+    This is deliberately *not* a per-request call to NASA: an endpoint that silently hit a remote
+    bucket would make page latency depend on someone else's availability, and would still not be
+    a stronger claim than "this is when we last checked". The file is written by
+    scripts/resync_osdr.py; the age of the snapshot is part of the payload.
+    """
+    path = DATA / "metadata" / "osdr_live_status.json"
+    if not path.is_file():
+        return {"available": False,
+                "reason": "No provenance re-sync has been recorded for this deployment.",
+                "howToRefresh": "python scripts/resync_osdr.py"}
+    payload = json.loads(path.read_text())
+    checked = payload.get("checkedAt")
+    age_days = None
+    if checked:
+        age_days = (datetime.now(timezone.utc) - datetime.fromisoformat(checked)).days
+    payload["available"] = True
+    payload["ageDays"] = age_days
+    payload["stale"] = age_days is not None and age_days > 30
+    payload["scopeNote"] = ("Recorded re-check of pinned NASA OSDR files: availability, byte "
+                            "count and published version. It is not a live query per request and "
+                            "it does not re-interpret any study.")
+    return payload
 
 
 def manifest():
