@@ -46,15 +46,21 @@ within-flight 0 g versus 0.34 g contrast reaching balanced accuracy 1.000 (p = 0
 corroborated by the deposit's own 8,478–13,504 differentially expressed genes, and
 **no model**, because 17 libraries in one mission cannot support one.
 
-Catalogue: **17 → 18** NASA datasets.
+Catalogue: **17 → 19** NASA datasets.
 
-## The second candidate, named but not analysed
+## The second candidate, now analysed
 
-**OSD-346** — Arabidopsis phyA/phyB under fractional gravity from 0 to 0.64 g, with
-eight gravity levels. Its expression is deposited as 26 per-sample RSEM files rather
-than one matrix, so merging it requires parsing its factor table first. Doing that
-badly would risk exactly the label error this phase is about, so it is the declared
-next action rather than a half-done addition.
+**OSD-346** — Arabidopsis phyA/phyB under blue light, six commanded gravity levels from
+0 to 1 g, 36 libraries, per-sample RSEM quantifications rather than a matrix. It was
+built and analysed as the independent test of the OSD-314 result, and it **does not
+reproduce it**: a graded gravity signal is present (ρ = 0.571, p = 0.0015) but emerges
+only from 0.6 g upward, and the microgravity-versus-0.34 g distinction is absent in
+every framing tried.
+
+The per-sample files are the reason the acquisition took a script rather than a
+download: 36 files are pinned by SHA-256 in `data/metadata/osd346_checksums.json` and
+combined into `data/processed/osd346_partial_gravity.csv`. The 73 MB of raw files are
+not committed; the digests are, so the matrix rebuilds byte-identically.
 
 ## Why nothing else was added
 
@@ -67,6 +73,7 @@ Every remaining weak model is limited by evidence that no available study suppli
 | Radiation dose at fine resolution | randomised processing order, not just more doses | no — each (dose, timepoint) cell is one sequencing batch |
 | Microbial absolute load across campaigns | a third campaign with baseline samples | only VEG-04A and VEG-04B exist |
 | Cross-study transfer target | a second radiation study whose own contrast survives an unseen (dose, timepoint) cell | OSD-782 does not; no other processed radiation RNA-seq study exists in the 231 |
+| Partial gravity above 1 g, or Moon/Mars levels | a study at 0.17 g or 0.38 g | no — the whole catalogue spans 0 to 1.05 g, so lunar and Mars gravity remain unobserved here |
 
 ## The lesson recorded here
 

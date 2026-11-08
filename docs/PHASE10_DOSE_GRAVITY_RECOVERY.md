@@ -130,13 +130,58 @@ data providers' finding, not an artefact of this split.
 - **The three-level analysis is never quoted alone.** It is flight-confounded by
   construction and is labelled so in the artifact and in the catalogue entry.
 
-### OSD-346 is the replication, and is deliberately unstarted
+### OSD-346 is the replication, and it does not reproduce the result
 
-OSD-346 has eight gravity levels and per-sample RSEM gene results, so it is the right
-replication. Its expression is deposited as 26 per-sample files rather than one matrix,
-and merging those without parsing its own factor table would risk exactly the label
-error this section is about. It is named as the next action rather than attempted
-half-way.
+OSD-346 is an independent ISS experiment: Arabidopsis **phytochrome mutants** (phyA,
+phyB) under blue light, at six commanded gravity levels from 0 to 1 g, with two light
+treatments per genotype that each carry the full gravity series. Two properties make it
+the right test:
+
+- **Every library is a flight sample**, so the whole 0–1 g series is comparable in
+  orbit. OSD-314 could not do this: its 1 g samples were ground controls.
+- **Each light treatment contains every gravity level**, so the same honest split
+  applies — train on one treatment, test on the other — and holding one out removes no
+  gravity level.
+
+Four analyses, protocols declared before the run:
+
+| Analysis | Result |
+| --- | --- |
+| **P1** 0 g vs 0.25–0.38 g, phyA, held-out light treatment | balanced accuracy **0.500**, classifier **collapsed** to the majority class, permutation null **degenerate** — uninformative, not "no effect" |
+| **P1c** 0 g vs all partial 0.1–0.38 g (14 libraries) | **0.450**, p = 1.00, null non-degenerate — genuinely no separation in this framing |
+| **P1b** 0 g vs 0.1 g (8 libraries) | 0.875, p = 0.085 — suggestive, underpowered |
+| **P2** graded ridge on realised g, 0–1 g | **ρ = 0.571, p = 0.0015**, MAE 0.21 g, **not monotone** |
+| **P2b** rank separation of predicted g at each level | significant at 0.64 g and 0.65 g (p = 0.029); **not** at 0.1, 0.25 or 0.38 g (p = 0.60–0.83) |
+| **P3** phyA-trained classifier applied to phyB | 0.667 — weak |
+
+**So the OSD-314 headline does not replicate.** A graded gravity signal is present in
+OSD-346 and is statistically clear, but it emerges at **0.6 g and above**, and the sharp
+microgravity-versus-0.34 g distinction that scored 1.000 in OSD-314 is absent here in
+every framing tried: binary classification at two different label widenings, the
+continuous model's own predictions, and cross-genotype transfer all fail to reproduce
+it.
+
+Three explanations are compatible with the data and cannot be separated with 36
+libraries: OSD-314's 1.000 is specific to **wild-type** plants (OSD-346 has only
+phytochrome mutants), to **red-light/dark** treatments (OSD-346 is blue light), or to
+**that mission's hardware and batch structure**. The third is the one to worry about,
+because OSD-314 offered no sequencing-run identifier and its 11 libraries came from a
+single processing run.
+
+### What this changes about the OSD-314 claim
+
+The OSD-314 artifact and the report now carry this explicitly rather than leaving it in
+a next-action field:
+
+> The within-flight 0 g versus 0.34 g contrast reaches balanced accuracy 1.000 in
+> OSD-314 and does not replicate in OSD-346 under the same held-out-treatment protocol.
+> It is reported as one experiment's finding, not as a property of plant
+> transcriptomes, and no model is served from either study.
+
+Reporting a failed replication of our own most striking result is more valuable than the
+result was. A 17-library, two-fold, perfect-separation number that survives one
+independent test is a finding; one that does not is a cautionary example, and the honest
+place to find that out is here rather than in someone else's review.
 
 ---
 
@@ -146,10 +191,10 @@ half-way.
 | --- | --- | --- |
 | Is the OSD-782 dose label usable? | no, "confounded with processing order" | **yes**; the confound is cell-level batch, not dose |
 | Is dose learnable? | no (0.361, p 0.2475) | **yes, across timepoints** (0.611, p 0.0005; ρ 0.197) — not across unseen cells (0.111) |
-| Does a partial-gravity plant study exist? | no | **yes: OSD-314**, and it is now catalogued |
-| Is partial gravity detectable? | untestable | **yes** within flight (1.000, p 0.0055), corroborated by the deposit's own DE table |
+| Does a partial-gravity plant study exist? | no | **yes: OSD-314 and OSD-346**, both catalogued |
+| Is partial gravity detectable? | untestable | **yes in OSD-314** (1.000, p 0.0055), corroborated by its own DE table — **but it does not replicate in OSD-346**, which shows a graded signal only from 0.6 g upward |
 | Is a gravity or dose model served? | no | **no**, and both exclusions stand |
 
-Registry: unchanged at 8 models. Catalogue: 17 → 18 NASA datasets. Tests:
+Registry: unchanged at 8 models. Catalogue: 17 → 19 NASA datasets (OSD-314, OSD-346). Tests:
 `backend/tests/test_phase10_dose_gravity.py`, which pins each number to its protocol
 and asserts that none of it is promoted.
