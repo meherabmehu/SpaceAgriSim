@@ -9,8 +9,12 @@ ROOT=Path(__file__).resolve().parents[1]
 def package():
     destination=ROOT/'backend/scientific_data'
     sources=[]
-    for name in ['dataset_manifest.json','download_checksums.json','quality_report.json','external_lettuce.json','phase2_nasa_candidates.json','phase9_nasa_datasets.json','osdr_live_status.json','phase14_nasa_expansion.json']:
+    for name in ['dataset_manifest.json','download_checksums.json','quality_report.json','external_lettuce.json','phase2_nasa_candidates.json','phase9_nasa_datasets.json','osdr_live_status.json']:
         sources.append(ROOT/'data/metadata'/name)
+    # Phase 19: the benchmark panel reads this artifact through the same bundle lookup as the
+    # manifest. Without it the endpoint answers "artifact not present" in production while the
+    # local build looks fine.
+    sources.append(ROOT/'data/derived'/'bpc_benchmark.json')
     sources.extend((ROOT/'data/processed').glob('*.csv'))
     sources.extend((ROOT/'data/raw/OSD-745').glob('*TRANSFORMED.csv'))
     # Phase 15: NASA BPC measurement excerpts acquired from NTRS. The evidence corpus reads
