@@ -107,15 +107,67 @@ Preserved: no redesign, no framework change. Added:
 
 Styles were appended to `platform.css`; no existing rule was modified.
 
+### 7. Live OSDR provenance re-sync
+
+`scripts/resync_osdr.py` asks the public OSDR bucket about every study the platform pins:
+
+* HEADs each sampled file URL, following the `geode` 302 to its presigned target and using a
+  one-byte ranged GET there, because a presigned URL is signed for `GET` and answers `403` to a
+  plain `HEAD`;
+* compares the served byte count with the pinned count;
+* lists the `version-N` directories the study publishes today.
+
+Per-study verdicts: `unchanged`, `newer-version-available`, `bytes-changed`, `missing-files`,
+`version-only`, `not-checkable`. The script records `filesChecked` vs `filesTotal` (hashed files
+are sampled first) and **never edits a pin** — a study whose bytes changed is reported so a human
+can decide.
+
+Result against the live repository on 2026-11-08:
+
+| verdict | studies |
+| --- | --- |
+| unchanged | 14 |
+| newer version published | 4 — OSD-120 (pinned v14, publishes v20), OSD-346, OSD-411, OSD-782 |
+| version-only (no pinned URL to HEAD) | 6 |
+
+`GET /datasets/live-status` serves that recorded snapshot with its age, a `stale` flag past 30
+days, and an explicit note that it is not a live query per request. A deployment with no snapshot
+says so and names the script.
+
+### 8. Benchmark panel
+
+`GET /benchmarks` assembles three things that used to live only in documents:
+
+* the pinned Biomass Production Chamber artifact (NASA TM 102788) — measured CO₂, water, dry
+  biomass and O₂ per m² per day, with the simulator's values under the chamber's own operating
+  point and the model ÷ measured ratio;
+* the leafy-green planning anchor (NTRS 20250001897): **59.5 g m⁻² day⁻¹**, with the simulator's
+  57.1 (0.96×), radish 42.9 (0.72×) and tomato 43.8 (0.74×);
+* the CO₂ response factor, **evaluated by calling the engine** at 420 / 1000 / 3000 ppm
+  (×1.00 / ×1.18 / ×1.29), next to the measured optimum of 1000 ppm and the disclosure that the
+  factor keeps rising above it.
+
+The panel has no ranking and no composite score. Measured and modelled sit in adjacent columns
+with the ratio, because the sizes of the gaps are the finding.
+
+### 9. Model comparison
+
+The **Model comparison** view lists every artifact-backed model with its own metric against its
+own baseline, its validation scheme, its sample count and its declared input domain. There is
+deliberately no ordering and no cross-model score: an R² on a transcriptomic classifier and an MAE
+on a harvest regression are not commensurable, and a league table would invent a comparison the
+metrics do not support.
+
 ## Verification
 
 ```
-backend:  648 passed, 1 skipped   (the skip is the PostgreSQL-only integration test)
+backend:  657 passed, 1 skipped   (the skip is the PostgreSQL-only integration test)
 frontend: npm run lint / typecheck / build  — clean
 ```
 
-Phase 18 baseline was 620 passed, 1 skipped; Phase 19 adds 28 cases across
-`test_phase19_accounts_sharing.py` (22) and `test_phase19_gateway_limits.py` (6).
+Phase 18 baseline was 620 passed, 1 skipped; Phase 19 adds 37 cases across
+`test_phase19_accounts_sharing.py` (22), `test_phase19_gateway_limits.py` (6) and
+`test_phase19_benchmarks_and_resync.py` (9).
 
 A live-server smoke run exercised the whole chain against real uvicorn: register → verify request
 (dev outbox) → confirm → forgot → reset → old session `401` → sign in with the new password →
@@ -126,12 +178,19 @@ deployment.
 
 ## Still open (disclosed, not filled)
 
-* **Live OSDR re-sync** and a **model-comparison view** are not in this phase.
-* Benchmark numbers from Phase 16/18 are still reachable from Methodology and Evidence but are
-  not, yet, surfaced as a single panel.
-* Science gaps unchanged and out of scope: ethylene/air-quality modelling, lunar and Martian
-  regolith crop trials, a stress→yield-loss curve, spacecraft water-loop measurements, and any
-  Moon/Mars yield claim from the molecular classifiers.
+Science gaps, unchanged and out of scope: ethylene/air-quality modelling, lunar and Martian
+regolith crop trials, a stress→yield-loss curve, spacecraft water-loop measurements, and any
+Moon/Mars yield claim from the molecular classifiers. None of them has a public dataset that
+could fill it, and inventing one would be worse than the gap.
+
+Operational notes for whoever deploys this:
+
+* `/api/ready` reports `emailDelivery` and `storage.durable`. On a serverless host with SQLite
+  under `/tmp`, accounts and scenarios do not survive a cold start — the payload says so.
+* `SPACEAGRISIM_TRUSTED_PROXY_HOPS` must be set to the real hop count behind a gateway;
+  `/api/ready` shows which identity mode is live.
+* `scripts/resync_osdr.py` is a scheduled job, not a request path. Four pinned studies have newer
+  versions published; re-pinning them is a deliberate, reviewed step.
 
 ## Configuration added
 
