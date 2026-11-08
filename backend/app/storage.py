@@ -1,10 +1,11 @@
 """Bounded shared scenario history. PostgreSQL in production, SQLite for local demos."""
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from functools import lru_cache
 from pathlib import Path
 from uuid import uuid4
 
-from sqlalchemy import Boolean, Column, MetaData, String, Table, Text, create_engine, delete, inspect, select, text
+from sqlalchemy import (Boolean, Column, MetaData, String, Table, Text, create_engine, delete,
+                        func, inspect, select, text)
 from app.config.settings import settings
 
 metadata = MetaData()
@@ -108,23 +109,113 @@ def save_scenario(name: str, configuration: str, owner_id: str | None = None):
     return row
 
 
-def list_analyses(owner_id: str):
-    """Analyses belonging to one account. The owner filter is never optional."""
+class AnalysisQuotaExceeded(Exception):
+    """Raised when saving would exceed a per-account limit. Carries the numbers for the caller."""
+
+    def __init__(self, code: str, message: str, **detail):
+        super().__init__(message)
+        self.code = code
+        self.message = message
+        self.detail = detail
+
+
+def _lock_owner(connection, owner_id: str) -> None:
+    """Serialise quota accounting for one account, without depending on the dialect.
+
+    Two concurrent saves could otherwise both read "199 of 200 used" and both insert. A no-op
+    UPDATE on the owner row takes a row lock in PostgreSQL and the database write lock in SQLite,
+    so the second transaction waits and then re-reads a count that includes the first.
+    """
+    connection.execute(users.update().where(users.c.id == owner_id)
+                       .values(created_at=users.c.created_at))
+
+
+def analysis_usage(owner_id: str) -> dict:
+    """Current count and byte usage for one account."""
+    if not owner_id:
+        raise ValueError("owner_id is required")
+    statement = (select(func.count(analyses.c.id),
+                        func.coalesce(func.sum(func.length(analyses.c.payload)), 0))
+                 .where(analyses.c.owner_id == owner_id))
+    with database().connect() as connection:
+        count, used = connection.execute(statement).one()
+    return {"count": int(count), "bytes": int(used),
+            "maxCount": settings.max_analyses_per_user,
+            "maxBytes": settings.max_analysis_bytes_per_user}
+
+
+def list_analyses(owner_id: str, limit: int | None = None, offset: int = 0):
+    """One page of an account's analyses, newest first, with the account-wide total.
+
+    The owner filter is never optional and never derived from the request body.
+    """
     if not owner_id:
         raise ValueError("owner_id is required to list analyses")
+    page_size = max(1, min(int(limit or settings.max_analyses_page_size),
+                           settings.max_analyses_page_size))
+    page_offset = max(0, int(offset or 0))
     statement = (select(analyses).where(analyses.c.owner_id == owner_id)
-                 .order_by(analyses.c.created_at.desc()).limit(settings.max_history))
+                 .order_by(analyses.c.created_at.desc(), analyses.c.id.desc())
+                 .limit(page_size).offset(page_offset))
+    total_statement = select(func.count(analyses.c.id)).where(analyses.c.owner_id == owner_id)
     with database().connect() as connection:
-        return [dict(row._mapping) for row in connection.execute(statement)]
+        rows = [dict(row._mapping) for row in connection.execute(statement)]
+        total = int(connection.execute(total_statement).scalar_one())
+    return rows, total, {"limit": page_size, "offset": page_offset, "total": total,
+                         "hasMore": page_offset + len(rows) < total}
 
 
 def save_analysis(owner_id: str, model_id: str, title: str, payload: str):
+    """Insert one analysis, enforcing size and per-account quotas inside the transaction."""
+    if not owner_id:
+        raise ValueError("owner_id is required to save an analysis")
+    payload_bytes = len(payload.encode("utf-8"))
+    if payload_bytes > settings.max_analysis_bytes:
+        raise AnalysisQuotaExceeded(
+            "payload-too-large", "Analysis payload is too large to save",
+            bytes=payload_bytes, limit=settings.max_analysis_bytes)
     row = {"id": str(uuid4()), "owner_id": owner_id, "model_id": model_id,
            "title": title, "created_at": datetime.now(timezone.utc).isoformat(),
            "payload": payload}
     with database().begin() as connection:
+        _lock_owner(connection, owner_id)
+        count, used = connection.execute(
+            select(func.count(analyses.c.id),
+                   func.coalesce(func.sum(func.length(analyses.c.payload)), 0))
+            .where(analyses.c.owner_id == owner_id)).one()
+        if int(count) >= settings.max_analyses_per_user:
+            raise AnalysisQuotaExceeded(
+                "quota-count", "Saved-analysis limit reached for this account",
+                count=int(count), limit=settings.max_analyses_per_user)
+        if int(used) + payload_bytes > settings.max_analysis_bytes_per_user:
+            raise AnalysisQuotaExceeded(
+                "quota-bytes", "Saved-analysis storage limit reached for this account",
+                bytes=int(used) + payload_bytes, limit=settings.max_analysis_bytes_per_user)
         connection.execute(analyses.insert().values(**row))
     return row
+
+
+def purge_expired_analyses(now: datetime | None = None) -> int:
+    """Delete analyses past the retention window. Returns the number removed.
+
+    Retention is off unless `analysis_retention_days` is positive, so the default behaviour for
+    an existing deployment is unchanged: nothing is deleted.
+    """
+    if settings.analysis_retention_days <= 0:
+        return 0
+    cutoff = (now or datetime.now(timezone.utc)) - timedelta(days=settings.analysis_retention_days)
+    with database().begin() as connection:
+        result = connection.execute(delete(analyses).where(analyses.c.created_at < cutoff.isoformat()))
+    return int(result.rowcount or 0)
+
+
+def delete_all_analyses(owner_id: str) -> int:
+    """Delete every analysis for one account. Scoped by owner, like every other accessor."""
+    if not owner_id:
+        raise ValueError("owner_id is required")
+    with database().begin() as connection:
+        result = connection.execute(delete(analyses).where(analyses.c.owner_id == owner_id))
+    return int(result.rowcount or 0)
 
 
 def get_analysis(owner_id: str, analysis_id: str):
