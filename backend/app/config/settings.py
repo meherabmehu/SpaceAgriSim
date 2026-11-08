@@ -6,10 +6,46 @@ Values can be overridden through environment variables, e.g.
     SPACEAGRISIM_CORS_ORIGINS='["http://localhost:5173"]'
 """
 
+import logging
 import os
 import secrets
-from pydantic import Field, field_validator
+from typing import Literal
+
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+logger = logging.getLogger(__name__)
+
+# One ephemeral secret per process. Before Phase 13 the fallback was generated per Settings
+# instance, which meant two workers of the same deployment could disagree about what a valid
+# token was. A process-local value is still wrong for a multi-process deployment - it is just
+# consistently wrong instead of randomly wrong - which is why production now refuses to start
+# without a real secret (see Settings.require_persistent_auth_secret).
+_EPHEMERAL_AUTH_SECRET = secrets.token_urlsafe(48)
+
+# Values that look deliberate but are not secret. Rejecting them is cheap; discovering that a
+# deployment signed tokens with "changeme" is not.
+AUTH_SECRET_REJECTED = {
+    "changeme", "change-me", "changemeplease", "secret", "secretkey", "password", "passw0rd",
+    "development", "dev", "dev-secret", "development-secret", "test", "testing", "example",
+    "placeholder", "insecure", "spaceagrisim", "spaceagrisim-secret", "your-secret",
+    "your-secret-here", "replace-me", "todo", "none", "null", "default",
+}
+
+
+def _validate_auth_secret(value: str | None, field: str) -> str | None:
+    if value is None:
+        return None
+    candidate = value.strip()
+    if not candidate:
+        return None
+    if len(candidate) < 32:
+        raise ValueError(f"{field} must be at least 32 characters; use a random value, not a password")
+    if len(set(candidate)) < 12:
+        raise ValueError(f"{field} has too little entropy; generate it with secrets.token_urlsafe(48)")
+    if candidate.lower() in AUTH_SECRET_REJECTED:
+        raise ValueError(f"{field} is a known placeholder value")
+    return candidate
 
 
 class Settings(BaseSettings):
@@ -24,10 +60,29 @@ class Settings(BaseSettings):
     database_pool_size: int = Field(default=5, ge=1, le=30)
     database_max_overflow: int = Field(default=5, ge=0, le=30)
 
-    # Set a durable high-entropy value through the host's secret manager. The
-    # ephemeral fallback makes local development usable but invalidates tokens
-    # at restart and is intentionally never suitable for multi-instance use.
-    auth_secret: str = Field(default_factory=lambda: secrets.token_urlsafe(48), min_length=32)
+    # development | test | staging | production. A hosting platform that sets VERCEL is treated
+    # as production unless the operator says otherwise, because that is where the ephemeral
+    # fallback would silently invalidate every token on each restart.
+    environment: Literal["development", "test", "staging", "production"] = Field(
+        default_factory=lambda: "production" if os.environ.get("VERCEL") else "development")
+
+    # Set a durable high-entropy value through the host's secret manager, e.g.
+    # SPACEAGRISIM_AUTH_SECRET=$(python -c "import secrets;print(secrets.token_urlsafe(48))").
+    # Unset in development means one ephemeral value per process: usable, and documented as
+    # invalid across restarts. Unset in production is a startup failure, not a warning.
+    auth_secret: str | None = None
+    # Rotation window: tokens signed with the previous secret still verify, so a deployment can
+    # roll the secret without logging every user out at once. Remove it once the longest token
+    # lifetime (auth_token_minutes) has passed. See docs/PHASE13_PRODUCTION_READINESS.md.
+    auth_secret_previous: str | None = None
+
+    # Saved-analysis quotas. Enforced inside the write transaction, not by a client-side count.
+    max_analyses_per_user: int = Field(default=200, ge=1, le=100_000)
+    max_analysis_bytes: int = Field(default=1_000_000, ge=1024, le=50_000_000)
+    max_analysis_bytes_per_user: int = Field(default=20_000_000, ge=1024, le=2_000_000_000)
+    max_analyses_page_size: int = Field(default=50, ge=1, le=500)
+    # 0 keeps analyses forever. A positive value enables the retention sweep.
+    analysis_retention_days: int = Field(default=0, ge=0, le=3650)
     auth_token_minutes: int = Field(default=60, ge=5, le=1440)
     auth_rate_limit_per_minute: int = Field(default=30, ge=1, le=60)
     # General per-IP request budget. The default is the production value; the
@@ -39,6 +94,46 @@ class Settings(BaseSettings):
     # Origins allowed to call the API from a browser. The Vite dev server
     # proxies /api so this mostly matters when the frontend is served elsewhere.
     cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
+
+    @field_validator("auth_secret", "auth_secret_previous")
+    @classmethod
+    def strong_auth_secret(cls, value: str | None, info) -> str | None:
+        return _validate_auth_secret(value, info.field_name)
+
+    @model_validator(mode="after")
+    def require_persistent_auth_secret(self):
+        """Fail fast rather than sign tokens with a secret the next worker will not share."""
+        if self.environment != "production":
+            if self.auth_secret is None:
+                logger.warning(
+                    "SPACEAGRISIM_AUTH_SECRET is not set; using a process-local ephemeral secret. "
+                    "Issued tokens become invalid on restart and are not shared between workers.")
+            return self
+        if self.auth_secret is None:
+            raise ValueError(
+                "SPACEAGRISIM_AUTH_SECRET must be set when SPACEAGRISIM_ENVIRONMENT=production. "
+                "Generate one with: python -c 'import secrets;print(secrets.token_urlsafe(48))' "
+                "and store it in the host's secret manager.")
+        if self.auth_secret_previous is not None and self.auth_secret_previous == self.auth_secret:
+            raise ValueError("auth_secret_previous must differ from auth_secret")
+        return self
+
+    @property
+    def resolved_auth_secret(self) -> str:
+        """The secret to sign with: the configured one, or the documented ephemeral fallback."""
+        return self.auth_secret or _EPHEMERAL_AUTH_SECRET
+
+    @property
+    def auth_secrets_for_verification(self) -> list[str]:
+        """Newest first. Rotation keeps the old secret verifying until it is removed."""
+        secrets_in_order = [self.resolved_auth_secret]
+        if self.auth_secret and self.auth_secret_previous:
+            secrets_in_order.append(self.auth_secret_previous)
+        return secrets_in_order
+
+    @property
+    def auth_secret_is_persistent(self) -> bool:
+        return self.auth_secret is not None
 
     @field_validator("cors_origins")
     @classmethod

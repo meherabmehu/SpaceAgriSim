@@ -40,7 +40,8 @@ def issue_token(user: dict) -> dict[str, str | int]:
     expires = now + timedelta(minutes=settings.auth_token_minutes)
     jti = uuid4().hex
     token = jwt.encode({"sub": user["id"], "email": user["email"], "jti": jti,
-                        "iat": now, "exp": expires}, settings.auth_secret, algorithm="HS256")
+                        "iat": now, "exp": expires}, settings.resolved_auth_secret,
+                       algorithm="HS256")
     return {"accessToken": token, "tokenType": "bearer", "expiresIn": settings.auth_token_minutes * 60,
             "expiresAt": expires.isoformat()}
 
@@ -61,10 +62,22 @@ def optional_user(credentials: HTTPAuthorizationCredentials | None = Depends(bea
 def current_user(credentials: HTTPAuthorizationCredentials | None = Depends(bearer)) -> dict:
     if credentials is None or credentials.scheme.lower() != "bearer":
         raise HTTPException(401, "Authentication is required", headers={"WWW-Authenticate": "Bearer"})
-    try:
-        payload = jwt.decode(credentials.credentials, settings.auth_secret, algorithms=["HS256"], options={"require": ["sub", "jti", "exp"]})
-    except jwt.PyJWTError as exc:
-        raise HTTPException(401, "Invalid or expired authentication token", headers={"WWW-Authenticate": "Bearer"}) from exc
+    payload = None
+    for secret in settings.auth_secrets_for_verification:
+        try:
+            payload = jwt.decode(credentials.credentials, secret, algorithms=["HS256"],
+                                 options={"require": ["sub", "jti", "exp"]})
+            break
+        except jwt.ExpiredSignatureError as exc:
+            # Expiry is not a secret mismatch: retrying with the previous secret would only
+            # delay the same answer.
+            raise HTTPException(401, "Authentication token has expired",
+                                headers={"WWW-Authenticate": "Bearer"}) from exc
+        except jwt.PyJWTError:
+            continue
+    if payload is None:
+        raise HTTPException(401, "Invalid or expired authentication token",
+                            headers={"WWW-Authenticate": "Bearer"})
     if storage.token_is_revoked(payload["jti"]):
         raise HTTPException(401, "Authentication token has been revoked", headers={"WWW-Authenticate": "Bearer"})
     user = storage.find_user_by_email(str(payload.get("email", "")))
