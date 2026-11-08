@@ -2,8 +2,8 @@
 # Phase 9 reproducible demo.
 #
 # Verifies provenance, retrains both served models from the pinned NASA files,
-# checks that the metrics match what the documentation claims, and shows a live
-# prediction through the API.
+# checks that the metrics match what the documentation claims, exercises the Phase 12
+# AI layer with its refusals, and shows a live prediction through the API.
 #
 # Every step is idempotent. Nothing here deploys anything.
 #
@@ -27,12 +27,12 @@ done
 
 step() { printf '\n\033[1m== %s\033[0m\n' "$1"; }
 
-step "1/7 Verify every NASA source file by checksum"
+step "1/8 Verify every NASA source file by checksum"
 python3 scripts/acquire_phase9.py
 echo "Every file above was matched against a pinned SHA-256."
 
 if [ "$FAST" -eq 0 ]; then
-  step "2/7 Retrain both served models (deterministic, seed 20261107)"
+  step "2/8 Retrain both served models (deterministic, seed 20261107)"
   # Order matters. Retraining regenerates the artifacts, the Phase 10 explanation step
   # re-attaches the explanation metadata that training alone does not write, and the
   # registry is rebuilt last so its checksums describe the files that now exist. Skipping
@@ -44,10 +44,10 @@ if [ "$FAST" -eq 0 ]; then
   echo "Artifacts and registry regenerated. Only trainedAt/generatedAt and the checksums"
   echo "change; every metric is bit-identical, which step 3 asserts next."
 else
-  step "2/7 Skipped retraining (--fast); using the committed artifacts"
+  step "2/8 Skipped retraining (--fast); using the committed artifacts"
 fi
 
-step "3/7 Assert the documented metrics still hold"
+step "3/8 Assert the documented metrics still hold"
 python3 - <<'PY'
 import json, sys
 from pathlib import Path
@@ -80,11 +80,11 @@ if failures:
 print("  metrics match the documentation")
 PY
 
-step "4/7 Verify registry checksums and run the scientific test suite"
+step "4/8 Verify registry checksums and run the scientific test suite"
 python3 scripts/package_runtime_data.py
 ( cd backend && python3 -m pytest -q tests/test_phase9_models.py )
 
-step "5/7 Show the interval calibration, the corrected transfer reading, and the recovered signals"
+step "5/8 Show the interval calibration, the corrected transfer reading, and the recovered signals"
 python3 - <<'PY'
 import json
 from pathlib import Path
@@ -147,7 +147,7 @@ print(f"    uG vs 0.34 g inside flight -> balanced {primary['balancedAccuracy']:
       f"not served, because n=17 in one mission; not replicated in OSD-346")
 PY
 
-step "6/7 Phase 11 evidence, including the results that are negative on purpose"
+step "6/8 Phase 11 evidence, including the results that are negative on purpose"
 python3 - <<'PY'
 import json
 from pathlib import Path
@@ -219,7 +219,10 @@ print(f"    threshold validated: {ood['thresholdValidated']}")
 PY
 
 if [ "$SERVER" -eq 1 ]; then
-  step "7/7 Live prediction through the API"
+  step "7/8 Phase 12: the AI layer, and its four refusals"
+python3 scripts/demo_phase12.py
+
+step "8/8 Live prediction through the API"
   ( cd backend && python3 -m uvicorn app.main:app --port 8011 --log-level warning ) &
   SERVER_PID=$!
   trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
@@ -278,7 +281,7 @@ except urllib.error.HTTPError as error:
     print(f"  lettuce explanation -> HTTP {error.code} (no valid method, no stub)")
 PY
 else
-  step "7/7 Skipped the live API section (--no-server)"
+  step "8/8 Skipped the live API section (--no-server)"
 fi
 
-printf '\n\033[1mDemo complete.\033[0m Two models served with exact explanations, four negatives documented, intervals calibrated on held-out groups.\n'
+printf '\n\033[1mDemo complete.\033[0m Two models served with exact explanations, four negatives documented, intervals calibrated on held-out groups, and four AI refusals demonstrated.\n'

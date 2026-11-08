@@ -45,6 +45,19 @@ def issue_token(user: dict) -> dict[str, str | int]:
             "expiresAt": expires.isoformat()}
 
 
+def optional_user(credentials: HTTPAuthorizationCredentials | None = Depends(bearer)) -> dict | None:
+    """Identify a caller if a valid token is presented, without requiring one.
+
+    Used by the workflow run endpoint, which serves an anonymous visitor exactly as the
+    existing prediction endpoints do, but must refuse to persist anything without an
+    account. A malformed token is *not* silently treated as anonymous: that would let a
+    caller with an expired session believe their analysis was saved.
+    """
+    if credentials is None:
+        return None
+    return current_user(credentials)
+
+
 def current_user(credentials: HTTPAuthorizationCredentials | None = Depends(bearer)) -> dict:
     if credentials is None or credentials.scheme.lower() != "bearer":
         raise HTTPException(401, "Authentication is required", headers={"WWW-Authenticate": "Bearer"})

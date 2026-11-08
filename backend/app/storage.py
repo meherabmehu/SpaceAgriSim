@@ -25,6 +25,19 @@ users = Table("users", metadata,
     Column("created_at", String(40), nullable=False),
     Column("disabled", Boolean, nullable=False, default=False),
 )
+# Phase 12: saved AI analyses. Kept separate from `scenarios` because an analysis is a
+# model inference with its citations, not a habitat configuration, and the two have
+# different retention and export semantics.
+analyses = Table("analyses", metadata,
+    Column("id", String(36), primary_key=True),
+    # Never nullable: an analysis always belongs to an authenticated account. There is
+    # no legacy row to migrate, so there is no reason to permit an orphan.
+    Column("owner_id", String(36), nullable=False, index=True),
+    Column("model_id", String(64), nullable=False),
+    Column("title", String(120), nullable=False),
+    Column("created_at", String(40), nullable=False),
+    Column("payload", Text, nullable=False),
+)
 revoked_tokens = Table("revoked_tokens", metadata,
     Column("jti", String(64), primary_key=True),
     Column("expires_at", String(40), nullable=False),
@@ -93,6 +106,44 @@ def save_scenario(name: str, configuration: str, owner_id: str | None = None):
         if expired:
             connection.execute(delete(scenarios).where(scenarios.c.id.in_(expired)))
     return row
+
+
+def list_analyses(owner_id: str):
+    """Analyses belonging to one account. The owner filter is never optional."""
+    if not owner_id:
+        raise ValueError("owner_id is required to list analyses")
+    statement = (select(analyses).where(analyses.c.owner_id == owner_id)
+                 .order_by(analyses.c.created_at.desc()).limit(settings.max_history))
+    with database().connect() as connection:
+        return [dict(row._mapping) for row in connection.execute(statement)]
+
+
+def save_analysis(owner_id: str, model_id: str, title: str, payload: str):
+    row = {"id": str(uuid4()), "owner_id": owner_id, "model_id": model_id,
+           "title": title, "created_at": datetime.now(timezone.utc).isoformat(),
+           "payload": payload}
+    with database().begin() as connection:
+        connection.execute(analyses.insert().values(**row))
+    return row
+
+
+def get_analysis(owner_id: str, analysis_id: str):
+    """Fetch one analysis, scoped to its owner.
+
+    Returning None for another user's id is deliberate: a 403 would confirm that the
+    id exists, which is an enumeration oracle.
+    """
+    with database().connect() as connection:
+        row = connection.execute(select(analyses).where(
+            (analyses.c.id == analysis_id) & (analyses.c.owner_id == owner_id))).first()
+    return dict(row._mapping) if row else None
+
+
+def delete_analysis(owner_id: str, analysis_id: str) -> bool:
+    with database().begin() as connection:
+        result = connection.execute(delete(analyses).where(
+            (analyses.c.id == analysis_id) & (analyses.c.owner_id == owner_id)))
+    return bool(result.rowcount)
 
 
 def find_user_by_email(email: str):

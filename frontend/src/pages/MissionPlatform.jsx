@@ -15,6 +15,7 @@ import {
   Layers3,
   Leaf,
   Menu,
+  MessageSquare,
   Orbit,
   Radio,
   Rocket,
@@ -41,6 +42,7 @@ const NAV = [
   ["dashboard", "Mission control", Orbit],
   ["laboratory", "Simulation lab", FlaskConical],
   ["predictions", "AI prediction center", Atom],
+  ["assistant", "Research assistant", MessageSquare],
   ["greenhouse", "3D greenhouse", Box],
   ["comparison", "World comparison", Globe2],
   ["crops", "Crop intelligence", Sprout],
@@ -188,6 +190,7 @@ export default function MissionPlatform() {
               <Icon size={18} />
               <span>{label}</span>
               {id === "predictions" && <small>ML</small>}
+              {id === "assistant" && <small>AI</small>}
             </a>
           ))}
         </nav>

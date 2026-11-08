@@ -362,6 +362,19 @@ FEATURES: list[Feature] = [
 ]
 
 
+def feature_by_id(feature_id: str) -> Feature | None:
+    """Look up one classified surface.
+
+    Added in Phase 12 so the model registry and the research assistant can attach
+    the category of a surface instead of duplicating the taxonomy in a second
+    place. There is exactly one source of truth for the classification.
+    """
+    for feature in FEATURES:
+        if feature.id == feature_id:
+            return feature
+    return None
+
+
 def by_category() -> dict[int, list[dict]]:
     groups: dict[int, list[dict]] = {c: [] for c in CATEGORY_NAMES}
     for feature in FEATURES:
