@@ -11,17 +11,20 @@ code rather than promised in prose.
 | --- | --- |
 | Base | remote `main` = `7957a05` (Phase 11 merge), verified with `git ls-remote` before any work |
 | Branch | `feat/phase12-ai-platform-completion` |
-| Feature commits | 7 (`6cf9619` … `7959e95`) |
-| Merge commit | **`67aec7f`** — `Merge Phase 12: evidence-grounded AI, scientific workflows, and dataset independence` |
-| Post-merge fix | **`bda7676`** — restores the executable bit on the demo scripts |
-| Local `main` HEAD | `bda7676` |
-| Force-push | none |
+| Feature branch HEAD | `c78e7a2` (`docs/phase12-ai-platform-completion`) |
+| Feature commits | 7 (`d2e7f4b` baseline doc … `c78e7a2` docs) |
+| Merge commit | **`5ccdf08`** — `Merge Phase 12: evidence-grounded AI, scientific workflows, and dataset independence` |
+| Remote `main` HEAD | **`5ccdf08e318bf67c8b7f433b9b02f05d05c3cb65`** (`git ls-remote`, and re-verified from a fresh clone) |
+| Push type | fast-forward `7957a05..5ccdf08`; **no force-push** |
 | Branch-protection bypass | none |
+| Remote tree equals local tree | yes (`HEAD^{tree}` identical in a fresh `--depth 1` clone) |
 
-The remote push is the one step that could not be completed inside the sandbox: the container
-holds no GitHub credential and the environment reset removed the one used in earlier phases.
-`git push origin main` fails with `could not read Username for 'https://github.com'`. The
-merge is prepared and verified locally; it needs a token to travel. See §8.
+The push required a credential, which the sandbox did not have after an environment reset;
+once a token was supplied the branch was pushed first (so the work survived the sandbox
+resetting its own `.git` directory mid-session), then merged into `main` and pushed. The
+history was rebuilt after that reset, so the commit ids above are the ones that actually
+exist on the remote — they were read back with `git ls-remote` and confirmed by cloning the
+repository fresh rather than trusted from the local log.
 
 ---
 
@@ -141,16 +144,28 @@ Phase 12 কখনো ক্যালিব্রেটেড সম্ভাব
 
 ---
 
-## 8. The one outstanding step
+## 8. Push and independent verification
 
-The merge is complete locally at `67aec7f` (plus `bda7676`). Pushing needs a GitHub token,
-which this sandbox does not have after the environment reset:
-
-```bash
-git push origin main        # fatal: could not read Username for 'https://github.com'
+```
+git push origin feat/phase12-ai-platform-completion   ->  6e31b70..c78e7a2
+git merge --no-ff feat/phase12-ai-platform-completion ->  5ccdf08
+git push origin main                                  ->  7957a05..5ccdf08
+git ls-remote origin refs/heads/main                  ->  5ccdf08e318bf67c8b7f433b9b02f05d05c3cb65
 ```
 
-Once a token is available the push is a single fast-forward from `7957a05` to `bda7676`, and
-`git ls-remote origin refs/heads/main` should then print
-`bda7676b939822e88c2035aa3801cf4b483d9734`. Nothing about the merge is waiting on further code
-work.
+Then verified from a **fresh clone**, not from the local repository:
+
+```
+git clone --depth 1 https://github.com/meherabmehu/SpaceAgriSim.git
+HEAD                       = 5ccdf08e318bf67c8b7f433b9b02f05d05c3cb65
+git rev-parse HEAD^{tree}  = identical to the local tree
+docs/PHASE12_*.md          = 11 files present
+workflow.py, assistant.py, explorer.py, ResearchAssistant.jsx, demo_phase12.py = all present
+```
+
+Nothing in Phase 12 is waiting on further work.
+
+> **Credential note.** The token used for this push was supplied in chat, so it should be
+> treated as exposed: revoke it in GitHub settings. It was used only for these two pushes, was
+> passed through a temporary `GIT_ASKPASS` script rather than written into `.git/config` or any
+> committed file, and never appears in the repository.
