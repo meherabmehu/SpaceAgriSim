@@ -20,17 +20,28 @@ def test_actual_dataset_inventory_and_no_cross_crop_claim(scientific_client):
     response = scientific_client.get("/api/datasets")
     assert response.status_code == 200
     studies = response.json()["datasets"]
-    # 14 from the original inventory, plus the four studies Phase 9 catalogued
-    # after finding that models cited studies the explorer did not list
-    # (OSD-46, OSD-782, OSD-411, OSD-780), plus the two graded-gravity plant
-    # studies the Phase 10 metadata scan found (OSD-314, OSD-346).
-    assert len(studies) == 20
+    # The explorer must show exactly the studies the application's catalogue declares — no
+    # more, no fewer. Asserting a literal count only restates the number in a second place
+    # and breaks on every legitimate acquisition; asserting agreement catches the failure
+    # that matters, a study that exists in one view of the catalogue and not the other.
+    declared = research.manifest()["datasets"]
+    assert len(studies) == len(declared)
+    assert {row["id"] for row in studies} == {row["id"] for row in declared}
+    # Phase 14 acquired five studies by pinned ISA metadata: crop safety on mizuna
+    # (OSD-386), long-duration mizuna transcriptome (OSD-59), substrate substitution
+    # (OSD-670), hydroponic chemistry (OSD-723) and simulated lunar soil (OSD-856).
+    phase14 = [row for row in studies if row["id"] in
+               {"OSD-59", "OSD-386", "OSD-670", "OSD-723", "OSD-856"}]
+    assert len(phase14) == 5
+    assert all(row["status"] == "verified-metadata" for row in phase14)
     mizuna = next(d for d in studies if d["id"] == "OSD-655")
     assert mizuna["organisms"] == ["Brassica rapa"]
     assert mizuna["sampleCount"] == 37
     assert mizuna["downloadedFileCount"] > 0
     assert "files" not in mizuna
-    assert len(response.json()["coverage"]) == 15
+    # Phase 14 added the substrate/regolith and edible-microbiology coverage rows, both
+    # of which state what the acquired data cannot establish.
+    assert len(response.json()["coverage"]) == 17
     eden = next(d for d in studies if d["id"] == "OSD-895")
     assert eden["classification"] == "useful for scientific calibration"
     assert eden["rowCount"] == 19

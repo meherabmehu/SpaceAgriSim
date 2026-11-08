@@ -520,12 +520,7 @@ def corpus() -> dict:
            for token, freq in document_frequency.items()}
     average_length = sum(len(p.tokens) for p in passages) / total
     return {"passages": passages, "idf": idf, "averageLength": average_length,
-            "quarantine": quarantine, "builtFrom": {
-                "datasets": sum(1 for p in passages if p.kind == "dataset"),
-                "models": sum(1 for p in passages if p.kind == "model"),
-                "findings": sum(1 for p in passages if p.kind == "evaluation"),
-                "methodology": sum(1 for p in passages if p.kind == "methodology"),
-            }}
+            "quarantine": quarantine, "builtFrom": _count_by_kind(passages)}
 
 
 # Words that belong to the corpus's own subject matter, so a match on them alone says
@@ -607,6 +602,36 @@ def passage_by_id(passage_id: str) -> Passage | None:
         if passage.id == passage_id:
             return passage
     return None
+
+
+# Passage kinds that make up the corpus, in the order the UI should show them, mapped to
+# the label the assistant reports. Every kind a passage can carry must appear here: the
+# breakdown is published next to the total, so an unlisted kind makes the two disagree
+# (classification passages were missing from it until this was made total by construction).
+KIND_LABELS = {
+    "dataset": "datasets",
+    "evaluation": "findings",
+    "model": "models",
+    "methodology": "methodology",
+    "classification": "classifications",
+}
+
+
+def _count_by_kind(passages) -> dict[str, int]:
+    """Counts per passage kind, covering every kind present in `passages`.
+
+    Derived from the passages themselves rather than from the builders, so the published
+    breakdown always sums to the published total. A kind added later is counted
+    automatically instead of silently vanishing from the breakdown.
+    """
+    counts: dict[str, int] = {}
+    for passage in passages:
+        counts[passage.kind] = counts.get(passage.kind, 0) + 1
+    ordered = {label: counts[kind] for kind, label in KIND_LABELS.items() if counts.get(kind)}
+    for kind, count in sorted(counts.items()):
+        if kind not in KIND_LABELS:
+            ordered[kind] = count
+    return ordered
 
 
 def stats() -> dict:

@@ -62,6 +62,8 @@ def coverage():
             ("Humidity", "NASA data available but requiring processing", "OSDR growth protocol metadata", "VPD-based scenario estimate", "No fitted crop humidity-response model."),
             ("Plant stress", "NASA molecular data available and modelled for radiation", "OSD-767 transcriptome; OSD-46 radiation response", "Molecular classification of experimental condition", "The labels are applied treatment or experiment context, not disease, stress severity or yield loss."),
             ("Environmental optimization", "No suitable NASA dataset identified", "Simulator objective functions", "Constrained scenario optimization", "Recommendations optimize assumed equations, not real spacecraft safety."),
+            ("Substrate and regolith", "NASA data available for simulants and substrate substitution, not for actual lunar or Martian regolith", "OSD-670 (carbonaceous-chondrite simulant), OSD-856 (simulated lunar soil batch #005)", "Exposed as a scenario assumption, not a calibrated response surface", "A simulant is not regolith: OSD-670 grows plants on an asteroid analogue and OSD-856 on one simulated lunar soil batch, so neither transfers to the Moon by analogy."),
+            ("Edible-product microbiology", "NASA data available and modelled as a within-campaign relative load", "OSD-267, OSD-268, OSD-269, OSD-655, OSD-745, OSD-780, OSD-386, OSD-723", "Relative culturable-aerobic-load regression; no pathogen model", "Plate counts measure culturable aerobic load, not pathogens or consumer risk; OSD-386 is a deliberate inoculation trial and does not estimate background contamination."),
         ]
     ]
 

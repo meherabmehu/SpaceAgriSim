@@ -1,0 +1,71 @@
+{
+  "studies": {
+    "OSD-59": {
+      "file": "data/raw/OSD-59/GLDS-59_metadata_GLDS-59-ISA.zip",
+      "bytes": 6715,
+      "sha256": "7e7572c3ff0404ee0ae800c054d87fbc604688d0673a02f50b90341189dc551e",
+      "version": 5,
+      "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-59/version-5/metadata/GLDS-59_metadata_GLDS-59-ISA.zip",
+      "pinnedAt": "2026-11-08T17:41:35.984682+00:00"
+    },
+    "OSD-386": {
+      "file": "data/raw/OSD-386/OSD-386_metadata_OSD-386-ISA.zip",
+      "bytes": 239326,
+      "sha256": "027a4f43dc89c0cb98c9f177982625210f2d8763003c6d826d3dccb721a2e959",
+      "version": 4,
+      "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-386/version-4/metadata/OSD-386_metadata_OSD-386-ISA.zip",
+      "pinnedAt": "2026-11-08T17:41:36.876952+00:00"
+    },
+    "OSD-670": {
+      "file": "data/raw/OSD-670/OSD-670_metadata_OSD-670-ISA.zip",
+      "bytes": 218973,
+      "sha256": "2c381b9edda44034bb28e01c4ed3a7c06601657a50fc5a1682e213c68e70f411",
+      "version": 3,
+      "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-670/version-3/metadata/OSD-670_metadata_OSD-670-ISA.zip",
+      "pinnedAt": "2026-11-08T17:41:39.884531+00:00"
+    },
+    "OSD-723": {
+      "file": "data/raw/OSD-723/OSD-723_metadata_OSD-723-ISA.zip",
+      "bytes": 599230,
+      "sha256": "ec6ec6f8044bd771e11dc403d596c56181c292d740c0eae7042120d0cf13d7d5",
+      "version": 1,
+      "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-723/version-1/metadata/OSD-723_metadata_OSD-723-ISA.zip",
+      "pinnedAt": "2026-11-08T17:41:41.123530+00:00"
+    },
+    "OSD-856": {
+      "file": "data/raw/OSD-856/OSD-856_metadata_OSD-856-ISA.zip",
+      "bytes": 28080,
+      "sha256": "c0487c9f3e0885e2560b8c2f0038b824d9f20609124569d50678b47699986701",
+      "version": 1,
+      "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-856/version-1/metadata/OSD-856_metadata_OSD-856-ISA.zip",
+      "pinnedAt": "2026-11-08T17:41:44.696168+00:00"
+    }
+  },
+  "discovery": {
+    "endpoint": "https://osdr.nasa.gov/osdr/data/search?term={term}",
+    "terms": [
+      "lettuce",
+      "Brassica",
+      "mizuna",
+      "wheat",
+      "tomato",
+      "potato",
+      "radish",
+      "rice",
+      "soybean",
+      "Veggie",
+      "plant growth",
+      "crop",
+      "Arabidopsis spaceflight"
+    ],
+    "note": "Candidates were filtered to OSD- accessions absent from the catalogue, then selected for space-crop relevance rather than by score.",
+    "selected": [
+      "OSD-59",
+      "OSD-386",
+      "OSD-670",
+      "OSD-723",
+      "OSD-856"
+    ],
+    "recordedAt": "2026-11-08T17:44:41.369564+00:00"
+  }
+}

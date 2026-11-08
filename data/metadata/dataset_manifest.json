@@ -1,8 +1,542 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-07T14:32:00.044485+00:00",
+  "generatedAt": "2026-11-08T17:44:41.358011+00:00",
   "source": "NASA OSDR official study and file APIs",
   "datasets": [
+    {
+      "id": "OSD-7",
+      "title": "The Arabidopsis spaceflight transcriptome: a comparison of whole plants to discrete root, hypocotyl and shoot responses to the orbital environment",
+      "description": "Arabidopsis thaliana was evaluated for its response to the spaceflight environment in three replicated experiments on the International Space Station. Two approaches were used; GFP reporter genes were used to collect gene expression data in real time within unique GFP imaging hardware, and plants were harvested on orbit to RNAlater for subsequent analyses of gene expression with using Affymetrix and SAGE transcriptome analyses. Three tissue types were examined (leaves, hypocotyls and roots) and compared to analyses conducted with whole plants. Transcriptome analyses with whole plants suggested that the spaceflight environment had little impact on the transcriptome of Arabidopsis, however, closer examination of selected tissues revealed that there are a number of tissue-specific responses that Arabidopsis employs to respond to this novel environment.",
+      "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-7",
+      "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/7",
+      "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/7",
+      "metadataSha256": "582350577b018d754489363ff593cebb90bda2715135c528ff3c719eb983910d",
+      "version": 6,
+      "verifiedAt": "2026-11-07T14:31:58.556416+00:00",
+      "organisms": [
+        "Arabidopsis thaliana"
+      ],
+      "assayTypes": [
+        "DNA microarray"
+      ],
+      "sampleCount": 36,
+      "sampleCountDefinition": "Unique study-material sample names; assay-specific counts may differ.",
+      "fileCount": 46,
+      "factors": [
+        "Spaceflight",
+        "Organism Part"
+      ],
+      "publications": [
+        {
+          "title": "Organ-specific remodeling of the Arabidopsis transcriptome in response to spaceflight.",
+          "doi": "10.1186/1471-2229-13-112"
+        }
+      ],
+      "trainingEligibility": "Metadata/omics only in this acquisition; not eligible for direct crop-yield training.",
+      "status": "verified-metadata",
+      "license": "Public OSDR access; retain study attribution and comply with OSDR terms; do not assume every contributed file is public domain.",
+      "licenseUrl": "https://science.nasa.gov/reference/osdr-help-terms-and-conditions/",
+      "limitations": [
+        "No matched lunar or Martian crop experiments identified in this study.",
+        "Study metadata and assay measurements are different evidence types."
+      ],
+      "files": [
+        {
+          "name": "OSD-7_metadata_OSD-7-ISA.zip",
+          "bytes": 74028,
+          "category": "Study Metadata Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=OSD-7_metadata_OSD-7-ISA.zip",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_array_software_versions_GLmicroarray.md",
+          "bytes": 1709,
+          "category": "GeneLab Processed Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_array_software_versions_GLmicroarray.md",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_array_nextflow_processing_info_GLmicroarray.txt",
+          "bytes": 2535,
+          "category": "GeneLab Processed Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_array_nextflow_processing_info_GLmicroarray.txt",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_array_microarray_v0_runsheet.csv",
+          "bytes": 16778,
+          "category": "GeneLab Processed Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_array_microarray_v0_runsheet.csv",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_array_NF_MAAffymetrix_v1.0.5_GLmicroarray.html",
+          "bytes": 106340799,
+          "category": "GeneLab Processed Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_array_NF_MAAffymetrix_v1.0.5_GLmicroarray.html",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_array_raw_intensities_probe_GLmicroarray.csv",
+          "bytes": 229805593,
+          "category": "GeneLab Processed Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_array_raw_intensities_probe_GLmicroarray.csv",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_array_normalized_intensities_probe_GLmicroarray.csv",
+          "bytes": 229681474,
+          "category": "GeneLab Processed Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_array_normalized_intensities_probe_GLmicroarray.csv",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_array_normalized_expression_probeset_GLmicroarray.csv",
+          "bytes": 20713095,
+          "category": "GeneLab Processed Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_array_normalized_expression_probeset_GLmicroarray.csv",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_array_processed_md5sum_GLmicroarray.tsv",
+          "bytes": 344,
+          "category": "GeneLab Processed Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_array_processed_md5sum_GLmicroarray.tsv",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_E-MTAB-1264.raw.1.zip",
+          "bytes": 62533430,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_E-MTAB-1264.raw.1.zip",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8439_Ferl_Paul_G6R2_(ATH1-121501).CEL",
+          "bytes": 5085886,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8439_Ferl_Paul_G6R2_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8438_Ferl_Paul_G6R1_(ATH1-121501).CEL",
+          "bytes": 5085934,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8438_Ferl_Paul_G6R1_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8437_Ferl_Paul_G2R1_(ATH1-121501).CEL",
+          "bytes": 5085890,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8437_Ferl_Paul_G2R1_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8436_Ferl_Paul_G4R2_(ATH1-121501).CEL",
+          "bytes": 5085074,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8436_Ferl_Paul_G4R2_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8435_Ferl_Paul_G4R1_(ATH1-121501).CEL",
+          "bytes": 5085830,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8435_Ferl_Paul_G4R1_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8434_Ferl_Paul_F6R2_(ATH1-121501).CEL",
+          "bytes": 5085954,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8434_Ferl_Paul_F6R2_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8433_Ferl_Paul_F6R1_(ATH1-121501).CEL",
+          "bytes": 5085250,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8433_Ferl_Paul_F6R1_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8432_Ferl_Paul_F4R2_(ATH1-121501).CEL",
+          "bytes": 5085826,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8432_Ferl_Paul_F4R2_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8431_Ferl_Paul_F4R1_(ATH1-121501).CEL",
+          "bytes": 5086198,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8431_Ferl_Paul_F4R1_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8430_Ferl_Paul_F2R1_(ATH1-121501).CEL",
+          "bytes": 5085074,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8430_Ferl_Paul_F2R1_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8429_Ferl_Paul_G6H2_(ATH1-121501).CEL",
+          "bytes": 5085066,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8429_Ferl_Paul_G6H2_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8428_Ferl_Paul_G6H1_(ATH1-121501).CEL",
+          "bytes": 5085886,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8428_Ferl_Paul_G6H1_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8427_Ferl_Paul_G4H2_(ATH1-121501).CEL",
+          "bytes": 5085830,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8427_Ferl_Paul_G4H2_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8426_Ferl_Paul_G4H1_(ATH1-121501).CEL",
+          "bytes": 5085918,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8426_Ferl_Paul_G4H1_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8425_Ferl_Paul_G2H1_(ATH1-121501).CEL",
+          "bytes": 5085826,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8425_Ferl_Paul_G2H1_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8424_Ferl_Paul_F6H2_(ATH1-121501).CEL",
+          "bytes": 5085058,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8424_Ferl_Paul_F6H2_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8423_Ferl_Paul_F6H1_(ATH1-121501).CEL",
+          "bytes": 5085854,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8423_Ferl_Paul_F6H1_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8422_Ferl_Paul_F4H2_(ATH1-121501).CEL",
+          "bytes": 5085870,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8422_Ferl_Paul_F4H2_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8421_Ferl_Paul_F4H1_(ATH1-121501).CEL",
+          "bytes": 5085102,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8421_Ferl_Paul_F4H1_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8420_Ferl_Paul_F2H1_(ATH1-121501).CEL",
+          "bytes": 5085786,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8420_Ferl_Paul_F2H1_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8419_Ferl_Paul_G6S2_(ATH1-121501).CEL",
+          "bytes": 5085966,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8419_Ferl_Paul_G6S2_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8418_Ferl_Paul_G6S1_(ATH1-121501).CEL",
+          "bytes": 5086186,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8418_Ferl_Paul_G6S1_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8417_Ferl_Paul_G4S2_(ATH1-121501).CEL",
+          "bytes": 5085810,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8417_Ferl_Paul_G4S2_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8416_Ferl_Paul_G4S1_(ATH1-121501).CEL",
+          "bytes": 5085946,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8416_Ferl_Paul_G4S1_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8415_Ferl_Paul_G2S1_(ATH1-121501).CEL",
+          "bytes": 5086158,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8415_Ferl_Paul_G2S1_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8414_Ferl_Paul_F6S2_(ATH1-121501).CEL",
+          "bytes": 5085006,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8414_Ferl_Paul_F6S2_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8413_Ferl_Paul_F6S1_(ATH1-121501).CEL",
+          "bytes": 5085882,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8413_Ferl_Paul_F6S1_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8412_Ferl_Paul_F4S2_(ATH1-121501).CEL",
+          "bytes": 5085858,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8412_Ferl_Paul_F4S2_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8411_Ferl_Paul_F4S1_(ATH1-121501).CEL",
+          "bytes": 5085906,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8411_Ferl_Paul_F4S1_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8410_Ferl_Paul_F2S1_(ATH1-121501).CEL",
+          "bytes": 5085138,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8410_Ferl_Paul_F2S1_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8316_GCTAGES6_30_Ferl.Paul_(ATH1-121501).CEL",
+          "bytes": 5086174,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8316_GCTAGES6_30_Ferl.Paul_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8315_FLTAGES6_29_Ferl.Paul_(ATH1-121501).CEL",
+          "bytes": 5085422,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8315_FLTAGES6_29_Ferl.Paul_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8314_GCTAGES4_28_Ferl.Paul_(ATH1-121501).CEL",
+          "bytes": 5086162,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8314_GCTAGES4_28_Ferl.Paul_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8313_FLTAGES4_27_Ferl.Paul_(ATH1-121501).CEL",
+          "bytes": 5085650,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8313_FLTAGES4_27_Ferl.Paul_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8312_GCTAGES2_26_Ferl.Paul_(ATH1-121501).CEL",
+          "bytes": 5086282,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8312_GCTAGES2_26_Ferl.Paul_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        },
+        {
+          "name": "GLDS-7_microarray_8311_FLTAGES2_25_Ferl.Paul_(ATH1-121501).CEL",
+          "bytes": 5085194,
+          "category": "Microarray Data Files",
+          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8311_FLTAGES2_25_Ferl.Paul_%28ATH1-121501%29.CEL",
+          "restricted": false,
+          "downloaded": false
+        }
+      ]
+    },
+    {
+      "id": "OSD-46",
+      "title": "Gamma radiation and HZE treatment of seedlings in Arabidopsis",
+      "description": "Plants exhibit a robust transcriptional response to gamma radiation which includes the induction of transcripts required for homologous recombination and the suppression of transcripts that promote cell cycle progression. Various DNA damaging agents induce different spectra of DNA damage as well as collateral damage to other cellular components and therefore are not expected to provoke identical responses by the cell. Here we study the effects of two different types of ionizing radiation (IR) treatment, HZE (1 GeV Fe26+ high mass, high charge, and high energy relativistic particles) and gamma photons, on the transcriptome of Arabidopsis thaliana seedlings. Both types of IR induce small clusters of radicals that can result in the formation of double strand breaks (DSBs), but HZE also produces linear arrays of extremely clustered damage. We performed these experiments across a range of time points (1.5-24 h after irradiation) in both wild-type plants and in mutants defective in the DSB-sensing protein kinase ATM. The two types of IR exhibit a shared double strand break-repair-related damage response, although they differ slightly in the timing, degree, and ATM-dependence of the response. The ATM-dependent, DNA metabolism-related transcripts of the DSB response were also induced by other DNA damaging agents, but were not induced by conventional stresses. Both Gamma and HZE irradiation induced, at 24 h post-irradiation, ATM-dependent transcripts associated with a variety of conventional stresses; these were overrepresented for pathogen response, rather than DNA metabolism. In contrast, only HZE-irradiated plants, at 1.5 h after irradiation, exhibited an additional and very extensive transcriptional response, shared with plants experiencing extended night. This response was not apparent in gamma-irradiated plants. We treated 5-day-old WT and atm-1 seedlings of Arabidopsis thaliana with 100 Gy of Gamma radiation (over a span of 15 minutes) or 30 Gy of HZE (over a span of approximately 12 minutes). Gamma irradiations were completed at 8:40 am, while HZE irradiations were conducted in two runs (due to space limitations) which were completed at 1:09 and 1:28pm respectively. Gamma treated seedlings were sampled at 10:10 am, 11:40 am, 2:55 pm, 8:40 pm, and 8:40 am. HZE treated seedlings were sampled at 2:39 pm, 4:09 pm, 7:24 pm, 1:09 am, and 1:09 pm. Un-irradiated WT and atm-1 control seedlings were sampled at 10:45 am on Day #1 and 9:15 am on Day #2. There are a total of 22 experimental or control conditions, with two replicates per condition, yielding 44 samples overall.",
+      "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-46",
+      "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/46",
+      "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/46",
+      "metadataSha256": "bf478a09853f644bbb7413d6a70c2a0a5c69cc2c44e83f07ab2557f0d200eb71",
+      "version": 6,
+      "verifiedAt": "2026-11-07T18:28:21.818975+00:00",
+      "organisms": [
+        "Arabidopsis thaliana"
+      ],
+      "assayTypes": [
+        "Transcription profiling (Affymetrix ATH1 microarray)"
+      ],
+      "sampleCount": 44,
+      "sampleCountDefinition": "44 arrays over 22 biological groups (genotype x condition x dose x timepoint x age); each group holds two replicate arrays.",
+      "fileCount": 3,
+      "factors": [
+        "Ionizing Radiation",
+        "Absorbed Radiation Dose",
+        "Exposure Duration",
+        "Time of Sample Collection After Treatment",
+        "Genotype",
+        "Age"
+      ],
+      "publications": [
+        {
+          "title": "High atomic weight, high-energy radiation (HZE) induces transcriptional responses shared with conventional stresses",
+          "doi": "10.3389/fpls.2014.00364"
+        }
+      ],
+      "trainingEligibility": "Eligible and trained: radiation-quality and radiation-exposure classifiers, group-held-out. Not eligible for yield or dose-regression training.",
+      "status": "verified-data",
+      "license": "Public OSDR access; retain study attribution and comply with OSDR terms; do not assume every contributed file is public domain.",
+      "licenseUrl": "https://science.nasa.gov/reference/osdr-help-terms-and-conditions/",
+      "limitations": [
+        "Ground-based irradiation of Arabidopsis seedlings, not a crop and not spaceflight.",
+        "Array batch is not reported in the ISA record and had to be recovered from the raw CEL headers; controls are not balanced across batches.",
+        "100 Gy gamma and 30 Gy Fe-56 differ in both quality and absorbed dose."
+      ],
+      "files": [
+        {
+          "name": "GLDS-46_array_normalized_expression_probeset_GLmicroarray.csv",
+          "bytes": 23794742,
+          "category": "Processed assay data",
+          "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-46/version-6/array/GLDS-46_array_normalized_expression_probeset_GLmicroarray.csv",
+          "restricted": false,
+          "downloaded": true,
+          "sha256": "f15c4179dbbebdfd39c53ffb906f6251ed1fc3fa3c926efc3c71c4736eefda27",
+          "role": "log2-normalised probeset expression, 22810 probesets x 44 samples",
+          "verifiedAt": null,
+          "verification": "sha256 match against pinned value"
+        },
+        {
+          "name": "GLDS-46_array_SampleTable_GLmicroarray.csv",
+          "bytes": 4139,
+          "category": "Processed assay data",
+          "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-46/version-6/array/GLDS-46_array_SampleTable_GLmicroarray.csv",
+          "restricted": false,
+          "downloaded": true,
+          "sha256": "0ae05ae0938670bce8e923889093658eac4f9e26537197b9a54d4ad96061532e",
+          "role": "sample to experimental-group assignment, 44 rows",
+          "verifiedAt": null,
+          "verification": "sha256 match against pinned value"
+        },
+        {
+          "name": "OSD-46_metadata_OSD-46-ISA.zip",
+          "bytes": 76123,
+          "category": "Study Metadata Files",
+          "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-46/version-6/metadata/OSD-46_metadata_OSD-46-ISA.zip",
+          "restricted": false,
+          "downloaded": true,
+          "sha256": "bf478a09853f644bbb7413d6a70c2a0a5c69cc2c44e83f07ab2557f0d200eb71",
+          "role": "ISA-Tab study metadata: title, description, six factors incl. absorbed dose",
+          "verifiedAt": null,
+          "verification": "sha256 match against pinned value"
+        }
+      ]
+    },
+    {
+      "id": "OSD-59",
+      "title": "RNA-Seq transcriptome analysis of reactive oxygen species gene network in Mizuna plants grown in long-term space flight",
+      "description": "Space environment is suspected to generate reactive oxygen species (ROS) and induce oxidative stress in plants, however, little is known about the gene expression of ROS gene network in plants grown in long-term space flight. RNA-Seq was used to define the large-scale gene expression profiles of Mizuna harvested after 27 days cultivation in the international space station to understand the molecular response and adaptation to space environment.Results: Total reads of transcripts from the Mizuna grown in the international space station as well as on the ground by RNA-Seq using next generation sequencing technology showed 8,258 and 14,170 transcripts up- and down-regulated in the space-grown Mizuna, respectively, when compared with those from the ground-grown Mizuna. A total of 20 in 32 ROS oxidative marker genes were up-regulated, including high expression of 4 hallmarks, and preferentially expressed gene associated with ROS-scavenging genes was thioredoxin, glutaredoxin, and alternative oxidase genes. In the transcription factors of ROS gene network , MEKK1-MKK4-MPK3, OXI1-MKK4-MPK3, and OXI1-MPK3 of MAP cascades, induction of WRKY22 by MEKK1-MKK4-MPK3 cascade, induction of WRKY25 and repression of ZAT7 by Zat12 were suggested. RbohD and RbohF genes were up-regulated preferentially in NADPH oxidase genes, which produce ROS.Conclusions: Our large-scale transcriptome analysis demonstrated that the space environment induced oxidative stress and ROS gene network was activated in the space-grown Mizuna, some of which were common genes up-regulated by abiotic and biotic stress and were preferentially up-regulated genes by the space environment, even though Mizuna grew in the space as well as on the ground, showing that plants could acclimate to the space environment by reprograming the expression of ROS gene network.",
+      "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-59",
+      "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/59",
+      "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/59",
+      "organisms": [
+        "Brassica rapa"
+      ],
+      "assayTypes": [
+        "transcription profiling",
+        "RNA Sequencing (RNA-Seq)"
+      ],
+      "sampleCount": 2,
+      "fileCount": 52,
+      "factors": [
+        "Spaceflight"
+      ],
+      "publications": [],
+      "metadataSha256": "7e7572c3ff0404ee0ae800c054d87fbc604688d0673a02f50b90341189dc551e",
+      "version": 5,
+      "verifiedAt": "2026-11-08T17:41:35.984682+00:00",
+      "sampleCountDefinition": "2 ISA sample records in the pinned metadata archive.",
+      "trainingEligibility": "Metadata only. Pinned and checksummed for provenance and for retrieval by the evidence assistant. Not a training table and not an input to any served model.",
+      "status": "verified-metadata",
+      "license": "not declared in the ISA metadata archive; see the OSDR study page",
+      "licenseUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-59",
+      "limitations": [
+        "Mizuna transcriptome over long-duration flight; it is molecular context, not a harvest or yield measurement.",
+        "One crop, one cultivar, one campaign: it cannot calibrate the simulator's mizuna growth curve.",
+        "Differential expression is not an edible-mass target, so nothing here is trained into a served model."
+      ],
+      "files": [
+        {
+          "name": "GLDS-59_metadata_GLDS-59-ISA.zip",
+          "sha256": "7e7572c3ff0404ee0ae800c054d87fbc604688d0673a02f50b90341189dc551e",
+          "bytes": 6715,
+          "category": "metadata"
+        }
+      ],
+      "acquisition": "scripts/acquire_phase14_nasa_expansion.py",
+      "rawCommitted": true,
+      "rawNote": "The ISA metadata archive is committed; it is the pinned provenance artifact. No sequencing data was downloaded."
+    },
     {
       "id": "OSD-120",
       "title": "Genetic dissection of the Arabidopsis spaceflight transcriptome: Are some responses dispensable for the physiological adaptation of plants to spaceflight?",
@@ -12291,6 +12825,61 @@
       ]
     },
     {
+      "id": "OSD-386",
+      "title": "Persistence of Escherichia coli in the microbiomes of mizuna mustard (Brassica rapa var. japonica) - does seed sanitization matter?",
+      "description": "Seed sanitization via chemical processes removes/reduces microbes from the external surfaces of the seed and thereby could have an impact on the plants' health or productivity. To determine the impact of seed sanitization on the plants' microbiome and pathogen persistence, sanitized and unsanitized seeds from two leafy green crops, red Romaine lettuce (Lactuca sativa cv. 'Outredgeous') and mizuna mustard (Brassica rapa var. japonica) were exposed to Escherichia coli and grown in controlled environment growth chambers simulating environmental conditions aboard the International Space Station. Plants were harvested at four intervals from 7 days post-germination to maturity. The bacterial communities of leaf and root were investigated using the 16S rRNA sequencing while quantitative polymerase chain reaction (qPCR) and heterotrophic plate counts were used to reveal the persistence of E. coli. Result: E. coli was detectable for longer periods of time in plants from sanitized versus unsanitized seeds and was identified in root tissue more frequently than in leaf tissue. 16S rRNA sequencing showed dynamic changes in the abundance of members of the phylum Proteobacteria, Firmicutes, and Bacteroidetes in leaf and root samples of both leafy crops. We observed minimal changes in the microbial diversity of lettuce or mizuna leaf tissue with time or between sanitized and unsanitized seeds. Beta-diversity showed that time had more of an influence on all samples versus the E. coli treatment. Conclusion: Our results indicated that the seed surface sanitization, a current requirement for sending seeds to space, could influence the microbiome. Insight into the changes in the crop microbiomes could lead to healthier plants and safer food supplementation.",
+      "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-386",
+      "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/386",
+      "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/386",
+      "organisms": [
+        "Microbiota"
+      ],
+      "assayTypes": [
+        "Amplicon Sequencing",
+        "16S"
+      ],
+      "sampleCount": 100,
+      "fileCount": 414,
+      "factors": [
+        "Treatment",
+        "Seed Sanitization",
+        "Organism Part"
+      ],
+      "publications": [
+        {
+          "doi": "10.1186/s12866-021-02345-5",
+          "pubMedId": null,
+          "title": "Persistence of Escherichia coli in the microbiomes of red Romaine lettuce (Lactuca sativa cv. \u2018Outredgeous\u2019) and mizuna mustard (Brassica rapa var. japonica) - does seed sanitization matter?",
+          "authorList": "Dixit Anirudha R., Khodadad Christina L. M., Hummerick Mary E., Spern Cory J., Spencer LaShelle E., Fischer Jason A., Curry Aaron B., Gooden Jennifer L., Maldonado Vazquez Gretchen J., Wheeler Raymond M., Massa Gioia D., Romeyn Matthew W."
+        }
+      ],
+      "metadataSha256": "027a4f43dc89c0cb98c9f177982625210f2d8763003c6d826d3dccb721a2e959",
+      "version": 4,
+      "verifiedAt": "2026-11-08T17:41:36.876952+00:00",
+      "sampleCountDefinition": "100 ISA sample records in the pinned metadata archive.",
+      "trainingEligibility": "Metadata only. Pinned and checksummed for provenance and for retrieval by the evidence assistant. Not a training table and not an input to any served model.",
+      "status": "verified-metadata",
+      "license": "not declared in the ISA metadata archive; see the OSDR study page",
+      "licenseUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-386",
+      "limitations": [
+        "Deliberate E. coli inoculation of mizuna mustard; it measures persistence in the microbiome, not the risk of contamination in an operational habitat.",
+        "Food-safety evidence, not a growth or yield measurement.",
+        "A positive result in an inoculated trial is not an estimate of background contamination."
+      ],
+      "files": [
+        {
+          "name": "OSD-386_metadata_OSD-386-ISA.zip",
+          "sha256": "027a4f43dc89c0cb98c9f177982625210f2d8763003c6d826d3dccb721a2e959",
+          "bytes": 239326,
+          "category": "metadata"
+        }
+      ],
+      "acquisition": "scripts/acquire_phase14_nasa_expansion.py",
+      "rawCommitted": true,
+      "rawNote": "The ISA metadata archive is committed; it is the pinned provenance artifact. No sequencing data was downloaded.",
+      "organismNote": "The ISA record lists Microbiota as the organism: the sequenced material is the microbial community. The host crop appears in the study title, not as an ISA Organism characteristic."
+    },
+    {
       "id": "OSD-411",
       "title": "Plant Gravity Perception: Pilot (PGP Pilot)",
       "description": "This study examined tissue-specific early transcriptional responses upon reorientation in wild type and starchless pgm-1 mutant seedlings of Arabidopsis. Seedlings were grown in vertical Petri dishes for four days. Treatment samples were reoriented 90 degrees for ten minutes while control plants remained vertical. All seedlings were flash frozen in liquid nitrogen and RNA was extracted from root tips, mature root, hypocotyl, and cotyledon fractions of the seedlings. RNA was sequenced via NovaSeq.",
@@ -12564,87 +13153,6 @@
           "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-436/download?source=datamanager&file=GLDS-436_microarray_GSM4848977_12819_Ferl_P10.3_AraGene-1_0-st_.CEL.gz",
           "restricted": false,
           "downloaded": false
-        }
-      ]
-    },
-    {
-      "id": "OSD-46",
-      "title": "Gamma radiation and HZE treatment of seedlings in Arabidopsis",
-      "description": "Plants exhibit a robust transcriptional response to gamma radiation which includes the induction of transcripts required for homologous recombination and the suppression of transcripts that promote cell cycle progression. Various DNA damaging agents induce different spectra of DNA damage as well as collateral damage to other cellular components and therefore are not expected to provoke identical responses by the cell. Here we study the effects of two different types of ionizing radiation (IR) treatment, HZE (1 GeV Fe26+ high mass, high charge, and high energy relativistic particles) and gamma photons, on the transcriptome of Arabidopsis thaliana seedlings. Both types of IR induce small clusters of radicals that can result in the formation of double strand breaks (DSBs), but HZE also produces linear arrays of extremely clustered damage. We performed these experiments across a range of time points (1.5-24 h after irradiation) in both wild-type plants and in mutants defective in the DSB-sensing protein kinase ATM. The two types of IR exhibit a shared double strand break-repair-related damage response, although they differ slightly in the timing, degree, and ATM-dependence of the response. The ATM-dependent, DNA metabolism-related transcripts of the DSB response were also induced by other DNA damaging agents, but were not induced by conventional stresses. Both Gamma and HZE irradiation induced, at 24 h post-irradiation, ATM-dependent transcripts associated with a variety of conventional stresses; these were overrepresented for pathogen response, rather than DNA metabolism. In contrast, only HZE-irradiated plants, at 1.5 h after irradiation, exhibited an additional and very extensive transcriptional response, shared with plants experiencing extended night. This response was not apparent in gamma-irradiated plants. We treated 5-day-old WT and atm-1 seedlings of Arabidopsis thaliana with 100 Gy of Gamma radiation (over a span of 15 minutes) or 30 Gy of HZE (over a span of approximately 12 minutes). Gamma irradiations were completed at 8:40 am, while HZE irradiations were conducted in two runs (due to space limitations) which were completed at 1:09 and 1:28pm respectively. Gamma treated seedlings were sampled at 10:10 am, 11:40 am, 2:55 pm, 8:40 pm, and 8:40 am. HZE treated seedlings were sampled at 2:39 pm, 4:09 pm, 7:24 pm, 1:09 am, and 1:09 pm. Un-irradiated WT and atm-1 control seedlings were sampled at 10:45 am on Day #1 and 9:15 am on Day #2. There are a total of 22 experimental or control conditions, with two replicates per condition, yielding 44 samples overall.",
-      "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-46",
-      "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/46",
-      "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/46",
-      "metadataSha256": "bf478a09853f644bbb7413d6a70c2a0a5c69cc2c44e83f07ab2557f0d200eb71",
-      "version": 6,
-      "verifiedAt": "2026-11-07T18:28:21.818975+00:00",
-      "organisms": [
-        "Arabidopsis thaliana"
-      ],
-      "assayTypes": [
-        "Transcription profiling (Affymetrix ATH1 microarray)"
-      ],
-      "sampleCount": 44,
-      "sampleCountDefinition": "44 arrays over 22 biological groups (genotype x condition x dose x timepoint x age); each group holds two replicate arrays.",
-      "fileCount": 3,
-      "factors": [
-        "Ionizing Radiation",
-        "Absorbed Radiation Dose",
-        "Exposure Duration",
-        "Time of Sample Collection After Treatment",
-        "Genotype",
-        "Age"
-      ],
-      "publications": [
-        {
-          "title": "High atomic weight, high-energy radiation (HZE) induces transcriptional responses shared with conventional stresses",
-          "doi": "10.3389/fpls.2014.00364"
-        }
-      ],
-      "trainingEligibility": "Eligible and trained: radiation-quality and radiation-exposure classifiers, group-held-out. Not eligible for yield or dose-regression training.",
-      "status": "verified-data",
-      "license": "Public OSDR access; retain study attribution and comply with OSDR terms; do not assume every contributed file is public domain.",
-      "licenseUrl": "https://science.nasa.gov/reference/osdr-help-terms-and-conditions/",
-      "limitations": [
-        "Ground-based irradiation of Arabidopsis seedlings, not a crop and not spaceflight.",
-        "Array batch is not reported in the ISA record and had to be recovered from the raw CEL headers; controls are not balanced across batches.",
-        "100 Gy gamma and 30 Gy Fe-56 differ in both quality and absorbed dose."
-      ],
-      "files": [
-        {
-          "name": "GLDS-46_array_normalized_expression_probeset_GLmicroarray.csv",
-          "bytes": 23794742,
-          "category": "Processed assay data",
-          "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-46/version-6/array/GLDS-46_array_normalized_expression_probeset_GLmicroarray.csv",
-          "restricted": false,
-          "downloaded": true,
-          "sha256": "f15c4179dbbebdfd39c53ffb906f6251ed1fc3fa3c926efc3c71c4736eefda27",
-          "role": "log2-normalised probeset expression, 22810 probesets x 44 samples",
-          "verifiedAt": null,
-          "verification": "sha256 match against pinned value"
-        },
-        {
-          "name": "GLDS-46_array_SampleTable_GLmicroarray.csv",
-          "bytes": 4139,
-          "category": "Processed assay data",
-          "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-46/version-6/array/GLDS-46_array_SampleTable_GLmicroarray.csv",
-          "restricted": false,
-          "downloaded": true,
-          "sha256": "0ae05ae0938670bce8e923889093658eac4f9e26537197b9a54d4ad96061532e",
-          "role": "sample to experimental-group assignment, 44 rows",
-          "verifiedAt": null,
-          "verification": "sha256 match against pinned value"
-        },
-        {
-          "name": "OSD-46_metadata_OSD-46-ISA.zip",
-          "bytes": 76123,
-          "category": "Study Metadata Files",
-          "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-46/version-6/metadata/OSD-46_metadata_OSD-46-ISA.zip",
-          "restricted": false,
-          "downloaded": true,
-          "sha256": "bf478a09853f644bbb7413d6a70c2a0a5c69cc2c44e83f07ab2557f0d200eb71",
-          "role": "ISA-Tab study metadata: title, description, six factors incl. absorbed dose",
-          "verifiedAt": null,
-          "verification": "sha256 match against pinned value"
         }
       ]
     },
@@ -13062,412 +13570,114 @@
       ]
     },
     {
-      "id": "OSD-7",
-      "title": "The Arabidopsis spaceflight transcriptome: a comparison of whole plants to discrete root, hypocotyl and shoot responses to the orbital environment",
-      "description": "Arabidopsis thaliana was evaluated for its response to the spaceflight environment in three replicated experiments on the International Space Station. Two approaches were used; GFP reporter genes were used to collect gene expression data in real time within unique GFP imaging hardware, and plants were harvested on orbit to RNAlater for subsequent analyses of gene expression with using Affymetrix and SAGE transcriptome analyses. Three tissue types were examined (leaves, hypocotyls and roots) and compared to analyses conducted with whole plants. Transcriptome analyses with whole plants suggested that the spaceflight environment had little impact on the transcriptome of Arabidopsis, however, closer examination of selected tissues revealed that there are a number of tissue-specific responses that Arabidopsis employs to respond to this novel environment.",
-      "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-7",
-      "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/7",
-      "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/7",
-      "metadataSha256": "582350577b018d754489363ff593cebb90bda2715135c528ff3c719eb983910d",
-      "version": 6,
-      "verifiedAt": "2026-11-07T14:31:58.556416+00:00",
+      "id": "OSD-670",
+      "title": "CI Asteroid Regolith as an In Situ Plant Growth Medium for Space Crop Production",
+      "description": "Human expansion into the solar system is currently at the forefront of space research. For our astronauts to survive, they will need to be fed a healthy and nutritious diet on a consistent basis. Right now, our current method of feeding astronauts consists of resupplied prepackaged food from Earth, which is unsustainable for long-term missions. Using planetary resources via in situ resource utilization to grow crops is the next step toward sustainability in space. Asteroids are an abundant space resource and should not be overlooked when considering crewed missions. In particular, the primordial CI carbonaceous asteroids are of interest because the regolith is suggested to contain soluble elemental nutrients, such as phosphorous and potassium, that crops can use for growth and development. We present a study on the ability of CI carbonaceous asteroid regolith simulant to sustain plant growth of lettuce (Latuca sativa), radishes (Raphanus sativus), and peppers (Capsicum annuum). We tested growing the selected crops in increasing mixtures of simulant and peat moss. The results showed that each species reacted differently to each treatment and that the radishes were more affected by the treatments. Subsequent analysis showed that the simulant contains small amounts of plant-usable nutrients, despite its high pH, low cation exchange capacity, and classification as a silt-based soil. Our results indicate that the simulant is prone to compaction and crusting, leading to drought stress on the crops. Further investigations are needed to determine mitigation strategies to make CI asteroid regolith a more conducive soil. This data set derives results from the Image Analysis Photography assay with leaf area measurements. Additional data provided in the sample table includes plant height and biomass measurements as well as a thorough analysis of the substrate including pH, elemental analysis, and soil texture analysis.",
+      "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-670",
+      "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/670",
+      "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/670",
       "organisms": [
-        "Arabidopsis thaliana"
+        "Lactuca sativa",
+        "Capsicum annuum",
+        "Raphanus sativus"
       ],
       "assayTypes": [
-        "DNA microarray"
+        "Image Analysis",
+        "Photography"
       ],
-      "sampleCount": 36,
-      "sampleCountDefinition": "Unique study-material sample names; assay-specific counts may differ.",
-      "fileCount": 46,
+      "sampleCount": 83,
+      "fileCount": 20,
       "factors": [
-        "Spaceflight",
-        "Organism Part"
+        "Substrate Type"
       ],
       "publications": [
         {
-          "title": "Organ-specific remodeling of the Arabidopsis transcriptome in response to spaceflight.",
-          "doi": "10.1186/1471-2229-13-112"
+          "doi": "10.3847/PSJ/ac74c9",
+          "pubMedId": null,
+          "title": "CI Asteroid Regolith as an In Situ Plant Growth Medium for Space Crop Production",
+          "authorList": "Russell SJ, Fieber-Beyer SK, Yurkonis KA."
         }
       ],
-      "trainingEligibility": "Metadata/omics only in this acquisition; not eligible for direct crop-yield training.",
+      "metadataSha256": "2c381b9edda44034bb28e01c4ed3a7c06601657a50fc5a1682e213c68e70f411",
+      "version": 3,
+      "verifiedAt": "2026-11-08T17:41:39.884531+00:00",
+      "sampleCountDefinition": "83 ISA sample records in the pinned metadata archive.",
+      "trainingEligibility": "Metadata only. Pinned and checksummed for provenance and for retrieval by the evidence assistant. Not a training table and not an input to any served model.",
       "status": "verified-metadata",
-      "license": "Public OSDR access; retain study attribution and comply with OSDR terms; do not assume every contributed file is public domain.",
-      "licenseUrl": "https://science.nasa.gov/reference/osdr-help-terms-and-conditions/",
+      "license": "not declared in the ISA metadata archive; see the OSDR study page",
+      "licenseUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-670",
       "limitations": [
-        "No matched lunar or Martian crop experiments identified in this study.",
-        "Study metadata and assay measurements are different evidence types."
+        "Regolith-substitution experiment; growth on an asteroid simulant does not establish growth on lunar or Martian regolith.",
+        "Substrate chemistry differs between simulants and returned material, so results do not transfer by analogy.",
+        "It bounds what a substrate change does to a plant, not what the simulator's soil assumptions should be."
       ],
       "files": [
         {
-          "name": "OSD-7_metadata_OSD-7-ISA.zip",
-          "bytes": 74028,
-          "category": "Study Metadata Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=OSD-7_metadata_OSD-7-ISA.zip",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_array_software_versions_GLmicroarray.md",
-          "bytes": 1709,
-          "category": "GeneLab Processed Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_array_software_versions_GLmicroarray.md",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_array_nextflow_processing_info_GLmicroarray.txt",
-          "bytes": 2535,
-          "category": "GeneLab Processed Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_array_nextflow_processing_info_GLmicroarray.txt",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_array_microarray_v0_runsheet.csv",
-          "bytes": 16778,
-          "category": "GeneLab Processed Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_array_microarray_v0_runsheet.csv",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_array_NF_MAAffymetrix_v1.0.5_GLmicroarray.html",
-          "bytes": 106340799,
-          "category": "GeneLab Processed Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_array_NF_MAAffymetrix_v1.0.5_GLmicroarray.html",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_array_raw_intensities_probe_GLmicroarray.csv",
-          "bytes": 229805593,
-          "category": "GeneLab Processed Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_array_raw_intensities_probe_GLmicroarray.csv",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_array_normalized_intensities_probe_GLmicroarray.csv",
-          "bytes": 229681474,
-          "category": "GeneLab Processed Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_array_normalized_intensities_probe_GLmicroarray.csv",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_array_normalized_expression_probeset_GLmicroarray.csv",
-          "bytes": 20713095,
-          "category": "GeneLab Processed Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_array_normalized_expression_probeset_GLmicroarray.csv",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_array_processed_md5sum_GLmicroarray.tsv",
-          "bytes": 344,
-          "category": "GeneLab Processed Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_array_processed_md5sum_GLmicroarray.tsv",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_E-MTAB-1264.raw.1.zip",
-          "bytes": 62533430,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_E-MTAB-1264.raw.1.zip",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8439_Ferl_Paul_G6R2_(ATH1-121501).CEL",
-          "bytes": 5085886,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8439_Ferl_Paul_G6R2_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8438_Ferl_Paul_G6R1_(ATH1-121501).CEL",
-          "bytes": 5085934,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8438_Ferl_Paul_G6R1_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8437_Ferl_Paul_G2R1_(ATH1-121501).CEL",
-          "bytes": 5085890,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8437_Ferl_Paul_G2R1_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8436_Ferl_Paul_G4R2_(ATH1-121501).CEL",
-          "bytes": 5085074,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8436_Ferl_Paul_G4R2_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8435_Ferl_Paul_G4R1_(ATH1-121501).CEL",
-          "bytes": 5085830,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8435_Ferl_Paul_G4R1_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8434_Ferl_Paul_F6R2_(ATH1-121501).CEL",
-          "bytes": 5085954,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8434_Ferl_Paul_F6R2_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8433_Ferl_Paul_F6R1_(ATH1-121501).CEL",
-          "bytes": 5085250,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8433_Ferl_Paul_F6R1_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8432_Ferl_Paul_F4R2_(ATH1-121501).CEL",
-          "bytes": 5085826,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8432_Ferl_Paul_F4R2_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8431_Ferl_Paul_F4R1_(ATH1-121501).CEL",
-          "bytes": 5086198,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8431_Ferl_Paul_F4R1_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8430_Ferl_Paul_F2R1_(ATH1-121501).CEL",
-          "bytes": 5085074,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8430_Ferl_Paul_F2R1_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8429_Ferl_Paul_G6H2_(ATH1-121501).CEL",
-          "bytes": 5085066,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8429_Ferl_Paul_G6H2_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8428_Ferl_Paul_G6H1_(ATH1-121501).CEL",
-          "bytes": 5085886,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8428_Ferl_Paul_G6H1_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8427_Ferl_Paul_G4H2_(ATH1-121501).CEL",
-          "bytes": 5085830,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8427_Ferl_Paul_G4H2_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8426_Ferl_Paul_G4H1_(ATH1-121501).CEL",
-          "bytes": 5085918,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8426_Ferl_Paul_G4H1_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8425_Ferl_Paul_G2H1_(ATH1-121501).CEL",
-          "bytes": 5085826,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8425_Ferl_Paul_G2H1_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8424_Ferl_Paul_F6H2_(ATH1-121501).CEL",
-          "bytes": 5085058,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8424_Ferl_Paul_F6H2_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8423_Ferl_Paul_F6H1_(ATH1-121501).CEL",
-          "bytes": 5085854,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8423_Ferl_Paul_F6H1_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8422_Ferl_Paul_F4H2_(ATH1-121501).CEL",
-          "bytes": 5085870,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8422_Ferl_Paul_F4H2_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8421_Ferl_Paul_F4H1_(ATH1-121501).CEL",
-          "bytes": 5085102,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8421_Ferl_Paul_F4H1_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8420_Ferl_Paul_F2H1_(ATH1-121501).CEL",
-          "bytes": 5085786,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8420_Ferl_Paul_F2H1_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8419_Ferl_Paul_G6S2_(ATH1-121501).CEL",
-          "bytes": 5085966,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8419_Ferl_Paul_G6S2_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8418_Ferl_Paul_G6S1_(ATH1-121501).CEL",
-          "bytes": 5086186,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8418_Ferl_Paul_G6S1_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8417_Ferl_Paul_G4S2_(ATH1-121501).CEL",
-          "bytes": 5085810,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8417_Ferl_Paul_G4S2_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8416_Ferl_Paul_G4S1_(ATH1-121501).CEL",
-          "bytes": 5085946,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8416_Ferl_Paul_G4S1_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8415_Ferl_Paul_G2S1_(ATH1-121501).CEL",
-          "bytes": 5086158,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8415_Ferl_Paul_G2S1_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8414_Ferl_Paul_F6S2_(ATH1-121501).CEL",
-          "bytes": 5085006,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8414_Ferl_Paul_F6S2_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8413_Ferl_Paul_F6S1_(ATH1-121501).CEL",
-          "bytes": 5085882,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8413_Ferl_Paul_F6S1_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8412_Ferl_Paul_F4S2_(ATH1-121501).CEL",
-          "bytes": 5085858,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8412_Ferl_Paul_F4S2_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8411_Ferl_Paul_F4S1_(ATH1-121501).CEL",
-          "bytes": 5085906,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8411_Ferl_Paul_F4S1_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8410_Ferl_Paul_F2S1_(ATH1-121501).CEL",
-          "bytes": 5085138,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8410_Ferl_Paul_F2S1_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8316_GCTAGES6_30_Ferl.Paul_(ATH1-121501).CEL",
-          "bytes": 5086174,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8316_GCTAGES6_30_Ferl.Paul_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8315_FLTAGES6_29_Ferl.Paul_(ATH1-121501).CEL",
-          "bytes": 5085422,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8315_FLTAGES6_29_Ferl.Paul_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8314_GCTAGES4_28_Ferl.Paul_(ATH1-121501).CEL",
-          "bytes": 5086162,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8314_GCTAGES4_28_Ferl.Paul_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8313_FLTAGES4_27_Ferl.Paul_(ATH1-121501).CEL",
-          "bytes": 5085650,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8313_FLTAGES4_27_Ferl.Paul_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8312_GCTAGES2_26_Ferl.Paul_(ATH1-121501).CEL",
-          "bytes": 5086282,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8312_GCTAGES2_26_Ferl.Paul_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
-        },
-        {
-          "name": "GLDS-7_microarray_8311_FLTAGES2_25_Ferl.Paul_(ATH1-121501).CEL",
-          "bytes": 5085194,
-          "category": "Microarray Data Files",
-          "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-7/download?source=datamanager&file=GLDS-7_microarray_8311_FLTAGES2_25_Ferl.Paul_%28ATH1-121501%29.CEL",
-          "restricted": false,
-          "downloaded": false
+          "name": "OSD-670_metadata_OSD-670-ISA.zip",
+          "sha256": "2c381b9edda44034bb28e01c4ed3a7c06601657a50fc5a1682e213c68e70f411",
+          "bytes": 218973,
+          "category": "metadata"
         }
-      ]
+      ],
+      "acquisition": "scripts/acquire_phase14_nasa_expansion.py",
+      "rawCommitted": true,
+      "rawNote": "The ISA metadata archive is committed; it is the pinned provenance artifact. No sequencing data was downloaded."
+    },
+    {
+      "id": "OSD-723",
+      "title": "Substrate Matters: Ionic Silver Alters Lettuce Growth, Nutrient Uptake, and Root Microbiome in a Hydroponics System",
+      "description": "Ionic silver (Ag+) is being investigated as a residual biocide for use in NASA spacecraft potable water systems on future crewed missions. This water will be used to irrigate future spaceflight crop production systems. We have evaluated the impact of three concentrations (31 ppb, 125 ppb, and 500 ppb) of ionic silver biocide solutions on lettuce in an arcillite (calcinated clay particle substrate) and hydroponic (substrate-less) growth setup after 28 days. Lettuce plant growth was reduced in the hydroponic samples treated with 31 ppb silver and severely stunted for samples treated at 125 ppb and 500 ppb silver. No growth defects were observed in arcillite-grown lettuce. Silver was detectable in the hydroponic-grown lettuce leaves at each concentration but was not detected in the arcillite-grown lettuce leaves. Specifically, when 125 ppb silver water was applied to a hydroponics tray, Ag+ was detected at an average amount of 7 ug/g (dry weight) in lettuce leaves. The increase in Ag+ corresponded with a decrease in several essential elements in the lettuce tissue (Ca, K, P, S). In the arcillite growth setup, silver did not impact the plant root zone microbiome in terms of alpha diversity and relative abundance between treatments and control. However, with increasing silver concentration, the alpha diversity increased in lettuce root samples and in the water from the hydroponics tray samples. The genera in the hydroponic root and water samples were similar across the silver concentrations but displayed different relative abundances. This suggests that ionic silver was acting as a selective pressure for the microbes that colonize the hydroponic water. The surviving microbes likely utilized exudates from the stunted plant roots as a carbon source. Analysis of the root-associated microbiomes in response to silver showed enrichment of metagenomic pathways associated with alternate carbon source utilization, fatty-acid synthesis, and the ppGpp (guanosine 3'-diphosphate 5'-diphosphate) stringent response global regulatory system that operates under conditions of environmental stress. Nutrient solutions containing Ag+ in concentrations greater than 31 ppb in hydroponic systems lacking cation-exchange capacity can severely impact crop production due to stunting of plant growth.",
+      "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-723",
+      "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/723",
+      "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/723",
+      "organisms": [
+        "Microbiota"
+      ],
+      "assayTypes": [
+        "Metagenomic sequencing",
+        "Whole-Genome Shotgun Sequencing"
+      ],
+      "sampleCount": 309,
+      "fileCount": 621,
+      "factors": [
+        "Organism Part",
+        "Growth Time",
+        "Treatment",
+        "Growth Medium"
+      ],
+      "publications": [
+        {
+          "doi": "10.3390/microorganisms12030515",
+          "pubMedId": null,
+          "title": "Substrate Matters: Ionic Silver Alters Lettuce Growth, Nutrient Uptake, and Root Microbiome in a Hydroponics System.",
+          "authorList": "Spencer L, Costine B, Irwin T, Dixit A, Spern C, Diaz A, Lozzi B, Li W, Khodadad C, Smith T, Wheeler R, O'Rourke A."
+        }
+      ],
+      "metadataSha256": "ec6ec6f8044bd771e11dc403d596c56181c292d740c0eae7042120d0cf13d7d5",
+      "version": 1,
+      "verifiedAt": "2026-11-08T17:41:41.123530+00:00",
+      "sampleCountDefinition": "309 ISA sample records in the pinned metadata archive.",
+      "trainingEligibility": "Metadata only. Pinned and checksummed for provenance and for retrieval by the evidence assistant. Not a training table and not an input to any served model.",
+      "status": "verified-metadata",
+      "license": "not declared in the ISA metadata archive; see the OSDR study page",
+      "licenseUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-723",
+      "limitations": [
+        "Hydroponic ionic-silver treatment on lettuce; it measures growth, nutrient uptake and root microbiome under one intervention.",
+        "Room-temperature ground hydroponics, not a spacecraft water loop, so it does not calibrate the simulator's recovery fraction.",
+        "Microbiome shifts are compositional; they are not a pathogen-risk measurement."
+      ],
+      "files": [
+        {
+          "name": "OSD-723_metadata_OSD-723-ISA.zip",
+          "sha256": "ec6ec6f8044bd771e11dc403d596c56181c292d740c0eae7042120d0cf13d7d5",
+          "bytes": 599230,
+          "category": "metadata"
+        }
+      ],
+      "acquisition": "scripts/acquire_phase14_nasa_expansion.py",
+      "rawCommitted": true,
+      "rawNote": "The ISA metadata archive is committed; it is the pinned provenance artifact. No sequencing data was downloaded.",
+      "organismNote": "The ISA record lists Microbiota as the organism: the sequenced material is the microbial community. The host crop appears in the study title, not as an ISA Organism characteristic."
     },
     {
       "id": "OSD-745",
@@ -26415,6 +26625,59 @@
           "verification": "sha256 match against pinned value"
         }
       ]
+    },
+    {
+      "id": "OSD-856",
+      "title": "Effect of varying amounts of simulated lunar soil batch #005 upon growth of lettuce explants",
+      "description": "The following general conclusions can be made concerning the use of tissue culture for assaying the effects of mineral elements from simulated lunar soil or other mineral samples: The method used here is a very sensitive one for showing that soluble materials are reaching the tissue explant. The effects found (inhibiting) are very probably caused by excess toxic materials or competition of non-essential elements with essential elements rather than pH changes because previously pH has been found- to have relatively little effect over a wide range. Any stimulatory effect of the simulated lunar soil will probably appear at concentrations below those used in these experiments. If this is the case, the method is much less wasteful of mineral materials than methods in which pre-grown callus is treated with mineral materials. Measurements of uptake of minerals will be difficult in this system because of the relatively small growth obtainable from the tissue and also because of the apparently large background of minerals contributed by the purified agar.",
+      "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-856",
+      "metadataUrl": "https://osdr.nasa.gov/osdr/data/osd/meta/856",
+      "filesUrl": "https://osdr.nasa.gov/osdr/data/osd/files/856",
+      "organisms": [
+        "Lactuca sativa"
+      ],
+      "assayTypes": [
+        "Germination and Growth Assesment",
+        "Plant Material Biomass"
+      ],
+      "sampleCount": 12,
+      "fileCount": 2,
+      "factors": [
+        "Treatment",
+        "Strain"
+      ],
+      "publications": [
+        {
+          "doi": "",
+          "pubMedId": null,
+          "title": "Analytical and Radio-Histo-Chemical Experiments of Plants and Tissue Culture Cells Treated with Lunar and Terrestrial Materials",
+          "authorList": "R.S. Halliwell"
+        }
+      ],
+      "metadataSha256": "c0487c9f3e0885e2560b8c2f0038b824d9f20609124569d50678b47699986701",
+      "version": 1,
+      "verifiedAt": "2026-11-08T17:41:44.696168+00:00",
+      "sampleCountDefinition": "12 ISA sample records in the pinned metadata archive.",
+      "trainingEligibility": "Metadata only. Pinned and checksummed for provenance and for retrieval by the evidence assistant. Not a training table and not an input to any served model.",
+      "status": "verified-metadata",
+      "license": "not declared in the ISA metadata archive; see the OSDR study page",
+      "licenseUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-856",
+      "limitations": [
+        "Growth of lettuce explants on a simulated lunar soil batch; a simulant is not lunar regolith.",
+        "Small, batch-specific soil chemistry: results do not generalise to other simulant batches or to the Moon.",
+        "It is a feasibility result for the substrate, not a yield prediction for a lunar greenhouse."
+      ],
+      "files": [
+        {
+          "name": "OSD-856_metadata_OSD-856-ISA.zip",
+          "sha256": "c0487c9f3e0885e2560b8c2f0038b824d9f20609124569d50678b47699986701",
+          "bytes": 28080,
+          "category": "metadata"
+        }
+      ],
+      "acquisition": "scripts/acquire_phase14_nasa_expansion.py",
+      "rawCommitted": true,
+      "rawNote": "The ISA metadata archive is committed; it is the pinned provenance artifact. No sequencing data was downloaded."
     }
   ]
 }
