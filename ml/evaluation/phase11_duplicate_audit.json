@@ -1,0 +1,403 @@
+{
+  "phase": 11,
+  "task": "find duplicate deposits before one is mistaken for independent validation",
+  "studiesChecked": 25,
+  "unavailable": [],
+  "identifierProvenance": {
+    "OSD-46": {
+      "identifierColumn": "Sample Name+Source Name",
+      "rawSampleNames": 88,
+      "uniqueCanonicalNames": 44
+    },
+    "OSD-320": {
+      "identifierColumn": "Sample Name+Source Name",
+      "rawSampleNames": 88,
+      "uniqueCanonicalNames": 88
+    },
+    "OSD-411": {
+      "identifierColumn": "Sample Name+Source Name",
+      "rawSampleNames": 128,
+      "uniqueCanonicalNames": 64
+    },
+    "OSD-314": {
+      "identifierColumn": "Sample Name+Source Name",
+      "rawSampleNames": 34,
+      "uniqueCanonicalNames": 34
+    },
+    "OSD-346": {
+      "identifierColumn": "Sample Name+Source Name",
+      "rawSampleNames": 72,
+      "uniqueCanonicalNames": 72
+    },
+    "OSD-782": {
+      "identifierColumn": "Sample Name+Source Name",
+      "rawSampleNames": 72,
+      "uniqueCanonicalNames": 36
+    },
+    "OSD-267": {
+      "identifierColumn": "Sample Name+Source Name",
+      "rawSampleNames": 24,
+      "uniqueCanonicalNames": 13
+    },
+    "OSD-268": {
+      "identifierColumn": "Sample Name+Source Name",
+      "rawSampleNames": 26,
+      "uniqueCanonicalNames": 14
+    },
+    "OSD-269": {
+      "identifierColumn": "Sample Name+Source Name",
+      "rawSampleNames": 30,
+      "uniqueCanonicalNames": 16
+    },
+    "OSD-745": {
+      "identifierColumn": "Sample Name+Source Name",
+      "rawSampleNames": 120,
+      "uniqueCanonicalNames": 63
+    },
+    "OSD-766": {
+      "identifierColumn": "Sample Name+Source Name",
+      "rawSampleNames": 284,
+      "uniqueCanonicalNames": 142
+    },
+    "OSD-767": {
+      "identifierColumn": "Sample Name+Source Name",
+      "rawSampleNames": 72,
+      "uniqueCanonicalNames": 36
+    },
+    "OSD-773": {
+      "identifierColumn": "Sample Name+Source Name",
+      "rawSampleNames": 312,
+      "uniqueCanonicalNames": 156
+    },
+    "OSD-7": {
+      "identifierColumn": "Sample Name+Source Name",
+      "rawSampleNames": 72,
+      "uniqueCanonicalNames": 72
+    },
+    "OSD-120": {
+      "identifierColumn": "Sample Name+Source Name",
+      "rawSampleNames": 180,
+      "uniqueCanonicalNames": 36
+    },
+    "OSD-436": {
+      "identifierColumn": "Sample Name+Source Name",
+      "rawSampleNames": 42,
+      "uniqueCanonicalNames": 42
+    },
+    "OSD-625": {
+      "identifierColumn": "Sample Name+Source Name",
+      "rawSampleNames": 32,
+      "uniqueCanonicalNames": 32
+    },
+    "OSD-375": {
+      "identifierColumn": "Sample Name+Source Name",
+      "rawSampleNames": 96,
+      "uniqueCanonicalNames": 48
+    },
+    "OSD-655": {
+      "identifierColumn": "Sample Name+Source Name",
+      "rawSampleNames": 74,
+      "uniqueCanonicalNames": 74
+    },
+    "OSD-780": {
+      "identifierColumn": "Sample Name+Source Name",
+      "rawSampleNames": 414,
+      "uniqueCanonicalNames": 252
+    },
+    "OSD-385": {
+      "identifierColumn": "Sample Name+Source Name",
+      "rawSampleNames": 200,
+      "uniqueCanonicalNames": 100
+    },
+    "OSD-386": {
+      "identifierColumn": "Sample Name+Source Name",
+      "rawSampleNames": 200,
+      "uniqueCanonicalNames": 100
+    },
+    "OSD-498": {
+      "identifierColumn": "Sample Name+Source Name",
+      "rawSampleNames": 32,
+      "uniqueCanonicalNames": 24
+    },
+    "OSD-502": {
+      "identifierColumn": "Sample Name+Source Name",
+      "rawSampleNames": 16,
+      "uniqueCanonicalNames": 12
+    },
+    "OSD-508": {
+      "identifierColumn": "Sample Name+Source Name",
+      "rawSampleNames": 72,
+      "uniqueCanonicalNames": 72
+    }
+  },
+  "overlaps": [
+    {
+      "studies": [
+        "OSD-320",
+        "OSD-46"
+      ],
+      "sharedSamples": 44,
+      "fractionOfSmaller": 1.0,
+      "examples": [
+        "GSM1506014",
+        "GSM1506015",
+        "GSM1506016",
+        "GSM1506017",
+        "GSM1506018"
+      ],
+      "assays": {
+        "OSD-320": [],
+        "OSD-46": [
+          "Transcription profiling (Affymetrix ATH1 microarray)"
+        ]
+      },
+      "assaysDisjoint": false,
+      "classification": "duplicate-measurement"
+    },
+    {
+      "studies": [
+        "OSD-267",
+        "OSD-269"
+      ],
+      "sharedSamples": 9,
+      "fractionOfSmaller": 0.6923,
+      "examples": [
+        "FLIGHTPLANTLEAFA",
+        "FLIGHTPLANTLEAFC",
+        "FLIGHTPLANTLEAFD",
+        "FLIGHTPLANTROOTA",
+        "GROUNDPLANTLEAFA"
+      ],
+      "assays": {
+        "OSD-267": [
+          "16S",
+          "ITS"
+        ],
+        "OSD-269": [
+          "16S"
+        ]
+      },
+      "assaysDisjoint": false,
+      "classification": "shared-sample-needs-numeric-check"
+    },
+    {
+      "studies": [
+        "OSD-268",
+        "OSD-269"
+      ],
+      "sharedSamples": 9,
+      "fractionOfSmaller": 0.6429,
+      "examples": [
+        "FLIGHTPLANTLEAFB",
+        "FLIGHTPLANTLEAFC",
+        "FLIGHTPLANTLEAFD",
+        "FLIGHTPLANTLEAFE",
+        "FLIGHTPLANTLEAFF"
+      ],
+      "assays": {
+        "OSD-268": [
+          "16S",
+          "ITS"
+        ],
+        "OSD-269": [
+          "16S"
+        ]
+      },
+      "assaysDisjoint": false,
+      "classification": "shared-sample-needs-numeric-check"
+    },
+    {
+      "studies": [
+        "OSD-655",
+        "OSD-780"
+      ],
+      "sharedSamples": 45,
+      "fractionOfSmaller": 0.6081,
+      "examples": [
+        "VEG04AF1",
+        "VEG04AF11",
+        "VEG04AF12",
+        "VEG04AF2",
+        "VEG04AF3"
+      ],
+      "assays": {
+        "OSD-655": [
+          "Inductively Coupled Plasma Optical Emission Spectroscopy",
+          "Oxygen Radical Absorbance Capacity",
+          "Phenolic Compound Content"
+        ],
+        "OSD-780": [
+          "Microbial plate counts"
+        ]
+      },
+      "assaysDisjoint": true,
+      "classification": "shared-biological-sample-distinct-assay"
+    },
+    {
+      "studies": [
+        "OSD-267",
+        "OSD-268"
+      ],
+      "sharedSamples": 5,
+      "fractionOfSmaller": 0.3846,
+      "examples": [
+        "FLIGHTPLANTLEAFC",
+        "FLIGHTPLANTLEAFD",
+        "GROUNDPLANTLEAFA",
+        "GROUNDPLANTLEAFC",
+        "GROUNDPLANTLEAFF"
+      ]
+    },
+    {
+      "studies": [
+        "OSD-267",
+        "OSD-745"
+      ],
+      "sharedSamples": 1,
+      "fractionOfSmaller": 0.0769,
+      "examples": [
+        "VEG01ALACTUCASATIVACVOUTREDGEOUS"
+      ]
+    },
+    {
+      "studies": [
+        "OSD-268",
+        "OSD-745"
+      ],
+      "sharedSamples": 1,
+      "fractionOfSmaller": 0.0714,
+      "examples": [
+        "VEG01BLACTUCASATIVACVOUTREDGEOUS"
+      ]
+    },
+    {
+      "studies": [
+        "OSD-269",
+        "OSD-745"
+      ],
+      "sharedSamples": 1,
+      "fractionOfSmaller": 0.0625,
+      "examples": [
+        "VEG03ALACTUCASATIVACVOUTREDGEOUS"
+      ]
+    }
+  ],
+  "duplicates": [
+    {
+      "studies": [
+        "OSD-320",
+        "OSD-46"
+      ],
+      "sharedSamples": 44,
+      "fractionOfSmaller": 1.0,
+      "examples": [
+        "GSM1506014",
+        "GSM1506015",
+        "GSM1506016",
+        "GSM1506017",
+        "GSM1506018"
+      ],
+      "assays": {
+        "OSD-320": [],
+        "OSD-46": [
+          "Transcription profiling (Affymetrix ATH1 microarray)"
+        ]
+      },
+      "assaysDisjoint": false,
+      "classification": "duplicate-measurement"
+    },
+    {
+      "studies": [
+        "OSD-267",
+        "OSD-269"
+      ],
+      "sharedSamples": 9,
+      "fractionOfSmaller": 0.6923,
+      "examples": [
+        "FLIGHTPLANTLEAFA",
+        "FLIGHTPLANTLEAFC",
+        "FLIGHTPLANTLEAFD",
+        "FLIGHTPLANTROOTA",
+        "GROUNDPLANTLEAFA"
+      ],
+      "assays": {
+        "OSD-267": [
+          "16S",
+          "ITS"
+        ],
+        "OSD-269": [
+          "16S"
+        ]
+      },
+      "assaysDisjoint": false,
+      "classification": "shared-sample-needs-numeric-check"
+    },
+    {
+      "studies": [
+        "OSD-268",
+        "OSD-269"
+      ],
+      "sharedSamples": 9,
+      "fractionOfSmaller": 0.6429,
+      "examples": [
+        "FLIGHTPLANTLEAFB",
+        "FLIGHTPLANTLEAFC",
+        "FLIGHTPLANTLEAFD",
+        "FLIGHTPLANTLEAFE",
+        "FLIGHTPLANTLEAFF"
+      ],
+      "assays": {
+        "OSD-268": [
+          "16S",
+          "ITS"
+        ],
+        "OSD-269": [
+          "16S"
+        ]
+      },
+      "assaysDisjoint": false,
+      "classification": "shared-sample-needs-numeric-check"
+    },
+    {
+      "studies": [
+        "OSD-655",
+        "OSD-780"
+      ],
+      "sharedSamples": 45,
+      "fractionOfSmaller": 0.6081,
+      "examples": [
+        "VEG04AF1",
+        "VEG04AF11",
+        "VEG04AF12",
+        "VEG04AF2",
+        "VEG04AF3"
+      ],
+      "assays": {
+        "OSD-655": [
+          "Inductively Coupled Plasma Optical Emission Spectroscopy",
+          "Oxygen Radical Absorbance Capacity",
+          "Phenolic Compound Content"
+        ],
+        "OSD-780": [
+          "Microbial plate counts"
+        ]
+      },
+      "assaysDisjoint": true,
+      "classification": "shared-biological-sample-distinct-assay"
+    }
+  ],
+  "numericProof": {
+    "studies": [
+      "OSD-46",
+      "OSD-320"
+    ],
+    "probesetsCompared": 22810,
+    "arraysCompared": 44,
+    "minimumCorrelation": 1.0,
+    "maximumAbsoluteDifference": 0.0,
+    "identical": true,
+    "statement": "The two accessions hold the same arrays. Every compared probeset is identical to the last bit, so OSD-320 is a second deposit of OSD-46, not an independent radiation study."
+  },
+  "consequence": "OSD-320 must not be used as a validation study for OSD-46 or for any radiation model trained on it. Cross-study validation needs a deposit of different arrays; the duplicate would have produced a perfect-score 'replication' from a study compared against itself.",
+  "guard": "Any future candidate is run through this audit before it is downloaded. Sample identifiers are canonicalised by stripping a trailing array suffix, because the duplicate is only visible once `GSM1506014_1` and `GSM1506014` are treated as the same accession."
+}
