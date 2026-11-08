@@ -495,6 +495,12 @@ def _methodology_passages(quarantine: list) -> list[Passage]:
 # production while passing locally.
 LITERATURE = DATA / "literature" / "ntrs_bpc.json"
 
+# NASA records evaluated outside the biomass-production-chamber set: a ground light-quality study with
+# measured endpoints for the two crops the simulator models, and an ethylene-sensitivity reprint that
+# defines a closed-chamber risk the simulator does not carry. Kept in their own file so the BPC
+# bundle and its page-level quotes stay exactly as they were.
+SUPPLEMENT = DATA / "literature" / "ntrs_supplement.json"
+
 # A NASA technical report page is quoted as evidence with its page number. It is measured data
 # in the everyday sense — somebody measured a canopy — but it is a *literature* measurement:
 # ground-based, one chamber, one cultivar, one campaign, and not a Moon or Mars result. Every
@@ -505,6 +511,63 @@ LITERATURE_LIMITS = [
     "Quoted from a scanned NASA technical report; table cells are not machine-parsed, so a "
     "number must be read on the cited page.",
 ]
+
+
+SUPPLEMENT_LIMITS = [
+    "Ground-based growth-chamber or greenhouse work; not a Moon, Mars or ISS result.",
+    "One cultivar per crop and one campaign per study: not a transferable response surface.",
+    "Recorded as citable evidence. No coefficient is fitted from it, so it does not change any "
+    "simulated number.",
+]
+
+
+def _supplement_passages(quarantine: list) -> list[Passage]:
+    """NASA records that are citable but deliberately not modelled."""
+    if not SUPPLEMENT.is_file():
+        return []
+    payload = _read_json(SUPPLEMENT)
+    passages: list[Passage] = []
+    for record_id, report in (payload.get("reports") or {}).items():
+        label = report.get("label") or record_id
+        title = report.get("title") or record_id
+        abstract = (report.get("abstract") or "").strip()
+        nature = (report.get("dataNature") or "").strip()
+        why = (report.get("whyItMatters") or "").strip()
+        if abstract:
+            text = (f"{label} ({record_id}) — {title}. {report.get('stiType', '')}. "
+                    f"What was measured: {abstract} Data nature: {nature} Why the platform holds "
+                    f"it: {why}")
+            verdict = screen(text)
+            if not verdict["safe"]:
+                quarantine.append({"sourceId": f"NTRS-{record_id}", "kind": "literature",
+                                   "injection": verdict["injection"], "secrets": verdict["secrets"]})
+            else:
+                passages.append(Passage(
+                    id=f"supplement::{record_id}::abstract",
+                    source_id=f"NTRS-{record_id}", kind="literature",
+                    title=f"{label} — {title}", text=text, url=report.get("url"), measured=True,
+                    local_ref=f"data/literature/ntrs_supplement.json#{record_id}",
+                    limitations=SUPPLEMENT_LIMITS + ([report.get("limits", [""])[0]] if report.get("limits") else [])))
+        for page in report.get("measurementPages") or []:
+            excerpt = (page.get("excerpt") or "").strip()
+            if not excerpt:
+                continue
+            terms = ", ".join(page.get("terms") or [])
+            text = (f"{label} ({record_id}), page {page['page']} — {title}. Recorded conditions and "
+                    f"findings: {terms}. Text on that page: {excerpt}")
+            verdict = screen(text)
+            if not verdict["safe"]:
+                quarantine.append({"sourceId": f"NTRS-{record_id}", "kind": "literature",
+                                   "injection": verdict["injection"], "secrets": verdict["secrets"]})
+                continue
+            passages.append(Passage(
+                id=f"supplement::{record_id}::p{page['page']}::{len(passages)}",
+                source_id=f"NTRS-{record_id}", kind="literature",
+                title=f"{label} p.{page['page']} — {title}", text=text,
+                url=f"{report.get('url')}", measured=True,
+                local_ref=f"data/literature/ntrs_supplement.json#{record_id}:p{page['page']}",
+                limitations=SUPPLEMENT_LIMITS))
+    return passages
 
 
 def _literature_passages(quarantine: list) -> list[Passage]:
@@ -566,7 +629,8 @@ def corpus() -> dict:
     passages = (_dataset_passages(quarantine) + _model_passages(quarantine)
                 + _evaluation_passages(quarantine)
                 + _methodology_passages(quarantine)
-                + _literature_passages(quarantine))
+                + _literature_passages(quarantine)
+                + _supplement_passages(quarantine))
     # Attach duplicate-safeguard context to dataset passages.
     for passage in passages:
         if passage.kind != "dataset":

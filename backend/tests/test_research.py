@@ -41,7 +41,7 @@ def test_actual_dataset_inventory_and_no_cross_crop_claim(scientific_client):
     assert "files" not in mizuna
     # Phase 14 added the substrate/regolith and edible-microbiology coverage rows, both
     # of which state what the acquired data cannot establish.
-    assert len(response.json()["coverage"]) == 17
+    assert len(response.json()["coverage"]) == 18
     eden = next(d for d in studies if d["id"] == "OSD-895")
     assert eden["classification"] == "useful for scientific calibration"
     assert eden["rowCount"] == 19
