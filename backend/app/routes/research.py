@@ -295,6 +295,12 @@ def datasets(q: str = ""):
         if q.lower() in searchable.lower():
             row = {k:v for k,v in d.items() if k != "files"}
             row["downloadedFileCount"] = sum(f.get("downloaded", False) for f in d.get("files", [])) + int("file" in d)
+            # Additive duplicate safeguards: a client that counts accessions must be able to
+            # see that one of them does not count as an independent study.
+            from app import explorer as _explorer  # local import: keeps import order simple
+            redundant = _explorer.REDUNDANT_DEPOSITS.get(d["id"])
+            row["countsAsIndependentStudy"] = redundant is None
+            row["redundantWith"] = (redundant or {}).get("redundantWith")
             rows.append(row)
     return {"datasets": rows, "source": registered.get("source"), "generatedAt": registered.get("generatedAt"), "coverage": research.coverage()}
 

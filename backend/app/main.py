@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config.settings import settings
-from app.routes import auth, health, simulation, workspace, research
+from app.routes import assistant, auth, explorer, health, simulation, workflow as workflow_routes, workspace, research
 from app.routes.errors import register_error_handlers
 from app.middleware import RequestGuard
 
@@ -45,6 +45,9 @@ app.include_router(auth.router, prefix=settings.api_prefix)
 app.include_router(simulation.router, prefix=settings.api_prefix)
 app.include_router(workspace.router, prefix=settings.api_prefix)
 app.include_router(research.router, prefix=settings.api_prefix)
+app.include_router(assistant.router, prefix=settings.api_prefix)
+app.include_router(workflow_routes.router, prefix=settings.api_prefix)
+app.include_router(explorer.router, prefix=settings.api_prefix)
 
 
 @app.get("/", include_in_schema=False)

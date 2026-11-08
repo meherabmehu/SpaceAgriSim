@@ -12,6 +12,10 @@ ROOT = Path(__file__).resolve().parents[2]
 BUNDLE = Path(__file__).resolve().parents[1] / 'scientific_data'
 DATA = (BUNDLE if BUNDLE.exists() else ROOT) / "data"
 ARTIFACTS = (BUNDLE if BUNDLE.exists() else ROOT) / "ml" / "artifacts"
+# Evaluation artifacts are not part of the packaged runtime bundle (they are analysis
+# output, not inference assets), so they are resolved separately and their absence is
+# handled rather than assumed.
+EVALUATION = (BUNDLE / "ml" / "evaluation") if (BUNDLE / "ml" / "evaluation").is_dir() else (ROOT / "ml" / "evaluation")
 MODEL_IDS = {
     "mizuna-harvest-v1",
     "tomato-flight-response-v1",
@@ -183,6 +187,70 @@ def _baseline_comparison(metrics, baseline):
             "outperformsBaselineMAE": bool(better)}
 
 
+@lru_cache(maxsize=1)
+def _calibration_status():
+    """Measured interval coverage per model, from the committed Phase 10 decision.
+
+    Coverage is reported as a measurement with the split it was measured on. It is
+    never relabelled as a guarantee, and `calibrated` stays false wherever it was
+    false, because empirical coverage on held-out groups does not validate a future
+    campaign.
+    """
+    path = EVALUATION / "phase10_uncertainty_decision.json"
+    if not path.is_file():
+        return {}
+    decision = read_json(path)
+    conformal_path = EVALUATION / "phase10_conformal.json"
+    conformal = read_json(conformal_path) if conformal_path.is_file() else {"models": {}}
+    status = {}
+    for model_id, choice in (decision.get("decisions") or {}).items():
+        measured = (conformal.get("models", {}).get(model_id, {})
+                    .get("summary", {}).get(choice.get("adopted", ""), {}))
+        status[model_id] = {
+            "calibrated": False,
+            "nominalCoverage": measured.get("nominalCoverage"),
+            "measuredCoverage": choice.get("achievedCoverage"),
+            "measuredWidth": measured.get("meanIntervalWidth"),
+            "method": choice.get("adopted"),
+            "measuredOn": "held-out biological groups",
+            "statement": ("Coverage is a measurement on held-out groups, not a guarantee: "
+                          "repeated tissues from one unit and a small number of campaigns "
+                          "are not a sample of future campaigns."),
+        }
+    return status
+
+
+def _explanation_available(model_id):
+    path = ARTIFACTS / f"{model_id}-explanation.json"
+    return path.is_file()
+
+
+def _classification_record(model_id):
+    """Attach the six-category classification to a model row.
+
+    Imported lazily and defensively: the registry must still render if the taxonomy
+    module is unavailable, and an unclassified model is a bug worth surfacing rather
+    than hiding behind a default.
+    """
+    try:
+        from app.science_classification import CATEGORY_NAMES, SERVICE_ALLOWED, feature_by_id
+    except ImportError:  # pragma: no cover - taxonomy is part of the app package
+        return None
+    feature = feature_by_id(model_id)
+    if feature is None:
+        return None
+    return {
+        "category": feature.category,
+        "categoryName": CATEGORY_NAMES[feature.category],
+        "serviceAllowed": SERVICE_ALLOWED[feature.category],
+        "servedStatus": feature.status,
+        "surface": feature.surface,
+        "evidence": feature.evidence,
+        "userFacing": feature.user_facing,
+        "notes": list(feature.notes),
+    }
+
+
 def model_registry():
     registry = read_json(ARTIFACTS / "registry.json")
     registered = {item["id"]: item for item in registry.get("models", [])}
@@ -213,6 +281,20 @@ def model_registry():
                 "artifactSha256": registered.get(model_id, {}).get("sha256"),
                 "predictionStatus": evidence_status,
                 "baselineComparison": _baseline_comparison(metrics, baseline),
+                # Phase 12: the facts a researcher needs to judge applicability were
+                # already computed and were simply not being served together.
+                "scientificClassification": _classification_record(model_id),
+                "calibration": _calibration_status().get(model_id) or {
+                    "calibrated": False,
+                    "measuredCoverage": None,
+                    "statement": "No measured interval coverage is recorded for this model.",
+                },
+                "explanationAvailable": _explanation_available(model_id),
+                # The artifact's own `supersedes` note is more specific than the registry
+                # id (it records that the predecessor is kept rather than overwritten), so
+                # the registry value only fills a gap and never overwrites it.
+                "supersedes": model.get("supersedes")
+                              or registered.get(model_id, {}).get("supersedes"),
             })
         except (FileNotFoundError, KeyError, ValueError, json.JSONDecodeError):
             models.append({"id": model_id, "name": model_id, "status": "unavailable", "artifactExists": False, "limitations": ["Verified model artifact not available; run the offline training pipeline."]})
