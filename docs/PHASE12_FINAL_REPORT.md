@@ -14,7 +14,8 @@ code rather than promised in prose.
 | Feature branch HEAD | `c78e7a2` (`docs/phase12-ai-platform-completion`) |
 | Feature commits | 7 (`d2e7f4b` baseline doc … `c78e7a2` docs) |
 | Merge commit | **`5ccdf08`** — `Merge Phase 12: evidence-grounded AI, scientific workflows, and dataset independence` |
-| Remote `main` HEAD | **`5ccdf08e318bf67c8b7f433b9b02f05d05c3cb65`** (`git ls-remote`, and re-verified from a fresh clone) |
+| Remote `main` HEAD | **`1b07d12576664207df4020cd59be1908458365da`** (`git ls-remote`, after this report was itself committed) |
+| Merge commit (pre-report) | `5ccdf08`, whose tree was verified identical in a fresh clone |
 | Push type | fast-forward `7957a05..5ccdf08`; **no force-push** |
 | Branch-protection bypass | none |
 | Remote tree equals local tree | yes (`HEAD^{tree}` identical in a fresh `--depth 1` clone) |
@@ -151,6 +152,9 @@ git push origin feat/phase12-ai-platform-completion   ->  6e31b70..c78e7a2
 git merge --no-ff feat/phase12-ai-platform-completion ->  5ccdf08
 git push origin main                                  ->  7957a05..5ccdf08
 git ls-remote origin refs/heads/main                  ->  5ccdf08e318bf67c8b7f433b9b02f05d05c3cb65
+# this report is itself a commit on main, pushed after the verification above:
+git push origin main                                  ->  5ccdf08..1b07d12
+git ls-remote origin refs/heads/main                  ->  1b07d12576664207df4020cd59be1908458365da
 ```
 
 Then verified from a **fresh clone**, not from the local repository:
