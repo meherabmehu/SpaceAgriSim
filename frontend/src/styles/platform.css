@@ -1640,3 +1640,91 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Phase 12: research assistant citations. Same palette and scale as the rest of the
+   workspace; no layout container changes. */
+.pill.amber {
+  color: #d9ba8e;
+  border-color: #6a5435;
+  background: #30271b55;
+}
+.sub-heading {
+  font-size: 10px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: #7f99a4;
+  margin: 18px 0 10px;
+  font-weight: 500;
+}
+.claim-list {
+  margin: 14px 0;
+  padding: 0;
+  list-style: none;
+}
+.claim-list li {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 9px 0;
+  border-bottom: 1px solid #283c44;
+  font-size: 11px;
+  line-height: 1.8;
+  color: #9db4bf;
+}
+.citation-list {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  counter-reset: citation;
+}
+.citation-list > li {
+  padding: 11px 0;
+  border-bottom: 1px solid #283c44;
+  font-size: 11px;
+  color: #9db4bf;
+}
+.citation-head {
+  display: flex;
+  gap: 9px;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.citation-head strong {
+  color: #c7e6da;
+  font-weight: 500;
+  font-size: 11px;
+}
+.citation-meta {
+  display: flex;
+  gap: 12px;
+  margin-top: 5px;
+  font-size: 9px;
+  color: #6f8d9a;
+}
+.citation-meta a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #8fc9ad;
+  text-decoration: none;
+}
+.citation-ref {
+  display: block;
+  margin-top: 6px;
+  font-size: 9px;
+  color: #8aa2ad;
+  background: #16242b;
+  border: 1px solid #2a3d45;
+  border-radius: 4px;
+  padding: 4px 6px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.citation-limits {
+  margin: 6px 0 0;
+  padding-left: 15px;
+  font-size: 9px;
+  line-height: 1.8;
+  color: #8a9fa9;
+}

@@ -8,6 +8,7 @@ import {
 } from "./moduleSupport.jsx";
 import { useState } from "react";
 import EarthLettucePrediction from './EarthLettucePrediction.jsx';
+import { ScientificStatusPanel, IndependencePanel } from './sciencePanels.jsx';
 import RadiationTranscriptomicPrediction from './RadiationTranscriptomicPrediction.jsx';
 import {
   ArrowRight,
@@ -40,6 +41,7 @@ export function Datasets({ registry, registryError }) {
           Registry unavailable: {registryError}
         </div>
       )}
+      <IndependencePanel />
       <Card
         title="Study catalog"
         label="VERIFIED SOURCE RECORDS"
@@ -212,6 +214,7 @@ export function Predictions({ models, registryError }) {
           Model registry unavailable: {registryError}
         </div>
       )}
+      <ScientificStatusPanel />
       <div className="module-grid">
         {models?.models?.map((model) => (
           <Card
