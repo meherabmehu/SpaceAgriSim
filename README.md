@@ -69,3 +69,7 @@ NASA study records point to their official OSDR sources; the product is not endo
 - [Phase 7 ML training](docs/PHASE7_ML_TRAINING.md) · [evaluation](docs/PHASE7_ML_EVALUATION.md)
 - [Phase 7 scientific calibration](docs/PHASE7_SCIENTIFIC_CALIBRATION.md)
 - [Phase 7 PostgreSQL verification](docs/PHASE7_POSTGRESQL_VERIFICATION.md)
+- [Phase 12 final report — evidence-grounded AI](docs/PHASE12_FINAL_REPORT.md)
+- [Phase 12 research assistant](docs/PHASE12_AI_RESEARCH_ASSISTANT.md) · [workflows](docs/PHASE12_AI_WORKFLOWS.md) · [dataset explorer](docs/PHASE12_DATASET_EXPLORER.md)
+- [Phase 12 scientific dashboard](docs/PHASE12_SCIENTIFIC_DASHBOARD.md) · [simulator validation](docs/PHASE12_SIMULATOR_VALIDATION.md)
+- [Phase 12 security review](docs/PHASE12_SECURITY_REVIEW.md) · [performance](docs/PHASE12_PERFORMANCE.md) · [competition demo](docs/PHASE12_COMPETITION_DEMO.md)
