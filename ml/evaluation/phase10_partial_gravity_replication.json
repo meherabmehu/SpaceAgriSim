@@ -1,0 +1,223 @@
+{
+  "phase": 10,
+  "study": "OSD-346 / GLDS-346",
+  "task": "replicate the OSD-314 partial-gravity result in an independent study",
+  "provenance": {
+    "acquisition": "scripts/acquire_phase10_osd346.py",
+    "checksums": "data/metadata/osd346_checksums.json",
+    "rawCommitted": false,
+    "rawNote": "73 MB of per-sample RSEM quantifications are not committed; their SHA-256 digests are, so the committed matrices rebuild byte-identically.",
+    "expression": "log2(TPM + 1), genes detected in at least half the libraries"
+  },
+  "design": {
+    "genotypes": [
+      "phyA",
+      "phyB"
+    ],
+    "lightTreatments": [
+      "Light Treatment 1",
+      "Light Treatment 2",
+      "Light Treatment 3",
+      "Light Treatment 4"
+    ],
+    "commandedGravityG": [
+      0.0,
+      0.1,
+      0.25,
+      0.3,
+      0.38,
+      0.5,
+      0.64,
+      0.65,
+      1.0
+    ],
+    "actualGravityRangeG": [
+      0.0,
+      1.05
+    ],
+    "libraries": 36,
+    "allSamplesAreFlight": true,
+    "noFlightConfound": "Every library is a flight sample, so the whole 0-1 g series is comparable in orbit. OSD-314 could not do this: its 1 g samples were ground controls.",
+    "fullSeriesInEachLightTreatment": true,
+    "whyThatMatters": "Holding out a light treatment removes no gravity level, so the split tests generalization rather than interpolation between missing levels."
+  },
+  "P1_binaryReplication": {
+    "scheme": "phyA, 0 g versus 0.25-0.38 g, train on one light treatment and test on the other",
+    "libraries": 10,
+    "counts": {
+      "microgravity": 4,
+      "partial": 6
+    },
+    "accuracy": 0.6,
+    "balancedAccuracy": 0.5,
+    "recallMicrogravity": 0.0,
+    "recallPartial": 1.0,
+    "predictedClassCounts": {
+      "partial": 10
+    },
+    "collapsedToSingleClass": true,
+    "permutation": {
+      "observed": 0.5,
+      "nullMedian": 0.5,
+      "degenerate": true,
+      "degenerateMeaning": "Every permutation returns the same score, which happens when the model predicts a single class: the null is a point mass and this p-value carries no information. It must not be read as 'no effect'.",
+      "null95": [
+        0.5,
+        0.5
+      ],
+      "permutations": 2000,
+      "exceedances": 2000,
+      "pCorrected": 1.0
+    },
+    "powerNote": "ten libraries over two folds. A binary classifier on 100 selected genes has very little room here, so a failure to replicate is underpowered evidence, not proof that the OSD-314 signal is absent."
+  },
+  "P1b_lowestPartial": {
+    "scheme": "phyA, 0 g versus 0.1 g, held-out light treatment",
+    "libraries": 8,
+    "balancedAccuracy": 0.875,
+    "permutation": {
+      "observed": 0.875,
+      "nullMedian": 0.375,
+      "degenerate": false,
+      "degenerateMeaning": null,
+      "null95": [
+        0.125,
+        0.875
+      ],
+      "permutations": 2000,
+      "exceedances": 169,
+      "pCorrected": 0.08496
+    }
+  },
+  "P1c_widerContrast": {
+    "scheme": "phyA, 0 g versus 0.1-0.38 g (all partial levels), held-out light treatment",
+    "libraries": 14,
+    "balancedAccuracy": 0.45,
+    "predictedClassCounts": {
+      "microgravity": 1,
+      "partial": 13
+    },
+    "permutation": {
+      "observed": 0.45,
+      "nullMedian": 0.45,
+      "degenerate": false,
+      "degenerateMeaning": null,
+      "null95": [
+        0.45,
+        0.625
+      ],
+      "permutations": 2000,
+      "exceedances": 2000,
+      "pCorrected": 1.0
+    }
+  },
+  "P2_gradedRegression": {
+    "scheme": "phyA, ridge on real g across six commanded levels 0-1 g, held-out light treatment",
+    "libraries": 24,
+    "correlation": {
+      "observedSpearman": 0.571,
+      "nullMedian": 0.0022,
+      "null95": [
+        -0.4058,
+        0.397
+      ],
+      "permutations": 2000,
+      "exceedances": 2,
+      "pCorrected": 0.0015
+    },
+    "byCommandedLevel": {
+      "0.00g": {
+        "n": 4,
+        "meanPredicted": 0.214
+      },
+      "0.10g": {
+        "n": 4,
+        "meanPredicted": 0.134
+      },
+      "0.25g": {
+        "n": 2,
+        "meanPredicted": 0.264
+      },
+      "0.38g": {
+        "n": 4,
+        "meanPredicted": 0.457
+      },
+      "0.64g": {
+        "n": 3,
+        "meanPredicted": 0.632
+      },
+      "0.65g": {
+        "n": 3,
+        "meanPredicted": 0.594
+      },
+      "1.00g": {
+        "n": 4,
+        "meanPredicted": 0.37
+      }
+    },
+    "monotoneInLevelOrder": false,
+    "meanAbsoluteErrorG": 0.2133
+  },
+  "P2b_rankSeparationByLevel": {
+    "0.10g": {
+      "nZero": 4,
+      "nLevel": 4,
+      "medianPredictedZero": 0.216,
+      "medianPredictedLevel": 0.176,
+      "oneSidedP": 0.8286
+    },
+    "0.25g": {
+      "nZero": 4,
+      "nLevel": 2,
+      "medianPredictedZero": 0.216,
+      "medianPredictedLevel": 0.264,
+      "oneSidedP": 0.6
+    },
+    "0.38g": {
+      "nZero": 4,
+      "nLevel": 4,
+      "medianPredictedZero": 0.216,
+      "medianPredictedLevel": 0.423,
+      "oneSidedP": 0.1714
+    },
+    "0.64g": {
+      "nZero": 4,
+      "nLevel": 3,
+      "medianPredictedZero": 0.216,
+      "medianPredictedLevel": 0.633,
+      "oneSidedP": 0.0286
+    },
+    "0.65g": {
+      "nZero": 4,
+      "nLevel": 3,
+      "medianPredictedZero": 0.216,
+      "medianPredictedLevel": 0.538,
+      "oneSidedP": 0.0286
+    },
+    "1.00g": {
+      "nZero": 4,
+      "nLevel": 4,
+      "medianPredictedZero": 0.216,
+      "medianPredictedLevel": 0.381,
+      "oneSidedP": 0.1
+    }
+  },
+  "P3_crossGenotype": {
+    "scheme": "train on phyA (0 g versus 0.1-0.5 g), test on phyB, no phyB rows seen in training",
+    "trainLibraries": 14,
+    "testLibraries": 8,
+    "balancedAccuracy": 0.6667,
+    "recallMicrogravity": 0.5,
+    "recallPartial": 0.8333
+  },
+  "decisionRule": "The OSD-314 result replicates only if the 0 g versus partial contrast exceeds 0.5 balanced accuracy on an unseen light treatment with a design-preserving permutation p below 0.05. Graded recoverability requires a positive Spearman correlation with p below 0.05. Fixed before the run.",
+  "replicated": false,
+  "gradedGravityDetected": true,
+  "registryChange": null,
+  "notPromotedBecause": [
+    "36 libraries across two genotypes and two light treatments",
+    "commanded and realised gravity differ (centrifugation), so the label is a measured level, not a set point",
+    "the genotypes are phytochrome mutants, so this is not wild-type physiology",
+    "a servable predictor needs replication across missions, not two light treatments inside one"
+  ]
+}

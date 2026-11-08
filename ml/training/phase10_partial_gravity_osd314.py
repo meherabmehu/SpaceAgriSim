@@ -113,11 +113,16 @@ def select(matrix: np.ndarray, labels: np.ndarray, k: int = TOP_GENES) -> np.nda
     return keep[order[:min(k, keep.size)]]
 
 
+def classifier():
+    """The one classifier used by every gravity analysis in this phase."""
+    return Pipeline([("scale", StandardScaler()),
+                     ("model", LogisticRegression(C=1.0, max_iter=5000,
+                                                  random_state=SEED))])
+
+
 def fit_fold(expression, labels, train_index, test_index, k=TOP_GENES):
     chosen = select(expression[train_index], labels[train_index], k)
-    model = Pipeline([("scale", StandardScaler()),
-                      ("model", LogisticRegression(C=1.0, max_iter=5000,
-                                                   random_state=SEED))])
+    model = classifier()
     model.fit(expression[np.ix_(train_index, chosen)], labels[train_index])
     in_sample = float((model.predict(expression[np.ix_(train_index, chosen)])
                        == labels[train_index]).mean())
@@ -333,11 +338,11 @@ def main() -> int:
             "labels",
         ],
         "nextAction": (
-            "OSD-346 (Arabidopsis phyA/phyB, fractional gravity 0-0.64 g under blue light) "
-            "is the obvious replication: it has eight gravity levels and per-sample RSEM "
-            "gene results. It was not analysed here because its expression is deposited as "
-            "26 per-sample files rather than one matrix, and merging them without its own "
-            "factor table would risk the exact label error this phase is about."),
+            "Done in Phase 10: OSD-346 was analysed as the replication. It does not "
+            "reproduce this contrast (see ml/evaluation/"
+            "phase10_partial_gravity_replication.json), so the 1.000 reported here must "
+            "be read as one experiment rather than as a stable property of plant "
+            "transcriptomes. A servable gravity predictor would need a third mission."),
     }
     OUT.write_text(json.dumps(result, indent=2) + "\n")
     print(f"\nprimary balanced accuracy {primary['balancedAccuracy']} "

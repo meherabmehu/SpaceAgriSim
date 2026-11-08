@@ -129,3 +129,38 @@ def test_the_registry_says_only_what_the_artifacts_support():
                      if entry["id"] == model_id)
         assert model["phase10"]["explanationAvailable"] is True
         assert model["phase10"]["explanationIsSurrogate"] is False
+
+
+def test_the_osd346_replication_is_catalogued_with_its_limit():
+    catalogue = {entry["id"]: entry for entry in research.manifest()["datasets"]}
+    assert "OSD-346" in catalogue
+    entry = catalogue["OSD-346"]
+    assert entry["status"] == "analysed-not-served"
+    assert entry["rawCommitted"] is False
+    assert entry["gravityLevelsG"] == [0.0, 0.1, 0.25, 0.3, 0.38, 0.5, 0.64, 0.65, 1.0]
+    # The genotypes are mutants only, and the entry must say so rather than imply
+    # wild-type physiology.
+    assert any("mutant" in limitation for limitation in entry["limitations"])
+
+
+def test_the_partial_gravity_result_did_not_replicate_and_says_so():
+    """The headline number must carry its failed replication wherever it travels."""
+    replication = artifact("phase10_partial_gravity_replication.json")
+    assert replication["replicated"] is False
+    assert replication["gradedGravityDetected"] is True
+    # A graded signal exists, but only at higher gravity: this is not a rescue.
+    assert replication["P2_gradedRegression"]["monotoneInLevelOrder"] is False
+    assert replication["P2_gradedRegression"]["correlation"]["pCorrected"] < 0.05
+    p1 = replication["P1_binaryReplication"]
+    assert p1["collapsedToSingleClass"] is True
+    # A collapsed classifier makes the null a point mass; the artifact must not
+    # present that p-value as evidence of absence.
+    assert p1["permutation"]["degenerate"] is True
+    assert "no information" in p1["permutation"]["degenerateMeaning"]
+    assert replication["registryChange"] is None
+
+
+def test_the_osd314_artifact_points_at_its_own_failed_replication():
+    gravity = artifact("phase10_partial_gravity.json")
+    assert "does not reproduce this contrast" in gravity["nextAction"]
+    assert "one experiment" in gravity["nextAction"]

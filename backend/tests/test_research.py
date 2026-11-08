@@ -22,9 +22,9 @@ def test_actual_dataset_inventory_and_no_cross_crop_claim(scientific_client):
     studies = response.json()["datasets"]
     # 14 from the original inventory, plus the four studies Phase 9 catalogued
     # after finding that models cited studies the explorer did not list
-    # (OSD-46, OSD-782, OSD-411, OSD-780), plus OSD-314, the first graded-gravity
-    # plant study in the catalogue, added by the Phase 10 metadata scan.
-    assert len(studies) == 19
+    # (OSD-46, OSD-782, OSD-411, OSD-780), plus the two graded-gravity plant
+    # studies the Phase 10 metadata scan found (OSD-314, OSD-346).
+    assert len(studies) == 20
     mizuna = next(d for d in studies if d["id"] == "OSD-655")
     assert mizuna["organisms"] == ["Brassica rapa"]
     assert mizuna["sampleCount"] == 37
