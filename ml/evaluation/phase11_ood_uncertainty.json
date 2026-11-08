@@ -1,0 +1,114 @@
+{
+  "phase": 11,
+  "protocol": "per-gene z-score within each study, then either (a) Mahalanobis distance in 10 PCA components fitted on OSD-46, or (b) mean 1 - Pearson correlation to the 5 nearest OSD-46 arrays",
+  "referenceDistancesAreLeaveOneOut": true,
+  "sharedGenes": {
+    "osd46": 21267,
+    "osd782": 23667,
+    "shared": 17997
+  },
+  "preDeclaredExpectations": {
+    "control1": "duplicate must rank at or below the reference distribution",
+    "control2": "different platform must rank above it, AUC >= 0.9",
+    "control3": "held-out group must be indistinguishable, |AUC - 0.5| < 0.15"
+  },
+  "thresholdValidated": false,
+  "scores": {
+    "mahalanobis_pca": {
+      "referenceMean": 2.595,
+      "duplicateMean": 3.043,
+      "shiftedMean": 1.286,
+      "control1_duplicate": {
+        "auc": 0.702,
+        "expected": "<= 0.5",
+        "passes": false,
+        "why": "OSD-320 holds the same arrays as OSD-46, so it should look like ordinary training data, not like a novelty"
+      },
+      "control2_platformShift": {
+        "auc": 0.016,
+        "expected": ">= 0.9",
+        "passes": false,
+        "why": "OSD-782 is a different measurement platform, so it should be flagged. Lower than 0.5 means the score calls a platform shift *more familiar* than the training data itself.",
+        "confound": "platform, preparation protocol and organism part all move together with this study; per-gene standardisation is needed to compare across platforms and it deletes gene-level mean differences, which is much of what a platform shift is"
+      },
+      "control3_heldOutGroups": {
+        "meanAuc": 0.471,
+        "range": [
+          0.0,
+          1.0
+        ],
+        "passes": true,
+        "why": "ordinary held-out groups must not be flagged, or the score fires on normal use"
+      },
+      "controlsPassed": 1,
+      "validated": false
+    },
+    "nearest_neighbour_correlation": {
+      "referenceMean": 1.0,
+      "duplicateMean": 0.395,
+      "shiftedMean": 0.837,
+      "control1_duplicate": {
+        "auc": 0.033,
+        "expected": "<= 0.5",
+        "passes": true,
+        "why": "OSD-320 holds the same arrays as OSD-46, so it should look like ordinary training data, not like a novelty"
+      },
+      "control2_platformShift": {
+        "auc": 0.31,
+        "expected": ">= 0.9",
+        "passes": false,
+        "why": "OSD-782 is a different measurement platform, so it should be flagged. Lower than 0.5 means the score calls a platform shift *more familiar* than the training data itself.",
+        "confound": "platform, preparation protocol and organism part all move together with this study; per-gene standardisation is needed to compare across platforms and it deletes gene-level mean differences, which is much of what a platform shift is"
+      },
+      "control3_heldOutGroups": {
+        "meanAuc": 0.505,
+        "range": [
+          0.442,
+          0.641
+        ],
+        "passes": true,
+        "why": "ordinary held-out groups must not be flagged, or the score fires on normal use"
+      },
+      "controlsPassed": 2,
+      "validated": false
+    }
+  },
+  "validatedScores": [],
+  "verdict": "ood-score-not-validated-by-any-available-control",
+  "mechanism": [
+    "cross-platform comparison requires per-gene standardisation, which removes gene-level mean shifts that are much of what a platform shift consists of",
+    "in-sample Mahalanobis distances are inflated by about sqrt((n-1)/(n-p)); with 44 arrays and 10 components that is 1.13x, larger than the gap between an ordinary and an unusual sample, so a new study looks nearer than the training data unless the reference is scored leave-one-out",
+    "the duplicate check also exposes scale sensitivity: a sample that is effectively in the training set is scored by a model fitted on all of it, while reference samples are scored with 43, and that difference alone moves the Mahalanobis AUC to 0.735"
+  ],
+  "productConsequence": {
+    "servedOodFlag": "must not be presented as a validated novelty detector. It may describe distance from the training cloud; it must not say 'outside distribution' as if a threshold had been validated",
+    "intervalAdvice": "conformal intervals with measured coverage remain the defensible uncertainty mechanism, with empirical and nominal coverage always shown separately"
+  },
+  "inStudyScoreQuantiles": {
+    "mahalanobis_pca": {
+      "q50": 2.625,
+      "q90": 3.324,
+      "q95": 3.452,
+      "q99": 3.553
+    },
+    "nearest_neighbour_correlation": {
+      "q50": 1.092,
+      "q90": 1.297,
+      "q95": 1.337,
+      "q99": 1.343
+    },
+    "note": "descriptive quantiles of leave-one-out training-study scores. They are not thresholds; supplying one would be the claim this phase refutes."
+  },
+  "uncertaintyCarriedOver": {
+    "source": "phase10_uncertainty_decision.json",
+    "nominalCoverage": 0.9,
+    "empiricalCoverage": {
+      "mizuna-microbial-relative-load-v2": 0.9919,
+      "mizuna-microbial-load-v1": 0.9919,
+      "lettuce-earth-growth-v2": 0.9606,
+      "lettuce-earth-growth-v1": 0.9393
+    },
+    "statement": "empirical and nominal coverage stay distinct everywhere; no interval is described as a 90 % interval unless its measured coverage reached it"
+  },
+  "registryChange": null
+}
