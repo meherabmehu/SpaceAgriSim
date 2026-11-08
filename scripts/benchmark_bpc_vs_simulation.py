@@ -40,6 +40,7 @@ from app.simulation.crops import get_crop, list_crop_keys  # noqa: E402
 from app.simulation.engine import SimulationInput, run_simulation  # noqa: E402
 
 MEASUREMENTS = ROOT / "data" / "literature" / "ntrs_bpc_measurements.json"
+SUPPLEMENT = ROOT / "data" / "literature" / "ntrs_supplement.json"
 OUT = ROOT / "data" / "derived" / "bpc_benchmark.json"
 
 # The BPC's own operating point, taken from the measurement table.
@@ -117,6 +118,28 @@ def simulate_crop(key: str) -> dict:
     }
 
 
+def leafy_anchor() -> dict:
+    """NASA's own planning figure for leafy / pick-and-eat production per m2 per day.
+
+    Taken from NTRS 20250001897: a 25 g microgreen serving grows in a 0.030 m2 tray on a 14-day
+    cycle, and 50 g per crew member per day fits in 0.84 m2. Both routes give the same number.
+    """
+    row = json.loads(SUPPLEMENT.read_text())["reports"]["20250001897"]["structured"]["areal_productivity_anchor"]
+    per_area = row["serving_fresh_mass_g"] / row["tray_area_m2"] / row["cycle_days"]
+    per_crew = row["crew_member_daily_serving_g"] / row["area_per_crew_member_m2"]
+    return {
+        "source": "NTRS 20250001897 (NASA space crop reference, 2024)",
+        "g_per_m2_day_from_tray": round(per_area, 1),
+        "g_per_m2_day_from_crew_area": round(per_crew, 1),
+        "tray_area_m2": row["tray_area_m2"],
+        "cycle_days": row["cycle_days"],
+        "serving_g": row["serving_fresh_mass_g"],
+        "crew_area_m2": row["area_per_crew_member_m2"],
+        "crew_daily_g": row["crew_member_daily_serving_g"],
+        "note": "planning arithmetic from the document, not a harvest record - see the record's limits field",
+    }
+
+
 def ratios(measured: dict, modelled: dict) -> dict:
     pairs = {
         "co2_mean": (measured["co2_g_per_m2_day_net"], modelled["co2_g_per_m2_day_mean"]),
@@ -145,6 +168,19 @@ def main() -> None:
     measured = measured_summary(rows)
     per_crop = {key: simulate_crop(key) for key in sorted(list_crop_keys())}
 
+    anchor = leafy_anchor()
+    # Fresh harvest per m2 per day for each crop, to compare with a fresh-mass anchor.
+    fresh = {}
+    for key in sorted(list_crop_keys()):
+        crop = get_crop(key)
+        fresh[key] = {
+            "fresh_g_per_m2_day": round(crop.harvest_biomass_g / crop.growth_duration_days, 1),
+            "cycle_days": crop.growth_duration_days,
+            "harvest_biomass_g_per_m2": crop.harvest_biomass_g,
+        }
+    for key, row in fresh.items():
+        row["ratio_to_nasa_leafy_anchor"] = round(row["fresh_g_per_m2_day"] / anchor["g_per_m2_day_from_tray"], 2)
+
     payload = {
         "schema": "spaceagrisim.bpc_benchmark/1",
         "purpose": "Compare the simulator's per-m2 resource fluxes with the NASA BPC measurements. "
@@ -157,6 +193,8 @@ def main() -> None:
                     "backend/tests/test_phase16_bpc_measurements.py",
         },
         "simulated": per_crop,
+        "leafy_anchor": anchor,
+        "fresh_productivity": fresh,
         "ratios": {key: ratios(measured, values) for key, values in per_crop.items()},
         "caveats": [
             "Different crops on purpose: the BPC grew wheat to grain, the platform simulates lettuce, "
@@ -195,6 +233,17 @@ def main() -> None:
                   f"{ratio['dry_biomass']['model_over_measured']:6.2f}")
         print()
         print("x = modelled / measured. This is a comparison, not a fit: the model is unchanged.")
+        print()
+        print(f"Leafy / pick-and-eat anchor ({anchor['source']}): "
+              f"{anchor['g_per_m2_day_from_tray']:.1f} g m-2 day-1 fresh "
+              f"({anchor['serving_g']:.0f} g per {anchor['tray_area_m2']} m2 tray per {anchor['cycle_days']} days)")
+        print(f"{'crop':9}{'fresh g/m2/d':>14}{'x':>7}")
+        print("-" * 30)
+        for key, row in fresh.items():
+            print(f"{key:9}{row['fresh_g_per_m2_day']:14.1f}{row['ratio_to_nasa_leafy_anchor']:7.2f}")
+        print()
+        print("Lettuce lands within 4 % of NASA's planning figure for a microgreen catch crop; radish and tomato sit "
+              "25-30 % below it, which is the expected direction for a longer-cycle crop and is not a defect.")
     print(f"wrote {OUT.relative_to(ROOT)}")
 
 

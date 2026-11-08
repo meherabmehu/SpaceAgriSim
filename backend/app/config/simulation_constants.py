@@ -115,6 +115,12 @@ EXCESS_LIGHT_PENALTY_PER_HOUR = 0.02
 # Enrichment to ~1000 ppm yields roughly +20 %, saturating around +30 %.
 CO2_HALF_SATURATION_PPM = 150.0
 
+# The CO2 response above is monotonic: more CO2 never hurts. NASA's closed-chamber work does not
+# support that above roughly this level - soybean seed yield and biomass peaked at 1000 ppm and were
+# lower at 2000 and 5000 ppm (NTRS 20040090155). The model is NOT rescaled from that abstract (one
+# cultivar is not a response surface), but a run above this level now carries a warning saying so.
+CO2_MEASURED_OPTIMUM_PPM = 1000.0
+
 # Water: growth scales with (availability / 100) ** exponent. 1.0 = linear,
 # following the roughly proportional biomass-transpiration relationship.
 WATER_RESPONSE_EXPONENT = 1.0

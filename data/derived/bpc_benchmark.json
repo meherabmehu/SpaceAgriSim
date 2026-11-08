@@ -88,6 +88,37 @@
       "note": "run through the unchanged engine; the BPC's conditions are fed in so the comparison is on the same CO2, photoperiod and PPF basis as the measurements"
     }
   },
+  "leafy_anchor": {
+    "source": "NTRS 20250001897 (NASA space crop reference, 2024)",
+    "g_per_m2_day_from_tray": 59.5,
+    "g_per_m2_day_from_crew_area": 59.5,
+    "tray_area_m2": 0.03,
+    "cycle_days": 14,
+    "serving_g": 25.0,
+    "crew_area_m2": 0.84,
+    "crew_daily_g": 50.0,
+    "note": "planning arithmetic from the document, not a harvest record - see the record's limits field"
+  },
+  "fresh_productivity": {
+    "lettuce": {
+      "fresh_g_per_m2_day": 57.1,
+      "cycle_days": 35,
+      "harvest_biomass_g_per_m2": 2000.0,
+      "ratio_to_nasa_leafy_anchor": 0.96
+    },
+    "radish": {
+      "fresh_g_per_m2_day": 42.9,
+      "cycle_days": 28,
+      "harvest_biomass_g_per_m2": 1200.0,
+      "ratio_to_nasa_leafy_anchor": 0.72
+    },
+    "tomato": {
+      "fresh_g_per_m2_day": 43.8,
+      "cycle_days": 80,
+      "harvest_biomass_g_per_m2": 3500.0,
+      "ratio_to_nasa_leafy_anchor": 0.74
+    }
+  },
   "ratios": {
     "lettuce": {
       "co2_mean": {

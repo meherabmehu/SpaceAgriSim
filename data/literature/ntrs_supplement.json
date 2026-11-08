@@ -1,6 +1,6 @@
 {
   "schema": "spaceagrisim.ntrs_supplement/1",
-  "purpose": "NASA records evaluated for the platform outside the Biomass Production Chamber report set: one light-quality study with measured endpoints for the exact crops the simulator models, and one ethylene-sensitivity study that defines a closed-chamber risk the model does not carry.",
+  "purpose": "NASA records evaluated for the platform outside the Biomass Production Chamber report set: measured endpoints for the crops the simulator models, a closed-chamber trace-gas study that defines a risk the model does not carry, a supraoptimal-CO2 study that shows a limit the CO2 factor ignores, and NASA's own space-crop reference document with planning-level productivity numbers.",
   "reports": {
     "20160006559": {
       "id": "20160006559",
@@ -241,6 +241,149 @@
         "Wheat and rice in ground chambers/greenhouses - not lettuce, tomato or radish, and not a space habitat.",
         "The platform deliberately does NOT turn this into an ethylene yield factor: a single crop pair at one trace-gas range is not a transferable response surface."
       ]
+    },
+    "20250001897": {
+      "id": "20250001897",
+      "label": "Space crop reference (NASA HRP)",
+      "title": "Space Crop Considerations for Human Exploration",
+      "stiType": "TECHNICAL_MEMORANDUM · NASA HRP (2024)",
+      "authors": "R. Fritsche, N. Haveman, G. Massa, M. Mickens, T. Smith, et al.",
+      "publication": "NASA, July 2024",
+      "url": "https://ntrs.nasa.gov/citations/20250001897",
+      "pdf": "data/raw/NTRS/20250001897.pdf",
+      "pdf_sha256": "2acbba91b60513d14257e2dcc9b9aaf8f5321545cb0fc73b23b9fc346f504cbe",
+      "pages": 82,
+      "dataNature": "NASA's own reference document on space crop production: which crops have passed Crop Readiness Level 9, what a crew's fresh-food requirement works out to in trays, area and volume, and the input/output terms a crop system has to account for. It reports planning arithmetic, not a growth experiment.",
+      "whyItMatters": "It supplies the one number the platform was missing: an areal productivity anchor for leafy / pick-and-eat crops from NASA's own planning, which the simulator's lettuce baseline can be checked against. It also states how few crops are actually flight-qualified.",
+      "abstract": "Why plants: a food system that sustains crew health and performance is required for exploration. ISS prepackaged food degrades over years at 21 C. The document sets out crop selection drivers, Crop Readiness Levels, food safety, hardware, and the inputs/outputs a crop growth system must account for, and gives worked planning arithmetic for leafy greens and microgreens per crew member.",
+      "measurementPages": [
+        {
+          "page": 44,
+          "terms": [
+            "25 g microgreen serving",
+            "0.030 m2 tray",
+            "approximately 14 days to grow",
+            "0.84 m2 per crew member",
+            "3.36 m2 for a four-person crew"
+          ],
+          "excerpt": "A small, dedicated area of about 0.030 m2, which is the size of a small tray (17.32 cm X 17.32 cm), is required to grow 25 g of harvest mass of microgreens. Microgreens take approximately 14 days to grow, and thus each crew member would need two small trays per day for 14 days, which is 28 trays per crew member. Therefore, a total area of 0.84 m2 would be needed per crew member or 3.36 m2 for a four-person crew."
+        },
+        {
+          "page": 45,
+          "terms": [
+            "177 g m-3 day-1",
+            "298 g day-1 m-3",
+            "nearly double that of mature leafy greens"
+          ],
+          "excerpt": "each plant produces up to 3.6 g of fresh harvest per day which would be 177 g m-3 day-1. Based on 50 g of fresh microgreens per crew member grown in a volume of 0.672m3 that calculates to 298 g day-1 m-3 which is nearly double that of mature leafy greens."
+        },
+        {
+          "page": 24,
+          "terms": [
+            "Crop Readiness Level 9",
+            "9 crops passed",
+            "376 crops tested"
+          ],
+          "excerpt": "Table A-3 Crops which have passed CRL 9 ... Considering that the Growing Beyond Earth program has tested 191 crops and KSC has tested 204 crops listed above and in Appendix E (total 376), but only 9 crops have passed CRL 9, and 10 crops have failed to progress, there remains a non-trivial amount of ground and flight test activities needed"
+        },
+        {
+          "page": 21,
+          "terms": [
+            "minimum crop numbers",
+            "3 crop species for vitamins",
+            "non-overlapping total of 31"
+          ],
+          "excerpt": "Table A-1 Crop numbers and types for early exploration missions ... Nutrition 3 crop species/varieties for vitamin categories ... Non-overlapping total 31"
+        }
+      ],
+      "structured": {
+        "areal_productivity_anchor": {
+          "serving_fresh_mass_g": 25.0,
+          "tray_area_m2": 0.03,
+          "cycle_days": 14,
+          "crew_member_daily_serving_g": 50.0,
+          "trays_per_crew_member": 28,
+          "area_per_crew_member_m2": 0.84,
+          "area_four_crew_m2": 3.36,
+          "derived_g_per_m2_day": 59.5,
+          "derived_note": "25 g / 0.030 m2 / 14 days = 59.5 g m-2 day-1 fresh; identical to 50 g/day over the 0.84 m2 planned per crew member"
+        },
+        "volumetric_productivity": {
+          "microgreens_g_per_m3_day": 177.0,
+          "microgreens_50g_g_per_m3_day": 298.0,
+          "note": "as printed; microgreens are a volume-efficient crop, nearly double mature leafy greens"
+        },
+        "crop_readiness": {
+          "crops_tested": 376,
+          "crops_at_crl9": 9,
+          "crops_failed": 10,
+          "crl9_list": [
+            "'Outredgeous' lettuce (Asteraceae)",
+            "'Waldmann's Green' lettuce (Asteraceae)",
+            "Mizuna mustard (Brassicaceae)",
+            "'Wasabi' mustard (Brassicaceae)",
+            "'Amara' mustard (Brassicaceae)",
+            "'Extra Dwarf' Pak Choi (Brassicaceae)",
+            "'Red Russian' kale (Brassicaceae)",
+            "Espanola Improved Pepper (Solanaceae)",
+            "'Cherry Belle' Radish (Brassicaceae)"
+          ],
+          "note": "no herb, microgreen or legume crop has reached CRL 9"
+        }
+      },
+      "limits": [
+        "Planning arithmetic, not a measured growth experiment: the 59.5 g m-2 day-1 figure is derived from a tray allocation, not a harvest record.",
+        "Microgreens are harvested young; the anchor is not directly transferable to a mature fruiting crop such as tomato.",
+        "A document about space crop programmes, so it says nothing quantitative about lunar or Martian gravity."
+      ]
+    },
+    "20040090155": {
+      "id": "20040090155",
+      "label": "Supraoptimal CO2 study (soybean)",
+      "title": "Supraoptimal carbon dioxide effects on growth of soybean [Glycine max (L.) Merr.]",
+      "stiType": "REPRINT · peer-reviewed (1993)",
+      "authors": "NASA/KSC life-support crop research (reprint)",
+      "publication": "1993",
+      "url": "https://ntrs.nasa.gov/citations/20040090155",
+      "pdf": null,
+      "pdf_sha256": null,
+      "pages": 0,
+      "dataNature": "Peer-reviewed study of what happens above the optimum CO2 partial pressure in a sealed life-support chamber. NTRS lists no downloadable full text for this record, so only the published abstract is used.",
+      "whyItMatters": "The simulator's CO2 response rises monotonically to 3000 ppm. This study found the opposite above about 1000 ppm for one soybean cultivar - exactly the range the platform lets a user select.",
+      "abstract": "In tightly closed environments used for human life support in space, CO2 partial pressures can reach 500 to 1000 Pa, which may be supraoptimal or toxic to plants. Soybeans (cvs. McCall and Pixie) were grown for 90 days at 50, 100, 200 and 500 Pa CO2 (500, 1000, 2000 and 5000 ppm) with recirculating nutrient film technique, a 12-h photoperiod, a 26/20 C thermoperiod and about 300 micromol m-2 s-1 PPF. Seed yield and total biomass were greatest at 100 Pa for cv. McCall, suggesting that higher CO2 levels were supraoptimal; cv. Pixie showed little difference between CO2 treatments. Average stomatal conductance of upper canopy leaves at 50 Pa CO2 was approximately 500 Pa > 200 Pa > 100 Pa.",
+      "measurementPages": [],
+      "structured": {
+        "co2_levels_pa": [
+          50,
+          100,
+          200,
+          500
+        ],
+        "co2_levels_ppm": [
+          500,
+          1000,
+          2000,
+          5000
+        ],
+        "cultivar_findings": [
+          {
+            "cultivar": "McCall",
+            "finding": "seed yield and total biomass greatest at 100 Pa (1000 ppm); higher levels supraoptimal"
+          },
+          {
+            "cultivar": "Pixie",
+            "finding": "little difference in seed yield or total biomass between CO2 treatments"
+          }
+        ],
+        "stomatal_conductance_order": "50 Pa about equal to 500 Pa > 200 Pa > 100 Pa",
+        "campaign": "90 days, nutrient film technique, 12 h photoperiod, 26/20 C, ~300 umol m-2 s-1 PPF",
+        "verified_against": "https://ntrs.nasa.gov/citations/20040090155 abstract field, retrieved 2026-11-07"
+      },
+      "limits": [
+        "Abstract only: NTRS exposes no full text for this record, so no page-level quote and no per-plant data.",
+        "Two soybean cultivars in a ground chamber - not lettuce, tomato or radish, and not a space habitat.",
+        "The platform does NOT cap or bend its CO2 factor from this: one abstract is not a response surface. The gap is disclosed in the app instead."
+      ]
     }
   },
   "not_used": [
@@ -251,6 +394,14 @@
     {
       "id": "20040087496",
       "reason": "Ethylene is disclosed as an unmodelled closed-chamber risk. Adding a factor from one abstract would be a fabricated coefficient."
+    },
+    {
+      "id": "20250001897",
+      "reason": "Used as an areal-productivity anchor and as evidence for crop qualification, but no crop model is fitted: the document reports planning arithmetic for microgreens, which is not a per-sample training set."
+    },
+    {
+      "id": "20040090155",
+      "reason": "Used to disclose a limit of the CO2 factor (decline above ~1000 ppm in one cultivar), not to fit it: the abstract carries no numeric yields per CO2 level, so any fitted coefficient would be invented."
     }
   ]
 }

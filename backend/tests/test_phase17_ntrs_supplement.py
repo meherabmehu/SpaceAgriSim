@@ -125,9 +125,12 @@ def test_ethylene_has_no_coefficient_in_the_simulator():
 
 def test_both_records_are_listed_as_not_used_and_say_why(payload):
     reasons = {row["id"]: row["reason"] for row in payload["not_used"]}
-    assert set(reasons) == {"20160006559", "20040087496"}
+    # Phase 18 added two more records to the same file; each one must state its own reason.
+    assert {"20160006559", "20040087496"} <= set(reasons)
     assert "fitted" in reasons["20160006559"].lower()
     assert "fabricated" in reasons["20040087496"].lower()
+    for record_id, reason in reasons.items():
+        assert len(reason) > 40, record_id
 
 
 # -- the corpus ______________________________________________________________

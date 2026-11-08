@@ -181,6 +181,11 @@ def to_response(result: SimulationResult, request: SimulationRequest) -> Simulat
         warnings.append("Reduced-gravity response is an assumed penalty, not a lunar or Martian crop measurement.")
     if request.lightSpectrum != "balanced":
         warnings.append("Spectrum is recorded as a scenario annotation; no validated spectrum response is available.")
+    if request.co2Level > constants.CO2_MEASURED_OPTIMUM_PPM:
+        warnings.append(
+            f"Above {constants.CO2_MEASURED_OPTIMUM_PPM:.0f} ppm CO2 the model still predicts a small yield gain, but NASA "
+            "closed-chamber soybean data show yield peaking near 1000 ppm and declining at 2000-5000 ppm (NTRS 20040090155). "
+            "No supraoptimal penalty is modelled, so treat these settings as an upper bound, not a prediction.")
     return SimulationResponse(
         provenance={"mode": "physics-based estimate", "modelVersion": "assumptions-2.0",
                     "nasaValidated": False, "confidenceInterval": None,
