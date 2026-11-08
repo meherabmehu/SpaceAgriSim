@@ -24,6 +24,7 @@ import {
   Sprout,
   Sun,
   Wind,
+  Workflow,
   X,
 } from "lucide-react";
 import { useSimulationConfig } from "../hooks/useSimulationConfig.js";
@@ -42,6 +43,7 @@ const NAV = [
   ["dashboard", "Mission control", Orbit],
   ["laboratory", "Simulation lab", FlaskConical],
   ["predictions", "AI prediction center", Atom],
+  ["workflow", "Scientific workflow", Workflow],
   ["assistant", "Research assistant", MessageSquare],
   ["greenhouse", "3D greenhouse", Box],
   ["comparison", "World comparison", Globe2],
@@ -128,6 +130,8 @@ export default function MissionPlatform() {
   };
   const title = NAV.find((n) => n[0] === page)?.[1] || "Mission control";
   const shared = {
+    session,
+    onRequireSignIn: () => setAuthMode("login"),
     params,
     setParam,
     config,

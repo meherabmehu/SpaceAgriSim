@@ -10,8 +10,9 @@ const Analytics = lazyExport(() => import("./modules/Analytics.jsx"), "Analytics
 const Advisor = lazyExport(() => import("./modules/Advisor.jsx"), "Advisor");
 const Methodology = lazyExport(() => import("./modules/Methodology.jsx"), "Methodology");
 const ResearchAssistant = lazyExport(() => import("./modules/ResearchAssistant.jsx"), "ResearchAssistant");
+const ScientificWorkflow = lazyExport(() => import("./modules/ScientificWorkflow.jsx"), "ScientificWorkflow");
 
-const modules = { laboratory: Laboratory, comparison: Comparison, datasets: Datasets, predictions: Predictions, crops: Crops, analytics: Analytics, advisor: Advisor, assistant: ResearchAssistant, methodology: Methodology };
+const modules = { laboratory: Laboratory, comparison: Comparison, datasets: Datasets, predictions: Predictions, crops: Crops, analytics: Analytics, advisor: Advisor, assistant: ResearchAssistant, workflow: ScientificWorkflow, methodology: Methodology };
 
 export default function PlatformModules(props) {
   const Module = modules[props.page] || Methodology;
