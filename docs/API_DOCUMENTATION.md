@@ -36,3 +36,30 @@ The simulator response retains all original chart fields. Added fields: `provena
 Set `SPACEAGRISIM_HISTORY_WRITES_ENABLED=false` to reject shared history saves with HTTP 403 on public deployments. This is an operator write gate, not user authentication.
 
 History is a shared demonstration workspace with bounded retention, not a private per-user account system. PostgreSQL deployment and initial schema are described in `backend/migrations/README.md`. This API contains no secrets and must not receive sensitive user data. The API caps request bodies at 64 KiB and uses per-process IP limits of 180 requests/minute (12/minute for optimization). HTTP 429 includes Retry-After. These limits are local to each worker; distributed edge limits remain appropriate for scaled deployments. Request IDs and method/path/status/duration are logged without scientific payloads or credentials. Optimization is intentionally a bounded 81-point grid. CORS origins are configured by `SPACEAGRISIM_CORS_ORIGINS`; no wildcard credential mode is used.
+
+## Phase 19: accounts, sharing, benchmarks and operator routes
+
+These are the routes added for the competitive build. All of them are also in `/api/openapi.json`;
+this table adds what a schema cannot say — the refusal behaviour and what each number means.
+
+| Endpoint | Behaviour |
+| --- | --- |
+| POST `/api/auth/register` | Creates an account; emails a verification token when SMTP is configured, otherwise writes a development outbox entry (non-production) or returns 503 with an explicit message (production) |
+| POST `/api/auth/verify/confirm` | Consumes a verification token; single use, expires |
+| POST `/api/auth/verify/request` | Re-sends verification; rate-limited per identity |
+| POST `/api/auth/login` | Issues a session token; failed attempts are counted per identity and reported through `/api/auth/activity` |
+| POST `/api/auth/password/forgot` | Always answers the same way whether or not the address exists — the response is not an account oracle |
+| POST `/api/auth/password/reset` | Consumes a reset token and **invalidates every existing session for that account** |
+| GET `/api/auth/me` | The calling account; 401 for a missing, expired or revoked session, and for the operator token, which is not an account |
+| GET `/api/auth/activity` | The caller's own recent authentication events |
+| POST `/api/auth/logout` | Revokes the presented session |
+| POST `/api/scenarios/{id}/share` | Mints a share token for an owned scenario, bounded by `SPACEAGRISIM_MAX_SHARE_LINKS_PER_SCENARIO` |
+| DELETE `/api/scenarios/{id}/share` | Revokes share tokens for that scenario |
+| GET `/api/shared/{token}` | Public, read-only view of a shared scenario. Re-runs the stored configuration against the current model, so a shared page always shows what the model produces now, not a frozen result |
+| GET `/api/benchmarks` | Measured-versus-modelled numbers from pinned artifacts: the closed-chamber comparison, the NASA leafy anchor, and the CO₂ response factor with its measured optimum |
+| GET `/api/external-validation` | Screening of independent sources for the lettuce model, plus the external check that was run and failed: per-observation predictions computed live, the root-temperature sensitivity probe, and the structural findings. Nothing here is a stored result |
+| GET `/api/metrics` | Prometheus-style counters for the gateway rate limiter |
+| GET `/api/datasets/live-status` | Last OSDR re-sync verdict per study, with the timestamp it was checked |
+| GET `/api/ready` | Extends the original readiness payload with storage durability, email delivery mode, share-link availability, the rate-limit identity ("socket" behind a gateway means every caller shares one budget), whether the operator console is configured, and — when the database fails — a `reason` code plus the SQLSTATE when the server answered at all |
+| GET `/api/admin/summary` | Operator console summary. **404 when `SPACEAGRISIM_ADMIN_TOKEN` is unset, 401 for a missing or wrong token**, compared in constant time. Account identifiers are SHA-256 prefixes, not addresses |
+| GET `/api/admin/audit` | Recent activity by kind, failed logins and live share links, pseudonymised the same way |
