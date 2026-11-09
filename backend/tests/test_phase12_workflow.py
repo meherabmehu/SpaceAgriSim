@@ -15,6 +15,7 @@ import uuid
 import pytest
 from fastapi.testclient import TestClient
 
+from app import research
 from app import workflow
 from app.main import app
 
@@ -46,7 +47,7 @@ def _run(client: TestClient, model_id: str, inputs: dict, **extra):
 def test_catalogue_lists_every_served_model_with_its_family(client):
     payload = client.get("/api/workflow/models").json()
     ids = {row["modelId"] for row in payload["models"]}
-    assert len(ids) == 8
+    assert len(ids) == len(research.MODEL_IDS)
     assert "mizuna-microbial-load-v1" in ids  # retired but kept reproducible
 
     families = {row["modelId"]: row["inputFamily"] for row in payload["models"]}

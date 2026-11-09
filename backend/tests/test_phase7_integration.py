@@ -14,6 +14,7 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from app import research
 from app.routes.research import router
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -119,7 +120,9 @@ def test_checksums_endpoint_verifies_every_model_artifact(client_scientific):
     models = payload["modelArtifacts"]
     # Eight artifacts: Phase 8 added lettuce-earth-growth-v2, Phase 9 added the two
     # OSD-46 radiation classifiers.
-    assert len(models) == 8
+    # Derived from the registry rather than hard-coded: adding a model must not need a test edit,
+    # and must not silently leave one unaudited either.
+    assert len(models) == len(research.MODEL_IDS)
     assert all(m["verified"] for m in models), [m for m in models if not m["verified"]]
 
 

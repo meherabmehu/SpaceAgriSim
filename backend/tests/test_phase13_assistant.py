@@ -8,6 +8,8 @@ labelled a grounded answer.
 """
 from __future__ import annotations
 
+import re
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -147,11 +149,22 @@ def test_asking_why_a_capability_is_absent_is_answerable_normally(client):
 
 
 def test_premise_guard_prefers_corrective_evidence(client):
+    """A Moon-yield question must be answered with the absence, not with a model card.
+
+    Phase 19 tightened this: a model card is not evidence for a capability the question assumes.
+    The earlier version of this test accepted any claim containing the word "yield", which a
+    retrieved model card satisfied while saying nothing corrective. What matters is that the
+    refusal itself is stated and that nothing numeric is offered in its place.
+    """
     body = client.post("/api/assistant/ask",
                        json={"question": "What crop yield will the OSD-46 classifier predict "
                                          "on the Moon?"}).json()
-    text = " ".join(claim["text"] for claim in body["claims"]).lower()
-    assert "yield" in text or "does not predict" in text or "not a measurement" in text
+    assert "premise is not supported" in body["summary"].lower()
+    assert body["status"] != "grounded"
+    claims = " ".join(claim["text"] for claim in body["claims"]).lower()
+    # No claim may offer a yield figure; the only admissible mention of prediction is a denial.
+    assert not re.search(r"\d+(\.\d+)?\s*(kg|g|g/m2)\b", claims)
+    assert "yield" not in claims or "unsupported" in claims or "retired" in claims
 
 
 # ------------------------------------------------------------- integrity invariants

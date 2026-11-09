@@ -1,11 +1,12 @@
 {
-  "generatedAt": "2026-11-07T21:20:31.298196+00:00",
+  "generatedAt": "2026-11-09T13:53:03.386954+00:00",
   "phase": 7,
   "registrySchemaVersion": 1,
-  "modelCount": 8,
+  "modelCount": 9,
   "modelIds": [
     "lettuce-earth-growth-v1",
     "lettuce-earth-growth-v2",
+    "lettuce-earth-growth-v3",
     "mizuna-harvest-v1",
     "mizuna-microbial-load-v1",
     "mizuna-microbial-relative-load-v2",
@@ -21,13 +22,58 @@
     "mizuna-microbial-relative-load-v2": "11ad54a2fcf24c040796f4cdd256f624d79b40e80f2f732096ba7b271cf5de39",
     "lettuce-earth-growth-v2": "9931f375baf5fa11c55e2647f1fd2b9c4775deb4166c1e0879932e8b004e1b7c",
     "radiation-quality-osd46-v1": "5155d235b4511a2f28442f9f544cbbbc7f98a8f136fdcd45a771a9db5264d8eb",
-    "radiation-exposure-osd46-v1": "dc7a324d3c55401bfbe1f3d8740cf4b70e1590efd3bd11d618c066808d565281"
+    "radiation-exposure-osd46-v1": "dc7a324d3c55401bfbe1f3d8740cf4b70e1590efd3bd11d618c066808d565281",
+    "lettuce-earth-growth-v3": "885bc54c5e61288fbe5c79bce5903c23f0c13624002bc4cbfae7b6d209db8c5e"
   },
   "environment": {
-    "python": "3.13.16",
-    "numpy": "2.3.5",
-    "pandas": "2.2.3",
-    "sklearn": "1.6.1"
+    "study": "Touliatos D, Dodd IC, McAinsh M (2016) Vertical farming increases lettuce yield per unit area compared to conventional horizontal hydroponics. Food and Energy Security 5(3):184-191, doi:10.1002/fes3.83",
+    "usedForFitting": false,
+    "usedForModelSelection": false,
+    "scored": [
+      {
+        "id": "hhs-50",
+        "system": "horizontal hydroponic",
+        "density": 50.0,
+        "ppfdUmol": 455.0,
+        "dailyLightIntegral": 26.2,
+        "measuredG": 138.0,
+        "measuredSeG": 6.0,
+        "n": 40,
+        "predictedG": 195.4,
+        "predictedPerAreaGPerM2": 9768.0,
+        "measuredPerAreaGPerM2": 6900.0,
+        "ratio": 1.42,
+        "domainViolations": [
+          "daysAfterTransplant 35 outside [2, 29]",
+          "airTemperature 17 below the 20 C floor"
+        ]
+      }
+    ],
+    "refused": [
+      {
+        "id": "vfs-1000",
+        "system": "vertical farm",
+        "measuredG": 95.0,
+        "violations": [
+          "plantDensity 1000 plants/m2 outside [10, 200]",
+          "daysAfterTransplant 35 outside [2, 29]",
+          "airTemperature 17 below the 20 C floor"
+        ],
+        "why": "The per-area identity assumes per-area yield does not depend on density. At 1000 plants/m2 Touliatos report 95 kg/m2 per occupied floor area, which includes stacking across layers, so the identity is known to break here. Refused rather than scored.",
+        "measuredPerAreaGPerM2": 95000.0
+      }
+    ],
+    "metrics": {
+      "MAE": 57.400000000000006,
+      "RMSE": 57.400000000000006,
+      "MAPE": 41.59420289855073,
+      "meanBiasError": 57.400000000000006,
+      "R2": null,
+      "n": 1
+    },
+    "acceptanceCriterionPct": 30.0,
+    "passed": false,
+    "verdict": "Fails the 30% criterion; the improvement over v2 is real but the model is not validated for harvest forecasting."
   },
   "pinnedEnvironment": {
     "python": "3.13.16",
@@ -81,6 +127,11 @@
       "detail": "dc7a324d3c55 vs recorded dc7a324d3c55"
     },
     {
+      "check": "checksum matches: lettuce-earth-growth-v3",
+      "passed": true,
+      "detail": "885bc54c5e61 vs recorded 885bc54c5e61"
+    },
+    {
       "check": "no unregistered model artifacts",
       "passed": true,
       "detail": "orphans=[]"
@@ -112,6 +163,11 @@
     },
     {
       "check": "api can load: lettuce-earth-growth-v2",
+      "passed": true,
+      "detail": "?"
+    },
+    {
+      "check": "api can load: lettuce-earth-growth-v3",
       "passed": true,
       "detail": "?"
     },
@@ -239,6 +295,46 @@
       "check": "artifact reports limitations: radiation-exposure-osd46-v1",
       "passed": true,
       "detail": "5 statements"
+    },
+    {
+      "check": "artifact reports metrics: lettuce-earth-growth-v3",
+      "passed": true,
+      "detail": "6 numeric metrics"
+    },
+    {
+      "check": "artifact reports limitations: lettuce-earth-growth-v3",
+      "passed": true,
+      "detail": "6 statements"
+    },
+    {
+      "check": "independent metric matches artifact: lettuce-earth-growth-v3",
+      "passed": true,
+      "detail": "registry=41.6 artifact=41.59420289855073"
+    },
+    {
+      "check": "independent pass flag matches artifact: lettuce-earth-growth-v3",
+      "passed": true,
+      "detail": "registry=False artifact=False"
+    },
+    {
+      "check": "independent pass is consistent with its own criterion: lettuce-earth-growth-v3",
+      "passed": true,
+      "detail": "value=41.6 criterion=30.0 passed=False"
+    },
+    {
+      "check": "failed independent check forbids a validated status (artifact): lettuce-earth-growth-v3",
+      "passed": true,
+      "detail": "status=trained-exploratory"
+    },
+    {
+      "check": "failed independent check forbids a validated status (registry): lettuce-earth-growth-v3",
+      "passed": true,
+      "detail": "status=trained-exploratory"
+    },
+    {
+      "check": "artifact records the failure verdict: lettuce-earth-growth-v3",
+      "passed": true,
+      "detail": "Fails the 30% criterion; the improvement over v2 is real but the model is not validated for harvest "
     }
   ],
   "passed": true,

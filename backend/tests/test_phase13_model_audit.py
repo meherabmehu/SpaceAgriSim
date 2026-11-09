@@ -43,8 +43,8 @@ def test_audit_reports_no_failures(report):
 
 def test_every_registered_artifact_is_audited(report):
     registry = json.loads((ARTIFACTS / "registry.json").read_text(encoding="utf-8"))
-    assert report["summary"]["registeredModels"] == len(registry["models"]) == 8
-    assert report["summary"]["auditedModels"] == 8
+    assert report["summary"]["registeredModels"] == len(registry["models"])
+    assert report["summary"]["auditedModels"] == len(registry["models"])
     assert {row["id"] for row in report["models"]} == {entry["id"] for entry in registry["models"]}
 
 
@@ -71,7 +71,10 @@ def test_api_metrics_match_the_artifacts_exactly(report):
 
 def test_superseded_predecessors_are_kept_not_overwritten(report):
     superseded = [row for row in report["models"] if row["supersedes"]]
+    # Two pre-existing pairs: lettuce v2 -> v1 and mizuna v2 -> v1. v3 supersedes nothing - it
+    # serves alongside lettuce v2, whose failed external check is the evidence that justified it.
     assert len(superseded) == 2
+    assert all(row["id"] != "lettuce-earth-growth-v3" for row in superseded)
     for row in superseded:
         # The recorded string is "mizuna-microbial-load-v1 (kept, not overwritten)": the id is the
         # first token, and the parenthetical is the statement of what happened to the old file.

@@ -142,6 +142,49 @@ def main() -> int:
             check(f"validated model has no negative held-out result: {item['id']}",
                   not negatives, f"negative in {negatives}")
 
+    # 7. Independent-validation claims are consistent between registry and artifact.
+    #
+    # Phase 19 gave models an explicit `independentValidation` block: a study, a metric, a value, a
+    # criterion fixed before the measurement, and whether it passed. Two things can go wrong and
+    # both are silent: the block can drift from the artifact it describes, or a failed evaluation
+    # can quietly become a pass. Both are checked against the artifact rather than against
+    # themselves.
+    for item in models:
+        declared = item.get("independentValidation")
+        if not declared:
+            continue
+        path = ARTIFACTS / f"{item['id']}.json"
+        if not path.is_file():
+            check(f"independent validation has an artifact: {item['id']}", False, str(path))
+            continue
+        card = json.loads(path.read_text())
+        recorded = ((card.get("validation") or {}).get("independent") or {})
+        if not recorded:
+            check(f"independent validation is recorded in the artifact: {item['id']}", False,
+                  "registry claims a holdout the artifact does not report")
+            continue
+        artifact_mape = (recorded.get("metrics") or {}).get(declared.get("metric", "MAPE"))
+        check(f"independent metric matches artifact: {item['id']}",
+              artifact_mape is not None and abs(float(artifact_mape) - float(declared["value"])) < 0.05,
+              f"registry={declared['value']} artifact={artifact_mape}")
+        check(f"independent pass flag matches artifact: {item['id']}",
+              bool(recorded.get("passed")) is bool(declared["passed"]),
+              f"registry={declared['passed']} artifact={recorded.get('passed')}")
+        # The criterion is a pre-declared threshold, so a pass must actually clear it.
+        check(f"independent pass is consistent with its own criterion: {item['id']}",
+              bool(declared["passed"]) == (float(declared["value"]) <= float(declared["criterionPct"])),
+              f"value={declared['value']} criterion={declared['criterionPct']} passed={declared['passed']}")
+        # A failed independent check forbids any validated-style status, in the artifact or the registry.
+        if not declared["passed"]:
+            for label, status in (("artifact", card.get("status") or card.get("evidenceStatus")),
+                                  ("registry", item.get("status"))):
+                check(f"failed independent check forbids a validated status ({label}): {item['id']}",
+                      not str(status or "").startswith(("validated", "calibrated", "externally")),
+                      f"status={status}")
+            check(f"artifact records the failure verdict: {item['id']}",
+                  bool(recorded.get("verdict")),
+                  str(recorded.get("verdict") or "no verdict text recorded")[:100])
+
     payload = {
         "generatedAt": datetime.now(timezone.utc).isoformat(),
         "phase": 7,

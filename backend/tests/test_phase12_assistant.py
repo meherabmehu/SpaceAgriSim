@@ -9,7 +9,7 @@ import re
 
 import pytest
 
-from app import assistant, evidence
+from app import assistant, evidence, research
 from app.main import app  # noqa: F401  (ensures routes are registered for the client fixture)
 
 QUESTIONS = [
@@ -244,7 +244,7 @@ def test_every_served_model_carries_its_scientific_classification(client):
     get conflated in a demo.
     """
     models = client.get("/api/models").json()["models"]
-    assert len(models) == 8
+    assert len(models) == len(research.MODEL_IDS)
     for model in models:
         record = model["scientificClassification"]
         assert record is not None, model["id"]

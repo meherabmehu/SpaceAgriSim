@@ -42,6 +42,8 @@ PHYSICAL_LIMITS = {
     "blue": (0.0, 1.0),
     "waterSuppliedL": (0.0, 1e4),
     "establishedPlants": (0.0, 1e4),
+    "photoperiodHours": (0.0, 24.0),
+    "plantDensityPerM2": (0.0, 2000.0),
 }
 
 # Which input family each served model needs. A model is offered only for the family it
@@ -50,6 +52,7 @@ PHYSICAL_LIMITS = {
 INPUT_FAMILY = {
     "lettuce-earth-growth-v1": "environment",
     "lettuce-earth-growth-v2": "environment",
+    "lettuce-earth-growth-v3": "environment",
     "mizuna-harvest-v1": "harvest",
     "mizuna-microbial-load-v1": "microbial",
     "mizuna-microbial-relative-load-v2": "microbial",

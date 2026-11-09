@@ -201,6 +201,35 @@ FEATURES: list[Feature] = [
         ],
     ),
     Feature(
+        id="lettuce-earth-growth-v3",
+        name="Earth lettuce fresh yield per area (v3, daily light integral)",
+        surface="POST /api/predict/lettuce-earth-growth-v3",
+        category=3,
+        status="served",
+        evidence=(
+            "Same WUR experiments as v1 and v2, but the target is fresh yield per square metre "
+            "reconstructed from per-plant mass at the source's 25 plants/m2, and light enters as "
+            "the daily light integral (PPFD x photoperiod) rather than instantaneous PPFD. "
+            "Leave-one-experiment-out: MAE 835.5 g/m2, MAPE 41.7 %, R2 0.861, n=1648."
+        ),
+        user_facing=(
+            "The current Earth lettuce yield model. It needs the photoperiod and the planting "
+            "density the caller is asking about, and returns them with the prediction."
+        ),
+        notes=[
+            "Development set (six PeerJ 17085 observations): MAPE 42.7 %, MBE +2.6 g. These "
+            "observations informed the choice of the light feature, so they are not validation.",
+            "Independent holdout (Touliatos et al. 2016, untouched during selection): MAPE 41.6 % "
+            "against a 30 % criterion declared in advance. It fails, and the API says so.",
+            "One source (1000 plants/m2 vertical farm) is refused rather than scored: the per-area "
+            "identity that converts yield to per-plant mass breaks at that density.",
+            "No cultivar input and no CO2 input. On the six development rows the model gives one "
+            "curve per light level, while the measured response is non-monotonic and differs by "
+            "cultivar by more than the light effect.",
+            "Still Earth data, still trained-exploratory, still not a space-crop prediction.",
+        ],
+    ),
+    Feature(
         id="mizuna-harvest-v1",
         name="Mizuna harvest fresh mass per pillow",
         surface="POST /api/predict/mizuna-harvest-v1",

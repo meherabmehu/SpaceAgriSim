@@ -73,12 +73,13 @@ def test_model_registry_requires_actual_verified_artifacts(scientific_client):
     # candidates that failed their pre-specified evaluation (OSD-782 dose,
     # OSD-411 gravity) are deliberately absent: they were excluded from the
     # registry rather than tuned until they appeared to work.
-    assert len(models) == 8
+    assert len(models) == len(research.MODEL_IDS)
     assert {m["id"] for m in models} == {
         "mizuna-harvest-v1", "tomato-flight-response-v1",
         "lettuce-earth-growth-v1", "lettuce-earth-growth-v2",
         "mizuna-microbial-load-v1", "mizuna-microbial-relative-load-v2",
         "radiation-quality-osd46-v1", "radiation-exposure-osd46-v1",
+        "lettuce-earth-growth-v3",
     }
     assert "radiation-dose-osd782-v1" not in {m["id"] for m in models}
     assert "gravity-reorientation-osd411-v1" not in {m["id"] for m in models}
@@ -324,5 +325,5 @@ def test_scientific_summary_never_claims_validation(scientific_client):
     assert payload["missionCertified"] is False
     assert payload["validatedModels"] == []
     assert payload["platformMaturity"] == "research-and-education"
-    assert len(payload["models"]) == 8
+    assert len(payload["models"]) == len(research.MODEL_IDS)
     assert payload["calibration"]["invariantsAllPassed"] is True
