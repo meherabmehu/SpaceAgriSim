@@ -123,3 +123,49 @@ def test_missing_snapshot_yields_an_honest_answer(monkeypatch, tmp_path):
     assert body["available"] is False
     assert "No provenance re-sync" in body["reason"]
     assert "scripts/resync_osdr.py" in body["howToRefresh"]
+
+
+# ---------------------------------------------------------------------------
+# External validation status
+# ---------------------------------------------------------------------------
+
+def test_external_validation_reports_no_validation_but_a_concrete_path(client):
+    body = client.get("/api/external-validation").json()
+    assert body["available"] is True
+    conclusion = body["conclusion"]
+    assert conclusion["externalValidationAvailable"] is False
+    assert "does not mean the model is wrong" in conclusion["whatThisDoesNotMean"].lower()
+    verdicts = {candidate["id"]: candidate["verdict"] for candidate in body["candidates"]}
+    assert verdicts["peerj-17085"] == "usable-after-transcription"
+    assert verdicts["touliatos-2016"] == "out-of-domain"
+
+
+def test_training_source_is_excluded_from_validation(client):
+    body = client.get("/api/external-validation").json()
+    assert body["trainingSource"]["id"] == "WUR-lettuce"
+    assert "cannot also be the external validation" in body["trainingSource"]["reason"]
+    assert "WUR-lettuce" not in {candidate["id"] for candidate in body["candidates"]}
+
+
+def test_no_candidate_invents_a_measurement(client):
+    """A transcribed number must name where it came from; an untranscribed one must stay empty."""
+    body = client.get("/api/external-validation").json()
+    for candidate in body["candidates"]:
+        if candidate["verdict"] == "usable-after-transcription":
+            assert candidate.get("blocking"), "a pending candidate must say what is blocking it"
+            assert "not yet transcribed" in candidate["blocking"]
+
+
+def test_out_of_domain_refusal_comes_from_the_served_model(client):
+    body = client.get("/api/external-validation").json()
+    check = body["domainCheck"]
+    assert check["available"] is True
+    assert check["flaggedOutOfDistribution"] is True
+    assert {item["feature"] for item in check["violations"]} >= {"airTemperature"}
+
+    # the flag shown here must be the same one the prediction route gives a real caller
+    response = client.post("/api/predict/lettuce-earth-growth-v2", json=check["point"])
+    assert response.status_code == 200
+    served = response.json()
+    assert served["outOfDistribution"] is True
+    assert any("temperature" in w.lower() or "domain" in w.lower() for w in served["warnings"])

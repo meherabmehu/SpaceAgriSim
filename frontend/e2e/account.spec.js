@@ -189,6 +189,15 @@ test("benchmarks show the measured number beside the modelled one", async ({
       .locator(".warning-box p")
       .filter({ hasText: /still rises, but the published soybean chamber data/i }),
   ).toBeVisible();
+
+  // External validation must say "not yet" rather than borrow the cross-validation as if it
+  // were independent, and the in-domain candidate must be shown as waiting on raw data.
+  await expect(page.getByText("Independent validation available")).toBeVisible();
+  await expect(page.locator(".stat-pair", { hasText: "Independent validation available" })).toContainText("not yet");
+  await expect(
+    page.locator(".bench-row", { hasText: /in domain — waiting on raw data/ }),
+  ).toContainText("peerj.17085");
+  await expect(page.getByText(/cannot be used|cannot also be the external validation/i).first()).toBeVisible();
 });
 
 test("the model comparison shows each baseline and no ranking", async ({ page }) => {

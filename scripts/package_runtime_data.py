@@ -24,6 +24,8 @@ def package():
     if not literature:
         raise ValueError('Phase 15 literature artifacts are missing; run acquire_ntrs_bpc_measurements.py')
     sources.extend(literature)
+    # Phase 19: external-validation screening for the lettuce model (literature/ is globbed, so
+    # this file travels with the corpus; the assert above keeps it from being dropped silently).
     sources.extend((ROOT/'ml/artifacts').glob('*.json'))
     registry=json.loads((ROOT/'ml/artifacts/registry.json').read_text())
     for item in registry['models']:

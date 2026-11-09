@@ -199,3 +199,21 @@ See `backend/.env.example`: `SPACEAGRISIM_SMTP_*`, `SPACEAGRISIM_PUBLIC_APP_URL`
 `SPACEAGRISIM_DATABASE_URL`, `SPACEAGRISIM_MAX_SHARE_LINKS_PER_SCENARIO`,
 `SPACEAGRISIM_SHARE_LINK_DAYS`, `SPACEAGRISIM_MAX_ACTIVITY_EVENTS`,
 `SPACEAGRISIM_TRUSTED_PROXY_HOPS`.
+
+## External validation — status: screened, not obtained
+
+`GET /api/external-validation` serves `data/literature/external_validation_screen.json`. It reports
+`externalValidationAvailable: false` and says so on the benchmarks page rather than presenting the
+leave-one-experiment-out figures as if they were independent: four experiments from one research
+group are still one source.
+
+Each candidate is recorded with the four inputs the model needs and a verdict. A candidate is only
+usable when all four are reported per observation. Substituting a study average across three light
+levels for a single-PPFD prediction would produce a number that looks like validation and is not,
+so PeerJ 17085 is held at `usable-after-transcription` with no measurement entered until its
+supplemental table is copied verbatim.
+
+`domainCheck` is evaluated against the served model artifact, not against a copy of the bounds kept
+in the route, so the panel cannot claim a flag the prediction route does not raise. The check runs
+through `/api/predict/lettuce-earth-growth-v2`, which answers 200 with `outOfDistribution: true` and
+the violated bounds attached — flagging, not refusal, and not evidence about accuracy.

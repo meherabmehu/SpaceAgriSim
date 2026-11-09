@@ -16,6 +16,7 @@ import { useResource, RequestState, JsonDetails, Limitations } from "./moduleSup
 export function Benchmarks() {
   const state = useResource("/benchmarks");
   const data = state.data?.benchmarks;
+  const external = useResource("/external-validation");
 
   return (
     <>
@@ -112,6 +113,8 @@ export function Benchmarks() {
             </Card>
           )}
 
+          {external.data && <ExternalValidation body={external.data} />}
+
           <Card title="How to read these tables" action={<Scale size={16} />}>
             <ul className="reading-list">
               {(data.reading || []).map((line) => (
@@ -123,5 +126,53 @@ export function Benchmarks() {
         </>
       )}
     </>
+  );
+}
+
+const VERDICT_LABEL = {
+  "usable-after-transcription": "in domain — waiting on raw data",
+  "out-of-domain": "outside the model's domain",
+  "not-usable": "cannot be used",
+};
+
+/**
+ * Whether anything outside the training data has held the lettuce model to account.
+ *
+ * The answer today is no, and saying that plainly is the point of the panel. A candidate source
+ * that is in domain is shown as waiting on a verbatim transcription rather than quietly scored
+ * against a study average, because the average would look like a validation and would not be one.
+ */
+function ExternalValidation({ body }) {
+  const conclusion = body.conclusion || {};
+  const check = body.domainCheck || {};
+  return (
+    <Card title="External validation" label="SOURCES THE LETTUCE MODEL WAS NOT TRAINED ON">
+      <div className="stat-pair">
+        <span>Independent validation available</span>
+        <strong>{conclusion.externalValidationAvailable ? "yes" : "not yet"}</strong>
+      </div>
+      <p className="muted">{conclusion.statement}</p>
+      <div className="bench-grid">
+        {(body.candidates || []).map((candidate) => (
+          <div className="bench-row" key={candidate.id}>
+            <span>
+              {candidate.title}
+              <small className="muted"> · {candidate.publication}</small>
+            </span>
+            <strong>{VERDICT_LABEL[candidate.verdict] || candidate.verdict}</strong>
+            <em>{candidate.doi}</em>
+            <small>{candidate.reason}</small>
+          </div>
+        ))}
+      </div>
+      <p className="muted">{conclusion.whatThisDoesNotMean}</p>
+      {check.available && (
+        <div className="warning-box">
+          <p>{check.means}</p>
+        </div>
+      )}
+      <p className="muted">{body.scopeNote}</p>
+      <JsonDetails title="Inspect the external-validation record" data={body} />
+    </Card>
   );
 }

@@ -6,7 +6,7 @@ from typing import Literal
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
-from app import benchmarks, research, science_classification
+from app import benchmarks, external_validation, research, science_classification
 
 router = APIRouter(tags=["scientific data and models"])
 
@@ -316,6 +316,12 @@ def datasets(q: str = ""):
     registered = research.manifest()
     return {"datasets": list(_dataset_rows(q)), "source": registered.get("source"),
             "generatedAt": registered.get("generatedAt"), "coverage": research.coverage()}
+
+
+@router.get("/external-validation")
+def external_validation_status():
+    """Which external sources could validate the lettuce model, and why none does yet."""
+    return external_validation.payload()
 
 
 @router.get("/benchmarks")
