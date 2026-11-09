@@ -229,6 +229,8 @@ def readiness():
             # every caller shares one budget; set SPACEAGRISIM_TRUSTED_PROXY_HOPS after checking
             # the forwarding chain on the actual platform.
             "rateLimitIdentity":("forwarded" if settings.trusted_proxy_hops else "socket"),
+            # Whether the operator surface is configured. The token itself is never echoed.
+            "operatorConsole":bool(settings.admin_token),
             "scientificValidation":"uncalibrated mathematical estimates"}
 
 

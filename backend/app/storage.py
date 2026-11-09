@@ -501,3 +501,41 @@ def list_activity(user_id: str, limit: int = 50):
             .where(audit_events.c.user_id == user_id)
             .order_by(audit_events.c.created_at.desc()).limit(max(1, min(limit, 200)))).all()
     return [dict(row._mapping) for row in rows]
+
+
+def list_recent_activity(limit: int = 100):
+    """Newest events across every account, for the operator audit view.
+
+    Returns user_id because the caller pseudonymises it before anything leaves the process; this
+    function is never wired to a public route.
+    """
+    with database().connect() as connection:
+        rows = connection.execute(
+            select(audit_events.c.user_id, audit_events.c.kind, audit_events.c.detail,
+                   audit_events.c.created_at)
+            .order_by(audit_events.c.created_at.desc()).limit(max(1, min(limit, 500)))).all()
+    return [dict(row._mapping) for row in rows]
+
+
+def activity_summary() -> dict:
+    """Aggregate counts an operator can read without seeing a single account."""
+    now = datetime.now(timezone.utc).isoformat()
+    with database().connect() as connection:
+        accounts = connection.execute(select(func.count(users.c.id))).scalar_one()
+        by_kind = dict(connection.execute(
+            select(audit_events.c.kind, func.count(audit_events.c.id))
+            .group_by(audit_events.c.kind)).all())
+        live_links = connection.execute(select(func.count(share_links.c.id)).where(
+            (share_links.c.revoked_at.is_(None)) & (share_links.c.expires_at > now))).scalar_one()
+    return {"accounts": int(accounts), "liveShareLinks": int(live_links),
+            "byKind": {key: int(value) for key, value in sorted(by_kind.items())}}
+
+
+def read_json_artifact(name: str):
+    """Read one metadata artifact out of the active data directory, or None when absent."""
+    from app.research import DATA
+    path = DATA / "metadata" / name
+    if not path.is_file():
+        return None
+    import json
+    return json.loads(path.read_text())

@@ -14,9 +14,10 @@ const ScientificWorkflow = lazyExport(() => import("./modules/ScientificWorkflow
 const Account = lazyExport(() => import("./modules/Account.jsx"), "Account");
 const Benchmarks = lazyExport(() => import("./modules/Benchmarks.jsx"), "Benchmarks");
 const ModelComparison = lazyExport(() => import("./modules/ModelComparison.jsx"), "ModelComparison");
+const Operator = lazyExport(() => import("./modules/Operator.jsx"), "Operator");
 const SharedScenario = lazyExport(() => import("./modules/SharedScenario.jsx"), "SharedScenario");
 
-const modules = { laboratory: Laboratory, comparison: Comparison, datasets: Datasets, predictions: Predictions, crops: Crops, analytics: Analytics, advisor: Advisor, assistant: ResearchAssistant, workflow: ScientificWorkflow, account: Account, benchmarks: Benchmarks, models: ModelComparison, methodology: Methodology };
+const modules = { laboratory: Laboratory, comparison: Comparison, datasets: Datasets, predictions: Predictions, crops: Crops, analytics: Analytics, advisor: Advisor, assistant: ResearchAssistant, workflow: ScientificWorkflow, account: Account, benchmarks: Benchmarks, models: ModelComparison, operator: Operator, methodology: Methodology };
 
 export default function PlatformModules(props) {
   // A share link is a public read-only route (`#shared/<token>`), not a signed-in workspace page.

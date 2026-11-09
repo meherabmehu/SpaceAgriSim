@@ -1975,3 +1975,31 @@
     grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 0.7fr));
   }
 }
+
+/* ---------------------------------------------------------------- Phase 19: operator console */
+.operator-token {
+  display: grid;
+  gap: 0.45rem;
+  margin-bottom: 0.6rem;
+}
+.operator-token label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(148, 163, 184, 0.95);
+}
+.operator-token-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.operator-token-row input {
+  flex: 1 1 18rem;
+  min-width: 0;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding: 0.45rem 0.6rem;
+}

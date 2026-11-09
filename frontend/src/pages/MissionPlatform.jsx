@@ -155,6 +155,8 @@ export default function MissionPlatform() {
     ? "Shared scenario"
     : page === "reset" || page === "verify"
       ? "Account access"
+      : page === "operator"
+        ? "Operator console"
       : NAV.find((n) => n[0] === page)?.[1] || "Mission control";
   const shared = {
     session,

@@ -79,6 +79,10 @@ class Settings(BaseSettings):
     max_share_links_per_scenario: int = Field(default=3, ge=1, le=20)
     share_link_days: int = Field(default=30, ge=1, le=365)
     max_activity_events: int = Field(default=200, ge=10, le=5000)
+    # Operator surface (/admin/*). Unset means the endpoints are not offered at all (404), so a
+    # public deployment does not advertise a panel nobody configured. This is a separate
+    # credential from any account: an operator should not need - or get - a login.
+    admin_token: str = ""
     database_pool_size: int = Field(default=5, ge=1, le=30)
     database_max_overflow: int = Field(default=5, ge=0, le=30)
 
