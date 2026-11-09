@@ -251,29 +251,77 @@ phase (20) plus the three skipped in the new module.
 
 ## 7. Production verification
 
-Filled in only from commands actually run against the live service. See the delivery report for the
-same results; nothing here is inferred from local tests.
+Everything in this section was produced by a command run against the live service on 2026-11-09,
+after the push of `68aaead..62daaf6` to `main`. Nothing here is inferred from local tests.
 
-Baseline captured **before** this phase's code was deployed, against
-`https://spaceagrisim-api.onrender.com/api/ready` [executed, 2026-11-09]:
+### 7.1 Readiness, after the deploy
+
+`GET https://spaceagrisim-api.onrender.com/api/ready` [executed]:
 
 ```json
 {"status": "ready", "database": "available", "databaseDialect": "postgresql",
  "databaseSchema": "present",
- "storage": {"dialect": "postgresql", "durable": true}, "emailDelivery": "unconfigured"}
+ "databaseMigrations": {"applied": 4, "total": 4, "pending": 0},
+ "databasePool": {"dialect": "postgresql", "pooled": true, "size": 5, "checkedOut": 0,
+                  "overflow": -3, "capacity": 10, "exhausted": false,
+                  "note": "per worker process; capacity is pool_size + max_overflow"},
+ "storage": {"dialect": "postgresql", "durable": true}}
 ```
 
-No `databaseMigrations` or `databasePool` field is present in that payload, which is direct
-evidence that the live service was still running the previous commit: the new fields appear only
-after the deploy. **The production smoke test cannot report the new behaviour until the deploy is
-triggered in the Render dashboard** (`autoDeployTrigger: 'off'`).
+The two new fields are present, which is direct evidence that the deployed service is running this
+phase's code: the payload before the push had neither. `applied: 4/4, pending: 0` is the migration
+registry answering from the real production schema — every registered step is present there, and
+inspecting it ran no DDL.
+
+Note for the record: `render.yaml` says `autoDeployTrigger: 'off'`, yet the live service is serving
+the new build. The deploy therefore happened, either from the dashboard default overriding the
+blueprint value or because Render's dashboard setting differs from the file. **The repository's
+stated intent and the live behaviour disagree, and the file should be reconciled with the dashboard
+setting** — that is the honest reading of the two facts; this audit did not observe which one
+caused the deploy.
+
+### 7.2 Production smoke test
+
+`SPACEAGRISIM_SMOKE_PASSWORD=… python3 scripts/production_smoke.py` (default target: the hosted API)
+[executed, twice, 14.5 s and 12.3 s]:
+
+```
+23 passed, 0 failed, 0 skipped
+```
+
+Both runs passed all twenty-three checks, including `migrations applied — 4/4 applied`,
+`ownership enforced — read=404 write=404 delete=404`, `update is durable on re-read — HTTP 200`,
+and `analysis saved` / `analysis retrieved by id — HTTP 200`. The second run also re-used the
+existing probe account instead of creating another, which is what the stable-account design is for.
+
+Cleanliness afterwards, read back through the API as the smoke account itself [executed]:
+
+```
+GET /api/scenarios -> []
+GET /api/analyses  -> 0
+```
+
+So the two production runs created two dedicated smoke accounts (`smoke-test@…`,
+`smoke-probe@…`, both `*.invalid` addresses that cannot receive mail) and left **no scenarios and no
+analyses** behind. No other account's data was read or written at any point.
+
+### 7.3 Other live endpoints
+
+| Endpoint | Result |
+| --- | --- |
+| `GET /api/health` | `{"status":"ok","service":"SpaceAgriSim API","version":"0.1.0"}` [executed] |
+| `GET /api/metrics` | `metrics.database = {slowQueries: {}, slowQueryCount: 0, failures: {}}`, `scope: "per-process; resets on deployment"` [executed] |
+| `https://spaceagrisim-web.onrender.com/` | HTTP 200 [executed] |
+
+The empty counter sets are the expected reading on a freshly deployed, lightly used instance; they
+are reported as observed, not as proof that no slow query has ever occurred.
 
 ## 8. Remaining manual and out-of-scope items
 
 | # | Item | Why it is not done here |
 | --- | --- | --- |
-| 1 | Trigger the API and static-site deploys in the Render dashboard after this push | `autoDeployTrigger: 'off'` in `render.yaml`; no Render API key is available in this environment, and the instruction was not to fabricate deployment success |
-| 2 | Re-run `scripts/production_smoke.py` against the deployed API | Requires the deploy in (1) |
+| 1 | Reconcile `autoDeployTrigger` with the dashboard: the file says `'off'`, the live service is nevertheless serving the new build | Recorded in §7.1 as an observed disagreement, not resolved here |
+| 2 | Decide whether the two smoke accounts should stay in production | They are dedicated `*.invalid` accounts with no data; deleting them is optional and there is no account-deletion endpoint |
 | 3 | Add the CI `postgres` job changes | The push token lacks the `workflow` scope; that job is already on `main` from the previous phase, unchanged here |
 | 4 | Enable automated backups or PITR | Free compute plan has neither; see `docs/DATABASE_BACKUP_AND_RECOVERY.md` for the options and their cost |
 | 5 | Move the rate limiter to a shared store before raising `--workers` | Needs a managed Redis/KV, which is not provisioned and cannot be tested from here |

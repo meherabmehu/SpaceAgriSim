@@ -44,6 +44,14 @@ The Vercel API service packages a small checksum-verified read-only copy of the 
   PostgreSQL pool capacity, slow-statement logging without text or parameters, failure
   classification, readiness 503 paths). Suite: **768 passed / 23 skipped** (SQLite), **791 passed**
   (PostgreSQL); 81 e2e passed; lint/typecheck/build clean.
+- **Production verification.** After the push (`68aaead..62daaf6`), the live API reported
+  `databaseMigrations {applied: 4, total: 4, pending: 0}` and `databasePool {capacity: 10,
+  exhausted: false}`; `scripts/production_smoke.py` passed **23/23 twice** against
+  `https://spaceagrisim-api.onrender.com` and left no scenarios or analyses behind; `/api/health`,
+  `/api/metrics` and the static site all answered. CI run on `62daaf6` succeeded.
+- **Observed discrepancy.** `render.yaml` still says `autoDeployTrigger: 'off'` while the live
+  service is serving the new build; the file and the dashboard setting disagree and should be
+  reconciled.
 - **Not done, deliberately.** Worker count unchanged (still `--workers 1`): the in-process rate
   limiter is the next blocker, not the database. Backups not enabled (needs a paid plan). Deployment
   after the push is a manual Render dashboard action because `autoDeployTrigger` is `off`.
