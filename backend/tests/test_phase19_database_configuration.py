@@ -124,6 +124,18 @@ def test_readiness_reports_sqlstate_but_not_the_driver_message(client, monkeypat
     assert "10.0.0.5" not in response.text
 
 
+def test_missing_sqlstate_is_read_as_never_reaching_the_server(client, monkeypatch):
+    from app import storage
+
+    def boom():
+        raise _FakeOperationalError(None)
+
+    monkeypatch.setattr(storage, "database_health", boom)
+    detail = client.get("/api/ready").json()["detail"]
+    assert "sqlstate" not in detail
+    assert "never reached a database server" in detail["remedy"]
+
+
 def test_driver_diagnosis_survives_a_wrapped_error():
     from app import storage
 

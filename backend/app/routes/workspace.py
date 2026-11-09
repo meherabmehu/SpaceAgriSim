@@ -229,14 +229,24 @@ def readiness():
         }) from exc
     except Exception as exc:
         logger.exception("Readiness database check failed")
+        diagnosis = storage._driver_diagnosis(exc)
+        # A SQLSTATE means the server answered and rejected us; no SQLSTATE means the connection
+        # never got that far, which is a different job for the operator.
+        remedy = (
+            "The database server answered and refused the connection. The SQLSTATE says why: "
+            "28P01 is a rejected password, 3D000 a database that does not exist."
+            if diagnosis.get("sqlstate") else
+            "The connection never reached a database server, so there is no SQLSTATE to read. "
+            "Check the host and port in SPACEAGRISIM_DATABASE_URL, and whether the instance still "
+            "exists and is running; a suspended or deleted managed database fails exactly this way."
+        )
         raise HTTPException(503, {
             "error": "database_unavailable",
             "message": f"Database unavailable: {type(exc).__name__}",
             "reason": "connection-failed",
             # SQLSTATE and exception type only; the driver's message contains the host.
-            **storage._driver_diagnosis(exc),
-            "remedy": "The configured database did not answer. Check that the server is running "
-                      "and that the credentials in SPACEAGRISIM_DATABASE_URL are current.",
+            **diagnosis,
+            "remedy": remedy,
         }) from exc
     return {"status":"ready","simulation":"available","database":database_status["status"],"databaseDialect":database_status["dialect"],
             # Phase 19: an operator can see from /ready whether saved data survives a restart and

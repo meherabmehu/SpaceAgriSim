@@ -237,5 +237,12 @@ Two gaps caused the confusing read:
    `path-unwritable`) and a remedy naming the variable. The URL, host and password are never echoed;
    a test asserts the password does not appear in the response.
 
-`/api/ready` carries the diagnosis, so after the next deploy the reason code states which problem it
-is rather than leaving it to be guessed.
+`/api/ready` carries the diagnosis: `reason`, exception type, and the SQLSTATE when the server
+answered at all. Observed on the live instance after the fix (2026-11-09): `reason:
+connection-failed` with **no SQLSTATE**, which means the connection never reached a database server
+— the URL form was accepted, and the failure is a suspended, deleted or wrongly addressed instance.
+That is a dashboard setting, not a code path; the remaining action is to check the Postgres
+instance behind `SPACEAGRISIM_DATABASE_URL` on Render.
+
+The frontend and browser deployments cannot be verified from here either: the Vercel preview host
+answers `302` (deployment protection), and no Vercel credentials are available in this environment.
