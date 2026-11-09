@@ -1,6 +1,7 @@
 import { GitCompareArrows } from "lucide-react";
 import { Card, number } from "../missionUI.jsx";
 import { useResource, RequestState, JsonDetails } from "./moduleSupport.jsx";
+import { validationText } from "../../services/formatters.js";
 
 /**
  * Side-by-side view of the served models.
@@ -86,7 +87,7 @@ export function ModelComparison() {
                       </p>
                     </td>
                     <td className="wrap">
-                      {model.validation || "—"}
+                      {validationText(model) || "—"}
                       {model.id === externalCheck?.modelId ? (
                         externalCheck.available && (
                           <p className="muted">

@@ -1,5 +1,6 @@
 import { Card, number } from "../missionUI.jsx";
 import { api } from "../../services/platformApi.ts";
+import { validationText } from "../../services/formatters.js";
 import {
   useResource,
   RequestState,
@@ -252,7 +253,7 @@ export function Predictions({ models, registryError }) {
                 {model.samples} samples ? {model.groups} groups
               </p>
             )}
-            <p className="muted fine">{model.validation}</p>
+            <p className="muted fine">{validationText(model)}</p>
             <JsonDetails
               title="Validation metrics and input schema"
               data={{

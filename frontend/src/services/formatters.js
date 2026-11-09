@@ -77,3 +77,50 @@ export function relativeChangePercent(before, after) {
   if (Math.abs(before) < 1e-9) return Math.abs(after) < 1e-9 ? 0 : null
   return ((after - before) / Math.abs(before)) * 100
 }
+
+/**
+ * A model's validation text, whatever shape the artifact records it in.
+ *
+ * Older artifacts store a sentence; models with an independent holdout store a structured object
+ * (internal folds, independent study, development set). The object is what lets the API carry a
+ * verdict it cannot misrepresent, so it stays - but React cannot render it as a child, and a
+ * dashboard error is not a scientific disclosure. This flattens either shape to one sentence, and
+ * prefers the API's own `validationSummary` when a newer artifact supplies one.
+ */
+export function validationText(model) {
+  if (!model) return ''
+  if (typeof model.validationSummary === 'string' && model.validationSummary) {
+    return model.validationSummary
+  }
+  const validation = model.validation
+  if (validation == null) return ''
+  if (typeof validation === 'string') return validation
+  if (typeof validation !== 'object') return String(validation)
+
+  const parts = []
+  const internal = validation.internal
+  if (internal && internal.metrics) {
+    const mape = internal.metrics.MAPE
+    parts.push(
+      `${internal.protocol || 'held-out'}: ` +
+        (mape != null ? `MAPE ${formatNumber(mape, 1)} %` : 'see metrics'),
+    )
+  }
+  const independent = validation.independent
+  if (independent) {
+    const mape = (independent.metrics || {}).MAPE
+    parts.push(
+      `independent holdout ${independent.study ? independent.study.split(',')[0] : 'unnamed'}: ` +
+        (mape != null ? `MAPE ${formatNumber(mape, 1)} % ` : '') +
+        `criterion ${formatNumber(independent.acceptanceCriterionPct ?? 0, 0)} %, ` +
+        `${independent.passed ? 'passed' : 'FAILED'}`.replace('  ', ' ').trim(),
+    )
+  }
+  const development = validation.development
+  if (development && development.metrics) {
+    parts.push(
+      `development set (not validation): MAPE ${formatNumber(development.metrics.MAPE, 1)} %`,
+    )
+  }
+  return parts.filter(Boolean).join(' · ')
+}
