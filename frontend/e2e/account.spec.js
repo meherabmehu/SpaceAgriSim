@@ -192,15 +192,28 @@ test("benchmarks show the measured number beside the modelled one", async ({
 
   // An external check was run against an independent study and the model failed it. The page has
   // to say so, per observation, rather than borrowing the cross-validation as if it were external.
-  const external = page.locator(".stat-pair", { hasText: "Independent validation" });
-  await expect(external).toContainText("failed");
-  await expect(page.getByText(/overpredicts mature fresh weight by a median of/i)).toBeVisible();
-  await expect(page.locator(".bench-row", { hasText: "Baby Cos · upper level" })).toContainText("84.5 g measured");
-  await expect(page.locator(".bench-row", { hasText: "Green Oak · lower level" })).toContainText("×1.67");
+  // Every sentence also appears in the raw JSON inspector on the same card, so each assertion is
+  // scoped to the rendered element or narrowed to the first match; an unscoped getByText resolves
+  // to two nodes and fails strict mode.
+  const externalCard = page.locator(".mission-card", {
+    hasText: "SOURCES THE LETTUCE MODEL WAS NOT TRAINED ON",
+  });
+  await expect(externalCard.locator(".stat-pair").first()).toContainText("failed");
   await expect(
-    page.locator(".warning-box p").filter({ hasText: /must not be used to forecast harvest weight/i }),
+    externalCard.locator("p.muted").filter({ hasText: /overpredicts mature fresh weight/i }).first(),
   ).toBeVisible();
-  await expect(page.getByText("Is the gap just the missing root temperature?")).toBeVisible();
+  await expect(
+    externalCard.locator(".bench-row", { hasText: "Baby Cos · upper level" }),
+  ).toContainText("84.5 g measured");
+  await expect(
+    externalCard.locator(".bench-row", { hasText: "Green Oak · lower level" }),
+  ).toContainText("×1.67");
+  await expect(
+    externalCard.locator(".warning-box p").filter({ hasText: /must not be used to forecast harvest weight/i }),
+  ).toBeVisible();
+  await expect(
+    externalCard.locator(".stat-pair", { hasText: "Is the gap just the missing root temperature?" }),
+  ).toContainText("no");
 });
 
 test("the model comparison shows each baseline and no ranking", async ({ page }) => {
