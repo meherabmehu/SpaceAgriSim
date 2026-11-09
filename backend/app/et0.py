@@ -65,9 +65,21 @@ def load_artifact() -> tuple[dict, dict] | None:
         return card, bundle
     except Exception as error:  # noqa: BLE001 - any failure means "physics only"
         _LAST_LOAD_ERROR.clear()
-        _LAST_LOAD_ERROR.update({"error": f"{type(error).__name__}: {error}",
-                                 "stage": "load"})
+        _LAST_LOAD_ERROR.update({
+            "error": f"{type(error).__name__}: {error}",
+            "stage": "load",
+            "runtimeScikitLearn": _version_of("sklearn"),
+            "trainedScikitLearn": card.get("environment", {}).get("scikit-learn")
+            if isinstance(card, dict) else None,
+        })
         logger.warning("ET0 emulator artifact unusable, serving physics only: %s", error)
+        return None
+
+
+def _version_of(package: str) -> str | None:
+    try:
+        return __import__(package).__version__
+    except Exception:  # noqa: BLE001 - an unimportable package has no version to report
         return None
 
 
@@ -94,6 +106,8 @@ def load_diagnostics() -> dict:
         "modelPath": str(ARTIFACT_MODEL),
         "packages": packages,
         "lastLoadError": _LAST_LOAD_ERROR.get("error"),
+        "runtimeScikitLearn": _LAST_LOAD_ERROR.get("runtimeScikitLearn"),
+        "trainedScikitLearn": _LAST_LOAD_ERROR.get("trainedScikitLearn"),
     }
 
 

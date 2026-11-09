@@ -364,6 +364,45 @@ def test_runtime_requirements_can_load_the_emulator():
         assert package in names, f"{package} missing from backend/requirements.txt (runtime)"
 
 
+def test_runtime_pins_match_the_environment_that_wrote_the_bundle():
+    """A scikit-learn pickle only loads where the module layout it recorded still exists.
+
+    The second production deploy of this feature failed on exactly this: the runtime resolved a
+    1.5-era scikit-learn, the bundle referenced `sklearn._loss`, and the service fell back to
+    physics with "No module named '_loss'". Ranges are right for a developer install and wrong for
+    a persisted estimator, so the runtime pins are compared with the artifact's own record.
+    """
+    trained = _card()["environment"]
+    requirements = (ROOT / "backend" / "requirements.txt").read_text(encoding="utf-8")
+    pins = {}
+    for line in requirements.splitlines():
+        line = line.split("#", 1)[0].strip()
+        if "==" in line:
+            name, version = line.split("==", 1)
+            pins[name.strip().lower()] = version.strip()
+    assert pins.get("scikit-learn") == trained["scikit-learn"]
+    assert pins.get("numpy") == trained["numpy"]
+    training_pins = (ROOT / "ml" / "requirements-training.txt").read_text(encoding="utf-8")
+    assert f"scikit-learn=={trained['scikit-learn']}" in training_pins
+
+
+def test_failed_load_reports_both_scikit_learn_versions(monkeypatch, tmp_path):
+    """When an unpickle fails, the diagnosis names the version mismatch, not just the exception."""
+    broken = tmp_path / "broken.joblib"
+    broken.write_bytes(b"not a pickle")
+    monkeypatch.setattr(et0, "ARTIFACT_MODEL", broken)
+    et0._LAST_LOAD_ERROR.clear()
+    et0.load_artifact.cache_clear()
+    try:
+        status = et0.artifact_status()
+        assert status["available"] is False
+        assert status["diagnostics"]["lastLoadError"]
+        assert status["diagnostics"]["runtimeScikitLearn"] is not None
+        assert status["diagnostics"]["trainedScikitLearn"] == _card()["environment"]["scikit-learn"]
+    finally:
+        et0.load_artifact.cache_clear()
+
+
 def test_emulator_features_match_the_served_bundle():
     bundle = json.loads(json.dumps(_card()["features"]))
     assert bundle == ["T2M_MAX", "T2M_MIN", "T2MDEW", "latitude", "elevationM",

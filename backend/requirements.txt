@@ -23,9 +23,12 @@ PyJWT>=2.8,<3.0
 # only. That is a silent capability loss, which is why the dependency is declared here and asserted
 # by backend/tests/test_phase23_reference_et0.py rather than left to the deployment to discover.
 #
-# Pinned as ranges, like the rest of this file: the artifact was trained with scikit-learn 1.6, and
-# an unpickle is not guaranteed across major versions.
-numpy>=1.26,<3.0
-scipy>=1.11,<2.0
-scikit-learn>=1.4,<2.0
+# Pinned EXACTLY to ml/requirements-training.txt, not to ranges. A scikit-learn pickle is only
+# portable across versions where the private module layout it recorded still exists: the first
+# deploy of this feature installed a 1.5-era build, the bundle referenced sklearn._loss (1.6+), and
+# the load failed with "No module named '_loss'" while every other test passed. Serving a persisted
+# estimator means shipping the versions that wrote it.
+numpy==2.3.5
+scipy==1.17.1
+scikit-learn==1.6.1
 joblib>=1.3,<2.0

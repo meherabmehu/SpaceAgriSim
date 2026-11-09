@@ -5,7 +5,7 @@
  "deployed": false,
  "productionModelChanged": false,
  "deploymentDecision": "exploratory: 3/4 acceptance gates passed. It wins on held-out days from the training sites (+30.74 % lower MAE than Hargreaves) and loses on an unseen site (-13.82 %), so the service serves FAO-56 physics and offers this value alongside it, flagged when inputs leave the training range.",
- "trainedAt": "2026-11-09T20:03:06.928714+00:00",
+ "trainedAt": "2026-11-09T20:38:11.900492+00:00",
  "algorithm": "HistGradientBoostingRegressor(max_iter=400, lr=0.06, leaves=31)",
  "features": [
   "T2M_MAX",
@@ -181,5 +181,12 @@
   "Cross-site error is about one fifth worse than Hargreaves-Samani, so the emulator is never the only number returned.",
   "Reanalysis resamples 0.5 deg x 0.625 deg grid cells, so the site label is a grid-cell value, not an on-site instrument reading."
  ],
+ "environment": {
+  "python": "3.13.16",
+  "scikit-learn": "1.6.1",
+  "numpy": "2.3.5",
+  "joblib": "1.5.3"
+ },
+ "environmentPins": "ml/requirements-training.txt",
  "reproduce": "python3 ml/research/train_et0_emulator.py"
 }

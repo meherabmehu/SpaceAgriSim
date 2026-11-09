@@ -236,6 +236,9 @@ def main() -> int:
         for name in FEATURES
     }
 
+    import joblib
+    import sklearn
+
     bundle = {
         "model": final,
         "features": FEATURES,
@@ -246,8 +249,15 @@ def main() -> int:
         "trainedOn": {"rows": int(len(frame)), "sites": sorted(frame["siteId"].unique()),
                       "firstDay": frame["date"].min().strftime("%Y-%m-%d"),
                       "lastDay": frame["date"].max().strftime("%Y-%m-%d")},
+        # A persisted estimator is only loadable where these versions exist. Recording them here is
+        # what lets the service say "trained with 1.6.1, running 1.5.2" instead of "could not load".
+        "environment": {
+            "python": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
+            "scikit-learn": sklearn.__version__,
+            "numpy": np.__version__,
+            "joblib": joblib.__version__,
+        },
     }
-    import joblib
     joblib.dump(bundle, ARTIFACTS / f"{MODEL_ID}.joblib")
 
     card = {
@@ -317,6 +327,8 @@ def main() -> int:
             "Reanalysis resamples 0.5 deg x 0.625 deg grid cells, so the site label is a grid-cell "
             "value, not an on-site instrument reading.",
         ],
+        "environment": bundle["environment"],
+        "environmentPins": "ml/requirements-training.txt",
         "reproduce": "python3 ml/research/train_et0_emulator.py",
     }
     (ARTIFACTS / f"{MODEL_ID}.json").write_text(json.dumps(card, indent=1) + "\n", encoding="utf-8")
