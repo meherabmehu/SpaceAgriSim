@@ -1,61 +1,75 @@
 {
- "schemaVersion": 1,
- "trainedAt": "2026-11-07T20:23:01.761929+00:00",
- "environment": {
-  "python": "3.13.16",
-  "numpy": "2.3.5",
-  "pandas": "2.2.3",
-  "sklearn": "1.6.1"
- },
- "models": [
-  {
-   "id": "lettuce-earth-growth-v1",
-   "artifact": "ml/artifacts/lettuce-earth-growth-v1.json",
-   "sha256": "b5af3819a4d55a1d9f7dd293886a72c692bbc57bf6d488bbcf45b1a4079491db"
+  "schemaVersion": 1,
+  "trainedAt": "2026-11-07T20:23:01.761929+00:00",
+  "environment": {
+    "python": "3.13.16",
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "sklearn": "1.6.1"
   },
-  {
-   "id": "mizuna-harvest-v1",
-   "artifact": "ml/artifacts/mizuna-harvest-v1.json",
-   "sha256": "78029d6d9a93946bdaf50427f697a463a805f3c588a4deb17afb61314cf22f38"
-  },
-  {
-   "id": "mizuna-microbial-load-v1",
-   "artifact": "ml/artifacts/mizuna-microbial-load-v1.json",
-   "sha256": "9868c660351f906ede6001ea7e2eb8d5fd2fc7b60b1c393c3dec94017db8cfff"
-  },
-  {
-   "id": "tomato-flight-response-v1",
-   "artifact": "ml/artifacts/tomato-flight-response-v1.json",
-   "sha256": "b1dd72b63130fccc6a334e3de286ae6774152291ce5fe00caf365d74cb10f593"
-  },
-  {
-   "id": "mizuna-microbial-relative-load-v2",
-   "artifact": "ml/artifacts/mizuna-microbial-relative-load-v2.json",
-   "sha256": "11ad54a2fcf24c040796f4cdd256f624d79b40e80f2f732096ba7b271cf5de39",
-   "supersedes": "mizuna-microbial-load-v1"
-  },
-  {
-   "id": "lettuce-earth-growth-v2",
-   "artifact": "ml/artifacts/lettuce-earth-growth-v2.json",
-   "sha256": "9931f375baf5fa11c55e2647f1fd2b9c4775deb4166c1e0879932e8b004e1b7c",
-   "supersedes": "lettuce-earth-growth-v1"
-  },
-  {
-   "id": "radiation-quality-osd46-v1",
-   "artifact": "ml/artifacts/radiation-quality-osd46-v1.json",
-   "sha256": "5155d235b4511a2f28442f9f544cbbbc7f98a8f136fdcd45a771a9db5264d8eb"
-  },
-  {
-   "id": "radiation-exposure-osd46-v1",
-   "artifact": "ml/artifacts/radiation-exposure-osd46-v1.json",
-   "sha256": "dc7a324d3c55401bfbe1f3d8740cf4b70e1590efd3bd11d618c066808d565281"
+  "models": [
+    {
+      "id": "lettuce-earth-growth-v1",
+      "artifact": "ml/artifacts/lettuce-earth-growth-v1.json",
+      "sha256": "b5af3819a4d55a1d9f7dd293886a72c692bbc57bf6d488bbcf45b1a4079491db"
+    },
+    {
+      "id": "mizuna-harvest-v1",
+      "artifact": "ml/artifacts/mizuna-harvest-v1.json",
+      "sha256": "78029d6d9a93946bdaf50427f697a463a805f3c588a4deb17afb61314cf22f38"
+    },
+    {
+      "id": "mizuna-microbial-load-v1",
+      "artifact": "ml/artifacts/mizuna-microbial-load-v1.json",
+      "sha256": "9868c660351f906ede6001ea7e2eb8d5fd2fc7b60b1c393c3dec94017db8cfff"
+    },
+    {
+      "id": "tomato-flight-response-v1",
+      "artifact": "ml/artifacts/tomato-flight-response-v1.json",
+      "sha256": "b1dd72b63130fccc6a334e3de286ae6774152291ce5fe00caf365d74cb10f593"
+    },
+    {
+      "id": "mizuna-microbial-relative-load-v2",
+      "artifact": "ml/artifacts/mizuna-microbial-relative-load-v2.json",
+      "sha256": "11ad54a2fcf24c040796f4cdd256f624d79b40e80f2f732096ba7b271cf5de39",
+      "supersedes": "mizuna-microbial-load-v1"
+    },
+    {
+      "id": "lettuce-earth-growth-v2",
+      "artifact": "ml/artifacts/lettuce-earth-growth-v2.json",
+      "sha256": "9931f375baf5fa11c55e2647f1fd2b9c4775deb4166c1e0879932e8b004e1b7c",
+      "supersedes": "lettuce-earth-growth-v1"
+    },
+    {
+      "id": "radiation-quality-osd46-v1",
+      "artifact": "ml/artifacts/radiation-quality-osd46-v1.json",
+      "sha256": "5155d235b4511a2f28442f9f544cbbbc7f98a8f136fdcd45a771a9db5264d8eb"
+    },
+    {
+      "id": "radiation-exposure-osd46-v1",
+      "artifact": "ml/artifacts/radiation-exposure-osd46-v1.json",
+      "sha256": "dc7a324d3c55401bfbe1f3d8740cf4b70e1590efd3bd11d618c066808d565281"
+    },
+    {
+      "id": "lettuce-earth-growth-v3",
+      "artifact": "ml/artifacts/lettuce-earth-growth-v3.json",
+      "sha256": "885bc54c5e61288fbe5c79bce5903c23f0c13624002bc4cbfae7b6d209db8c5e",
+      "supersedes": "",
+      "status": "trained-exploratory",
+      "independentValidation": {
+        "study": "Touliatos et al. 2016",
+        "metric": "MAPE",
+        "value": 41.6,
+        "passed": false,
+        "criterionPct": 30.0
+      }
+    }
+  ],
+  "dataVersion": "e5a3967ac7c471a2a81ed71e6ac179e8ca01809d199a8739afc9b498b18fdc7c",
+  "externalDataVersion": "539e724e1ca68142a96f9f45ba4247e45ba6b120a259e9017d82d01b71e14d04",
+  "externalTrainingEnvironment": {
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "sklearn": "1.6.1"
   }
- ],
- "dataVersion": "e5a3967ac7c471a2a81ed71e6ac179e8ca01809d199a8739afc9b498b18fdc7c",
- "externalDataVersion": "539e724e1ca68142a96f9f45ba4247e45ba6b120a259e9017d82d01b71e14d04",
- "externalTrainingEnvironment": {
-  "numpy": "2.3.5",
-  "pandas": "2.2.3",
-  "sklearn": "1.6.1"
- }
 }
