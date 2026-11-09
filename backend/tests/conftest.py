@@ -1,3 +1,18 @@
+import os
+import tempfile
+
+# The suite must not run against `sqlite:///:memory:`.
+#
+# An in-memory SQLite database belongs to a single connection, while the test client dispatches
+# synchronous endpoints on worker threads: a request served by a fresh thread opened its own empty
+# database and failed with "no such table: users". A file on disk gives every connection the same
+# schema and keeps the concurrent-quota test meaningful. A URL the caller deliberately points at a
+# real database (PostgreSQL, a named file) is left alone.
+_DATABASE_URL = os.environ.get("SPACEAGRISIM_DATABASE_URL", "")
+if _DATABASE_URL.startswith("sqlite://") and ":memory:" in _DATABASE_URL:
+    _scratch = tempfile.mkdtemp(prefix="spaceagrisim-tests-")
+    os.environ["SPACEAGRISIM_DATABASE_URL"] = f"sqlite:///{_scratch}/spaceagrisim.db"
+
 import warnings
 
 import pytest

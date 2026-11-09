@@ -38,6 +38,14 @@ async function apiSignIn(page, email, password) {
   return session;
 }
 
+async function readSession(page) {
+  const session = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem("spaceagrisim.auth") || "null"),
+  );
+  expect(session?.accessToken).toBeTruthy();
+  return session;
+}
+
 async function registerViaApi(page, email) {
   const response = await page.request.post("/api/auth/register", {
     data: { email, password: PASSWORD },
@@ -56,7 +64,9 @@ test("an account can save a scenario and share it without exposing the owner", a
   // A saved scenario needs a signed-in browser, so the session is injected directly.
   await apiSignIn(page, email, PASSWORD);
   await ready(page, "laboratory");
+  const token = (await readSession(page)).accessToken;
   const saved = await page.request.post("/api/scenarios", {
+    headers: { Authorization: `Bearer ${token}` },
     data: {
       name: `Shared ${testInfo.project.name}`,
       configuration: {
@@ -97,7 +107,7 @@ test("an account can save a scenario and share it without exposing the owner", a
     sharedPage.getByText(/Read-only shared scenario/).first(),
   ).toBeVisible();
   const body = await sharedPage.locator("body").innerText();
-  expect(body).not.toContain(email) ?? undefined;
+  expect(body).not.toContain(email);
   expect(body.toLowerCase()).not.toContain("owner");
 
   // Revoking from the account page must make that link stop answering.
@@ -117,6 +127,7 @@ test("a password reset signs the old session out", async ({ page }, testInfo) =>
 
   await ready(page, "account");
   await expect(page.getByText(email, { exact: true })).toBeVisible();
+  const oldToken = (await readSession(page)).accessToken;
 
   // The development server has no SMTP, so the reset token is returned directly.
   const forgot = await page.request.post("/api/auth/password/forgot", {
@@ -140,7 +151,7 @@ test("a password reset signs the old session out", async ({ page }, testInfo) =>
 
   // The stored session is gone, and the old password no longer works.
   const stale = await page.request.get("/api/auth/me", {
-    headers: { Authorization: `Bearer ${await page.evaluate(() => JSON.parse(localStorage.getItem("spaceagrisim.auth") || "null")?.accessToken ?? "")}` },
+    headers: { Authorization: `Bearer ${oldToken}` },
   });
   expect(stale.status()).toBe(401);
   const oldLogin = await page.request.post("/api/auth/login", {
@@ -168,9 +179,10 @@ test("benchmarks show the measured number beside the modelled one", async ({
   await expect(page.getByText("59.5 g m⁻² day⁻¹")).toBeVisible();
 
   // The CO2 factor is evaluated by the model, so all three reference points are present.
-  await expect(page.getByText("420 ppm")).toBeVisible();
-  await expect(page.getByText("1000 ppm")).toBeVisible();
-  await expect(page.getByText("3000 ppm")).toBeVisible();
+  // The UI formats thousands, so the rendered labels are "420 ppm", "1,000 ppm" and "3,000 ppm".
+  await expect(page.locator(".bench-row", { hasText: "420 ppm" })).toBeVisible();
+  await expect(page.locator(".bench-row", { hasText: "1,000 ppm" })).toBeVisible();
+  await expect(page.locator(".bench-row", { hasText: "3,000 ppm" })).toBeVisible();
   await expect(
     page.getByText(/still rises, but the published soybean chamber data/i),
   ).toBeVisible();
@@ -181,7 +193,10 @@ test("the model comparison shows each baseline and no ranking", async ({ page })
   await expect(
     page.getByRole("heading", { name: /Every served model/i }),
   ).toBeVisible();
+  // Wait for the registry payload rather than sampling the DOM once: the table fills after the
+  // fetch resolves, and an immediate count() would read zero on a slow runner.
   const rows = page.locator(".compare-table tbody tr");
+  await expect(rows.first()).toBeVisible();
   expect(await rows.count()).toBeGreaterThan(0);
   await expect(page.locator(".compare-table thead")).toContainText("Baseline");
   await expect(page.getByText(/It does not rank models/i)).toBeVisible();
