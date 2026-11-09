@@ -276,3 +276,81 @@ Every line below is a response this session received; the raw payload is reprodu
    substitute; the gap matrix says so.
 7. Decide whether the weather-driven water path should become the default. It should not, until
    step 6 produces a measurement to arbitrate the ~60 % difference between the two curves.
+
+## J. Phase 25 — ERA5-Land completion and experimental water-use readiness
+
+Sections A–I describe Phase 23 and are unchanged. This section records what Phase 25 added, and
+where an older statement is superseded, says so.
+
+**Scope.** Repository-level implementation, validation, testing and documentation only. **No Render
+operation was performed** — no deploy trigger, no service, environment-variable, database or
+start-command change. §H's auto-deploy description and §I step 1's Render half are superseded by
+that restriction; production is the owner's responsibility.
+
+### J.1 Material correction: Phase 24 is not on the remote
+
+The Phase 24 work package (a validation pipeline plus its tests and documentation) never reached
+`edd95a6`. Its delivery report was deleted rather than shipped, and the code was re-implemented and
+extended as part of Phase 25. Evidence lives in `docs/PHASE25_DELIVERY_REPORT.md` and
+`docs/ERA5_LAND_INDEPENDENT_VALIDATION.md`, both of which refer only to committed files.
+
+### J.2 New scientific evidence — and the claim it supports
+
+The reference ET0 path, previously checked only against one provider's reanalysis (§E), is now
+checked against four sources and one independent implementation over 2021–2023 at six sites
+(6 570 site-days), with the disagreement decomposed by a Shapley game over the five daily drivers:
+
+| Control | MAE | RMSE | bias | R² |
+|---|---|---|---|---|
+| Implementation (our ERA5-daily PM vs provider FAO-56 ET0) | 0.181 | 0.228 | +0.009 | 0.987 |
+| Form (hourly-summed vs daily equation) | 0.273 | 0.328 | −0.213 | 0.985 |
+| Forcing (ERA5-daily PM vs NASA POWER ET0) | 0.519 | 0.703 | −0.132 | 0.907 |
+| Station (ERA5-Hargreaves vs NOAA ISD Hargreaves) | 0.598 | 0.807 | +0.007 | 0.841 |
+
+**The claim this supports:** the residual disagreement is weather forcing, not equation
+implementation — two independent implementations on the same forcing agree to +0.009 mm d⁻¹.
+**The claim it does not support:** independent *field* validation. Two of the four legs are
+reanalyses with overlapping observing systems and the station leg is a point station measuring a
+temperature-only method. §E's "no independent weather source" line is therefore **narrowed, not
+closed**.
+
+### J.3 What was not completed
+
+* **ERA5-Land via CDS: not executed** — no `CDSAPI_URL`/`CDSAPI_KEY` in this environment. The
+  retrieval path is implemented and unit-tested against synthetic NetCDF, and the run populates
+  itself on the first credentialed invocation. No ERA5-Land FAO-56 metric appears anywhere, and
+  `docs/ERA5_LAND_VALIDATION_RESULTS.md` was deliberately not created.
+* **The experiment: not performed.** Ingestion, schema and protocol exist; zero measurements exist.
+  `measured-eta` remains **blocking / open**.
+* **No dataset was acquired to change a count**, and **no gap was claimed closed** — the matrix is
+  still 12 gaps (3 blocking, 4 major, 5 minor). The catalogue grew 21 → 23 with three class-C
+  entries (A:1 B:5 C:8 D:3 E:5 F:1), which is a bookkeeping consequence of using those products.
+* **Model classification is unchanged**: the ET0 emulator remains `trained-exploratory` at 3/4
+  gates with its cross-site gate failing; no threshold was touched.
+
+### J.4 Tests
+
+| Suite | Result |
+|---|---|
+| Backend (SQLite), full | **950 passed, 24 skipped, 0 failed** |
+| Phase 25 ET0 validation | **60 passed** |
+| Phase 25 experimental ingestion | **40 passed** |
+| Phase 23 reference ET0 (updated to 23 datasets) | **58 passed** |
+| `scripts/audit_models.py` / `scripts/verify_model_registry.py` | 141 checks 0 failed / 60 of 60 |
+| Catalogue `--check` / gap-matrix build | up to date (23 datasets) / 12 gaps |
+
+The skip set is unchanged: 24 PostgreSQL tests, because no PostgreSQL server exists in this sandbox
+and the CI backend job also runs SQLite in memory. §G's "not run" list still applies verbatim.
+
+### J.5 Remaining manual steps, revised
+
+§I steps 1 (Render half) and 5 are restated here:
+
+1. **Push** the Phase 25 commits.
+2. **Export `CDSAPI_URL` and `CDSAPI_KEY`**, then run
+   `python3 scripts/et0_validation/run_validation.py` to populate the two `era5_land_cds_pm_*`
+   comparisons. Only then create `docs/ERA5_LAND_VALIDATION_RESULTS.md`.
+3. **PostgreSQL suite** (§I step 3) and **frontend lint/typecheck/build/E2E** (§I step 4) are
+   unchanged.
+4. **Commission the water-use trial** (§I step 6) — still the only route to closing the blocking gap.
+5. **Do not** promote the weather-driven water path to default (§I step 7).

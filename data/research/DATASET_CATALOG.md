@@ -4,15 +4,15 @@ Generated from `data/research/dataset_catalog.json` on 2026-11-09 by `ml/researc
 
 Every dataset the project has evaluated, with the licence evidence behind its class. The class answers one question: could this support a claim the product makes, under the licence it is actually distributed with?
 
-**21 datasets evaluated.** A: 1, B: 6, C: 5, D: 3, E: 5, F: 1.
+**23 datasets evaluated.** A: 1, B: 5, C: 8, D: 3, E: 5, F: 1.
 
 ## Classes
 
 | Class | Meaning | Datasets |
 |---|---|---|
 | **A** | acquired and used in this repository | 1 |
-| **B** | usable after preprocessing - open licence, relevant variables, usable scale | 6 |
-| **C** | external validation only - wrong task, sensor or size for training | 5 |
+| **B** | usable after preprocessing - open licence, relevant variables, usable scale | 5 |
+| **C** | external validation only - wrong task, sensor or size for training | 8 |
 | **D** | scientific reference only - open and correct, but cannot validate this product | 3 |
 | **E** | needs an agreement or a licence decision before use | 5 |
 | **F** | not suitable - the licence prohibits the intended use | 1 |
@@ -21,7 +21,7 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 
 | Grade | Meaning | Datasets |
 |---|---|---|
-| verified | the terms were read for this entry | 7 |
+| verified | the terms were read for this entry | 9 |
 | documented-secondary | a credible registry or dataset card states it | 10 |
 | unverified | believed open, not checked; must be checked before use | 4 |
 
@@ -33,7 +33,9 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 | [SMAP L4 Global 3-hourly 9 km surface and root-zone soil moisture (SPL4SMGP v8)](#smap-l4-ssm) | **B** | NASA open data policy; free Earthdata login required | permitted | no |
 | [MODIS/Terra Vegetation Indices 16-Day L3 Global 250 m (MOD13Q1 v061)](#mod13q1-v061) | **B** | CC BY 4.0 (AWS Open Data registry entry for MODIS) | permitted with attribution | no |
 | [GPM IMERG Final Precipitation L3 Half Hourly 0.1 deg (3B-HH v07)](#gpm-imerg-3imerghh-07) | **B** | openly shared without restriction per EOSDIS policy; Earthdata login required | permitted | no |
-| [ERA5-Land hourly reanalysis](#era5-land) | **B** | Copernicus licence: free, attribution and no endorsement required | permitted with attribution | no |
+| [ERA5-Land hourly reanalysis](#era5-land) | **C** | Copernicus licence: free, attribution and no endorsement required | permitted with attribution | yes |
+| [ERA5 hourly reanalysis (0.25 deg) via Open-Meteo archive](#era5-hourly-0p25) | **C** | Open-Meteo CC BY 4.0; values under the Copernicus licence | permitted with attribution | yes |
+| [NOAA ISD-Lite hourly surface observations](#noaa-isd-lite) | **C** | U.S. Government work, public domain | permitted | yes |
 | [SoilGrids 2.0 predicted soil properties](#soilgrids-2-0) | **B** | CC BY 4.0 | permitted with attribution | no |
 | [CHIRPS v2.0 quasi-global precipitation](#chirps-v2-0) | **B** | public domain per the CHC data page; citation requested | permitted with attribution | no |
 | [Global Wheat Head Detection 2021](#gwhd2021) | **C** | CC BY 4.0 | permitted with attribution | no |
@@ -119,8 +121,8 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 
 ### ERA5-Land hourly reanalysis  `era5-land`
 
-- **Class:** B - usable after preprocessing - open licence, relevant variables, usable scale
-- **Why this class:** The independent weather source this project needs, and the cheapest way to close the `independent-et0` gap. Not imported: the CDS API needs a free personal token, which the owner has not issued.
+- **Class:** C - external validation only - wrong task, sensor or size for training
+- **Why this class:** External validation input, not training data. Used through a credential-free delivery for its 0.1 deg temperature field only: that route returns null for radiation and wind, so it cannot drive a full FAO-56 computation. The hourly radiation and wind fields still require a CDS token and were not retrieved.
 - **Publisher:** Copernicus Climate Change Service (C3S) via the Climate Data Store
 - **URL:** https://cds.climate.copernicus.eu/datasets/reanalysis-era5-land
 - **Format:** NetCDF / GRIB via CDS API
@@ -130,8 +132,40 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 - **Licence:** Copernicus licence: free, attribution and no endorsement required
 - **Licence evidence:** documented-secondary (https://cds.climate.copernicus.eu/licences/)
 - **Commercial use:** permitted with attribution
-- **Imported:** no - blocked on a free CDS API token
-- **Caveat:** Same family of physics as every reanalysis; it is independent of MERRA-2, not of reanalysis.
+- **Imported:** yes - data/validation/et0/ - temperature-only Hargreaves leg, no training use
+- **Caveat:** Temperature-only in every result reported here, and its 0.1 deg Tmax was further from the station than ERA5 0.25 deg at all six validation sites: a finer grid is not automatically closer to a point observation.
+
+### ERA5 hourly reanalysis (0.25 deg) via Open-Meteo archive  `era5-hourly-0p25`
+
+- **Class:** C - external validation only - wrong task, sensor or size for training
+- **Why this class:** The primary forcing of the independent ET0 validation and the source of the provider's own FAO-56 series used as the implementation control. External validation only; it never enters training.
+- **Publisher:** ECMWF/C3S, delivered by the Open-Meteo archive API
+- **URL:** https://open-meteo.com/en/docs/historical-weather-api
+- **Format:** JSON over HTTPS
+- **Coverage:** global, 0.25 deg, hourly, 1940-present
+- **Variables:** 2 m temperature, 2 m dew point, shortwave radiation, 10 m wind speed, surface pressure, provider FAO-56 ET0
+- **Units:** degC; degC; W m^-2; m s^-1; hPa; mm d^-1
+- **Licence:** Open-Meteo CC BY 4.0; values under the Copernicus licence
+- **Licence evidence:** verified (https://open-meteo.com/en/license)
+- **Commercial use:** permitted with attribution
+- **Imported:** yes - data/validation/et0/harmonised_daily.csv - validation forcing
+- **Caveat:** A reanalysis: agreement with it bounds implementation and forcing error, not physical truth, and it shares much of its observing system with MERRA-2.
+
+### NOAA ISD-Lite hourly surface observations  `noaa-isd-lite`
+
+- **Class:** C - external validation only - wrong task, sensor or size for training
+- **Why this class:** The only leg in the ET0 validation with no reanalysis lineage: a point station measurement. It carries no radiation field, so it can only support a temperature-based method. External validation only.
+- **Publisher:** NOAA National Centers for Environmental Information
+- **URL:** https://www.ncei.noaa.gov/pub/data/noaa/isd-lite/
+- **Format:** gzipped fixed-width text, one file per station-year
+- **Coverage:** per station, hourly, global
+- **Variables:** air temperature, dew point, sea-level pressure, wind speed, sky cover code, precipitation
+- **Units:** degC (stored as tenths); hPa; m s^-1; coded
+- **Licence:** U.S. Government work, public domain
+- **Licence evidence:** verified (https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.ncdc:C00516)
+- **Commercial use:** permitted
+- **Imported:** yes - data/validation/et0/ - Hargreaves observational leg
+- **Caveat:** A point observation at an airport, not a grid cell: representativeness, not accuracy, is the limiting factor, and it cannot confirm the radiation term.
 
 ### SoilGrids 2.0 predicted soil properties  `soilgrids-2-0`
 

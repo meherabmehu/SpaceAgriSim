@@ -144,13 +144,63 @@ DATASETS = [
         "licenseUrl": "https://cds.climate.copernicus.eu/licences/",
         "licenseEvidence": "documented-secondary",
         "commercialUse": "permitted with attribution",
-        "usabilityClass": "B",
-        "classReason": ("The independent weather source this project needs, and the cheapest way "
-                        "to close the `independent-et0` gap. Not imported: the CDS API needs a "
-                        "free personal token, which the owner has not issued."),
-        "imported": False,
-        "importNote": "blocked on a free CDS API token",
-        "caveat": "Same family of physics as every reanalysis; it is independent of MERRA-2, not of reanalysis.",
+        "usabilityClass": "C",
+        "classReason": ("External validation input, not training data. Used through a "
+                        "credential-free delivery for its 0.1 deg temperature field only: that "
+                        "route returns null for radiation and wind, so it cannot drive a full "
+                        "FAO-56 computation. The hourly radiation and wind fields still require "
+                        "a CDS token and were not retrieved."),
+        "imported": True,
+        "importNote": "data/validation/et0/ - temperature-only Hargreaves leg, no training use",
+        "caveat": ("Temperature-only in every result reported here, and its 0.1 deg Tmax was "
+                   "further from the station than ERA5 0.25 deg at all six validation sites: a "
+                   "finer grid is not automatically closer to a point observation."),
+    },
+    {
+        "id": "era5-hourly-0p25",
+        "name": "ERA5 hourly reanalysis (0.25 deg) via Open-Meteo archive",
+        "publisher": "ECMWF/C3S, delivered by the Open-Meteo archive API",
+        "url": "https://open-meteo.com/en/docs/historical-weather-api",
+        "format": "JSON over HTTPS",
+        "coverage": "global, 0.25 deg, hourly, 1940-present",
+        "variables": ["2 m temperature", "2 m dew point", "shortwave radiation",
+                      "10 m wind speed", "surface pressure", "provider FAO-56 ET0"],
+        "units": "degC; degC; W m^-2; m s^-1; hPa; mm d^-1",
+        "license": "Open-Meteo CC BY 4.0; values under the Copernicus licence",
+        "licenseUrl": "https://open-meteo.com/en/license",
+        "licenseEvidence": "verified",
+        "commercialUse": "permitted with attribution",
+        "usabilityClass": "C",
+        "classReason": ("The primary forcing of the independent ET0 validation and the source of "
+                        "the provider's own FAO-56 series used as the implementation control. "
+                        "External validation only; it never enters training."),
+        "imported": True,
+        "importNote": "data/validation/et0/harmonised_daily.csv - validation forcing",
+        "caveat": ("A reanalysis: agreement with it bounds implementation and forcing error, not "
+                   "physical truth, and it shares much of its observing system with MERRA-2."),
+    },
+    {
+        "id": "noaa-isd-lite",
+        "name": "NOAA ISD-Lite hourly surface observations",
+        "publisher": "NOAA National Centers for Environmental Information",
+        "url": "https://www.ncei.noaa.gov/pub/data/noaa/isd-lite/",
+        "format": "gzipped fixed-width text, one file per station-year",
+        "coverage": "per station, hourly, global",
+        "variables": ["air temperature", "dew point", "sea-level pressure", "wind speed",
+                      "sky cover code", "precipitation"],
+        "units": "degC (stored as tenths); hPa; m s^-1; coded",
+        "license": "U.S. Government work, public domain",
+        "licenseUrl": "https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.ncdc:C00516",
+        "licenseEvidence": "verified",
+        "commercialUse": "permitted",
+        "usabilityClass": "C",
+        "classReason": ("The only leg in the ET0 validation with no reanalysis lineage: a point "
+                        "station measurement. It carries no radiation field, so it can only "
+                        "support a temperature-based method. External validation only."),
+        "imported": True,
+        "importNote": "data/validation/et0/ - Hargreaves observational leg",
+        "caveat": ("A point observation at an airport, not a grid cell: representativeness, not "
+                   "accuracy, is the limiting factor, and it cannot confirm the radiation term."),
     },
     {
         "id": "soilgrids-2-0",

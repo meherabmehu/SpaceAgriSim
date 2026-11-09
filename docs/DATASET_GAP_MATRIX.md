@@ -20,8 +20,8 @@ None of them is closed. The point of the matrix is that each open gap has a name
 
 | # | Capability | What is needed | Severity | Gap type | Status |
 |---|---|---|---|---|---|
-| 1 | Predicted crop water use in litres per plant per day | Measured evapotranspiration or sap-flow/lysimeter water use for the modelled crops at plant scale | **blocking** | no-data | open |
-| 2 | The claim that the ET0 target is itself correct | An ET0 or weather source that does not share MERRA-2 lineage with POWER | **major** | credential-blocked | open |
+| 1 | Predicted crop water use in litres per plant per day | Measured evapotranspiration or sap-flow/lysimeter water use for the modelled crops at plant scale | **blocking** | no-data | open and blocking. The ingestion pipeline and the pre-registered protocol exist and are tested |
+| 2 | The claim that the ET0 target is itself correct | A weather or ET0 source that does not share MERRA-2 lineage with POWER, and a measured latent-heat series to convert mutual agreement into physical truth | **major** | partially-addressed | open, partially addressed: disagreement now decomposed into formulation (0.273 mm/d), forcing (0.519) and implementation (+0.009) - the residual is weather, not code - but every leg is either a reanalysis or a temperature-only point method, so nothing here is field validation of the ET0 magnitude |
 | 3 | Effect of Mars or lunar gravity on crop growth | Yield or growth measurements at gravity levels other than 1 g, with the same cultivar and protocol as the terrestrial baseline | **blocking** | no-data | open and permanently so for the current data landscape |
 | 4 | Response to specific LED spectra and photoperiods | Biomass or yield response surfaces across spectra, PPFD and photoperiod for each supported crop | **major** | insufficient | open |
 | 5 | Root-zone water status in a hydroponic or substrate system | Substrate water content, irrigation schedule and drainage fraction at high temporal resolution | **major** | no-data | open |
@@ -38,20 +38,20 @@ None of them is closed. The point of the matrix is that each open gap has a name
 ### Predicted crop water use in litres per plant per day  `measured-eta`
 
 - **Needed:** Measured evapotranspiration or sap-flow/lysimeter water use for the modelled crops at plant scale
-- **Available:** Reference ET0 computed from NASA POWER reanalysis (FAO-56 Penman-Monteith), plus a learned emulator of that same computed quantity
+- **Available:** Reference ET0 computed from reanalysis (FAO-56 Penman-Monteith, now cross-validated against four sources), plus a learned emulator of that same computed quantity, plus a schema and an 18-check ingestion validator for a future water-use trial. Still no measured crop water use of any kind.
 - **Gap type:** no-data
 - **Severity:** blocking - a claim in the product cannot be supported at all without this
-- **How it could be closed:** A lysimeter or gravimetric water-use trial in the target growth system. No open dataset measures per-plant water use in a controlled-environment facility for lettuce or mizuna; this is a measurement to commission, not a download.
-- **Current status:** open; mitigated by labelling ET0 as a computed reference flux and requiring a crop coefficient before it becomes a crop water demand
+- **How it could be closed:** A lysimeter or gravimetric water-use trial in the target growth system. No open dataset measures per-plant water use in a controlled-environment facility for lettuce or mizuna; this is a measurement to commission, not a download. New ingestion apparatus does not change the status: a validator can reject a bad measurement, it cannot create one.
+- **Current status:** open and blocking. The ingestion pipeline and the pre-registered protocol exist and are tested; zero measurements exist, so the ~60 % difference between the two water paths remains unarbitrated by data.
 
 ### The claim that the ET0 target is itself correct  `independent-et0`
 
-- **Needed:** An ET0 or weather source that does not share MERRA-2 lineage with POWER
-- **Available:** POWER only. The FAO-56 implementation is validated against three published worked examples, which validates the code, not the input weather.
-- **Gap type:** credential-blocked
+- **Needed:** A weather or ET0 source that does not share MERRA-2 lineage with POWER, and a measured latent-heat series to convert mutual agreement into physical truth
+- **Available:** Four legs over 2021-2023 at six sites (6570 site-days): ERA5 0.25 deg hourly and daily, NASA POWER daily, ERA5-Land 0.1 deg temperature, and NOAA ISD station temperatures. Our FAO-56 implementation agrees with the provider's independent implementation on identical ERA5 forcing to bias +0.009 mm/d (MAE 0.181, R2 0.987), while the forcing difference between ERA5 and POWER is MAE 0.519 mm/d. The station leg is temperature-only (Hargreaves) and no leg measures latent heat.
+- **Gap type:** partially-addressed
 - **Severity:** major - the claim is supportable only with a stated limitation that a user would notice
-- **How it could be closed:** ERA5-Land (class B in the catalogue) via a free CDS API token. Rebuild ET0 from ERA5-Land at the same six sites and compare to the POWER-derived series.
-- **Current status:** open; highest-value closure available, blocked on a token the owner has not issued
+- **How it could be closed:** Still needs (a) a Copernicus CDS token for the ERA5-Land hourly radiation and wind fields, which the credential-free delivery does not expose, and (b) a measured latent-heat series (eddy covariance or lysimeter) at at least one site, because reanalyses agreeing cannot establish absolute correctness.
+- **Current status:** open, partially addressed: disagreement now decomposed into formulation (0.273 mm/d), forcing (0.519) and implementation (+0.009) - the residual is weather, not code - but every leg is either a reanalysis or a temperature-only point method, so nothing here is field validation of the ET0 magnitude
 
 ### Effect of Mars or lunar gravity on crop growth  `fractional-gravity`
 

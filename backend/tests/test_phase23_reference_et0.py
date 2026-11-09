@@ -503,13 +503,18 @@ def test_emulator_is_classified_as_a_mechanistic_calculation():
 
 
 # --------------------------------------------------------------------------- catalogue + audit
-def test_catalogue_covers_twenty_one_datasets_with_the_documented_class_counts():
+def test_catalogue_covers_twenty_three_datasets_with_the_documented_class_counts():
+    """23 since Phase 25 added ERA5 hourly and NOAA ISD-Lite and moved ERA5-Land to class C.
+
+    All three are class C on purpose: they are external validation inputs, and no dataset was
+    acquired to raise a count. Class A is unchanged at 1 because no training data was added.
+    """
     payload = json.loads((ROOT / "data" / "research" / "dataset_catalog.json").read_text())
-    assert len(payload["datasets"]) == 21
+    assert len(payload["datasets"]) == 23
     counts = {}
     for dataset in payload["datasets"]:
         counts[dataset["usabilityClass"]] = counts.get(dataset["usabilityClass"], 0) + 1
-    assert counts == {"A": 1, "B": 6, "C": 5, "D": 3, "E": 5, "F": 1}
+    assert counts == {"A": 1, "B": 5, "C": 8, "D": 3, "E": 5, "F": 1}
 
 
 def test_only_the_imported_datasets_have_an_open_commercial_licence():
