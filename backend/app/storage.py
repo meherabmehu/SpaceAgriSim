@@ -165,6 +165,22 @@ def _migrate_users_columns(engine) -> None:
             connection.execute(text(f"ALTER TABLE users ADD COLUMN {name} {ddl}"))
 
 
+def _driver_diagnosis(exc: BaseException) -> dict[str, str]:
+    """Non-secret fragments of a connection failure that actually narrow it down.
+
+    A psycopg SQLSTATE separates "wrong password" (28P01) from "no such database" (3D000) from
+    "host unreachable" (08006 ...), and none of those codes carries a host or a credential. The
+    message itself is deliberately not included: psycopg puts the address in it.
+    """
+    diagnosis = {"exceptionType": type(exc).__name__}
+    for source in (exc, getattr(exc, "orig", None)):
+        code = getattr(source, "sqlstate", None) or getattr(source, "pgcode", None)
+        if code:
+            diagnosis["sqlstate"] = str(code)
+            break
+    return diagnosis
+
+
 def database_health() -> dict[str, str]:
     """Perform a no-write health check without exposing connection details."""
     engine = database()

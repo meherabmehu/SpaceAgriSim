@@ -95,3 +95,44 @@ def test_resolved_url_is_what_the_storage_layer_opens(monkeypatch):
 
     monkeypatch.setattr(storage.settings, "database_url", "  ", raising=False)
     assert storage.settings.database_url_resolved == storage.settings.database_url_default
+
+
+class _FakeOperationalError(Exception):
+    """Stands in for psycopg's OperationalError, which carries a SQLSTATE."""
+
+    def __init__(self, sqlstate):
+        super().__init__("connection to server at db.internal (10.0.0.5) failed")
+        self.sqlstate = sqlstate
+
+
+@pytest.mark.parametrize("sqlstate", ["28P01", "3D000", "08006"])
+def test_readiness_reports_sqlstate_but_not_the_driver_message(client, monkeypatch, sqlstate):
+    from app import storage
+
+    def boom():
+        raise _FakeOperationalError(sqlstate)
+
+    monkeypatch.setattr(storage, "database_health", boom)
+    response = client.get("/api/ready")
+    assert response.status_code == 503
+    detail = response.json()["detail"]
+    assert detail["reason"] == "connection-failed"
+    assert detail["sqlstate"] == sqlstate
+    assert detail["exceptionType"] == "_FakeOperationalError"
+    # the driver's own message names the host and must not be forwarded
+    assert "db.internal" not in response.text
+    assert "10.0.0.5" not in response.text
+
+
+def test_driver_diagnosis_survives_a_wrapped_error():
+    from app import storage
+
+    class Wrapper(Exception):
+        def __init__(self):
+            super().__init__("wrapped")
+            self.orig = _FakeOperationalError("28P01")
+
+    assert storage._driver_diagnosis(Wrapper()) == {
+        "exceptionType": "Wrapper",
+        "sqlstate": "28P01",
+    }

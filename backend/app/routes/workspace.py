@@ -233,6 +233,8 @@ def readiness():
             "error": "database_unavailable",
             "message": f"Database unavailable: {type(exc).__name__}",
             "reason": "connection-failed",
+            # SQLSTATE and exception type only; the driver's message contains the host.
+            **storage._driver_diagnosis(exc),
             "remedy": "The configured database did not answer. Check that the server is running "
                       "and that the credentials in SPACEAGRISIM_DATABASE_URL are current.",
         }) from exc
