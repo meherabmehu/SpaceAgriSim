@@ -53,7 +53,7 @@
     {
       "id": "lettuce-earth-growth-v3",
       "artifact": "ml/artifacts/lettuce-earth-growth-v3.json",
-      "sha256": "885bc54c5e61288fbe5c79bce5903c23f0c13624002bc4cbfae7b6d209db8c5e",
+      "sha256": "b5d1532dac106d289b9498f705efa4c4cdf071d8dc81739c1f09ea3d206e946a",
       "supersedes": "",
       "status": "trained-exploratory",
       "independentValidation": {

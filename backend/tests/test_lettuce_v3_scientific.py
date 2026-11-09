@@ -47,6 +47,14 @@ def client() -> TestClient:
     return TestClient(app)
 
 
+@pytest.fixture(scope="module")
+def full_client() -> TestClient:
+    """The real application: some behaviour only exists once the workflow router is mounted."""
+    from app.main import app as application
+
+    return TestClient(application)
+
+
 def predict(client: TestClient, **overrides) -> dict:
     response = client.post(f"/api/predict/{MODEL_ID}", json={**PEERJ, **overrides})
     assert response.status_code == 200, response.text
@@ -314,3 +322,34 @@ def test_external_validation_reports_v3_development_and_holdout():
     assert v3["developmentMetrics"]["mapeV3Pct"] < v3["developmentMetrics"]["mapeV2Pct"]
     assert v3["independentHoldout"]["passed"] is False
     assert v3["verdict"]["passed"] is False
+
+
+# ---------------------------------------------------------------------------
+# The generic workflow path must not report a log value as a yield
+# ---------------------------------------------------------------------------
+def test_workflow_run_inverts_the_target_and_labels_the_unit(full_client):
+    """Regression: the workflow shared the log value 4.8 where the answer is 5924 g/m2.
+
+    Every other model in the registry is served from the same generic path, so a target
+    transform that only the dedicated route understood was a defect waiting to surface on the
+    next log-target artifact - and it surfaced silently, with a plausible-looking number.
+    """
+    body = {"modelId": MODEL_ID,
+            "inputs": {"daysAfterTransplant": 28.0, "airTemperature": 27.5,
+                       "rootTemperature": 27.5, "dailyLightIntegral": 16.9}}
+    response = full_client.post("/api/workflow/run", json=body)
+    assert response.status_code == 200, response.text
+    output = response.json()["output"]
+    assert output["prediction"] > 1000          # a yield per square metre, not a logarithm
+    assert output["unit"] == "g fresh mass per m2"
+    assert output["interval"]["low"] < output["prediction"] < output["interval"]["high"]
+    # The workflow cannot know the caller's density, so it must say what it did and did not return.
+    assert "plantDensityPerM2" in output["scopeNote"]
+
+
+def test_workflow_rejects_a_physically_impossible_dli(full_client):
+    body = {"modelId": MODEL_ID,
+            "inputs": {"daysAfterTransplant": 28.0, "airTemperature": 27.5,
+                       "rootTemperature": 27.5, "dailyLightIntegral": 250.0}}
+    response = full_client.post("/api/workflow/run", json=body)
+    assert response.status_code in {400, 422}

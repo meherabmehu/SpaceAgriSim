@@ -105,7 +105,7 @@ recorded and the mid-point used for scoring is stated explicitly in the model ar
 | `lettuce-earth-growth-v2` | 1648 | 4 | `WUR-lettuce` | trained-exploratory | `9931f375baf5fa11` |
 | `radiation-quality-osd46-v1` | 44 | 22 | `OSD-46` | trained-exploratory | `5155d235b4511a2f` |
 | `radiation-exposure-osd46-v1` | 44 | 22 | `OSD-46` | trained-exploratory | `dc7a324d3c55401b` |
-| `lettuce-earth-growth-v3` | 1648 | 4 | `WUR-lettuce` | trained-exploratory | `885bc54c5e61288f` |
+| `lettuce-earth-growth-v3` | 1648 | 4 | `WUR-lettuce` | trained-exploratory | `b5d1532dac106d28` |
 
 A model appears here only if it is registered with a checksum. `scripts/verify_model_registry.py`
 re-derives every artifact hash and refuses to pass if one does not match.

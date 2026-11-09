@@ -19458,5 +19458,11 @@
     "inverse": "exp",
     "why": "Fresh yield is strictly positive and varies over two orders of magnitude across the growth curve; the log target makes the error multiplicative and lets the conformal interval become a ratio. Predictions are therefore median-like, not mean-like."
   },
-  "servesAlongside": "lettuce-earth-growth-v2 (byte-identical, still callable, still serving its 232 % external failure as the record that motivated v3)"
+  "servesAlongside": "lettuce-earth-growth-v2 (byte-identical, still callable, still serving its 232 % external failure as the record that motivated v3)",
+  "workflow": {
+    "outputName": "fresh yield per square metre",
+    "unit": "g fresh mass per m2",
+    "needsDensity": true,
+    "note": "The workflow passes the model's four recorded features, so it returns areal yield. Per-plant mass is areal yield divided by plantDensityPerM2; use POST /api/predict/lettuce-earth-growth-v3 to supply the density and the photoperiod that defines the daily light integral."
+  }
 }

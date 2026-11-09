@@ -44,6 +44,9 @@ PHYSICAL_LIMITS = {
     "establishedPlants": (0.0, 1e4),
     "photoperiodHours": (0.0, 24.0),
     "plantDensityPerM2": (0.0, 2000.0),
+    # Daily light integral in mol m-2 d-1. Even the brightest plant factory stays near 40; 100 is
+    # already past any published crop response, so a value above it is a unit slip, not a setpoint.
+    "dailyLightIntegral": (0.0, 100.0),
 }
 
 # Which input family each served model needs. A model is offered only for the family it
@@ -279,20 +282,38 @@ def run_model(model_id: str, inputs: dict) -> dict:
                           f"experimental condition, not a measurement of dose, damage or "
                           f"yield.")
     else:
-        value, warnings = research.predict_values(model, values)
+        raw, warnings = research.predict_values(model, values)
+        # A model fitted on log(y) returns log(y). The transform is declared in the artifact, so it
+        # is undone here as well as in the dedicated route - otherwise the workflow would report
+        # 4.8 where the answer is 5924 g/m2 and nothing in the response would look wrong.
+        value = research.inverse_target_transform(model, raw)
         interval = model.get("interval") or {}
         radius = interval.get("radius")
+        workflow_meta = model.get("workflow") or {}
+        unit = workflow_meta.get("unit") or model.get("unit")
+        if radius is not None:
+            bounds = {"low": max(0.0, value - radius), "high": value + radius,
+                      "kind": interval.get("kind")}
+        elif interval.get("logResidualLow") is not None:
+            # Log-target intervals are ratios, so they scale with the prediction rather than
+            # adding a fixed radius that would be meaningless across two orders of magnitude.
+            bounds = {"low": max(0.0, value * math.exp(interval["logResidualLow"])),
+                      "high": value * math.exp(interval["logResidualHigh"]),
+                      "kind": interval.get("kind")}
+        else:
+            bounds = None
         output = {"kind": "regression",
                   "isMeasurement": False,
                   "prediction": value,
-                  "unit": model.get("unit"),
-                  "interval": ({"low": max(0.0, value - radius), "high": value + radius,
-                                "kind": interval.get("kind")} if radius is not None else None),
+                  "unit": unit,
+                  "interval": bounds,
                   "calibrated": False,
                   "note": ("The interval radius comes from conformal calibration on the "
                            "training distribution. Its measured coverage is reported "
                            "separately and is not a guarantee.")}
-        interpretation = (f"The model estimates {value:.4g} {model.get('unit', '')}. "
+        if workflow_meta.get("note"):
+            output["scopeNote"] = workflow_meta["note"]
+        interpretation = (f"The model estimates {value:.4g} {unit or ''}. "
                           f"This is a model output, not a measurement of a real plant.")
         if warnings:
             output["warnings"] = warnings

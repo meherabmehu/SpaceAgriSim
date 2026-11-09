@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-09T13:53:03.386954+00:00",
+  "generatedAt": "2026-11-09T14:15:21.268453+00:00",
   "phase": 7,
   "registrySchemaVersion": 1,
   "modelCount": 9,
@@ -23,7 +23,7 @@
     "lettuce-earth-growth-v2": "9931f375baf5fa11c55e2647f1fd2b9c4775deb4166c1e0879932e8b004e1b7c",
     "radiation-quality-osd46-v1": "5155d235b4511a2f28442f9f544cbbbc7f98a8f136fdcd45a771a9db5264d8eb",
     "radiation-exposure-osd46-v1": "dc7a324d3c55401bfbe1f3d8740cf4b70e1590efd3bd11d618c066808d565281",
-    "lettuce-earth-growth-v3": "885bc54c5e61288fbe5c79bce5903c23f0c13624002bc4cbfae7b6d209db8c5e"
+    "lettuce-earth-growth-v3": "b5d1532dac106d289b9498f705efa4c4cdf071d8dc81739c1f09ea3d206e946a"
   },
   "environment": {
     "study": "Touliatos D, Dodd IC, McAinsh M (2016) Vertical farming increases lettuce yield per unit area compared to conventional horizontal hydroponics. Food and Energy Security 5(3):184-191, doi:10.1002/fes3.83",
@@ -129,7 +129,7 @@
     {
       "check": "checksum matches: lettuce-earth-growth-v3",
       "passed": true,
-      "detail": "885bc54c5e61 vs recorded 885bc54c5e61"
+      "detail": "b5d1532dac10 vs recorded b5d1532dac10"
     },
     {
       "check": "no unregistered model artifacts",
