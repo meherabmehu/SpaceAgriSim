@@ -89,6 +89,11 @@ def audit() -> dict:
     rows: list[dict] = []
     registered_names: set[str] = set()
     superseded_names: set[str] = set()
+    # Cards for models served by their own runtime are legitimate artifacts here, but only
+    # because they are declared. The declaration is checked below, and an undeclared card is
+    # still an orphan.
+    external_cards = {Path(service["card"]).name
+                      for service in research.EXTERNAL_SERVICES.values()}
 
     # ---------------------------------------------------------------- 1. checksums
     for entry in registry["models"]:
@@ -239,9 +244,72 @@ def audit() -> dict:
             continue
         if path.name in registered_names or path.name in superseded_names:
             continue
+        if path.name in external_cards:
+            continue
         check(f"artifact-registered:{path.name}", False, "artifact on disk is neither registered nor superseded")
     check("no-orphan-artifacts", not any(c["check"].startswith("artifact-registered:") for c in CHECKS),
           "every artifact is registered or explicitly superseded")
+
+    # --------------------------------------- 11. models served by their own runtime
+    for model_id, service in research.EXTERNAL_SERVICES.items():
+        card_path = ROOT / service["card"]
+        check(f"external-card-exists:{model_id}", card_path.is_file(), service["card"])
+        if not card_path.is_file():
+            continue
+        card = json.loads(card_path.read_text(encoding="utf-8"))
+        row = catalogue.get(model_id) or {}
+        # The whole point of the declaration is that such a model cannot be parked somewhere
+        # unreachable: the catalogue must name the surface that serves it, and that surface must
+        # exist in the mounted app.
+        check(f"external-run-status:{model_id}", row.get("runStatus") == "external-service",
+              f"catalogue runStatus={row.get('runStatus')}")
+        check(f"external-endpoint-named:{model_id}",
+              bool(service.get("endpoint")) and service["endpoint"].startswith("/api/"),
+              str(service.get("endpoint")))
+        # Routers are nested, so the app's own OpenAPI document is the honest answer to "is this
+        # path actually reachable" rather than walking `app.routes`.
+        from app.main import app as mounted_app
+
+        mounted = set(mounted_app.openapi().get("paths") or {})
+        check(f"external-endpoint-mounted:{model_id}",
+              service["endpoint"] in mounted,
+              f"{service['endpoint']} is declared but not routed")
+        check(f"external-card-endpoint-mounted:{model_id}",
+              service["cardEndpoint"] in mounted,
+              f"{service['cardEndpoint']} is declared but not routed")
+        check(f"external-classified:{model_id}",
+              science_classification.feature_by_id(model_id) is not None,
+              "served model with no science classification")
+        service_class = science_classification.feature_by_id(model_id)
+        if service_class is not None:
+            check(f"external-not-unsupported:{model_id}", service_class.category != 6,
+                  f"category {service_class.category}")
+        # A surrogate that has not passed its gates must not claim to be deployed.
+        gates = (card.get("validation") or {}).get("acceptanceGate") or []
+        failed = [gate["criterion"] for gate in gates if not gate.get("passed")]
+        check(f"external-gates-recorded:{model_id}", bool(gates), f"{len(gates)} criteria")
+        check(f"external-deployment-matches-gates:{model_id}",
+              (not failed and card.get("deployed") is True)
+              or (bool(failed) and card.get("deployed") is False),
+              f"failed={failed} deployed={card.get('deployed')}")
+        metrics = card.get("metrics") or {}
+        check(f"external-metrics-present:{model_id}",
+              all(key in metrics for key in ("mae", "rmse", "n")), str(sorted(metrics)))
+        baseline = (card.get("baselineMetrics") or {}).get("hargreaves") or {}
+        check(f"external-baseline-present:{model_id}", "mae" in baseline, "no baseline to compare")
+        # The direction of every criterion is declared, so a "lower is better" metric can never be
+        # read as an improvement.
+        criteria = card.get("criteria") or {}
+        check(f"external-criteria-direction:{model_id}",
+              bool(criteria.get("mae")) and "lower" in str(criteria.get("mae")).lower(),
+              str(criteria))
+        check(f"external-model-binary-present:{model_id}",
+              (card_path.parent / f"{model_id}.joblib").is_file()
+              or (card_path.parent / f"{model_id}.pkl").is_file(),
+              "card without a fitted model beside it")
+        registry_row = next((item for item in research.model_registry()["models"]
+                             if item["id"] == model_id), {})
+        et0_status_checks(model_id, card, registry_row)
 
     # ------------------------------------------------ 9. superseded / excluded handling
     for entry in registry["models"]:
@@ -298,6 +366,8 @@ def audit() -> dict:
         "registeredModels": len(registry["models"]),
         "auditedModels": len(rows),
         "servedModels": sum(1 for row in rows if row["runStatus"] == "runnable"),
+        "externallyServedModels": sum(1 for row in rows
+                                      if row["runStatus"] == "external-service"),
         "retiredModels": sum(1 for row in rows if row["runStatus"] == "retired"),
         "supersededModels": len(superseded_names),
         "withExplanations": sum(1 for row in rows if row["explanationAvailable"]),
@@ -324,6 +394,25 @@ def audit() -> dict:
                  "artifacts and never adjusted, and no model is retrained. A failure here means an "
                  "artifact and its record disagree, not that a score is low."),
     }
+
+
+def et0_status_checks(model_id: str, card: dict, row: dict) -> bool:
+    """Level with the serving layer rather than re-deriving its answer.
+
+    `app.et0` already degrades to physics when the artifact is unreadable; the audit asserts that
+    the registry row reports the same availability, so a service that silently fell back would be
+    caught here as a disagreement between the card and the API.
+    """
+    from app import et0
+
+    status = et0.artifact_status()
+    check(f"external-availability-agrees:{model_id}",
+          bool(status.get("available")) == bool(row.get("artifactExists")),
+          f"service={status.get('available')} registry={row.get('artifactExists')}")
+    check(f"external-primary-is-physics:{model_id}",
+          "physics" in str(status.get("fallback") or "") or status.get("available") is False,
+          "the physics fallback is not described")
+    return bool(status.get("available"))
 
 
 def main() -> int:

@@ -73,13 +73,16 @@ def test_model_registry_requires_actual_verified_artifacts(scientific_client):
     # candidates that failed their pre-specified evaluation (OSD-782 dose,
     # OSD-411 gravity) are deliberately absent: they were excluded from the
     # registry rather than tuned until they appeared to work.
-    assert len(models) == len(research.MODEL_IDS)
+    # CATALOGUE_MODEL_IDS, not MODEL_IDS: Phase 23 added et0-emulator-v1, which is served by its
+    # own runtime (app.et0) and therefore ships no entry in the JSON registry. Both sets have to
+    # agree with what the API serves, and this is the assertion that keeps them honest.
+    assert len(models) == len(research.CATALOGUE_MODEL_IDS)
     assert {m["id"] for m in models} == {
         "mizuna-harvest-v1", "tomato-flight-response-v1",
         "lettuce-earth-growth-v1", "lettuce-earth-growth-v2",
         "mizuna-microbial-load-v1", "mizuna-microbial-relative-load-v2",
         "radiation-quality-osd46-v1", "radiation-exposure-osd46-v1",
-        "lettuce-earth-growth-v3",
+        "lettuce-earth-growth-v3", "et0-emulator-v1",
     }
     assert "radiation-dose-osd782-v1" not in {m["id"] for m in models}
     assert "gravity-reorientation-osd411-v1" not in {m["id"] for m in models}
@@ -325,5 +328,5 @@ def test_scientific_summary_never_claims_validation(scientific_client):
     assert payload["missionCertified"] is False
     assert payload["validatedModels"] == []
     assert payload["platformMaturity"] == "research-and-education"
-    assert len(payload["models"]) == len(research.MODEL_IDS)
+    assert len(payload["models"]) == len(research.CATALOGUE_MODEL_IDS)
     assert payload["calibration"]["invariantsAllPassed"] is True

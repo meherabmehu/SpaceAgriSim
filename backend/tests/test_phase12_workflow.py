@@ -47,7 +47,7 @@ def _run(client: TestClient, model_id: str, inputs: dict, **extra):
 def test_catalogue_lists_every_served_model_with_its_family(client):
     payload = client.get("/api/workflow/models").json()
     ids = {row["modelId"] for row in payload["models"]}
-    assert len(ids) == len(research.MODEL_IDS)
+    assert len(ids) == len(research.CATALOGUE_MODEL_IDS)
     assert "mizuna-microbial-load-v1" in ids  # retired but kept reproducible
 
     families = {row["modelId"]: row["inputFamily"] for row in payload["models"]}
@@ -62,8 +62,13 @@ def test_catalogue_never_marks_a_retired_model_runnable(client):
     retired = [row for row in rows if row["runStatus"] == "retired"]
     assert [row["modelId"] for row in retired] == ["mizuna-microbial-load-v1"]
     assert retired[0]["runStatus"] == "retired"
-    assert all(row["runStatus"] == "runnable"
+    # `external-service` is the third legitimate state: served, but by its own endpoint rather
+    # than by this workflow. It is never reported as runnable here, and the row names where it is.
+    assert all(row["runStatus"] in {"runnable", "external-service"}
                for row in rows if row["modelId"] != "mizuna-microbial-load-v1")
+    external = [row for row in rows if row["runStatus"] == "external-service"]
+    assert [row["modelId"] for row in external] == ["et0-emulator-v1"]
+    assert external[0]["servedAt"] == "/api/reference-et0/estimate"
 
 
 def test_catalogue_carries_classification_and_calibration_status(client):

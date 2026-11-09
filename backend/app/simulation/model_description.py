@@ -26,9 +26,64 @@ MODEL_STATUS = {
 }
 
 
+def _normalise(entries: list[dict]) -> list[dict]:
+    for entry in entries:
+        entry.setdefault("evidence", None)
+        entry.setdefault("sources", [])
+    return entries
+
+
+def reference_et0_component() -> dict:
+    """The optional reference-flux water path, described like every other component.
+
+    It is listed among the assumptions rather than hidden in the API docs because it changes what
+    the litres mean: `crop-relative` is the simulator's own peak demand, `et0-reference` is a
+    flux-driven demand that is only as good as the ET0 fed into it.
+    """
+    from app import et0
+
+    status = et0.artifact_status()
+    return {
+        "key": "reference-et0",
+        "title": "Reference-flux water demand (optional)",
+        "formula": "demand(day) = ET0 [mm/day] x Kc x area [m2] x canopyScale(day)",
+        "note": (
+            "Only used when a caller supplies et0MmPerDay. 1 mm over 1 m2 is 1 litre, so the flux "
+            "converts directly and no constant is invented. The light and VPD scales are NOT "
+            "applied on this path: ET0 already contains the site's radiation and humidity. "
+            "Kc defaults to 1.0, which is the reference grass surface, not a crop."
+        ),
+        "constants": {
+            "defaultCropCoefficient": constants.DEFAULT_CROP_COEFFICIENT,
+            "litresPerMmPerM2": constants.ET0_MM_PER_M2_TO_LITRES,
+            "plausibleMinMmPerDay": constants.ET0_PLAUSIBLE_RANGE_MM_PER_DAY[0],
+            "plausibleMaxMmPerDay": constants.ET0_PLAUSIBLE_RANGE_MM_PER_DAY[1],
+        },
+        "sources": [
+            "FAO-56 Penman-Monteith daily reference evapotranspiration (computed here, "
+            "checked against the manual's worked examples)",
+            "NASA POWER daily agroclimatology, community AG (reanalysis, citation requested)",
+        ],
+        "evidence": (
+            "ET0 is a computed standard for a hypothetical reference surface. It is not a "
+            "measurement of the modelled crop's water use, and the emulator that can speed it up "
+            "lost to Hargreaves-Samani on an unseen site in this project's own study"
+            if status.get("available") else
+            "ET0 is a computed standard for a hypothetical reference surface. The learned "
+            "emulator artifact is not available in this deployment, so only the physics is served."
+        ),
+    }
+
+
 def describe_assumptions() -> list[dict]:
-    """One entry per model component: formula, constants and a plain-language note."""
-    return [
+    """One entry per model component: formula, constants and a plain-language note.
+
+    `evidence` and `sources` are filled in for every component, empty where nothing backs it, so
+    `/api/config` (validated through `ModelAssumption`) and `/api/assumptions` (served raw) return
+    the same objects. A component with no source says so instead of omitting the field.
+    """
+    entries = [
+        reference_et0_component(),
         {"key": "intensity", "title": "PPFD response (assumed)",
          "formula": "factor = [I/(I+200)] / [300/(300+200)]",
          "note": "Uncalibrated saturating response. Spectrum is annotation only; DLI = I * hours * 0.0036 mol/m?/day.",
@@ -180,3 +235,4 @@ def describe_assumptions() -> list[dict]:
             },
         },
     ]
+    return _normalise(entries)

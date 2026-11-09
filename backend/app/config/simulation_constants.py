@@ -145,6 +145,31 @@ LOGISTIC_STEEPNESS = 10.0
 SEEDLING_ACTIVITY_FRACTION = 0.15
 
 # ---------------------------------------------------------------------------
+# Reference evapotranspiration (reference-flux water demand)
+# ---------------------------------------------------------------------------
+# The simulator's native water demand is crop-relative: a peak litre figure per
+# square metre scaled by canopy cover and light. A caller who has an actual
+# reference ET0 for the site can instead drive demand from that flux, which is
+# how agronomy does it:
+#
+#     demand(day) = ET0 [mm/day] x Kc x area [m^2] x canopy_scale(day)
+#
+# 1 mm of water over 1 m^2 is exactly 1 litre, so no conversion constant is
+# needed and none is invented here.
+ET0_MM_PER_M2_TO_LITRES = 1.0
+
+# Kc defaults to 1.0 on purpose. 1.0 means "the reference grass surface FAO-56
+# describes", not "your crop": a crop coefficient has to come from a source that
+# measured that crop under that management (FAO-56 Table 12 and its local
+# adjustments), and this repository has no such measurement for lettuce, tomato
+# or radish. A caller who supplies one states where it came from.
+DEFAULT_CROP_COEFFICIENT = 1.0
+
+# Plausible daily reference ET0 band, used only to reject inputs that cannot be
+# daily ET0 (a negative flux, or a value no vegetated surface reaches).
+ET0_PLAUSIBLE_RANGE_MM_PER_DAY = (0.0, 20.0)
+
+# ---------------------------------------------------------------------------
 # Life support
 # ---------------------------------------------------------------------------
 # Share of the water the plants transpire that is captured again as condensate

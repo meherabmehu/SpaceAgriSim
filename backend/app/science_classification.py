@@ -354,6 +354,33 @@ FEATURES: list[Feature] = [
             "Must not be described as 'measured' or 'validated' anywhere.",
         ],
     ),
+    # ------------------------- category 4: mechanistic ----------------------
+    Feature(
+        id="et0-emulator-v1",
+        name="Reference ET0 emulator (gradient-boosted surrogate of FAO-56)",
+        surface="GET /api/reference-et0/estimate, POST /api/simulate (et0MmPerDay)",
+        category=4,
+        status="served-mechanistic",
+        evidence=(
+            "Category 4, not 1 or 3. The target it reproduces is FAO-56 Penman-Monteith "
+            "reference ET0 computed from NASA POWER reanalysis weather - a standard, not a "
+            "measurement - and its error is measured against that computed standard. It was "
+            "never compared with a lysimeter, a sap-flow sensor or a flux tower. On a "
+            "leave-one-site-out test it is about 14 % worse than Hargreaves-Samani, so the "
+            "FAO-56 equation remains the primary number and the emulator is offered beside it."
+        ),
+        user_facing=(
+            "Served with the physics alternatives, the acceptance gates it failed, a conformal "
+            "interval, and an out-of-distribution flag when an input leaves its training range."
+        ),
+        notes=[
+            "The label is computed from reanalysis, so a perfect score would prove it learned "
+            "the equation, not that it predicts a crop's water use.",
+            "Not validated for microgravity, low pressure or LED-lit interiors.",
+            "Water demand from ET0 still needs a crop coefficient; Kc defaults to 1.0, which "
+            "describes the reference surface rather than a crop.",
+        ],
+    ),
     Feature(
         id="gravity-response",
         name="Microgravity growth penalty",

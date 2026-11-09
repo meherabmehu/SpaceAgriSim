@@ -521,8 +521,143 @@
    "passed": true
   },
   {
+   "check": "artifact-exists:lettuce-earth-growth-v3",
+   "detail": "ml/artifacts/lettuce-earth-growth-v3.json",
+   "passed": true
+  },
+  {
+   "check": "checksum:lettuce-earth-growth-v3",
+   "detail": "registry=b5d1532dac106d28\u2026 disk=b5d1532dac106d28\u2026",
+   "passed": true
+  },
+  {
+   "check": "provenance:lettuce-earth-growth-v3",
+   "detail": "complete",
+   "passed": true
+  },
+  {
+   "check": "limitations:lettuce-earth-growth-v3",
+   "detail": "6 recorded",
+   "passed": true
+  },
+  {
+   "check": "schema:lettuce-earth-growth-v3",
+   "detail": "4 features, target=log(freshYieldGPerM2), unit=g fresh shoot mass per plant",
+   "passed": true
+  },
+  {
+   "check": "metrics-present:lettuce-earth-growth-v3",
+   "detail": "['MAE', 'MAPE', 'R2', 'RMSE', 'meanBiasError', 'n']",
+   "passed": true
+  },
+  {
+   "check": "metrics-no-null:lettuce-earth-growth-v3",
+   "detail": "all valued",
+   "passed": true
+  },
+  {
+   "check": "uncertainty:lettuce-earth-growth-v3",
+   "detail": "['coverageNote', 'kind', 'logResidualHigh', 'logResidualLow', 'outOfFoldCoverage']",
+   "passed": true
+  },
+  {
+   "check": "classification:lettuce-earth-growth-v3",
+   "detail": "no science classification entry",
+   "passed": true
+  },
+  {
+   "check": "catalogue:lettuce-earth-growth-v3",
+   "detail": "registered model missing from the workflow catalogue",
+   "passed": true
+  },
+  {
+   "check": "served-not-retired:lettuce-earth-growth-v3",
+   "detail": "category 3 model reports runStatus=runnable",
+   "passed": true
+  },
+  {
+   "check": "explanation-flag:lettuce-earth-growth-v3",
+   "detail": "flag=False file=lettuce-earth-growth-v3-explanation.json exists=False",
+   "passed": true
+  },
+  {
    "check": "no-orphan-artifacts",
    "detail": "every artifact is registered or explicitly superseded",
+   "passed": true
+  },
+  {
+   "check": "external-card-exists:et0-emulator-v1",
+   "detail": "ml/artifacts/et0-emulator-v1.json",
+   "passed": true
+  },
+  {
+   "check": "external-run-status:et0-emulator-v1",
+   "detail": "catalogue runStatus=external-service",
+   "passed": true
+  },
+  {
+   "check": "external-endpoint-named:et0-emulator-v1",
+   "detail": "/api/reference-et0/estimate",
+   "passed": true
+  },
+  {
+   "check": "external-endpoint-mounted:et0-emulator-v1",
+   "detail": "/api/reference-et0/estimate is declared but not routed",
+   "passed": true
+  },
+  {
+   "check": "external-card-endpoint-mounted:et0-emulator-v1",
+   "detail": "/api/reference-et0/model is declared but not routed",
+   "passed": true
+  },
+  {
+   "check": "external-classified:et0-emulator-v1",
+   "detail": "served model with no science classification",
+   "passed": true
+  },
+  {
+   "check": "external-not-unsupported:et0-emulator-v1",
+   "detail": "category 4",
+   "passed": true
+  },
+  {
+   "check": "external-gates-recorded:et0-emulator-v1",
+   "detail": "4 criteria",
+   "passed": true
+  },
+  {
+   "check": "external-deployment-matches-gates:et0-emulator-v1",
+   "detail": "failed=['crossSiteGeneralisation'] deployed=False",
+   "passed": true
+  },
+  {
+   "check": "external-metrics-present:et0-emulator-v1",
+   "detail": "['bias', 'mae', 'n', 'r2', 'rmse']",
+   "passed": true
+  },
+  {
+   "check": "external-baseline-present:et0-emulator-v1",
+   "detail": "no baseline to compare",
+   "passed": true
+  },
+  {
+   "check": "external-criteria-direction:et0-emulator-v1",
+   "detail": "{'mae': 'lower is better', 'rmse': 'lower is better', 'bias': 'lower is better', 'r2': 'higher'}",
+   "passed": true
+  },
+  {
+   "check": "external-model-binary-present:et0-emulator-v1",
+   "detail": "card without a fitted model beside it",
+   "passed": true
+  },
+  {
+   "check": "external-availability-agrees:et0-emulator-v1",
+   "detail": "service=True registry=True",
+   "passed": true
+  },
+  {
+   "check": "external-primary-is-physics:et0-emulator-v1",
+   "detail": "the physics fallback is not described",
    "passed": true
   },
   {
@@ -674,9 +809,21 @@
    "field": "calibration",
    "model": "radiation-exposure-osd46-v1",
    "severity": "high"
+  },
+  {
+   "detail": "not recorded on the artifact",
+   "field": "sourceType",
+   "model": "lettuce-earth-growth-v3",
+   "severity": "documentation"
+  },
+  {
+   "detail": "not recorded on the artifact",
+   "field": "license",
+   "model": "lettuce-earth-growth-v3",
+   "severity": "documentation"
   }
  ],
- "generatedAt": "2026-11-08T14:25:29.938329+00:00",
+ "generatedAt": "2026-11-09T20:08:47.366226+00:00",
  "models": [
   {
    "baselineMetrics": {
@@ -1125,6 +1272,311 @@
    "unit": null,
    "validation": "Leave-one-biological-group-out cross-validation over 22 groups. Gene filtering and ANOVA selection fitted inside each training fold only. Labels permuted between groups for the null.",
    "version": "1.0.0"
+  },
+  {
+   "baselineMetrics": {
+    "MAE": 2797.719012503388,
+    "MAPE": 459.1540328330944,
+    "R2": -0.2740925836030792,
+    "RMSE": 4668.2978449323955,
+    "meanBiasError": -2132.1197045195636,
+    "n": 1648
+   },
+   "calibration": {
+    "calibrated": false,
+    "measuredCoverage": null,
+    "statement": "No measured interval coverage is recorded for this model."
+   },
+   "checksumMatches": true,
+   "classification": {
+    "category": 3,
+    "name": "Experimentally supported by non-NASA data"
+   },
+   "explanationAvailable": false,
+   "features": 4,
+   "groups": 4,
+   "id": "lettuce-earth-growth-v3",
+   "limitations": 6,
+   "metrics": {
+    "MAE": 835.5101616419312,
+    "MAPE": 41.68343427964123,
+    "R2": 0.8613898072115063,
+    "RMSE": 1539.769266234756,
+    "meanBiasError": -249.31002468932155,
+    "n": 1648
+   },
+   "provenance": {
+    "license": null,
+    "method": "Boosted regression trees on log(fresh yield per m2). Light enters as daily light integral; per-plant mass is served as per-area yield divided by the plant density the caller states.",
+    "seed": 42,
+    "sourceStudy": "WUR-lettuce",
+    "sourceType": null,
+    "sourceUrl": "https://doi.org/10.4121/5a7472f0-8a67-4ec0-84c9-9d032990d654.v1",
+    "trainedAt": "2026-11-09T13:43:29.547745+00:00",
+    "validation": {
+     "development": {
+      "countsAsValidation": false,
+      "metrics": {
+       "MAE": 51.916666666666664,
+       "MAPE": 42.65096177554813,
+       "R2": -0.5271173476773707,
+       "RMSE": 58.92680487972628,
+       "meanBiasError": 2.583333333333343,
+       "n": 6
+      },
+      "note": "Reported for transparency and for comparison with v2 on the same six observations. Not evidence of independent accuracy.",
+      "scored": [
+       {
+        "id": "baby-cos-upper",
+        "measuredG": 84.5,
+        "ppfdUmol": 697,
+        "predictedG": 157.4,
+        "predictedPerAreaGPerM2": 7556.0,
+        "ratio": 1.86
+       },
+       {
+        "id": "baby-cos-middle",
+        "measuredG": 123.8,
+        "ppfdUmol": 391,
+        "predictedG": 123.4,
+        "predictedPerAreaGPerM2": 5924.0,
+        "ratio": 1.0
+       },
+       {
+        "id": "baby-cos-lower",
+        "measuredG": 92.9,
+        "ppfdUmol": 322,
+        "predictedG": 123.4,
+        "predictedPerAreaGPerM2": 5924.0,
+        "ratio": 1.33
+       },
+       {
+        "id": "green-oak-upper",
+        "measuredG": 97.3,
+        "ppfdUmol": 697,
+        "predictedG": 157.4,
+        "predictedPerAreaGPerM2": 7556.0,
+        "ratio": 1.62
+       },
+       {
+        "id": "green-oak-middle",
+        "measuredG": 190.7,
+        "ppfdUmol": 391,
+        "predictedG": 123.4,
+        "predictedPerAreaGPerM2": 5924.0,
+        "ratio": 0.65
+       },
+       {
+        "id": "green-oak-lower",
+        "measuredG": 203.7,
+        "ppfdUmol": 322,
+        "predictedG": 123.4,
+        "predictedPerAreaGPerM2": 5924.0,
+        "ratio": 0.61
+       }
+      ],
+      "study": "Wicharuck et al. 2024, PeerJ 12:e17085, doi:10.7717/peerj.17085",
+      "usedForModelSelection": true
+     },
+     "independent": {
+      "acceptanceCriterionPct": 30.0,
+      "metrics": {
+       "MAE": 57.400000000000006,
+       "MAPE": 41.59420289855073,
+       "R2": null,
+       "RMSE": 57.400000000000006,
+       "meanBiasError": 57.400000000000006,
+       "n": 1
+      },
+      "passed": false,
+      "refused": [
+       {
+        "id": "vfs-1000",
+        "measuredG": 95.0,
+        "measuredPerAreaGPerM2": 95000.0,
+        "system": "vertical farm",
+        "violations": [
+         "plantDensity 1000 plants/m2 outside [10, 200]",
+         "daysAfterTransplant 35 outside [2, 29]",
+         "airTemperature 17 below the 20 C floor"
+        ],
+        "why": "The per-area identity assumes per-area yield does not depend on density. At 1000 plants/m2 Touliatos report 95 kg/m2 per occupied floor area, which includes stacking across layers, so the identity is known to break here. Refused rather than scored."
+       }
+      ],
+      "scored": [
+       {
+        "dailyLightIntegral": 26.2,
+        "density": 50.0,
+        "domainViolations": [
+         "daysAfterTransplant 35 outside [2, 29]",
+         "airTemperature 17 below the 20 C floor"
+        ],
+        "id": "hhs-50",
+        "measuredG": 138.0,
+        "measuredPerAreaGPerM2": 6900.0,
+        "measuredSeG": 6.0,
+        "n": 40,
+        "ppfdUmol": 455.0,
+        "predictedG": 195.4,
+        "predictedPerAreaGPerM2": 9768.0,
+        "ratio": 1.42,
+        "system": "horizontal hydroponic"
+       }
+      ],
+      "study": "Touliatos D, Dodd IC, McAinsh M (2016) Vertical farming increases lettuce yield per unit area compared to conventional horizontal hydroponics. Food and Energy Security 5(3):184-191, doi:10.1002/fes3.83",
+      "usedForFitting": false,
+      "usedForModelSelection": false,
+      "verdict": "Fails the 30% criterion; the improvement over v2 is real but the model is not validated for harvest forecasting."
+     },
+     "internal": {
+      "metrics": {
+       "MAE": 835.5101616419312,
+       "MAPE": 41.68343427964123,
+       "R2": 0.8613898072115063,
+       "RMSE": 1539.769266234756,
+       "meanBiasError": -249.31002468932155,
+       "n": 1648
+      },
+      "protocol": "leave-one-experiment-out, 4 folds"
+     }
+    }
+   },
+   "runStatus": "runnable",
+   "samples": 1648,
+   "sha256": "b5d1532dac106d289b9498f705efa4c4cdf071d8dc81739c1f09ea3d206e946a",
+   "status": "trained-exploratory",
+   "supersedes": null,
+   "target": "log(freshYieldGPerM2)",
+   "task": "Earth fresh shoot mass per plant, mediated by fresh yield per square metre",
+   "unit": "g fresh shoot mass per plant",
+   "validation": {
+    "development": {
+     "countsAsValidation": false,
+     "metrics": {
+      "MAE": 51.916666666666664,
+      "MAPE": 42.65096177554813,
+      "R2": -0.5271173476773707,
+      "RMSE": 58.92680487972628,
+      "meanBiasError": 2.583333333333343,
+      "n": 6
+     },
+     "note": "Reported for transparency and for comparison with v2 on the same six observations. Not evidence of independent accuracy.",
+     "scored": [
+      {
+       "id": "baby-cos-upper",
+       "measuredG": 84.5,
+       "ppfdUmol": 697,
+       "predictedG": 157.4,
+       "predictedPerAreaGPerM2": 7556.0,
+       "ratio": 1.86
+      },
+      {
+       "id": "baby-cos-middle",
+       "measuredG": 123.8,
+       "ppfdUmol": 391,
+       "predictedG": 123.4,
+       "predictedPerAreaGPerM2": 5924.0,
+       "ratio": 1.0
+      },
+      {
+       "id": "baby-cos-lower",
+       "measuredG": 92.9,
+       "ppfdUmol": 322,
+       "predictedG": 123.4,
+       "predictedPerAreaGPerM2": 5924.0,
+       "ratio": 1.33
+      },
+      {
+       "id": "green-oak-upper",
+       "measuredG": 97.3,
+       "ppfdUmol": 697,
+       "predictedG": 157.4,
+       "predictedPerAreaGPerM2": 7556.0,
+       "ratio": 1.62
+      },
+      {
+       "id": "green-oak-middle",
+       "measuredG": 190.7,
+       "ppfdUmol": 391,
+       "predictedG": 123.4,
+       "predictedPerAreaGPerM2": 5924.0,
+       "ratio": 0.65
+      },
+      {
+       "id": "green-oak-lower",
+       "measuredG": 203.7,
+       "ppfdUmol": 322,
+       "predictedG": 123.4,
+       "predictedPerAreaGPerM2": 5924.0,
+       "ratio": 0.61
+      }
+     ],
+     "study": "Wicharuck et al. 2024, PeerJ 12:e17085, doi:10.7717/peerj.17085",
+     "usedForModelSelection": true
+    },
+    "independent": {
+     "acceptanceCriterionPct": 30.0,
+     "metrics": {
+      "MAE": 57.400000000000006,
+      "MAPE": 41.59420289855073,
+      "R2": null,
+      "RMSE": 57.400000000000006,
+      "meanBiasError": 57.400000000000006,
+      "n": 1
+     },
+     "passed": false,
+     "refused": [
+      {
+       "id": "vfs-1000",
+       "measuredG": 95.0,
+       "measuredPerAreaGPerM2": 95000.0,
+       "system": "vertical farm",
+       "violations": [
+        "plantDensity 1000 plants/m2 outside [10, 200]",
+        "daysAfterTransplant 35 outside [2, 29]",
+        "airTemperature 17 below the 20 C floor"
+       ],
+       "why": "The per-area identity assumes per-area yield does not depend on density. At 1000 plants/m2 Touliatos report 95 kg/m2 per occupied floor area, which includes stacking across layers, so the identity is known to break here. Refused rather than scored."
+      }
+     ],
+     "scored": [
+      {
+       "dailyLightIntegral": 26.2,
+       "density": 50.0,
+       "domainViolations": [
+        "daysAfterTransplant 35 outside [2, 29]",
+        "airTemperature 17 below the 20 C floor"
+       ],
+       "id": "hhs-50",
+       "measuredG": 138.0,
+       "measuredPerAreaGPerM2": 6900.0,
+       "measuredSeG": 6.0,
+       "n": 40,
+       "ppfdUmol": 455.0,
+       "predictedG": 195.4,
+       "predictedPerAreaGPerM2": 9768.0,
+       "ratio": 1.42,
+       "system": "horizontal hydroponic"
+      }
+     ],
+     "study": "Touliatos D, Dodd IC, McAinsh M (2016) Vertical farming increases lettuce yield per unit area compared to conventional horizontal hydroponics. Food and Energy Security 5(3):184-191, doi:10.1002/fes3.83",
+     "usedForFitting": false,
+     "usedForModelSelection": false,
+     "verdict": "Fails the 30% criterion; the improvement over v2 is real but the model is not validated for harvest forecasting."
+    },
+    "internal": {
+     "metrics": {
+      "MAE": 835.5101616419312,
+      "MAPE": 41.68343427964123,
+      "R2": 0.8613898072115063,
+      "RMSE": 1539.769266234756,
+      "meanBiasError": -249.31002468932155,
+      "n": 1648
+     },
+     "protocol": "leave-one-experiment-out, 4 folds"
+    }
+   },
+   "version": "3.0.0"
   }
  ],
  "note": "Read-only audit. Checksums are recomputed from disk, metrics are read from the artifacts and never adjusted, and no model is retrained. A failure here means an artifact and its record disagree, not that a score is low.",
@@ -1141,13 +1593,14 @@
   "trainedAt": "2026-11-07T20:23:01.761929+00:00"
  },
  "summary": {
-  "auditedModels": 8,
+  "auditedModels": 9,
   "checksFailed": 0,
-  "checksRun": 114,
-  "documentedGaps": 17,
-  "registeredModels": 8,
+  "checksRun": 141,
+  "documentedGaps": 19,
+  "externallyServedModels": 0,
+  "registeredModels": 9,
   "retiredModels": 1,
-  "servedModels": 7,
+  "servedModels": 8,
   "supersededModels": 2,
   "withExplanations": 2
  },

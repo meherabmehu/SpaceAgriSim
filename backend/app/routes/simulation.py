@@ -37,10 +37,14 @@ def simulate(request: SimulationRequest) -> SimulationResponse:
         humidity=request.humidity,
         light_spectrum=request.lightSpectrum,
         water_recycling_efficiency=request.waterRecyclingEfficiency / 100.0,
+        et0_mm_per_day=request.et0MmPerDay,
+        crop_coefficient=request.cropCoefficient,
     )
     try:
         result = run_simulation(params)
     except KeyError as exc:  # unknown crop slipped past validation
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except ValueError as exc:  # e.g. an implausible ET0 that reached the water module
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     return to_response(result, request)
 

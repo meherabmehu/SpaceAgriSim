@@ -87,6 +87,10 @@ def _run(request: RunRequest, owner: dict | None):
         status = 404 if error.code == "unclassified-model" else 422
         if error.code == "retired-model":
             status = 410
+        if error.code == "external-service":
+            # 409, not 422: the request is well formed, it is simply addressed to the wrong
+            # surface. The message names the endpoint that does serve this model.
+            status = 409
         raise HTTPException(status, {"error": error.code, "message": error.message,
                                      **error.detail}) from error
     except KeyError as error:

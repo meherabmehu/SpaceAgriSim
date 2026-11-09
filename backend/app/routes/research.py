@@ -3,10 +3,13 @@ import math
 from functools import lru_cache
 from typing import Literal
 
-from fastapi import APIRouter, HTTPException
+from datetime import datetime, timezone
+
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field
 
-from app import benchmarks, closed_loop, external_validation, research, science_classification
+from app import benchmarks, closed_loop, et0, external_validation, research, science_classification
+from app.simulation import et0_fao56
 
 router = APIRouter(tags=["scientific data and models"])
 
@@ -305,6 +308,80 @@ def predict_radiation_quality(request: TranscriptomicPredictionRequest):
 def predict_radiation_exposure(request: TranscriptomicPredictionRequest):
     """Irradiated versus non-irradiated from Arabidopsis expression, OSD-46."""
     return _transcriptomic_prediction("radiation-exposure-osd46-v1", request)
+
+
+@router.get("/reference-et0/estimate")
+def reference_et0_estimate(
+    tmaxC: float = Query(ge=-90.0, le=60.0, description="Daily maximum air temperature, degC"),
+    tminC: float = Query(ge=-90.0, le=60.0, description="Daily minimum air temperature, degC"),
+    latitude: float = Query(ge=-90.0, le=90.0, description="Site latitude, degrees"),
+    elevationM: float = Query(default=0.0, ge=-500.0, le=6000.0, description="Site elevation, m"),
+    dayOfYear: int | None = Query(default=None, ge=1, le=366),
+    tdewC: float | None = Query(default=None, ge=-100.0, le=60.0,
+                                description="Daily mean dew point, degC"),
+    relativeHumidityPct: float | None = Query(default=None, ge=0.1, le=100.0,
+                                              description="Daily mean RH, % (used if tdewC is absent)"),
+    solarRadiationMJm2: float | None = Query(default=None, ge=0.0, le=50.0,
+                                             description="Incoming shortwave radiation, MJ m^-2 d^-1"),
+    windSpeedMs: float | None = Query(default=None, ge=0.0, le=70.0,
+                                      description="Wind speed at 2 m, m s^-1"),
+    pressureKpa: float | None = Query(default=None, ge=50.0, le=110.0,
+                                      description="Surface pressure, kPa (optional)"),
+):
+    """Reference ET0 for one day, by every method the supplied inputs allow.
+
+    FAO-56 Penman-Monteith needs radiation and wind. When either is missing the endpoint does
+    not guess: it returns Hargreaves-Samani (temperature and latitude only) as the primary
+    number, the emulator beside it, and the reason the physics was not available.
+    """
+    if tdewC is None and relativeHumidityPct is None:
+        raise HTTPException(status_code=422,
+                            detail="supply either tdewC or relativeHumidityPct to define vapour pressure")
+    resolved_day = dayOfYear if dayOfYear is not None else datetime.now(timezone.utc).timetuple().tm_yday
+    try:
+        return et0.estimate(
+            tmax_c=tmaxC, tmin_c=tminC, day_of_year=resolved_day, latitude=latitude,
+            elevation_m=elevationM, tdew_c=tdewC,
+            relative_humidity_pct=relativeHumidityPct,
+            solar_radiation_mj=solarRadiationMJm2, wind_speed_ms=windSpeedMs,
+            pressure_kpa=pressureKpa) | {"dayOfYearSource": ("supplied" if dayOfYear is not None
+                                                             else "current UTC day")}
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+
+
+@router.get("/reference-et0/model")
+def reference_et0_model():
+    """The model card: what the emulator is, what it failed, and how it is served."""
+    card = et0.artifact_status()
+    published = [
+        {key: row[key] for key in ("example", "publishedMmPerDay", "computedMmPerDay",
+                                  "differenceMmPerDay", "withinTolerance")}
+        for row in et0_fao56.run_published_examples()
+    ]
+    return card | {
+        "physics": {
+            "module": "app.simulation.et0_fao56",
+            "standard": "FAO-56 Penman-Monteith daily reference evapotranspiration (eq. 6)",
+            "publishedExamples": published,
+            "allExamplesWithinTolerance": all(row["withinTolerance"] for row in published),
+            "note": ("These check the implementation against the source document's own worked "
+                     "examples. They validate the code, not the reanalysis weather it is fed."),
+        },
+        "serving": {
+            "primary": ("penman-monteith when radiation and wind are supplied, else "
+                        "hargreaves-samani"),
+            "emulatorRole": ("offered beside the physics, never instead of it; flagged when an "
+                             "input leaves its training range"),
+            "waterDemand": ("POST /api/simulate accepts et0MmPerDay and cropCoefficient and "
+                            "reports demandBasis"),
+        },
+        "provenance": {
+            "trainingData": "data/processed/et0_dataset.csv (NASA POWER, community AG)",
+            "weatherLicense": "NASA POWER: no restrictions, citation requested",
+            "reproduce": "python3 ml/research/{acquire_power_climate,build_et0_dataset,train_et0_emulator}.py",
+        },
+    }
 
 
 @router.get("/models/{model_id}/explanation")

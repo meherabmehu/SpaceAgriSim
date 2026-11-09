@@ -62,6 +62,7 @@ INPUT_FAMILY = {
     "tomato-flight-response-v1": "gene-expression",
     "radiation-quality-osd46-v1": "gene-expression",
     "radiation-exposure-osd46-v1": "gene-expression",
+    "et0-emulator-v1": "weather",
 }
 
 FAMILY_DESCRIPTION = {
@@ -69,6 +70,7 @@ FAMILY_DESCRIPTION = {
     "harvest": "Mizuna harvest records (water supplied, established plants, environment, spectrum).",
     "microbial": "VEG-04 microbial assay context (campaign, environment, spectrum, tissue mass, harvest).",
     "gene-expression": "A complete transcriptomic feature vector in the model's own gene space.",
+    "weather": "A daily weather summary (temperature, dew point, day of year, site).",
 }
 
 
@@ -135,7 +137,10 @@ def model_catalogue() -> dict:
             "categoryName": (CATEGORY_NAMES[classification.category]
                              if classification else None),
             "runStatus": ("retired" if retired
+                          else "external-service" if model_id in research.EXTERNAL_SERVICES
                           else "runnable" if model.get("artifactExists") else "unavailable"),
+            "servedAt": (research.EXTERNAL_SERVICES.get(model_id, {}).get("endpoint")
+                         if model_id in research.EXTERNAL_SERVICES else None),
             "retiredReason": (classification.evidence if retired else None),
             "calibration": model.get("calibration"),
             "explanationAvailable": model.get("explanationAvailable"),
@@ -258,6 +263,16 @@ def validate_input(model_id: str, inputs: dict) -> dict:
 
 def run_model(model_id: str, inputs: dict) -> dict:
     """Validate, run the served inference, and attach interpretation and provenance."""
+    if model_id in research.EXTERNAL_SERVICES:
+        service = research.EXTERNAL_SERVICES[model_id]
+        raise WorkflowError(
+            "external-service",
+            (f"{model_id} is not run through this workflow: it is served by "
+             f"{service['servedBy']} at {service['endpoint']}. Call that endpoint with a daily "
+             "weather summary; this workflow drives the JSON-artifact models."),
+            {"endpoint": service["endpoint"],
+             "cardEndpoint": service["cardEndpoint"],
+             "reason": service["why"]})
     validated = validate_input(model_id, inputs)
     model = validated["model"]
     values = validated["values"]

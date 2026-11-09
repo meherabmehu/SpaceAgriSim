@@ -32,6 +32,34 @@ MODEL_IDS = {
     "radiation-exposure-osd46-v1",
 }
 
+# Models served by their own runtime rather than by the JSON artifact loader above.
+#
+# `et0-emulator-v1` is a scikit-learn bundle behind a prediction service, not a table of trees
+# this module can walk. Two things follow, and both are enforced elsewhere:
+#   * it is NOT in MODEL_IDS, so `load_model` never tries to open it as JSON;
+#   * it IS in CATALOGUE_MODEL_IDS, so the registry, the workflow catalogue, the science
+#     classification and the audit all see the same set of models the API serves.
+# A model that is served but invisible is the failure mode this exists to prevent.
+EXTERNAL_SERVICES: dict[str, dict] = {
+    "et0-emulator-v1": {
+        "name": "ET0 emulator v1 (surrogate of FAO-56 reference ET0)",
+        "endpoint": "/api/reference-et0/estimate",
+        "cardEndpoint": "/api/reference-et0/model",
+        "card": "ml/artifacts/et0-emulator-v1.json",
+        "servedBy": "app.et0",
+        "inputFamily": "weather",
+        "target": "FAO-56 reference evapotranspiration",
+        "outputUnit": "mm/day",
+        "status": "trained-exploratory",
+        "why": ("It is a fitted scikit-learn estimator, not a coefficient table, and it is served "
+                "beside the FAO-56 equation it approximates rather than instead of it: it loses "
+                "to Hargreaves-Samani on an unseen site, so the physics is the primary number."),
+    },
+}
+EXTERNAL_SERVICES_BY_NAME = {item["name"]: model_id
+                             for model_id, item in EXTERNAL_SERVICES.items()}
+CATALOGUE_MODEL_IDS = MODEL_IDS | set(EXTERNAL_SERVICES)
+
 
 def read_json(path):
     return json.loads(path.read_text(encoding="utf-8"))
@@ -287,11 +315,99 @@ def _classification_record(model_id):
     }
 
 
+def _external_calibration(card_path: Path) -> dict:
+    """Measured interval coverage for an externally served model, straight from its card."""
+    uncertainty = {}
+    if card_path.is_file():
+        uncertainty = read_json(card_path).get("uncertainty") or {}
+    return {
+        "calibrated": False,
+        "nominalCoverage": 95.0 if uncertainty else None,
+        "measuredCoverage": uncertainty.get("coverageOnHoldoutPct"),
+        "measuredWidth": uncertainty.get("halfWidthMm"),
+        "method": uncertainty.get("method", "unknown"),
+        "measuredOn": "temporal holdout 2024-01-01..2025-10-31",
+        "statement": ("Coverage is measured on held-out days, not guaranteed, and a 95 % interval "
+                      "on a computed target says nothing about a real crop."),
+    }
+
+
+def external_model_row(model_id: str) -> dict:
+    """Registry row for a model served by its own runtime.
+
+    Everything in it comes from the shipped model card, so the row cannot say more than the
+    artifact does. When the card is missing the row says so instead of disappearing - a model
+    that silently vanishes from the registry is worse than one that reports itself unavailable.
+    """
+    from app import et0
+
+    service = EXTERNAL_SERVICES[model_id]
+    card_path = ROOT / service["card"]
+    status = et0.artifact_status()
+    base = {
+        "id": model_id,
+        "name": service["name"],
+        "status": status.get("status") or service["status"],
+        "deployed": bool(status.get("deployed", False)),
+        "servedBy": service["servedBy"],
+        "servedAt": service["endpoint"],
+        "target": service["target"],
+        "unit": service["outputUnit"],
+        "domain": ("Daily weather for a mid-latitude to equatorial site: " + ", ".join(
+                      f"{name} {bounds['min']}..{bounds['max']}"
+                      for name, bounds in (status.get("domainBounds") or {}).items())
+                  if status.get("domainBounds") else
+                  "Unknown: the artifact that records the training envelope is not available."),
+        "domainBounds": status.get("domainBounds"),
+        "artifactExists": bool(status.get("available")),
+        "artifactSha256": (hashlib.sha256(card_path.read_bytes()).hexdigest()
+                           if card_path.is_file() else None),
+        "scientificClassification": _classification_record(model_id),
+        "explanationAvailable": False,
+        "calibration": _external_calibration(card_path),
+    }
+    if not status.get("available"):
+        return base | {
+            "features": [],
+            "limitations": [status.get("reason") or "artifact unavailable"],
+            "baselineComparison": _baseline_comparison({}, {}),
+        }
+    metrics = status.get("metrics") or {}
+    baseline = (status.get("baselineMetrics") or {}).get("hargreaves") or {}
+    return base | {
+        "features": status.get("features") or [],
+        "metrics": metrics,
+        "baselineMetrics": status.get("baselineMetrics") or {},
+        "predictionStatus": "experimental",
+        # Temporal holdout only. The same model loses to this baseline on an unseen site, so the
+        # comparison is stated with the split it was measured on rather than as a bare verdict.
+        "baselineComparison": _baseline_comparison(
+            {"MAE": metrics.get("mae")}, {"MAE": baseline.get("mae")}) | {
+            "measuredOn": "temporal holdout 2024-01-01..2025-10-31",
+            "crossSiteVerdict": ((status.get("validation") or {})
+                                 .get("acceptanceGate") or []),
+        },
+        "validation": status.get("validation"),
+        "improvementOverHargreaves": status.get("deploymentDecision"),
+        "limitations": status.get("limitations") or [],
+        "trainingData": status.get("trainingData"),
+    }
+
+
 def model_registry():
     registry = read_json(ARTIFACTS / "registry.json")
     registered = {item["id"]: item for item in registry.get("models", [])}
     models = []
-    for model_id in sorted(MODEL_IDS):
+    for model_id in sorted(CATALOGUE_MODEL_IDS):
+        if model_id in EXTERNAL_SERVICES:
+            try:
+                models.append(external_model_row(model_id))
+            except Exception as error:  # noqa: BLE001 - never break the registry on one row
+                models.append({"id": model_id, "name": EXTERNAL_SERVICES[model_id]["name"],
+                               "status": "unavailable", "artifactExists": False,
+                               "servedBy": EXTERNAL_SERVICES[model_id]["servedBy"],
+                               "limitations": [f"{type(error).__name__}: {error}"]})
+            continue
         try:
             model = load_model(model_id)
             # Keep executable coefficients/tree arrays private, but expose the

@@ -46,6 +46,12 @@ class SimulationInput:
     humidity: float = 60.0
     water_recycling_efficiency: float = 0.90
     light_spectrum: str = "balanced"
+    # Optional reference-flux demand. `None` keeps the crop-relative equation every saved
+    # scenario was produced with; a value switches the water module to
+    # demand = ET0 x Kc x area x canopy, which is a different basis and is labelled as such
+    # in the response rather than silently replacing the old numbers.
+    et0_mm_per_day: float | None = None
+    crop_coefficient: float | None = None
 
 
 @dataclass(frozen=True)
@@ -65,6 +71,11 @@ class ScenarioResult:
     potential_harvest_g: float = 0.0  # what one full cycle yields under these conditions
     water_demand_l: float = 0.0  # what a healthy canopy would have wanted
     water_deficit_l: float = 0.0  # unmet demand (demand - supplied)
+    # Which equation produced the water numbers, and the inputs it used. Defaults describe the
+    # crop-relative path, so every existing caller reads the same values it did before.
+    demand_basis: str = "crop-relative"
+    et0_mm_per_day: float | None = None
+    crop_coefficient: float | None = None
     daily_growth: list[growth.DailyGrowthPoint] = field(default_factory=list, repr=False)
     daily_water: list[water.DailyWaterPoint] = field(default_factory=list, repr=False)
     daily_gas: list[gas_exchange.DailyGasPoint] = field(default_factory=list, repr=False)
@@ -146,6 +157,8 @@ def _run_scenario(
     temperature: float = 22.0,
     humidity: float = 60.0,
     water_recycling_efficiency: float = 0.90,
+    et0_mm_per_day: float | None = None,
+    crop_coefficient: float | None = None,
 ) -> ScenarioResult:
     env = factors.combined_growth_factor(
         crop,
@@ -169,6 +182,8 @@ def _run_scenario(
         recovery_efficiency=water_recycling_efficiency,
         demand_scale=(factors.vapor_pressure_deficit(temperature, humidity) /
                       factors.vapor_pressure_deficit(22.0, 60.0)),
+        et0_mm_per_day=et0_mm_per_day,
+        crop_coefficient=crop_coefficient,
     )
     daily_gas = gas_exchange.simulate_gas_exchange(crop, daily_growth)
 
@@ -186,6 +201,10 @@ def _run_scenario(
         water_deficit_l=water.total_water_deficit_l(daily_water),
         co2_removed_g=gas_exchange.total_co2_removed_g(daily_gas),
         o2_produced_g=gas_exchange.total_o2_produced_g(daily_gas),
+        demand_basis=water.demand_basis(et0_mm_per_day),
+        et0_mm_per_day=et0_mm_per_day,
+        crop_coefficient=(crop_coefficient if et0_mm_per_day is not None
+                          else None),
         daily_growth=daily_growth,
         daily_water=daily_water,
         daily_gas=daily_gas,
@@ -210,6 +229,10 @@ def earth_reference_conditions(params: SimulationInput, crop: CropProfile) -> di
         "temperature": params.temperature,
         "humidity": params.humidity,
         "water_recycling_efficiency": params.water_recycling_efficiency,
+        # ET0 describes the site's weather, not the scenario, so both runs use it. The Earth
+        # reference answers "same site, Earth gravity and background radiation".
+        "et0_mm_per_day": params.et0_mm_per_day,
+        "crop_coefficient": params.crop_coefficient,
     }
     if params.earth_comparison_mode == "baseline":
         conditions.update(
@@ -241,6 +264,8 @@ def run_simulation(params: SimulationInput) -> SimulationResult:
         temperature=params.temperature,
         humidity=params.humidity,
         water_recycling_efficiency=params.water_recycling_efficiency,
+        et0_mm_per_day=params.et0_mm_per_day,
+        crop_coefficient=params.crop_coefficient,
     )
 
     earth_conditions = earth_reference_conditions(params, crop)

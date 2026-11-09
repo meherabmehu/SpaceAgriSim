@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-09T14:15:21.268453+00:00",
+  "generatedAt": "2026-11-09T20:14:06.333215+00:00",
   "phase": 7,
   "registrySchemaVersion": 1,
   "modelCount": 9,
@@ -335,6 +335,56 @@
       "check": "artifact records the failure verdict: lettuce-earth-growth-v3",
       "passed": true,
       "detail": "Fails the 30% criterion; the improvement over v2 is real but the model is not validated for harvest "
+    },
+    {
+      "check": "external card exists: et0-emulator-v1",
+      "passed": true,
+      "detail": "ml/artifacts/et0-emulator-v1.json"
+    },
+    {
+      "check": "service loads the card: et0-emulator-v1",
+      "passed": true,
+      "detail": "loaded"
+    },
+    {
+      "check": "gates are recorded per criterion: et0-emulator-v1",
+      "passed": true,
+      "detail": "4 criteria"
+    },
+    {
+      "check": "gate verdict matches its own numbers (beatsHargreavesTemporal): et0-emulator-v1",
+      "passed": true,
+      "detail": "observed=30.74 threshold=> 0 % lower MAE passed=True"
+    },
+    {
+      "check": "gate verdict matches its own numbers (beatsClimatology): et0-emulator-v1",
+      "passed": true,
+      "detail": "observed=36.96 threshold=> 0 % lower MAE passed=True"
+    },
+    {
+      "check": "gate verdict matches its own numbers (crossSiteGeneralisation): et0-emulator-v1",
+      "passed": true,
+      "detail": "observed=-13.82 threshold=> 0 % lower pooled MAE across LOSO passed=False"
+    },
+    {
+      "check": "gate verdict matches its own numbers (intervalCoverage): et0-emulator-v1",
+      "passed": true,
+      "detail": "observed=91.99 threshold=90-98 % empirical coverage passed=True"
+    },
+    {
+      "check": "metric directions are declared: et0-emulator-v1",
+      "passed": true,
+      "detail": "['bias', 'mae', 'r2', 'rmse']"
+    },
+    {
+      "check": "failed gates forbid deployment: et0-emulator-v1",
+      "passed": true,
+      "detail": "verdicts={'beatsHargreavesTemporal': True, 'beatsClimatology': True, 'crossSiteGeneralisation': False, 'intervalCoverage': True} deployed=False"
+    },
+    {
+      "check": "temporal gate matches the recorded metrics: et0-emulator-v1",
+      "passed": true,
+      "detail": "model=0.3981 baseline=0.5748"
     }
   ],
   "passed": true,

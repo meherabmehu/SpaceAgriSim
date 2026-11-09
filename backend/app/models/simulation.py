@@ -71,6 +71,23 @@ class SimulationRequest(BaseModel):
             "baseline: Earth reference also uses reference resources"
         ),
     )
+    # Optional reference-flux water demand. Omitted, the simulator uses its own crop-relative
+    # demand and returns exactly the numbers it always has. Supplied, daily demand becomes
+    # ET0 x Kc x area x canopy cover, and `demandBasis` in the response says so.
+    et0MmPerDay: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=20.0,
+        description=("Reference evapotranspiration for the site in mm/day, e.g. from "
+                     "/api/reference-et0/estimate. Omit to keep the crop-relative demand."),
+    )
+    cropCoefficient: float | None = Field(
+        default=None,
+        gt=0.0,
+        le=3.0,
+        description=("Crop coefficient Kc applied to ET0. Defaults to 1.0, which is the "
+                     "reference grass surface, not your crop - supply a Kc you can cite."),
+    )
 
     @field_validator("crop")
     @classmethod
@@ -263,6 +280,10 @@ class SimulationResponse(BaseModel):
     dailyWaterData: list[DailyWaterEntry]
     dailyLifeSupportData: list[DailyLifeSupportEntry]
 
+    # Which equation produced the water numbers. Always present so a caller can tell the two
+    # bases apart without guessing from the magnitudes.
+    demandBasis: dict = Field(default_factory=dict)
+
     disclaimer: str
 
 
@@ -286,6 +307,11 @@ class ModelAssumption(BaseModel):
     formula: str
     note: str
     constants: dict[str, float]
+    # Optional, additive: how well backed this component is, and on what. Only the reference-ET0
+    # component fills them today, and a component that has no source says nothing rather than
+    # inventing one.
+    evidence: str | None = None
+    sources: list[str] = []
 
 
 class ModelStatus(BaseModel):

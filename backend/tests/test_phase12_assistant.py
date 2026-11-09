@@ -244,7 +244,9 @@ def test_every_served_model_carries_its_scientific_classification(client):
     get conflated in a demo.
     """
     models = client.get("/api/models").json()["models"]
-    assert len(models) == len(research.MODEL_IDS)
+    # The catalogue is the served set, which is larger than MODEL_IDS since Phase 23: the ET0
+    # emulator runs in its own service and is not an entry in the JSON registry.
+    assert len(models) == len(research.CATALOGUE_MODEL_IDS)
     for model in models:
         record = model["scientificClassification"]
         assert record is not None, model["id"]

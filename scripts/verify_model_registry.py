@@ -78,6 +78,13 @@ def main() -> int:
     registered_ids = {item["id"] for item in models}
     on_disk = {p.stem for p in ARTIFACTS.glob("*.json")} - {"registry", "tomato_example"}
     on_disk = {stem for stem in on_disk if not stem.endswith("-explanation")}
+    # Models served by their own runtime ship a card here rather than a registry entry, because
+    # they are not loaded through this loader. They are excluded from the orphan set only when
+    # `research.EXTERNAL_SERVICES` declares them - an undeclared card is still an orphan.
+    from app import research
+
+    external = dict(research.EXTERNAL_SERVICES)
+    on_disk -= set(external)
     orphans = sorted(on_disk - registered_ids)
     check("no unregistered model artifacts", not orphans, f"orphans={orphans}")
 
@@ -93,8 +100,6 @@ def main() -> int:
               f"registered successor of {target} is {successor}")
 
     # 4. The API loading path accepts every artifact (this is the path that serves them).
-    from app import research
-
     for model_id in sorted(registered_ids):
         try:
             model = research.load_model(model_id)
@@ -184,6 +189,56 @@ def main() -> int:
             check(f"artifact records the failure verdict: {item['id']}",
                   bool(recorded.get("verdict")),
                   str(recorded.get("verdict") or "no verdict text recorded")[:100])
+
+    # 8. Externally served models are verified through their own service.
+    #
+    # They cannot be checked by this file's JSON loader, and skipping them would leave the newest
+    # model in the product unverified. Each one is loaded through `app.et0`, and its gate verdicts
+    # are checked per criterion with the direction the card declares - a "lower is better" metric
+    # read with a "higher is better" rule inverts the verdict, which is exactly how a failed
+    # generalisation check could be reported as a pass.
+    for model_id, service in external.items():
+        card_path = ARTIFACTS / f"{model_id}.json"
+        check(f"external card exists: {model_id}", card_path.is_file(), service["card"])
+        if not card_path.is_file():
+            continue
+        card = json.loads(card_path.read_text(encoding="utf-8"))
+        from app import et0
+
+        status = et0.artifact_status()
+        check(f"service loads the card: {model_id}", bool(status.get("available")),
+              str(status.get("reason") or "loaded"))
+        gates = (card.get("validation") or {}).get("acceptanceGate") or []
+        check(f"gates are recorded per criterion: {model_id}", len(gates) >= 3,
+              f"{len(gates)} criteria")
+        for gate in gates:
+            observed = gate.get("observed")
+            threshold = str(gate.get("threshold", ""))
+            passed = bool(gate.get("passed"))
+            if gate["criterion"].startswith("intervalCoverage"):
+                consistent = (90.0 <= float(observed) <= 98.0) == passed
+            else:
+                # Every other criterion here is a percentage improvement: > 0 means better.
+                consistent = (float(observed) > 0.0) == passed
+            check(f"gate verdict matches its own numbers ({gate['criterion']}): {model_id}",
+                  consistent, f"observed={observed} threshold={threshold} passed={passed}")
+        directions = card.get("criteria") or {}
+        check(f"metric directions are declared: {model_id}",
+              "mae" in directions and "lower" in str(directions["mae"]).lower(),
+              str(sorted(directions)))
+        verdicts = {gate["criterion"]: gate["passed"] for gate in gates}
+        check(f"failed gates forbid deployment: {model_id}",
+              (all(verdicts.values()) and card.get("deployed") is True)
+              or (not all(verdicts.values()) and card.get("deployed") is False),
+              f"verdicts={verdicts} deployed={card.get('deployed')}")
+        metrics = card.get("metrics") or {}
+        baseline = (card.get("baselineMetrics") or {}).get("hargreaves") or {}
+        if metrics.get("mae") is not None and baseline.get("mae") is not None:
+            temporal_pass = verdicts.get("beatsHargreavesTemporal")
+            if temporal_pass is not None:
+                check(f"temporal gate matches the recorded metrics: {model_id}",
+                      bool(float(metrics["mae"]) < float(baseline["mae"])) == bool(temporal_pass),
+                      f"model={metrics['mae']} baseline={baseline['mae']}")
 
     payload = {
         "generatedAt": datetime.now(timezone.utc).isoformat(),
