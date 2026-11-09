@@ -14,6 +14,10 @@ The Vercel API service packages a small checksum-verified read-only copy of the 
 
 ## Follow-up work
 
+- Closed-loop measurements added: `GET /api/closed-loop` serves NASA's measured ethylene
+  production and lettuce dose response (Wheeler et al. 1996) and the ISS 98 % water recovery figure;
+  transcribed in `data/literature/nasa_air_and_water.json`. Ethylene stays out of the growth
+  equations by design and a test enforces that.
 - Obtain sufficiently large, compatible mission and ground yield datasets before recalibrating the simulator.
   For the lettuce model specifically, `docs/DATASET_GAP_ANALYSIS.md` now states the acquisition
   requirements as acceptance criteria: per-observation rows with root-zone temperature, at least two

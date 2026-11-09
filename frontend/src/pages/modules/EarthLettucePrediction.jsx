@@ -12,7 +12,12 @@ export default function EarthLettucePrediction(){
   const predict=async()=>{setBusy(true);setError('');setResult(null);try{setResult(await api('/predict/lettuce-earth-growth-v1',inputs))}catch(err){setError(err.message)}finally{setBusy(false)}}
   return <Card title="Earth lettuce growth experiment" label="WAGENINGEN / 4TU · EXTERNAL DATA, NOT NASA">
     <p className="prose">Predict fresh shoot mass per plant for Batavia Othilie lettuce in Earth growth chambers. The source uses a 16-hour photoperiod and non-limiting water, nutrients and CO₂. This model cannot estimate spaceflight yield or area-level production.</p>
-    <div className="warning-box"><p>The current v2 lettuce model failed an independent check: scored against a Thai greenhouse trial it was never trained on, it overpredicted fresh weight by ×1.7 to ×5.4. This v1 model shares the same four inputs and no cultivar input, so treat any value below as exploratory, not as a harvest forecast. See the benchmarks page for the per-observation numbers.</p></div>
+    <details className="evidence-note">
+      <summary>How much to trust this number <span className="muted">(1)</span></summary>
+      <ul>
+        <li>The current v2 lettuce model failed an independent check: scored against a Thai greenhouse trial it was never trained on, it overpredicted fresh weight by ×1.7 to ×5.4. This v1 model shares the same four inputs and no cultivar input, so treat any value below as exploratory rather than as a harvest forecast. Per-observation numbers are on the benchmarks page.</li>
+      </ul>
+    </details>
     <div className="control-grid">{fields.map(([key,label,min,max,step])=><label className="field" key={key}>{label}<input type="number" min={min} max={max} step={step} value={inputs[key]} onChange={e=>{setInputs({...inputs,[key]:Number(e.target.value)});setResult(null)}}/></label>)}</div>
     <div className="module-actions"><button className="primary-button" disabled={busy} onClick={predict}>{busy?'Computing…':'Predict Earth lettuce mass'}</button></div>
     {error&&<div className="error-banner" role="alert">{error}</div>}

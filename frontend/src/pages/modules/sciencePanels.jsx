@@ -166,7 +166,7 @@ export function IndependencePanel() {
           </div>
 
           {Object.entries(offsets).map(([id, record]) => (
-            <div className="warning-box" key={id}>
+            <div className="deposit-note" key={id}>
               <p>
                 <strong>{id}</strong> is a second deposit of {record.redundantWith}.{" "}
                 {record.reason}

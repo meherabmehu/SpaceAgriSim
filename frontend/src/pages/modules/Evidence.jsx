@@ -430,9 +430,9 @@ function MolecularPrediction() {
         </button>
       </div>
       {example && (
-        <p className="warning-box">
-          Loaded {example.sample} from {example.sourceStudy}. This is a training
-          specimen for checking inference, not independent validation.
+        <p className="muted">
+          Loaded {example.sample} from {example.sourceStudy}. This is a training specimen for
+          checking inference, not independent validation.
         </p>
       )}
       <label className="field">

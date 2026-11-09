@@ -2003,3 +2003,34 @@
   font: inherit;
   padding: 0.45rem 0.6rem;
 }
+
+/* Scientific caveats used to render as amber warning blocks on nearly every card, which made the
+   workspace look like it was permanently malfunctioning. They are now a muted, collapsed note:
+   present, one click away, and no longer competing with the result. `.warning-box` is kept for
+   genuine configuration problems (missing SMTP, unset operator token), which are states to fix
+   rather than scientific caveats. */
+.evidence-note {
+  margin: 14px 0 4px;
+  border-top: 1px solid #223138;
+  padding-top: 10px;
+  font-size: 12.5px;
+  color: #8b9fa7;
+}
+.evidence-note summary {
+  cursor: pointer;
+  color: #9db4bd;
+  list-style: none;
+}
+.evidence-note summary::-webkit-details-marker { display: none; }
+.evidence-note summary::before { content: "▸ "; color: #5f7b86; }
+.evidence-note[open] summary::before { content: "▾ "; }
+.evidence-note ul { margin: 10px 0 0 18px; line-height: 1.75; }
+.evidence-note li { margin-bottom: 6px; }
+
+.deposit-note {
+  border-left: 2px solid #2f4650;
+  padding: 6px 0 6px 12px;
+  margin: 10px 0;
+  color: #9db4bd;
+  font-size: 13px;
+}

@@ -37,13 +37,27 @@ export function RequestState({ state }) {
     </div>
   ) : null;
 }
-export function Limitations({ items }) {
+/**
+ * Evidence notes for a result.
+ *
+ * These used to render as a warning block on every page, which trained the reader to skip them and
+ * made the whole workspace look like it was apologising. The lines are unchanged and still one
+ * click away; what changed is that they no longer compete with the result for attention.
+ */
+export function Limitations({ items, title = "Evidence notes" }) {
+  const notes = (items || []).filter(Boolean);
+  if (!notes.length) return null;
   return (
-    <div className="warning-box">
-      {(items || []).map((item, i) => (
-        <p key={i}>{item}</p>
-      ))}
-    </div>
+    <details className="evidence-note">
+      <summary>
+        {title} <span className="muted">({notes.length})</span>
+      </summary>
+      <ul>
+        {notes.map((item, i) => (
+          <li key={i}>{item}</li>
+        ))}
+      </ul>
+    </details>
   );
 }
 export function JsonDetails({ title = "Inspect complete API output", data }) {

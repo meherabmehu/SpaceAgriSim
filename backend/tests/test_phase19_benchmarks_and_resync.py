@@ -268,3 +268,50 @@ def test_structural_findings_name_what_the_model_cannot_represent(client):
     findings = " ".join(item["finding"] for item in check["structuralFindings"])
     assert "no cultivar input" in findings
     assert "not monotonic" in findings
+
+
+# ---------------------------------------------------------------------------
+# Closed-loop measurements: ethylene and water
+# ---------------------------------------------------------------------------
+
+def test_ethylene_numbers_come_from_the_cited_nasa_source(client):
+    body = client.get("/api/closed-loop").json()["ethylene"]
+    production = body["production"]
+    assert "10.1016/0273-1177(95)00877-H" in production["source"]
+    assert "PMID 11538797" in production["source"]
+    assert production["chamberConcentrationPpb"]["wheat"] == 120
+    assert production["peakProduction"]["value"] == "0.04-0.06"
+    dose = {item["ethyleneNlPerL"]: item["dryWeightReductionPct"] for item in body["doseResponse"]["findings"]}
+    assert dose[120] == "25-50"
+    assert dose[55] == "1-25"
+    assert "unaffected by temperature" in " ".join(body["doseResponse"]["notes"])
+
+
+def test_ethylene_is_a_hazard_screen_and_says_it_is_not_a_growth_term(client):
+    body = client.get("/api/closed-loop").json()["ethylene"]
+    joined = " ".join(body["notClaimed"])
+    assert "No ethylene effect is applied inside the simulator" in joined
+    # the bound is checked against NASA's own chamber measurement rather than left alone
+    check = body["chamberCheck"]
+    assert check["measuredPpb"].startswith("40-120")
+    assert check["ratioToUpperMeasured"] > 1.0
+    assert "upper limit, not a prediction" in check["explanation"]
+
+
+def test_ethylene_accumulation_is_arithmetic_with_named_assumptions():
+    from app import closed_loop
+
+    result = closed_loop.ethylene_accumulation(area_m2=20.0, days=28, volume_m3=113.0)
+    assert result["mixingRatioPpb"] > 0
+    assert len(result["assumptions"]) == 3
+    # doubling the volume halves the concentration: it is proportional arithmetic, not a fit
+    doubled = closed_loop.ethylene_accumulation(area_m2=20.0, days=28, volume_m3=226.0)
+    assert abs(doubled["mixingRatioPpb"] * 2 - result["mixingRatioPpb"]) < 0.2
+
+
+def test_water_recovery_is_bounded_by_the_measured_iss_figure(client):
+    water = client.get("/api/closed-loop").json()["water"]
+    assert water["issRecovery"]["currentPct"] == 98
+    assert water["issRecovery"]["previousPct"] == "93-94"
+    assert water["implication"]["waterMakeupAt98PctKg"] == 250
+    assert "Anything above 98 % is not a demonstrated capability" in water["useInSimulator"]

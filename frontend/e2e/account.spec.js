@@ -183,11 +183,13 @@ test("benchmarks show the measured number beside the modelled one", async ({
   await expect(page.locator(".bench-row", { hasText: "420 ppm" })).toBeVisible();
   await expect(page.locator(".bench-row", { hasText: "1,000 ppm" })).toBeVisible();
   await expect(page.locator(".bench-row", { hasText: "3,000 ppm" })).toBeVisible();
-  // The same sentence also appears in the raw JSON inspector, so scope to the disclosure itself.
+  // Caveats are rendered as plain notes now rather than amber warning blocks, and the same
+  // sentence also appears in the raw JSON inspector, so take the first rendered match.
   await expect(
     page
-      .locator(".warning-box p")
-      .filter({ hasText: /still rises, but the published soybean chamber data/i }),
+      .locator("p.muted")
+      .filter({ hasText: /still rises, but the published soybean chamber data/i })
+      .first(),
   ).toBeVisible();
 
   // An external check was run against an independent study and the model failed it. The page has
@@ -209,11 +211,17 @@ test("benchmarks show the measured number beside the modelled one", async ({
     externalCard.locator(".bench-row", { hasText: "Green Oak · lower level" }),
   ).toContainText("×1.67");
   await expect(
-    externalCard.locator(".warning-box p").filter({ hasText: /must not be used to forecast harvest weight/i }),
+    externalCard.locator("p.muted").filter({ hasText: /must not be used to forecast harvest weight/i }).first(),
   ).toBeVisible();
   await expect(
     externalCard.locator(".stat-pair", { hasText: "Is the gap just the missing root temperature?" }),
   ).toContainText("no");
+
+  // The two questions that used to be answered with a caveat now carry measured NASA numbers.
+  const closedLoop = page.locator(".mission-card", { hasText: "SEALED-CHAMBER ATMOSPHERE AND WATER" });
+  await expect(closedLoop.locator(".stat-pair").first()).toContainText("120 ppb wheat");
+  await expect(closedLoop.locator(".bench-row", { hasText: "120 nL L⁻¹" })).toContainText("25-50 %");
+  await expect(closedLoop.locator(".stat-pair", { hasText: "ISS water recovery" })).toContainText("98 %");
 });
 
 test("the model comparison shows each baseline and no ranking", async ({ page }) => {

@@ -147,6 +147,23 @@ def describe_assumptions() -> list[dict]:
             },
         },
         {
+            "key": "closedLoop",
+            "title": "Ethylene and water closure",
+            "formula": "not applied to growth; served as measured reference (GET /api/closed-loop)",
+            "note": (
+                "Two questions this simulator used to answer with a caveat now have measured NASA "
+                "numbers beside it. Ethylene: 20 m² stands reached 40–120 ppb in NASA's Biomass "
+                "Production Chamber, and controlled chamber work on lettuce measured 1–25 % dry "
+                "weight loss at 55 nL L⁻¹ and 25–50 % at 120 nL L⁻¹. Ethylene is deliberately not a "
+                "term in the growth equations — no scrubbing, leakage or uptake kinetics were "
+                "measured in a form that would support one, so inventing the term would be worse "
+                "than omitting it. Water: the ISS recovers 98 % of the water it brings aboard "
+                "(93–94 % before the brine processor), so that is where the recycling control's "
+                "upper bound comes from."
+            ),
+            "constants": {},
+        },
+        {
             "key": "earthReference",
             "title": "Earth reference run",
             "formula": "Earth run = 1 g + background radiation; matched keeps your resources, baseline resets them",

@@ -17,6 +17,7 @@ export function Benchmarks() {
   const state = useResource("/benchmarks");
   const data = state.data?.benchmarks;
   const external = useResource("/external-validation");
+  const closedLoop = useResource("/closed-loop");
 
   return (
     <>
@@ -106,12 +107,12 @@ export function Benchmarks() {
                 ))}
               </div>
               <p className="muted">{data.co2.form}</p>
-              <div className="warning-box">
-                <p>{data.co2.limitation}</p>
-              </div>
+              <p className="muted">{data.co2.limitation}</p>
               <p className="muted">{data.co2.evidenceStatus}</p>
             </Card>
           )}
+
+          {closedLoop.data?.available && <ClosedLoop body={closedLoop.data} />}
 
           {external.data && <ExternalValidation body={external.data} />}
 
@@ -182,9 +183,7 @@ function ExternalValidation({ body }) {
             best case ×{number(external.metrics.closestRatio, 2)}. Mean absolute percentage error{" "}
             {number(external.metrics.meanAbsolutePercentageError, 0)} %.
           </p>
-          <div className="warning-box">
-            <p>{external.verdict.consequence}</p>
-          </div>
+          <p className="muted">{external.verdict.consequence}</p>
           <div className="stat-pair">
             <span>Is the gap just the missing root temperature?</span>
             <strong>no</strong>
@@ -226,12 +225,68 @@ function ExternalValidation({ body }) {
       </div>
       <p className="muted">{conclusion.whatThisDoesNotMean}</p>
       {check.available && (
-        <div className="warning-box">
-          <p>{check.means}</p>
-        </div>
+        <p className="muted">{check.means}</p>
       )}
       <p className="muted">{body.scopeNote}</p>
       <JsonDetails title="Inspect the external-validation record" data={body} />
+    </Card>
+  );
+}
+
+/**
+ * What NASA measured inside a sealed chamber: ethylene, and the water loop that keeps a crew alive.
+ *
+ * These are the two questions the simulator used to answer with a caveat instead of a number.
+ * Neither is folded into the growth equations: ethylene is a hazard screen beside the simulation,
+ * and the water figure bounds a control the simulator already exposes.
+ */
+function ClosedLoop({ body }) {
+  const ethylene = body.ethylene;
+  const water = body.water;
+  const check = ethylene.chamberCheck;
+  return (
+    <Card title="Sealed-chamber atmosphere and water" label="NASA CELSS BIOMASS PRODUCTION CHAMBER · ISS ECLSS">
+      <div className="stat-pair">
+        <span>Ethylene measured in NASA&apos;s closed chamber</span>
+        <strong>{ethylene.production.chamberConcentrationPpb.wheat} ppb wheat · {ethylene.production.chamberConcentrationPpb.soybean} ppb soybean</strong>
+      </div>
+      <div className="bench-grid">
+        {ethylene.doseResponse.findings.map((finding) => (
+          <div className="bench-row" key={finding.ethyleneNlPerL}>
+            <span>Lettuce at {number(finding.ethyleneNlPerL, 0)} nL L⁻¹</span>
+            <strong>{finding.dryWeightReductionPct} % dry weight lost</strong>
+            <em>{finding.note || "measured in controlled chambers"}</em>
+            <small />
+          </div>
+        ))}
+      </div>
+      <p className="muted">
+        Peak production {ethylene.production.peakProduction.value}{" "}
+        {ethylene.production.peakProduction.unit} ({ethylene.production.peakProduction.equivalent}),
+        unadjusted for chamber leakage.
+      </p>
+      <div className="stat-pair">
+        <span>No-leak bound for the same chamber volume</span>
+        <strong>
+          {number(check.boundedPpb, 0)} ppb → ×{number(check.ratioToUpperMeasured, 1)} the highest
+          measured value
+        </strong>
+      </div>
+      <p className="muted">{check.explanation}</p>
+
+      <div className="stat-pair">
+        <span>ISS water recovery</span>
+        <strong>
+          {number(water.issRecovery.currentPct, 0)} % now · {water.issRecovery.previousPct} % before
+          the brine processor
+        </strong>
+      </div>
+      <p className="muted">
+        {water.implication.note} Anything above {number(water.issRecovery.currentPct, 0)} % is not a
+        demonstrated capability, so the simulator&apos;s recycling control stops there.
+      </p>
+      <p className="muted">{body.scopeNote}</p>
+      <JsonDetails title="Inspect the closed-loop measurements" data={body} />
     </Card>
   );
 }

@@ -116,11 +116,31 @@ def test_the_ethylene_dose_response_numbers_are_the_published_ones(ethylene):
 
 
 def test_ethylene_has_no_coefficient_in_the_simulator():
-    """It is disclosed, not modelled - so no ethylene factor may appear in the engine."""
-    sources = list((ROOT / "backend" / "app" / "simulation").glob("*.py"))
-    sources.append(ROOT / "backend" / "app" / "config" / "simulation_constants.py")
-    hits = [path.name for path in sources if "ethylene" in path.read_text().lower()]
-    assert hits == [], f"an ethylene term appeared in the model: {hits}"
+    """It is disclosed, not modelled - so no ethylene term may reach the growth engine.
+
+    Phase 19 added measured NASA ethylene numbers and serves them at /api/closed-loop. The guard
+    still applies where it matters: the engine that computes growth. `model_description.py` is
+    allowed to carry the disclosure text, but only if it says the term is not applied — so a real
+    coefficient cannot hide behind a comment.
+    """
+    engine = [path for path in (ROOT / "backend" / "app" / "simulation").glob("*.py")
+              if path.name != "model_description.py"]
+    engine.append(ROOT / "backend" / "app" / "config" / "simulation_constants.py")
+    hits = [path.name for path in engine if "ethylene" in path.read_text().lower()]
+    assert hits == [], f"an ethylene term appeared in the growth engine: {hits}"
+
+    description = (ROOT / "backend" / "app" / "simulation" / "model_description.py").read_text()
+    assert "Ethylene" in description, "the disclosure text went missing"
+    lowered = description.lower()
+    assert "not applied to growth" in lowered
+    # the sentence is wrapped across string literals, so check its parts rather than the whole
+    assert "ethylene is deliberately not a" in lowered
+    assert "term in the growth equations" in lowered
+
+    # and the numbers themselves are served beside the simulator, never inside it
+    from app import closed_loop
+
+    assert closed_loop.payload()["ethylene"]["doseResponse"]["findings"]
 
 
 def test_both_records_are_listed_as_not_used_and_say_why(payload):

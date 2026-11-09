@@ -57,6 +57,7 @@ this table adds what a schema cannot say — the refusal behaviour and what each
 | DELETE `/api/scenarios/{id}/share` | Revokes share tokens for that scenario |
 | GET `/api/shared/{token}` | Public, read-only view of a shared scenario. Re-runs the stored configuration against the current model, so a shared page always shows what the model produces now, not a frozen result |
 | GET `/api/benchmarks` | Measured-versus-modelled numbers from pinned artifacts: the closed-chamber comparison, the NASA leafy anchor, and the CO₂ response factor with its measured optimum |
+| GET `/api/closed-loop` | Measured closed-loop numbers: ethylene production per crop and the lettuce dry-weight dose response from NASA's Biomass Production Chamber, a no-leak accumulation bound checked against that chamber's own measurement, and the ISS water recovery figure (98 %, up from 93–94 %) that bounds the recycling control |
 | GET `/api/external-validation` | Screening of independent sources for the lettuce model, plus the external check that was run and failed: per-observation predictions computed live, the root-temperature sensitivity probe, and the structural findings. Nothing here is a stored result |
 | GET `/api/metrics` | Prometheus-style counters for the gateway rate limiter |
 | GET `/api/datasets/live-status` | Last OSDR re-sync verdict per study, with the timestamp it was checked |

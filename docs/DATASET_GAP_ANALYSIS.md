@@ -37,3 +37,21 @@ acceptance criteria so the same endpoint decides whether the gate was passed.
 **Gate:** the model stays `trained-exploratory` and the failure stays on the benchmarks page until a
 new artifact passes the external check with a stated domain that covers the sources used. A passing
 in-domain cross-validation is not the gate — that is what failed to transfer.
+
+## Gaps closed by search, and gaps that remain
+
+A deep search of NASA sources on 2026-11-09 changed the status of two of the five rows above.
+Both are now backed by measured numbers served at `GET /api/closed-loop`, transcribed into
+`data/literature/nasa_air_and_water.json`.
+
+| Gap | What was found | Status |
+| --- | --- | --- |
+| Ethylene / air quality | NASA CELSS Biomass Production Chamber: 20 m² stands reached **120 ppb (wheat), 60 ppb (soybean), 40–50 ppb (lettuce, potato)**; peak production **0.04–0.06 mL m⁻² d⁻¹ ≈ 0.8–1.1 nL g⁻¹ FW h⁻¹** (Wheeler et al. 1996, doi:10.1016/0273-1177(95)00877-H). Lettuce dose response: **25–50 % dry-weight loss at 120 nL L⁻¹, 1–25 % at 55 nL L⁻¹**, unaffected by temperature. | **Measured — served as a hazard screen.** Still not a growth term: no scrubbing, leakage or uptake kinetics were measured in a usable form, so no coefficient was invented. |
+| Water loop | ISS ECLSS recovers **98 %** of the water brought aboard (93–94 % before the Brine Processor Assembly, 2023). NASA's own four-person, 900-day Mars example: **~12 t of water without recycling, ~250 kg of make-up at 98 %**. | **Measured — bounds the recycling control.** Anything above 98 % is not a demonstrated capability. |
+| Radiation effects on crop yield at these dose rates | No crop-yield-measuring dataset at habitat-relevant chronic dose rates was recovered. The OSDR corpus is molecular. | **Open.** The simulator's radiation response stays a disclosed placeholder. |
+| Yield versus gravity | No crop fresh-weight dataset across fractional gravity was recovered. The ISS fractional-g work (EMCS, Seedling Growth, OSD-346) is transcriptomic and morphometric; the published conclusions are that Mars gravity *may* not limit plant development and that microgravity effects on biomass are modest and mixed. | **Open.** No yield-versus-gravity coefficient is claimed. |
+| Real regolith | NASA reports exist (lunar/Martian simulant trials, CI asteroid regolith dataset) with biomass reductions, but they are simulants, not returned regolith, and the trials are heterogeneous in substrate, fertilisation and cultivar. | **Open, on purpose.** No regolith term is modelled. |
+
+The rule applied throughout: where a measurement exists it is transcribed and served with its DOI
+and licence; where none exists the feature is not modelled and the simulator says so in one line
+rather than shipping a fabricated coefficient.
