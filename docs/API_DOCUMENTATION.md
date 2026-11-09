@@ -19,6 +19,9 @@ All scientific POST operations below accept the same `SimulationRequest`: crop (
 | POST `/api/optimize` | 81-candidate Pareto frontier, baseline, recommendation, sensitivity, explicit constraints and limitations |
 | GET `/api/scenarios` | Newest shared saved configurations, bounded by `SPACEAGRISIM_MAX_HISTORY` |
 | POST `/api/scenarios` | `{name,configuration}`; stores validated config, timestamp and model version; HTTP 201 |
+| GET `/api/scenarios/{id}` | One saved scenario, owner-scoped. 404 for another account's id rather than 403, so the API is not an existence oracle |
+| PATCH `/api/scenarios/{id}` | Rename and/or replace the configuration of one owned scenario. A partial update keeps the field it was not given |
+| DELETE `/api/scenarios/{id}` | Delete one owned scenario and every share link that pointed at it, in the same transaction. 204, or 404 when the id is not the caller's |
 | POST `/api/reports/json` | Reproducible simulation output and configuration as JSON attachment |
 | POST `/api/reports/csv` | Configuration/comment rows then daily growth, supplied/recovered water and gases with units |
 | POST `/api/reports/pdf` | Actual generated PDF with configuration, outputs, method and limitations |

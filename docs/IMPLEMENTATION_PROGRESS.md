@@ -43,6 +43,23 @@ The Vercel API service packages a small checksum-verified read-only copy of the 
   inversion, artifact checksum and provenance, prediction reproducibility against the published
   development values, criterion immutability, input validation). Suite: **734 passed, 1 skipped**.
 
+## Phase 20 — PostgreSQL persistence audit
+
+- **Audit.** Every persisted resource mapped to its table and route; in-memory state in production
+  paths enumerated and classified. `docs/DATABASE_PERSISTENCE_AUDIT.md`.
+- **Defects fixed.** Scenario read/update/delete did not exist (added, owner-scoped, share links
+  deleted with their scenario); retention trimmed history across *all* accounts (now per-owner);
+  `owner_id` had no index on migrated databases (`CREATE INDEX IF NOT EXISTS`); engine construction
+  raced under concurrency and duplicated `create_all` (now serialised); `/api/ready` reported a
+  reachable-but-unmigrated database as available (now inspects the seven required tables and returns
+  503 `schema-incomplete`).
+- **Tests.** 19 PostgreSQL tests on a real server in a throwaway schema, including the
+  restart-equivalent test that disposes the engine, reconnects on a different server backend and
+  reads the rows back. 15 API-level persistence tests run on every suite. CI gained a `postgres`
+  job with a `postgres:16-alpine` service; it fails if any persistence test skips.
+- **Results.** 751 passed / 20 skipped (SQLite default), 771 passed (PostgreSQL), 81 e2e passed.
+  `docs/DATABASE_PERSISTENCE_TEST_REPORT.md`.
+
 ## Follow-up work
 
 - Features without a dataset dropped from the UI rather than shown with a caveat: the gravity and
