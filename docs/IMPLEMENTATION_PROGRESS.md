@@ -12,6 +12,42 @@
 
 The Vercel API service packages a small checksum-verified read-only copy of the data/model assets at build time. On serverless Vercel deployments, history writes are intentionally marked read-only unless a durable database and enabled write policy are configured. Local and container deployments can enable durable scenario history through `SPACEAGRISIM_DATABASE_URL`.
 
+## Phase 21 — production deployment verification and database reliability
+
+- **Schema bootstrap is serialised.** On PostgreSQL the startup DDL takes a session advisory lock with
+  a bounded wait and refuses to start half-migrated (`migration-lock-timeout`) instead of racing; this
+  closes the class of failure behind the duplicate `pg_type` error seen earlier under concurrency.
+- **Migration registry.** `MIGRATIONS` records the four additive steps with the condition that proves
+  each applied; `migration_state()` inspects the live schema **without running DDL**. `/api/ready` now
+  reports `databaseMigrations` and `databasePool`, and returns 503 `database_schema_incomplete` /
+  `database_migration_pending` instead of `ready` when the schema is behind — the health check Render
+  uses is therefore honest.
+- **Diagnostics without secrets.** Slow statements are counted and logged by SQL verb and duration
+  only (threshold `SPACEAGRISIM_SLOW_QUERY_MS`, default 250 ms); database failures are counted by
+  class (`connect`, `pool-timeout`, `integrity`, `configuration`, `other`), including unhandled
+  exceptions classified in the request middleware and re-raised unchanged. `/api/metrics` exposes
+  them per process.
+- **Smoke test.** `scripts/production_smoke.py` — 23 checks over the public API (readiness and
+  migration count, accounts and sessions, scenario create/read/update/re-read/list, ownership
+  enforcement from a second account, saved-analysis round trip, delete, cleanup limited to `SMOKE-`
+  rows). One stable probe account is reused so runs do not accumulate undeletable user rows. Local
+  PostgreSQL run: **23 passed, 0 failed** twice, with no rows left behind.
+- **Backup reality.** Render's Free compute plan provides no backups and no PITR; the database is
+  dashboard-created and absent from `render.yaml`. Documented in
+  `docs/DATABASE_BACKUP_AND_RECOVERY.md`, together with a manual dump/restore procedure and an
+  **executed** restore drill (`scripts/restore_drill.sh`: 3 users / 1 scenario restored into a
+  separate database with identical counts, then the API answered `ready` against it, logged the
+  account in, and listed the restored scenario).
+- **Tests.** 20 new tests in `backend/tests/test_multi_worker_readiness.py` (advisory lock refusal and
+  release, eight concurrent workers producing one schema, registry integrity, empty-database
+  inspection staying read-only, repeatable non-destructive schema application, SQLite pool honesty,
+  PostgreSQL pool capacity, slow-statement logging without text or parameters, failure
+  classification, readiness 503 paths). Suite: **768 passed / 23 skipped** (SQLite), **791 passed**
+  (PostgreSQL); 81 e2e passed; lint/typecheck/build clean.
+- **Not done, deliberately.** Worker count unchanged (still `--workers 1`): the in-process rate
+  limiter is the next blocker, not the database. Backups not enabled (needs a paid plan). Deployment
+  after the push is a manual Render dashboard action because `autoDeployTrigger` is `off`.
+
 ## Phase 20 — scientific audit, correction and independent validation
 
 - **Audit.** Every model inspected for mathematics, assumptions, units, data, algorithm, limitations

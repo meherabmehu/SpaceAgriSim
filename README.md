@@ -74,3 +74,4 @@ NASA study records point to their official OSDR sources; the product is not endo
 - [Phase 12 scientific dashboard](docs/PHASE12_SCIENTIFIC_DASHBOARD.md) · [simulator validation](docs/PHASE12_SIMULATOR_VALIDATION.md)
 - [Phase 12 security review](docs/PHASE12_SECURITY_REVIEW.md) · [performance](docs/PHASE12_PERFORMANCE.md) · [competition demo](docs/PHASE12_COMPETITION_DEMO.md)
 - [Phase 19 accounts, sharing and deployment readiness](docs/PHASE19_ACCOUNT_SHARING_READINESS.md)
+- [Production readiness audit](docs/PRODUCTION_READINESS_AUDIT.md) · [database backup and recovery](docs/DATABASE_BACKUP_AND_RECOVERY.md)
