@@ -13,8 +13,9 @@ import json
 from uuid import uuid4
 
 from starlette.responses import JSONResponse
+from app import storage
 from app.config.settings import settings
-from app.observability import record
+from app.observability import record, record_db_failure
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -119,6 +120,15 @@ class RequestGuard:
             await send(message)
         try:
             await self.app(scope,receive,tracked_send)
+        except BaseException as exc:
+            # A database exception that no route converted into a response is still a database
+            # exception: classify it before it leaves, so a burst of them is visible on /metrics
+            # as `connect` or `pool-timeout` instead of a bare count of 500s. The exception is
+            # re-raised unchanged, so no response contract changes here.
+            kind = storage.classify_db_failure(exc)
+            if kind:
+                record_db_failure(kind)
+            raise
         finally:
             record(path, status)
             logger.info(json.dumps({"event":"request_complete","request_id":request_id,

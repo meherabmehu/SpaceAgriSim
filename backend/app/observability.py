@@ -5,6 +5,12 @@ from threading import Lock
 _lock = Lock()
 _requests = Counter()
 _errors = Counter()
+# Database diagnostics. These are deliberately aggregate: an operation verb, a duration bucket,
+# and a failure class. No statement text, no parameters, no URL, no account identifier.
+_db_failures = Counter()
+_db_slow = Counter()
+_db_slow_total = 0
+_db_slow_ms = 0.0
 
 
 def record(path: str, status: int) -> None:
@@ -16,6 +22,47 @@ def record(path: str, status: int) -> None:
             _errors[path] += 1
 
 
+def record_db_failure(kind: str) -> None:
+    """Count a database failure class: connect, pool-timeout, integrity, other.
+
+    The class is what an operator acts on: `pool-timeout` means capacity, `connect` means the
+    server, `integrity` means the request. None of them needs the statement or its parameters.
+    """
+    with _lock:
+        _db_failures[kind] += 1
+
+
+def record_db_slow_query(operation: str, elapsed_ms: float) -> None:
+    global _db_slow_total, _db_slow_ms
+    with _lock:
+        _db_slow[operation or "OTHER"] += 1
+        _db_slow_total += 1
+        _db_slow_ms += elapsed_ms
+
+
+def database_snapshot() -> dict:
+    with _lock:
+        return {
+            "slowQueries": dict(_db_slow),
+            "slowQueryCount": _db_slow_total,
+            "slowQueryMeanMs": round(_db_slow_ms / _db_slow_total, 1) if _db_slow_total else None,
+            "failures": dict(_db_failures),
+            "scope": "per-process; resets on restart",
+        }
+
+
+def reset_database_counters() -> None:
+    """Test helper: counters are process-wide, so a test that asserts a count must start clean."""
+    global _db_slow_total, _db_slow_ms
+    with _lock:
+        _db_failures.clear()
+        _db_slow.clear()
+        _db_slow_total = 0
+        _db_slow_ms = 0.0
+
+
 def snapshot() -> dict:
     with _lock:
-        return {"requests": dict(_requests), "serverErrors": dict(_errors)}
+        return {"requests": dict(_requests), "serverErrors": dict(_errors),
+                "database": {"slowQueries": dict(_db_slow), "slowQueryCount": _db_slow_total,
+                             "failures": dict(_db_failures)}}

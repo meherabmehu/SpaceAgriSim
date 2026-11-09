@@ -16,7 +16,7 @@ from reportlab.pdfgen import canvas
 
 from app.models.simulation import SimulationRequest
 from app.routes.simulation import simulate
-from app import mailer, storage
+from app import mailer, observability, storage
 from app.config.settings import settings
 from app.auth import current_user
 
@@ -279,6 +279,15 @@ def shared_scenario(token: str):
             "limitations": LIMITATIONS}
 
 
+def _pool_status() -> dict:
+    """Pool capacity for the readiness payload. Never raises: readiness must still answer."""
+    try:
+        return storage.pool_status()
+    except Exception as exc:  # noqa: BLE001 - a diagnostic must not break the probe
+        logger.warning("Readiness: pool inspection failed (%s)", type(exc).__name__)
+        return {"dialect": None, "pooled": False, "error": type(exc).__name__}
+
+
 @router.get("/ready")
 def readiness():
     try:
@@ -286,6 +295,7 @@ def readiness():
     except storage.DatabaseConfigurationError as exc:
         # A misconfigured URL is the operator's problem to fix, so say which way it is wrong
         # instead of the bare "Database unavailable" that hid it. No URL, host or password here.
+        observability.record_db_failure("configuration")
         logger.error("Readiness: database configuration rejected (%s)", exc.reason)
         raise HTTPException(503, {
             "error": "database_misconfigured",
@@ -296,6 +306,7 @@ def readiness():
         }) from exc
     except Exception as exc:
         logger.exception("Readiness database check failed")
+        observability.record_db_failure("connect")
         diagnosis = storage._driver_diagnosis(exc)
         # A SQLSTATE means the server answered and rejected us; no SQLSTATE means the connection
         # never got that far, which is a different job for the operator.
@@ -315,9 +326,20 @@ def readiness():
             **diagnosis,
             "remedy": remedy,
         }) from exc
+    # A registered migration that has not applied is a deployment that skipped a step. Read-only
+    # inspection, no DDL: this endpoint must never change the schema it is reporting on.
+    try:
+        migrations = storage.migration_state()
+    except Exception as exc:  # noqa: BLE001 - the readiness answer must not itself raise
+        logger.exception("Readiness: migration inspection failed")
+        migrations = {"applied": [], "pending": [], "appliedCount": 0, "pendingCount": None,
+                      "total": None, "error": type(exc).__name__}
+
     if database_status.get("status") != "available":
-        # Reachable server, missing tables. Saying "ready" here is how a half-migrated deployment
-        # serves every account route as a 500 while the probe stays green.
+        # Reachable server with no schema at all. Checked before the migration list so an operator
+        # gets "the schema was never created" rather than a list of every step: the pending ids are
+        # still included, but the headline says what actually happened. Saying "ready" here is how
+        # a half-migrated deployment serves 500s while the probe stays green.
         raise HTTPException(503, {
             "error": "database_schema_incomplete",
             "message": ("Database reachable but its schema is incomplete; the migration has not "
@@ -325,11 +347,28 @@ def readiness():
             "reason": "schema-incomplete",
             "missingTables": [name for name in database_status.get("missingTables", "").split(",")
                               if name],
+            "pendingMigrations": [item["id"] for item in migrations.get("pending") or []],
             "remedy": ("Start the application once with the configured database URL so the "
                        "additive migration runs, then re-check /api/ready."),
         })
+    # Columns or indexes missing on an otherwise-initialised schema: the deployment reached the
+    # database but skipped an additive step.
+    if migrations.get("pending"):
+        raise HTTPException(503, {
+            "error": "database_migration_pending",
+            "message": "Database reachable but required migrations have not been applied",
+            "reason": "migration-pending",
+            "pendingMigrations": [item["id"] for item in migrations["pending"]],
+            "missing": [missing for item in migrations["pending"] for missing in item["missing"]],
+            "remedy": ("Restart the service once against this database so the additive migration "
+                       "runs, then re-check /api/ready. The migration never drops or rewrites "
+                       "existing rows."),
+        })
     return {"status":"ready","simulation":"available","database":database_status["status"],"databaseDialect":database_status["dialect"],
             "databaseSchema":database_status.get("schema","present"),
+            "databaseMigrations":{"applied":migrations.get("appliedCount"),"total":migrations.get("total"),
+                                  "pending":migrations.get("pendingCount")},
+            "databasePool":_pool_status(),
             # Phase 19: an operator can see from /ready whether saved data survives a restart and
             # whether account email can actually be delivered, instead of finding out from a user.
             "storage":storage.storage_durability(),

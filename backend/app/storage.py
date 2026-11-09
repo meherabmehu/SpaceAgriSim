@@ -1,15 +1,21 @@
 """Bounded shared scenario history. PostgreSQL in production, SQLite for local demos."""
 import hashlib
+import logging
+import os
 import secrets
 import threading
+import time
 from datetime import datetime, timedelta, timezone
 from functools import lru_cache
 from pathlib import Path
 from uuid import uuid4
 
 from sqlalchemy import (Boolean, Column, MetaData, String, Table, Text, create_engine, delete,
-                        func, inspect, select, text)
+                        event, func, inspect, select, text)
 from app.config.settings import settings
+from app.observability import record_db_slow_query
+
+logger = logging.getLogger(__name__)
 
 metadata = MetaData()
 scenarios = Table("scenarios", metadata,
@@ -102,6 +108,20 @@ def _url_scheme(url: str) -> str:
     return url.split("://", 1)[0] if "://" in url else "unset"
 
 
+# Advisory lock that serialises the startup DDL across processes. A `threading.Lock` only covers
+# threads inside one worker; two workers on the same database each ran create_all, and PostgreSQL
+# rejected the loser with `duplicate key value violates unique constraint "pg_type_typname_nsp_index"`.
+SCHEMA_LOCK_KEY = 0x5A5A_2026
+
+# Bounded wait for that lock. A deploy that cannot take it within the window refuses to start
+# half-migrated, which is a clear log line, rather than racing another worker.
+MIGRATION_LOCK_TIMEOUT_S = float(os.environ.get("SPACEAGRISIM_MIGRATION_LOCK_TIMEOUT_S", "30") or 30)
+
+# Statements slower than this are counted and logged by verb and duration only. Parameters are
+# where addresses, hashes and free text live, so neither the text nor the parameters are logged.
+SLOW_QUERY_MS = float(os.environ.get("SPACEAGRISIM_SLOW_QUERY_MS", "250") or 250)
+
+
 # One lock for engine construction. `lru_cache` is not atomic around a slow function, and
 # building an engine runs `CREATE TABLE IF NOT EXISTS` for every table: two threads arriving on a
 # cold start - or at the first request after a restart - both miss the cache, both run create_all,
@@ -147,10 +167,75 @@ def _build_database():
         **({"pool_size": settings.database_pool_size, "max_overflow": settings.database_max_overflow}
            if url.startswith("postgresql+") else {}),
     )
+    _install_slow_query_logging(engine)
+    _initialise_schema(engine)
+    return engine
+
+
+def _install_slow_query_logging(engine) -> None:
+    """Log slow statements by operation and duration, never by text or parameters.
+
+    Parameters are where addresses, hashes and free text live, so they are not logged. The
+    operation verb is enough to tell a slow read from a slow write, and the duration is the
+    signal that matters. Errors are counted separately by `observability`.
+    """
+    if getattr(engine, "_spaceagrisim_timed", False):
+        return
+
+    @event.listens_for(engine, "before_cursor_execute")
+    def _before(conn, cursor, statement, parameters, context, executemany):  # noqa: ANN001
+        context._spaceagrisim_started = time.perf_counter()
+
+    @event.listens_for(engine, "after_cursor_execute")
+    def _after(conn, cursor, statement, parameters, context, executemany):  # noqa: ANN001
+        started = getattr(context, "_spaceagrisim_started", None)
+        if started is None:
+            return
+        elapsed_ms = (time.perf_counter() - started) * 1000.0
+        if elapsed_ms >= SLOW_QUERY_MS:
+            operation = (statement or "").split(" ", 1)[0].upper()[:12]
+            record_db_slow_query(operation, elapsed_ms)
+            logger.warning("slow database statement: %s took %.0f ms", operation, elapsed_ms)
+
+    engine._spaceagrisim_timed = True  # type: ignore[attr-defined]
+
+
+def _initialise_schema(engine) -> None:
+    """Create the schema and apply the additive migrations, once, across every worker.
+
+    Serialised with a PostgreSQL advisory lock so a multi-instance rollout cannot have two
+    workers running `create_all` at the same moment. On SQLite there is only one process by
+    definition for this deployment, so the in-process lock is sufficient.
+    """
+    if engine.dialect.name != "postgresql":
+        _apply_schema(engine)
+        return
+    with engine.connect() as connection:
+        # A dedicated connection holds the lock; DDL runs on it so the lock covers the DDL.
+        acquired = connection.execute(
+            text("SELECT pg_try_advisory_lock(:key)"), {"key": SCHEMA_LOCK_KEY}).scalar()
+        waited = 0.0
+        while not acquired and waited < MIGRATION_LOCK_TIMEOUT_S:
+            time.sleep(0.25)
+            waited += 0.25
+            acquired = connection.execute(
+                text("SELECT pg_try_advisory_lock(:key)"), {"key": SCHEMA_LOCK_KEY}).scalar()
+        if not acquired:
+            raise DatabaseConfigurationError(
+                "migration-lock-timeout",
+                f"another process held the schema lock for more than "
+                f"{MIGRATION_LOCK_TIMEOUT_S:.0f}s; refusing to start half-migrated")
+        try:
+            _apply_schema(engine)
+        finally:
+            connection.execute(text("SELECT pg_advisory_unlock(:key)"),
+                               {"key": SCHEMA_LOCK_KEY})
+
+
+def _apply_schema(engine) -> None:
     metadata.create_all(engine)
     _migrate_scenarios_owner(engine)
     _migrate_users_columns(engine)
-    return engine
 
 
 def _migrate_scenarios_owner(engine) -> None:
@@ -224,6 +309,138 @@ def _driver_diagnosis(exc: BaseException) -> dict[str, str]:
 # for connectivity and this closes for schema.
 REQUIRED_TABLES = ("scenarios", "users", "analyses", "revoked_tokens", "email_tokens",
                    "share_links", "audit_events")
+
+
+# ---------------------------------------------------------------------------------------------
+# Migration registry
+#
+# Every schema step this project has ever needed is listed here with the condition that proves it
+# applied. Nothing rewrites or drops data, so the list is a record of additive steps and the
+# inspection below is read-only: it never runs DDL, which is what makes it safe to expose on a
+# production readiness endpoint.
+# ---------------------------------------------------------------------------------------------
+MIGRATIONS = (
+    {
+        "id": "0001-initial-schema",
+        "description": "Create the seven tables the API reads and writes.",
+        "requires": {"tables": REQUIRED_TABLES},
+    },
+    {
+        "id": "0002-scenarios-owner-id",
+        "description": "Add scenarios.owner_id for per-account history.",
+        "requires": {"columns": {"scenarios": ("owner_id",)}},
+    },
+    {
+        "id": "0003-users-phase19-columns",
+        "description": "Add users.email_verified and users.password_changed_at.",
+        "requires": {"columns": {"users": ("email_verified", "password_changed_at")}},
+    },
+    {
+        "id": "0004-scenarios-owner-index",
+        "description": "Index scenarios.owner_id so owner-scoped queries do not scan the table.",
+        "requires": {"indexes": {"scenarios": ("ix_scenarios_owner_id",)}},
+    },
+)
+
+
+def migration_state() -> dict:
+    """Read-only: which registered migrations have applied, and which have not.
+
+    A deployment that skipped a step reports it here instead of failing later on a query the
+    schema cannot answer. This runs no DDL and writes nothing.
+    """
+    engine = database()
+    inspector = inspect(engine)
+    tables = set(inspector.get_table_names())
+    columns: dict[str, set[str]] = {}
+    indexes: dict[str, set[str]] = {}
+    for table in REQUIRED_TABLES:
+        if table not in tables:
+            continue
+        columns[table] = {column["name"] for column in inspector.get_columns(table)}
+        indexes[table] = {index["name"] for index in inspector.get_indexes(table)}
+
+    applied, pending = [], []
+    for migration in MIGRATIONS:
+        requires = migration["requires"]
+        missing: list[str] = []
+        for table in requires.get("tables", ()):  # pragma: no branch - one entry today
+            if table not in tables:
+                missing.append(f"table {table}")
+        for table, names in requires.get("columns", {}).items():
+            if table not in tables:
+                missing.append(f"table {table}")
+                continue
+            missing.extend(f"column {table}.{name}" for name in names
+                           if name not in columns.get(table, set()))
+        for table, names in requires.get("indexes", {}).items():
+            if table not in tables:
+                missing.append(f"table {table}")
+                continue
+            missing.extend(f"index {table}.{name}" for name in names
+                           if name not in indexes.get(table, set()))
+        entry = {"id": migration["id"], "description": migration["description"]}
+        if missing:
+            pending.append({**entry, "missing": missing})
+        else:
+            applied.append(entry)
+    return {"applied": applied, "pending": pending, "appliedCount": len(applied),
+            "pendingCount": len(pending), "total": len(MIGRATIONS)}
+
+
+def pool_status() -> dict:
+    """Connection-pool state, without the URL. Safe to report to an operator.
+
+    `exhausted` is the condition that turns into a burst of 500s under load: every pooled
+    connection is checked out and the overflow allowance is spent, so the next request waits and
+    then fails with a pool timeout.
+    """
+    engine = database()
+    if engine.dialect.name != "postgresql":
+        # SQLite is this project's single-process store; its pool has no meaningful capacity
+        # story, and reporting one invites a reader to treat it as a production pool.
+        return {"dialect": engine.dialect.name, "pooled": False,
+                "note": "single-process store; pool capacity is not a production concern"}
+    pool = engine.pool
+    try:
+        size = pool.size()
+        checked_out = pool.checkedout()
+        overflow = pool.overflow()
+    except (AttributeError, NotImplementedError):
+        return {"dialect": engine.dialect.name, "pooled": False}
+    max_overflow = getattr(pool, "_max_overflow", None)
+    capacity = size + max(0, max_overflow) if isinstance(max_overflow, int) else None
+    return {
+        "dialect": engine.dialect.name,
+        "pooled": True,
+        "size": size,
+        "checkedOut": checked_out,
+        "overflow": overflow,
+        "capacity": capacity,
+        "exhausted": bool(capacity is not None and checked_out >= capacity),
+        "note": "per worker process; capacity is pool_size + max_overflow",
+    }
+
+
+def classify_db_failure(exc: BaseException) -> str | None:
+    """Name the failure class of a database exception, or None if it is not a database exception.
+
+    Four classes cover what an operator actually acts on, and each maps to a different fix:
+    `pool-timeout` (capacity), `connect` (the server or its credentials), `integrity` (a request
+    or code path), `other` (everything else). The exception message is never returned: psycopg
+    puts the host and, on a bad password, the user in it.
+    """
+    from sqlalchemy import exc as sa_exc
+
+    if isinstance(exc, sa_exc.TimeoutError):
+        return "pool-timeout"
+    if isinstance(exc, sa_exc.IntegrityError):
+        return "integrity"
+    if isinstance(exc, (sa_exc.OperationalError, sa_exc.InterfaceError, sa_exc.DisconnectionError)):
+        return "connect"
+    if isinstance(exc, sa_exc.SQLAlchemyError):
+        return "other"
+    return None
 
 
 def database_health() -> dict[str, str]:
