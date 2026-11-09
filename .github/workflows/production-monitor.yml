@@ -1,0 +1,94 @@
+# Production monitoring: liveness, readiness, and an actionable verdict.
+#
+# `/api/health` answers "is a process listening". `/api/ready` answers "can it serve" - database
+# dialect, schema, applied migrations, pool exhaustion, durable storage. `/api/metrics` adds
+# per-process counters and, since this phase, the process uptime, which is the only way to notice a
+# crash loop from outside: a restarting service still answers green between restarts.
+#
+# This workflow polls those three endpoints and turns them into a pass/fail with a remedy for each
+# failure, so the alert says what to do rather than pointing at a dashboard. It reads nothing
+# private: it never authenticates, so it cannot see any account, scenario or share link.
+#
+# Cost: three requests per run, every 30 minutes. On a Free web service that also keeps it warm
+# during the day, which is a side effect worth knowing about (it spends Free instance hours).
+name: Production monitoring
+
+on:
+  schedule:
+    # Every 30 minutes. GitHub's scheduler is best-effort and can delay runs under load; this is an
+    # observer, not an SLA instrument.
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'API base URL to check'
+        required: false
+        default: 'https://spaceagrisim-api.onrender.com'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    name: Check /api/health, /api/ready, /api/metrics
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run the monitor
+        id: monitor
+        env:
+          BASE_URL: ${{ inputs.base_url || 'https://spaceagrisim-api.onrender.com' }}
+        run: |
+          set -o pipefail
+          set +e
+          python3 scripts/monitor_production.py --base-url "$BASE_URL" --json \
+            | tee "$RUNNER_TEMP/monitor.json"
+          status=${PIPESTATUS[0]}
+          echo "exit_code=${status}" >> "$GITHUB_OUTPUT"
+          set -e
+          # 0 = healthy, 3 = healthy with warnings (spindown identity, email unconfigured), 1 =
+          # a real failure. Only the last one should turn the badge red.
+          case "$status" in
+            0|3) ;;
+            *) echo "monitor reported a failure (exit $status)" ;;
+          esac
+          python3 - "$RUNNER_TEMP/monitor.json" "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json, sys
+          report = json.load(open(sys.argv[1]))
+          lines = [f"### Production monitor: {report['baseUrl']}", "",
+                   f"- {report['summary']}"]
+          if report.get("warnings"):
+              lines.append("- warnings: " + ", ".join(report["warnings"]))
+          lines += ["", "| check | result | detail |", "| --- | --- | --- |"]
+          for check in report["checks"]:
+              label = "ok" if check["ok"] else "**FAIL**"
+              lines.append(f"| {check['check']} | {label} | {check['detail']} |")
+          remedies = [c for c in report["checks"] if not c["ok"] and c.get("remedy")]
+          if remedies:
+              lines += ["", "#### What to do", ""]
+              lines += [f"- **{c['check']}**: {c['remedy']}" for c in remedies]
+          open(sys.argv[2], "a").write("\n".join(lines) + "\n")
+          PY
+          case "$status" in
+            0|3) exit 0 ;;
+            *) exit "$status" ;;
+          esac
+
+      - name: Upload the monitor report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-monitor-${{ github.run_id }}
+          path: ${{ runner.temp }}/monitor.json
+          retention-days: 14
+          if-no-files-found: warn

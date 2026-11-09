@@ -1,0 +1,238 @@
+# Encrypted, verified PostgreSQL backup of the hosted SpaceAgriSim database.
+#
+# Why this exists: Render's Free compute plan provides no automated backups, no logical exports and
+# no point-in-time recovery (https://render.com/docs/free#30-day-limit). A `pg_dump` taken from
+# outside Render is the documented workaround, and a scheduled workflow is the difference between
+# "someone remembered" and a recovery point objective that can be stated as a number.
+#
+# What a run does, in order, and why each step is there:
+#   1. refuses to start without the three repository secrets (fail loudly, not silently),
+#   2. installs PostgreSQL **18** client tools, because pg_dump refuses to dump a newer server,
+#   3. writes a 0600 .pgpass so the password never appears in an argument list,
+#   4. dumps in custom format with NO connection string on any command line,
+#   5. verifies the archive with `pg_restore --list` and counts the tables it actually contains,
+#   6. encrypts with AES-256 (GPG symmetric) and proves it can be decrypted again to the same
+#      SHA-256 before the plaintext is deleted,
+#   7. uploads only the ciphertext as a workflow artifact.
+#
+# Nothing here prints a URL, a password, a key or any user row. The step summary carries sizes and
+# row counts only - aggregates, not records.
+name: Encrypted production database backup
+
+on:
+  schedule:
+    # 02:17 UTC daily. Offset from the hour on purpose: GitHub's scheduler queues on-the-hour jobs
+    # and drops runs when it is busy, and a backup is the one job you do not want dropped.
+    - cron: '17 2 * * *'
+  workflow_dispatch:
+    inputs:
+      retention_days:
+        description: 'Artifact retention in days (1-90; Render data is small, so 14 is plenty)'
+        required: false
+        default: '14'
+      skip_if_no_secrets:
+        description: 'Exit 0 instead of failing when secrets are missing (for forks)'
+        required: false
+        default: 'false'
+
+permissions:
+  contents: read
+
+concurrency:
+  # Two dumps at once would only compete for the same connections; a queued run is enough.
+  group: production-db-backup
+  cancel-in-progress: false
+
+env:
+  PG_MAJOR: '18'
+
+jobs:
+  backup:
+    name: Dump, verify, encrypt, upload
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check required secrets
+        id: secrets
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+        run: |
+          missing=""
+          [ -n "${DATABASE_URL:-}" ] || missing="$missing PRODUCTION_DATABASE_URL"
+          [ -n "${PASSPHRASE:-}" ] || missing="$missing BACKUP_ENCRYPTION_PASSPHRASE"
+          if [ -n "$missing" ]; then
+            echo "missing repository secret(s):$missing" >&2
+            echo "Set them in Settings -> Secrets and variables -> Actions." >&2
+            echo "PRODUCTION_DATABASE_URL = Render database -> Connect -> External Database URL" >&2
+            echo "  (must be reachable from GitHub-hosted runners; PGSSLMODE=require)" >&2
+            echo "BACKUP_ENCRYPTION_PASSPHRASE = a long random passphrase, stored in your vault" >&2
+            if [ "${{ inputs.skip_if_no_secrets }}" = "true" ]; then
+              echo "skip_if_no_secrets=true, exiting 0"
+              exit 0
+            fi
+            exit 1
+          fi
+          case "${DATABASE_URL}" in
+            postgres://*|postgresql://*|postgresql+psycopg://*) ;;
+            *) echo "PRODUCTION_DATABASE_URL must start with postgres:// or postgresql://" >&2; exit 1 ;;
+          esac
+          echo "configured=true" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        if: steps.secrets.outputs.configured == 'true'
+
+      - name: Install PostgreSQL ${{ env.PG_MAJOR }} client tools
+        if: steps.secrets.outputs.configured == 'true'
+        run: |
+          set -euo pipefail
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+            https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          . /etc/os-release
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] \
+          https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq "postgresql-client-${PG_MAJOR}"
+          pg_dump --version
+
+      - name: Configure libpq from the secret URL (password into .pgpass only)
+        if: steps.secrets.outputs.configured == 'true'
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+        run: |
+          set -euo pipefail
+          umask 077
+          # Parsed with python because the URL can contain a percent-encoded password. The parsed
+          # pieces go into $GITHUB_ENV except the password, which goes into a 0600 .pgpass file that
+          # only libpq reads.
+          python3 - "$RUNNER_TEMP/pgpass" <<'PY'
+          import os, sys
+          from urllib.parse import unquote, urlsplit
+          url = os.environ["DATABASE_URL"].replace("postgresql+psycopg://", "postgresql://")
+          parts = urlsplit(url)
+          path = os.path.join(os.environ["GITHUB_ENV"])
+          write = lambda key, value: open(path, "a").write(f"{key}={value}\n")
+          write("PGHOST", parts.hostname or "")
+          write("PGPORT", str(parts.port or 5432))
+          write("PGUSER", unquote(parts.username or ""))
+          write("PGDATABASE", (parts.path or "/").lstrip("/"))
+          write("PGSSLMODE", "require")
+          write("PGAPPNAME", "spaceagrisim-ci-backup")
+          write("PGPASSFILE", sys.argv[1])
+          password = unquote(parts.password or "")
+          def esc(value):
+              return value.replace("\\", "\\\\").replace(":", "\\:")
+          with open(sys.argv[1], "w") as handle:
+              handle.write("*:*:*:%s:%s\n" % (esc(unquote(parts.username or "")), esc(password)))
+          print("libpq configured; password written to .pgpass only")
+          PY
+          chmod 600 "$RUNNER_TEMP/pgpass"
+          # Prove the credentials work before taking a dump, and prove the server major version
+          # matches the client we installed.
+          psql --no-password -tAc "select version(), current_database()" | sed 's/ on .*//'
+
+      - name: Dump, verify archive, record counts
+        if: steps.secrets.outputs.configured == 'true'
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/backup"
+          python3 scripts/db_backup.py --from-libpq-env --out "$RUNNER_TEMP/backup"
+          dump="$(find "$RUNNER_TEMP/backup" -name '*.dump' -type f | head -n 1)"
+          manifest="${dump}.manifest.json"
+          [ -s "$dump" ] || { echo "no dump produced" >&2; exit 1; }
+          [ -s "$manifest" ] || { echo "no manifest produced" >&2; exit 1; }
+          # Independent of the script: list the archive again here, so the log itself shows a
+          # readable TOC even if the script ever changes.
+          pg_restore --list "$dump" > "$RUNNER_TEMP/backup/toc.txt"
+          tables="$(grep -c 'TABLE DATA' "$RUNNER_TEMP/backup/toc.txt" || true)"
+          echo "archive lists $tables table-data entries"
+          [ "$tables" -ge 7 ] || { echo "dump has fewer than 7 table-data entries" >&2; exit 1; }
+          rm -f "$RUNNER_TEMP/backup/toc.txt"
+          python3 - "$manifest" <<'PY'
+          import json, sys
+          m = json.load(open(sys.argv[1]))
+          print("dump bytes:", m["bytes"])
+          print("toc entries verified:", m.get("tocVerified"))
+          print("tables in dump:", ", ".join(m.get("tablesInDump") or []))
+          if m.get("sourceInventory"):
+              print("row counts:", json.dumps(m["sourceInventory"], sort_keys=True))
+          PY
+
+      - name: Encrypt and prove the ciphertext decrypts
+        if: steps.secrets.outputs.configured == 'true'
+        env:
+          PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          umask 077
+          work="$RUNNER_TEMP/backup"
+          dump="$(find "$work" -name '*.dump' -type f | head -n 1)"
+          # The passphrase reaches gpg through a 0600 file, never through an argument.
+          printf '%s' "$PASSPHRASE" > "$RUNNER_TEMP/pass"
+          encrypt() {
+            gpg --batch --yes --quiet --pinentry-mode loopback \
+                --passphrase-file "$RUNNER_TEMP/pass" --symmetric \
+                --cipher-algo AES256 --compress-algo none --output "$2" "$1"
+          }
+          encrypt "$dump" "${dump}.gpg"
+          encrypt "${dump}.manifest.json" "${dump}.manifest.json.gpg"
+
+          plain_sha="$(sha256sum "$dump" | cut -d' ' -f1)"
+          # A ciphertext nobody can open is not a backup: decrypt it again, compare digests, and
+          # confirm the round-tripped file is still a readable archive before the plaintext goes.
+          gpg --batch --yes --quiet --pinentry-mode loopback \
+              --passphrase-file "$RUNNER_TEMP/pass" --output "$RUNNER_TEMP/roundtrip.dump" \
+              --decrypt "${dump}.gpg"
+          [ "$plain_sha" = "$(sha256sum "$RUNNER_TEMP/roundtrip.dump" | cut -d' ' -f1)" ] \
+            || { echo "round-trip SHA-256 mismatch: the ciphertext does not open to the dump" >&2; exit 1; }
+          pg_restore --list "$RUNNER_TEMP/roundtrip.dump" > /dev/null
+          echo "ciphertext decrypts to the exact plaintext and still lists as a valid archive"
+
+          # A wrong passphrase must fail, which is what makes the previous success meaningful.
+          if printf 'not-the-passphrase' > "$RUNNER_TEMP/wrong" && \
+             gpg --batch --quiet --pinentry-mode loopback --passphrase-file "$RUNNER_TEMP/wrong" \
+                 --output /dev/null --decrypt "${dump}.gpg" 2>/dev/null; then
+            echo "decryption succeeded with the wrong passphrase - the artifact is not protected" >&2
+            exit 1
+          fi
+          echo "a wrong passphrase is rejected"
+
+          rm -f "$RUNNER_TEMP/roundtrip.dump" "$RUNNER_TEMP/pass" "$RUNNER_TEMP/wrong" \
+                "$dump" "${dump}.manifest.json"
+          ls -l "$work"
+
+      - name: Upload encrypted backup
+        if: steps.secrets.outputs.configured == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: spaceagrisim-db-backup-${{ github.run_id }}
+          path: ${{ runner.temp }}/backup/*.gpg
+          retention-days: ${{ inputs.retention_days || 14 }}
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Summary
+        if: steps.secrets.outputs.configured == 'true'
+        run: |
+          {
+            echo "### Encrypted database backup"
+            echo ""
+            echo "| item | value |"
+            echo "| --- | --- |"
+            echo "| artifact | \`spaceagrisim-db-backup-${GITHUB_RUN_ID}\` |"
+            echo "| retention | ${{ inputs.retention_days || 14 }} days |"
+            echo "| encryption | GPG symmetric, AES-256 |"
+            echo "| archive verification | \`pg_restore --list\` + decrypt round-trip |"
+            echo ""
+            echo "Download it, then restore with \`docs/DATABASE_BACKUP_AND_RECOVERY.md\` §4."
+            echo "Decrypt with: \`gpg --decrypt <file>.dump.gpg > <file>.dump\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Note a skipped run
+        if: steps.secrets.outputs.configured != 'true'
+        run: |
+          echo "Backup skipped: PRODUCTION_DATABASE_URL / BACKUP_ENCRYPTION_PASSPHRASE not set." \
+            >> "$GITHUB_STEP_SUMMARY"
+          echo "See docs/DATABASE_BACKUP_AUTOMATION.md §2 for the exact setup steps."

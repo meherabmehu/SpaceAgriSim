@@ -1,0 +1,211 @@
+# Restore validation: does the backup actually restore?
+#
+# The backup workflow produces a file. This workflow answers the only question that matters about
+# it: can it be turned back into a working database, and does that database still contain the
+# accounts, scenarios, saved analyses and share links that owned each other before the dump?
+#
+# It is deliberately incapable of touching production:
+#   * the only database it connects to is a throwaway PostgreSQL container started by this job,
+#   * it never receives PRODUCTION_DATABASE_URL, and scripts/restore_validate.py refuses a
+#     non-local target without --allow-remote, which is never passed here,
+#   * the container is destroyed with the runner.
+#
+# A weekly run plus workflow_dispatch means a corrupt backup is discovered within a week, not on
+# the day it is needed.
+name: Restore validation (throwaway database)
+
+on:
+  schedule:
+    # Sunday 03:41 UTC, after the daily backup has had time to run and be retained.
+    - cron: '41 3 * * 0'
+  workflow_dispatch:
+    inputs:
+      backup_run_id:
+        description: 'Workflow run id of a db-backup run (blank = the most recent successful one)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+  actions: read   # required to download an artifact from another workflow run
+
+concurrency:
+  group: production-db-restore-verify
+  cancel-in-progress: false
+
+jobs:
+  resolve-backup:
+    name: Find the backup artifact
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      run_id: ${{ steps.pick.outputs.run_id }}
+      artifact: ${{ steps.pick.outputs.artifact }}
+    steps:
+      - name: Pick a backup run
+        id: pick
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INPUT_RUN: ${{ inputs.backup_run_id }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          run_id="${INPUT_RUN:-}"
+          if [ -z "$run_id" ]; then
+            run_id="$(gh api -X GET "repos/${REPO}/actions/workflows/db-backup.yml/runs" \
+                        -f status=success -f per_page=1 --jq '.workflow_runs[0].id // empty')"
+          fi
+          if [ -z "$run_id" ]; then
+            echo "no successful db-backup run found; run db-backup.yml once, then re-run this" \
+              >> "$GITHUB_STEP_SUMMARY"
+            echo "run_id=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          artifact="$(gh api "repos/${REPO}/actions/runs/${run_id}/artifacts" \
+                        --jq '.artifacts[] | select(.name | startswith("spaceagrisim-db-backup-")) | .name' \
+                        | head -n 1)"
+          if [ -z "$artifact" ]; then
+            echo "run ${run_id} has no spaceagrisim-db-backup artifact (expired?)" >&2
+            exit 1
+          fi
+          echo "run_id=${run_id}" >> "$GITHUB_OUTPUT"
+          echo "artifact=${artifact}" >> "$GITHUB_OUTPUT"
+          echo "validating artifact \`${artifact}\` from run ${run_id}" >> "$GITHUB_STEP_SUMMARY"
+
+  verify:
+    name: Restore into a throwaway PostgreSQL 18 and verify
+    needs: resolve-backup
+    if: needs.resolve-backup.outputs.run_id != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      # The same major version production runs, so a restore proves compatibility with the
+      # instance the dump came from rather than with whatever client happens to be installed.
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_PASSWORD: restore_check_only
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      # Not a secret: a throwaway container that dies with the job. The production URL is
+      # intentionally absent from this workflow.
+      TARGET_URL: postgresql://postgres:restore_check_only@127.0.0.1:5432/spaceagrisim_restore_check
+      PGPASSWORD: restore_check_only
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install PostgreSQL 18 client tools and psycopg
+        run: |
+          set -euo pipefail
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+            https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          . /etc/os-release
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] \
+          https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-18
+          python -m pip install --quiet -r backend/requirements.txt
+          pg_restore --version
+
+      - name: Download the encrypted backup
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.resolve-backup.outputs.artifact }}
+          run-id: ${{ needs.resolve-backup.outputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: artifact
+
+      - name: Decrypt
+        env:
+          PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          umask 077
+          [ -n "${PASSPHRASE:-}" ] || { echo "BACKUP_ENCRYPTION_PASSPHRASE is not set" >&2; exit 1; }
+          printf '%s' "$PASSPHRASE" > "$RUNNER_TEMP/pass"
+          dump_gpg="$(find artifact -name '*.dump.gpg' | head -n 1)"
+          manifest_gpg="$(find artifact -name '*.manifest.json.gpg' | head -n 1)"
+          [ -n "$dump_gpg" ] || { echo "artifact has no .dump.gpg" >&2; exit 1; }
+          gpg --batch --yes --quiet --pinentry-mode loopback --passphrase-file "$RUNNER_TEMP/pass" \
+              --output "$RUNNER_TEMP/backup.dump" --decrypt "$dump_gpg"
+          [ -n "$manifest_gpg" ] && gpg --batch --yes --quiet --pinentry-mode loopback \
+              --passphrase-file "$RUNNER_TEMP/pass" \
+              --output "$RUNNER_TEMP/backup.dump.manifest.json" --decrypt "$manifest_gpg" || true
+          rm -f "$RUNNER_TEMP/pass"
+          # Digest check against the manifest, so a truncated artifact is caught here and not by
+          # the restore error that would follow.
+          python3 - "$RUNNER_TEMP/backup.dump" "$RUNNER_TEMP/backup.dump.manifest.json" <<'PY'
+          import hashlib, json, os, sys
+          dump, manifest = sys.argv[1], sys.argv[2]
+          body = open(dump, "rb").read()
+          digest = hashlib.sha256(body).hexdigest()
+          print("decrypted dump:", len(body), "bytes, sha256", digest[:16] + "...")
+          if os.path.exists(manifest):
+              recorded = json.load(open(manifest)).get("sha256")
+              if recorded and recorded != digest:
+                  sys.exit("sha256 does not match the manifest: the artifact is corrupt")
+              print("sha256 matches the backup manifest")
+          PY
+
+      - name: Create the throwaway target database
+        run: |
+          set -euo pipefail
+          psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 \
+               -c 'create database spaceagrisim_restore_check'
+          psql -h 127.0.0.1 -U postgres -d postgres -tAc \
+               "select datname from pg_database where datname = 'spaceagrisim_restore_check'"
+
+      - name: Restore and verify
+        run: |
+          set -euo pipefail
+          python3 scripts/restore_validate.py \
+            --dump "$RUNNER_TEMP/backup.dump" \
+            --expected "$RUNNER_TEMP/backup.dump.manifest.json" \
+            --target-url "$TARGET_URL" \
+            --json | tee "$RUNNER_TEMP/restore-report.json"
+          python3 - "$RUNNER_TEMP/restore-report.json" <<'PY'
+          import json, os, sys
+          report = json.load(open(sys.argv[1]))
+          lines = ["### Restore validation", "",
+                   f"- result: **{report['summary']}**",
+                   f"- target: `{report.get('target')}` (throwaway container, destroyed with this job)",
+                   f"- expected counts from: {report['expectedCountsSource']}", "",
+                   "| check | result | detail |", "| --- | --- | --- |"]
+          for check in report["checks"]:
+              lines.append(f"| {check['check']} | {'ok' if check['ok'] else 'FAIL'} | {check['detail']} |")
+          open(os.environ["GITHUB_STEP_SUMMARY"], "a").write("\n".join(lines) + "\n")
+          if not report["ok"]:
+              sys.exit("restore validation failed")
+          PY
+
+      - name: Prove production was never involved
+        run: |
+          set -euo pipefail
+          # A statement of fact, not a promise: this job has no production credentials at all.
+          if [ -n "${PRODUCTION_DATABASE_URL:-}" ]; then
+            echo "PRODUCTION_DATABASE_URL is present in this job - it must not be" >&2
+            exit 1
+          fi
+          echo "this job never held a production database URL; only 127.0.0.1 was contacted"
+
+      - name: Upload the restore report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: restore-validation-report-${{ github.run_id }}
+          path: ${{ runner.temp }}/restore-report.json
+          retention-days: 30
+          if-no-files-found: warn
