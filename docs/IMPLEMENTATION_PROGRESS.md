@@ -15,6 +15,9 @@ The Vercel API service packages a small checksum-verified read-only copy of the 
 ## Follow-up work
 
 - Obtain sufficiently large, compatible mission and ground yield datasets before recalibrating the simulator.
+  For the lettuce model specifically, `docs/DATASET_GAP_ANALYSIS.md` now states the acquisition
+  requirements as acceptance criteria: per-observation rows with root-zone temperature, at least two
+  labelled cultivars and three light levels each, including one below ~350 µmol m⁻² s⁻¹.
 - Add calibrated uncertainty before any model leaves exploratory status.
 - Close the external-validation gap the check exposed: the served lettuce model has no cultivar
   input and no non-monotonic light response, so no amount of recalibration will fit the PeerJ
