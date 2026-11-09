@@ -16,3 +16,16 @@ reportlab>=4.2,<5.0
 # Account authentication: Argon2 password hashes and signed, expiring bearer tokens.
 argon2-cffi>=23.1,<26.0
 PyJWT>=2.8,<3.0
+
+# The reference-ET0 emulator (ml/artifacts/et0-emulator-v1.joblib) is a scikit-learn estimator, so
+# serving it needs the scientific stack in the runtime image, not only in the dev image. Without
+# these the service does not fail: `app/et0.py` catches the ImportError and serves FAO-56 physics
+# only. That is a silent capability loss, which is why the dependency is declared here and asserted
+# by backend/tests/test_phase23_reference_et0.py rather than left to the deployment to discover.
+#
+# Pinned as ranges, like the rest of this file: the artifact was trained with scikit-learn 1.6, and
+# an unpickle is not guaranteed across major versions.
+numpy>=1.26,<3.0
+scipy>=1.11,<2.0
+scikit-learn>=1.4,<2.0
+joblib>=1.3,<2.0

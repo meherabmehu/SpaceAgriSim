@@ -327,6 +327,22 @@ def test_emulator_limitations_name_what_it_is_not():
     assert "microgravity" in blob
 
 
+def test_runtime_requirements_can_load_the_emulator():
+    """The runtime image ships the artifact, so it must also ship the code that reads it.
+
+    The first production deploy proved the failure mode: `ml/artifacts/et0-emulator-v1.joblib` was
+    in the image, `joblib` was not, and the service answered every request from FAO-56 physics while
+    the model card said `available: false`. It degraded correctly and silently - which is exactly
+    why this assertion parses the runtime requirement file rather than trusting the image.
+    """
+    requirements = (ROOT / "backend" / "requirements.txt").read_text(encoding="utf-8")
+    names = {line.split("[")[0].split(">")[0].split("=")[0].split("<")[0].strip().lower()
+             for line in requirements.splitlines()
+             if line.strip() and not line.strip().startswith("#")}
+    for package in ("scikit-learn", "joblib", "numpy"):
+        assert package in names, f"{package} missing from backend/requirements.txt (runtime)"
+
+
 def test_emulator_features_match_the_served_bundle():
     bundle = json.loads(json.dumps(_card()["features"]))
     assert bundle == ["T2M_MAX", "T2M_MIN", "T2MDEW", "latitude", "elevationM",
