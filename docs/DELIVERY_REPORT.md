@@ -201,6 +201,29 @@ Diagnosing 2 and 3 needed the service to say *which* failure it was, so `0026688
 scikit-learn version) to `/api/reference-et0/model`. Without it the API said only "artifact missing
 or unreadable", which is true of both failures and actionable for neither.
 
+### Scheduled automation, now running
+
+The three workflow files that were withheld from the Phase 22 commit (the token lacked `workflow`
+scope) are on `main` as **`c667608`**, and the workflows are registered by GitHub as `active`. Two
+runs were dispatched to prove the pipeline rather than assume it:
+
+| Workflow | Run | Result |
+|---|---|---|
+| `production-monitor.yml` | 42697472774 | **success, 12/12 checks** — health 200 in 282 ms, ready in 443 ms, PostgreSQL with 4/4 migrations, pool 5/0/10 not exhausted, storage durable, 0 5xx of 23 requests, no database failure classes, uptime 831 s |
+| `db-backup.yml` | 42697608472 | **failure at "Check required secrets"** — exactly the state described in the previous section: GitHub reports `total_count: 0` repository secrets |
+
+The monitor's checks are fixed health assertions; `emailDelivery=unconfigured` is reported as a
+check that passes while naming the missing capability, not hidden. Its payload is committed as
+`docs/production_monitor_run_2026-11-09.json`.
+
+**The backup job fails on purpose and that is the honest state.** `db-backup.yml` accepts a
+`skip_if_no_secrets` input, but the scheduled trigger passes nothing, so an unconfigured run is red.
+A nightly job that silently exits green while dumping nothing is the failure mode this repository
+spent Phase 1 documenting; a red run every night until the two secrets exist is the correct signal.
+The fix is two repository secrets, not a workflow change.
+
+The CI workflow ran on the same commit and passed on all three jobs (backend, frontend, browser).
+
 ### Production verification, measured at 2026-11-09T20:47Z
 
 Live service: `https://spaceagrisim-api.onrender.com`, frontend `https://spaceagrisim-web.onrender.com`.

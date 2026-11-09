@@ -1,0 +1,75 @@
+{
+  "baseUrl": "https://spaceagrisim-api.onrender.com",
+  "ok": true,
+  "summary": "12/12 checks passed",
+  "checks": [
+    {
+      "check": "health:reachable",
+      "ok": true,
+      "detail": "HTTP 200 in 282 ms"
+    },
+    {
+      "check": "health:status-ok",
+      "ok": true,
+      "detail": "status='ok'"
+    },
+    {
+      "check": "ready:status",
+      "ok": true,
+      "detail": "ready in 443 ms"
+    },
+    {
+      "check": "ready:database",
+      "ok": true,
+      "detail": "database='available', dialect='postgresql'",
+      "remedy": "the schema or the connection is missing; /api/ready will name which."
+    },
+    {
+      "check": "ready:migrations",
+      "ok": true,
+      "detail": "4/4 applied, 0 pending"
+    },
+    {
+      "check": "ready:pool",
+      "ok": true,
+      "detail": "size=5, checkedOut=0, capacity=10, exhausted=False"
+    },
+    {
+      "check": "ready:storage-durable",
+      "ok": true,
+      "detail": "durable=True, dialect='postgresql'"
+    },
+    {
+      "check": "ready:rate-limit-identity",
+      "ok": true,
+      "detail": "rateLimitIdentity='socket'",
+      "warning": true
+    },
+    {
+      "check": "ready:email-delivery",
+      "ok": true,
+      "detail": "emailDelivery=unconfigured (verification and reset mail is not sent)",
+      "remedy": "expected until SMTP is configured; accounts still work, the UI prompts instead of emailing.",
+      "warning": true
+    },
+    {
+      "check": "metrics:server-errors",
+      "ok": true,
+      "detail": "0 5xx of 23 requests"
+    },
+    {
+      "check": "metrics:database-failures",
+      "ok": true,
+      "detail": "no database failure classes recorded"
+    },
+    {
+      "check": "metrics:uptime",
+      "ok": true,
+      "detail": "process uptime 831.6s"
+    }
+  ],
+  "warnings": [
+    "ready:rate-limit-identity",
+    "ready:email-delivery"
+  ]
+}
