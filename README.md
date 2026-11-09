@@ -8,14 +8,14 @@ SpaceAgriSim is an evidence-aware workspace for exploring controlled-environment
 
 - Mission dashboard, advanced laboratory controls, Earth/Moon/Mars comparison, crop explorer, NASA study explorer, analytics, advisor and methodology views.
 - A FastAPI simulation API with bounded inputs, request guards, deterministic reports and optional scenario history.
-- A verified NASA OSDR inventory (13 studies; 28 small acquired files with checksums), provenance and data-quality views.
+- A verified NASA OSDR inventory (25 NASA OSDR study records served: the 24-study provenance manifest plus the EDEN ISS analogue reviewed separately; 28 acquired files with checksums), provenance and data-quality views.
 - Offline-only model training and versioned artifacts. The application never trains a model from a browser request.
 - An Earth-only lettuce fresh-mass model trained on licensed WUR/4TU data, explicitly kept separate from NASA and spaceflight evidence.
 - A WebGL greenhouse with a usable 2D fallback, keyboard-accessible controls and responsive layouts.
 
 ## Evidence boundaries
 
-The simulator is an assumption-driven decision-support prototype, not a calibrated mission digital twin. NASA metadata and source files are preserved with provenance, but most registered studies do not provide a compatible crop-yield calibration target. The mizuna research model is deliberately marked weak (grouped CV MAE 14.76; R2 -0.153), and the tomato artifact classifies recorded molecular flight context rather than crop health, stress or yield. The lettuce model is Earth-only and does not support claims about partial gravity, radiation, water stress or other cultivars.
+The simulator is an assumption-driven decision-support prototype, not a calibrated mission digital twin. NASA metadata and source files are preserved with provenance, but most registered studies do not provide a compatible crop-yield calibration target. The mizuna research model is deliberately marked weak (grouped CV MAE 15.50 g; R2 -0.333, worse than predicting the mean), and the tomato artifact classifies recorded molecular flight context rather than crop health, stress or yield. The lettuce model is Earth-only and does not support claims about partial gravity, radiation, water stress or other cultivars.
 
 See [scientific validation](docs/SCIENTIFIC_VALIDATION.md), [model evaluation](docs/MODEL_EVALUATION.md), [model limitations](docs/MODEL_LIMITATIONS.md), and the [dataset gap analysis](docs/DATASET_GAP_ANALYSIS.md) before using any result.
 
@@ -74,4 +74,4 @@ NASA study records point to their official OSDR sources; the product is not endo
 - [Phase 12 scientific dashboard](docs/PHASE12_SCIENTIFIC_DASHBOARD.md) · [simulator validation](docs/PHASE12_SIMULATOR_VALIDATION.md)
 - [Phase 12 security review](docs/PHASE12_SECURITY_REVIEW.md) · [performance](docs/PHASE12_PERFORMANCE.md) · [competition demo](docs/PHASE12_COMPETITION_DEMO.md)
 - [Phase 19 accounts, sharing and deployment readiness](docs/PHASE19_ACCOUNT_SHARING_READINESS.md)
-- [Production readiness audit](docs/PRODUCTION_READINESS_AUDIT.md) · [database backup and recovery](docs/DATABASE_BACKUP_AND_RECOVERY.md)
+- [Production readiness audit](docs/PRODUCTION_READINESS_AUDIT.md) · [database backup and recovery](docs/DATABASE_BACKUP_AND_RECOVERY.md) · [backup automation setup](docs/DATABASE_BACKUP_AUTOMATION.md) · [why the API runs one worker](docs/MULTI_WORKER_RATE_LIMITING.md)

@@ -73,7 +73,7 @@ writes until the PostgreSQL round-trip has actually been run.
 | Root `Dockerfile` | ✅ Present | multi-stage API image |
 | `docker-compose.yml` | ✅ Valid | API + nginx web, named volume for scenarios, health-gated `depends_on` |
 | `vercel.json` | ✅ Present | services + `/api/*` rewrite |
-| `render.yaml` | ✅ Present | API web service, `/api/ready` health check, `autoDeployTrigger: off` |
+| `render.yaml` | ✅ Present | API web service, `/api/ready` health check, `autoDeployTrigger` (was `off` here; corrected to `commit` in Phase 22 to match the dashboard) |
 | **Phase 6 evidence in runtime bundle** | ✅ **Fixed** | `package_runtime_data.py` now packages `docs/phase6/*.json` into `scientific_data/phase6/`, so `/api/science/calibration` returns real data on serverless |
 
 ### Deployment gap found and fixed

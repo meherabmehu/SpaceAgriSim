@@ -2,7 +2,7 @@
 
 ## What is verified
 
-The local NASA OSDR manifest registers 13 official studies and records source URLs, metadata, retrieval timestamps and file checksums. Twenty-eight small public files were acquired for schema inspection and preview; this is a catalogue/provenance layer, not a claim that every study is usable for crop production modelling.
+The local NASA OSDR manifest registers 24 official studies, and the served catalogue carries 25 study records because the EDEN ISS Antarctic analogue (OSD-895) was reviewed separately in Phase 2. Each record carries its source URL, metadata, retrieval timestamp and file checksums. The count was 13 when this section was first written; it grew as the discovery phases added studies, and `docs/DATASET_REGISTRY.md` is the generated list that must be trusted over any number typed here. Twenty-eight small public files were acquired for schema inspection and preview; this is a catalogue/provenance layer, not a claim that every study is usable for crop production modelling.
 
 ## Gaps that prevent a calibrated space crop twin
 

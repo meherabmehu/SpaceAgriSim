@@ -25,7 +25,7 @@ timestamps, in [Production verification](#7-production-verification).
 | API service | Render web service `spaceagrisim-api`, Python, region Singapore, `plan: free` | `render.yaml` [executed] |
 | Start command | `uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port $PORT --workers 1 --timeout-graceful-shutdown 25` | `render.yaml` |
 | Health check | `healthCheckPath: /api/ready` | `render.yaml` |
-| Auto-deploy | `autoDeployTrigger: 'off'`, so a push to `main` does **not** deploy; a deploy must be started manually | `render.yaml` |
+| Auto-deploy | `autoDeployTrigger: 'commit'` in `render.yaml` since Phase 22, matching the dashboard, which reports auto-deploy **on** with a commit trigger for both services | operator-read dashboard + `render.yaml` [executed] |
 | Web client | Render static site `spaceagrisim-web`, `plan: free`, build `cd frontend && npm ci && npm run build` | `render.yaml` |
 | Database | Render Postgres, **created in the dashboard, not in the blueprint** — `render.yaml` has no `databases:` block, so its plan, version and backup policy are not version-controlled | `render.yaml` [executed] |
 | Backups on the database | See `docs/DATABASE_BACKUP_AND_RECOVERY.md`; on the Free compute plan: none | [doc] |
@@ -35,9 +35,11 @@ Two consequences follow immediately, and both are operational rather than code:
 1. **The blueprint is not the whole deployment.** The database's existence, plan and settings live
    only in the Render dashboard. A rebuild from `render.yaml` alone would produce an API with no
    database URL (`SPACEAGRISIM_DATABASE_URL` is `sync: false`, i.e. entered by hand).
-2. **Nothing deploys itself.** `autoDeployTrigger: 'off'` means the commit that fixes a production
-   problem is inert until someone presses *Deploy* (or hits the deploy hook). Any verification
-   performed on the live URL is only meaningful *after* that manual step.
+2. **Deploys follow commits.** The dashboard reports auto-deploy on, triggered by a commit to the
+   linked branch, and `render.yaml` now says the same thing (`commit`). It said `'off'` until
+   Phase 22, which was a latent trap: nothing had ever been synced from the file, so it disagreed
+   with the running services and a later blueprint sync would have silently disabled auto-deploy.
+   See §10.4.
 
 ## 2. What changed in this phase
 
@@ -273,12 +275,10 @@ phase's code: the payload before the push had neither. `applied: 4/4, pending: 0
 registry answering from the real production schema — every registered step is present there, and
 inspecting it ran no DDL.
 
-Note for the record: `render.yaml` says `autoDeployTrigger: 'off'`, yet the live service is serving
-the new build. The deploy therefore happened, either from the dashboard default overriding the
-blueprint value or because Render's dashboard setting differs from the file. **The repository's
-stated intent and the live behaviour disagree, and the file should be reconciled with the dashboard
-setting** — that is the honest reading of the two facts; this audit did not observe which one
-caused the deploy.
+Note for the record: this audit originally recorded that `render.yaml` said
+`autoDeployTrigger: 'off'` while the live service was nevertheless serving the new build. Phase 22
+resolved it in the direction the evidence pointed: the dashboard has auto-deploy on with a commit
+trigger, so the file was wrong, not the platform. `render.yaml` now says `commit` (§10.4).
 
 ### 7.2 Production smoke test
 
@@ -320,11 +320,11 @@ are reported as observed, not as proof that no slow query has ever occurred.
 
 | # | Item | Why it is not done here |
 | --- | --- | --- |
-| 1 | Reconcile `autoDeployTrigger` with the dashboard: the file says `'off'`, the live service is nevertheless serving the new build | Recorded in §7.1 as an observed disagreement, not resolved here |
+| 1 | ~~Reconcile `autoDeployTrigger` with the dashboard~~ | **Done in Phase 22** (§10.4): the dashboard reports auto-deploy on with a commit trigger, and `render.yaml` was corrected to match instead of the other way round |
 | 2 | Decide whether the two smoke accounts should stay in production | They are dedicated `*.invalid` accounts with no data; deleting them is optional and there is no account-deletion endpoint |
-| 3 | Add the CI `postgres` job changes | The push token lacks the `workflow` scope; that job is already on `main` from the previous phase, unchanged here |
-| 4 | Enable automated backups or PITR | Free compute plan has neither; see `docs/DATABASE_BACKUP_AND_RECOVERY.md` for the options and their cost |
-| 5 | Move the rate limiter to a shared store before raising `--workers` | Needs a managed Redis/KV, which is not provisioned and cannot be tested from here |
+| 3 | Add the CI `postgres` job changes | That job is already on `main` from the previous phase, unchanged here |
+| 4 | Enable automated backups or PITR **inside Render** | Free compute plan has neither. Phase 22 added an encrypted off-Render backup in GitHub Actions instead (§10.2); the vendor-side option still needs a paid plan |
+| 5 | Move the rate limiter to a shared store before raising `--workers` | Needs a managed Redis/KV, which is not provisioned. Phase 22 documented the prerequisite in `docs/MULTI_WORKER_RATE_LIMITING.md`; the worker count is still 1 |
 | 6 | Database plan, version and region are dashboard-only | Not represented in `render.yaml`; recommended follow-up is to add a `databases:` block once the plan is decided |
 
 ## 9. Known limitations of this audit
@@ -343,3 +343,156 @@ are reported as observed, not as proof that no slow query has ever occurred.
   and it is recorded here rather than hidden.
 * **No penetration or load testing** was performed; this audit covers correctness of the schema
   lifecycle, multi-worker safety of the bootstrap, diagnostics, and the smoke path.
+
+---
+
+## 10. Phase 22 addendum — backup automation, restore validation, monitoring (2026-11-09)
+
+This section is the follow-up phase. It adds no scientific behaviour, no UI change and no API change
+except two additive diagnostic fields; it is about what happens when the database is lost, and about
+noticing that the service is unhealthy before a user does.
+
+### 10.1 Backup automation
+
+`render.yaml`'s own comment used to end with "automate the dump in CI once the push token has the
+`workflow` scope". That token is not needed for a workflow file committed to the repository; what is
+needed is the *secrets*, and they do not exist yet. So the honest status is: **implemented, proven
+offline, not yet scheduled**.
+
+| Component | What it does | Status |
+| --- | --- | --- |
+| `.github/workflows/db-backup.yml` | daily 02:17 UTC + `workflow_dispatch`; `pg_dump -Fc`; `pg_restore --list` verification; row counts; GPG AES-256; decrypt round-trip; artifact upload | committed, **never run on GitHub** |
+| `scripts/db_backup.py` (extended) | libpq-environment mode so no URL is on any command line; archive TOC verification; per-table counts; manifest with **no** host or credentials | [executed] against PostgreSQL 18.6 |
+| `.github/workflows/db-restore-verify.yml` | weekly + manual restore into a throwaway `postgres:18` container | committed, never run on GitHub |
+| `scripts/restore_validate.py` | safety gates + schema, counts, ownership verification | [executed] 17/17 |
+
+Secrets, exactly: `PRODUCTION_DATABASE_URL` (Render → database → Connect → **External** Database
+URL) and `BACKUP_ENCRYPTION_PASSPHRASE` (a passphrase kept in the owner's vault). Full setup:
+`docs/DATABASE_BACKUP_AUTOMATION.md` §2.
+
+Two facts that shaped the design and are easy to get wrong:
+
+* **The client major version must be ≥ the server's.** `pg_dump` 17 against this PostgreSQL 18
+  instance fails outright. The workflow installs `postgresql-client-18` from the PGDG repository
+  rather than relying on whatever the runner image ships.
+* **The repository is public**, so an Actions artifact is not private storage. Encryption is the
+  control, retention is short (14 days), and the doc recommends either a private repository or a
+  monthly download into the owner's own encrypted storage.
+
+### 10.2 Restore validation evidence
+
+Executed against local PostgreSQL **18.6** with a seeded production-shaped database — see
+`docs/DATABASE_BACKUP_AND_RECOVERY.md` §5.1 for the transcript: 11,991-byte dump, 30 TOC entries,
+7 tables, ciphertext 12,096 bytes, round-trip SHA-256 equal, wrong passphrase rejected,
+`pg_restore --exit-on-error` clean, **17/17 checks passed**, and the application then read the
+restored database (schema present, 4/4 migrations, both accounts, the owner's scenario).
+
+Every refusal path was executed too and returned exit 2 without writing anything: production URL as
+target, production database name elsewhere, non-local host, already-populated target, truncated
+dump. That is the part that matters most — a restore tool that can be pointed at production by a
+typo is a liability.
+
+### 10.3 Monitoring
+
+`scripts/monitor_production.py` reads the three public endpoints and turns them into a verdict with
+one remedy per failure. Executed against the live deployment [executed, 2026-11-09]:
+
+```
+health:reachable        HTTP 200 in 267 ms
+ready:status            ready in 2456 ms
+ready:database          available, postgresql
+ready:migrations        4/4 applied, 0 pending
+ready:pool              size=5, checkedOut=0, capacity=10, exhausted=False
+ready:storage-durable   durable=True
+rateLimitIdentity       'socket'            (warning)
+emailDelivery           unconfigured        (warning)
+metrics:server-errors   0 5xx of 4 requests
+metrics:uptime          uptimeSeconds not reported (older build)
+12/12 checks passed, service healthy with 3 warnings
+```
+
+The third warning is itself the evidence that `/api/metrics` will gain `startedAt` and
+`uptimeSeconds` only when this phase deploys: the live payload does not have them yet. Those fields
+are aggregates — no client address, no request identifier, no account — and they are the only
+external way to distinguish "up for six hours" from "restarting every two minutes", which a health
+probe cannot see.
+
+`production-monitor.yml` runs the same script every 30 minutes. It exits non-zero only on a real
+failure: warnings (spindown identity, unconfigured email) exit 3 and are recorded without turning
+the badge red.
+
+### 10.4 Render configuration consistency
+
+`render.yaml` disagreed with the platform, in the direction that could have broken deploys:
+
+| Field | `render.yaml` before | Dashboard (reported by the owner) | Now |
+| --- | --- | --- | --- |
+| `autoDeployTrigger` (API) | `'off'` | auto-deploy **on**, commit trigger | `'commit'` |
+| `autoDeployTrigger` (web) | `'off'` | auto-deploy **on**, commit trigger | `'commit'` |
+| branch | `main` | `main` | `main` (unchanged) |
+| worker count | `--workers 1` | `1` | unchanged |
+| health check | `/api/ready` | `/api/ready` | unchanged |
+
+Both services have always built from `main`, and auto-deploy was already on — which is why pushes
+were reaching production while the file claimed they would not. The file was corrected rather than
+the dashboard: no production setting was changed, and no deploy was triggered by this phase.
+`checksPass` is documented in the file as the alternative if deploys should wait for CI.
+
+**What could not be verified from this environment:** no Render API key or dashboard session is
+available here, so the dashboard values above are *reported by the owner*, not measured by this
+audit. That distinction is deliberate — the same reason §7.1 could only call the disagreement
+"observed" last phase.
+
+### 10.5 Database expiry (9 December 2026)
+
+Documented in full, with consequences, options and a checklist, in
+`docs/DATABASE_BACKUP_AND_RECOVERY.md` §8. Summary: a Free Render Postgres expires 30 days after
+creation, is then inaccessible for a 14-day grace period, and is **deleted** after that — so after
+2026-12-23 only an off-platform dump can recover anything. Upgrading is a purchase decision and was
+not made here; recreating a Free instance is possible but the workspace allows one Free database at a
+time, which is precisely why the dump has to exist first.
+
+### 10.6 Multi-worker safety
+
+Unchanged: still `--workers 1`. The reasoning, the arithmetic of how a shared budget multiplies, and
+the prerequisite (a shared counter store, a fail-closed degrade path, a pool budget, a load test) are
+now in `docs/MULTI_WORKER_RATE_LIMITING.md`. No Redis, no paid infrastructure, no worker-count change.
+
+### 10.7 What this phase did not do
+
+| # | Item | Why |
+| --- | --- | --- |
+| 1 | Push commits or deploy to Render | No GitHub credential in this environment; the work is committed locally and exported as a patch |
+| 2 | Create the two repository secrets | Requires the owner's GitHub account |
+| 3 | Run the backup or restore workflows on GitHub | Depends on 2 |
+| 4 | Vendor-side backups / PITR | Paid plan only; needs the owner's approval |
+| 5 | Alert delivery on a failed backup | GitHub's default owner notification only; anything else is a paid/third-party service |
+| 6 | A load test at 2+ workers | Not possible while the limiter is process-local, and out of scope |
+
+### 10.8 Deployment state after this phase
+
+No deployment happened in this phase, because nothing was pushed: this environment has no GitHub
+credential, so the commits exist locally and were exported as a patch. Both services are still
+serving the previous build, which is visible in the data rather than assumed:
+
+| Observation | Reading |
+| --- | --- |
+| `GET /api/ready` → `status: ready`, `databaseDialect: postgresql`, `databaseMigrations {4/4, pending 0}`, `storage.durable: true` | production is healthy on the **current** build [executed, 2026-11-09 18:12 UTC] |
+| `GET /api/metrics` has no `uptimeSeconds` | the deployed build predates this phase; the field appears after the next deploy |
+| `GET /api/health` → 200, `https://spaceagrisim-web.onrender.com/` → 200, `last-modified: Mon, 09 Nov 2026 16:53:06 UTC` | both services up; the web client's build timestamp is from before this phase |
+
+**Render deployment ids and statuses could not be read from here.** They are behind the Render API
+or the dashboard, and no `RENDER_API_KEY` exists in this environment. With a read-only key, the
+same facts are one request each (not executed here — listed so the check is repeatable):
+
+```bash
+# service id, then its most recent deploy: id, commit, status, finishedAt
+curl -s -H "Authorization: Bearer $RENDER_API_KEY" \
+  "https://api.render.com/v1/services?name=spaceagrisim-api&limit=20" | jq '.[0].service.id'
+curl -s -H "Authorization: Bearer $RENDER_API_KEY" \
+  "https://api.render.com/v1/services/<service-id>/deploys?limit=1" | jq '.[0].deploy | {id, commit, status, finishedAt}'
+```
+
+After the patch is pushed and auto-deploy runs (it is on, with a commit trigger), the same two
+requests should show `status: live` on the new commit — and `/api/metrics` gaining `uptimeSeconds`
+is the in-band proof that the new build is the one answering.

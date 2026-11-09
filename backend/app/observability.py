@@ -1,8 +1,15 @@
 """In-process, privacy-safe service counters for small hosted deployments."""
 from collections import Counter
+from datetime import datetime, timezone
 from threading import Lock
+from time import monotonic
 
 _lock = Lock()
+# When this process started. Exposed so a monitor can tell "up for 6 hours" from "restarted every
+# two minutes", which is the failure mode a health probe cannot see: a crash-looping service keeps
+# answering for the few seconds it is alive. Neither value identifies a client or a request.
+_STARTED_MONOTONIC = monotonic()
+_STARTED_AT = datetime.now(timezone.utc)
 _requests = Counter()
 _errors = Counter()
 # Database diagnostics. These are deliberately aggregate: an operation verb, a duration bucket,
@@ -61,8 +68,15 @@ def reset_database_counters() -> None:
         _db_slow_ms = 0.0
 
 
+def uptime() -> dict:
+    """Seconds since this process started, plus the UTC start time. No secrets, no clients."""
+    return {"startedAt": _STARTED_AT.isoformat().replace("+00:00", "Z"),
+            "uptimeSeconds": round(monotonic() - _STARTED_MONOTONIC, 1)}
+
+
 def snapshot() -> dict:
     with _lock:
         return {"requests": dict(_requests), "serverErrors": dict(_errors),
                 "database": {"slowQueries": dict(_db_slow), "slowQueryCount": _db_slow_total,
-                             "failures": dict(_db_failures)}}
+                             "failures": dict(_db_failures)},
+                **uptime()}

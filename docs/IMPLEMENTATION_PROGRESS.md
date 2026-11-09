@@ -12,6 +12,43 @@
 
 The Vercel API service packages a small checksum-verified read-only copy of the data/model assets at build time. On serverless Vercel deployments, history writes are intentionally marked read-only unless a durable database and enabled write policy are configured. Local and container deployments can enable durable scenario history through `SPACEAGRISIM_DATABASE_URL`.
 
+## Phase 22 — backup automation, restore validation and monitoring
+
+- **Encrypted daily backup in CI.** `.github/workflows/db-backup.yml` dumps production with
+  `pg_dump -Fc` (client 18, because pg_dump cannot dump a newer server), verifies every archive with
+  `pg_restore --list`, records table names and row counts in a manifest, encrypts with GPG AES-256,
+  proves the ciphertext decrypts back to the same SHA-256, and uploads **only** the ciphertext as an
+  artifact (retention 14 days). Runs daily at 02:17 UTC and on `workflow_dispatch`. The connection
+  string reaches libpq through a 0600 `.pgpass`; it never appears on a command line, in a manifest or
+  in a log. Setup, secret names and limits: `docs/DATABASE_BACKUP_AUTOMATION.md`.
+- **Restore validation.** `scripts/restore_validate.py` + `.github/workflows/db-restore-verify.yml`
+  restore a backup into a throwaway `postgres:18` service container and verify schema, required
+  columns/index, per-table row counts against the manifest, six ownership edges, and account rows —
+  refusing production URL, production database name, remote hosts and non-empty targets first.
+  **Executed offline on PostgreSQL 18.6: 17/17 checks passed**, and the application read the restored
+  database correctly (schema present, 4/4 migrations, both accounts, the owner's scenario).
+- **Monitoring.** `scripts/monitor_production.py` + `.github/workflows/production-monitor.yml` poll
+  `/api/health`, `/api/ready` and `/api/metrics` every 30 minutes and print a remedy per failure
+  (database failure classes, pool exhaustion, pending migrations, non-durable storage). `/api/metrics`
+  gained `startedAt` and `uptimeSeconds` — additive, aggregate, no client data — so a crash loop is
+  visible from outside. Live run against production: **12/12 checks passed**, three warnings
+  (`rateLimitIdentity: socket`, `emailDelivery: unconfigured`, uptime field not yet deployed).
+- **Render configuration reconciled.** The dashboard reports auto-deploy **on** with a commit trigger
+  for both services; `render.yaml` said `'off'`, which would have silently disabled deploys on the
+  next blueprint sync. Corrected to `autoDeployTrigger: 'commit'` for both services; see
+  `docs/PRODUCTION_READINESS_AUDIT.md` §10.4. No production setting was changed from here.
+- **Multi-worker safety documented, worker count unchanged.** `docs/MULTI_WORKER_RATE_LIMITING.md`
+  records why `--workers 1` stands: the limiter's state is a per-process `defaultdict(deque)`, so the
+  budget scales with worker count, and a shared Redis/KV store plus a fail-closed degrade path is the
+  prerequisite. No Redis or paid infrastructure was added.
+- **Tests.** 25 new tests in `backend/tests/test_phase22_backup_automation.py` (restore safety gates,
+  manifest secrecy, libpq-mode argument handling, monitor verdicts against a real local HTTP server,
+  remediation text, uptime fields). Suite: **793 passed / 23 skipped** (SQLite), **816 passed**
+  (PostgreSQL **18.6**).
+- **Not done, deliberately.** Nothing was pushed or deployed from here (no GitHub credential in this
+  environment), so no Render deployment id changed in this phase; the workflows need two repository
+  secrets before their first run.
+
 ## Phase 21 — production deployment verification and database reliability
 
 - **Schema bootstrap is serialised.** On PostgreSQL the startup DDL takes a session advisory lock with
@@ -49,12 +86,12 @@ The Vercel API service packages a small checksum-verified read-only copy of the 
   exhausted: false}`; `scripts/production_smoke.py` passed **23/23 twice** against
   `https://spaceagrisim-api.onrender.com` and left no scenarios or analyses behind; `/api/health`,
   `/api/metrics` and the static site all answered. CI run on `62daaf6` succeeded.
-- **Observed discrepancy.** `render.yaml` still says `autoDeployTrigger: 'off'` while the live
-  service is serving the new build; the file and the dashboard setting disagree and should be
-  reconciled.
+- **Observed discrepancy (resolved in Phase 22).** `render.yaml` said `autoDeployTrigger: 'off'`
+  while the live service was serving the new build. The dashboard reports auto-deploy on with a
+  commit trigger, so the file was corrected to match.
 - **Not done, deliberately.** Worker count unchanged (still `--workers 1`): the in-process rate
-  limiter is the next blocker, not the database. Backups not enabled (needs a paid plan). Deployment
-  after the push is a manual Render dashboard action because `autoDeployTrigger` is `off`.
+  limiter is the next blocker, not the database. Vendor-side backups not enabled (needs a paid
+  plan); Phase 22 added an encrypted off-platform backup in CI instead.
 
 ## Phase 20 — scientific audit, correction and independent validation
 
@@ -121,18 +158,25 @@ The Vercel API service packages a small checksum-verified read-only copy of the 
 - Close the external-validation gap the check exposed: the served lettuce model has no cultivar
   input and no non-monotonic light response, so no amount of recalibration will fit the PeerJ
   observations. A replacement would need both features before it could be scored again.
-- External validation of the lettuce model: **attempted and failed**. Wicharuck et al. 2024 (PeerJ
-  12:e17085, CC BY 4.0) was transcribed verbatim into
-  `data/literature/external_lettuce_peerj17085.json` (six observations: two cultivars × three
+- External validation of the lettuce model: **attempted, improved, still failed.** Wicharuck et al.
+  2024 (PeerJ 12:e17085, CC BY 4.0) was transcribed verbatim into
+  `data/literature/external_lettuce_peerj17085.json` (six observations: two cultivars x three
   canopy levels, fresh weight at 28 DAT, source SHA-256 recorded) and served at
-  `GET /api/external-validation` with predictions computed live rather than stored. The model
-  overpredicts every observation, by ×1.67 to ×5.38, with a median of ×3.21 and a mean absolute
-  percentage error of 232 %. Probing the one unmeasured input (root temperature, 20–32 °C) moves
-  the median ratio only between ×2.28 and ×3.21, so the assumption does not explain the gap. The
-  model stays exploratory: its R² describes interpolation within four experiments by one group and
-  must not be read as transferable accuracy.
-- Configure a managed database and explicit CORS policy before enabling hosted history writes.
-  Live check 2026-11-09: database-backed routes were failing on the hosted instance (login 500,
-  share links 503) while `/api/health` stayed green. URL aliases are now normalised and `/api/ready`
-  reports a `reason` code; the remaining step is setting `SPACEAGRISIM_DATABASE_URL` on the host.
+  `GET /api/external-validation` with predictions computed live rather than stored. The first
+  scoring, on `lettuce-earth-growth-v2`, overpredicted every observation by x1.67 to x5.38 (median
+  x3.21), a mean absolute percentage error of 232 %. Phase 20 rebuilt the model as
+  `lettuce-earth-growth-v3` (daily light integral, per-area target, density identity), which scores
+  42.7 % MAPE with a mean bias of +2.6 g on the same six rows, and 41.6 % on the independent
+  Touliatos 2016 holdout. That is a large improvement and still a failure against the pre-registered
+  30 % criterion, so the model stays `trained-exploratory`. Its R2 describes interpolation within
+  four experiments by one group and must not be read as transferable accuracy.
+- **Managed database: configured and verified.** A live check on 2026-11-09 found database-backed
+  routes failing on the hosted instance (login 500, share links 503) while `/api/health` stayed
+  green. URL aliases are now normalised, `/api/ready` reports a `reason` code, and
+  `SPACEAGRISIM_DATABASE_URL` is set on the host. Re-verified after the Phase 21 deploy:
+  `/api/ready` reports `databaseDialect postgresql`, `databaseSchema present`,
+  `databaseMigrations {applied: 4, total: 4, pending: 0}` and `storage.durable true`, and
+  `scripts/production_smoke.py` passes 23/23 against the live API. What remains is operational, not
+  code: no automated backup or point-in-time recovery exists on the current plan (see
+  `docs/DATABASE_BACKUP_AND_RECOVERY.md`).
 - Profile and split the large WebGL bundle further if field performance requires it.

@@ -59,8 +59,11 @@ cd /home/user/SpaceAgriSim_repo
 git push origin main
 ```
 
-The blueprint must be on `main` before you create services, because `autoDeployTrigger: 'off'`
-means Render will not redeploy on later pushes — you trigger each deploy yourself.
+The blueprint must be on `main` before you create services.
+
+> **Superseded (Phase 22, 2026-11-09).** `autoDeployTrigger` is now `'commit'`, matching the
+> dashboard, which has auto-deploy on with a commit trigger for both services. The paragraph below
+> described the file as it was written in Phase 13.
 
 ### Step 2 — Create the database first (recommended)
 

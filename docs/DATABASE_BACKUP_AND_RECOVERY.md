@@ -4,14 +4,20 @@ Date: 2026-11-09
 Applies to: the Render-hosted deployment (`spaceagrisim-api.onrender.com`) and its PostgreSQL
 database.
 
-**Bottom line, stated plainly:** as configured today this deployment has **no verified automated
-backup and no point-in-time recovery**. The database lives on Render, the blueprint in this
-repository does not describe it, and on a Free compute plan Render provides no backups at all. Until
-that changes, the recovery plan is a manual `pg_dump` that someone has to remember to run, plus the
-restore drill in this document that proves such a dump can actually be restored.
+**Bottom line, stated plainly:** Render provides **no backup and no point-in-time recovery** for
+this database, because the Free compute plan includes neither. Since Phase 22 (2026-11-09) there is
+an **off-platform, encrypted, scheduled `pg_dump`** in this repository's GitHub Actions, and a
+restore-validation workflow that restores a backup into a throwaway PostgreSQL 18 database and
+checks it row by row. That is a real backup — but it is *not* vendor-side recovery: the recovery
+point is "the last successful daily run" (up to 24 hours), not "ten minutes ago".
 
-Nothing below claims a backup exists. Where a fact is not verifiable from this environment, it says
-so.
+The automation's components were executed locally against PostgreSQL 18 with production-shaped data
+(§5.1); the first run inside GitHub Actions has **not happened yet**, because the workflow and its
+two secrets are not on GitHub at the time of writing. `docs/DATABASE_BACKUP_AUTOMATION.md` is the
+setup and runbook, including the exact secret names.
+
+Nothing below claims a vendor backup exists. Where a fact is not verifiable from this environment,
+it says so.
 
 ---
 
@@ -126,7 +132,8 @@ Cutover, when step 3 is green:
 
 1. Set `SPACEAGRISIM_DATABASE_URL` on the `spaceagrisim-api` service to the restored database's
    **Internal** URL (Render service → Environment).
-2. Deploy/restart the service. `autoDeployTrigger` is `off`, so a restart is a deliberate action.
+2. Deploy/restart the service. Auto-deploy is on with a commit trigger (Phase 22), so a restart is
+   now an explicit **Manual Deploy** in the dashboard rather than a side effect of a push.
 3. Confirm `/api/ready` → `status: ready` with `databaseMigrations: {applied: 4, total: 4,
    pending: 0}`.
 4. Run `scripts/production_smoke.py` against the API to prove accounts and scenarios actually work,
@@ -186,19 +193,56 @@ Limits of this evidence, stated rather than glossed:
 * The dump was small (three accounts, one scenario). It proves the mechanism, not the timing of a
   large restore; RTO for this dataset is seconds, but that is a property of its size today.
 
+### 5.1 Phase 22: restore validation against PostgreSQL 18, with ownership checks
+
+The drill above compares row counts. `scripts/restore_validate.py` goes further, because a count can
+match while the *relationships* are broken: it checks the six ownership edges, the migration-added
+columns and the account rows themselves, and it refuses any target that looks like production.
+
+Executed 2026-11-09 against a local **PostgreSQL 18.6** server — the same major version Render runs
+— with a source database seeded through the application's own storage layer (2 accounts, 3
+scenarios including one legacy unowned row, 1 analysis, 1 share link, 1 email token, 1 audit event),
+dumped with the same `scripts/db_backup.py` path the workflow uses:
+
+```
+dump:     11,991 bytes, sha256 25dba99e…, pg_restore --list lists 30 entries / 7 table-data blocks
+encrypted: 12,096 bytes (GPG symmetric, AES-256); decrypt round-trip sha256 matches;
+           a wrong passphrase is rejected; the round-tripped dump still lists as a valid archive
+restore:   pg_restore --exit-on-error into spaceagrisim_restore_check -> no errors
+checks:    17/17 passed
+           - all seven tables, required columns, required index present
+           - row counts equal the dump manifest for all seven tables
+           - no orphans on scenarios/analyses/share_links/email_tokens/audit_events -> users,
+             share_links -> scenarios
+           - no empty password hashes, no duplicate emails
+           - 1 legacy scenario without an owner: reported, not modified
+app:       the API's own storage layer pointed at the restored database reads it correctly:
+           {'dialect': 'postgresql', 'status': 'available', 'schema': 'present'},
+           migrations 4/4 applied / 0 pending, durable True, both accounts, owner's scenario listed
+```
+
+Refusals, also executed, each exiting 2 without touching anything: production URL as target,
+production database name on another host, a non-local host without `--allow-remote`, a target that
+already had the schema, and a truncated dump
+(`pg_restore: error: could not read from input file: end of file`).
+
+Limits: it ran locally, not against Render, and the dump is 12 KB — it proves the mechanism, not the
+timing of a large restore.
+
 ## 6. Recovery objectives implied by the current configuration
 
 | Objective | Current answer | Why |
 | --- | --- | --- |
-| RPO (most data you can lose) | **Everything since the last manual dump**, i.e. unbounded if none was taken | No automated backup, no PITR on the Free compute plan |
+| RPO (most data you can lose) | **Up to 24 hours** once `db-backup.yml` runs with its secrets; currently **unbounded** because it has not run yet | No vendor backup or PITR on the Free compute plan; the off-platform daily dump is the only recovery point |
 | RTO (time to serve again) | Minutes *if a dump exists* (drill: seconds for this dataset), **never** if none exists | Restore + cutover as in §4 |
-| Backup integrity assurance | Only from a drill that has actually restored the file | The drill in §5 is the mechanism |
+| Backup integrity assurance | Every run (archive listing + decrypt round-trip), every week (full restore validation) | §5 and §5.1; `db-restore-verify.yml` automates the weekly part |
 | Protection against instance deletion | **None** | Render deletes backups with the instance |
 
 ## 7. Recommended actions, in order of cost-effectiveness
 
-1. **Start a manual dump schedule now.** One `pg_dump` per day to encrypted storage outside Render,
-   plus one before any risky operation. Cost: minutes; it moves RPO from "unbounded" to "one day".
+1. ~~Start a manual dump schedule~~ — **done in Phase 22**: `.github/workflows/db-backup.yml` runs
+   daily at 02:17 UTC, plus `workflow_dispatch`. It moves the RPO from "unbounded" to "one day" the
+   moment its two repository secrets exist. See `docs/DATABASE_BACKUP_AUTOMATION.md`.
 2. **Run `scripts/restore_drill.sh` against a throwaway database quarterly** (or after any schema
    change), and keep its output with the release record. A backup nobody has restored is unproven.
 3. **Move the database to a paid instance type** if the data matters. Hobby gives 3-day PITR, Pro
@@ -207,17 +251,82 @@ Limits of this evidence, stated rather than glossed:
 4. **Represent the database in `render.yaml`** (a `databases:` block with plan, region and version)
    so its configuration is reviewable, and so a rebuild from the blueprint does not silently lack a
    database.
-5. **Automate the dump in CI** (a scheduled workflow running `pg_dump` with a repository secret and
-   uploading the archive) once the push token used here has the `workflow` scope — the token
-   available during this audit does not, so no workflow change was made. Until then a local cron or
-   a manual monthly run is the honest answer.
-6. **Alert on backup absence.** A note in the release checklist is weaker than a monitor, but for a
-   single-instance deployment it is what exists today; the `/api/ready` payload is the place to
-   surface "last verified dump" if this is ever automated.
+5. ~~Automate the dump in CI~~ — **written in Phase 22** (`db-backup.yml` + `db-restore-verify.yml`),
+   pending the two repository secrets. Until those exist, a manual run is still the honest answer.
+6. **Alert on backup absence.** The scheduled run notifies the repository owner on failure, which is
+   GitHub's default and the only free mechanism. A "last verified dump" field on `/api/ready` was
+   considered and rejected: the API never sees the dump artifacts, so it could only report a value
+   someone wrote by hand, which is worse than no field at all.
+7. **Raise the database to a paid instance type before the expiry date** if the account data is to
+   survive (§8) — this is the only action in this list that needs a spending decision.
 
-## 8. What this document does *not* claim
+## 8. The database expires on 9 December 2026
 
-* It does not claim a backup job is configured, because none is.
+This is the most time-critical fact in this document, and it is a hard vendor limit rather than a
+risk that may or may not materialise. Render's documentation states it without qualification
+([free instances](https://render.com/docs/free#30-day-limit)):
+
+> Free Render Postgres databases **expire 30 days after creation**. An expired Free database is
+> inaccessible unless you upgrade it to a paid compute plan. After a Free database expires, you have
+> a grace period of **14 days** to upgrade it… After the grace period, Render **deletes** the
+> database (along with all of its data).
+
+Applied to this instance (creation date reported by the dashboard as 2026-11-09, expiry
+**2026-12-09**):
+
+| Date | What happens | What is still possible |
+| --- | --- | --- |
+| up to 2026-12-09 | normal service | everything |
+| 2026-12-09 → 2026-12-23 | database **inaccessible**; 14-day grace | upgrade to a paid plan, or restore the last dump into a **new** instance |
+| after 2026-12-23 | Render **deletes** the instance and all data | only an off-platform dump can restore anything |
+
+Note the second row carefully: during the grace period the data still exists but the running API
+cannot read it, so `/api/ready` will answer `database_unavailable` (with a SQLSTATE if the server
+answered) and every account, scenario, analysis and share link will be unreachable. If that happens
+and there is no dump, **the data is not recoverable** — it is not merely offline.
+
+### Consequences, in order of severity
+
+1. **Total loss of user-authored data if no backup exists.** Accounts, scenarios, saved analyses and
+   share links are not derivable from Git; only the code and models are.
+2. **Public share links break permanently.** `share_links` rows live in the same database; there is
+   no external copy of the token → scenario mapping.
+3. **Registered accounts must re-register**, and because `emailDelivery` is `unconfigured` there is
+   no verification or password-reset mail to soften that.
+4. **The API and web client stay up but useless.** Static hosting is unaffected, so the site loads
+   and every data-backed action fails — a worse failure mode than a clean outage.
+
+### Options, with what each actually costs
+
+| Option | Data survives? | Needs approval / spend | Notes |
+| --- | --- | --- | --- |
+| **A. Upgrade the database compute plan** (Hobby or higher) | Yes, in place | **Yes — paid plan.** Not done, not recommended unilaterally | Hobby also brings 3-day PITR and logical exports; Pro brings 7 days |
+| **B. Keep Free, recreate a new Free database before expiry** | Only if a dump is restored into it | No spend, but it expires 30 days later (a rolling 30-day horizon) | The workspace allows **one** Free Postgres at a time, so the old instance must be deleted — which is exactly why the dump must exist first |
+| **C. Move to another provider's free tier** (e.g. Neon/Supabase free) | Only if a dump is restored | No spend; changes `SPACEAGRISIM_DATABASE_URL` | Out of scope here: a new vendor, new secrets, new latency profile |
+| **D. Do nothing, keep the dumps** | No — the service loses its data on 2026-12-23 | No spend | The honest "acceptable for a demo, not for users" position |
+
+**Restoring into a new instance is proven, not assumed:** the §5.1 run restored a dump into a
+separate PostgreSQL 18 database and the application read accounts and scenarios back from it. Doing
+the same against a new Render Postgres instance differs only in the host in
+`SPACEAGRISIM_DATABASE_URL`; the client-major-version rule (install PostgreSQL **18** client tools,
+as the workflow does) is the one thing that changes if the new instance runs a different major
+version.
+
+### Checklist for the expiry window
+
+- [ ] A dump newer than 2026-12-08 is downloaded and stored **outside GitHub** (artifacts expire).
+- [ ] Its SHA-256 matches the manifest, and `pg_restore --list` reads it.
+- [ ] `db-restore-verify.yml` has been green on that artifact.
+- [ ] The decision (upgrade / recreate / migrate / retire) is recorded before 2026-12-09.
+- [ ] If upgrading or recreating: `SPACEAGRISIM_DATABASE_URL` is updated and `/api/ready` reports
+      `status: ready` with `databaseMigrations.pending: 0`, and `scripts/production_smoke.py`
+      passes 23/23 against the new instance.
+
+## 9. What this document does *not* claim
+
+* It does not claim a backup job is **running**: the workflow is committed, but nothing has executed
+  it yet (no repository secrets existed when it was written). Until the first green run, the backup
+  status is still "manual only" — `docs/DATABASE_BACKUP_AUTOMATION.md` §6 says the same thing.
 * It does not claim the Render instance's plan was verified; it says what each plan provides and
   what an unverified plan means.
 * It does not present the local drill as a production restore; it is the mechanism being proven, in

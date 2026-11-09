@@ -1,5 +1,12 @@
 # Render Blueprint — API (Python) + web client (static site).
-# Reviewed against https://render.com/docs/blueprint-spec on 2026-11-07.
+# Reviewed against https://render.com/docs/blueprint-spec on 2026-11-07 and 2026-11-09.
+#
+# autoDeployTrigger below is 'commit', which is what the Render dashboard reports for both services
+# (auto-deploy on, triggered by a commit to the linked branch). It said 'off' until 2026-11-09, and
+# that was a trap: nothing in the running services had ever been synced from it, so the file
+# disagreed with reality and the next blueprint sync would have silently turned auto-deploy off -
+# after which "I pushed and nothing deployed" would have looked like a broken pipeline rather than
+# a config change. Set it to 'checksPass' instead if deploys should wait for CI.
 #
 # Three settings have to agree with each other, and none of them fails at build time:
 #   1. the static site's build-time VITE_API_BASE_URL,
@@ -19,7 +26,10 @@ services:
     # would need a shared limiter and a real database; see docs/PHASE13_PRODUCTION_READINESS.md.
     startCommand: uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port $PORT --workers 1 --timeout-graceful-shutdown 25
     healthCheckPath: /api/ready
-    autoDeployTrigger: 'off'
+    # --workers 1 is not a placeholder: the request limiter in backend/app/middleware.py is an
+    # in-process dict of deques, so a second worker doubles every caller's budget and makes the
+    # limit unenforceable. See docs/MULTI_WORKER_RATE_LIMITING.md before changing it.
+    autoDeployTrigger: 'commit'
     envVars:
       # Phase 13: production refuses to start without a real secret, and an ephemeral one would
       # log every user out on each restart — which on a free instance happens on every wake from
@@ -51,7 +61,7 @@ services:
     branch: main
     buildCommand: cd frontend && npm ci && npm run build
     staticPublishPath: ./frontend/dist
-    autoDeployTrigger: 'off'
+    autoDeployTrigger: 'commit'
     envVars:
       # Baked into the bundle at BUILD time, not read at runtime. Changing it requires a rebuild,
       # not a restart — the single most common "I changed the variable and nothing happened"

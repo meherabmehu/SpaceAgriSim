@@ -125,7 +125,9 @@ https://spaceagrisim-api.onrender.com/api
 
 ## ধাপ ৪ — API deploy করুন (৫–৮ মিনিট)
 
-1. Blueprint Apply করার পর Render দুইটা সার্ভিসই তৈরি করবে, কিন্তু `autoDeployTrigger: 'off'` থাকায় নিজে থেকে deploy হবে না।
+1. Blueprint Apply করার পর Render দুইটা সার্ভিসই তৈরি করবে।
+
+> **আপডেট (Phase 22, 2026-11-09):** `autoDeployTrigger` এখন `'commit'` — dashboard-এ দুইটা সার্ভিসেরই auto-deploy চালু আছে এবং সেটাই এখন ফাইলে লেখা। নিচের পুরোনো লেখাটা Phase 13-এর অবস্থা।
 2. `spaceagrisim-api` সার্ভিসে ঢুকে ডান দিকে **Manual Deploy** → **Deploy latest commit**।
 3. **Logs** ট্যাবে দেখুন। সফল হলে শেষে এমন লাইন আসবে:
 
@@ -207,7 +209,7 @@ https://spaceagrisim-api.onrender.com/api
 2. **Free Postgres ৩০ দিন পরে এক্সপায়ার হয়** (এরপর ~১৪ দিন grace period)। ডেটা রাখতে চাইলে সময়মতো paid-এ আপগ্রেড বা ডেটা export করতে হবে।
 3. **RAM ৫১২ MB, CPU ০.১** — single worker (`--workers 1`) ইচ্ছাকৃত: in-process rate limiter আর SQLite path একই worker-এ coherent থাকে।
 4. **Postgres না বসালে** SQLite ফাইলে ডেটা যায়, আর free instance-এর disk ephemeral — প্রতিবার restart/spin-down-এ অ্যাকাউন্ট ও analysis মুছে যাবে। তাই §১ আর §৩.১ বাদ দেওয়া যাবে না।
-5. **Deploy নিজে থেকে হয় না** (`autoDeployTrigger: 'off'`) — প্রতিবার নিজে Manual Deploy চাপতে হবে। এটা ইচ্ছাকৃত, যাতে অর্ধেক-কাজ করা commit হঠাৎ live না হয়ে যায়।
+5. **Deploy নিজে থেকে হয়** (`autoDeployTrigger: 'commit'`) — `main`-এ commit গেলে deploy trigger হয়। Phase 22-এর আগে ফাইলে `'off'` লেখা ছিল, যা dashboard-এর সাথে মিলত না।
 
 ---
 

@@ -63,5 +63,10 @@ data/raw/OSD-411/
 data/raw/OSD-267/
 data/raw/OSD-269/
 
+# GLDS-709 RNA-seq count matrix (4.5 MB). Same policy: the SHA-256 is versioned
+# in data/metadata/download_checksums.json and scripts/nasa_pipeline.py
+# re-acquires it, so a clean clone validates once the blob is downloaded.
+data/raw/OSD-767/
+
 # Local CI/scratch database used by the test workflow
 .ci/
