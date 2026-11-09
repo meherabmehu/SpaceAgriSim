@@ -245,4 +245,21 @@ def test_readiness_reports_the_schema_state_not_only_connectivity(client):
     assert payload["database"] == "available"
     # A reachable server with missing tables is reported by databaseSchema, and /ready refuses.
     assert payload["databaseSchema"] == "present"
-    assert payload["storage"]["durable"] is True
+
+    # Durability is a property of *where* this suite happens to run, not a constant: the CI job
+    # points the suite at a scratch SQLite file under /tmp, which is correctly reported as
+    # non-durable. Asserting True here made the test pass locally and fail in CI, which is the
+    # difference the field exists to expose - so assert the consistency, not the value.
+    from app.config.settings import settings
+
+    storage = payload["storage"]
+    url = settings.database_url_resolved
+    assert storage["dialect"] == ("postgresql" if url.startswith("postgresql") else "sqlite")
+    if storage["dialect"] == "postgresql":
+        assert storage["durable"] is True
+    else:
+        volatile = ":memory:" in url or "/tmp/" in url
+        assert storage["durable"] is (not volatile)
+        if volatile:
+            # A non-durable store must say why and how to fix it, not just report false.
+            assert storage["remedy"]
