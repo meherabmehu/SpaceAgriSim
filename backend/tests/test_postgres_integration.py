@@ -1,4 +1,10 @@
-"""Optional real-PostgreSQL test. It runs only with an explicitly supplied test DSN."""
+"""Optional real-PostgreSQL round trip. Runs only with an explicitly supplied test DSN.
+
+Superseded in coverage by `test_postgresql_persistence.py`, which isolates itself in a throwaway
+schema and covers the restart-equivalent path. This one is kept because it is the oldest statement
+of the guarantee - a row written to PostgreSQL is readable back - and because it runs in the full
+suite whenever a DSN is present.
+"""
 import os
 import uuid
 
@@ -22,9 +28,13 @@ def test_postgres_scenario_roundtrip(monkeypatch):
         row = storage.save_scenario(marker, '{"crop":"lettuce"}')
         assert row["name"] == marker
         assert any(saved["id"] == row["id"] for saved in storage.list_scenarios())
-        assert storage.database_health() == {"dialect": "postgresql", "status": "available"}
+        health = storage.database_health()
+        assert health["dialect"] == "postgresql"
+        assert health["status"] == "available"
+        # Connectivity alone is not the claim: the schema the API queries must be there too.
+        assert health["schema"] == "present"
+        assert health["missingTables"] == ""
     finally:
         with storage.database().begin() as connection:
             connection.execute(delete(storage.scenarios).where(storage.scenarios.c.name == marker))
-        storage.database().dispose()
         storage.database.cache_clear()
