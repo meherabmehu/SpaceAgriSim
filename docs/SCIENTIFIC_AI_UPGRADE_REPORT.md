@@ -236,7 +236,7 @@ records, 4 unverified and labelled as unverified.
 
 | Check | Result |
 |---|---|
-| Backend suite (SQLite) | **846 passed, 24 skipped, 0 failed** |
+| Backend suite (SQLite) | **850 passed, 24 skipped, 0 failed** |
 | Physics self-checks | 5.72 / 3.88 / 5.03 vs 5.72 / 3.88 / 5.0 |
 | Model audit | 141 checks, 0 failed |
 | Registry verification | 60/60 |

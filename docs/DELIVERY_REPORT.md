@@ -122,7 +122,7 @@ re-applied on top of `3cfe9a4` after the working tree lost the earlier commits.
 **New (34):**
 
 - physics and service: `backend/app/simulation/et0_fao56.py`, `backend/app/et0.py`
-- tests: `backend/tests/test_phase23_reference_et0.py` (54 tests)
+- tests: `backend/tests/test_phase23_reference_et0.py` (58 tests)
 - pipeline: `ml/research/{acquire_power_climate,build_et0_dataset,train_et0_emulator,build_catalog,build_gap_matrix,et0_fao56}.py`
 - artifacts: `ml/artifacts/et0-emulator-v1.{json,joblib}`, `ml/evaluation/{et0_dataset_quality.json,
   et0_model_comparison.md, et0_model_comparison.csv}`
@@ -147,8 +147,8 @@ gained additive fields only, and the default simulation path is byte-identical.
 
 | Suite | Result |
 |---|---|
-| Backend (SQLite), full | **846 passed, 24 skipped, 0 failed** |
-| New Phase 23 tests | 54 passed (`test_phase23_reference_et0.py`: physics 11, service 6, water 8, dataset 4, emulator honesty 8, API integration 10, catalogue and audit 7) |
+| Backend (SQLite), full | **850 passed, 24 skipped, 0 failed** |
+| New Phase 23 tests | **58 passed**, one module: physics against the manual's worked examples, service contract and degradation, the two water-demand bases, dataset integrity, emulator honesty (gates, directions, LOSO), API integration, and the catalogue/audit drift checks |
 | `scripts/audit_models.py` | 141 checks, **0 failed**, 19 documented gaps |
 | `scripts/verify_model_registry.py` | **60/60** |
 | Catalogue / gap-matrix / dataset drift (`--check`) | all three clean |
@@ -164,26 +164,76 @@ gained additive fields only, and the default simulation path is byte-identical.
   `train_et0_emulator.py` produce identical metrics and identical gate verdicts (checked by
   comparing the two artifact cards); the training script is not a stochastic sweep.
 
-## H. Commit and deployment
+## H. Commit, deployment and production verification
 
-- **Local commits on top of `3cfe9a4`:** `088e339` (Phase 22, 20 files) and `d92b0a7` (Phase 23, 57
-  files), followed by the documentation commit that contains this line.
-- **Remote state checked, not assumed:** `git fetch origin main` returns `3cfe9a4`, so the branch is
-  a fast-forward with no rebase needed. This was verified rather than remembered: the sandbox had
-  previously held a stale `origin/main`, which is why the fetch is recorded here explicitly.
-- **Pushed: no.** The write credential is not available in this environment. `git push` fails with
-  `remote: No anonymous write access`, there is no `~/.git-credentials`, no `GH_TOKEN`/`GITHUB_TOKEN`
-  in the environment, and no credential helper holding a token. The repository is public for
-  **read** only. The commits are ready to send with a push from a shell that holds the token; that
-  is step 1 of section I, not something this report can claim.
-- **Render deployment: unverifiable from this environment.** No deployment was triggered, no
-  deployment ID exists, and no production URL was contacted. Any status claimed here would be
-  fabricated.
-- **GitHub secrets** (`PRODUCTION_DATABASE_URL`, `BACKUP_ENCRYPTION_PASSPHRASE`): their presence
-  cannot be checked without API credentials. **If both are absent, the backup automation is not
-  operational** - that is the failure mode worth knowing, and it is why this line says unknown.
-- **No secrets, dumps or credentials** were written to the repository; the new data is open-licence
-  reanalysis and generated artefacts.
+**Remote.** `main` is at the commit that contains this report. Every commit below was pushed with
+`git push` and then verified by re-reading the remote: `GET /repos/meherabmehu/SpaceAgriSim/commits/main`
+and a fresh clone, not the push output alone.
+
+| Commit | Content |
+|---|---|
+| `34aae63` | Phase 22: backup automation, restore validation, monitoring (17 files) |
+| `1851c43` | Phase 23: FAO-56 reference ET0, emulator, dataset catalogue (57 files) |
+| `80ecf3a` | Documentation corrected to the rebuilt artifacts |
+| `dcada04` | Registry verification artefact refreshed |
+| `f3cb00e` | Scientific stack declared in the runtime image |
+| `0026688` | Artifact diagnostics served by the API |
+| `08a151d` | Serving stack pinned to the versions that wrote the bundle |
+
+**Three things went wrong on the way to a green deployment, and all three are recorded because a
+delivery report that only lists the successful pushes is useless.**
+
+1. **The push token has `repo` scope only.** GitHub refuses a push that creates
+   `.github/workflows/*` files without `workflow` scope, so the three Phase 22 workflow files
+   (`db-backup.yml`, `db-restore-verify.yml`, `production-monitor.yml`) are **not on the remote**.
+   The Python automation they schedule is. That is a real gap: **the backup and monitoring jobs do
+   not run on a schedule until those files land** (section I, step 1). Everything else in Phase 22
+   is deployed.
+2. **The first deploy served physics only.** `/api/reference-et0/model` returned HTTP 200 with
+   `available: false`: the artifact was in the image but `joblib`/`scikit-learn` were only in the
+   dev requirements. Fixed by `f3cb00e`; found by querying the live service, not the local one.
+3. **The second deploy still failed, on versions.** With the packages installed the unpickle raised
+   `ModuleNotFoundError: No module named '_loss'`: a scikit-learn 1.6+ module a 1.5-era runtime does
+   not have. Fixed by `08a151d`, which pins the runtime to `ml/requirements-training.txt` exactly.
+
+Diagnosing 2 and 3 needed the service to say *which* failure it was, so `0026688` added
+`diagnostics` (files present, packages importable, last load error, runtime vs trained
+scikit-learn version) to `/api/reference-et0/model`. Without it the API said only "artifact missing
+or unreadable", which is true of both failures and actionable for neither.
+
+### Production verification, measured at 2026-11-09T20:47Z
+
+Live service: `https://spaceagrisim-api.onrender.com`, frontend `https://spaceagrisim-web.onrender.com`.
+Every line below is a response this session received; the raw payload is reproduced in section D.
+
+| Check | Result |
+|---|---|
+| `GET /api/health` | **200** `{"status":"ok","service":"SpaceAgriSim API","version":"0.1.0"}` |
+| `GET /api/ready` | **200** `database: postgresql`, schema present, migrations **4/4 applied, 0 pending** |
+| `GET /api/reference-et0/model` | **200**, `available: true`, `status: trained-exploratory`, `deployed: false`, gates **3/4** |
+| Published-example checks, from the live process | 5.768 vs 5.72, 3.880 vs 3.88, 5.033 vs 5.0 — all `withinTolerance: true` |
+| `GET /api/reference-et0/estimate` (Uccle, complete inputs) | **200**, `primaryMethod: penman-monteith`, **3.974 mm/day** (radiation 2.63 + aero 1.344, VPD 0.588); emulator 3.796 ±0.999, Hargreaves 4.058 |
+| `GET /api/reference-et0/estimate` (no radiation, no wind) | **200**, `primaryMethod: emulator`, 4.347 mm/day, `outOfDistribution: true` on `elevationM`, Hargreaves 5.403 returned alongside |
+| `POST /api/simulate` (no flux) | **200**, `waterUsed 389.40 L`, `demandBasis: crop-relative`, yield 18,268.5 g |
+| `POST /api/simulate` (`et0MmPerDay: 4.0`) | **200**, `waterUsed 623.04 L`, `demandBasis: et0-reference`, Kc 1.0, **identical yield** |
+| `GET /api/models` | **200**, 10 models, `et0-emulator-v1` present, category **4** |
+| `GET /api/workflow/models` | **200**, `runStatus: external-service`, `servedAt: /api/reference-et0/estimate` |
+| `POST /api/workflow/run` (`et0-emulator-v1`) | **409**, `external-service`, naming the right endpoint |
+| `GET /api/config` | **200**, 14 assumptions including `reference-et0`, Kc default 1.0 |
+| `GET /` on the static site | **200**, title `SpaceAgriSim` |
+| CORS from the web origin | `access-control-allow-origin: https://spaceagrisim-web.onrender.com` |
+
+**Still unverifiable from here:**
+
+- **The two GitHub repository secrets.** `PRODUCTION_DATABASE_URL` and
+  `BACKUP_ENCRYPTION_PASSPHRASE` cannot be read without an admin-scoped credential. If either is
+  absent **the backup automation is not operational**; that is stated rather than assumed. Note
+  that the Render API's own `SPACEAGRISIM_DATABASE_URL` *is* set — `/api/ready` reports a live
+  PostgreSQL connection — but that is the service's variable, not the workflow secret.
+- **The scheduled workflows themselves**, because of defect 1 above: they are not on the remote.
+- **PostgreSQL test suite** and **frontend lint/build/E2E**: no PostgreSQL server and no
+  `node_modules` in the sandbox. The deployed service does run PostgreSQL, and its readiness report
+  is the evidence quoted above.
 
 ## I. Exact remaining manual steps
 
