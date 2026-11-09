@@ -642,7 +642,7 @@ export default function MissionPlatform() {
               <ChevronRight size={13} />
             </button>
           </footer>
-          {authMode && <AuthDialog token={accountToken} mode={authMode} onModeChange={setAuthMode} onClose={() => setAuthMode(null)} onAuthenticated={(next) => { setSession(next); setAuthMode(null); setNotice(next.user.emailVerified === false ? "Signed in. Your email address is not verified yet — verify it from Account & sharing." : "Signed in. Your scenarios are private to your account."); }} />}
+          {authMode && <AuthDialog token={accountToken} mode={authMode} onModeChange={setAuthMode} onClose={() => setAuthMode(null)} onAuthenticated={(next) => { setSession(next); setAuthMode(null); setNotice(next.user.emailVerified === false ? "Signed in. Your scenarios are private to your account. Verify your email address from Account & sharing." : "Signed in. Your scenarios are private to your account."); }} />}
         </main>
       </div>
     </div>
