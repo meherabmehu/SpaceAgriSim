@@ -12,10 +12,15 @@ import pytest
 from sqlalchemy import delete
 
 from app import storage
-from app.config.settings import settings
+from app.config.settings import resolve_database_url, settings
 
 
-POSTGRES_TEST_URL = os.getenv("SPACEAGRISIM_TEST_POSTGRES_URL")
+# Operators paste the URL Render prints (`postgresql://…`), so the guard normalises it exactly as
+# the application does instead of demanding that the caller already know the driver suffix.
+POSTGRES_TEST_URL = resolve_database_url(
+    os.getenv("SPACEAGRISIM_TEST_POSTGRES_URL", ""), "")
+if POSTGRES_TEST_URL and not POSTGRES_TEST_URL.startswith("postgresql"):
+    POSTGRES_TEST_URL = None
 
 
 @pytest.mark.skipif(not POSTGRES_TEST_URL, reason="Set SPACEAGRISIM_TEST_POSTGRES_URL to run against an isolated PostgreSQL test database")
