@@ -68,7 +68,7 @@ def simulation_config() -> SimulationConfigResponse:
         disclaimer=PHASE_1_DISCLAIMER,
         assumptions=describe_assumptions(),
         modelStatus=MODEL_STATUS,
-        capabilities={"historyWritesEnabled":settings.history_writes_enabled,"historyScope":"shared workspace","durableHistory":not settings.database_url.startswith('sqlite')},
+        capabilities={"historyWritesEnabled":settings.history_writes_enabled,"historyScope":"shared workspace","durableHistory":not settings.database_url_resolved.startswith('sqlite')},
     )
 
 

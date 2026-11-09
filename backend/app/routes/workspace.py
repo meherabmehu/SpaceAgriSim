@@ -216,9 +216,26 @@ def shared_scenario(token: str):
 def readiness():
     try:
         database_status = storage.database_health()
+    except storage.DatabaseConfigurationError as exc:
+        # A misconfigured URL is the operator's problem to fix, so say which way it is wrong
+        # instead of the bare "Database unavailable" that hid it. No URL, host or password here.
+        logger.error("Readiness: database configuration rejected (%s)", exc.reason)
+        raise HTTPException(503, {
+            "error": "database_misconfigured",
+            "message": f"Database unavailable: {exc.detail}",
+            "reason": exc.reason,
+            "remedy": "Set SPACEAGRISIM_DATABASE_URL to a sqlite:/// path or a PostgreSQL URL; "
+                      "postgres:// and postgresql:// are accepted and mapped to the psycopg driver.",
+        }) from exc
     except Exception as exc:
         logger.exception("Readiness database check failed")
-        raise HTTPException(503,"Database unavailable") from exc
+        raise HTTPException(503, {
+            "error": "database_unavailable",
+            "message": f"Database unavailable: {type(exc).__name__}",
+            "reason": "connection-failed",
+            "remedy": "The configured database did not answer. Check that the server is running "
+                      "and that the credentials in SPACEAGRISIM_DATABASE_URL are current.",
+        }) from exc
     return {"status":"ready","simulation":"available","database":database_status["status"],"databaseDialect":database_status["dialect"],
             # Phase 19: an operator can see from /ready whether saved data survives a restart and
             # whether account email can actually be delivered, instead of finding out from a user.

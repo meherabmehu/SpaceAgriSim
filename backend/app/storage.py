@@ -82,15 +82,44 @@ audit_events = Table("audit_events", metadata,
 )
 
 
+class DatabaseConfigurationError(RuntimeError):
+    """The configured database cannot be opened, and the reason is safe to show an operator.
+
+    `reason` is a short code the readiness endpoint and the error handler can pass on: "blank" is
+    resolved before this point, so what remains is a scheme the driver cannot use, a filesystem
+    that refuses the SQLite file, or a server that will not answer. None of them includes the URL
+    itself, which may carry a password.
+    """
+
+    def __init__(self, reason: str, detail: str):
+        super().__init__(detail)
+        self.reason = reason
+        self.detail = detail
+
+
+def _url_scheme(url: str) -> str:
+    return url.split("://", 1)[0] if "://" in url else "unset"
+
+
 @lru_cache(maxsize=1)
 def database():
-    url = settings.database_url
+    url = settings.database_url_resolved
     if url.startswith("sqlite:///"):
         name = url.removeprefix("sqlite:///")
         if name != ":memory:":
-            Path(name).parent.mkdir(parents=True, exist_ok=True)
+            try:
+                Path(name).parent.mkdir(parents=True, exist_ok=True)
+            except OSError as exc:
+                raise DatabaseConfigurationError(
+                    "path-unwritable",
+                    f"the SQLite directory could not be created ({type(exc).__name__})",
+                ) from exc
     if not (url.startswith("sqlite:///") or url.startswith("postgresql+psycopg://")):
-        raise ValueError("Database URL must use sqlite:/// or postgresql+psycopg://")
+        raise DatabaseConfigurationError(
+            "scheme-unsupported",
+            f"database URL scheme {_url_scheme(url)!r} is not supported; "
+            "use sqlite:/// or a PostgreSQL URL",
+        )
     # pre-ping prevents a stale pooled PostgreSQL connection from surfacing as
     # an opaque scenario-save failure after an idle hosted deployment.
     engine = create_engine(
@@ -151,7 +180,7 @@ def storage_durability() -> dict:
     only in a README: it is the difference between "your account exists" and "your account
     existed until the last cold start".
     """
-    url = settings.database_url
+    url = settings.database_url_resolved
     dialect = "postgresql" if url.startswith("postgresql+") else "sqlite"
     if dialect == "postgresql":
         return {"dialect": dialect, "durable": True,

@@ -48,6 +48,28 @@ def _validate_auth_secret(value: str | None, field: str) -> str | None:
     return candidate
 
 
+# Managed platforms hand out database URLs in several dialects: Render's blueprint prints
+# `postgresql://`, older Heroku-style add-ons print `postgres://`, and SQLAlchemy needs the driver
+# named explicitly. Without this, a perfectly valid connection string is rejected at startup and
+# every account, history and share-link route answers 500 with no clue why.
+_POSTGRES_ALIASES = ("postgres://", "postgresql://")
+
+
+def resolve_database_url(raw: str, default: str) -> str:
+    """Map an operator-supplied URL to something the storage layer accepts.
+
+    A blank value is treated as unset: a dashboard variable created but left empty is far more
+    common than an operator intending an unusable empty connection string.
+    """
+    url = (raw or "").strip()
+    if not url:
+        return default
+    for alias in _POSTGRES_ALIASES:
+        if url.startswith(alias):
+            return "postgresql+psycopg://" + url[len(alias):]
+    return url
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="SPACEAGRISIM_", env_file=".env", extra="ignore")
 
@@ -176,6 +198,18 @@ class Settings(BaseSettings):
         if any(not origin.startswith(("https://", "http://localhost", "http://127.0.0.1")) for origin in origins):
             raise ValueError("CORS origins must use HTTPS outside local development")
         return origins
+
+    # ---------------------------------------------------------------- Phase 19: hosted database
+    @property
+    def database_url_resolved(self) -> str:
+        """The URL the storage layer actually uses, with platform aliases normalised."""
+        return resolve_database_url(self.database_url, self.database_url_default)
+
+    @property
+    def database_url_default(self) -> str:
+        """Where data goes when no URL is configured: /tmp on Vercel, the repo on a plain host."""
+        return ("sqlite:////tmp/spaceagrisim/scenarios.db" if os.environ.get("VERCEL")
+                else "sqlite:///.spaceagrisim/scenarios.db")
 
 
 settings = Settings()

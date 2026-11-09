@@ -7,9 +7,12 @@ per-field map while keeping the original `detail` for compatibility.
 """
 
 from fastapi import FastAPI, Request
+from starlette.responses import JSONResponse as _JSONResponse  # noqa: F401  (kept for typing parity)
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 import logging
+
+from app.storage import DatabaseConfigurationError
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -43,6 +46,20 @@ async def validation_error_handler(_: Request, exc: RequestValidationError) -> J
 
 def register_error_handlers(app: FastAPI) -> None:
     app.add_exception_handler(RequestValidationError, validation_error_handler)
+
+    @app.exception_handler(DatabaseConfigurationError)
+    async def database_configuration_error(_: Request, exc: DatabaseConfigurationError) -> JSONResponse:
+        # Without this the misconfiguration surfaced as an opaque 500 on login and 503 on share
+        # links, which read as two unrelated bugs rather than one wrong environment variable.
+        logger.error("Database configuration rejected: %s", exc.reason)
+        return JSONResponse(
+            status_code=503,
+            content={
+                "error": "database_misconfigured",
+                "message": f"Database unavailable: {exc.detail}",
+                "reason": exc.reason,
+            },
+        )
 
     @app.exception_handler(Exception)
     async def unhandled_error(_: Request, exc: Exception) -> JSONResponse:

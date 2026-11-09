@@ -217,3 +217,25 @@ supplemental table is copied verbatim.
 in the route, so the panel cannot claim a flag the prediction route does not raise. The check runs
 through `/api/predict/lettuce-earth-growth-v2`, which answers 200 with `outOfDistribution: true` and
 the violated bounds attached — flagging, not refusal, and not evidence about accuracy.
+
+## Hosted database configuration — found broken, now diagnosable
+
+While checking the live deployment on 2026-11-09, `GET /api/health` answered 200 but every
+database-backed route failed: `/api/auth/login` returned an opaque **500** and `/api/shared/<token>`
+returned **503 "Share links unavailable"**. Accounts, history and share links were all down on the
+hosted instance while the same paths passed locally, which is precisely the case that
+"no claiming production verification from local tests" exists for.
+
+Two gaps caused the confusing read:
+
+1. The storage layer accepted only `sqlite:///` and `postgresql+psycopg://`. Render's blueprint
+   prints `postgresql://` and older add-ons print `postgres://`, so a correct connection string was
+   rejected outright. Those aliases are now normalised, and a blank dashboard variable falls back to
+   the default file instead of disabling every route.
+2. A rejected URL surfaced as a bare 500 on login and a bare "Database unavailable" on readiness.
+   Both now return `503 database_misconfigured` with a `reason` (`scheme-unsupported`,
+   `path-unwritable`) and a remedy naming the variable. The URL, host and password are never echoed;
+   a test asserts the password does not appear in the response.
+
+`/api/ready` carries the diagnosis, so after the next deploy the reason code states which problem it
+is rather than leaving it to be guessed.
