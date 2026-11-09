@@ -236,7 +236,7 @@ records, 4 unverified and labelled as unverified.
 
 | Check | Result |
 |---|---|
-| Backend suite (SQLite) | **822 passed, 23 skipped, 0 failed** |
+| Backend suite (SQLite) | **846 passed, 24 skipped, 0 failed** |
 | Physics self-checks | 5.72 / 3.88 / 5.03 vs 5.72 / 3.88 / 5.0 |
 | Model audit | 141 checks, 0 failed |
 | Registry verification | 60/60 |
@@ -297,20 +297,25 @@ chain, and every acquisition is checksummed before parsing.
 
 ## 18. Files changed
 
-New: `backend/app/et0.py`, `backend/app/simulation/et0_fao56.py`,
-`backend/tests/test_phase23_reference_et0.py`, `ml/research/{acquire_power_climate,build_et0_dataset,
-train_et0_emulator,build_catalog,build_gap_matrix,et0_fao56}.py`,
-`ml/artifacts/et0-emulator-v1.{json,joblib}`, `ml/evaluation/et0_{dataset_quality,emulator_validation}.json`,
-`data/raw/nasa_power/`, `data/processed/power_daily/`, `data/processed/et0_dataset.csv`,
-`data/metadata/power_acquisition_manifest.json`, `data/research/*`, `docs/SCIENTIFIC_MODEL_AUDIT.md`,
-`docs/DATA_QUALITY_AND_HARMONIZATION.md`, `docs/DATASET_GAP_MATRIX.md`, this report.
+Phase 23 is commit **`d92b0a7`** (57 files, 41,030 insertions); Phase 22 is `088e339`. The full
+per-file list with counts is in `docs/DELIVERY_REPORT.md` section F, derived from the commit rather
+than retyped. In summary:
+
+New: the physics module and the service (`backend/app/simulation/et0_fao56.py`,
+`backend/app/et0.py`), 54 tests (`backend/tests/test_phase23_reference_et0.py`), six research
+scripts, the emulator card and binary, the evaluation tables, the six raw POWER responses, the
+harmonized daily series, the processed dataset and its metadata, the catalogue JSON and markdown,
+the gap-matrix JSON, and the five documents.
 
 Modified: `backend/app/{research,workflow,science_classification}.py`,
-`backend/app/routes/{research,simulation}.py`, `backend/app/models/simulation.py`,
-`backend/app/simulation/{water,engine,crops,serializers,model_description}.py`,
-`backend/app/config/simulation_constants.py`, `scripts/{audit_models,verify_model_registry}.py`,
-six test files, `ml/artifacts/registry.json`, `docs/phase7/registry_verification.json`,
-`ml/evaluation/phase13_model_audit.json`.
+`backend/app/routes/{research,simulation,workflow}.py`, `backend/app/models/simulation.py`,
+`backend/app/simulation/{water,engine,serializers,model_description}.py`,
+`backend/app/config/simulation_constants.py`, both audit scripts, four existing test files, and the
+two regenerated audit artefacts.
+
+Six corrections to earlier statements are folded into these documents rather than appended: the
+dataset checksum, the non-positive-ET0 row count (145, not 0), the dew-point informational counts,
+the model metrics, the audit check counts, and the licence-evidence distribution.
 
 ## 19. What would change the conclusions
 

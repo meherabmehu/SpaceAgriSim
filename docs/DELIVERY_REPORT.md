@@ -116,62 +116,74 @@ response, and here. It can only restrict use.
 
 ## F. Changed files
 
-**New (23):** `backend/app/et0.py`; `backend/app/simulation/et0_fao56.py`;
-`backend/tests/test_phase23_reference_et0.py` (43 tests);
-`ml/research/{acquire_power_climate,build_et0_dataset,train_et0_emulator,build_catalog,build_gap_matrix,et0_fao56}.py`;
-`ml/artifacts/et0-emulator-v1.{json,joblib}`; `ml/evaluation/et0_dataset_quality.json`,
-`ml/evaluation/et0_emulator_validation.json`; `data/raw/nasa_power/` (6 files);
-`data/processed/power_daily/` (6 files); `data/processed/et0_dataset.csv`;
-`data/metadata/power_acquisition_manifest.json`; `data/research/dataset_catalog.json`,
-`data/research/DATASET_CATALOG.md`, `data/research/dataset_gap_matrix.json`;
-`docs/{SCIENTIFIC_MODEL_AUDIT,DATA_QUALITY_AND_HARMONIZATION,DATASET_GAP_MATRIX}.md`.
+Phase 23 is commit **`d92b0a7`**, 57 files, 41,030 insertions. Phase 22 is **`088e339`**, the patch
+re-applied on top of `3cfe9a4` after the working tree lost the earlier commits.
 
-**Modified (22):** `backend/app/{research,workflow,science_classification}.py`;
-`backend/app/routes/{research,simulation}.py`; `backend/app/models/simulation.py`;
-`backend/app/simulation/{water,engine,crops,serializers,model_description}.py`;
+**New (34):**
+
+- physics and service: `backend/app/simulation/et0_fao56.py`, `backend/app/et0.py`
+- tests: `backend/tests/test_phase23_reference_et0.py` (54 tests)
+- pipeline: `ml/research/{acquire_power_climate,build_et0_dataset,train_et0_emulator,build_catalog,build_gap_matrix,et0_fao56}.py`
+- artifacts: `ml/artifacts/et0-emulator-v1.{json,joblib}`, `ml/evaluation/{et0_dataset_quality.json,
+  et0_model_comparison.md, et0_model_comparison.csv}`
+- data: `data/raw/nasa_power/` (6 responses, 2.5 MB), `data/processed/power_daily/` (6 CSVs),
+  `data/processed/et0_dataset.csv` (2.4 MB), `data/processed/et0_dataset.metadata.json`,
+  `data/metadata/power_acquisition_manifest.json`
+- catalogue: `data/research/{DATASET_CATALOG.md,dataset_catalog.json,dataset_gap_matrix.json}`
+- documentation: `docs/{SCIENTIFIC_MODEL_AUDIT,DATA_QUALITY_AND_HARMONIZATION,DATASET_GAP_MATRIX,
+  SCIENTIFIC_AI_UPGRADE_REPORT,DELIVERY_REPORT}.md`
+
+**Modified (23):** `backend/app/{research,workflow,science_classification}.py`;
+`backend/app/routes/{research,simulation,workflow}.py`; `backend/app/models/simulation.py`;
+`backend/app/simulation/{water,engine,serializers,model_description}.py`;
 `backend/app/config/simulation_constants.py`; `scripts/{audit_models,verify_model_registry}.py`;
-`backend/tests/{test_phase7_integration,test_phase9_models,test_phase12_assistant,
-test_phase12_workflow,test_research}.py`; `ml/artifacts/registry.json`;
+`backend/tests/{test_research,test_phase9_models,test_phase12_assistant,test_phase12_workflow}.py`;
 `ml/evaluation/phase13_model_audit.json`; `docs/phase7/registry_verification.json`.
 
 **No frontend file changed.** The UI consumes `/api/config` and `/api/simulate`, both of which
-gained only additive fields.
+gained additive fields only, and the default simulation path is byte-identical.
 
 ## G. Tests
 
 | Suite | Result |
 |---|---|
-| Backend (SQLite), full | **822 passed, 23 skipped, 0 failed** |
-| New Phase 23 tests | 54 passed (`tests/test_phase23_reference_et0.py`: physics 11, service 6, water 8, dataset 4, emulator honesty 8, API integration 10, catalogue/audit 7) |
+| Backend (SQLite), full | **846 passed, 24 skipped, 0 failed** |
+| New Phase 23 tests | 54 passed (`test_phase23_reference_et0.py`: physics 11, service 6, water 8, dataset 4, emulator honesty 8, API integration 10, catalogue and audit 7) |
 | `scripts/audit_models.py` | 141 checks, **0 failed**, 19 documented gaps |
 | `scripts/verify_model_registry.py` | **60/60** |
-| Catalogue drift (`--check`) | up to date |
-| Gap-matrix drift (`--check`) | up to date |
-| Physics self-checks | 5.72 / 3.88 / 5.03 vs 5.72 / 3.88 / 5.0 |
+| Catalogue / gap-matrix / dataset drift (`--check`) | all three clean |
+| Physics self-checks | 5.768 / 3.880 / 5.033 vs published 5.72 / 3.88 / 5.0 |
 
 **Not run, and why:**
-- **PostgreSQL suite** — no PostgreSQL server exists in this sandbox (`pg_isready` absent, nothing
-  listening on 5432/5433). The earlier phase's PG evidence (816 tests) is not re-verified here.
-- **Frontend lint/typecheck/build and Playwright E2E** — `node_modules` is not installed. No
+
+- **PostgreSQL suite** - no PostgreSQL server exists in this sandbox (nothing listening on
+  5432/5433). The earlier phase's PG evidence is not re-verified here.
+- **Frontend lint/typecheck/build and Playwright E2E** - `node_modules` is not installed. No
   frontend source changed, so the exposure is limited to additive JSON fields.
+- **The emulator was trained once, deterministically.** Two consecutive runs of
+  `train_et0_emulator.py` produce identical metrics and identical gate verdicts (checked by
+  comparing the two artifact cards); the training script is not a stochastic sweep.
 
 ## H. Commit and deployment
 
-- **Commits:** `6509d47` (Phase 22, re-applied from `SpaceAgriSim_phase22_backup_monitoring.patch`)
-  and the commit containing this report (Phase 23, 56 files), both on top of `origin/main` = `3cfe9a4`.
-- **Pushed:** **no.** No credential is present in this environment: `/tmp/ap.sh` does not exist, no
-  `GH_TOKEN`/`GITHUB_TOKEN` is exported, and there is no `.netrc` or `.git-credentials`. A push was
-  attempted and rejected with `could not read Username for 'https://github.com'`. The commits are
-  ready to send with `git push origin main` from a shell that holds the token.
-- **Render deployment:** **unverifiable from this environment.** No deployment was triggered, no
-  deployment ID exists to report, and no production URL was contacted. Claiming a deployment status
-  here would be fabrication.
+- **Local commits on top of `3cfe9a4`:** `088e339` (Phase 22, 20 files) and `d92b0a7` (Phase 23, 57
+  files), followed by the documentation commit that contains this line.
+- **Remote state checked, not assumed:** `git fetch origin main` returns `3cfe9a4`, so the branch is
+  a fast-forward with no rebase needed. This was verified rather than remembered: the sandbox had
+  previously held a stale `origin/main`, which is why the fetch is recorded here explicitly.
+- **Pushed: no.** The write credential is not available in this environment. `git push` fails with
+  `remote: No anonymous write access`, there is no `~/.git-credentials`, no `GH_TOKEN`/`GITHUB_TOKEN`
+  in the environment, and no credential helper holding a token. The repository is public for
+  **read** only. The commits are ready to send with a push from a shell that holds the token; that
+  is step 1 of section I, not something this report can claim.
+- **Render deployment: unverifiable from this environment.** No deployment was triggered, no
+  deployment ID exists, and no production URL was contacted. Any status claimed here would be
+  fabricated.
 - **GitHub secrets** (`PRODUCTION_DATABASE_URL`, `BACKUP_ENCRYPTION_PASSPHRASE`): their presence
-  cannot be checked without the repository's API credential. **If both are absent, the backup
-  automation is not operational** — that is the failure mode worth knowing, and it is the reason
-  this line is stated as unknown rather than assumed.
-- **No secrets, dumps or credentials** were written to the repository in this phase; the new data is
-  all open-licence reanalysis and generated artefacts.
+  cannot be checked without API credentials. **If both are absent, the backup automation is not
+  operational** - that is the failure mode worth knowing, and it is why this line says unknown.
+- **No secrets, dumps or credentials** were written to the repository; the new data is open-licence
+  reanalysis and generated artefacts.
 
 ## I. Exact remaining manual steps
 
