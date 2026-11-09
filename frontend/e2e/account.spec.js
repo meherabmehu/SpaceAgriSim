@@ -183,8 +183,11 @@ test("benchmarks show the measured number beside the modelled one", async ({
   await expect(page.locator(".bench-row", { hasText: "420 ppm" })).toBeVisible();
   await expect(page.locator(".bench-row", { hasText: "1,000 ppm" })).toBeVisible();
   await expect(page.locator(".bench-row", { hasText: "3,000 ppm" })).toBeVisible();
+  // The same sentence also appears in the raw JSON inspector, so scope to the disclosure itself.
   await expect(
-    page.getByText(/still rises, but the published soybean chamber data/i),
+    page
+      .locator(".warning-box p")
+      .filter({ hasText: /still rises, but the published soybean chamber data/i }),
   ).toBeVisible();
 });
 
