@@ -62,3 +62,6 @@ data/raw/OSD-782/
 data/raw/OSD-411/
 data/raw/OSD-267/
 data/raw/OSD-269/
+
+# Local CI/scratch database used by the test workflow
+.ci/
