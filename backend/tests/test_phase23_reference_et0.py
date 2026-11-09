@@ -177,6 +177,27 @@ def test_service_degrades_to_physics_when_the_artifact_is_unreadable(monkeypatch
         et0.load_artifact.cache_clear()
 
 
+def test_artifact_diagnostics_name_the_actual_failure(monkeypatch, tmp_path):
+    """A missing file and a missing package fail the same way but need different fixes."""
+    healthy = et0.load_diagnostics()
+    assert healthy["cardFilePresent"] and healthy["modelFilePresent"]
+    assert all(healthy["packages"].values())
+
+    monkeypatch.setattr(et0, "ARTIFACT_MODEL", tmp_path / "absent.joblib")
+    et0._LAST_LOAD_ERROR.clear()
+    et0.load_artifact.cache_clear()
+    try:
+        status = et0.artifact_status()
+        assert status["available"] is False
+        assert "not present in this deployment" in status["reason"]
+        assert status["diagnostics"]["modelFilePresent"] is False
+        assert status["diagnostics"]["cardFilePresent"] is True
+        # The physics fallback is described even when nothing is available.
+        assert "Hargreaves" in status["fallback"]
+    finally:
+        et0.load_artifact.cache_clear()
+
+
 def test_service_refuses_to_guess_the_vapour_pressure():
     with pytest.raises(ValueError):
         et0.estimate(tmax_c=25.0, tmin_c=15.0, day_of_year=200, latitude=40.0,

@@ -26,6 +26,12 @@ from app.simulation import et0_fao56
 
 logger = logging.getLogger(__name__)
 
+# Why the last load attempt failed, so a deployment can be diagnosed from the API rather than
+# from the build log. A single "artifact missing or unreadable" answer cannot distinguish a file
+# that was not copied into the image from a dependency that was not installed, and those two have
+# completely different fixes.
+_LAST_LOAD_ERROR: dict = {}
+
 ROOT = Path(__file__).resolve().parents[2]
 ARTIFACT_JSON = ROOT / "ml" / "artifacts" / "et0-emulator-v1.json"
 ARTIFACT_MODEL = ROOT / "ml" / "artifacts" / "et0-emulator-v1.joblib"
@@ -58,18 +64,59 @@ def load_artifact() -> tuple[dict, dict] | None:
             raise ValueError("bundle is missing its feature list or model")
         return card, bundle
     except Exception as error:  # noqa: BLE001 - any failure means "physics only"
+        _LAST_LOAD_ERROR.clear()
+        _LAST_LOAD_ERROR.update({"error": f"{type(error).__name__}: {error}",
+                                 "stage": "load"})
         logger.warning("ET0 emulator artifact unusable, serving physics only: %s", error)
         return None
+
+
+def load_diagnostics() -> dict:
+    """What the loader can see, without attempting a second load.
+
+    Deliberately reports the two failures separately: a missing file means the artifact was not
+    shipped, a missing package means the runtime image is incomplete. The first production deploy
+    of this feature was the second case, and the single generic message hid it for several minutes.
+    """
+    packages = {}
+    for name in ("joblib", "sklearn", "numpy"):
+        try:
+            __import__(name)
+            packages[name] = True
+        except Exception:  # noqa: BLE001 - an unimportable package is the finding
+            packages[name] = False
+    return {
+        "cardFilePresent": ARTIFACT_JSON.is_file(),
+        "modelFilePresent": ARTIFACT_MODEL.is_file(),
+        # Not relative_to(ROOT): under a test monkeypatch the path may point outside the tree, and
+        # a diagnostic that raises on the path it is meant to report is worse than useless.
+        "cardPath": str(ARTIFACT_JSON),
+        "modelPath": str(ARTIFACT_MODEL),
+        "packages": packages,
+        "lastLoadError": _LAST_LOAD_ERROR.get("error"),
+    }
 
 
 def artifact_status() -> dict:
     """Availability and the gate results that decide how the artifact may be used."""
     loaded = load_artifact()
     if loaded is None:
+        diagnostics = load_diagnostics()
+        if not (diagnostics["cardFilePresent"] and diagnostics["modelFilePresent"]):
+            reason = ("the emulator artifact is not present in this deployment; the service "
+                      "serves FAO-56 physics only")
+        elif not all(diagnostics["packages"].values()):
+            missing = [name for name, present in diagnostics["packages"].items() if not present]
+            reason = (f"the runtime image is missing {', '.join(missing)}, so the emulator bundle "
+                      "cannot be loaded; the service serves FAO-56 physics only")
+        else:
+            reason = (f"the emulator bundle could not be loaded ({diagnostics['lastLoadError']}); "
+                      "the service serves FAO-56 physics only")
         return {
             "available": False,
             "modelId": "et0-emulator-v1",
-            "reason": "artifact missing or unreadable; the service serves FAO-56 physics only",
+            "reason": reason,
+            "diagnostics": diagnostics,
             "fallback": ("FAO-56 Penman-Monteith when radiation and wind are supplied, else "
                          "Hargreaves-Samani"),
         }
