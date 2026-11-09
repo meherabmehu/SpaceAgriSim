@@ -200,7 +200,7 @@ See `backend/.env.example`: `SPACEAGRISIM_SMTP_*`, `SPACEAGRISIM_PUBLIC_APP_URL`
 `SPACEAGRISIM_SHARE_LINK_DAYS`, `SPACEAGRISIM_MAX_ACTIVITY_EVENTS`,
 `SPACEAGRISIM_TRUSTED_PROXY_HOPS`.
 
-## External validation — status: screened, not obtained
+## External validation — status: attempted against an independent study, failed
 
 `GET /api/external-validation` serves `data/literature/external_validation_screen.json`. It reports
 `externalValidationAvailable: false` and says so on the benchmarks page rather than presenting the
@@ -246,3 +246,44 @@ instance behind `SPACEAGRISIM_DATABASE_URL` on Render.
 
 The frontend and browser deployments cannot be verified from here either: the Vercel preview host
 answers `302` (deployment protection), and no Vercel credentials are available in this environment.
+
+### The transcription and the result
+
+The PeerJ 17085 per-level table was obtained from the publisher's open-access full text (EuropePMC
+JATS XML, SHA-256 `69f08243…d27bb`, CC BY 4.0) and copied by hand into
+`data/literature/external_lettuce_peerj17085.json`: fresh weight per plant at 28 DAT for 'Baby Cos'
+and 'Green Oak' at three canopy levels (PPFD 697 / 391 / 322 µmol m⁻² s⁻¹), with the publication's
+own standard deviations and significance groups. No value was read off a figure, and the reported
+study averages (100.4 g and 163.9 g) were deliberately not used in place of the per-level rows.
+
+The model was then scored against all six observations, with predictions computed from the served
+artifact on each request rather than stored:
+
+| Observation | Measured (g) | Modelled (g) | Ratio |
+|---|---|---|---|
+| Baby Cos, upper (697 µmol) | 84.5 | 454.2 | ×5.38 |
+| Baby Cos, middle (391 µmol) | 123.8 | 341.0 | ×2.75 |
+| Baby Cos, lower (322 µmol) | 92.9 | 341.0 | ×3.67 |
+| Green Oak, upper (697 µmol) | 97.3 | 454.2 | ×4.67 |
+| Green Oak, middle (391 µmol) | 190.7 | 341.0 | ×1.79 |
+| Green Oak, lower (322 µmol) | 203.7 | 341.0 | ×1.67 |
+
+Median ×3.21, mean absolute percentage error 232 %, every observation overpredicted.
+
+**Root temperature was not measured by the study.** It is assumed equal to the reported air
+temperature (27.5 °C) and the assumption is recorded in the artifact rather than buried. Probing it
+from 20 to 32 °C moves the median ratio only between ×2.28 and ×3.21, so this is not what produced
+the gap.
+
+### What the check found about the model, not just its numbers
+
+- **It has no cultivar input.** The two cultivars differ by 63 % on average in the study — more
+  than the light-level effect within either cultivar. Identical inputs therefore produce identical
+  outputs, so this variation cannot be represented at all.
+- **Its light response is monotonic and stepwise.** The observed response is not monotonic: 'Baby
+  Cos' peaks at the middle level, 'Green Oak' at the lower level. A tree ensemble returns flat
+  plateaus between split points (341.0 g for both 322 and 391 µmol) and cannot express either the
+  peak or the cultivar crossover.
+
+Recalibration alone cannot close this gap, because the missing structure is in the feature set. The
+model stays exploratory and must not be used to forecast harvest weight or size a farm.

@@ -190,14 +190,17 @@ test("benchmarks show the measured number beside the modelled one", async ({
       .filter({ hasText: /still rises, but the published soybean chamber data/i }),
   ).toBeVisible();
 
-  // External validation must say "not yet" rather than borrow the cross-validation as if it
-  // were independent, and the in-domain candidate must be shown as waiting on raw data.
-  await expect(page.getByText("Independent validation available")).toBeVisible();
-  await expect(page.locator(".stat-pair", { hasText: "Independent validation available" })).toContainText("not yet");
+  // An external check was run against an independent study and the model failed it. The page has
+  // to say so, per observation, rather than borrowing the cross-validation as if it were external.
+  const external = page.locator(".stat-pair", { hasText: "Independent validation" });
+  await expect(external).toContainText("failed");
+  await expect(page.getByText(/overpredicts mature fresh weight by a median of/i)).toBeVisible();
+  await expect(page.locator(".bench-row", { hasText: "Baby Cos · upper level" })).toContainText("84.5 g measured");
+  await expect(page.locator(".bench-row", { hasText: "Green Oak · lower level" })).toContainText("×1.67");
   await expect(
-    page.locator(".bench-row", { hasText: /in domain — waiting on raw data/ }),
-  ).toContainText("peerj.17085");
-  await expect(page.getByText(/cannot be used|cannot also be the external validation/i).first()).toBeVisible();
+    page.locator(".warning-box p").filter({ hasText: /must not be used to forecast harvest weight/i }),
+  ).toBeVisible();
+  await expect(page.getByText("Is the gap just the missing root temperature?")).toBeVisible();
 });
 
 test("the model comparison shows each baseline and no ranking", async ({ page }) => {

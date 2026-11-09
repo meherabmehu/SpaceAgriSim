@@ -129,14 +129,16 @@ def test_missing_snapshot_yields_an_honest_answer(monkeypatch, tmp_path):
 # External validation status
 # ---------------------------------------------------------------------------
 
-def test_external_validation_reports_no_validation_but_a_concrete_path(client):
+def test_external_validation_records_every_candidate_with_a_verdict(client):
     body = client.get("/api/external-validation").json()
     assert body["available"] is True
     conclusion = body["conclusion"]
-    assert conclusion["externalValidationAvailable"] is False
-    assert "does not mean the model is wrong" in conclusion["whatThisDoesNotMean"].lower()
+    # the check has since been run and failed; the record keeps both facts
+    assert conclusion["externalValidationAvailable"] is True
+    assert conclusion["externalValidationPassed"] is False
+    assert "does not mean the model's internal cross-validation was wrong" in conclusion["whatThisDoesNotMean"]
     verdicts = {candidate["id"]: candidate["verdict"] for candidate in body["candidates"]}
-    assert verdicts["peerj-17085"] == "usable-after-transcription"
+    assert verdicts["peerj-17085"] == "used-external-check-failed"
     assert verdicts["touliatos-2016"] == "out-of-domain"
 
 
@@ -148,12 +150,13 @@ def test_training_source_is_excluded_from_validation(client):
 
 
 def test_no_candidate_invents_a_measurement(client):
-    """A transcribed number must name where it came from; an untranscribed one must stay empty."""
+    """A candidate that was scored must name the transcription it was scored from."""
     body = client.get("/api/external-validation").json()
-    for candidate in body["candidates"]:
-        if candidate["verdict"] == "usable-after-transcription":
-            assert candidate.get("blocking"), "a pending candidate must say what is blocking it"
-            assert "not yet transcribed" in candidate["blocking"]
+    used = [c for c in body["candidates"] if c["verdict"] == "used-external-check-failed"]
+    assert used, "the used candidate must still be listed, not quietly removed"
+    assert used[0]["transcription"]["observations"] == 6
+    assert len(used[0]["transcription"]["sourceSha256"]) == 64
+    assert used[0]["blocking"] == ""
 
 
 def test_out_of_domain_refusal_comes_from_the_served_model(client):
@@ -169,3 +172,99 @@ def test_out_of_domain_refusal_comes_from_the_served_model(client):
     served = response.json()
     assert served["outOfDistribution"] is True
     assert any("temperature" in w.lower() or "domain" in w.lower() for w in served["warnings"])
+
+
+# ---------------------------------------------------------------------------
+# External check: transcription provenance and the honesty of the verdict
+# ---------------------------------------------------------------------------
+
+def test_transcription_matches_the_published_table_verbatim():
+    """Six observations, each traceable to a numbered row of the study's Table 1."""
+    import json
+    from app.research import DATA
+
+    study = json.loads((DATA / "literature" / "external_lettuce_peerj17085.json").read_text())
+    assert study["source"]["doi"] == "10.7717/peerj.17085"
+    assert study["source"]["license"] == "CC BY 4.0"
+    assert len(study["source"]["retrievedSha256"]) == 64
+    assert study["source"]["retrievedAt"]
+    assert len(study["observations"]) == 6
+    # the values are the publication's: fresh yield per plant at 28 DAT, per level and cultivar
+    expected = {
+        "baby-cos-upper": (697, 84.5), "baby-cos-middle": (391, 123.8),
+        "baby-cos-lower": (322, 92.9), "green-oak-upper": (697, 97.3),
+        "green-oak-middle": (391, 190.7), "green-oak-lower": (322, 203.7),
+    }
+    for observation in study["observations"]:
+        ppfd, fresh = expected[observation["id"]]
+        assert observation["ppfdUmol"] == ppfd
+        assert observation["freshWeightGPerPlant"] == fresh
+        assert observation["daysAfterTransplant"] == 28
+        assert observation["sourceTable"] == "Table 1"
+    # the reported study average must not have been used in place of the per-level rows
+    averages = {observation["freshWeightGPerPlant"] for observation in study["observations"]}
+    assert 100.4 not in averages and 163.9 not in averages
+
+
+def test_missing_root_temperature_is_declared_not_invented():
+    import json
+    from app.research import DATA
+
+    study = json.loads((DATA / "literature" / "external_lettuce_peerj17085.json").read_text())
+    assumption = study["acceptedAssumptions"][0]
+    assert assumption["input"] == "rootTemperature"
+    assert "not root-zone or growing-media temperature" in assumption["why"]
+    assert assumption["sensitivityChecked"] is True
+    assert "rootTemperature" not in study["studyConditions"]
+
+
+def test_external_check_reports_a_failure_rather_than_a_score(client):
+    check = client.get("/api/external-validation").json()["externalCheck"]
+    assert check["available"] is True
+    metrics = check["metrics"]
+    assert metrics["observations"] == 6
+    # every observation is overpredicted: the model fails, and the payload says so
+    rows = check["rows"]
+    assert all(row["ratio"] > 1.0 for row in rows)
+    assert metrics["medianRatio"] > 2.0
+    assert check["verdict"]["passed"] is False
+    assert "overpredicts" in check["verdict"]["headline"]
+    assert "must not be used to forecast harvest weight" in check["verdict"]["consequence"]
+
+
+def test_external_check_predictions_are_computed_not_stored(client):
+    """The rows must come from the served artifact, so a retrained model changes them."""
+    from app import external_validation
+
+    first = client.get("/api/external-validation").json()["externalCheck"]["rows"]
+    external_validation._external.cache_clear()
+    second = client.get("/api/external-validation").json()["externalCheck"]["rows"]
+    assert first == second
+    # a stored result would not move when the model changes; this one must
+    from app import research
+
+    original = research.predict_values
+    try:
+        research.predict_values = lambda model, values: (100.0, [])
+        external_validation._predict.cache_clear() if hasattr(external_validation._predict, "cache_clear") else None
+        moved = external_validation._external_check()["rows"]
+    finally:
+        research.predict_values = original
+    assert moved[0]["predictedG"] == 100.0
+    assert moved != first
+
+
+def test_root_temperature_assumption_cannot_explain_the_gap(client):
+    check = client.get("/api/external-validation").json()["externalCheck"]
+    probes = check["rootTemperatureSensitivity"]
+    assert {probe["rootTemperatureC"] for probe in probes} >= {20.0, 27.5, 32.0}
+    # even at the probe most favourable to the model, it still overpredicts
+    assert all(probe["medianRatio"] > 1.0 for probe in probes)
+    assert "not explained by the root-temperature assumption" in check["verdict"]["statement"]
+
+
+def test_structural_findings_name_what_the_model_cannot_represent(client):
+    check = client.get("/api/external-validation").json()["externalCheck"]
+    findings = " ".join(item["finding"] for item in check["structuralFindings"])
+    assert "no cultivar input" in findings
+    assert "not monotonic" in findings

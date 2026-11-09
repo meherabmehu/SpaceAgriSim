@@ -131,6 +131,7 @@ export function Benchmarks() {
 
 const VERDICT_LABEL = {
   "usable-after-transcription": "in domain — waiting on raw data",
+  "used-external-check-failed": "scored — the model failed it",
   "out-of-domain": "outside the model's domain",
   "not-usable": "cannot be used",
 };
@@ -145,12 +146,70 @@ const VERDICT_LABEL = {
 function ExternalValidation({ body }) {
   const conclusion = body.conclusion || {};
   const check = body.domainCheck || {};
+  const external = body.externalCheck || {};
   return (
     <Card title="External validation" label="SOURCES THE LETTUCE MODEL WAS NOT TRAINED ON">
       <div className="stat-pair">
-        <span>Independent validation available</span>
-        <strong>{conclusion.externalValidationAvailable ? "yes" : "not yet"}</strong>
+        <span>Independent validation</span>
+        <strong>
+          {external.available
+            ? external.verdict?.passed ? "passed" : "failed"
+            : "not yet attempted"}
+        </strong>
       </div>
+      {external.available && (
+        <>
+          <p className="muted">
+            {external.verdict.headline}. Held against {external.citation}, a greenhouse trial on a
+            different continent that the model was never trained on, {external.metrics.observations}{" "}
+            transcribed observations were scored at 28 days after transplanting.
+          </p>
+          <div className="bench-grid">
+            {external.rows.map((row) => (
+              <div className="bench-row" key={row.id}>
+                <span>
+                  {row.cultivar} · {row.level} level
+                  <small className="muted"> · {number(row.ppfdUmol, 0)} µmol m⁻² s⁻¹</small>
+                </span>
+                <strong>{number(row.measuredG, 1)} g measured</strong>
+                <em>{number(row.predictedG, 1)} g modelled</em>
+                <small>×{number(row.ratio, 2)}</small>
+              </div>
+            ))}
+          </div>
+          <p className="muted">
+            Worst case ×{number(external.metrics.worstRatio, 2)} ({external.metrics.worstObservation}),
+            best case ×{number(external.metrics.closestRatio, 2)}. Mean absolute percentage error{" "}
+            {number(external.metrics.meanAbsolutePercentageError, 0)} %.
+          </p>
+          <div className="warning-box">
+            <p>{external.verdict.consequence}</p>
+          </div>
+          <div className="stat-pair">
+            <span>Is the gap just the missing root temperature?</span>
+            <strong>no</strong>
+          </div>
+          <p className="muted">
+            The study reports air temperature but not root-zone temperature, so root temperature is
+            assumed equal to air temperature ({number(external.conditions.airTemperatureC, 1)} °C) and
+            flagged as an assumption. Probing it from 20 to 32 °C moves the median ratio only between
+            ×{number(Math.min(...external.rootTemperatureSensitivity.map((p) => p.medianRatio)), 2)} and
+            ×{number(Math.max(...external.rootTemperatureSensitivity.map((p) => p.medianRatio)), 2)},
+            so the assumption cannot explain a median overshoot of ×{number(external.metrics.medianRatio, 2)}.
+          </p>
+          <ul className="reading-list">
+            {external.structuralFindings.map((item) => (
+              <li key={item.finding}>
+                <strong>{item.finding}</strong> {item.evidence}
+              </li>
+            ))}
+          </ul>
+          <p className="muted">
+            Provenance: {external.doi} ({external.license}), retrieved {external.retrievedAt},
+            transcribed {external.transcribedAt}, source SHA-256 {external.retrievedSha256.slice(0, 12)}…
+          </p>
+        </>
+      )}
       <p className="muted">{conclusion.statement}</p>
       <div className="bench-grid">
         {(body.candidates || []).map((candidate) => (

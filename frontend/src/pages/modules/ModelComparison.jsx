@@ -13,6 +13,11 @@ import { useResource, RequestState, JsonDetails } from "./moduleSupport.jsx";
 export function ModelComparison() {
   const state = useResource("/models");
   const models = state.data?.models || [];
+  // The lettuce artifact's own `validation` field describes the scheme used when it was trained.
+  // An external check has since been run against an independent study, so that has to be shown
+  // beside the artifact's own wording rather than left to a report nobody reads.
+  const external = useResource("/external-validation");
+  const externalCheck = external.data?.externalCheck;
 
   const rows = models.map((model) => {
     const metrics = model.metrics || {};
@@ -80,7 +85,17 @@ export function ModelComparison() {
                         {Object.entries(baseline).map(([key, value]) => `${key} ${number(value, 2)}`).join(" · ") || "none recorded"}
                       </p>
                     </td>
-                    <td className="wrap">{model.validation || "—"}</td>
+                    <td className="wrap">
+                      {model.validation || "—"}
+                      {model.id === externalCheck?.modelId ? (
+                        externalCheck.available && (
+                          <p className="muted">
+                            External check {externalCheck.verdict.passed ? "passed" : "failed"}:{" "}
+                            {externalCheck.verdict.headline.toLowerCase()} ({externalCheck.citation}).
+                          </p>
+                        )
+                      ) : null}
+                    </td>
                     <td className="wrap">
                       {model.domain
                         ? Object.entries(model.domain)
