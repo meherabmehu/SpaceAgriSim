@@ -133,6 +133,73 @@ def scenarios(user: dict = Depends(current_user)):
     return {"scenarios":rows,"scope":"private account scenario history"}
 
 
+@router.get("/scenarios/{scenario_id}")
+def get_scenario(scenario_id: str, user: dict = Depends(current_user)):
+    """Read back one saved scenario by id.
+
+    Until this existed a scenario could only be listed, so there was no way for a client to prove
+    that a specific saved configuration had been stored intact.
+    """
+    try:
+        row = storage.get_scenario(user["id"], scenario_id)
+    except Exception as exc:
+        logger.exception("Scenario lookup unavailable")
+        raise HTTPException(503,"Scenario history unavailable; check database configuration") from exc
+    if row is None:
+        # 404 rather than 403 for another account's id: the API must not be an existence oracle.
+        raise HTTPException(404, "Scenario not found")
+    row["configuration"] = json.loads(row["configuration"])
+    return row
+
+
+class UpdateScenario(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    name: str | None = Field(default=None, min_length=1, max_length=100, pattern=r".*\S.*")
+    configuration: SimulationRequest | None = None
+
+
+@router.patch("/scenarios/{scenario_id}")
+def update_scenario(scenario_id: str, request: UpdateScenario,
+                    user: dict = Depends(current_user)):
+    """Rename and/or replace the configuration of one owned scenario."""
+    if not settings.history_writes_enabled:
+        raise HTTPException(403,"Shared history writes are disabled by the operator")
+    if request.name is None and request.configuration is None:
+        raise HTTPException(422, "Supply a name, a configuration, or both")
+    try:
+        row = storage.update_scenario(
+            user["id"], scenario_id,
+            name=request.name.strip() if request.name is not None else None,
+            configuration=(request.configuration.model_dump_json()
+                           if request.configuration is not None else None))
+    except Exception as exc:
+        logger.exception("Scenario update unavailable")
+        raise HTTPException(503,"Scenario history unavailable; check database configuration") from exc
+    if row is None:
+        raise HTTPException(404, "Scenario not found")
+    storage.record_activity(user["id"], "scenario-updated")
+    row["configuration"] = json.loads(row["configuration"])
+    return row
+
+
+@router.delete("/scenarios/{scenario_id}", status_code=204)
+def delete_scenario(scenario_id: str, user: dict = Depends(current_user)):
+    """Delete one owned scenario and any share links that pointed at it.
+
+    Erasure is allowed even when history writes are disabled: an account's own data is not a
+    write the operator's policy switch was meant to block.
+    """
+    try:
+        deleted = storage.delete_scenario(user["id"], scenario_id)
+    except Exception as exc:
+        logger.exception("Scenario deletion unavailable")
+        raise HTTPException(503,"Scenario history unavailable; check database configuration") from exc
+    if not deleted:
+        raise HTTPException(404, "Scenario not found")
+    storage.record_activity(user["id"], "scenario-deleted")
+    return Response(status_code=204)
+
+
 @router.post("/scenarios",status_code=201)
 def save_scenario(request: SaveScenario, user: dict = Depends(current_user)):
     if not settings.history_writes_enabled:
@@ -248,7 +315,21 @@ def readiness():
             **diagnosis,
             "remedy": remedy,
         }) from exc
+    if database_status.get("status") != "available":
+        # Reachable server, missing tables. Saying "ready" here is how a half-migrated deployment
+        # serves every account route as a 500 while the probe stays green.
+        raise HTTPException(503, {
+            "error": "database_schema_incomplete",
+            "message": ("Database reachable but its schema is incomplete; the migration has not "
+                        "run against this database"),
+            "reason": "schema-incomplete",
+            "missingTables": [name for name in database_status.get("missingTables", "").split(",")
+                              if name],
+            "remedy": ("Start the application once with the configured database URL so the "
+                       "additive migration runs, then re-check /api/ready."),
+        })
     return {"status":"ready","simulation":"available","database":database_status["status"],"databaseDialect":database_status["dialect"],
+            "databaseSchema":database_status.get("schema","present"),
             # Phase 19: an operator can see from /ready whether saved data survives a restart and
             # whether account email can actually be delivered, instead of finding out from a user.
             "storage":storage.storage_durability(),
