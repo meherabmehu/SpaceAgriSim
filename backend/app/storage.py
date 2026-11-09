@@ -1,6 +1,7 @@
 """Bounded shared scenario history. PostgreSQL in production, SQLite for local demos."""
 import hashlib
 import secrets
+import threading
 from datetime import datetime, timedelta, timezone
 from functools import lru_cache
 from pathlib import Path
@@ -101,8 +102,24 @@ def _url_scheme(url: str) -> str:
     return url.split("://", 1)[0] if "://" in url else "unset"
 
 
-@lru_cache(maxsize=1)
+# One lock for engine construction. `lru_cache` is not atomic around a slow function, and
+# building an engine runs `CREATE TABLE IF NOT EXISTS` for every table: two threads arriving on a
+# cold start - or at the first request after a restart - both miss the cache, both run create_all,
+# and PostgreSQL rejects the loser with a duplicate-key error on a catalog index. That surfaced as
+# a real failure in the concurrency test, not as a theoretical one.
+_ENGINE_LOCK = threading.Lock()
+
+
 def database():
+    """The process-wide engine, built at most once even under concurrent first use."""
+    if _build_database.cache_info().currsize:
+        return _build_database()
+    with _ENGINE_LOCK:
+        return _build_database()
+
+
+@lru_cache(maxsize=1)
+def _build_database():
     url = settings.database_url_resolved
     if url.startswith("sqlite:///"):
         name = url.removeprefix("sqlite:///")
@@ -148,6 +165,12 @@ def _migrate_scenarios_owner(engine) -> None:
     if "owner_id" not in columns:
         with engine.begin() as connection:
             connection.execute(text("ALTER TABLE scenarios ADD COLUMN owner_id VARCHAR(36)"))
+    # `index=True` in the Table definition only creates the index with the table. On a database
+    # that predates the column, the ALTER adds it without one, and every owner-scoped query then
+    # scans the table. IF NOT EXISTS makes this repeatable on both dialects.
+    with engine.begin() as connection:
+        connection.execute(text(
+            "CREATE INDEX IF NOT EXISTS ix_scenarios_owner_id ON scenarios (owner_id)"))
 
 
 def _migrate_users_columns(engine) -> None:
@@ -163,6 +186,20 @@ def _migrate_users_columns(engine) -> None:
             continue
         with engine.begin() as connection:
             connection.execute(text(f"ALTER TABLE users ADD COLUMN {name} {ddl}"))
+
+
+def dispose_database() -> None:
+    """Close the pooled engine and forget it, so the next call builds a new one.
+
+    This is what an application restart does to the storage layer. It exists as a named function
+    rather than a `cache_clear()` in each test so the restart-equivalent persistence test exercises
+    the same path production takes: pool disposed, engine rebuilt, schema re-verified, rows read
+    back from the server rather than from a connection that was never closed.
+    """
+    with _ENGINE_LOCK:
+        if _build_database.cache_info().currsize:
+            _build_database().dispose()
+        _build_database.cache_clear()
 
 
 def _driver_diagnosis(exc: BaseException) -> dict[str, str]:
@@ -181,12 +218,32 @@ def _driver_diagnosis(exc: BaseException) -> dict[str, str]:
     return diagnosis
 
 
+# The tables every persistence path needs. A readiness check that only runs SELECT 1 reports a
+# reachable but uninitialised database as available, and then every account, history and share
+# route fails while the health probe stays green - which is exactly the incident Phase 19 fixed
+# for connectivity and this closes for schema.
+REQUIRED_TABLES = ("scenarios", "users", "analyses", "revoked_tokens", "email_tokens",
+                   "share_links", "audit_events")
+
+
 def database_health() -> dict[str, str]:
-    """Perform a no-write health check without exposing connection details."""
+    """No-write health check: connectivity *and* the schema the API actually queries.
+
+    `SELECT 1` proves a socket answered. It does not prove the tables exist, so a fresh or
+    half-migrated database would be reported ready and then fail on first use. This inspects the
+    tables as well, which is read-only and costs one catalog query per call.
+    """
     engine = database()
     with engine.connect() as connection:
         connection.execute(text("SELECT 1"))
-    return {"dialect": engine.dialect.name, "status": "available"}
+        present = set(inspect(connection).get_table_names())
+    missing = [name for name in REQUIRED_TABLES if name not in present]
+    return {
+        "dialect": engine.dialect.name,
+        "status": "unavailable" if missing else "available",
+        "schema": "incomplete" if missing else "present",
+        "missingTables": ",".join(missing),
+    }
 
 def storage_durability() -> dict:
     """Whether saved data survives a restart, in the operator's terms.
@@ -222,14 +279,87 @@ def list_scenarios(owner_id: str | None = None):
     with database().connect() as connection:
         return [dict(row._mapping) for row in connection.execute(statement)]
 
+def get_scenario(owner_id: str, scenario_id: str):
+    """One scenario, scoped to its owner.
+
+    Returns None for another account's id rather than 403, for the same reason the analysis
+    accessor does: a distinguishable answer is an existence oracle.
+    """
+    if not owner_id:
+        raise ValueError("owner_id is required")
+    with database().connect() as connection:
+        row = connection.execute(select(scenarios).where(
+            (scenarios.c.id == scenario_id) & (scenarios.c.owner_id == owner_id))).first()
+    return dict(row._mapping) if row else None
+
+
+def update_scenario(owner_id: str, scenario_id: str, *,
+                    name: str | None = None, configuration: str | None = None):
+    """Rename and/or replace one owned scenario. Returns the stored row, or None if not owned.
+
+    The WHERE clause carries the owner, so the update can never touch another account's row: a
+    scoped read followed by an unscoped write would be a race that hands one account another's
+    scenario. Nothing is written when neither field is supplied.
+    """
+    if not owner_id:
+        raise ValueError("owner_id is required")
+    changes: dict[str, str] = {}
+    if name is not None:
+        changes["name"] = name
+    if configuration is not None:
+        changes["configuration"] = configuration
+    if not changes:
+        return get_scenario(owner_id, scenario_id)
+    with database().begin() as connection:
+        result = connection.execute(
+            scenarios.update()
+            .where((scenarios.c.id == scenario_id) & (scenarios.c.owner_id == owner_id))
+            .values(**changes))
+        if not result.rowcount:
+            return None
+        row = connection.execute(select(scenarios).where(scenarios.c.id == scenario_id)).first()
+    return dict(row._mapping) if row else None
+
+
+def delete_scenario(owner_id: str, scenario_id: str) -> bool:
+    """Delete one owned scenario and every share link that pointed at it.
+
+    The share links are removed in the same transaction, because a link that survives its
+    scenario is a dangling reference that resolves to nothing and cannot be revoked from a
+    page that no longer exists.
+    """
+    if not owner_id:
+        raise ValueError("owner_id is required")
+    with database().begin() as connection:
+        owned = connection.execute(select(scenarios.c.id).where(
+            (scenarios.c.id == scenario_id) & (scenarios.c.owner_id == owner_id))).first()
+        if owned is None:
+            return False
+        connection.execute(delete(share_links).where(
+            (share_links.c.scenario_id == scenario_id)
+            & (share_links.c.owner_id == owner_id)))
+        connection.execute(delete(scenarios).where(
+            (scenarios.c.id == scenario_id) & (scenarios.c.owner_id == owner_id)))
+    return True
+
+
 def save_scenario(name: str, configuration: str, owner_id: str | None = None):
     row = {"id": str(uuid4()), "name": name,
            "created_at": datetime.now(timezone.utc).isoformat(),
            "configuration": configuration, "model_version": "assumptions-2.0", "owner_id": owner_id}
     with database().begin() as connection:
         connection.execute(scenarios.insert().values(**row))
-        expired = connection.execute(select(scenarios.c.id).order_by(
-            scenarios.c.created_at.desc()).offset(settings.max_history)).scalars().all()
+        # Retention trims the owner's own history. Trimming globally would delete the oldest rows
+        # in the table regardless of who owns them, so one active account could evict another
+        # account's data - a persistence bug that only shows up once there are two accounts.
+        expired_statement = select(scenarios.c.id)
+        if owner_id is not None:
+            expired_statement = expired_statement.where(scenarios.c.owner_id == owner_id)
+        else:
+            expired_statement = expired_statement.where(scenarios.c.owner_id.is_(None))
+        expired = connection.execute(
+            expired_statement.order_by(scenarios.c.created_at.desc())
+            .offset(settings.max_history)).scalars().all()
         if expired:
             connection.execute(delete(scenarios).where(scenarios.c.id.in_(expired)))
     return row
@@ -584,3 +714,11 @@ def read_json_artifact(name: str):
         return None
     import json
     return json.loads(path.read_text())
+
+
+# Older call sites (tests, backup tooling) drop the memoised engine with `database.cache_clear()`.
+# `database()` is no longer an lru_cache wrapper itself, so the attributes are carried over: the
+# same call now disposes the pool as well, which is what those callers always meant by "forget the
+# engine".
+database.cache_clear = dispose_database  # type: ignore[attr-defined]
+database.cache_info = _build_database.cache_info  # type: ignore[attr-defined]
