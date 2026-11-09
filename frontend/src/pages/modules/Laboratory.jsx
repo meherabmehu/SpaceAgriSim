@@ -1,4 +1,5 @@
-import { Card, GrowthPlot, number } from "../missionUI.jsx";
+import { Card, number } from "../missionUI.jsx";
+import { GrowthPlot } from "../../charts/GrowthPlot.jsx";
 import { Limitations, JsonDetails } from "./moduleSupport.jsx";
 import { RefreshCw, FlaskConical } from "lucide-react";
 const CONTROLS = [

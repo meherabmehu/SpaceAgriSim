@@ -37,7 +37,12 @@ import { api, downloadReport } from "../services/platformApi.ts";
 import { authenticate, clearSession, logout, readSession } from "../services/auth.ts";
 import { confirmVerification, requestPasswordReset, resetPassword } from "../services/accountApi.ts";
 import PlatformModules from "./PlatformModules.jsx";
-import { Card, GrowthPlot, number } from "./missionUI.jsx";
+import { Card, number } from "./missionUI.jsx";
+// The chart library is 69 kB gzipped and the curve only exists once a simulation has returned,
+// so it is fetched with the first result instead of with the shell.
+const GrowthPlot = lazy(() =>
+  import("../charts/GrowthPlot.jsx").then((module) => ({ default: module.GrowthPlot })),
+);
 
 // Keep the greenhouse controls, its WebGL feature check, and Three.js out of
 // the mission shell until a researcher actually opens the greenhouse route.
@@ -478,7 +483,15 @@ export default function MissionPlatform() {
                         </span>
                       </div>
                     </div>
-                    <GrowthPlot result={result} />
+                    <Suspense
+                      fallback={
+                        <div className="growth-plot" aria-live="polite">
+                          <section className="module-loading">Loading growth curve…</section>
+                        </div>
+                      }
+                    >
+                      <GrowthPlot result={result} />
+                    </Suspense>
                     <div className="chart-footer">
                       <ShieldCheck size={14} />
                       Scenario output · No calibrated confidence interval
