@@ -12,6 +12,37 @@
 
 The Vercel API service packages a small checksum-verified read-only copy of the data/model assets at build time. On serverless Vercel deployments, history writes are intentionally marked read-only unless a durable database and enabled write policy are configured. Local and container deployments can enable durable scenario history through `SPACEAGRISIM_DATABASE_URL`.
 
+## Phase 20 — scientific audit, correction and independent validation
+
+- **Audit.** Every model inspected for mathematics, assumptions, units, data, algorithm, limitations
+  and existing validation; findings and verdicts in `docs/SCIENTIFIC_AUDIT.md`. Criteria and split
+  rules were written down before measurement in `docs/SCIENTIFIC_VALIDATION_PLAN.md`.
+- **Lettuce correction (the 232 % investigation).** Root cause: v2 had no photoperiod input (light
+  dose is flux × time) and no density input (per-plant mass = per-area yield ÷ density). v3 targets
+  log(fresh yield per m²), enters light as daily light integral, and serves per-plant mass through the
+  stated density. Development MAPE 232.2 % → **42.7 %**, bias +246.6 g → **+2.6 g**.
+- **Independent validation: failed, and reported as failed.** Touliatos et al. 2016 (untouched during
+  fitting and selection) gives MAPE **41.6 %** against a 30 % criterion fixed in advance; one source
+  (1000 plants/m², stacked) is refused rather than scored because the per-area identity breaks there.
+  v3 stays `trained-exploratory`; the criterion was not relaxed and the holdout was not re-used.
+- **Serving.** `POST /api/predict/lettuce-earth-growth-v3` takes `photoperiodHours` and
+  `plantDensityPerM2`, returns the derived DLI, the per-area yield, a conformal interval, and a
+  `validationStatus` block carrying the model version, both evaluation results and their verdicts.
+  v2 remains callable and byte-identical. The log target is inverted through one declared
+  `targetTransform` in `research.inverse_target_transform`, not per route.
+- **Guard tightened.** A Moon/Mars yield question may no longer be answered with a model card: model
+  passages are excluded from that premise unless they themselves state the absence. This surfaced
+  because v3's name contains "fresh yield" and started winning the lexical match, turning a correct
+  refusal into a partial answer.
+- **Registry.** `ml/artifacts/registry.json` gains an `independentValidation` block per model;
+  `scripts/verify_model_registry.py` now cross-checks it against the artifact, verifies the pass flag
+  against its own criterion, and fails if a failed evaluation carries a validated-style status.
+  `docs/DATASET_REGISTRY.md` is generated from the data files by `scripts/generate_dataset_registry.py`.
+- **Tests.** 36 new scientific tests in `backend/tests/test_lettuce_v3_scientific.py` (DLI derivation,
+  density identity and mass conservation across densities, refusal above 200 plants/m², exact-once log
+  inversion, artifact checksum and provenance, prediction reproducibility against the published
+  development values, criterion immutability, input validation). Suite: **734 passed, 1 skipped**.
+
 ## Follow-up work
 
 - Features without a dataset dropped from the UI rather than shown with a caveat: the gravity and

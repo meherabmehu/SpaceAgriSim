@@ -17,5 +17,18 @@
    to forecast harvest weight, size a farm, or compare cropping systems. See
    `GET /api/external-validation` and `docs/PHASE19_ACCOUNT_SHARING_READINESS.md`.
 
+9. `lettuce-earth-growth-v3` is the current Earth lettuce yield model and is still
+   **`trained-exploratory`**, because it **failed** the independent criterion set for it. On
+   Touliatos et al. 2016 — untouched during fitting and model selection — its MAPE is 41.6 % against
+   a 30 % criterion; a second source (1000 plants/m², stacked vertical farm) is refused rather than
+   scored, because the per-area identity that converts yield to per-plant mass does not hold at that
+   density. It fixes the two structural gaps v2 had (light now enters as daily light integral, and
+   density is a caller input), which cuts development error from 232.2 % to 42.7 % and bias from
+   +246.6 g to +2.6 g, but it still takes no cultivar, CO2 or nutrient input, its light response is
+   monotonic where the data are not, and the near-zero bias is two opposing errors cancelling. Do not
+   use it to forecast harvest weight, size a farm, or compare cropping systems. Domain: DAT 2–29,
+   air/root 20–32 C, DLI 11.5–34.5 mol m⁻² d⁻¹, density 10–200 plants/m². See
+   `docs/MODEL_VALIDATION_REPORT.md` and `GET /api/external-validation`.
+
 Use the tool for hypothesis generation and transparent planning conversations, not safety-critical mission decisions.
 
