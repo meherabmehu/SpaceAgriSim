@@ -376,6 +376,21 @@ def answer(question: str, *, max_claims: int = MAX_CLAIMS,
                     row["subs"].append(sub.id)
                 row["score"] = max(row["score"], score)
 
+    if premise and premise["id"] == "moon-mars-production":
+        # A model card is the wrong evidence for "what is the yield on Mars". Every served model
+        # here was trained on Earth or low-Earth-orbit data, and citing one - however neutrally,
+        # however well its limitations are stated - is what a reader sees as "the platform
+        # answered a Mars yield question with a model". Only passages that can speak to the
+        # absence itself (datasets, evaluation notes) are kept.
+        #
+        # This surfaced in Phase 19: v3's name contains "fresh yield", so it began to win the
+        # lexical match on yield questions and turned a correct refusal into a partial answer.
+        # The guard belongs here, not in the model's name. A model card that does state the
+        # absence ("does not predict", "not a measurement") is exactly the evidence to keep.
+        merged = {key: row for key, row in merged.items()
+                  if row["passage"].kind != "model"
+                  or CORRECTION_SENTENCE.search(row["passage"].text)}
+
     if premise:
         # When the question assumes a capability the model does not have, the useful evidence is
         # the passage that says so. Boost corrective passages instead of letting the model card

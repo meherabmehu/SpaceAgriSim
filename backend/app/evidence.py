@@ -175,6 +175,48 @@ def _metric(name, value) -> str:
     return f"{name} {value}"
 
 
+def _validation_summary(validation) -> str:
+    """One sentence of validation per protocol, never a nested object stringified.
+
+    Phase 19 changed a model's `validation` from a string to a structured object. Passing that
+    straight through `_clean` put the whole nested dict into the retrieval corpus: a single model
+    card became several kilobytes of metric JSON, which both drowned its own limitations and gave
+    unrelated questions a spurious lexical match on words like "yield" and "predicted".
+    """
+    if isinstance(validation, str):
+        return _clean(validation)
+    if not isinstance(validation, dict):
+        return ""
+    def study_name(block) -> str:
+        """First author and year are enough to identify a source; a full citation is not a passage."""
+        raw = _clean(block.get("study", "unnamed"))
+        return raw if len(raw) <= 90 else raw[:87].rstrip(" ,;:") + "..."
+
+    parts = []
+    internal = validation.get("internal")
+    if isinstance(internal, dict):
+        metrics = internal.get("metrics") or {}
+        metrics_text = ", ".join(f"{k} {v:.4g}" if isinstance(v, (int, float)) else f"{k} {v}"
+                                 for k, v in metrics.items())
+        parts.append(f"internal {internal.get('protocol', 'held-out')}: {metrics_text}")
+    independent = validation.get("independent")
+    if isinstance(independent, dict):
+        metrics = independent.get("metrics") or {}
+        parts.append(
+            f"independent holdout {study_name(independent)}: "
+            f"MAPE {metrics.get('MAPE')} % against a {independent.get('acceptanceCriterionPct')} % "
+            f"criterion, passed {independent.get('passed')}"
+            + (f"; {independent.get('verdict')}" if independent.get("verdict") else ""))
+    development = validation.get("development")
+    if isinstance(development, dict):
+        metrics = development.get("metrics") or {}
+        parts.append(
+            f"development set {study_name(development)}: MAPE {metrics.get('MAPE')} % "
+            f"(used for model selection: {development.get('usedForModelSelection')}; counts as "
+            f"validation: {development.get('countsAsValidation')})")
+    return "; ".join(part for part in parts if part.strip())
+
+
 def _clean(value) -> str:
     if value is None:
         return ""
@@ -277,7 +319,7 @@ def _model_passages(quarantine: list) -> list[Passage]:
                 f"Target: {_clean(model.get('target'))} "
                 f"[{_clean(model.get('unit'))}]. Training rows {model.get('samples')} over "
                 f"{model.get('groups')} independent groups. Held-out metrics: {metric_text}. "
-                f"Validation: {_clean(model.get('validation'))}. "
+                f"Validation: {_validation_summary(model.get('validation'))}. "
                 + (f"Scientific category {classification.category}: "
                    f"{CATEGORY_NAMES[classification.category]}. "
                    f"Service allowance: {SERVICE_ALLOWED[classification.category]}. "

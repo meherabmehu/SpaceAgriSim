@@ -19,6 +19,10 @@ from app.research import DATA, load_model
 SCREEN = DATA / "literature" / "external_validation_screen.json"
 EXTERNAL = DATA / "literature" / "external_lettuce_peerj17085.json"
 MODEL_ID = "lettuce-earth-growth-v2"
+# The Phase 19 successor. v2 is kept and still scored, because its failure is the record that
+# justified rebuilding it; deleting the failing check once a better model existed would erase the
+# evidence the correction was needed.
+MODEL_ID_V3 = "lettuce-earth-growth-v3"
 
 # Root temperature is not reported by the external study, so it is assumed equal to air
 # temperature. These probes show whether that assumption could explain the gap. They are a
@@ -45,6 +49,111 @@ def _predict(inputs: list[float]) -> float:
 
     value, _ = research.predict_values(load_model(MODEL_ID), inputs)
     return float(value)
+
+
+def _predict_v3(days: float, air: float, root: float, ppfd: float,
+                photoperiod: float, density: float) -> float:
+    """Run the served v3 artifact the way the API does: DLI in, log target inverted, density out."""
+    from app import research
+
+    model = load_model(MODEL_ID_V3)
+    dli = ppfd * photoperiod * 3600.0 / 1e6
+    raw, _ = research.predict_values(model, [days, air, root, dli])
+    per_area = max(0.0, research.inverse_target_transform(model, raw))
+    return per_area / density
+
+
+def _v3_check() -> dict:
+    """v3 on the same six PeerJ observations, plus the untouched independent holdout.
+
+    PeerJ is now a development set: its numbers informed the choice of the daily-light-integral
+    feature, so it cannot be called validation. The independent number is Touliatos 2016, which was
+    not touched during model selection, and it is reported here from the artifact's own recorded
+    evaluation rather than recomputed, because recomputing it here would make it a second selection
+    opportunity.
+    """
+    study = _external()
+    if study is None:
+        return {"available": False,
+                "reason": "data/literature/external_lettuce_peerj17085.json is not in this deployment"}
+    try:
+        model = load_model(MODEL_ID_V3)
+    except (KeyError, FileNotFoundError, ValueError) as exc:
+        return {"available": False,
+                "reason": f"v3 artifact unavailable ({type(exc).__name__})"}
+
+    conditions = study["studyConditions"]
+    air = float(conditions["airTemperatureC"])
+    photoperiod = float(conditions.get("photoperiodHours", 12.0))
+    density = float(conditions.get("plantDensityPerM2", 48.0))
+    rows = []
+    for observation in study["observations"]:
+        measured = float(observation["freshWeightGPerPlant"])
+        predicted = _predict_v3(float(observation["daysAfterTransplant"]), air, air,
+                                float(observation["ppfdUmol"]), photoperiod, density)
+        v2 = _predict([float(observation["daysAfterTransplant"]), air, air,
+                       float(observation["ppfdUmol"])])
+        rows.append({
+            "id": observation["id"],
+            "cultivar": observation["cultivar"],
+            "ppfdUmol": observation["ppfdUmol"],
+            "measuredG": measured,
+            "predictedV3G": round(predicted, 1),
+            "predictedV2G": round(v2, 1),
+            "ratioV3": round(predicted / measured, 2),
+            "ratioV2": round(v2 / measured, 2),
+        })
+    mape_v3 = statistics.fmean(abs(r["predictedV3G"] - r["measuredG"]) / r["measuredG"] for r in rows) * 100
+    mape_v2 = statistics.fmean(abs(r["predictedV2G"] - r["measuredG"]) / r["measuredG"] for r in rows) * 100
+    mbe_v3 = statistics.fmean(r["predictedV3G"] - r["measuredG"] for r in rows)
+
+    validation = model.get("validation") or {}
+    independent = validation.get("independent") or {}
+    return {
+        "available": True,
+        "modelId": MODEL_ID_V3,
+        "status": model.get("status"),
+        "derivedInputs": {"photoperiodHours": photoperiod, "plantDensityPerM2": density,
+                          "dailyLightIntegralFormula": model["derivedFeatures"]["dailyLightIntegral"]["formula"]},
+        "rows": rows,
+        "developmentMetrics": {
+            "countsAsValidation": False,
+            "why": ("The daily-light-integral feature was chosen because it scored best on these six "
+                    "observations, so they are part of model selection and are reported as a "
+                    "development set, not as validation."),
+            "observations": len(rows),
+            "mapeV3Pct": round(mape_v3, 1),
+            "mbeV3G": round(mbe_v3, 1),
+            "mapeV2Pct": round(mape_v2, 1),
+            "improvementNote": ("v2's 232.2 % is the figure that opened this audit; v3 is scored on the "
+                                "same rows here so the improvement is checkable rather than asserted. "
+                                "v3 predicts 157.4 / 123.4 / 123.4 g against 84.5 / 123.8 / 92.9 (Baby "
+                                "Cos) and 157.4 / 123.4 / 123.4 g against 97.3 / 190.7 / 203.7 (Green "
+                                "Oak): the bias is gone, the flat plateaus are not, because a tree "
+                                "ensemble without a cultivar input has only one curve per light level."),
+        },
+        "independentHoldout": {
+            "study": independent.get("study"),
+            "doi": independent.get("doi"),
+            "untouchedDuringSelection": independent.get("untouchedDuringSelection"),
+            "metrics": independent.get("metrics"),
+            "acceptanceCriterionPct": independent.get("acceptanceCriterionPct"),
+            "passed": independent.get("passed"),
+            "domainViolations": independent.get("domainViolations"),
+            "refused": independent.get("refused"),
+            "verdict": independent.get("verdict"),
+        },
+        "verdict": {
+            "passed": bool(independent.get("passed")),
+            "headline": (f"v3 development error {mape_v3:.1f} % (v2: {mape_v2:.1f} %); independent "
+                         f"holdout {(independent.get('metrics') or {}).get('MAPE', float('nan')):.1f} % "
+                         f"against a {independent.get('acceptanceCriterionPct')} % criterion"),
+            "statement": independent.get("verdict"),
+            "consequence": ("The model stays trained-exploratory. Its independent error is above the "
+                            "criterion fixed before it was measured, and one source had to be refused "
+                            "as out of domain. No deployment may present v3 as validated."),
+        },
+    }
 
 
 def _domain_check() -> dict:
@@ -204,6 +313,7 @@ def payload() -> dict:
     body: dict = {
         "domainCheck": _domain_check(),
         "externalCheck": _external_check(),
+        "v3Check": _v3_check(),
         "scopeNote": ("Screening and check of independent sources for the lettuce model. An "
                       "external check is only run when all four model inputs are reported per "
                       "observation; study averages are never substituted for them."),
