@@ -22,6 +22,9 @@ MODEL_IDS = {
     "tomato-flight-response-v1",
     "lettuce-earth-growth-v1",
     "lettuce-earth-growth-v2",
+    # Phase 19: per-area fresh-yield model with density and photoperiod as inputs. Served beside
+    # v2, which stays byte-identical so its failed external check remains reproducible.
+    "lettuce-earth-growth-v3",
     "mizuna-microbial-load-v1",
     "mizuna-microbial-relative-load-v2",
     # Phase 9: NASA OSD-46 radiation response models.
@@ -409,6 +412,21 @@ def predict_values(model, values):
         if not domain["min"] <= value <= domain["max"]:
             warnings.append(f"{name} outside observed training range [{domain['min']:.3g}, {domain['max']:.3g}]")
     return result, warnings
+
+
+def inverse_target_transform(model, value):
+    """Undo the target transform a model was fitted with.
+
+    A model trained on log(y) returns a log value. Applying it as if it were y is the kind of bug
+    that produces a plausible-looking number three orders of magnitude out, so the transform is
+    declared in the artifact and applied here, in one place, rather than remembered per route.
+    """
+    transform = (model.get("targetTransform") or {}).get("name")
+    if transform == "log":
+        return math.exp(value)
+    if transform is None:
+        return value
+    raise ValueError(f"Unknown target transform {transform!r} in {model.get('id', '<unnamed>')}")
 
 
 def explanation(model_id):

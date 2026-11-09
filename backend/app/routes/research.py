@@ -25,6 +25,21 @@ class MolecularPredictionRequest(BaseModel):
     expression: dict[str, float] = Field(min_length=1, max_length=128, description="Exact artifact gene IDs, each normalized log1p(CPM), never raw counts")
 
 
+class LettuceYieldPredictionRequest(BaseModel):
+    """v3 inputs: v2's four plus the two variables v2 had to assume."""
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    crop: Literal['lettuce'] = 'lettuce'
+    daysAfterTransplant: float = Field(ge=0, le=60)
+    airTemperature: float = Field(ge=5, le=40)
+    rootTemperature: float = Field(ge=5, le=40)
+    ppfd: float = Field(ge=0, le=1000)
+    # The two variables every source reports and v2 silently assumed. Photoperiod distinguishes a
+    # 16 h plant factory from a 12 h greenhouse at the same instantaneous flux; density converts
+    # fresh yield per square metre into mass per plant.
+    photoperiodHours: float = Field(default=16.0, gt=0, le=24)
+    plantDensityPerM2: float = Field(default=25.0, gt=0, le=2000)
+
+
 class LettucePredictionRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
     crop: Literal['lettuce'] = 'lettuce'
@@ -48,6 +63,92 @@ def predict_lettuce(request: LettucePredictionRequest):
         warnings.append('Tip-burn treatment combinations were omitted in the published analysis; this region is unsupported.')
     radius=model['interval']['radius']
     return {'modelId':model['id'],'prediction':value,'unit':model['unit'],'method':model['method'],'sourceStudy':'WUR-lettuce','sourceUrl':model['sourceUrl'],'interval':{'low':max(0,value-radius),'high':value+radius,'kind':model['interval']['kind']},'outOfDistribution':bool(warnings),'warnings':warnings+model['limitations'],'inputs':request.model_dump()}
+
+
+@router.post("/predict/lettuce-earth-growth-v3")
+def predict_lettuce_v3(request: LettuceYieldPredictionRequest):
+    """v3: fresh yield per square metre, divided by the density the caller states.
+
+    v2 predicted mass per plant from PPFD alone and overpredicted an independent greenhouse trial
+    by a median of 3.2x. Two reported variables were missing from its inputs: the photoperiod,
+    which decides how much light a plant actually receives per day, and the planting density,
+    which decides how much of a square metre's yield belongs to one plant. Both are inputs here.
+
+    The model is still `trained-exploratory`: its independent holdout (Touliatos et al. 2016)
+    error is 41.6% against a 30% criterion fixed in advance, and this response says so.
+    """
+    model = artifact("lettuce-earth-growth-v3")
+    daily_light_integral = request.ppfd * request.photoperiodHours * 3600.0 / 1e6
+    raw, warnings = research.predict_values(
+        model, [request.daysAfterTransplant, request.airTemperature,
+                request.rootTemperature, daily_light_integral])
+    # The artifact is fitted on log(fresh yield per m2); left uninverted that is a plausible number
+    # three orders of magnitude out, so the transform is declared and applied centrally.
+    raw_per_area = research.inverse_target_transform(model, raw)
+    per_area = max(0.0, raw_per_area)
+    value = per_area / request.plantDensityPerM2
+
+    # The per-area identity is known to break at very high densities, so refuse to extrapolate it.
+    density_bounds = model["densityDomain"]["plantsPerM2"]
+    if not density_bounds["min"] <= request.plantDensityPerM2 <= density_bounds["max"]:
+        warnings.append(
+            f"plantDensityPerM2 {request.plantDensityPerM2:g} outside the supported "
+            f"[{density_bounds['min']:g}, {density_bounds['max']:g}] range: per-plant mass there "
+            "extrapolates the density identity itself, not the fitted growth response.")
+
+    # Conformal interval on the log target, carried through the same density division.
+    low = per_area * math.exp(model["interval"]["logResidualLow"]) / request.plantDensityPerM2
+    high = per_area * math.exp(model["interval"]["logResidualHigh"]) / request.plantDensityPerM2
+
+    independent = (model.get("validation") or {}).get("independent") or {}
+    development = (model.get("validation") or {}).get("development") or {}
+    return {
+        "modelId": model["id"],
+        "prediction": round(value, 3),
+        "unit": model["unit"],
+        "method": model["method"],
+        "sourceStudy": "WUR-lettuce",
+        "sourceUrl": model["sourceUrl"],
+        "derived": {
+            "dailyLightIntegral": round(daily_light_integral, 2),
+            "unit": "mol m-2 d-1",
+            "formula": model["derivedFeatures"]["dailyLightIntegral"]["formula"],
+        },
+        "perAreaYieldGPerM2": round(per_area, 1),
+        "densityUsedPlantsPerM2": request.plantDensityPerM2,
+        "interval": {
+            "low": round(max(0.0, low), 3),
+            "high": round(high, 3),
+            "kind": model["interval"]["kind"],
+            "calibrated": False,
+        },
+        "validationStatus": {
+            "status": model["status"],
+            "independentCheck": {
+                "study": independent.get("study"),
+                "metrics": independent.get("metrics"),
+                "acceptanceCriterionPct": independent.get("acceptanceCriterionPct"),
+                "passed": independent.get("passed"),
+                "verdict": independent.get("verdict"),
+            },
+            "developmentCheck": {
+                "study": development.get("study"),
+                "metrics": development.get("metrics"),
+                "countsAsValidation": development.get("countsAsValidation"),
+                "usedForModelSelection": development.get("usedForModelSelection"),
+            },
+            "comparedWithV2": {
+                "v2DevelopmentMAPEPct": 232.2,
+                "v3DevelopmentMAPEPct": (development.get("metrics") or {}).get("MAPE"),
+                "note": ("Both scored on the same six PeerJ observations. v2's figure came first and "
+                         "is what motivated v3; the comparison is reported so the improvement can "
+                         "be checked rather than asserted."),
+            },
+        },
+        "outOfDistribution": bool(warnings),
+        "warnings": warnings + model["limitations"],
+        "inputs": request.model_dump(),
+    }
 
 
 @router.post("/predict/lettuce-earth-growth-v2")
