@@ -96,14 +96,22 @@ EARTH_REFERENCE_WATER_AVAILABILITY = 100.0
 # Environment response constants
 # ---------------------------------------------------------------------------
 # Gravity: linear penalty as gravity drops from 1 g to 0 g, plus a smaller
-# penalty for hypergravity above 1 g. Real microgravity effects on biomass are
-# modest and mixed in the literature - this is a placeholder magnitude.
+# penalty for hypergravity above 1 g.
+#
+# ASSUMPTION, NOT A MEASUREMENT. A search of NASA sources on 2026-11-09 found no crop
+# fresh-weight dataset across fractional gravity: the ISS fractional-gravity work (EMCS,
+# Seedling Growth, OSD-346) measures gene expression and morphology, and the published
+# conclusions are that Mars-level gravity may not limit plant development and that microgravity
+# effects on biomass are modest and mixed. This magnitude is a scenario coefficient so the
+# world comparison has something to show, and it is not presented as measured anywhere in the
+# product surface.
 MICROGRAVITY_GROWTH_PENALTY = 0.15  # growth lost at 0 g (before crop sensitivity)
 HYPERGRAVITY_PENALTY_PER_G = 0.10  # growth lost per g above 1 g
 
 # Radiation: exponential decay of growth with dose rate above Earth background.
-# Plants tolerate chronic radiation far better than animals; the steepness here
-# is a placeholder so the effect is visible on the slider, not a measured value.
+#
+# ASSUMPTION, NOT A MEASUREMENT. No crop-yield dataset at habitat-relevant chronic dose rates was
+# recovered; the OSDR radiation corpus is molecular. Kept as a visible scenario coefficient.
 RADIATION_DECAY_PER_MGY_PER_DAY = 0.25
 
 # Light: saturating response normalised to the crop's optimal photoperiod,
@@ -194,5 +202,10 @@ PARAMETER_RANGES.update({
     "lightIntensity": {"min": 0, "max": 1000, "step": 10, "default": 300, "unit": "?mol/m?/s"},
     "temperature": {"min": 5, "max": 40, "step": 0.5, "default": 22, "unit": "?C"},
     "humidity": {"min": 10, "max": 100, "step": 1, "default": 60, "unit": "% RH"},
-    "waterRecyclingEfficiency": {"min": 0, "max": 100, "step": 1, "default": 90, "unit": "%"},
+    # Bounded by what a real loop has demonstrated: the ISS recovers 98 % of the water it brings
+    # aboard (93-94 % before the Brine Processor Assembly, 2023). A slider that allowed 100 %
+    # would let a scenario claim a closure nobody has achieved.
+    "waterRecyclingEfficiency": {"min": 0, "max": 98, "step": 1, "default": 90, "unit": "%",
+                                 "measuredMaximum": 98,
+                                 "measuredMaximumNote": "ISS ECLSS water recovery, 2023"},
 })

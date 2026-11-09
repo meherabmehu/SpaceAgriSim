@@ -25,12 +25,21 @@ def test_light_temperature_and_humidity_have_real_effects(client):
 
 def test_recycling_changes_makeup_without_changing_growth(client):
     low=estimate(client,waterRecyclingEfficiency=0)
-    high=estimate(client,waterRecyclingEfficiency=100)
+    # 98 % is the ceiling, not 100 %: it is what the ISS has actually demonstrated. The endpoint
+    # refuses a higher value rather than letting a scenario claim a closure nobody has achieved.
+    high=estimate(client,waterRecyclingEfficiency=98)
     assert low["cropYield"] == high["cropYield"]
     assert low["waterRecovered"] == 0
-    assert high["lifeSupport"]["water"]["netConsumed"] == 0
-    assert high["waterRecovered"] == high["waterUsed"]
-    assert high["lifeSupport"]["waterRecoveryEfficiency"] == 1
+    # the endpoint rounds recovered water to 2 dp, so compare at that precision
+    assert high["waterRecovered"] == pytest.approx(high["waterUsed"] * 0.98, abs=0.02)
+    assert high["lifeSupport"]["waterRecoveryEfficiency"] == pytest.approx(0.98)
+    assert high["lifeSupport"]["water"]["netConsumed"] > 0
+
+
+def test_recovery_above_the_demonstrated_maximum_is_refused(client):
+    response = client.post("/api/simulate", json={"waterRecyclingEfficiency": 100})
+    assert response.status_code == 422
+    assert "waterRecyclingEfficiency" in response.json()["fields"]
 
 
 def test_spectrum_is_annotated_without_fabricated_response(client):

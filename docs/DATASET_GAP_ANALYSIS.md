@@ -53,5 +53,16 @@ Both are now backed by measured numbers served at `GET /api/closed-loop`, transc
 | Real regolith | NASA reports exist (lunar/Martian simulant trials, CI asteroid regolith dataset) with biomass reductions, but they are simulants, not returned regolith, and the trials are heterogeneous in substrate, fertilisation and cultivar. | **Open, on purpose.** No regolith term is modelled. |
 
 The rule applied throughout: where a measurement exists it is transcribed and served with its DOI
-and licence; where none exists the feature is not modelled and the simulator says so in one line
-rather than shipping a fabricated coefficient.
+and licence; where none exists the user-facing control is removed rather than given an invented
+response curve.
+
+Applied in this pass:
+
+- **Removed from the simulation form:** the gravity slider and the radiation dose-rate slider. Both
+  response curves are scenario coefficients with no dataset behind them, and offering them as
+  controls implied a precision the evidence does not have. World presets still carry gravity and
+  dose rate as scenario context and the coefficients stay documented in
+  `simulation_constants.py` as assumptions, not measurements.
+- **Constrained by measurement:** the water-recovery control now stops at 98 %, the ISS figure. A
+  value above it is refused with a 422 rather than accepted as a scenario.
+- **Added as measured data:** ethylene and water closure, above.

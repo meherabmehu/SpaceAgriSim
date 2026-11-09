@@ -14,6 +14,9 @@ The Vercel API service packages a small checksum-verified read-only copy of the 
 
 ## Follow-up work
 
+- Features without a dataset dropped from the UI rather than shown with a caveat: the gravity and
+  radiation dose-rate sliders are gone from the simulation form, and the water-recovery control is
+  capped at the measured ISS 98 %.
 - Closed-loop measurements added: `GET /api/closed-loop` serves NASA's measured ethylene
   production and lettuce dose response (Wheeler et al. 1996) and the ISS 98 % water recovery figure;
   transcribed in `data/literature/nasa_air_and_water.json`. Ethylene stays out of the growth

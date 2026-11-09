@@ -2,19 +2,14 @@ import { Card, number } from "../missionUI.jsx";
 import { GrowthPlot } from "../../charts/GrowthPlot.jsx";
 import { Limitations, JsonDetails } from "./moduleSupport.jsx";
 import { RefreshCw, FlaskConical } from "lucide-react";
+// Gravity and the radiation dose rate are deliberately not user controls here.
+//
+// Neither has a dataset behind it: a 2026-11-09 search of NASA sources found no crop fresh-weight
+// dataset across fractional gravity (the ISS fractional-gravity work is transcriptomic and
+// morphological) and no crop-yield dataset at habitat-relevant chronic dose rates. Rather than
+// offer a slider whose response curve is invented, the world is chosen from the presets, where
+// gravity and dose rate are carried as scenario context.
 const CONTROLS = [
-  [
-    "gravity",
-    "Gravity",
-    "g",
-    "Assumed root-zone gravity response; partial-gravity crop validation is unavailable.",
-  ],
-  [
-    "radiation",
-    "Radiation dose rate",
-    "mGy/day",
-    "Illustrative absorbed dose, not a shielding calculation or equivalent dose.",
-  ],
   [
     "waterAvailability",
     "Water availability",
@@ -67,7 +62,8 @@ const CONTROLS = [
     "waterRecyclingEfficiency",
     "Water recovery",
     "%",
-    "User-assumed fraction of supplied water recovered; engineering losses are simplified.",
+    // The backend caps this at 98 because that is the best the ISS has demonstrated.
+    "Fraction of supplied water recovered. The ceiling is 98 %, the ISS figure.",
   ],
 ];
 export function Laboratory({ params, setParam, config, result, resetParams }) {
