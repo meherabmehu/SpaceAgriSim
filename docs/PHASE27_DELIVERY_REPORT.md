@@ -169,11 +169,13 @@ The scientific conclusion did not change. The numbers now match the data.
 
 ## 7. Remote verification
 
-`main` moved from `5800b9a` to `184fbd9dc2ff1b299f41a9cf8ae90748c5b6cb2e`.
+`main` moved from `5800b9a` to the tip of this branch. The code and documentation commits are
+`f6ffd08` … `184fbd9`; the commit carrying this line is the documentation-only tip on top of
+`184fbd9`.
 
 ```
 $ git ls-remote origin main
-184fbd9dc2ff1b299f41a9cf8ae90748c5b6cb2e   refs/heads/main
+184fbd9dc2ff1b299f41a9cf8ae90748c5b6cb2e   refs/heads/main    # before the documentation tip
 ```
 
 **Fresh-clone verification of `main`** (a new `--depth 1` clone, not the working copy):
