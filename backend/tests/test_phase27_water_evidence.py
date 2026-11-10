@@ -224,3 +224,80 @@ def test_missing_table_reports_unavailable_instead_of_an_estimate(monkeypatch):
     assert comparison["available"] is False
     assert comparison["verdict"] == "not-applicable"
     assert "no measured benchmark" in comparison["reason"]
+
+
+# ---------------------------------------------------------------------------------------
+# the implementation coverage matrix (Phase 27 deliverable)
+# ---------------------------------------------------------------------------------------
+COVERAGE = REPO_ROOT / "data" / "research" / "phase27" / "feature_implementation_coverage.json"
+
+
+@pytest.fixture(scope="module")
+def coverage() -> dict:
+    if not COVERAGE.is_file():
+        pytest.skip("coverage matrix not built")
+    return json.loads(COVERAGE.read_text(encoding="utf-8"))
+
+
+def test_coverage_covers_every_audited_feature(coverage):
+    readiness = json.loads(
+        (REPO_ROOT / "data" / "research" / "phase26" / "feature_readiness.json").read_text())
+    assert {f["id"] for f in coverage["features"]} == {f["id"] for f in readiness["features"]}
+
+
+def test_coverage_tiers_agree_with_the_readiness_audit(coverage):
+    readiness = {f["id"]: f["tier"] for f in json.loads(
+        (REPO_ROOT / "data" / "research" / "phase26" / "feature_readiness.json").read_text()
+    )["features"]}
+    for feature in coverage["features"]:
+        assert feature["readinessTier"] == readiness[feature["id"]], feature["id"]
+
+
+def test_coverage_gives_every_feature_all_ten_layers(coverage):
+    layers = set(coverage["layerDefinitions"])
+    assert len(layers) == 10
+    for feature in coverage["features"]:
+        assert set(feature["layers"]) == layers, feature["id"]
+
+
+def test_no_layer_is_present_without_evidence(coverage):
+    for feature in coverage["features"]:
+        for name, entry in feature["layers"].items():
+            if entry["state"] == "present":
+                assert entry["evidence"], f"{feature['id']}.{name}"
+            for path in entry["evidence"]:
+                assert (REPO_ROOT / path).exists(), f"{feature['id']}.{name}: {path}"
+
+
+def test_exactly_one_feature_is_a_complete_phase27_workflow(coverage):
+    assert coverage["summary"]["completeWorkflows"] == ["measured-eta"]
+
+
+def test_the_completed_feature_has_no_missing_applicable_layer(coverage):
+    measured = next(f for f in coverage["features"] if f["id"] == "measured-eta")
+    for name, entry in measured["layers"].items():
+        assert entry["state"] in ("present", "not-applicable"), name
+
+
+def test_coverage_records_the_uncertainty_layer_as_the_weakest(coverage):
+    """The audit's central finding, asserted so a later phase cannot quietly lose it."""
+    by_layer = coverage["summary"]["byLayer"]
+    assert by_layer["uncertainty"]["present"] <= 2
+    assert by_layer["uncertainty"]["absent"] >= 4
+    assert by_layer["tests"]["present"] >= 10
+
+
+def test_coverage_lists_cross_cutting_gaps_with_evidence(coverage):
+    assert len(coverage["crossCuttingGaps"]) >= 5
+    for gap in coverage["crossCuttingGaps"]:
+        assert gap["evidence"]
+        assert gap["severity"] in {"major", "minor"}
+        for path in gap["evidence"]:
+            assert (REPO_ROOT / path).exists(), gap["id"]
+
+
+def test_coverage_markdown_is_not_stale():
+    import subprocess
+    result = subprocess.run([sys.executable, "ml/research/build_feature_coverage.py", "--check"],
+                            cwd=REPO_ROOT, capture_output=True, text=True)
+    assert result.returncode == 0, result.stdout + result.stderr

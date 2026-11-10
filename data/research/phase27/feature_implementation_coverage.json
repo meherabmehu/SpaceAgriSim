@@ -1,0 +1,935 @@
+{
+  "phase": 27,
+  "generatedBy": "ml/research/build_feature_coverage.py",
+  "generatedOn": "2026-11-10",
+  "layerDefinitions": {
+    "data": "A dataset, artefact or documented assumption the calculation reads",
+    "method": "The model or closed-form calculation",
+    "service": "The backend module that assembles the result",
+    "endpoint": "The HTTP route a client calls",
+    "inputCheck": "Request validation that rejects impossible inputs",
+    "outputCheck": "Validation that the result is physically coherent",
+    "uncertainty": "A quantified spread, or an explicit statement that none exists",
+    "provenance": "Sources and their limits travel with the answer",
+    "frontend": "A screen a user can reach and read",
+    "tests": "Automated tests covering the path"
+  },
+  "stateDefinitions": {
+    "present": "implemented and verified in this repository",
+    "partial": "implemented for some inputs or some of the layer's meaning",
+    "absent": "missing, and usable if built",
+    "not-applicable": "the layer does not apply to this kind of feature"
+  },
+  "summary": {
+    "byLayer": {
+      "data": {
+        "present": 6,
+        "partial": 1,
+        "absent": 5
+      },
+      "method": {
+        "present": 5,
+        "absent": 4,
+        "partial": 3
+      },
+      "service": {
+        "present": 8,
+        "absent": 4
+      },
+      "endpoint": {
+        "present": 7,
+        "absent": 4,
+        "partial": 1
+      },
+      "inputCheck": {
+        "present": 9,
+        "not-applicable": 3
+      },
+      "outputCheck": {
+        "present": 1,
+        "partial": 5,
+        "not-applicable": 6
+      },
+      "uncertainty": {
+        "present": 1,
+        "partial": 2,
+        "not-applicable": 4,
+        "absent": 5
+      },
+      "provenance": {
+        "present": 9,
+        "partial": 1,
+        "not-applicable": 2
+      },
+      "frontend": {
+        "present": 7,
+        "partial": 1,
+        "absent": 4
+      },
+      "tests": {
+        "present": 10,
+        "not-applicable": 2
+      }
+    },
+    "completeWorkflows": [
+      "measured-eta"
+    ],
+    "features": 12
+  },
+  "features": [
+    {
+      "id": "measured-eta",
+      "order": 1,
+      "claim": "Measured crop water use, compared against the platform's demand",
+      "readinessTier": "research-ready",
+      "phase27Status": "completed",
+      "layers": {
+        "data": {
+          "state": "present",
+          "evidence": [
+            "data/processed/phase26/schroder2021_lettuce_et.csv",
+            "data/metadata/phase26_acquisition_manifest.json"
+          ],
+          "note": "345 usable pot-days reduced to 11 treatment-mean dates, hash-verified"
+        },
+        "method": {
+          "state": "present",
+          "evidence": [
+            "backend/app/simulation/water.py"
+          ],
+          "note": "the shipped crop-relative demand path, called unmodified"
+        },
+        "service": {
+          "state": "present",
+          "evidence": [
+            "backend/app/water_evidence.py"
+          ],
+          "note": "assembles the benchmark, the comparison, the uncertainty and the limits"
+        },
+        "endpoint": {
+          "state": "present",
+          "evidence": [
+            "backend/app/routes/research.py"
+          ],
+          "note": "GET /api/water-use-evidence and POST /api/water-use-evidence/compare"
+        },
+        "inputCheck": {
+          "state": "present",
+          "evidence": [
+            "backend/app/routes/research.py",
+            "backend/tests/test_phase27_water_evidence.py"
+          ],
+          "note": "extra fields forbidden, area and light scale bounded, unknown crop 422"
+        },
+        "outputCheck": {
+          "state": "present",
+          "evidence": [
+            "backend/tests/test_phase27_water_evidence.py"
+          ],
+          "note": "the service must reproduce the independent pandas artefact's Spearman and pair count; every curve point must be positive and inside [0,1]"
+        },
+        "uncertainty": {
+          "state": "present",
+          "evidence": [
+            "ml/evaluation/phase26_measured_et_validation.json"
+          ],
+          "note": "between-pot spread, measured; plus the three denominators shown side by side and the explicit statement that no confidence interval exists"
+        },
+        "provenance": {
+          "state": "present",
+          "evidence": [
+            "data/research/dataset_catalog.json"
+          ],
+          "note": "DOI, licence, processed path and per-file SHA-256, with hashVerified computed"
+        },
+        "frontend": {
+          "state": "present",
+          "evidence": [
+            "frontend/src/pages/modules/WaterEvidencePanel.jsx",
+            "frontend/e2e/water-evidence.spec.js"
+          ],
+          "note": "inside the existing simulation lab; verdict, curve, spread, denominators"
+        },
+        "tests": {
+          "state": "present",
+          "evidence": [
+            "backend/tests/test_phase27_water_evidence.py",
+            "frontend/e2e/water-evidence.spec.js"
+          ],
+          "note": "24 backend tests and 4 browser tests across three viewports"
+        }
+      }
+    },
+    {
+      "id": "independent-et0",
+      "order": 2,
+      "claim": "The ET0 target is itself correct",
+      "readinessTier": "research-ready",
+      "phase27Status": "audited only",
+      "layers": {
+        "data": {
+          "state": "present",
+          "evidence": [
+            "data/raw/nasa_power/power_tucson_us.json",
+            "data/metadata/power_acquisition_manifest.json"
+          ],
+          "note": "POWER plus three cross-check sources"
+        },
+        "method": {
+          "state": "present",
+          "evidence": [
+            "backend/app/simulation/et0_fao56.py"
+          ]
+        },
+        "service": {
+          "state": "present",
+          "evidence": [
+            "backend/app/et0.py"
+          ]
+        },
+        "endpoint": {
+          "state": "present",
+          "evidence": [
+            "backend/app/routes/research.py"
+          ],
+          "note": "GET /api/reference-et0/estimate and /model"
+        },
+        "inputCheck": {
+          "state": "present",
+          "evidence": [
+            "backend/app/routes/research.py"
+          ]
+        },
+        "outputCheck": {
+          "state": "partial",
+          "evidence": [
+            "ml/evaluation/et0_dataset_quality.json"
+          ],
+          "note": "input-quality checks exist; no physical-plausibility gate on output"
+        },
+        "uncertainty": {
+          "state": "partial",
+          "evidence": [
+            "docs/ERA5_LAND_INDEPENDENT_VALIDATION.md"
+          ],
+          "note": "cross-source spread is reported; no confidence interval"
+        },
+        "provenance": {
+          "state": "present",
+          "evidence": [
+            "data/research/dataset_catalog.json"
+          ]
+        },
+        "frontend": {
+          "state": "present",
+          "evidence": [
+            "frontend/src/pages/modules/Methodology.jsx"
+          ],
+          "note": "shown as method documentation, not as a per-simulation result"
+        },
+        "tests": {
+          "state": "present",
+          "evidence": [
+            "backend/tests/test_phase23_reference_et0.py"
+          ]
+        }
+      }
+    },
+    {
+      "id": "yield-labels",
+      "order": 3,
+      "claim": "Predicted harvest mass per plant",
+      "readinessTier": "research-ready",
+      "phase27Status": "audited only",
+      "layers": {
+        "data": {
+          "state": "present",
+          "evidence": [
+            "ml/evaluation/lettuce_out_of_fold.csv"
+          ]
+        },
+        "method": {
+          "state": "present",
+          "evidence": [
+            "ml/artifacts/lettuce-earth-growth-v2.json"
+          ]
+        },
+        "service": {
+          "state": "present",
+          "evidence": [
+            "backend/app/routes/research.py"
+          ]
+        },
+        "endpoint": {
+          "state": "present",
+          "evidence": [
+            "backend/app/routes/research.py"
+          ],
+          "note": "POST /api/predict/lettuce-earth-growth-v2 and -v3"
+        },
+        "inputCheck": {
+          "state": "present",
+          "evidence": [
+            "backend/app/routes/research.py"
+          ],
+          "note": "typed ranges on every field; extra fields forbidden"
+        },
+        "outputCheck": {
+          "state": "partial",
+          "evidence": [
+            "backend/tests/test_phase9_models.py"
+          ],
+          "note": "no guard against extrapolation beyond the training envelope"
+        },
+        "uncertainty": {
+          "state": "partial",
+          "evidence": [
+            "ml/evaluation/lettuce_splits.json"
+          ],
+          "note": "leave-one-experiment-out error is reported; per-prediction interval is not"
+        },
+        "provenance": {
+          "state": "present",
+          "evidence": [
+            "ml/artifacts/registry.json"
+          ]
+        },
+        "frontend": {
+          "state": "present",
+          "evidence": [
+            "frontend/src/pages/modules/Evidence.jsx"
+          ]
+        },
+        "tests": {
+          "state": "present",
+          "evidence": [
+            "backend/tests/test_phase9_models.py"
+          ]
+        }
+      }
+    },
+    {
+      "id": "led-spectrum-response",
+      "order": 4,
+      "claim": "Response to specific LED spectra and photoperiods",
+      "readinessTier": "experimental",
+      "phase27Status": "audited only",
+      "layers": {
+        "data": {
+          "state": "present",
+          "evidence": [
+            "data/processed/phase26/greenlight2024_lettuce_harvest.csv"
+          ]
+        },
+        "method": {
+          "state": "absent",
+          "evidence": [],
+          "note": "no model consumes the spectrum table; the simulator annotates only"
+        },
+        "service": {
+          "state": "absent",
+          "evidence": []
+        },
+        "endpoint": {
+          "state": "absent",
+          "evidence": []
+        },
+        "inputCheck": {
+          "state": "present",
+          "evidence": [
+            "backend/app/models/simulation.py"
+          ],
+          "note": "lightSpectrum is a Literal of three values"
+        },
+        "outputCheck": {
+          "state": "not-applicable",
+          "evidence": []
+        },
+        "uncertainty": {
+          "state": "not-applicable",
+          "evidence": []
+        },
+        "provenance": {
+          "state": "present",
+          "evidence": [
+            "data/research/dataset_catalog.json"
+          ]
+        },
+        "frontend": {
+          "state": "partial",
+          "evidence": [
+            "frontend/src/pages/modules/Laboratory.jsx"
+          ],
+          "note": "the selector says it is an annotation and infers no response"
+        },
+        "tests": {
+          "state": "present",
+          "evidence": [
+            "backend/tests/test_phase26_datasets.py"
+          ],
+          "note": "the dataset is tested; the feature is not implemented"
+        }
+      }
+    },
+    {
+      "id": "nutrient-balance",
+      "order": 5,
+      "claim": "Nutrient solution management",
+      "readinessTier": "experimental",
+      "phase27Status": "audited only",
+      "layers": {
+        "data": {
+          "state": "partial",
+          "evidence": [
+            "data/raw/phase26/zenodo-halbert-2020-tomato-hydroponic/"
+          ],
+          "note": "acquired and verified, not preprocessed into a table"
+        },
+        "method": {
+          "state": "absent",
+          "evidence": []
+        },
+        "service": {
+          "state": "absent",
+          "evidence": []
+        },
+        "endpoint": {
+          "state": "absent",
+          "evidence": []
+        },
+        "inputCheck": {
+          "state": "not-applicable",
+          "evidence": []
+        },
+        "outputCheck": {
+          "state": "not-applicable",
+          "evidence": []
+        },
+        "uncertainty": {
+          "state": "not-applicable",
+          "evidence": []
+        },
+        "provenance": {
+          "state": "present",
+          "evidence": [
+            "data/research/dataset_catalog.json"
+          ]
+        },
+        "frontend": {
+          "state": "absent",
+          "evidence": []
+        },
+        "tests": {
+          "state": "present",
+          "evidence": [
+            "backend/tests/test_phase26_datasets.py"
+          ],
+          "note": "acquisition is tested; no nutrient feature exists"
+        }
+      }
+    },
+    {
+      "id": "sub-daily-weather",
+      "order": 6,
+      "claim": "Heat-stress and VPD excursion claims",
+      "readinessTier": "research-ready",
+      "phase27Status": "audited only",
+      "layers": {
+        "data": {
+          "state": "present",
+          "evidence": [
+            "data/raw/nasa_power/power_tucson_us.json"
+          ]
+        },
+        "method": {
+          "state": "present",
+          "evidence": [
+            "backend/app/simulation/gas_exchange.py"
+          ],
+          "note": "VPD is computed per scenario from temperature and humidity"
+        },
+        "service": {
+          "state": "present",
+          "evidence": [
+            "backend/app/simulation/serializers.py"
+          ]
+        },
+        "endpoint": {
+          "state": "present",
+          "evidence": [
+            "backend/app/routes/simulation.py"
+          ],
+          "note": "environment.vaporPressureDeficitKpa on /api/simulate"
+        },
+        "inputCheck": {
+          "state": "present",
+          "evidence": [
+            "backend/app/models/simulation.py"
+          ]
+        },
+        "outputCheck": {
+          "state": "partial",
+          "evidence": [
+            "backend/tests/test_engine.py"
+          ]
+        },
+        "uncertainty": {
+          "state": "absent",
+          "evidence": [],
+          "note": "the reported VPD is a point value with no stated source error"
+        },
+        "provenance": {
+          "state": "partial",
+          "evidence": [
+            "backend/app/simulation/serializers.py"
+          ],
+          "note": "method named; the weather source is not attached per value"
+        },
+        "frontend": {
+          "state": "present",
+          "evidence": [
+            "frontend/src/pages/modules/Laboratory.jsx"
+          ]
+        },
+        "tests": {
+          "state": "present",
+          "evidence": [
+            "backend/tests/test_engine.py"
+          ]
+        }
+      }
+    },
+    {
+      "id": "cultivar-metadata",
+      "order": 7,
+      "claim": "Cultivar-specific growth parameters",
+      "readinessTier": "experimental",
+      "phase27Status": "audited only",
+      "layers": {
+        "data": {
+          "state": "absent",
+          "evidence": [],
+          "note": "no experiment in-repo carries a cultivar label usable as an input"
+        },
+        "method": {
+          "state": "partial",
+          "evidence": [
+            "backend/app/simulation/crops.py"
+          ],
+          "note": "three species profiles, no cultivar field"
+        },
+        "service": {
+          "state": "present",
+          "evidence": [
+            "backend/app/simulation/crops.py"
+          ]
+        },
+        "endpoint": {
+          "state": "present",
+          "evidence": [
+            "backend/app/routes/simulation.py"
+          ],
+          "note": "GET /api/crops lists the profiles"
+        },
+        "inputCheck": {
+          "state": "present",
+          "evidence": [
+            "backend/app/models/simulation.py"
+          ]
+        },
+        "outputCheck": {
+          "state": "not-applicable",
+          "evidence": []
+        },
+        "uncertainty": {
+          "state": "absent",
+          "evidence": []
+        },
+        "provenance": {
+          "state": "present",
+          "evidence": [
+            "backend/app/routes/simulation.py"
+          ],
+          "note": "'Phase 1 simulation assumptions, not measured NASA values'"
+        },
+        "frontend": {
+          "state": "present",
+          "evidence": [
+            "frontend/src/pages/modules/Laboratory.jsx"
+          ]
+        },
+        "tests": {
+          "state": "present",
+          "evidence": [
+            "backend/tests/test_crops.py"
+          ]
+        }
+      }
+    },
+    {
+      "id": "mission-energy",
+      "order": 8,
+      "claim": "Energy and mass cost of a described mission",
+      "readinessTier": "experimental",
+      "phase27Status": "audited only",
+      "layers": {
+        "data": {
+          "state": "present",
+          "evidence": [
+            "backend/app/config/simulation_constants.py"
+          ],
+          "note": "stated energy assumptions, not measurements"
+        },
+        "method": {
+          "state": "present",
+          "evidence": [
+            "backend/app/simulation/engine.py"
+          ]
+        },
+        "service": {
+          "state": "present",
+          "evidence": [
+            "backend/app/simulation/engine.py"
+          ]
+        },
+        "endpoint": {
+          "state": "present",
+          "evidence": [
+            "backend/app/routes/simulation.py"
+          ]
+        },
+        "inputCheck": {
+          "state": "present",
+          "evidence": [
+            "backend/app/models/simulation.py"
+          ]
+        },
+        "outputCheck": {
+          "state": "partial",
+          "evidence": [
+            "backend/tests/test_engine.py"
+          ]
+        },
+        "uncertainty": {
+          "state": "absent",
+          "evidence": []
+        },
+        "provenance": {
+          "state": "present",
+          "evidence": [
+            "backend/app/simulation/model_description.py"
+          ]
+        },
+        "frontend": {
+          "state": "present",
+          "evidence": [
+            "frontend/src/pages/modules/Analytics.jsx"
+          ]
+        },
+        "tests": {
+          "state": "present",
+          "evidence": [
+            "backend/tests/test_engine.py"
+          ]
+        }
+      }
+    },
+    {
+      "id": "fractional-gravity",
+      "order": 9,
+      "claim": "Effect of Mars or lunar gravity on crop growth",
+      "readinessTier": "data-blocked",
+      "phase27Status": "audited only",
+      "layers": {
+        "data": {
+          "state": "absent",
+          "evidence": [],
+          "note": "no fractional-gravity growth dataset exists"
+        },
+        "method": {
+          "state": "partial",
+          "evidence": [
+            "backend/app/simulation/factors.py"
+          ],
+          "note": "an assumed sensitivity coefficient, documented as an assumption"
+        },
+        "service": {
+          "state": "present",
+          "evidence": [
+            "backend/app/simulation/factors.py"
+          ]
+        },
+        "endpoint": {
+          "state": "partial",
+          "evidence": [
+            "frontend/src/pages/modules/Laboratory.jsx"
+          ],
+          "note": "the endpoint accepts gravity; the UI deliberately does not expose it"
+        },
+        "inputCheck": {
+          "state": "present",
+          "evidence": [
+            "backend/app/models/simulation.py"
+          ]
+        },
+        "outputCheck": {
+          "state": "not-applicable",
+          "evidence": []
+        },
+        "uncertainty": {
+          "state": "absent",
+          "evidence": []
+        },
+        "provenance": {
+          "state": "present",
+          "evidence": [
+            "backend/app/simulation/serializers.py"
+          ],
+          "note": "warns that reduced-gravity response is an assumed penalty"
+        },
+        "frontend": {
+          "state": "absent",
+          "evidence": [],
+          "note": "removed on purpose: no data behind the response curve"
+        },
+        "tests": {
+          "state": "present",
+          "evidence": [
+            "backend/tests/test_factors.py"
+          ]
+        }
+      }
+    },
+    {
+      "id": "substrate-water",
+      "order": 10,
+      "claim": "Root-zone water status",
+      "readinessTier": "data-blocked",
+      "phase27Status": "audited only",
+      "layers": {
+        "data": {
+          "state": "absent",
+          "evidence": [],
+          "note": "no root-zone water-potential time series exists"
+        },
+        "method": {
+          "state": "partial",
+          "evidence": [
+            "backend/app/simulation/water.py"
+          ],
+          "note": "a single well-mixed store with a recovery-efficiency assumption"
+        },
+        "service": {
+          "state": "present",
+          "evidence": [
+            "backend/app/simulation/water.py"
+          ]
+        },
+        "endpoint": {
+          "state": "present",
+          "evidence": [
+            "backend/app/routes/simulation.py"
+          ]
+        },
+        "inputCheck": {
+          "state": "present",
+          "evidence": [
+            "backend/app/models/simulation.py"
+          ]
+        },
+        "outputCheck": {
+          "state": "partial",
+          "evidence": [
+            "backend/tests/test_water.py"
+          ]
+        },
+        "uncertainty": {
+          "state": "absent",
+          "evidence": []
+        },
+        "provenance": {
+          "state": "present",
+          "evidence": [
+            "backend/app/simulation/serializers.py"
+          ]
+        },
+        "frontend": {
+          "state": "present",
+          "evidence": [
+            "frontend/src/services/twinState.js"
+          ]
+        },
+        "tests": {
+          "state": "present",
+          "evidence": [
+            "backend/tests/test_water.py"
+          ]
+        }
+      }
+    },
+    {
+      "id": "imagery",
+      "order": 11,
+      "claim": "Plant health or growth stage from imagery",
+      "readinessTier": "data-blocked",
+      "phase27Status": "audited only",
+      "layers": {
+        "data": {
+          "state": "absent",
+          "evidence": [],
+          "note": "no paired imagery and harvest labels; the catalogue's imagery datasets are class E/F under their licences"
+        },
+        "method": {
+          "state": "absent",
+          "evidence": []
+        },
+        "service": {
+          "state": "absent",
+          "evidence": []
+        },
+        "endpoint": {
+          "state": "absent",
+          "evidence": []
+        },
+        "inputCheck": {
+          "state": "not-applicable",
+          "evidence": []
+        },
+        "outputCheck": {
+          "state": "not-applicable",
+          "evidence": []
+        },
+        "uncertainty": {
+          "state": "not-applicable",
+          "evidence": []
+        },
+        "provenance": {
+          "state": "not-applicable",
+          "evidence": []
+        },
+        "frontend": {
+          "state": "absent",
+          "evidence": []
+        },
+        "tests": {
+          "state": "not-applicable",
+          "evidence": []
+        }
+      }
+    },
+    {
+      "id": "long-run-climate",
+      "order": 12,
+      "claim": "Siting for a future climate",
+      "readinessTier": "data-blocked",
+      "phase27Status": "audited only",
+      "layers": {
+        "data": {
+          "state": "absent",
+          "evidence": [],
+          "note": "the CMIP6 downscaled product is catalogued at class D and not acquired"
+        },
+        "method": {
+          "state": "absent",
+          "evidence": []
+        },
+        "service": {
+          "state": "absent",
+          "evidence": []
+        },
+        "endpoint": {
+          "state": "absent",
+          "evidence": []
+        },
+        "inputCheck": {
+          "state": "not-applicable",
+          "evidence": []
+        },
+        "outputCheck": {
+          "state": "not-applicable",
+          "evidence": []
+        },
+        "uncertainty": {
+          "state": "not-applicable",
+          "evidence": []
+        },
+        "provenance": {
+          "state": "not-applicable",
+          "evidence": []
+        },
+        "frontend": {
+          "state": "absent",
+          "evidence": []
+        },
+        "tests": {
+          "state": "not-applicable",
+          "evidence": []
+        }
+      }
+    }
+  ],
+  "crossCuttingGaps": [
+    {
+      "id": "et0-parameter-not-in-frontend",
+      "finding": "POST /api/simulate accepts et0MmPerDay and cropCoefficient, and the whole reference-ET0 water path is reachable only by hand-crafting an HTTP request. No frontend control sets either field.",
+      "evidence": [
+        "backend/app/models/simulation.py",
+        "frontend/src/services/defaultConfig.js"
+      ],
+      "severity": "major",
+      "why": "a validated-by-construction capability that no user can reach",
+      "feasibility": "high: two optional request fields and one control group"
+    },
+    {
+      "id": "no-per-prediction-interval",
+      "finding": "The harvest models report leave-one-experiment-out error as a single number. No individual prediction carries a range, so a user cannot tell whether a given scenario is inside or outside the model's envelope.",
+      "evidence": [
+        "ml/evaluation/lettuce_splits.json"
+      ],
+      "severity": "major",
+      "why": "the platform's central claim is prediction, and a point estimate hides its own error",
+      "feasibility": "medium: quantile regression or a fold-based empirical interval"
+    },
+    {
+      "id": "no-out-of-distribution-warning",
+      "finding": "Model endpoints validate types and ranges but not whether an input lies outside the training envelope. A prediction at day 60 with 1000 umol/m2/s returns a number with no warning.",
+      "evidence": [
+        "backend/app/routes/research.py"
+      ],
+      "severity": "major",
+      "why": "an extrapolated prediction is indistinguishable from an interpolated one to a user",
+      "feasibility": "high: the training envelope is in the split artefacts"
+    },
+    {
+      "id": "water-paths-unarbitrated",
+      "finding": "Two water demand paths ship - crop-relative and ET0-reference - and the response names which one ran but does not say they cannot both be right.",
+      "evidence": [
+        "backend/app/simulation/serializers.py",
+        "ml/evaluation/phase26_measured_et_validation.json"
+      ],
+      "severity": "major",
+      "why": "a ~60 % difference between two live calculations with no arbiter",
+      "feasibility": "done for the evidence half in Phase 27; the arbiter needs per-day weather"
+    },
+    {
+      "id": "comparison-is-parameter-only",
+      "finding": "The comparison module compares parameter sets. The measured benchmark cannot be included in a comparison because it is not a scenario, and there is no export of the comparison with its provenance.",
+      "evidence": [
+        "backend/app/routes/workspace.py"
+      ],
+      "severity": "minor",
+      "why": "users comparing scenarios cannot see how any of them relates to measurement",
+      "feasibility": "high"
+    },
+    {
+      "id": "units-not-machine-readable",
+      "finding": "Units appear in field names (`waterUsed` is litres, `co2Removed` grams) and in descriptions, but no response field carries a unit object, so a client must read prose to know what it has.",
+      "evidence": [
+        "backend/app/models/simulation.py"
+      ],
+      "severity": "minor",
+      "why": "the stated goal includes consistent units across the platform",
+      "feasibility": "medium: an additive `units` map without breaking existing clients"
+    }
+  ]
+}
