@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | Phase start commit | `6b93fc1` (Phase 29, verified as remote `main` HEAD before any work) |
-| Final commit | recorded at the end of this document and verified against the remote |
+| Final commit | `5b5facf` — pushed to `origin/main` and re-read from the remote (`git ls-remote origin main` → `5b5facfe893c53c937c0207f6b4577a342b3ddf4`) |
 | Branch | `main` |
 | Production changes | **none** — no Render deploy, no environment variables, no service settings, no production database, no paid resources |
 
@@ -227,5 +227,6 @@ a documented multi-source failure with the capability removed.
 
 ---
 
-**Final commit:** see the head of this repository's `main`; the SHA is recorded in the delivery
-message and verified against `git ls-remote origin main` after the push.
+**Final commit:** `5b5facf`, on `main`, verified against the remote after the push
+(`refs/heads/main = 5b5facfe893c53c937c0207f6b4577a342b3ddf4`). Working tree clean apart from this
+document's own pinning commit.
