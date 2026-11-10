@@ -8,7 +8,8 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field
 
-from app import benchmarks, closed_loop, et0, external_validation, research, science_classification
+from app import (benchmarks, closed_loop, et0, external_validation, research,
+                 science_classification, water_evidence)
 from app.simulation import et0_fao56
 
 router = APIRouter(tags=["scientific data and models"])
@@ -21,6 +22,27 @@ class HarvestPredictionRequest(BaseModel):
     establishedPlants: int = Field(ge=0, le=10)
     environment: Literal["flight", "ground"]
     spectrum: Literal["red", "blue"]
+
+
+class WaterUseComparisonRequest(BaseModel):
+    """A live simulation's water demand, held against the measured lettuce benchmark.
+
+    Only three inputs are accepted because only three matter on the crop-relative demand path:
+    the crop, the area the demand is spread over, and the light scale. Everything else in a full
+    simulation request affects growth and gas exchange, not this equation - accepting them would
+    imply an influence this comparison does not have.
+    """
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    crop: Literal["lettuce", "tomato", "radish"] = "lettuce"
+    growingAreaM2: float = Field(
+        default=0.0112, gt=0, le=10_000,
+        description=("Area the demand is spread over, in m2. The default is the single-pot area "
+                     "assumption, which is what makes the comparison like-for-like with the "
+                     "measurement."))
+    lightScale: float = Field(
+        default=1.0, gt=0, le=3.0,
+        description=("The platform's light multiplier for the demand equation. 1.0 is the "
+                     "reference the measurement is compared at."))
 
 
 class MolecularPredictionRequest(BaseModel):
@@ -512,6 +534,30 @@ def external_validation_status():
 def benchmark_panel():
     """Measured NASA anchors held against the simulator, with the caveats attached."""
     return benchmarks.payload()
+
+
+@router.get("/water-use-evidence")
+def water_use_evidence():
+    """The measured crop water-use benchmark, its provenance and its limits.
+
+    This is the evidence behind the water feature. It is served as a benchmark, not a
+    calibration: `isValidation` is false everywhere it appears, and the limitations travel with
+    the numbers instead of living in a separate document nobody opens.
+    """
+    return water_evidence.benchmark()
+
+
+@router.post("/water-use-evidence/compare")
+def water_use_comparison(request: WaterUseComparisonRequest):
+    """Hold the shipped demand equation against the measured benchmark.
+
+    Never returns `validated`. The study publishes neither pot geometry nor per-day weather, so
+    the level cannot be identified from it and the simulator is left untouched.
+    """
+    try:
+        return water_evidence.compare(request.crop, request.lightScale, request.growingAreaM2)
+    except KeyError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @router.get("/datasets/live-status")
