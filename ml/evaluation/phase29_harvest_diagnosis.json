@@ -1,0 +1,349 @@
+{
+  "schema": "spaceagrisim.phase29_harvest_diagnosis/1",
+  "generatedAt": "2026-11-10T15:39:56.876048+00:00",
+  "modelDiagnosed": "lettuce-earth-growth-v3",
+  "reproduction": {
+    "protocol": "leave-one-experiment-out (GroupKFold, 4 folds), gradient boosting, log(fresh yield per m2) target, seed 42",
+    "folds": [
+      {
+        "fold": 0,
+        "heldOutExperiments": [
+          "EXP4"
+        ],
+        "trainRows": 1216,
+        "trainExperiments": [
+          "EXP1",
+          "EXP2",
+          "EXP3"
+        ],
+        "testRows": 432
+      },
+      {
+        "fold": 1,
+        "heldOutExperiments": [
+          "EXP2"
+        ],
+        "trainRows": 1216,
+        "trainExperiments": [
+          "EXP1",
+          "EXP3",
+          "EXP4"
+        ],
+        "testRows": 432
+      },
+      {
+        "fold": 2,
+        "heldOutExperiments": [
+          "EXP1"
+        ],
+        "trainRows": 1216,
+        "trainExperiments": [
+          "EXP2",
+          "EXP3",
+          "EXP4"
+        ],
+        "testRows": 432
+      },
+      {
+        "fold": 3,
+        "heldOutExperiments": [
+          "EXP3"
+        ],
+        "trainRows": 1296,
+        "trainExperiments": [
+          "EXP1",
+          "EXP2",
+          "EXP4"
+        ],
+        "testRows": 352
+      }
+    ],
+    "outOfFoldMAEgPerM2": 835.5,
+    "outOfFoldMedianAbsolutePercentageError": 28.44,
+    "outOfFoldMeanAbsolutePercentageError": 41.68,
+    "matchesArtifactMAE": true
+  },
+  "errorDecomposition": {
+    "byExperiment": {
+      "EXP1": {
+        "rows": 432,
+        "measuredMeanGPerM2": 3954.3,
+        "predictedMeanGPerM2": 3319.1,
+        "meanBiasGPerM2": -635.2,
+        "meanRelativeError": 0.3626,
+        "maeGPerM2": 1061.2
+      },
+      "EXP2": {
+        "rows": 432,
+        "measuredMeanGPerM2": 4548.5,
+        "predictedMeanGPerM2": 4023.8,
+        "meanBiasGPerM2": -524.7,
+        "meanRelativeError": -0.1493,
+        "maeGPerM2": 803.6
+      },
+      "EXP3": {
+        "rows": 352,
+        "measuredMeanGPerM2": 1640.9,
+        "predictedMeanGPerM2": 2146.1,
+        "meanBiasGPerM2": 505.2,
+        "meanRelativeError": 0.13,
+        "maeGPerM2": 850.5
+      },
+      "EXP4": {
+        "rows": 432,
+        "measuredMeanGPerM2": 2551.8,
+        "predictedMeanGPerM2": 2349.0,
+        "meanBiasGPerM2": -202.8,
+        "meanRelativeError": 0.1513,
+        "maeGPerM2": 629.5
+      }
+    },
+    "withinExperimentMAEgPerM2": 956.2,
+    "overallMAEgPerM2": 835.5,
+    "betweenExperimentShareOfMAE": -0.1445,
+    "reading": "Removing each experiment's own mean bias leaves 956 g/m2 of error against 836 overall. The difference is the model's inability to place a new experiment, not its inability to describe growth within one."
+  },
+  "trainingDesign": {
+    "airTemperature": {
+      "distinctValues": [
+        20,
+        24,
+        28,
+        32
+      ],
+      "distinctCount": 4,
+      "perExperimentDistinct": {
+        "EXP1": 2,
+        "EXP2": 2,
+        "EXP3": 2,
+        "EXP4": 2
+      }
+    },
+    "rootTemperature": {
+      "distinctValues": [
+        20,
+        24,
+        28,
+        32
+      ],
+      "distinctCount": 4,
+      "perExperimentDistinct": {
+        "EXP1": 2,
+        "EXP2": 2,
+        "EXP3": 2,
+        "EXP4": 2
+      }
+    },
+    "ppfd": {
+      "distinctValues": [
+        200,
+        400,
+        750
+      ],
+      "distinctCount": 3,
+      "perExperimentDistinct": {
+        "EXP1": 3,
+        "EXP2": 3,
+        "EXP3": 3,
+        "EXP4": 3
+      }
+    },
+    "temperatureByExperiment": {
+      "EXP1": {
+        "air": [
+          20,
+          24
+        ],
+        "root": [
+          20,
+          24
+        ]
+      },
+      "EXP2": {
+        "air": [
+          20,
+          24
+        ],
+        "root": [
+          28,
+          32
+        ]
+      },
+      "EXP3": {
+        "air": [
+          28,
+          32
+        ],
+        "root": [
+          20,
+          24
+        ]
+      },
+      "EXP4": {
+        "air": [
+          28,
+          32
+        ],
+        "root": [
+          28,
+          32
+        ]
+      }
+    },
+    "conclusion": "PPFD takes three values (200, 400, 750 umol/m2/s) and is varied inside every experiment. Air and root-zone temperature take four values overall (20, 24, 28, 32 C) but only two inside any one experiment, and the four experiments cover the four quadrants: EXP1 20/24-20/24, EXP2 20/24-28/32, EXP3 28/32-20/24, EXP4 28/32-28/32. So temperature is a gradient with two levels per experiment, confounded with experiment identity, while light is a clean three-level within-experiment gradient. Leave-one-experiment-out cross-validation therefore removes one temperature quadrant at a time and asks the model to place a quadrant it has never seen."
+  },
+  "externalChecks": {
+    "development": {
+      "study": "PeerJ 12:e17085 (Wicharuck et al. 2024)",
+      "countsAsValidation": false,
+      "whyNot": "its observations informed the v3 feature choice",
+      "observations": [
+        {
+          "id": "baby-cos-upper",
+          "measuredG": 84.5,
+          "predictedG": 157.4,
+          "ratio": 1.863
+        },
+        {
+          "id": "baby-cos-middle",
+          "measuredG": 123.8,
+          "predictedG": 123.4,
+          "ratio": 0.997
+        },
+        {
+          "id": "baby-cos-lower",
+          "measuredG": 92.9,
+          "predictedG": 123.4,
+          "ratio": 1.328
+        },
+        {
+          "id": "green-oak-upper",
+          "measuredG": 97.3,
+          "predictedG": 157.4,
+          "ratio": 1.618
+        },
+        {
+          "id": "green-oak-middle",
+          "measuredG": 190.7,
+          "predictedG": 123.4,
+          "ratio": 0.647
+        },
+        {
+          "id": "green-oak-lower",
+          "measuredG": 203.7,
+          "predictedG": 123.4,
+          "ratio": 0.606
+        }
+      ],
+      "medianRatio": 1.163,
+      "minRatio": 0.606,
+      "maxRatio": 1.863
+    },
+    "independentHoldout": {
+      "study": "Touliatos et al. 2016",
+      "observations": [
+        {
+          "id": "hhs-50",
+          "measuredG": 138.0,
+          "predictedG": 195.4,
+          "dailyLightIntegral": 26.21,
+          "ratio": 1.416,
+          "percentageError": 41.57
+        }
+      ],
+      "meanAbsolutePercentageError": 41.59,
+      "nObservations": 1,
+      "acceptanceCriterionPct": 30.0
+    }
+  },
+  "domainCheck": {
+    "peerj": {
+      "observations": 6,
+      "violations": [],
+      "dailyLightIntegralValues": [
+        13.91,
+        16.89,
+        30.11
+      ]
+    },
+    "touliatos": {
+      "observations": 1,
+      "violations": [
+        "daysAfterTransplant=35 outside [2, 29]",
+        "airTemperature=17 outside [20, 32]",
+        "rootTemperature=17 outside [20, 32]"
+      ]
+    }
+  },
+  "declaredDomainAudit": {
+    "daysAfterTransplant": {
+      "observed": [
+        2.0,
+        29.0
+      ],
+      "declared": [
+        2.0,
+        29.0
+      ],
+      "declaredMatchesObserved": true,
+      "declaredIsNarrower": false,
+      "declaredIsWider": false
+    },
+    "airTemperature": {
+      "observed": [
+        20.0,
+        32.0
+      ],
+      "declared": [
+        20.0,
+        32.0
+      ],
+      "declaredMatchesObserved": true,
+      "declaredIsNarrower": false,
+      "declaredIsWider": false
+    },
+    "rootTemperature": {
+      "observed": [
+        20.0,
+        32.0
+      ],
+      "declared": [
+        20.0,
+        32.0
+      ],
+      "declaredMatchesObserved": true,
+      "declaredIsNarrower": false,
+      "declaredIsWider": false
+    },
+    "dailyLightIntegral": {
+      "observed": [
+        11.52,
+        43.2
+      ],
+      "declared": [
+        11.5,
+        34.5
+      ],
+      "declaredMatchesObserved": false,
+      "declaredIsNarrower": true,
+      "declaredIsWider": true
+    },
+    "finding": "The declared dailyLightIntegral maximum is 34.5, but the training design reaches 43.2 (PPFD 750 at a 16 h photoperiod). The upper bound was hardcoded in train_lettuce_v3.py rather than derived from the data, so the served model reports a valid light level as out of domain and simultaneously advertises support up to a light level it never saw. The same hardcoding means a later change to the training data would silently leave the domain stale."
+  },
+  "trainingExperimentScale": {
+    "meanFreshMassGPerPlant": {
+      "EXP1": 158.2,
+      "EXP2": 181.9,
+      "EXP3": 65.6,
+      "EXP4": 102.1
+    },
+    "peakPerAreaYieldGPerM2": {
+      "EXP1": 22062.0,
+      "EXP2": 23552.0,
+      "EXP3": 8997.0,
+      "EXP4": 17486.0
+    },
+    "note": "Four experiments by one group, in a CO2-enriched plant factory at 25 plants/m2 and 16 h. The external studies are ambient greenhouse and a vertical farm; the systematic overprediction is consistent with an environment-variable difference the model has no input for."
+  },
+  "notDoneHere": "No model was refitted for production, no threshold was moved and no holdout observation was used to choose anything. This file is a diagnosis."
+}
