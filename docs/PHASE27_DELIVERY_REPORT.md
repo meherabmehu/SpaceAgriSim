@@ -21,7 +21,8 @@ threshold relaxation.
 | `80c6166` | phase27: audit feature implementation coverage across ten workflow layers |
 | `da03f0f` | phase27: audit simulation engine integrity with executable checks |
 | `df91594` | docs: phase 27 integration and feature audit reports |
-| *(this commit)* | docs: phase 27 delivery report |
+| `4ddc9d9` | docs: phase 27 delivery report |
+| `184fbd9` | phase27: remove a race from the water-evidence browser test |
 
 Every SHA is verified against the remote ref; the exact `git ls-remote` output is in §7.
 
@@ -49,6 +50,7 @@ Every SHA is verified against the remote ref; the exact `git ls-remote` output i
 | Frontend E2E | 89 passed | **93 passed** (desktop, tablet, mobile) |
 | Phase 26 water-use dates | 10 used, prose said 13 | **11**, and the prose matches |
 | Duplicated calculations | 1 found | 0 |
+| Flaky browser tests | 1 (mine, introduced this phase) | 0 — fixed with a direct API assertion |
 
 ## 4. Verification, reported by outcome
 
@@ -167,16 +169,31 @@ The scientific conclusion did not change. The numbers now match the data.
 
 ## 7. Remote verification
 
-`main` moved from `5800b9a` to the SHAs listed in §1. Verification command and output are recorded in
-the final commit's message and reproduced here after the push:
+`main` moved from `5800b9a` to `184fbd9dc2ff1b299f41a9cf8ae90748c5b6cb2e`.
 
 ```
 $ git ls-remote origin main
-<recorded below>
+184fbd9dc2ff1b299f41a9cf8ae90748c5b6cb2e   refs/heads/main
 ```
 
-*(The push and its `ls-remote` confirmation follow this commit; the transcript is in the chat record
-for this turn and in the commit message.)*
+**Fresh-clone verification of `main`** (a new `--depth 1` clone, not the working copy):
+
+| Check | Result |
+| --- | --- |
+| `python3 -m pytest -q backend/tests` (SQLite) | **1069 passed, 24 skipped** |
+| same suite against a new PostgreSQL database | **1093 passed, 0 skipped** |
+| `build_catalog.py --check` | up to date, 28 datasets |
+| `build_gap_matrix.py --check` | up to date, 12 gaps |
+| `build_feature_readiness.py --check` | up to date, 12 features |
+| `build_feature_coverage.py --check` | up to date, 12 features |
+| `npm run lint` / `typecheck` / `build` | clean / clean / built in 8.2 s |
+| `npx playwright test e2e/water-evidence.spec.js` | 12 passed |
+| Deliverable files present | all four Phase 27 documents, the coverage JSON, the service module, the panel and the spec |
+
+One extra finding from that verification: the first fresh-clone run failed 3 tests and errored 19
+because my own `CREATE DATABASE` for the test database had silently failed behind password
+authentication — an operator mistake in my verification, not a repository defect. Rerun against a
+database that existed: 1093 passed, 0 skipped.
 
 ## 8. Remaining work, ranked
 
