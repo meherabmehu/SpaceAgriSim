@@ -503,18 +503,21 @@ def test_emulator_is_classified_as_a_mechanistic_calculation():
 
 
 # --------------------------------------------------------------------------- catalogue + audit
-def test_catalogue_covers_twenty_three_datasets_with_the_documented_class_counts():
-    """23 since Phase 25 added ERA5 hourly and NOAA ISD-Lite and moved ERA5-Land to class C.
+def test_catalogue_counts_match_the_documented_class_counts():
+    """28 since Phase 26 added five acquired experimental datasets.
 
-    All three are class C on purpose: they are external validation inputs, and no dataset was
-    acquired to raise a count. Class A is unchanged at 1 because no training data was added.
+    Each of the five was downloaded, hashed against the publisher's own checksum and preprocessed
+    before it entered the catalogue; none was added to raise a count. The class assignments are
+    deliberately mixed - A for the one that now drives a committed validation artefact, B for the
+    two that are usable but unconsumed, C for the twenty-plant open-field tomato trial, D for the
+    tree gas-exchange series - because a class is an answer about usability, not a trophy.
     """
     payload = json.loads((ROOT / "data" / "research" / "dataset_catalog.json").read_text())
-    assert len(payload["datasets"]) == 23
+    assert len(payload["datasets"]) == 28
     counts = {}
     for dataset in payload["datasets"]:
         counts[dataset["usabilityClass"]] = counts.get(dataset["usabilityClass"], 0) + 1
-    assert counts == {"A": 1, "B": 5, "C": 8, "D": 3, "E": 5, "F": 1}
+    assert counts == {"A": 2, "B": 7, "C": 9, "D": 4, "E": 5, "F": 1}
 
 
 def test_only_the_imported_datasets_have_an_open_commercial_licence():

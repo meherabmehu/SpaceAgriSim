@@ -8,12 +8,30 @@
       "id": "measured-eta",
       "capability": "Predicted crop water use in litres per plant per day",
       "needed": "Measured evapotranspiration or sap-flow/lysimeter water use for the modelled crops at plant scale",
-      "available": "Reference ET0 computed from reanalysis (FAO-56 Penman-Monteith, now cross-validated against four sources), plus a learned emulator of that same computed quantity, plus a schema and an 18-check ingestion validator for a future water-use trial. Still no measured crop water use of any kind.",
-      "gapType": "no-data",
+      "available": "Reference ET0 computed from reanalysis (FAO-56 Penman-Monteith, cross-validated against four sources), a learned emulator of that computed quantity, an 18-check ingestion validator, and \u2014 new in Phase 26 \u2014 one third-party measured dataset: gravimetric per-pot evapotranspiration of greenhouse lettuce (Schr\u00f6der et al. 2021, 35 published pots, 345 usable pot-days), acquired, hashed and preprocessed in-repo with an out-of-sample comparison against the platform's water path.",
+      "gapType": "partially-addressed",
       "severity": "blocking",
       "howCouldBeClosed": "A lysimeter or gravimetric water-use trial in the target growth system. No open dataset measures per-plant water use in a controlled-environment facility for lettuce or mizuna; this is a measurement to commission, not a download. New ingestion apparatus does not change the status: a validator can reject a bad measurement, it cannot create one.",
-      "currentStatus": "open and blocking. The ingestion pipeline and the pre-registered protocol exist and are tested; zero measurements exist, so the ~60 % difference between the two water paths remains unarbitrated by data.",
-      "severityMeaning": "a claim in the product cannot be supported at all without this"
+      "currentStatus": "open and blocking on its original terms, with its first measured evidence bench. The comparison artefact (ml/evaluation/phase26_measured_et_validation.json) shows the seasonal shape is broadly right (Spearman 0.72 across 13 measurement days) while the level cannot be identified: on a pot-surface denominator the platform's flux is 0.24x the measurement, on a canopy-area denominator it is 2.7x. Because the study publishes neither pot diameter nor spacing, the sign of the discrepancy depends on an assumption, and no constant was changed.",
+      "severityMeaning": "a claim in the product cannot be supported at all without this",
+      "evidenceAdded": {
+        "phase": 26,
+        "datasets": [
+          "zenodo-schroder-2021-lettuce-pot"
+        ],
+        "artefacts": [
+          "ml/evaluation/phase26_measured_et_validation.json",
+          "data/processed/phase26/schroder2021_lettuce_et.csv"
+        ],
+        "severityUnchanged": "blocking",
+        "stillBlockedBy": [
+          "evapotranspiration includes substrate evaporation; transpiration is not separated",
+          "no per-day trial weather, so no reference ET0 and no crop coefficient",
+          "one cultivar, one greenhouse, four weeks, pot culture",
+          "terrestrial trial: no reduced-gravity information"
+        ],
+        "closedGap": "the 'no measured crop water use of any kind exists' clause only"
+      }
     },
     {
       "rank": 2,
@@ -44,12 +62,23 @@
       "id": "led-spectrum-response",
       "capability": "Response to specific LED spectra and photoperiods",
       "needed": "Biomass or yield response surfaces across spectra, PPFD and photoperiod for each supported crop",
-      "available": "One study, six observations, one crop (lettuce), light intensity and temperature axes only",
+      "available": "One study, six observations, one crop (lettuce), light intensity and temperature axes only Phase 26 added a hydroponic lettuce spectral-composition trial (Zenodo 20394352, 252 plants across four fixed spectra at constant PPFD and 16 h photoperiod), preprocessed but not yet consumed by a model.",
       "gapType": "insufficient",
       "severity": "major",
       "howCouldBeClosed": "The published CEA literature is large but fragmented: hundreds of small papers, no shared protocol, rarely any raw data. A meta-analysis with study-level random effects is the realistic route, and it needs a person reading papers, not an API.",
       "currentStatus": "open; DLI is computed from measured irradiance and the light-response coefficient is a literature estimate with a stated range",
-      "severityMeaning": "the claim is supportable only with a stated limitation that a user would notice"
+      "severityMeaning": "the claim is supportable only with a stated limitation that a user would notice",
+      "evidenceAdded": {
+        "phase": 26,
+        "datasets": [
+          "zenodo-greenlight-2024-lettuce"
+        ],
+        "artefacts": [
+          "data/processed/phase26/greenlight2024_lettuce_harvest.csv"
+        ],
+        "severityUnchanged": "major",
+        "note": "spectrum is manipulated with PPFD held constant, so this dataset cannot separate a spectral effect from a total-light effect and does not address the photoperiod half of the gap"
+      }
     },
     {
       "rank": 5,
@@ -109,7 +138,22 @@
       "severity": "blocking",
       "howCouldBeClosed": "More measured harvests with recorded light, temperature and duration. Until then the model's MAPE (41.7 %) is the honest number and the acceptance criterion is not met.",
       "currentStatus": "open; the model is registered as trained-exploratory and the failed criterion is exposed through the API",
-      "severityMeaning": "a claim in the product cannot be supported at all without this"
+      "severityMeaning": "a claim in the product cannot be supported at all without this",
+      "evidenceAdded": {
+        "phase": 26,
+        "datasets": [
+          "zenodo-greenlight-2024-lettuce",
+          "zenodo-schroder-2021-lettuce-pot",
+          "zenodo-ledphotoperiod-2025-tomato"
+        ],
+        "artefacts": [
+          "data/processed/phase26/greenlight2024_lettuce_harvest.csv",
+          "data/processed/phase26/schroder2021_lettuce_biomass.csv",
+          "data/processed/phase26/ledphotoperiod2025_tomato_harvest.csv"
+        ],
+        "severityUnchanged": "blocking",
+        "note": "per-plant harvest mass now exists for lettuce in two independent experiments and tomato in one open-field experiment. None of them is a controlled-environment tomato or a mizuna experiment, and none is a spaceflight label."
+      }
     },
     {
       "rank": 10,

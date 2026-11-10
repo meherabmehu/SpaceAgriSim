@@ -4,16 +4,16 @@ Generated from `data/research/dataset_catalog.json` on 2026-11-09 by `ml/researc
 
 Every dataset the project has evaluated, with the licence evidence behind its class. The class answers one question: could this support a claim the product makes, under the licence it is actually distributed with?
 
-**23 datasets evaluated.** A: 1, B: 5, C: 8, D: 3, E: 5, F: 1.
+**28 datasets evaluated.** A: 2, B: 7, C: 9, D: 4, E: 5, F: 1.
 
 ## Classes
 
 | Class | Meaning | Datasets |
 |---|---|---|
-| **A** | acquired and used in this repository | 1 |
-| **B** | usable after preprocessing - open licence, relevant variables, usable scale | 5 |
-| **C** | external validation only - wrong task, sensor or size for training | 8 |
-| **D** | scientific reference only - open and correct, but cannot validate this product | 3 |
+| **A** | acquired and used in this repository | 2 |
+| **B** | usable after preprocessing - open licence, relevant variables, usable scale | 7 |
+| **C** | external validation only - wrong task, sensor or size for training | 9 |
+| **D** | scientific reference only - open and correct, but cannot validate this product | 4 |
 | **E** | needs an agreement or a licence decision before use | 5 |
 | **F** | not suitable - the licence prohibits the intended use | 1 |
 
@@ -21,7 +21,7 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 
 | Grade | Meaning | Datasets |
 |---|---|---|
-| verified | the terms were read for this entry | 9 |
+| verified | the terms were read for this entry | 14 |
 | documented-secondary | a credible registry or dataset card states it | 10 |
 | unverified | believed open, not checked; must be checked before use | 4 |
 
@@ -52,6 +52,11 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 | [Present-day and future Koppen-Geiger climate classification (Beck et al. 2018)](#koppen-geiger-beck) | **D** | CC BY 4.0 | permitted with attribution | no |
 | [NASA NEX-GDDP-CMIP6 statistically downscaled climate projections](#nasa-nex-gddp-cmip6) | **D** | open (NASA NEX); model-specific citation requested | permitted | no |
 | [PlantWild in-the-wild plant image dataset](#plantwild) | **F** | CC BY-NC-ND 4.0 - non-commercial, no derivatives | not permitted (non-commercial, no derivatives) | no |
+| [Greenhouse lettuce pot experiment with gravimetric evapotranspiration (Schroeder et al. 2021)](#zenodo-schroder-2021-lettuce-pot) | **A** | CC BY 4.0 | permitted with attribution | yes |
+| [Green-light spectral composition trial in hydroponic lettuce](#zenodo-greenlight-2024-lettuce) | **B** | CC BY 4.0 | permitted with attribution | yes |
+| [Portable-platform LED photoperiod extension trial in open-field tomato](#zenodo-ledphotoperiod-2025-tomato) | **C** | CC BY 4.0 | permitted with attribution | yes |
+| [Tomato hydroponic nutrient-uptake and yield trial (Halbert-Howard et al. 2020)](#zenodo-halbert-2020-tomato-hydroponic) | **B** | CC BY 4.0 | permitted with attribution | no |
+| [Leaf gas-exchange series for Corymbia calophylla (marri)](#zenodo-marri-2021-gasexchange) | **D** | CC BY 4.0 | permitted with attribution | no |
 
 ## Detail
 
@@ -422,6 +427,86 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 - **Commercial use:** not permitted (non-commercial, no derivatives)
 - **Imported:** no - licence prohibits the intended use
 - **Caveat:** Kept in the catalogue so the exclusion is a documented decision, not an omission.
+
+### Greenhouse lettuce pot experiment with gravimetric evapotranspiration (Schroeder et al. 2021)  `zenodo-schroder-2021-lettuce-pot`
+
+- **Class:** A - acquired and used in this repository
+- **Why this class:** Acquired, hash-verified and used: it is the measured side of ml/evaluation/phase26_measured_et_validation.json, the first measured crop water-use comparison in the repository.
+- **Publisher:** Zenodo (Agronomy 11:1175 supplementary data)
+- **URL:** https://doi.org/10.5281/zenodo.5550230
+- **Format:** XLSX, 9 sheets
+- **Coverage:** 35 published pots across 7 treatments, 13 weighing dates over 35 days, greenhouse, 2019
+- **Variables:** per-pot evapotranspiration, shoot and root fresh/dry mass, water holding capacity, nutrient contents, fertilisation
+- **Units:** mL per pot per day; g per pot; % by mass
+- **Licence:** CC BY 4.0
+- **Licence evidence:** verified (https://zenodo.org/records/5550230)
+- **Commercial use:** permitted with attribution
+- **Imported:** yes - data/raw/phase26/ via scripts/datasets/acquire.py; data/processed/phase26/schroder2021_*
+- **Caveat:** Evapotranspiration, not transpiration: substrate evaporation is included. Pot diameter, pot spacing and per-day weather are unpublished, so no crop coefficient can be derived and any mm-per-day figure carries an area assumption. One cultivar, one greenhouse, Earth gravity.
+
+### Green-light spectral composition trial in hydroponic lettuce  `zenodo-greenlight-2024-lettuce`
+
+- **Class:** B - usable after preprocessing - open licence, relevant variables, usable scale
+- **Why this class:** Acquired and preprocessed into data/processed/phase26. Usable, but it manipulates spectral composition only, so it cannot support a light-intensity claim and does not yet train anything.
+- **Publisher:** Zenodo
+- **URL:** https://doi.org/10.5281/zenodo.20394352
+- **Format:** XLSX, 4 sheets
+- **Coverage:** 252 harvested plants across 4 spectral treatments, 35 days after sowing, constant 200 umol m^-2 s^-1 and 16 h photoperiod
+- **Variables:** leaf length and width, rosette width, fresh and dry mass, leaf number, leaf area, chlorophyll fluorescence indices, postharvest assays
+- **Units:** mm; g; count; mm^2 as published (see caveat); dimensionless indices
+- **Licence:** CC BY 4.0
+- **Licence evidence:** verified (https://zenodo.org/records/20394352)
+- **Commercial use:** permitted with attribution
+- **Imported:** yes - data/processed/phase26/greenlight2024_lettuce_harvest.csv and _fluorescence.csv
+- **Caveat:** The leafAreaMm2 column is numerically consistent with cm^2 rather than mm^2 (a 48 g lettuce with 20 leaves of 158 x 123 mm implies ~1350 cm^2). Recorded as an inference in the table's quality file, not corrected in the source.
+
+### Portable-platform LED photoperiod extension trial in open-field tomato  `zenodo-ledphotoperiod-2025-tomato`
+
+- **Class:** C - external validation only - wrong task, sensor or size for training
+- **Why this class:** Twenty plants in ambient field conditions: an external check on the shape of a tomato growth curve, not a controlled-environment observation and far too few plants to train on.
+- **Publisher:** Zenodo
+- **URL:** https://doi.org/10.5281/zenodo.23759737
+- **Format:** XLSX, 8 sheets
+- **Coverage:** 20 tagged plants, weekly non-destructive measurements, open agricultural field
+- **Variables:** plant height, leaf number, stem number, stem diameter, weekly RGB leaf area, final shoot and root mass, field environment
+- **Units:** cm; mm; count; g
+- **Licence:** CC BY 4.0
+- **Licence evidence:** verified (https://zenodo.org/records/23759737)
+- **Commercial use:** permitted with attribution
+- **Imported:** yes - data/processed/phase26/ledphotoperiod2025_tomato_growth.csv and _harvest.csv
+- **Caveat:** Open field, not a controlled environment. Ambient weather was not held constant and is not used as a model input.
+
+### Tomato hydroponic nutrient-uptake and yield trial (Halbert-Howard et al. 2020)  `zenodo-halbert-2020-tomato-hydroponic`
+
+- **Class:** B - usable after preprocessing - open licence, relevant variables, usable scale
+- **Why this class:** Acquired and licensed for reuse, but replicated at row level only and not yet preprocessed into a table, so nothing consumes it.
+- **Publisher:** Zenodo
+- **URL:** https://doi.org/10.5281/zenodo.5084389
+- **Format:** XLSX, 11 sheets
+- **Coverage:** per-row shoot and fruit biomass with nutrient uptake, concentration series and recycled-solution fractions
+- **Variables:** shoot fresh and dry mass, fruit number and mass, dry-matter ratio, shoot and fruit nutrient uptake, solution concentrations, recycled fraction
+- **Units:** g per row; mg per row; mmol L^-1; %
+- **Licence:** CC BY 4.0
+- **Licence evidence:** verified (https://zenodo.org/records/5084389)
+- **Commercial use:** permitted with attribution
+- **Imported:** no - acquired only; no processed table yet
+- **Caveat:** Row-level replication means the effective sample size is the number of rows, not the number of plants. Not a per-plant dataset.
+
+### Leaf gas-exchange series for Corymbia calophylla (marri)  `zenodo-marri-2021-gasexchange`
+
+- **Class:** D - scientific reference only - open and correct, but cannot validate this product
+- **Why this class:** A mature field tree, not a crop: the physiology is real and open, and it cannot validate a crop growth or water model. Reference only.
+- **Publisher:** Zenodo
+- **URL:** https://doi.org/10.5281/zenodo.5130624
+- **Format:** CSV, 2454 rows
+- **Coverage:** field tree, per-measurement records with PAR, conductance, transpiration and leaf temperature
+- **Variables:** assimilation, stomatal conductance, intercellular CO2, transpiration, PAR, leaf temperature, leaf-to-air VPD
+- **Units:** umol m^-2 s^-1; mol m^-2 s^-1; mmol m^-2 s^-1; umol m^-2 s^-1; degC; kPa
+- **Licence:** CC BY 4.0
+- **Licence evidence:** verified (https://zenodo.org/records/5130624)
+- **Commercial use:** permitted with attribution
+- **Imported:** no - acquired for reference; never used as a label or a feature
+- **Caveat:** Species mismatch. Any use as a crop prior would be an unstated extrapolation.
 
 ## What the catalogue does not do
 

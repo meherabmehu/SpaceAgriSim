@@ -13,14 +13,17 @@
  "counts": {
   "byClass": {
    "A": [
-    "nasa-power-daily"
+    "nasa-power-daily",
+    "zenodo-schroder-2021-lettuce-pot"
    ],
    "B": [
     "smap-l4-ssm",
     "mod13q1-v061",
     "gpm-imerg-3imerghh-07",
     "soilgrids-2-0",
-    "chirps-v2-0"
+    "chirps-v2-0",
+    "zenodo-greenlight-2024-lettuce",
+    "zenodo-halbert-2020-tomato-hydroponic"
    ],
    "C": [
     "era5-land",
@@ -30,7 +33,8 @@
     "osdr-plant-experiments",
     "peerj17085-lettuce",
     "deepweeds",
-    "fluxnet2015"
+    "fluxnet2015",
+    "zenodo-ledphotoperiod-2025-tomato"
    ],
    "E": [
     "plantvillage",
@@ -42,14 +46,15 @@
    "D": [
     "faostat",
     "koppen-geiger-beck",
-    "nasa-nex-gddp-cmip6"
+    "nasa-nex-gddp-cmip6",
+    "zenodo-marri-2021-gasexchange"
    ],
    "F": [
     "plantwild"
    ]
   },
   "byLicenseEvidence": {
-   "verified": 9,
+   "verified": 14,
    "documented-secondary": 10,
    "unverified": 4
   }
@@ -601,6 +606,138 @@
    "imported": false,
    "importNote": "licence prohibits the intended use",
    "caveat": "Kept in the catalogue so the exclusion is a documented decision, not an omission."
+  },
+  {
+   "id": "zenodo-schroder-2021-lettuce-pot",
+   "name": "Greenhouse lettuce pot experiment with gravimetric evapotranspiration (Schroeder et al. 2021)",
+   "publisher": "Zenodo (Agronomy 11:1175 supplementary data)",
+   "url": "https://doi.org/10.5281/zenodo.5550230",
+   "format": "XLSX, 9 sheets",
+   "coverage": "35 published pots across 7 treatments, 13 weighing dates over 35 days, greenhouse, 2019",
+   "variables": [
+    "per-pot evapotranspiration",
+    "shoot and root fresh/dry mass",
+    "water holding capacity",
+    "nutrient contents",
+    "fertilisation"
+   ],
+   "units": "mL per pot per day; g per pot; % by mass",
+   "license": "CC BY 4.0",
+   "licenseUrl": "https://zenodo.org/records/5550230",
+   "licenseEvidence": "verified",
+   "commercialUse": "permitted with attribution",
+   "usabilityClass": "A",
+   "classReason": "Acquired, hash-verified and used: it is the measured side of ml/evaluation/phase26_measured_et_validation.json, the first measured crop water-use comparison in the repository.",
+   "imported": true,
+   "importNote": "data/raw/phase26/ via scripts/datasets/acquire.py; data/processed/phase26/schroder2021_*",
+   "caveat": "Evapotranspiration, not transpiration: substrate evaporation is included. Pot diameter, pot spacing and per-day weather are unpublished, so no crop coefficient can be derived and any mm-per-day figure carries an area assumption. One cultivar, one greenhouse, Earth gravity."
+  },
+  {
+   "id": "zenodo-greenlight-2024-lettuce",
+   "name": "Green-light spectral composition trial in hydroponic lettuce",
+   "publisher": "Zenodo",
+   "url": "https://doi.org/10.5281/zenodo.20394352",
+   "format": "XLSX, 4 sheets",
+   "coverage": "252 harvested plants across 4 spectral treatments, 35 days after sowing, constant 200 umol m^-2 s^-1 and 16 h photoperiod",
+   "variables": [
+    "leaf length and width",
+    "rosette width",
+    "fresh and dry mass",
+    "leaf number",
+    "leaf area",
+    "chlorophyll fluorescence indices",
+    "postharvest assays"
+   ],
+   "units": "mm; g; count; mm^2 as published (see caveat); dimensionless indices",
+   "license": "CC BY 4.0",
+   "licenseUrl": "https://zenodo.org/records/20394352",
+   "licenseEvidence": "verified",
+   "commercialUse": "permitted with attribution",
+   "usabilityClass": "B",
+   "classReason": "Acquired and preprocessed into data/processed/phase26. Usable, but it manipulates spectral composition only, so it cannot support a light-intensity claim and does not yet train anything.",
+   "imported": true,
+   "importNote": "data/processed/phase26/greenlight2024_lettuce_harvest.csv and _fluorescence.csv",
+   "caveat": "The leafAreaMm2 column is numerically consistent with cm^2 rather than mm^2 (a 48 g lettuce with 20 leaves of 158 x 123 mm implies ~1350 cm^2). Recorded as an inference in the table's quality file, not corrected in the source."
+  },
+  {
+   "id": "zenodo-ledphotoperiod-2025-tomato",
+   "name": "Portable-platform LED photoperiod extension trial in open-field tomato",
+   "publisher": "Zenodo",
+   "url": "https://doi.org/10.5281/zenodo.23759737",
+   "format": "XLSX, 8 sheets",
+   "coverage": "20 tagged plants, weekly non-destructive measurements, open agricultural field",
+   "variables": [
+    "plant height",
+    "leaf number",
+    "stem number",
+    "stem diameter",
+    "weekly RGB leaf area",
+    "final shoot and root mass",
+    "field environment"
+   ],
+   "units": "cm; mm; count; g",
+   "license": "CC BY 4.0",
+   "licenseUrl": "https://zenodo.org/records/23759737",
+   "licenseEvidence": "verified",
+   "commercialUse": "permitted with attribution",
+   "usabilityClass": "C",
+   "classReason": "Twenty plants in ambient field conditions: an external check on the shape of a tomato growth curve, not a controlled-environment observation and far too few plants to train on.",
+   "imported": true,
+   "importNote": "data/processed/phase26/ledphotoperiod2025_tomato_growth.csv and _harvest.csv",
+   "caveat": "Open field, not a controlled environment. Ambient weather was not held constant and is not used as a model input."
+  },
+  {
+   "id": "zenodo-halbert-2020-tomato-hydroponic",
+   "name": "Tomato hydroponic nutrient-uptake and yield trial (Halbert-Howard et al. 2020)",
+   "publisher": "Zenodo",
+   "url": "https://doi.org/10.5281/zenodo.5084389",
+   "format": "XLSX, 11 sheets",
+   "coverage": "per-row shoot and fruit biomass with nutrient uptake, concentration series and recycled-solution fractions",
+   "variables": [
+    "shoot fresh and dry mass",
+    "fruit number and mass",
+    "dry-matter ratio",
+    "shoot and fruit nutrient uptake",
+    "solution concentrations",
+    "recycled fraction"
+   ],
+   "units": "g per row; mg per row; mmol L^-1; %",
+   "license": "CC BY 4.0",
+   "licenseUrl": "https://zenodo.org/records/5084389",
+   "licenseEvidence": "verified",
+   "commercialUse": "permitted with attribution",
+   "usabilityClass": "B",
+   "classReason": "Acquired and licensed for reuse, but replicated at row level only and not yet preprocessed into a table, so nothing consumes it.",
+   "imported": false,
+   "importNote": "acquired only; no processed table yet",
+   "caveat": "Row-level replication means the effective sample size is the number of rows, not the number of plants. Not a per-plant dataset."
+  },
+  {
+   "id": "zenodo-marri-2021-gasexchange",
+   "name": "Leaf gas-exchange series for Corymbia calophylla (marri)",
+   "publisher": "Zenodo",
+   "url": "https://doi.org/10.5281/zenodo.5130624",
+   "format": "CSV, 2454 rows",
+   "coverage": "field tree, per-measurement records with PAR, conductance, transpiration and leaf temperature",
+   "variables": [
+    "assimilation",
+    "stomatal conductance",
+    "intercellular CO2",
+    "transpiration",
+    "PAR",
+    "leaf temperature",
+    "leaf-to-air VPD"
+   ],
+   "units": "umol m^-2 s^-1; mol m^-2 s^-1; mmol m^-2 s^-1; umol m^-2 s^-1; degC; kPa",
+   "license": "CC BY 4.0",
+   "licenseUrl": "https://zenodo.org/records/5130624",
+   "licenseEvidence": "verified",
+   "commercialUse": "permitted with attribution",
+   "usabilityClass": "D",
+   "classReason": "A mature field tree, not a crop: the physiology is real and open, and it cannot validate a crop growth or water model. Reference only.",
+   "imported": false,
+   "importNote": "acquired for reference; never used as a label or a feature",
+   "caveat": "Species mismatch. Any use as a crop prior would be an unstated extrapolation."
   }
  ]
 }
