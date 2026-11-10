@@ -54,7 +54,7 @@ export default function MissionControls({ config, params, onChange, onReset, isL
     >
       {/* compact summary shown on small screens while the controls are collapsed */}
       <div className={`px-4 py-3 font-mono text-[13px] text-slate-400 lg:hidden ${openOnMobile ? 'hidden' : ''}`}>
-        {crop?.name} · {params.gravity} g · {params.radiation} mGy/day · {params.waterAvailability}% water · {params.lightHours} h ·{' '}
+        {crop?.name} · {params.radiation} mGy/day · {params.waterAvailability}% water · {params.lightHours} h ·{' '}
         {params.co2Level} ppm · {params.growingArea} m² · {params.simulationDays} d
       </div>
 
@@ -63,18 +63,7 @@ export default function MissionControls({ config, params, onChange, onReset, isL
           <CropSelector crops={config.crops} value={params.crop} onChange={(key) => onChange('crop', key)} />
         </ControlGroup>
 
-        <ControlGroup index="B" title="Environment" description="space-specific drivers">
-          <ParameterSlider
-            id="gravity"
-            label="Gravity"
-            accent="purple"
-            value={params.gravity}
-            {...p.gravity}
-            presets={config.gravityPresets}
-            presetNote={config.presetNote}
-            hint="Below 1 g the model applies a linear growth penalty scaled by crop sensitivity; above 1 g a smaller one."
-            onChange={(v) => onChange('gravity', v)}
-          />
+        <ControlGroup index="B" title="Environment" description="space-specific driver">
           <ParameterSlider
             id="radiation"
             label="Radiation dose rate"

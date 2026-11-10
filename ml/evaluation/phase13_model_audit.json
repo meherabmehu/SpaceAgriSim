@@ -704,6 +704,86 @@
    "check": "duplicate-safeguard-wording",
    "detail": "the OSD-320 finding must state that the shared arrays are not independent evidence",
    "passed": true
+  },
+  {
+   "check": "removed:gravity-field-absent",
+   "detail": "the simulation request must not accept a gravity input",
+   "passed": true
+  },
+  {
+   "check": "removed:gravity-factor-absent",
+   "detail": "gravity_factor() must not exist",
+   "passed": true
+  },
+  {
+   "check": "removed:gravity-constants-absent",
+   "detail": "the gravity penalty and Earth-gravity constants must not exist",
+   "passed": true
+  },
+  {
+   "check": "removed:harvest-catalogue-entry-present",
+   "detail": "the removed workflow must stay visible as removed, not disappear",
+   "passed": true
+  },
+  {
+   "check": "removed:harvest-catalogue-not-complete",
+   "detail": "unavailable",
+   "passed": true
+  },
+  {
+   "check": "removed:harvest-no-run-endpoint",
+   "detail": "an unavailable workflow must not advertise a run endpoint",
+   "passed": true
+  },
+  {
+   "check": "removed:harvest-forecast-flag",
+   "detail": "operationalForecast must be false",
+   "passed": true
+  },
+  {
+   "check": "removed:harvest-capability-unavailable",
+   "detail": "unavailable",
+   "passed": true
+  },
+  {
+   "check": "removed:harvest-evaluations-retained",
+   "detail": "4 evaluations, none passing",
+   "passed": true
+  },
+  {
+   "check": "removed:harvest-no-served-model",
+   "detail": "a removed workflow must not expose a served model or an input schema",
+   "passed": true
+  },
+  {
+   "check": "removed:endpoint-mounted:harvest-prediction:capability",
+   "detail": "GET /api/workflows/harvest-prediction/capability is advertised but not mounted",
+   "passed": true
+  },
+  {
+   "check": "removed:endpoint-mounted:harvest-prediction:parity",
+   "detail": "GET /api/workflows/harvest-prediction/parity is advertised but not mounted",
+   "passed": true
+  },
+  {
+   "check": "removed:endpoint-mounted:water-demand:capability",
+   "detail": "GET /api/workflows/water-demand/capability is advertised but not mounted",
+   "passed": true
+  },
+  {
+   "check": "removed:endpoint-mounted:water-demand:run",
+   "detail": "POST /api/workflows/water-demand/run is advertised but not mounted",
+   "passed": true
+  },
+  {
+   "check": "removed:endpoint-mounted:light-stress:capability",
+   "detail": "GET /api/workflows/light-stress/capability is advertised but not mounted",
+   "passed": true
+  },
+  {
+   "check": "removed:endpoint-mounted:light-stress:run",
+   "detail": "POST /api/workflows/light-stress/run is advertised but not mounted",
+   "passed": true
   }
  ],
  "failures": [],
@@ -823,7 +903,7 @@
    "severity": "documentation"
   }
  ],
- "generatedAt": "2026-11-09T20:08:47.366226+00:00",
+ "generatedAt": "2026-11-10T17:52:45.369903+00:00",
  "models": [
   {
    "baselineMetrics": {
@@ -1595,7 +1675,7 @@
  "summary": {
   "auditedModels": 9,
   "checksFailed": 0,
-  "checksRun": 141,
+  "checksRun": 157,
   "documentedGaps": 19,
   "externallyServedModels": 0,
   "registeredModels": 9,

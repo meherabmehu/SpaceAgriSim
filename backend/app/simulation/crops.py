@@ -30,7 +30,6 @@ class CropProfile:
     peak_water_l_per_day: float  # per m^2 at full canopy
     optimal_light_hours: float
     radiation_sensitivity: float
-    microgravity_sensitivity: float
 
     @property
     def total_biomass_g(self) -> float:
@@ -55,7 +54,6 @@ class CropProfile:
             "peakWaterLPerDay": self.peak_water_l_per_day,
             "optimalLightHours": self.optimal_light_hours,
             "radiationSensitivity": self.radiation_sensitivity,
-            "microgravitySensitivity": self.microgravity_sensitivity,
         }
 
 

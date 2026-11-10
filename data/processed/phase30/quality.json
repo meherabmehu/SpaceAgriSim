@@ -1,0 +1,447 @@
+{
+  "schema": "spaceagrisim.phase30_datasets/1",
+  "generatedAt": "2026-11-10T17:28:42.030038+00:00",
+  "datasets": {
+    "cea-wheat-apogee": {
+      "id": "cea-wheat-apogee",
+      "name": "Indoor wheat (cv. Apogee) under fully controlled environmental conditions",
+      "publisher": "Zenodo",
+      "doi": "10.5281/zenodo.17764612",
+      "license": "CC BY 4.0",
+      "file": "wheat_yields.xlsx",
+      "sourceSheet": "Data (Data S2, wheat yields)",
+      "crop": "wheat",
+      "cultivar": "Apogee",
+      "system": "indoor vertical farm, controlled-environment chambers",
+      "observationUnit": "harvested sub-plot within one experiment",
+      "independenceUnit": "experiment (chamber run)",
+      "processedFiles": [
+        "data/processed/phase30/cea_wheat_subplots.csv",
+        "data/processed/phase30/cea_wheat_experiments.csv"
+      ],
+      "notAcquired": {
+        "file": "20260801_Data_S1_EnvironmentalConditions.zip",
+        "bytes": 33322741,
+        "reason": "the chamber climate-computer logs. Data S2 already carries the per-experiment environment means computed by the data authors, and the raw logs would add no independent information to a model fitted at experiment level."
+      },
+      "rawSha256": "385d4680067832026296ec6bec1ce8757fa4bc42bd42d6f37b62899b52dc33c5",
+      "subplotRows": 719,
+      "experimentRows": 39,
+      "experimentsWithYieldAndEnvironment": 34,
+      "experimentsWhereEnvironmentVariesWithinTheRun": {
+        "meanPpfdUmolPerM2S": 33,
+        "photoperiodHours": 16,
+        "co2Ppm": 1,
+        "airTemperatureC": 1,
+        "relativeHumidityPct": 0,
+        "lightIntegralDayUnidentified": 0,
+        "cycleLengthDays": 0
+      },
+      "excluded": {
+        "rows without a real experiment id (summary artefact)": 1
+      },
+      "environmentRanges": {
+        "meanPpfdUmolPerM2S": {
+          "n": 38,
+          "min": 235.036,
+          "max": 1084.2223,
+          "distinct": 38
+        },
+        "photoperiodHours": {
+          "n": 38,
+          "min": 6.0779,
+          "max": 22.5641,
+          "distinct": 38
+        },
+        "co2Ppm": {
+          "n": 38,
+          "min": 400.0,
+          "max": 1478.0,
+          "distinct": 9
+        },
+        "airTemperatureC": {
+          "n": 38,
+          "min": 21.1,
+          "max": 28.0,
+          "distinct": 23
+        },
+        "relativeHumidityPct": {
+          "n": 38,
+          "min": 55.0,
+          "max": 72.0,
+          "distinct": 14
+        },
+        "cycleLengthDays": {
+          "n": 37,
+          "min": 39.0,
+          "max": 91.0,
+          "distinct": 22
+        }
+      },
+      "yieldRange": {
+        "n": 37,
+        "min": 0.0625,
+        "max": 1.8076,
+        "distinct": 37
+      },
+      "unitMap": {
+        "experimentId": {
+          "unit": "identifier",
+          "modelled": true
+        },
+        "system": {
+          "unit": "category",
+          "modelled": true
+        },
+        "threshingDate": {
+          "unit": "date",
+          "modelled": true
+        },
+        "grainYieldKgPerM2": {
+          "unit": "kg/m2",
+          "modelled": true
+        },
+        "grainMassPerSpikeMg": {
+          "unit": "mg",
+          "modelled": true
+        },
+        "spikesPerM2": {
+          "unit": "count/m2",
+          "modelled": true
+        },
+        "grainsPerM2": {
+          "unit": "count/m2",
+          "modelled": true
+        },
+        "grainsPerSpike": {
+          "unit": "count",
+          "modelled": true
+        },
+        "harvestIndex": {
+          "unit": "fraction",
+          "modelled": true
+        },
+        "grainFillMgPerDay": {
+          "unit": "mg/day",
+          "modelled": true
+        },
+        "grainFillRate": {
+          "unit": "unstated in source",
+          "modelled": true
+        },
+        "lightUseEfficiencyGPerMol": {
+          "unit": "g/mol",
+          "modelled": true
+        },
+        "annualisedYieldKgPerM2Yr": {
+          "unit": "kg/m2/yr",
+          "modelled": true
+        },
+        "threshingResidueKgPerM2": {
+          "unit": "kg/m2",
+          "modelled": true
+        },
+        "biomassKgPerM2": {
+          "unit": "kg/m2",
+          "modelled": true
+        },
+        "plantHeightCm": {
+          "unit": "cm",
+          "modelled": true
+        },
+        "cycleLengthDays": {
+          "unit": "day",
+          "modelled": true
+        },
+        "anthesisLengthDays": {
+          "unit": "day",
+          "modelled": true
+        },
+        "lightSumMolPerM2": {
+          "unit": "mol/m2",
+          "modelled": true
+        },
+        "lightIntegralDayUnidentified": {
+          "unit": null,
+          "modelled": false,
+          "why": "plausibly a daily photon integral (mol/m2/day), but the workbook gives no unit tag for it, the neighbouring column carries a value three orders of magnitude larger, and neither matches Light_SUM divided by the cycle length. Unidentifiable, so it is carried for fidelity and never modelled or converted."
+        },
+        "lightIntegralNightUnidentified": {
+          "unit": null,
+          "modelled": false,
+          "why": "same unidentified quantity as the day column, recorded for fidelity only"
+        },
+        "meanPpfdUmolPerM2S": {
+          "unit": "umol/m2/s",
+          "modelled": true
+        },
+        "photoperiodHours": {
+          "unit": "h/day",
+          "modelled": true
+        },
+        "co2Ppm": {
+          "unit": "ppm",
+          "modelled": true
+        },
+        "airTemperatureC": {
+          "unit": "degC",
+          "modelled": true
+        },
+        "temperatureSumDegCDay": {
+          "unit": "degC.day",
+          "modelled": true
+        },
+        "relativeHumidityPct": {
+          "unit": "%",
+          "modelled": true
+        },
+        "borderRows": {
+          "unit": "category",
+          "modelled": true
+        },
+        "positionId": {
+          "unit": "identifier",
+          "modelled": true
+        }
+      }
+    },
+    "lettuce-multistudy-lue": {
+      "id": "lettuce-multistudy-lue",
+      "name": "Lettuce light-use-efficiency compilation across published studies",
+      "publisher": "Zenodo",
+      "doi": "10.5281/zenodo.14640245",
+      "license": "CC BY 4.0",
+      "file": "lue_dataset.xlsx",
+      "sourceSheet": "dataset",
+      "crop": "lettuce",
+      "cultivar": "mixed across studies",
+      "system": "controlled environment, mixed across studies",
+      "observationUnit": "published treatment mean",
+      "independenceUnit": "study",
+      "derivedFrom": "a compilation of published lettuce light-use-efficiency experiments; the source workbook cites the underlying study on every row and that citation is preserved as `citation`",
+      "processedFiles": [
+        "data/processed/phase30/lettuce_multistudy.csv"
+      ],
+      "rawSha256": "feb96c6c79c3997fde182dedbd252a76aa41ddd6d980db34c8ce2beaf434cedd",
+      "rows": 53,
+      "studies": 40,
+      "treatmentsPerStudy": {
+        "Ahmed": 1,
+        "Bhuiyan": 1,
+        "Bian": 1,
+        "Cammarisano": 2,
+        "Carotti": 1,
+        "Chen": 3,
+        "Cope": 1,
+        "Esmaili": 1,
+        "G\u00f3mez": 1,
+        "Hyt\u00f6nen": 1,
+        "Incrocci": 1,
+        "Jayalath": 1,
+        "Jin": 1,
+        "Joshi": 1,
+        "Kelly": 1,
+        "Kim": 2,
+        "Kong": 1,
+        "Kook": 1,
+        "Kuno": 1,
+        "Kusuma": 1,
+        "Lee": 1,
+        "Li": 1,
+        "Meng": 3,
+        "Morsi": 1,
+        "Nguyen": 1,
+        "Ohtake": 2,
+        "Pennisi": 4,
+        "Rouphael": 1,
+        "Saengtharatip": 1,
+        "Spalholz": 1,
+        "Tosti": 1,
+        "Touliatos": 1,
+        "Va\u0161takaite-Kairien": 1,
+        "Voutsinos": 1,
+        "Wang": 1,
+        "Xu": 1,
+        "Yan": 1,
+        "Yi": 1,
+        "Zhang": 2,
+        "Zou": 3
+      },
+      "coverage": {
+        "co2Ppm": 53,
+        "photoperiodHours": 52,
+        "ppfdUmolPerM2S": 49,
+        "dailyLightIntegralMolPerM2Day": 53,
+        "plantAgeDays": 53,
+        "cumulativeDliMolPerM2": 53,
+        "plantDensityPerM2": 52,
+        "shootDryMassG": 53
+      },
+      "ranges": {
+        "shootDryMassG": {
+          "n": 53,
+          "min": 0.0,
+          "max": 16.5,
+          "distinct": 38
+        },
+        "co2Ppm": {
+          "n": 53,
+          "min": 40.0,
+          "max": 2800.0,
+          "distinct": 23
+        },
+        "photoperiodHours": {
+          "n": 52,
+          "min": 12.0,
+          "max": 24.0,
+          "distinct": 7
+        },
+        "ppfdUmolPerM2S": {
+          "n": 49,
+          "min": 43.0,
+          "max": 428.0,
+          "distinct": 25
+        },
+        "plantDensityPerM2": {
+          "n": 52,
+          "min": 16.0,
+          "max": 1372.0,
+          "distinct": 31
+        }
+      },
+      "unitMap": {
+        "sourceRowId": {
+          "unit": "identifier",
+          "modelled": false
+        },
+        "studyLabel": {
+          "unit": "identifier",
+          "modelled": false
+        },
+        "citation": {
+          "unit": "text",
+          "modelled": false
+        },
+        "co2Ppm": {
+          "unit": "ppm",
+          "modelled": true
+        },
+        "photoperiodHours": {
+          "unit": "h/day",
+          "modelled": true
+        },
+        "ppfdUmolPerM2S": {
+          "unit": "umol/m2/s",
+          "modelled": true
+        },
+        "dailyLightIntegralMolPerM2Day": {
+          "unit": "mol/m2/day",
+          "modelled": true
+        },
+        "plantAgeDays": {
+          "unit": "day",
+          "modelled": true
+        },
+        "cumulativeDliMolPerM2": {
+          "unit": "mol",
+          "modelled": true
+        },
+        "plantDensityPerM2": {
+          "unit": "plant/m2",
+          "modelled": true
+        },
+        "shootDryMassG": {
+          "unit": "g",
+          "modelled": true
+        },
+        "lightUseEfficiencyDryGPerMol": {
+          "unit": "g/mol",
+          "modelled": true
+        },
+        "lightUseEfficiencyFreshGPerMol": {
+          "unit": "g/mol",
+          "modelled": true
+        },
+        "molsPerKg": {
+          "unit": "mol/kg",
+          "modelled": true
+        }
+      }
+    }
+  },
+  "rejected": [
+    {
+      "doi": "10.5281/zenodo.8410252",
+      "source": "Zenodo",
+      "title": "Piikkio2023 lettuce 3D pointcloud dataset for fresh weight estimation",
+      "reason": "licence field is null, so it is not redistributable and cannot be committed"
+    },
+    {
+      "doi": "10.5281/zenodo.20759414",
+      "source": "Zenodo",
+      "bytes": 39000000000,
+      "reason": "39 GB, and the variability it varies is fertigation rather than light or temperature"
+    },
+    {
+      "doi": "10.5281/zenodo.22004997",
+      "source": "Zenodo",
+      "reason": "measures the light environment only; no crop response variable"
+    },
+    {
+      "doi": "10.5281/zenodo.20394352",
+      "source": "Zenodo",
+      "reason": "a reanalysis of the Greenlight trial already used for workflow C; adding it would double-count one experiment rather than add an independent one"
+    },
+    {
+      "doi": "10.5281/zenodo.17712088",
+      "source": "Zenodo",
+      "reason": "simulation output, not measurement"
+    },
+    {
+      "doi": "10.5281/zenodo.16271245",
+      "source": "Zenodo",
+      "reason": "pak choi; wrong species for every modelled crop"
+    },
+    {
+      "doi": "10.5281/zenodo.14529253",
+      "source": "Zenodo",
+      "reason": "wheat SPAD readings; the response variable is a chlorophyll index, not biomass or yield"
+    },
+    {
+      "doi": "10.5281/zenodo.22280237",
+      "source": "Zenodo",
+      "reason": "spinach far-red timing, 22 KB: one treatment series with no yield response variable"
+    },
+    {
+      "doi": "10.5061/dryad.73n5tb3d4",
+      "source": "Dryad",
+      "bytes": 8000000000,
+      "reason": "8 GB of UAV imagery only; download also returned 401 without an account"
+    },
+    {
+      "doi": "10.5281/zenodo.5797817",
+      "source": "Zenodo",
+      "title": "Long time series (2001-2015) high-resolution crop yield and water productivity dataset of China",
+      "reason": "field-scale yield and water productivity from remote sensing over maize and wheat. It contains no deficit treatment, no water-application gradient and therefore no crop-specific Ky; it cannot support a water-deficit yield-loss claim."
+    },
+    {
+      "doi": "10.5281/zenodo.7895889",
+      "source": "Zenodo",
+      "title": "Data of crop yield derived from H2020 Diverfarming project",
+      "reason": "field-grown mandarin with alley crops under control and regulated deficit irrigation. Wrong species and system for this platform's crops, and the design does not report a yield response factor."
+    },
+    {
+      "doi": "10.5061/dryad.gqnk98skd",
+      "source": "Dryad",
+      "title": "Water stress and insect herbivory interactively reduce crop yield while the insect pollination benefit is conserved",
+      "reason": "faba bean field experiment where water stress is crossed with herbivory and pollination. The water effect cannot be separated from the biotic treatments, so it cannot produce a crop water-production function."
+    }
+  ],
+  "transformations": [
+    "column names mapped to unit-carrying names; the map is in this file's builder",
+    "no imputation: blanks stay blank and coverage is reported per field",
+    "no unit conversion: published units are carried in the column name",
+    "experiment-level aggregation computes the mean of sub-plot yields and refuses to average an environment that changed within an experiment (reported as a range instead)",
+    "literature rows are labelled observationKind=published-treatment-mean; they are means reported by other authors, not plants weighed in this repository"
+  ]
+}

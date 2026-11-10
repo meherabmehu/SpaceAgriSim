@@ -3,13 +3,12 @@ import { GrowthPlot } from "../../charts/GrowthPlot.jsx";
 import { Limitations, JsonDetails } from "./moduleSupport.jsx";
 import { WaterEvidencePanel } from "./WaterEvidencePanel.jsx";
 import { RefreshCw, FlaskConical } from "lucide-react";
-// Gravity and the radiation dose rate are deliberately not user controls here.
+// Gravity is not a control here, and since Phase 30 it is not an input either.
 //
-// Neither has a dataset behind it: a 2026-11-09 search of NASA sources found no crop fresh-weight
-// dataset across fractional gravity (the ISS fractional-gravity work is transcriptomic and
-// morphological) and no crop-yield dataset at habitat-relevant chronic dose rates. Rather than
-// offer a slider whose response curve is invented, the world is chosen from the presets, where
-// gravity and dose rate are carried as scenario context.
+// A 2026-11-09 search of NASA sources found no crop fresh-weight dataset across fractional gravity
+// (the ISS fractional-gravity work is transcriptomic and morphological), so the placeholder
+// penalty was removed from the model rather than kept behind a slider. The radiation dose rate is
+// still a scenario input with an assumed response curve; it is chosen from the presets.
 const CONTROLS = [
   [
     "waterAvailability",

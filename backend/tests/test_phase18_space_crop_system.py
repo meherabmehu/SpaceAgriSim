@@ -114,7 +114,7 @@ def test_the_crop_readiness_list_is_recorded_with_its_honest_totals(crop_tm):
 # -- the supraoptimal-CO2 limit now reaches the user ---------------------------
 def test_a_run_above_the_measured_optimum_carries_a_warning(client):
     body = client.post("/api/simulate", json={
-        "crop": "lettuce", "gravity": 0.16, "radiation": 0.3, "waterAvailability": 100,
+        "crop": "lettuce", "radiation": 0.3, "waterAvailability": 100,
         "lightHours": 16, "co2Level": 2000, "growingArea": 10, "simulationDays": 30,
     }).json()
     assert any("supraoptimal" in warning.lower() or "Above 1000 ppm" in warning
@@ -123,7 +123,7 @@ def test_a_run_above_the_measured_optimum_carries_a_warning(client):
 
 def test_a_run_at_the_measured_optimum_does_not_carry_that_warning(client):
     body = client.post("/api/simulate", json={
-        "crop": "lettuce", "gravity": 0.16, "radiation": 0.3, "waterAvailability": 100,
+        "crop": "lettuce", "radiation": 0.3, "waterAvailability": 100,
         "lightHours": 16, "co2Level": 1000, "growingArea": 10, "simulationDays": 30,
     }).json()
     assert not any("Above 1000 ppm" in warning for warning in body["warnings"])

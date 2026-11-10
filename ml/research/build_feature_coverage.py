@@ -56,6 +56,7 @@ STATES = {
     "partial": "implemented for some inputs or some of the layer's meaning",
     "absent": "missing, and usable if built",
     "not-applicable": "the layer does not apply to this kind of feature",
+    "retired": "removed in Phase 30 - the capability is gone and a test proves it is gone",
 }
 
 # Every feature from the Phase 26 readiness audit, with the workflow layers as they actually stand.
@@ -136,24 +137,37 @@ FEATURES: list[dict[str, Any]] = [
         "id": "yield-labels",
         "order": 3,
         "claim": "Predicted harvest mass per plant",
-        "readinessTier": "research-ready",
+        "readinessTier": "removed",
         "phase27Status": "audited only",
+        "phase30Status": "removed",
+        "removal": (
+            "Operational harvest forecasting was removed in Phase 30. A leave-one-study-out "
+            "evaluation over 40 published lettuce studies returned 310.17 % MAPE against the "
+            "unchanged 30 % criterion, with the mean baseline selected; the Phase 28 holdout had "
+            "already returned 41.59 %. POST /api/workflows/harvest-prediction/run is a 410 "
+            "tombstone, the catalogue entry is 'unavailable', and the measured-versus-model parity "
+            "record remains readable."
+        ),
         "layers": {
-            "data": {"state": "present", "evidence": ["ml/evaluation/lettuce_out_of_fold.csv"]},
-            "method": {"state": "present", "evidence": ["ml/artifacts/lettuce-earth-growth-v2.json"]},
-            "service": {"state": "present", "evidence": ["backend/app/routes/research.py"]},
-            "endpoint": {"state": "present", "evidence": ["backend/app/routes/research.py"],
-                         "note": "POST /api/predict/lettuce-earth-growth-v2 and -v3"},
-            "inputCheck": {"state": "present", "evidence": ["backend/app/routes/research.py"],
-                           "note": "typed ranges on every field; extra fields forbidden"},
-            "outputCheck": {"state": "partial", "evidence": ["backend/tests/test_phase9_models.py"],
-                            "note": "no guard against extrapolation beyond the training envelope"},
-            "uncertainty": {"state": "partial", "evidence": ["ml/evaluation/lettuce_splits.json"],
-                            "note": "leave-one-experiment-out error is reported; per-prediction "
-                                    "interval is not"},
-            "provenance": {"state": "present", "evidence": ["ml/artifacts/registry.json"]},
-            "frontend": {"state": "present", "evidence": ["frontend/src/pages/modules/Evidence.jsx"]},
-            "tests": {"state": "present", "evidence": ["backend/tests/test_phase9_models.py"]},
+            "data": {"state": "retired", "evidence": ["data/processed/phase30/lettuce_multistudy.csv"],
+                     "note": "the evaluation data is kept; the served model is not"},
+            "method": {"state": "retired", "evidence": ["ml/evaluation/phase30_harvest_crossstudy.json"],
+                       "note": "the model and its failed evaluation are recorded, not served"},
+            "service": {"state": "retired", "evidence": ["backend/app/workflows/harvest.py"]},
+            "endpoint": {"state": "retired", "evidence": ["backend/app/routes/workflows.py"],
+                         "note": "POST .../run answers 410; GET .../capability and .../parity remain"},
+            "inputCheck": {"state": "retired", "evidence": []},
+            "outputCheck": {"state": "retired", "evidence": []},
+            "uncertainty": {"state": "retired", "evidence": [],
+                            "note": "the interval used to span a factor of 29; it is no longer served"},
+            "provenance": {"state": "present", "evidence": ["backend/app/workflows/harvest.py"],
+                           "note": "the removal reason and every failed evaluation stay readable"},
+            "frontend": {"state": "retired", "evidence": ["frontend/src/pages/modules/GuidedWorkflows.jsx"],
+                         "note": "the run tab is gone; the evidence tab shows the measured record"},
+            "tests": {"state": "present", "evidence": [
+                "backend/tests/test_phase28_workflows.py",
+                "backend/tests/test_phase30_removed_capabilities.py"],
+                "note": "the tests assert the capability is unavailable, not that a screen exists"},
         },
     },
     {
@@ -164,9 +178,15 @@ FEATURES: list[dict[str, Any]] = [
         "phase27Status": "audited only",
         "layers": {
             "data": {"state": "present", "evidence": [
-                "data/processed/phase26/greenlight2024_lettuce_harvest.csv"]},
-            "method": {"state": "absent", "evidence": [],
-                       "note": "no model consumes the spectrum table; the simulator annotates only"},
+                "data/processed/phase29/light_stress_harvest.csv",
+                "data/processed/phase30/cea_wheat_experiments.csv"],
+                "note": "two measured datasets: four spectral regimes in lettuce, and 39 "
+                        "controlled-environment wheat runs varying PPFD, photoperiod, CO2 and "
+                        "temperature"},
+            "method": {"state": "partial", "evidence": ["backend/app/workflows/light_stress.py",
+                                                        "backend/app/workflows/cea_evidence.py"],
+                       "note": "measured group comparison ships; the fitted response surface "
+                               "failed its sealed holdout (297.46 % MAPE) and is not served"},
             "service": {"state": "absent", "evidence": []},
             "endpoint": {"state": "absent", "evidence": []},
             "inputCheck": {"state": "present", "evidence": ["backend/app/models/simulation.py"],
@@ -277,25 +297,37 @@ FEATURES: list[dict[str, Any]] = [
         "id": "fractional-gravity",
         "order": 9,
         "claim": "Effect of Mars or lunar gravity on crop growth",
-        "readinessTier": "data-blocked",
+        "readinessTier": "removed",
         "phase27Status": "audited only",
+        "phase30Status": "removed",
+        "removal": (
+            "The fractional-gravity response was removed in Phase 30: the growth-penalty "
+            "coefficient, the input field, the presets, the impact step and the frontend readout "
+            "are gone. No open dataset measures crop yield or biomass across fractional gravity - "
+            "the ISS graded-gravity work measures gene expression and morphology, and a clinostat "
+            "is not partial gravity - so the placeholder could not be replaced by evidence."
+        ),
         "layers": {
-            "data": {"state": "absent", "evidence": [],
-                     "note": "no fractional-gravity growth dataset exists"},
-            "method": {"state": "partial", "evidence": ["backend/app/simulation/factors.py"],
-                       "note": "an assumed sensitivity coefficient, documented as an assumption"},
-            "service": {"state": "present", "evidence": ["backend/app/simulation/factors.py"]},
-            "endpoint": {"state": "partial", "evidence": [
-                "frontend/src/pages/modules/Laboratory.jsx"],
-                "note": "the endpoint accepts gravity; the UI deliberately does not expose it"},
-            "inputCheck": {"state": "present", "evidence": ["backend/app/models/simulation.py"]},
+            "data": {"state": "retired", "evidence": [],
+                     "note": "no fractional-gravity growth dataset exists, and none was recoverable"},
+            "method": {"state": "retired", "evidence": ["backend/app/simulation/factors.py"],
+                       "note": "gravity_factor() no longer exists; a test asserts its absence"},
+            "service": {"state": "retired", "evidence": ["backend/app/simulation/engine.py"],
+                        "note": "the engine has no gravity term"},
+            "endpoint": {"state": "retired", "evidence": ["backend/app/models/simulation.py"],
+                         "note": "/api/simulate rejects a gravity field and names the decision"},
+            "inputCheck": {"state": "present", "evidence": ["backend/app/models/simulation.py"],
+                           "note": "extra='forbid' plus a model validator turn the field into a 422"},
             "outputCheck": {"state": "not-applicable", "evidence": []},
-            "uncertainty": {"state": "absent", "evidence": []},
+            "uncertainty": {"state": "not-applicable", "evidence": []},
             "provenance": {"state": "present", "evidence": ["backend/app/simulation/serializers.py"],
-                           "note": "warns that reduced-gravity response is an assumed penalty"},
-            "frontend": {"state": "absent", "evidence": [],
-                         "note": "removed on purpose: no data behind the response curve"},
-            "tests": {"state": "present", "evidence": ["backend/tests/test_factors.py"]},
+                           "note": "the radiation warning states that gravity is not modelled at all"},
+            "frontend": {"state": "retired", "evidence": ["frontend/src/components/MissionControls.jsx"],
+                         "note": "the gravity control and its presets were removed"},
+            "tests": {"state": "present", "evidence": [
+                "backend/tests/test_phase27_engine_integrity.py",
+                "backend/tests/test_phase30_removed_capabilities.py"],
+                "note": "the tests assert the input is refused and the factor is absent"},
         },
     },
     {

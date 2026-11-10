@@ -7,7 +7,6 @@ import { formatDays, formatNumber } from '../services/formatters.js'
  */
 export default function MissionOverview({ params, config, result }) {
   const crop = config.crops.find((c) => c.key === params.crop)
-  const gravityLabel = nearestPreset(config.gravityPresets, params.gravity, 0.02)
   const radiationLabel = nearestPreset(config.radiationPresets, params.radiation, 0.015)
   const cycleDays = result?.crop?.growthDurationDays ?? crop?.growthDurationDays
 
@@ -18,14 +17,16 @@ export default function MissionOverview({ params, config, result }) {
       detail: cycleDays ? `${cycleDays}-day cycle` : '',
     },
     {
+      // Phase 30 removed the gravity control: nothing in the model depends on it any more, so the
+      // overview shows the one environment variable that does - dose rate - and no gravity figure.
       label: 'Environment',
-      value: gravityLabel ?? `${formatNumber(params.gravity, 2)} g`,
-      detail: `${formatNumber(params.gravity, 2)} g gravity`,
+      value: radiationLabel ?? `${formatNumber(params.radiation, 2)} mGy/day`,
+      detail: `${formatNumber(params.radiation, 2)} mGy/day chronic dose`,
     },
     {
-      label: 'Radiation',
-      value: radiationLabel ?? `${formatNumber(params.radiation, 2)} mGy/day`,
-      detail: `${formatNumber(params.radiation, 2)} mGy/day`,
+      label: 'Photoperiod',
+      value: `${formatNumber(params.lightHours, 1)} h/day`,
+      detail: `${formatNumber(params.lightIntensity, 0)} µmol/m²/s`,
     },
     {
       label: 'Duration',

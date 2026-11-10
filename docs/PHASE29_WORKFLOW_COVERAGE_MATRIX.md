@@ -8,12 +8,12 @@ A workflow is **complete** only when all ten layers are present and a test file 
 
 ## Summary
 
-**3 of 3 workflows complete.** Evidence classes: `water-demand` reference-calculation, `harvest-prediction` trained-model, `light-stress` measured-observation.
+**2 of 3 workflows complete.** Evidence classes: `water-demand` reference-calculation, `harvest-prediction` trained-model, `light-stress` measured-observation.
 
 | # | Workflow | Answers | Evidence class | Layers | Status | Readiness |
 |---|---|---|---|---|---|---|
 | 1 | **Water demand and irrigation scheduling** `water-demand` | How much water does this canopy want today, and what happens if it is irrigated on this schedule? | `reference-calculation` | 10/10 | **complete** | `research-ready` |
-| 2 | **Crop growth and harvest prediction** `harvest-prediction` | What fresh mass per square metre does the served model predict from this DLI and environment, and how much should that number be trusted? | `trained-model` | 10/10 | **complete** | `experimental` |
+| 2 | **Crop growth and harvest prediction** `harvest-prediction` | What fresh mass per square metre does the served model predict from this DLI and environment, and how much should that number be trusted? | `trained-model` | 5/10 | **removed** | `experimental` |
 | 3 | **Light quality and environmental stress** `light-stress` | Under this spectral regime, what did the plants actually weigh and how did their photosystems behave? | `measured-observation` | 10/10 | **complete** | `research-ready` |
 
 ## What each workflow does not do
@@ -47,12 +47,12 @@ The negative statements are part of the contract: a workflow that lists what it 
 | Layer | `water-demand` | `harvest-prediction` | `light-stress` |
 |---|---|---|---|
 | `data` — the dataset, artefact or documented assumption the calculation reads | present | present | present |
-| `method` — the model or closed-form calculation itself | present | present | present |
+| `method` — the model or closed-form calculation itself | present | **absent** | present |
 | `service` — the backend module that assembles the result | present | present | present |
-| `endpoint` — the HTTP route a client calls | present | present | present |
-| `inputCheck` — request validation that rejects impossible inputs | present | present | present |
-| `outputCheck` — validation that the result is coherent, or a stated absence | present | present | present |
-| `uncertainty` — a quantified spread, or an explicit statement that none exists | present | present | present |
+| `endpoint` — the HTTP route a client calls | present | **absent** | present |
+| `inputCheck` — request validation that rejects impossible inputs | present | **absent** | present |
+| `outputCheck` — validation that the result is coherent, or a stated absence | present | **absent** | present |
+| `uncertainty` — a quantified spread, or an explicit statement that none exists | present | **absent** | present |
 | `provenance` — the sources and their limits travel with the answer | present | present | present |
 | `frontend` — a screen a user can reach and read | present | present | present |
 | `tests` — automated tests covering the path | present | present | present |
@@ -91,5 +91,6 @@ These are not to-do items. Each is blocked by the absence of data, and the produ
 - **A response surface for environmental stress.** Four regimes with unequal replicate counts, of which two hold a fixed spectrum and one changes density as well, cannot support a continuous surface. A surface fitted through them would be a curve drawn through four points with a confound among them, and it would be presented as a prediction.
 - **A separate stress score.** Collapsing Fv'/Fm', PhiNO, NPQt and yield into one number requires weights nobody measured. The workflow reports the indices separately.
 - **A yield-loss conversion for irrigation deficits.** The FAO-56 water balance yields a relative transpiration deficit. Turning that into lost biomass needs a crop-specific yield-response factor, and inventing one would be the exact failure mode this project exists to avoid.
-- **A replacement harvest model.** The candidate improved cross-validated MAE by 4.6 % and still missed the holdout criterion by 9.3 points. Shipping it would have moved the headline number without moving the science.
+- **A replacement harvest model.** Not built: the Phase 30 evaluation showed that no fitted candidate beat the mean baseline out of fold, and the sealed cross-study holdout returned 310.17 % MAPE. The forecast was removed instead of being given another candidate class.
+- **A predictive response surface for PPFD, CO2 or temperature.** The Phase 30 wheat acquisition made the fit possible and the fit failed its sealed holdout at 297.46 % MAPE. The measured band comparison ships; the surface does not.
 

@@ -4,13 +4,13 @@ Generated from `data/research/dataset_catalog.json` on 2026-11-09 by `ml/researc
 
 Every dataset the project has evaluated, with the licence evidence behind its class. The class answers one question: could this support a claim the product makes, under the licence it is actually distributed with?
 
-**28 datasets evaluated.** A: 3, B: 6, C: 9, D: 4, E: 5, F: 1.
+**30 datasets evaluated.** A: 5, B: 6, C: 9, D: 4, E: 5, F: 1.
 
 ## Classes
 
 | Class | Meaning | Datasets |
 |---|---|---|
-| **A** | acquired and used in this repository | 3 |
+| **A** | acquired and used in this repository | 5 |
 | **B** | usable after preprocessing - open licence, relevant variables, usable scale | 6 |
 | **C** | external validation only - wrong task, sensor or size for training | 9 |
 | **D** | scientific reference only - open and correct, but cannot validate this product | 4 |
@@ -21,7 +21,7 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 
 | Grade | Meaning | Datasets |
 |---|---|---|
-| verified | the terms were read for this entry | 14 |
+| verified | the terms were read for this entry | 16 |
 | documented-secondary | a credible registry or dataset card states it | 10 |
 | unverified | believed open, not checked; must be checked before use | 4 |
 
@@ -54,6 +54,8 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 | [PlantWild in-the-wild plant image dataset](#plantwild) | **F** | CC BY-NC-ND 4.0 - non-commercial, no derivatives | not permitted (non-commercial, no derivatives) | no |
 | [Greenhouse lettuce pot experiment with gravimetric evapotranspiration (Schroeder et al. 2021)](#zenodo-schroder-2021-lettuce-pot) | **A** | CC BY 4.0 | permitted with attribution | yes |
 | [Green-light spectral composition trial in hydroponic lettuce](#zenodo-greenlight-2024-lettuce) | **A** | CC BY 4.0 | permitted with attribution | yes |
+| [Indoor wheat (cv. Apogee) under fully controlled environmental conditions](#zenodo-cea-wheat-apogee) | **A** | CC BY 4.0 | permitted with attribution | yes |
+| [Kilowatts to kilograms: lettuce light-use-efficiency compilation](#zenodo-kilowatts-lettuce-lue) | **A** | CC BY 4.0 | permitted with attribution | yes |
 | [Portable-platform LED photoperiod extension trial in open-field tomato](#zenodo-ledphotoperiod-2025-tomato) | **C** | CC BY 4.0 | permitted with attribution | yes |
 | [Tomato hydroponic nutrient-uptake and yield trial (Halbert-Howard et al. 2020)](#zenodo-halbert-2020-tomato-hydroponic) | **B** | CC BY 4.0 | permitted with attribution | no |
 | [Leaf gas-exchange series for Corymbia calophylla (marri)](#zenodo-marri-2021-gasexchange) | **D** | CC BY 4.0 | permitted with attribution | no |
@@ -459,6 +461,38 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 - **Commercial use:** permitted with attribution
 - **Imported:** yes - data/processed/phase29/light_stress_harvest.csv, _photosynthesis.csv, _pigments.csv and light_spectrum_treatments.csv (supersedes the phase26 extracts)
 - **Caveat:** The leafAreaMm2 column is numerically consistent with cm^2 rather than mm^2 (a 48 g lettuce with 20 leaves of 158 x 123 mm implies ~1350 cm^2). Recorded as an inference in the table's quality file, not corrected in the source.
+
+### Indoor wheat (cv. Apogee) under fully controlled environmental conditions  `zenodo-cea-wheat-apogee`
+
+- **Class:** A - acquired and used in this repository
+- **Why this class:** Acquired and served as a measured comparison: Phase 30 built data/processed/phase30/cea_wheat_experiments.csv and _subplots.csv, and the light-stress workflow's controlled-environment panel reports measured yields by environmental band. A response surface fitted to it failed its sealed holdout and is not served.
+- **Publisher:** Zenodo
+- **URL:** https://doi.org/10.5281/zenodo.17764612
+- **Format:** XLSX (yield table, 719 sub-plot rows) plus ZIP of per-run environmental logs (not acquired)
+- **Coverage:** 39 chamber experiments / runs, 719 destructive grain-harvest sub-plots, PPFD 235-1084 umol m^-2 s^-1, photoperiod 6.1-22.6 h, CO2 400-1478 ppm, air temperature 21.1-28.0 degC, 39-91 day cycles
+- **Variables:** grain yield per sub-plot, mean PPFD, photoperiod, CO2 setpoint, air temperature, relative humidity, cycle length, sowing and harvest dates, cultivar, system
+- **Units:** kg m^-2 (grain, as harvested); umol m^-2 s^-1; h day^-1; ppm; degC; % RH; days
+- **Licence:** CC BY 4.0
+- **Licence evidence:** verified (https://zenodo.org/records/17764612)
+- **Commercial use:** permitted with attribution
+- **Imported:** yes - data/processed/phase30/cea_wheat_experiments.csv, cea_wheat_subplots.csv, and the shared quality record data/processed/phase30/quality.json
+- **Caveat:** One cultivar (Apogee) in one facility family. The environmental logs are per-run summaries here, and PPFD varied within a run in most experiments, so a band is a group of whole experiments rather than a controlled level. Grain yield is not edible biomass and the harvest index is not modelled.
+
+### Kilowatts to kilograms: lettuce light-use-efficiency compilation  `zenodo-kilowatts-lettuce-lue`
+
+- **Class:** A - acquired and used in this repository
+- **Why this class:** Acquired and used as an independent evaluation set, not as training data: Phase 30 scored the harvest model leave-one-study-out on these 40 studies. The model failed (310 % holdout MAPE) and forecasting was withdrawn, so the table now serves as the record of that failure.
+- **Publisher:** Zenodo
+- **URL:** https://doi.org/10.5281/zenodo.14640245
+- **Format:** XLSX, 1 sheet, 53 published treatment means
+- **Coverage:** 53 treatment means from 40 published studies; PPFD 43-428 umol m^-2 s^-1, photoperiod 12-24 h, CO2 280-2800 ppm, plant density 16-1372 plants m^-2, dry mass up to 16.5 g per plant
+- **Variables:** dry mass per plant, PPFD, photoperiod, daily light integral, CO2, plant density, source study
+- **Units:** g (dry mass); umol m^-2 s^-1; h day^-1; mol m^-2 d^-1; ppm; plants m^-2
+- **Licence:** CC BY 4.0
+- **Licence evidence:** verified (https://zenodo.org/records/14640245)
+- **Commercial use:** permitted with attribution
+- **Imported:** yes - data/processed/phase30/lettuce_multistudy.csv
+- **Caveat:** Treatment means copied from publications rather than raw replicates, so within-study variance is unavailable and the unit of independence is the study, not the plant. Dry mass, not fresh mass, and no cultivar metadata.
 
 ### Portable-platform LED photoperiod extension trial in open-field tomato  `zenodo-ledphotoperiod-2025-tomato`
 

@@ -9,16 +9,14 @@ from app.simulation.crops import get_crop
 LETTUCE = get_crop("lettuce")
 
 
-def test_gravity_factor_is_one_on_earth_and_lower_in_microgravity():
-    assert factors.gravity_factor(1.0, LETTUCE) == pytest.approx(1.0)
-    micro = factors.gravity_factor(0.0, LETTUCE)
-    mars = factors.gravity_factor(0.38, LETTUCE)
-    assert micro < mars < 1.0
-    assert micro == pytest.approx(1.0 - constants.MICROGRAVITY_GROWTH_PENALTY)
+def test_no_gravity_factor_exists():
+    """Phase 30 removed it: no dataset measures yield across fractional gravity.
 
-
-def test_hypergravity_also_penalised():
-    assert factors.gravity_factor(2.0, LETTUCE) < 1.0
+    The old factor was a placeholder (15 % at 0 g) and is asserted absent so a future change has
+    to be deliberate and evidenced rather than a quiet revert.
+    """
+    assert not hasattr(factors, "gravity_factor")
+    assert not hasattr(constants, "MICROGRAVITY_GROWTH_PENALTY")
 
 
 def test_radiation_factor_decreases_monotonically():

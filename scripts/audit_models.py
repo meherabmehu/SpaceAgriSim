@@ -362,6 +362,61 @@ def audit() -> dict:
             check(f"osd320-not-independence:{path.name}", not absent,
                   "OSD-320 is mentioned without a duplicate/independence caveat")
 
+    # ------------------------------------------------ 11. removed capabilities (Phase 30)
+    #
+    # A removed capability fails the audit in one of two ways: it comes back (a field, a factor, a
+    # constant, a route or a service function reappears) or it leaves an orphan behind (a catalogue
+    # entry claiming a run it cannot do, a UI control with nothing behind it). Both are checked from
+    # the artifacts rather than from a report saying the removal happened.
+    import app.simulation.factors as simulation_factors
+    from app.config import simulation_constants
+    from app.models.simulation import SimulationRequest
+    from app.workflows import harvest as harvest_workflow
+
+    check("removed:gravity-field-absent", "gravity" not in SimulationRequest.model_fields,
+          "the simulation request must not accept a gravity input")
+    check("removed:gravity-factor-absent", not hasattr(simulation_factors, "gravity_factor"),
+          "gravity_factor() must not exist")
+    check("removed:gravity-constants-absent",
+          not hasattr(simulation_constants, "MICROGRAVITY_GROWTH_PENALTY")
+          and not hasattr(simulation_constants, "EARTH_REFERENCE_GRAVITY_G"),
+          "the gravity penalty and Earth-gravity constants must not exist")
+
+    from app.routes.workflows import workflow_catalogue
+    catalogue_workflows = workflow_catalogue()["workflows"]
+    harvest_entry = next((item for item in catalogue_workflows
+                          if item["id"] == "harvest-prediction"), None)
+    check("removed:harvest-catalogue-entry-present", harvest_entry is not None,
+          "the removed workflow must stay visible as removed, not disappear")
+    if harvest_entry is not None:
+        check("removed:harvest-catalogue-not-complete", harvest_entry["status"] != "complete",
+              harvest_entry["status"])
+        check("removed:harvest-no-run-endpoint", "run" not in harvest_entry["endpoints"],
+              "an unavailable workflow must not advertise a run endpoint")
+        check("removed:harvest-forecast-flag", harvest_entry.get("operationalForecast") is False,
+              "operationalForecast must be false")
+
+    harvest_capability = harvest_workflow.capability()
+    check("removed:harvest-capability-unavailable",
+          harvest_capability["status"] == "unavailable"
+          and harvest_capability["capabilityAvailable"] is False,
+          harvest_capability["status"])
+    check("removed:harvest-evaluations-retained",
+          len(harvest_capability["evaluations"]) >= 2
+          and all(item["passed"] is not True for item in harvest_capability["evaluations"]),
+          f"{len(harvest_capability['evaluations'])} evaluations, none passing")
+    check("removed:harvest-no-served-model",
+          "model" not in harvest_capability and "fields" not in harvest_capability,
+          "a removed workflow must not expose a served model or an input schema")
+
+    for workflow_id in ("harvest-prediction", "water-demand", "light-stress"):
+        entry = next(item for item in catalogue_workflows if item["id"] == workflow_id)
+        for name, endpoint in entry["endpoints"].items():
+            route = endpoint.split(" ", 1)[1]
+            mounted = route in mounted_paths()
+            check(f"removed:endpoint-mounted:{workflow_id}:{name}", mounted,
+                  f"{endpoint} is advertised but not mounted")
+
     summary = {
         "registeredModels": len(registry["models"]),
         "auditedModels": len(rows),
@@ -394,6 +449,12 @@ def audit() -> dict:
                  "artifacts and never adjusted, and no model is retrained. A failure here means an "
                  "artifact and its record disagree, not that a score is low."),
     }
+
+
+def mounted_paths() -> set[str]:
+    """Every path the application actually serves, read from its own OpenAPI document."""
+    from app.main import app as fastapi_app
+    return set(fastapi_app.openapi().get("paths", {}))
 
 
 def et0_status_checks(model_id: str, card: dict, row: dict) -> bool:

@@ -32,6 +32,10 @@ UNITS: dict[str, tuple[str, str, list[str]]] = {
                    ["per pot, and the pot's surface area is what makes it a flux"]),
     "mL": ("volume", "millilitres of water", []),
     "mm2": ("area", "square millimetres", ["leaf area per plant, not per square metre of bench"]),
+    "kg/m2": ("mass flux", "kilograms of harvested grain per square metre of growing area",
+              ["grain mass at field moisture as harvested, not dry matter and not edible "
+               "fraction; wheat in the controlled-environment series, never converted to fresh "
+               "mass or to another crop"]),
     "g/m2": ("mass flux", "grams of fresh mass per square metre of growing area",
              ["this is an areal yield, not a per-plant mass: dividing by density assumes the "
               "per-area yield is independent of density, which the model itself warns is not "

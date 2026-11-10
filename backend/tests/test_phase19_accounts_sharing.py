@@ -186,7 +186,7 @@ def test_activity_records_carry_no_address_or_free_text(client):
 # Share links
 # ---------------------------------------------------------------------------
 
-CONFIGURATION = {"crop": "lettuce", "gravity": 1.0, "radiation": 0.01, "lightHours": 12,
+CONFIGURATION = {"crop": "lettuce", "radiation": 0.01, "lightHours": 12,
                  "co2Level": 420, "humidity": 60, "waterAvailability": 100,
                  "simulationDays": 30}
 

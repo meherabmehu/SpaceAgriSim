@@ -479,9 +479,13 @@ def _methodology_passages(quarantine: list) -> list[Passage]:
          ("The space agriculture simulator is an assumption-based mathematical model, "
           "category 5, hypothetical scenario exploration. It is not NASA-calibrated for "
           "Moon or Mars crop growth, and no lunar or Martian predictive validation exists. "
-          "Its gravity, radiation and light response factors are heuristic scenario "
-          "assumptions, while the separately trained Earth lettuce regression is category 3 "
-          "from external measured data."),
+          "Its radiation, light, temperature and humidity response factors are heuristic "
+          "scenario assumptions. The gravity response was removed in Phase 30 rather than kept as "
+          "a placeholder: no recovered dataset measures plant production as a function of "
+          "gravity level, so the simulator "
+          "now has no gravity input, factor or control. The separately trained Earth lettuce "
+          "regression is category 3 from external measured data and is no longer served as a "
+          "harvest forecast, because its independent evaluations failed."),
          "docs/SIMULATION_METHODOLOGY.md"),
         ("method-classification", "Methodology: the six-category scientific classification",
          ("Every prediction surface is classified into one of six categories: 1 NASA-measured "

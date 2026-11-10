@@ -67,11 +67,13 @@ const NAV = [
   ["account", "Account & sharing", UserRound],
   ["methodology", "Methodology", BookOpen],
 ];
+// Phase 30 removed the fractional-gravity response, so a "world" is a radiation environment and
+// nothing else. The names stay because the dose rates are the ones those environments are quoted at.
 const WORLDS = {
-  Earth: { gravity: 1, radiation: 0.01 },
-  Moon: { gravity: 0.16, radiation: 0.5 },
-  Mars: { gravity: 0.38, radiation: 0.2 },
-  Orbit: { gravity: 0, radiation: 0.3 },
+  Earth: { radiation: 0.01 },
+  Moon: { radiation: 0.5 },
+  Mars: { radiation: 0.2 },
+  Orbit: { radiation: 0.3 },
 };
 
 export default function MissionPlatform() {
@@ -80,7 +82,7 @@ export default function MissionPlatform() {
   const { result, error, isLoading, retry } = useSimulation(params);
   const [page, setPage] = useState(() => location.hash.slice(1) || "dashboard");
   const [mobile, setMobile] = useState(false);
-  const world = Object.keys(WORLDS).find(name => WORLDS[name].gravity === params.gravity && WORLDS[name].radiation === params.radiation) || 'Custom';
+  const world = Object.keys(WORLDS).find(name => WORLDS[name].radiation === params.radiation) || 'Custom';
   const [notice, setNotice] = useState("");
   const [registry, setRegistry] = useState(null);
   const [models, setModels] = useState(null);

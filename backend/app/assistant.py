@@ -570,7 +570,7 @@ def suggested_questions() -> list[dict]:
          "phase11-gravity-osd346", "evaluation"),
         ("Which model can analyse a gene expression input?",
          "radiation-exposure-osd46-v1", "model"),
-        ("What evidence supports the simulator's gravity assumptions?",
+        ("Why does the simulator no longer model gravity?",
          "method-simulator", "methodology"),
         ("Which crop growth predictions are Earth-only?",
          "lettuce-earth-growth-v2", "model"),

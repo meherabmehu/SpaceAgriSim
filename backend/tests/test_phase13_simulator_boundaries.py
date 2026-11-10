@@ -24,13 +24,13 @@ from app.main import app
 client = TestClient(app)
 RANGES = constants.PARAMETER_RANGES
 
-BASE = {"crop": "lettuce", "gravity": 1.0, "radiation": 0.05, "waterAvailability": 100,
+BASE = {"crop": "lettuce", "radiation": 0.05, "waterAvailability": 100,
         "lightHours": 16, "co2Level": 1000, "simulationDays": 30, "growingArea": 10,
         "earthComparisonMode": "matched", "lightIntensity": 300, "temperature": 24,
         "humidity": 60, "lightSpectrum": "balanced", "waterRecyclingEfficiency": 85}
 
-MOON = {**BASE, "gravity": 0.16, "radiation": 0.5}
-MARS = {**BASE, "gravity": 0.38, "radiation": 0.2}
+MOON = {**BASE, "radiation": 0.5}
+MARS = {**BASE, "radiation": 0.2}
 
 NUMERIC_FIELDS = ("cropYield", "growthRate", "waterUsed", "waterRecovered", "co2Removed",
                   "estimatedOxygenProduced")
@@ -87,13 +87,14 @@ def test_zero_water_is_a_deficit_not_a_crash():
     assert any("water" in warning.lower() for warning in result["warnings"]) or True
 
 
-def test_zero_gravity_is_still_returned_as_an_assumption():
-    """Orbit is in the range. It must produce an estimate, and that estimate must be labelled."""
-    result = simulate({**BASE, "gravity": 0.0})
+def test_the_default_scenario_is_still_returned_as_an_assumption():
+    """Phase 30 removed the gravity control; the labelling requirement survives it."""
+    result = simulate({**BASE})
     assert result["provenance"]["nasaValidated"] is False
     assert result["cropYield"] >= 0
     assert any("assum" in warning.lower() or "not a" in warning.lower()
                for warning in result["warnings"])
+    assert "gravity" not in result["inputs"]
 
 
 def test_area_scaling_holds_at_the_boundary():
@@ -135,16 +136,19 @@ def test_no_response_promises_a_yield_or_claims_validation(payload):
 
 
 @pytest.mark.parametrize("payload", [MOON, MARS], ids=["moon", "mars"])
-def test_reduced_gravity_output_is_explicitly_not_a_planetary_measurement(payload):
+def test_a_planetary_radiation_case_is_explicitly_not_a_planetary_measurement(payload):
+    """Phase 30: what still separates a "Moon" or "Mars" case from Earth is dose rate.
+
+    The response must state that the estimate is an assumption-based number and must warn about
+    the radiation level it is charging for - without implying that anything was measured.
+    """
     result = simulate(payload)
     provenance = result["provenance"]
     assert provenance["nasaValidated"] is False
     assert provenance["confidenceInterval"] is None
     joined = " ".join(result["warnings"] + [result.get("disclaimer", "")]).lower()
     assert "not" in joined and ("measurement" in joined or "assum" in joined)
-    # A reduced-gravity warning must name the consequence rather than implying a measured value.
-    assert any(("gravity" in warning.lower() or "lunar" in warning.lower()
-                or "martian" in warning.lower()) for warning in result["warnings"])
+    assert any("radiation" in warning.lower() for warning in result["warnings"])
 
 
 def test_the_disclaimer_travels_with_every_export_format():

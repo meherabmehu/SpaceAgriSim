@@ -53,9 +53,11 @@ def render(matrix: dict) -> str:
         f"**{len(gaps)} gaps recorded: blocking: {counts['blocking']}, "
         f"major: {counts['major']}, minor: {counts['minor']}.**",
         "",
-        "None of them is closed. The point of the matrix is that each open gap has a named "
-        "consequence for what the product is allowed to claim, and the product states that "
-        "consequence rather than papering over it.",
+        "A few are closed by decision rather than by data - the capability was removed instead of "
+        "being kept behind a placeholder - and each of those says so and says what was searched "
+        "first. The point of the matrix is that every gap, open or closed, has a named consequence "
+        "for what the product is allowed to claim, and the product states that consequence rather "
+        "than papering over it.",
         "",
         "## Severity",
         "",

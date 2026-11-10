@@ -177,8 +177,16 @@ def to_response(result: SimulationResult, request: SimulationRequest) -> Simulat
     space = result.space
     from app.simulation.factors import vapor_pressure_deficit
     warnings = ["Growth, water and gas outputs are uncalibrated mathematical estimates; no empirical confidence interval is available."]
-    if request.gravity < 1:
-        warnings.append("Reduced-gravity response is an assumed penalty, not a lunar or Martian crop measurement.")
+    # Phase 30 removed the gravity control, which had been the only thing flagging a space case.
+    # Radiation above background is now the term that separates the space run from the Earth run,
+    # so it carries the equivalent warning: the decay curve is an assumption, not a measurement.
+    if request.radiation > constants.EARTH_BACKGROUND_RADIATION_MGY_PER_DAY:
+        warnings.append(
+            f"Radiation is modelled as an assumed exponential growth penalty above "
+            f"{constants.EARTH_BACKGROUND_RADIATION_MGY_PER_DAY:g} mGy/day; the curve shape and its "
+            "steepness are assumptions, not a measured radiation effect on crop yield, and they are "
+            "not a lunar or Martian crop measurement. Gravity is not modelled at all: no dataset "
+            "measures crop yield across fractional gravity.")
     if request.lightSpectrum != "balanced":
         warnings.append("Spectrum is recorded as a scenario annotation; no validated spectrum response is available.")
     if request.et0MmPerDay is not None:

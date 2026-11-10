@@ -20,7 +20,7 @@ from typing import Any, Literal
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.workflows import harvest, light_stress, units, water_demand
+from app.workflows import cea_evidence, harvest, light_stress, units, water_demand
 
 router = APIRouter(tags=["workflows"], prefix="/workflows")
 
@@ -55,17 +55,6 @@ class WaterRunRequest(BaseModel):
     scenarios: list[WaterScenario] = Field(min_length=1, max_length=MAX_SCENARIOS)
 
 
-class HarvestScenario(BaseModel):
-    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
-    label: str | None = Field(default=None, max_length=60)
-    daysAfterTransplant: float = Field(ge=0, le=60)
-    airTemperature: float = Field(ge=5, le=40)
-    rootTemperature: float = Field(ge=5, le=40)
-    ppfd: float = Field(ge=0, le=1000)
-    photoperiodHours: float = Field(default=16.0, gt=0, le=24)
-    plantDensityPerM2: float = Field(default=25.0, gt=0, le=2000)
-
-
 class LightStressScenario(BaseModel):
     model_config = ConfigDict(extra="forbid")
     label: str | None = Field(default=None, max_length=60)
@@ -79,9 +68,16 @@ class LightStressRunRequest(BaseModel):
     scenarios: list[LightStressScenario] = Field(min_length=1, max_length=MAX_SCENARIOS)
 
 
-class HarvestRunRequest(BaseModel):
+class CeaSelection(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    scenarios: list[HarvestScenario] = Field(min_length=1, max_length=MAX_SCENARIOS)
+    factor: Literal["ppfdUmolPerM2S", "photoperiodHours", "co2Ppm", "airTemperatureC"]
+    band: Literal["low", "mid", "high", "short", "standard", "long", "ambient", "enriched",
+                  "cool", "warm"]
+
+
+class CeaRunRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    selections: list[CeaSelection] = Field(min_length=1, max_length=6)
 
 
 @router.get("")
@@ -118,14 +114,17 @@ def workflow_catalogue() -> dict[str, Any]:
             {
                 "id": "harvest-prediction",
                 "title": "Crop growth and harvest prediction (lettuce)",
-                "status": "complete",
-                "modelStatus": "trained-exploratory",
-                "modelValidatedForForecasting": False,
-                "measures": "fresh shoot mass per plant and fresh yield per square metre",
+                "status": "unavailable",
+                "capabilityAvailable": False,
+                "operationalForecast": False,
+                "removedInPhase": 30,
+                "removedBecause": ("no harvest model met the independent 30 % error criterion: 41.6 % "
+                                   "on the Phase 28 holdout and over 300 % on eight unseen published "
+                                   "lettuce studies"),
+                "measures": "nothing predictive; the measured-versus-model record is still available",
                 "measuredEvidence": True,
                 "endpoints": {
                     "capability": "GET /api/workflows/harvest-prediction/capability",
-                    "run": "POST /api/workflows/harvest-prediction/run",
                     "parity": "GET /api/workflows/harvest-prediction/parity",
                 },
             },
@@ -189,6 +188,17 @@ def light_stress_run(request: LightStressRunRequest) -> dict[str, Any]:
         raise HTTPException(status_code=422, detail=str(error)) from error
 
 
+@router.get("/light-stress/controlled-environment/capability")
+def cea_capability() -> dict[str, Any]:
+    return cea_evidence.capability()
+
+
+@router.post("/light-stress/controlled-environment/run")
+def cea_run(request: CeaRunRequest) -> dict[str, Any]:
+    selections = [item.model_dump() for item in request.selections]
+    return cea_evidence.run(selections)
+
+
 @router.get("/harvest-prediction/capability")
 def harvest_capability() -> dict[str, Any]:
     return harvest.capability()
@@ -199,10 +209,21 @@ def harvest_parity() -> dict[str, Any]:
     return harvest.parity()
 
 
-@router.post("/harvest-prediction/run")
-def harvest_run(request: HarvestRunRequest) -> dict[str, Any]:
-    scenarios = [item.model_dump() for item in request.scenarios]
-    try:
-        return harvest.compare(scenarios)
-    except (KeyError, ValueError) as error:
-        raise HTTPException(status_code=422, detail=str(error)) from error
+@router.post("/harvest-prediction/run", status_code=410, deprecated=True,
+             responses={410: {"description": "Removed in Phase 30; no forecast replacement."}})
+def harvest_run_removed() -> dict[str, Any]:
+    """Tombstone for the retired forecast endpoint.
+
+    Kept as an explicit 410 rather than a 404 so a caller who built against it learns why it is gone
+    and what did not replace it. The endpoint stores nothing and computes nothing.
+    """
+    raise HTTPException(status_code=410, detail={
+        "capability": "harvest-forecast",
+        "status": "removed",
+        "removedInPhase": 30,
+        "reason": ("no harvest model met the 30 % independent-error criterion: 41.6 % on the Phase 28 "
+                   "holdout and over 300 % MAPE on eight unseen published lettuce studies"),
+        "notReplacedBy": ("there is no forecast replacement; the measured-versus-model record is at "
+                          "GET /api/workflows/harvest-prediction/parity and the decision record is at "
+                          "GET /api/workflows/harvest-prediction/capability"),
+    })

@@ -87,8 +87,16 @@ WORKFLOWS: list[dict[str, Any]] = [
         "title": "Crop growth and harvest prediction",
         "answers": "What fresh mass per square metre does the served model predict from this DLI and "
                    "environment, and how much should that number be trusted?",
-        "status": "complete",
+        "status": "removed",
         "evidenceClass": "trained-model",
+        "phase30Change": (
+            "the forecast was removed. A leave-one-study-out evaluation over 53 published treatment "
+            "means from 40 studies returned 310.17 % MAPE against the unchanged 30 % criterion, with "
+            "the mean baseline selected out of fold; the sealed Phase 28 holdout had already returned "
+            "41.59 %. POST /api/workflows/harvest-prediction/run is now a 410 tombstone and the "
+            "catalogue entry is 'unavailable'. Only the measured-versus-model parity record and the "
+            "decision record remain readable."
+        ),
         "phase29Change": ("the served model was re-examined rather than replaced: the pipeline was "
                           "audited, six candidates were scored on identical grouped folds, and the "
                           "winner was taken to the holdout once. It failed the unchanged 30 % "
@@ -103,18 +111,19 @@ WORKFLOWS: list[dict[str, Any]] = [
             "and coverage by experiment falls to 0.696 in EXP3",
         ],
         "layers": {
-            "data": ["data/processed/lettuce_earth.csv"],
-            "method": ["ml/artifacts/lettuce-earth-growth-v3.json",
-                       "backend/app/workflows/harvest.py"],
+            # Only the evidence surface remains: data, the failed evaluations, the parity record,
+            # the rendering of both, and the tests that prove no forecast is served.
+            "data": ["data/processed/phase30/lettuce_multistudy.csv"],
+            "method": [],
             "service": ["backend/app/workflows/harvest.py"],
-            "endpoint": ["backend/app/routes/workflows.py"],
-            "inputCheck": ["backend/app/workflows/harvest.py"],
-            "outputCheck": ["backend/app/workflows/harvest.py"],
-            "uncertainty": ["ml/evaluation/phase29_interval_audit.json"],
-            "provenance": ["ml/evaluation/phase29_harvest_final.json",
-                           "ml/artifacts/registry.json"],
+            "endpoint": [],
+            "inputCheck": [],
+            "outputCheck": [],
+            "uncertainty": [],
+            "provenance": ["ml/evaluation/phase30_harvest_crossstudy.json",
+                           "ml/evaluation/phase29_harvest_final.json"],
             "frontend": ["frontend/src/pages/modules/GuidedWorkflows.jsx"],
-            "tests": ["backend/tests/test_phase29_model_evidence.py",
+            "tests": ["backend/tests/test_phase30_removed_capabilities.py",
                       "backend/tests/test_phase28_workflows.py"],
         },
     },
@@ -223,6 +232,16 @@ def verify(workflows: list[dict[str, Any]]) -> list[str]:
 def summarise(workflow: dict[str, Any]) -> dict[str, Any]:
     present = {layer: ("present" if workflow["layers"].get(layer) else "absent") for layer, _ in LAYERS}
     complete = all(state == "present" for state in present.values())
+    # Phase 30: a removed workflow keeps its record but is never reported as delivered. The layers
+    # that remain are the evidence surface, and calling that "complete" would be the same mistake
+    # the removal was made to correct.
+    if workflow["status"] == "removed":
+        return {
+            "layersPresent": sum(1 for state in present.values() if state == "present"),
+            "layersTotal": len(LAYERS),
+            "allLayersPresent": False,
+            "deliveredStatus": "removed",
+        }
     return {
         "layersPresent": sum(1 for state in present.values() if state == "present"),
         "layersTotal": len(LAYERS),
@@ -323,9 +342,13 @@ def render(payload: dict[str, Any]) -> str:
         "relative transpiration deficit. Turning that into lost biomass needs a crop-specific "
         "yield-response factor, and inventing one would be the exact failure mode this project "
         "exists to avoid.\n"
-        "- **A replacement harvest model.** The candidate improved cross-validated MAE by 4.6 % and "
-        "still missed the holdout criterion by 9.3 points. Shipping it would have moved the "
-        "headline number without moving the science.\n"
+        "- **A replacement harvest model.** Not built: the Phase 30 evaluation showed that no "
+        "fitted candidate beat the mean baseline out of fold, and the sealed cross-study holdout "
+        "returned 310.17 % MAPE. The forecast was removed instead of being given another candidate "
+        "class.\n"
+        "- **A predictive response surface for PPFD, CO2 or temperature.** The Phase 30 wheat "
+        "acquisition made the fit possible and the fit failed its sealed holdout at 297.46 % MAPE. "
+        "The measured band comparison ships; the surface does not.\n"
     )
     return "\n".join(out) + "\n"
 

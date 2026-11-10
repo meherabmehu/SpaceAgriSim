@@ -4,7 +4,7 @@ Impact decomposition: why is the space scenario different from Earth?
 Growth is linear in the combined environment factor, and that factor is a
 product of one factor per driver:
 
-    combined = light x water x gravity x radiation x co2
+    combined = light x water x radiation x co2
 
 so the space / Earth yield ratio is the product of the per-driver ratios
 
@@ -18,7 +18,7 @@ combined difference, which is what makes the chart honest.
 Two different percentages are reported for every driver:
 
     percent             the driver's own effect relative to Earth for the
-                        SAME driver, e.g. gravity 0 g -> -15 %
+                        SAME driver, e.g. radiation 0.3 mGy/day -> -7 %
     contributionPoints  how many percentage points of the final gap that
                         driver accounts for once the earlier steps are applied
 
@@ -26,7 +26,10 @@ In "matched" mode water, light and CO2 are identical in both runs, so their
 ratio is 1 and they contribute 0 points even when the absolute response is
 large (CO2 enrichment boosts both runs alike). `responsePercent` keeps that
 absolute response visible: the factor relative to the crop's reference
-conditions (1 g, background radiation, 100 % water, optimal light, ambient CO2).
+conditions (background radiation, 100 % water, optimal light, ambient CO2).
+
+Gravity has no factor any more: Phase 30 removed the fractional-gravity response rather than keep a
+coefficient no dataset supports, so it can neither appear in the waterfall nor move a yield.
 """
 
 from __future__ import annotations
@@ -34,10 +37,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 # Fixed presentation order: the space-specific drivers first, then resources.
-FACTOR_ORDER = ["gravity", "radiation", "water", "light", "co2"]
+FACTOR_ORDER = ["radiation", "water", "light", "co2"]
 
 FACTOR_LABELS = {
-    "gravity": "Gravity",
     "radiation": "Radiation",
     "water": "Water",
     "light": "Light",

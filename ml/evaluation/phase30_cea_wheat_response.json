@@ -1,0 +1,349 @@
+{
+ "schema": "spaceagrisim.phase30_cea_wheat_response/1",
+ "generatedAt": "2026-11-10T17:29:45.630265+00:00",
+ "purpose": "test whether the Phase 30 controlled-environment wheat series supports a yield response surface, with the experiment as the unit of independence",
+ "dataset": {
+  "id": "cea-wheat-apogee",
+  "doi": "10.5281/zenodo.17764612",
+  "license": "CC BY 4.0",
+  "file": "data/processed/phase30/cea_wheat_experiments.csv",
+  "experiments": 36,
+  "target": "grain yield kg/m2, mean of the harvested sub-plots in one experiment",
+  "features": [
+   "log10Ppfd",
+   "photoperiodHours",
+   "co2Ppm",
+   "airTemperatureC",
+   "relativeHumidityPct",
+   "dailyLightIntegralMolPerM2Day"
+  ],
+  "featureUnits": {
+   "log10Ppfd": "log10(umol/m2/s)",
+   "photoperiodHours": "h/day",
+   "co2Ppm": "ppm",
+   "airTemperatureC": "degC",
+   "relativeHumidityPct": "%",
+   "dailyLightIntegralMolPerM2Day": "mol/m2/day"
+  },
+  "environmentRanges": {
+   "meanPpfdUmolPerM2S": {
+    "n": 38,
+    "min": 235.036,
+    "max": 1084.2223,
+    "distinct": 38
+   },
+   "photoperiodHours": {
+    "n": 38,
+    "min": 6.0779,
+    "max": 22.5641,
+    "distinct": 38
+   },
+   "co2Ppm": {
+    "n": 38,
+    "min": 400.0,
+    "max": 1478.0,
+    "distinct": 9
+   },
+   "airTemperatureC": {
+    "n": 38,
+    "min": 21.1,
+    "max": 28.0,
+    "distinct": 23
+   },
+   "relativeHumidityPct": {
+    "n": 38,
+    "min": 55.0,
+    "max": 72.0,
+    "distinct": 14
+   },
+   "cycleLengthDays": {
+    "n": 37,
+    "min": 39.0,
+    "max": 91.0,
+    "distinct": 22
+   }
+  },
+  "subplotRows": 719
+ },
+ "protocol": {
+  "split": "leave-one-experiment-out over the development experiments",
+  "groupingKey": "experiment (sub-plots of one chamber stay together)",
+  "targetTransform": "log10(grain yield kg/m2)",
+  "holdoutSelectionMethod": "SHA-256 of the experiment id, lowest 6",
+  "holdoutExperiments": [
+   "Exp007",
+   "Exp012",
+   "Exp013",
+   "Exp023",
+   "Exp036",
+   "Exp040"
+  ],
+  "developmentExperiments": [
+   "Exp002",
+   "Exp003",
+   "Exp004",
+   "Exp005",
+   "Exp006",
+   "Exp017",
+   "Exp019",
+   "Exp021",
+   "Exp022",
+   "Exp024",
+   "Exp026",
+   "Exp027",
+   "Exp030",
+   "Exp031",
+   "Exp032",
+   "Exp033",
+   "Exp037",
+   "Exp038",
+   "Exp039",
+   "Exp041",
+   "Exp042",
+   "Exp043",
+   "Exp044",
+   "Exp045",
+   "Exp046",
+   "Exp047",
+   "Exp048",
+   "Exp049",
+   "Exp050",
+   "Exp051"
+  ],
+  "holdoutUsedForSelection": false,
+  "selectionRule": "lowest out-of-fold MAE; within 2 % prefer the structurally simpler candidate in the declared order",
+  "candidateOrder": [
+   "baseline-mean",
+   "structured-dli-co2",
+   "ridge-log",
+   "gbm-log"
+  ],
+  "selectionRuleWrittenBeforeScoring": true,
+  "acceptanceCriterionPct": 30.0,
+  "criterionSource": "unchanged project criterion, not set by this phase",
+  "seed": 20261110,
+  "noRandomSplit": "sub-plots of one chamber share an environment; a random split across rows would leak and is not used"
+ },
+ "candidates": {
+  "baseline-mean": {
+   "n": 30,
+   "MAE": 0.3731,
+   "RMSE": 0.4763,
+   "MAPE": 67.952,
+   "medianAPE": 47.294,
+   "meanBias": -0.1328,
+   "R2": -0.1588,
+   "spearman": -1.0
+  },
+  "structured-dli-co2": {
+   "n": 30,
+   "MAE": 0.3173,
+   "RMSE": 0.3775,
+   "MAPE": 57.417,
+   "medianAPE": 38.977,
+   "meanBias": -0.0721,
+   "R2": 0.272,
+   "spearman": 0.4634
+  },
+  "ridge-log": {
+   "n": 30,
+   "MAE": 0.3406,
+   "RMSE": 0.428,
+   "MAPE": 58.628,
+   "medianAPE": 41.75,
+   "meanBias": -0.0633,
+   "R2": 0.0645,
+   "spearman": 0.4087
+  },
+  "gbm-log": {
+   "n": 30,
+   "MAE": 0.3486,
+   "RMSE": 0.4209,
+   "MAPE": 64.17,
+   "medianAPE": 33.315,
+   "meanBias": -0.033,
+   "R2": 0.0951,
+   "spearman": 0.4265
+  }
+ },
+ "selected": "structured-dli-co2",
+ "selectedOutOfFold": {
+  "n": 30,
+  "MAE": 0.3173,
+  "RMSE": 0.3775,
+  "MAPE": 57.417,
+  "medianAPE": 38.977,
+  "meanBias": -0.0721,
+  "R2": 0.272,
+  "spearman": 0.4634
+ },
+ "interval": {
+  "method": "split conformal on out-of-fold log10 residuals, 90 % two-sided",
+  "logLow": -0.2996,
+  "logHigh": 0.2545,
+  "multiplicativeWidth": 3.582,
+  "nResiduals": 30,
+  "outOfFoldCoverage": 0.8667,
+  "coverageByCo2Band": {
+   "ambient": {
+    "n": 23,
+    "coverage": 0.8261
+   },
+   "enriched": {
+    "n": 2,
+    "coverage": 1.0
+   },
+   "high": {
+    "n": 5,
+    "coverage": 1.0
+   }
+  },
+  "coverageNote": "an in-sample coverage figure from the same residuals the interval was built on; descriptive, not a guarantee for a new experiment",
+  "exchangeabilityCheck": {
+   "halves": [
+    {
+     "half": "half-a",
+     "n": 15,
+     "coverage": 0.8,
+     "medianResidualLog10": 0.0989
+    },
+    {
+     "half": "half-b",
+     "n": 15,
+     "coverage": 0.9333,
+     "medianResidualLog10": 0.0046
+    }
+   ],
+   "exchangeableAt15Pct": true,
+   "conclusion": "residuals are treated as exchangeable across experiments"
+  }
+ },
+ "holdout": {
+  "experiments": 6,
+  "perExperiment": [
+   {
+    "experimentId": "Exp007",
+    "co2Ppm": 400.0,
+    "measuredKgPerM2": 0.163,
+    "predictedKgPerM2": 0.7205,
+    "apePct": 342.04
+   },
+   {
+    "experimentId": "Exp012",
+    "co2Ppm": 400.0,
+    "measuredKgPerM2": 0.0625,
+    "predictedKgPerM2": 0.4071,
+    "apePct": 551.77
+   },
+   {
+    "experimentId": "Exp013",
+    "co2Ppm": 400.0,
+    "measuredKgPerM2": 0.0914,
+    "predictedKgPerM2": 0.6928,
+    "apePct": 657.62
+   },
+   {
+    "experimentId": "Exp023",
+    "co2Ppm": 400.0,
+    "measuredKgPerM2": 0.9057,
+    "predictedKgPerM2": 0.6165,
+    "apePct": 31.93
+   },
+   {
+    "experimentId": "Exp036",
+    "co2Ppm": 400.0,
+    "measuredKgPerM2": 0.8873,
+    "predictedKgPerM2": 0.6179,
+    "apePct": 30.36
+   },
+   {
+    "experimentId": "Exp040",
+    "co2Ppm": 400.0,
+    "measuredKgPerM2": 0.2149,
+    "predictedKgPerM2": 0.5825,
+    "apePct": 171.03
+   }
+  ],
+  "metrics": {
+   "n": 6,
+   "MAE": 0.4049,
+   "RMSE": 0.4248,
+   "MAPE": 297.46,
+   "medianAPE": 256.538,
+   "meanBias": 0.2188,
+   "R2": -0.3673,
+   "spearman": 0.0857
+  },
+  "errorDiagnostic": {
+   "yieldRangeRatio": 28.9,
+   "note": "measured grain yield spans a factor of 29 across experiments, from 0.0625 to 1.8076 kg/m2. MAPE is dominated by the smallest yields; that is a property of the series and not a reason to change the criterion.",
+   "criterionAppliesTo": "the unmodified MAPE over every holdout experiment"
+  },
+  "intervalCoverage": 0.3333,
+  "acceptanceCriterionPct": 30.0,
+  "passed": false
+ },
+ "domain": {
+  "measuredRanges": {
+   "meanPpfdUmolPerM2S": {
+    "n": 36,
+    "min": 235.036,
+    "max": 1084.2223,
+    "distinct": 36
+   },
+   "photoperiodHours": {
+    "n": 36,
+    "min": 6.0779,
+    "max": 22.5641,
+    "distinct": 36
+   },
+   "co2Ppm": {
+    "n": 36,
+    "min": 400.0,
+    "max": 1478.0,
+    "distinct": 8
+   },
+   "airTemperatureC": {
+    "n": 36,
+    "min": 21.1,
+    "max": 28.0,
+    "distinct": 21
+   },
+   "relativeHumidityPct": {
+    "n": 36,
+    "min": 55.0,
+    "max": 72.0,
+    "distinct": 14
+   },
+   "dailyLightIntegralMolPerM2Day": {
+    "n": 36,
+    "min": 10.038,
+    "max": 75.1549,
+    "distinct": 36
+   }
+  },
+  "crop": "wheat cv. Apogee only",
+  "system": "indoor controlled-environment chambers at one facility family",
+  "noExtrapolationRule": "inputs outside the measured ranges are refused, not clipped, and no other crop is accepted"
+ },
+ "served": false,
+ "servedReason": "the selected model missed the pre-registered 30 % holdout criterion by an order of magnitude, so no predictive surface is served. Workflow C reports measured groups instead, and this file is the record of the attempt.",
+ "holdoutSpent": "this holdout has been scored once and will not be re-split. Selecting a different candidate set after seeing these numbers would be tuning on the evaluation data.",
+ "limitations": [
+  "One crop and one facility family: nothing here transfers to lettuce, tomato or radish.",
+  "The environmental axes are correlated by design; a coefficient is an association across experiments, not an isolated response to one factor.",
+  "Temperature spans a narrow band and CO2 has few distinct levels, so neither a cardinal temperature response nor a full CO2 saturation curve is identifiable.",
+  "Grain yield, not edible biomass, and the harvest index is not modelled.",
+  "The sample is small: every interval is wide and the holdout is a handful of experiments, so a single unusual run moves the metric."
+ ],
+ "units": {
+  "log10Ppfd": "log10(umol/m2/s)",
+  "photoperiodHours": "h/day",
+  "co2Ppm": "ppm",
+  "airTemperatureC": "degC",
+  "relativeHumidityPct": "%",
+  "dailyLightIntegralMolPerM2Day": "mol/m2/day",
+  "grainYieldKgPerM2": "kg/m2"
+ },
+ "priorHoldoutInspection": "no experiment in this dataset was inspected before the sealed holdout was chosen; the split was fixed by SHA-256 and scored once"
+}

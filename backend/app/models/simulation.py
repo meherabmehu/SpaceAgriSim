@@ -10,12 +10,33 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.config import simulation_constants as constants
 from app.simulation.crops import list_crop_keys
 
 _R = constants.PARAMETER_RANGES
+
+# Fields that earlier releases accepted and Phase 30 removed, with the reason. A request that still
+# carries one gets a sentence that names it, instead of a generic "extra fields not permitted".
+REMOVED_FIELDS: dict[str, str] = {
+    "gravity": (
+        "gravity was removed in Phase 30. No open dataset measures crop yield across fractional "
+        "gravity, so the simulator applied an invented penalty; it no longer accepts a gravity input "
+        "and no output depends on one. See data/research/dataset_gap_matrix.json, gap "
+        "'fractional-gravity'."
+    ),
+}
+
+
+def strip_removed_fields(payload: dict) -> dict:
+    """Drop removed fields from a *stored* payload before it is re-validated.
+
+    Saved scenarios are user data and are never rewritten; a scenario saved before Phase 30 carries a
+    gravity value that no longer enters any calculation. Stripping it here reproduces the rest of the
+    configuration exactly instead of refusing to open the scenario at all.
+    """
+    return {key: value for key, value in payload.items() if key not in REMOVED_FIELDS}
 
 
 def _range_field(name: str, description: str, **extra):
@@ -39,7 +60,6 @@ class SimulationRequest(BaseModel):
         json_schema_extra={
             "example": {
                 "crop": "lettuce",
-                "gravity": 0.0,
                 "radiation": 0.3,
                 "waterAvailability": 100,
                 "lightHours": 16,
@@ -51,13 +71,21 @@ class SimulationRequest(BaseModel):
         }
     )
 
+    @model_validator(mode="before")
+    @classmethod
+    def _reject_removed_fields(cls, data):
+        if isinstance(data, dict):
+            for name, reason in REMOVED_FIELDS.items():
+                if name in data:
+                    raise ValueError(reason)
+        return data
+
     lightIntensity: float = _range_field("lightIntensity", "Photosynthetic photon flux density")
     temperature: float = _range_field("temperature", "Chamber air temperature")
     humidity: float = _range_field("humidity", "Relative humidity")
     waterRecyclingEfficiency: float = _range_field("waterRecyclingEfficiency", "Captured fraction of supplied water")
     lightSpectrum: Literal["balanced", "red-blue", "white"] = "balanced"
     crop: str = Field(default=constants.DEFAULT_CROP, description="Crop key: lettuce, tomato or radish")
-    gravity: float = _range_field("gravity", "Gravity level, Earth = 1.0")
     radiation: float = _range_field("radiation", "Absorbed radiation dose rate")
     waterAvailability: float = _range_field("waterAvailability", "Share of crop water demand that is met")
     lightHours: float = _range_field("lightHours", "Photoperiod")
@@ -107,7 +135,6 @@ class GrowthFactors(BaseModel):
     humidity: float = 1.0
     light: float
     water: float
-    gravity: float
     radiation: float
     co2: float
     combined: float
@@ -329,7 +356,6 @@ class SimulationConfigResponse(BaseModel):
     defaultCrop: str
     parameters: dict[str, ParameterRange]
     durationOptions: list[int]
-    gravityPresets: list[Preset]
     radiationPresets: list[Preset]
     presetNote: str = ""
     disclaimer: str

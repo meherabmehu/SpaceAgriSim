@@ -5,7 +5,7 @@ Simulation engine - the single entry point the API calls.
 
 The engine orchestrates the individual modules:
 
-    factors.py       environment multipliers (light, water, gravity, radiation, CO2)
+    factors.py       environment multipliers (light, water, radiation, CO2)
     growth.py        daily biomass curve
     water.py         daily water use / recovery
     gas_exchange.py  daily CO2 removal / O2 production
@@ -31,14 +31,13 @@ from app.simulation.crops import CropProfile, get_crop
 @dataclass(frozen=True)
 class SimulationInput:
     crop: str
-    gravity: float
     radiation: float
     water_availability: float
     light_hours: float
     co2_level: float
     simulation_days: int
     growing_area: float = constants.PARAMETER_RANGES["growingArea"]["default"]
-    # "matched": Earth run keeps the user's water/light/CO2 (isolates gravity + radiation)
+    # "matched": Earth run keeps the user's water/light/CO2 (isolates radiation)
     # "baseline": Earth run also resets water/light/CO2 to the crop's reference values
     earth_comparison_mode: str = "matched"
     light_intensity: float = 300.0
@@ -146,7 +145,6 @@ class SimulationResult:
 def _run_scenario(
     label: str,
     crop: CropProfile,
-    gravity: float,
     radiation: float,
     water_availability: float,
     light_hours: float,
@@ -162,7 +160,6 @@ def _run_scenario(
 ) -> ScenarioResult:
     env = factors.combined_growth_factor(
         crop,
-        gravity_g=gravity,
         radiation_mgy_per_day=radiation,
         water_availability_percent=water_availability,
         light_hours=light_hours,
@@ -215,12 +212,15 @@ def earth_reference_conditions(params: SimulationInput, crop: CropProfile) -> di
     """
     Conditions for the Earth comparison run.
 
-    matched  -> Earth gravity + background radiation, user's resources kept
-    baseline -> Earth gravity + background radiation + reference resources
+    matched  -> background radiation, user's resources kept
+    baseline -> background radiation + reference resources
                 (100 % water, crop's optimal photoperiod, ambient CO2)
+
+    Gravity is deliberately absent: Phase 30 removed the fractional-gravity response rather than keep
+    an invented coefficient, so this comparison isolates radiation and the resource settings and
+    nothing else.
     """
     conditions = {
-        "gravity": constants.EARTH_REFERENCE_GRAVITY_G,
         "radiation": constants.EARTH_BACKGROUND_RADIATION_MGY_PER_DAY,
         "water_availability": params.water_availability,
         "light_hours": params.light_hours,
@@ -230,7 +230,7 @@ def earth_reference_conditions(params: SimulationInput, crop: CropProfile) -> di
         "humidity": params.humidity,
         "water_recycling_efficiency": params.water_recycling_efficiency,
         # ET0 describes the site's weather, not the scenario, so both runs use it. The Earth
-        # reference answers "same site, Earth gravity and background radiation".
+        # reference answers "same site, background radiation".
         "et0_mm_per_day": params.et0_mm_per_day,
         "crop_coefficient": params.crop_coefficient,
     }
@@ -253,7 +253,6 @@ def run_simulation(params: SimulationInput) -> SimulationResult:
     space = _run_scenario(
         "space",
         crop,
-        gravity=params.gravity,
         radiation=params.radiation,
         water_availability=params.water_availability,
         light_hours=params.light_hours,

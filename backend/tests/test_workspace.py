@@ -18,9 +18,11 @@ def test_compare_has_matched_resources_and_actual_outputs(client):
     response=client.post("/api/compare",json={"simulationDays":7,"growingArea":2})
     assert response.status_code==200
     rows=response.json()["scenarios"]
-    assert [row["name"] for row in rows]==["Earth","Moon","Mars","Custom habitat"]
+    assert [row["name"] for row in rows]==["Earth background","Lunar surface","Mars surface","Custom habitat"]
     assert all(row["result"]["inputs"]["growingArea"]==2 for row in rows)
-    assert rows[0]["result"]["cropYield"]>rows[1]["result"]["cropYield"]
+    # Gravity is no longer modelled, so the named cases differ in radiation only and each name
+    # says which environment it is. Payloads must not carry a gravity field at all.
+    assert all("gravity" not in row["result"]["inputs"] for row in rows)
 
 
 def test_advisor_numerical_claims_use_simulation_output(client):
@@ -32,13 +34,13 @@ def test_advisor_numerical_claims_use_simulation_output(client):
 
 
 def test_optimizer_frontier_is_not_dominated_and_keeps_hazards_fixed(client):
-    response=client.post("/api/optimize",json={"simulationDays":7,"gravity":.38,"radiation":.2})
+    response=client.post("/api/optimize",json={"simulationDays":7,"radiation":.2})
     assert response.status_code==200
     body=response.json()
     assert body["candidateCount"]==81
     assert len(body["pareto"])>0
     for point in body["pareto"]:
-        assert point["configuration"]["gravity"]==.38
+        assert "gravity" not in point["configuration"]
         assert point["configuration"]["radiation"]==.2
         for other in body["pareto"]:
             assert not (other["yieldG"]>point["yieldG"] and other["netWaterL"]<point["netWaterL"] and other["dailyLightIntegral"]<=point["dailyLightIntegral"])

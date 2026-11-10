@@ -2,7 +2,6 @@ import pytest
 
 BASE_REQUEST = {
     "crop": "lettuce",
-    "gravity": 0.0,
     "radiation": 0.3,
     "waterAvailability": 100,
     "lightHours": 16,
@@ -54,6 +53,8 @@ def test_simulate_rejects_unknown_crop(client):
 
 
 def test_simulate_rejects_out_of_range_values(client):
+    # `gravity` is no longer a field at all, so it is rejected as unknown rather than as
+    # out-of-range; the other six are range violations.
     for field, value in (("gravity", 5), ("radiation", -1), ("waterAvailability", 150), ("lightHours", 25), ("co2Level", 10), ("simulationDays", 0), ("growingArea", 0)):
         response = client.post("/api/simulate", json={**BASE_REQUEST, field: value})
         assert response.status_code == 422, field
@@ -76,17 +77,18 @@ def test_crops_and_config_endpoints(client):
     crops = client.get("/api/crops").json()["crops"]
     assert {c["key"] for c in crops} == {"lettuce", "tomato", "radish"}
     config = client.get("/api/config").json()
-    assert set(config["parameters"]) >= {"gravity", "radiation", "waterAvailability", "lightHours", "co2Level", "simulationDays"}
+    assert set(config["parameters"]) >= {"radiation", "waterAvailability", "lightHours", "co2Level", "simulationDays"}
+    assert "gravity" not in config["parameters"]
     assert config["durationOptions"] == [7, 14, 30, 60, 90]
 
 
 def test_validation_errors_have_flat_message_and_fields(client):
-    response = client.post("/api/simulate", json={**BASE_REQUEST, "gravity": 9, "crop": "kale"})
+    response = client.post("/api/simulate", json={**BASE_REQUEST, "crop": "kale"})
     assert response.status_code == 422
     body = response.json()
     assert body["error"] == "validation_error"
-    assert set(body["fields"]) == {"gravity", "crop"}
-    assert "gravity" in body["message"] and "crop" in body["message"]
+    assert set(body["fields"]) == {"crop"}
+    assert "crop" in body["message"]
     assert isinstance(body["detail"], list)
 
 
@@ -138,10 +140,10 @@ def test_comparison_includes_impact_breakdown(client):
     comparison = body["comparison"]
     assert comparison["isDefined"] is True
     impact = comparison["impact"]
-    assert [f["key"] for f in impact["factors"]] == ["gravity", "radiation", "water", "light", "co2"]
+    assert [f["key"] for f in impact["factors"]] == ["radiation", "water", "light", "co2"]
     assert impact["combinedPercent"] == pytest.approx(comparison["differencePercent"], abs=0.15)
     assert sum(f["contributionPoints"] for f in impact["factors"]) == pytest.approx(impact["combinedPercent"], abs=0.3)
-    assert impact["limitingFactor"] == "gravity"
+    assert impact["limitingFactor"] == "radiation"
 
     dry = client.post("/api/simulate", json={**BASE_REQUEST, "waterAvailability": 0}).json()
     assert dry["comparison"]["isDefined"] is False
@@ -152,7 +154,8 @@ def test_comparison_includes_impact_breakdown(client):
 def test_config_describes_the_model_assumptions(client):
     body = client.get("/api/config").json()
     keys = [a["key"] for a in body["assumptions"]]
-    assert {"growth", "gravity", "radiation", "water", "light", "co2", "waterLoop", "gasExchange"} <= set(keys)
+    assert {"growth", "radiation", "water", "light", "co2", "waterLoop", "gasExchange"} <= set(keys)
+    assert "gravity" not in keys
     loop = next(a for a in body["assumptions"] if a["key"] == "waterLoop")
     assert loop["constants"]["recoveryEfficiency"] == pytest.approx(0.9)
     assert body["modelStatus"]["phase"] == "Phase 1"
@@ -165,14 +168,15 @@ def test_config_describes_the_model_assumptions(client):
 
 def test_presets_are_labelled_as_scenarios(client):
     body = client.get("/api/config").json()
-    assert [p["label"] for p in body["gravityPresets"]] == ["Microgravity", "Moon-like", "Mars-like", "Earth-like"]
+    # Phase 30 removed the gravity control, so the gravity presets went with it.
+    assert "gravityPresets" not in body
     assert [p["label"] for p in body["radiationPresets"]] == [
         "Earth surface-like",
         "Mars-like",
         "ISS-like",
         "Deep-space-like",
     ]
-    assert all(p["description"] for p in body["gravityPresets"] + body["radiationPresets"])
+    assert all(p["description"] for p in body["radiationPresets"])
     assert "Phase 1" in body["presetNote"]
 
 

@@ -71,7 +71,6 @@ test("an account can save a scenario and share it without exposing the owner", a
       name: `Shared ${testInfo.project.name}`,
       configuration: {
         crop: "lettuce",
-        gravity: 1,
         radiation: 0.01,
         lightHours: 12,
         co2Level: 420,

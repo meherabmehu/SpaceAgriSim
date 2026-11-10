@@ -72,10 +72,13 @@ def bpc(variable: str) -> dict:
 def scenario_grid() -> list[engine.SimulationInput]:
     grid = []
     for crop in ("lettuce", "tomato", "radish"):
-        for gravity, radiation in ((0.0, 0.3), (0.16, 0.2), (1.0, 0.01)):
+        # Phase 30 removed the gravity input, so the grid now spans the two environments that
+        # still move a number: radiation (Earth background vs a heavy surface dose) crossed with
+        # resources. The fingerprinted field set is unchanged.
+        for radiation in (0.3, 0.2, 0.01):
             for water, light, co2 in ((100.0, 16.0, 1000.0), (60.0, 20.0, 1200.0), (25.0, 8.0, 400.0)):
                 grid.append(engine.SimulationInput(
-                    crop=crop, gravity=gravity, radiation=radiation,
+                    crop=crop, radiation=radiation,
                     water_availability=water, light_hours=light, co2_level=co2,
                     simulation_days=60, growing_area=10.0))
     return grid
@@ -353,6 +356,25 @@ def main() -> int:
              "status": "declined", "detail": phase6_suggestions()},
         ],
         "massBalance": balance,
+        # The fingerprint is not immutable across phases on purpose: a change to the model must
+        # break the test, be regenerated here, and be justified in this list. Phase 30's entry is
+        # the removal of the gravity input.
+        "deliberateChanges": [
+            {
+                "phase": 30,
+                "what": "the fractional-gravity input, factor and control were removed",
+                "why": (
+                    "no open dataset measures crop yield or biomass across fractional gravity, so "
+                    "the 15 %-at-0 g growth penalty was an invented coefficient. Its removal deletes "
+                    "a factor from the fingerprint and replaces the gravity axis of the scenario "
+                    "grid with a radiation axis, so the combined hash changes."
+                ),
+                "fingerprintBefore": "d9165881105535e2a733650450123eb6fbfbfd0b86d4b9796261ade72855c596",
+                "fingerprintAfter": combined,
+                "cropsAffected": ["lettuce", "tomato", "radish"],
+                "direction": "outputs rise, because the removed penalty no longer discounts space-case growth",
+            },
+        ],
         "outputFingerprint": {
             "grid": f"{len(scenario_grid())} scenarios x 3 crops x space/earth blocks",
             "sha256": combined,

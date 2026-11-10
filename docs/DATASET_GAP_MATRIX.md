@@ -1,19 +1,19 @@
 # SpaceAgriSim Dataset Gap Matrix
 
-Generated from `data/research/dataset_gap_matrix.json` on 2026-11-09 by `ml/research/build_gap_matrix.py`. Edit the JSON, not this file.
+Generated from `data/research/dataset_gap_matrix.json` on 2026-11-10 by `ml/research/build_gap_matrix.py`. Edit the JSON, not this file.
 
 Every capability SpaceAgriSim claims or is asked about, matched against the data that would actually be needed to support it. A gap here is a statement about evidence, not a to-do list: several will stay open on purpose because the data does not exist at any price.
 
-**12 gaps recorded: blocking: 3, major: 4, minor: 5.**
+**14 gaps recorded: blocking: 3, major: 6, minor: 5.**
 
-None of them is closed. The point of the matrix is that each open gap has a named consequence for what the product is allowed to claim, and the product states that consequence rather than papering over it.
+A few are closed by decision rather than by data - the capability was removed instead of being kept behind a placeholder - and each of those says so and says what was searched first. The point of the matrix is that every gap, open or closed, has a named consequence for what the product is allowed to claim, and the product states that consequence rather than papering over it.
 
 ## Severity
 
 | Severity | Meaning | Count |
 |---|---|---|
 | **blocking** | a claim in the product cannot be supported at all without this | 3 |
-| **major** | the claim is supportable only with a stated limitation that a user would notice | 4 |
+| **major** | the claim is supportable only with a stated limitation that a user would notice | 6 |
 | **minor** | the claim is supportable; this would improve accuracy or resolution | 5 |
 
 ## Matrix
@@ -22,16 +22,18 @@ None of them is closed. The point of the matrix is that each open gap has a name
 |---|---|---|---|---|---|
 | 1 | Predicted crop water use in litres per plant per day | Measured evapotranspiration or sap-flow/lysimeter water use for the modelled crops at plant scale | **blocking** | partially-addressed | open and blocking on its original terms, with its first measured evidence bench. The comparison artefact (ml/evaluation/phase26_measured_et_validation.json) shows the seasonal shape is broadly right (Spearman 0.7909 across 11 measurement days) while the level cannot be identified: on a pot-surface denominator the platform's flux is 0.247x the measurement, on a canopy-area denominator it is 2.7x. Because the study publishes neither pot diameter nor spacing, the sign of the discrepancy depends on an assumption, and no constant was changed. |
 | 2 | The claim that the ET0 target is itself correct | A weather or ET0 source that does not share MERRA-2 lineage with POWER, and a measured latent-heat series to convert mutual agreement into physical truth | **major** | partially-addressed | open, partially addressed: disagreement now decomposed into formulation (0.273 mm/d), forcing (0.519) and implementation (+0.009) - the residual is weather, not code - but every leg is either a reanalysis or a temperature-only point method, so nothing here is field validation of the ET0 magnitude |
-| 3 | Effect of Mars or lunar gravity on crop growth | Yield or growth measurements at gravity levels other than 1 g, with the same cultivar and protocol as the terrestrial baseline | **blocking** | no-data | open and permanently so for the current data landscape |
-| 4 | Response to specific LED spectra and photoperiods | Biomass or yield response surfaces across spectra, PPFD and photoperiod for each supported crop | **major** | insufficient | open for the surface, served for the comparison: the light-stress workflow is complete as a measured comparison over spectral composition at one PPFD and one photoperiod, and offers no control for PPFD, photoperiod, CO2, temperature or humidity because the experiment did not vary them. The environmental-stress-response-surface gap named in the workflow catalogue is this same gap and stays blocked. |
+| 3 | Effect of Mars or lunar gravity on crop growth | Yield or growth measurements at gravity levels other than 1 g, with the same cultivar and protocol as the terrestrial baseline | **blocking** | no-data | closed by decision, not by data: Phase 30 removed the fractional-gravity input, factor, control, API field and tests. The gap is permanent - no open dataset measures crop yield or biomass across fractional gravity, ISS graded-gravity work measures gene expression and morphology, and a ground clinostat or reorientation is not partial gravity - so the capability was withdrawn rather than left as a placeholder coefficient. |
+| 4 | Response to specific LED spectra and photoperiods | Biomass or yield response surfaces across spectra, PPFD and photoperiod for each supported crop | **major** | insufficient | open for the predictive surface, served for two measured comparisons: the light-stress workflow compares four spectral regimes at one PPFD and photoperiod, and Phase 30 added a controlled-environment panel over the wheat series (PPFD, photoperiod, CO2, air temperature bands with measured grain yield). A response surface was fitted to that series and failed its sealed holdout (297.46 % MAPE against the 30 % criterion), so no predictive light, CO2 or temperature control is offered. |
 | 5 | Root-zone water status in a hydroponic or substrate system | Substrate water content, irrigation schedule and drainage fraction at high temporal resolution | **major** | no-data | open |
 | 6 | Heat-stress and VPD excursion claims | Hourly temperature, humidity and radiation at the site | **minor** | too-coarse | open |
 | 7 | Cultivar-specific growth parameters | Cultivar identity and calibrated growth parameters per cultivar | **major** | insufficient | open |
 | 8 | Plant health or growth stage from imagery | Labelled canopy imagery from the platform's own camera geometry | **minor** | no-data | open and deliberately not addressed |
-| 9 | Predicted harvest mass per plant | Measured harvest mass with the same covariates the model uses | **blocking** | insufficient | open |
+| 9 | Predicted harvest mass per plant | Measured harvest mass with the same covariates the model uses | **blocking** | insufficient | closed by decision, not by data: Phase 30 removed operational harvest forecasting. A leave-one-study-out evaluation over 40 published lettuce studies returned 310.17 % MAPE against the unchanged 30 % criterion, and the best out-of-fold candidate was the mean baseline, so no model in this repository can forecast harvest mass. The measured-versus-model parity record is retained |
 | 10 | Energy and mass cost of a described mission | Power draw per fixture, thermal load and resupply mass figures for real flight hardware | **minor** | no-data | open and out of scope |
 | 11 | Nutrient solution management | Ion concentrations, uptake rates and EC/pH response per crop | **minor** | no-data | open and out of scope |
 | 12 | Siting for a future climate rather than the observed recent past | Downscaled climate projections at the candidate sites | **minor** | no-data | open |
+| 13 | Yield loss from crop water deficit (crop-specific Ky) | Measured yield at two or more water-supply levels for the same crop and cultivar, with enough levels to fit a Ky slope and an independent study to validate it | **major** | no-data | open |
+| 14 | Calibrated prediction intervals with measured coverage | Enough independent evaluation points to estimate coverage per crop and per experiment group without reusing the selection data | **major** | insufficient | open |
 
 ## Detail
 
@@ -60,7 +62,7 @@ None of them is closed. The point of the matrix is that each open gap has a name
 - **Gap type:** no-data
 - **Severity:** blocking - a claim in the product cannot be supported at all without this
 - **How it could be closed:** None available. Orbital and Mars-surface experiments produce too few replicates and too few cultivars to fit a response function; the honest position is that gravity response is a qualitative modifier with a stated uncertainty, never a trained coefficient.
-- **Current status:** open and permanently so for the current data landscape; the product must not present a gravity response as calibrated
+- **Current status:** closed by decision, not by data: Phase 30 removed the fractional-gravity input, factor, control, API field and tests. The gap is permanent - no open dataset measures crop yield or biomass across fractional gravity, ISS graded-gravity work measures gene expression and morphology, and a ground clinostat or reorientation is not partial gravity - so the capability was withdrawn rather than left as a placeholder coefficient.
 
 ### Response to specific LED spectra and photoperiods  `led-spectrum-response`
 
@@ -69,7 +71,7 @@ None of them is closed. The point of the matrix is that each open gap has a name
 - **Gap type:** insufficient
 - **Severity:** major - the claim is supportable only with a stated limitation that a user would notice
 - **How it could be closed:** The published CEA literature is large but fragmented: hundreds of small papers, no shared protocol, rarely any raw data. A meta-analysis with study-level random effects is the realistic route, and it needs a person reading papers, not an API.
-- **Current status:** open for the surface, served for the comparison: the light-stress workflow is complete as a measured comparison over spectral composition at one PPFD and one photoperiod, and offers no control for PPFD, photoperiod, CO2, temperature or humidity because the experiment did not vary them. The environmental-stress-response-surface gap named in the workflow catalogue is this same gap and stays blocked.
+- **Current status:** open for the predictive surface, served for two measured comparisons: the light-stress workflow compares four spectral regimes at one PPFD and photoperiod, and Phase 30 added a controlled-environment panel over the wheat series (PPFD, photoperiod, CO2, air temperature bands with measured grain yield). A response surface was fitted to that series and failed its sealed holdout (297.46 % MAPE against the 30 % criterion), so no predictive light, CO2 or temperature control is offered.
 
 ### Root-zone water status in a hydroponic or substrate system  `substrate-water`
 
@@ -114,7 +116,7 @@ None of them is closed. The point of the matrix is that each open gap has a name
 - **Gap type:** insufficient
 - **Severity:** blocking - a claim in the product cannot be supported at all without this
 - **How it could be closed:** More measured harvests with recorded light, temperature and duration. Until then the model's MAPE (41.7 %) is the honest number and the acceptance criterion is not met.
-- **Current status:** open; the model is registered as trained-exploratory and the failed criterion is exposed through the API
+- **Current status:** closed by decision, not by data: Phase 30 removed operational harvest forecasting. A leave-one-study-out evaluation over 40 published lettuce studies returned 310.17 % MAPE against the unchanged 30 % criterion, and the best out-of-fold candidate was the mean baseline, so no model in this repository can forecast harvest mass. The measured-versus-model parity record is retained; no prediction is served.
 
 ### Energy and mass cost of a described mission  `mission-energy`
 
@@ -142,6 +144,24 @@ None of them is closed. The point of the matrix is that each open gap has a name
 - **Severity:** minor - the claim is supportable; this would improve accuracy or resolution
 - **How it could be closed:** NASA NEX-GDDP-CMIP6 is the standard product and is open; it was outside this phase's scope because the reference ET0 study needed observed weather, not projections.
 - **Current status:** open; the product makes no future-climate claim
+
+### Yield loss from crop water deficit (crop-specific Ky)  `crop-water-response-ky`
+
+- **Needed:** Measured yield at two or more water-supply levels for the same crop and cultivar, with enough levels to fit a Ky slope and an independent study to validate it
+- **Available:** FAO-56 tabulated Ky values exist for many field crops but not for the three crops served here, and no open dataset recovered in Phase 30 measures lettuce, tomato or radish yield across irrigation levels. Two candidate sources were screened and rejected: a China remote-sensing yield/water-productivity dataset (no deficit treatment) and a mandarin regulated-deficit-irrigation trial (wrong species, no Ky).
+- **Gap type:** no-data
+- **Severity:** major - the claim is supportable only with a stated limitation that a user would notice
+- **How it could be closed:** A controlled deficit-irrigation experiment per crop with at least four water levels and a measured harvest. Ky must never be transferred between crops, so one experiment closes one cell of the matrix.
+- **Current status:** open; the FAO-56 water balance and the irrigation schedule remain, and no yield-loss claim is made anywhere in the platform
+
+### Calibrated prediction intervals with measured coverage  `prediction-intervals-independent-coverage`
+
+- **Needed:** Enough independent evaluation points to estimate coverage per crop and per experiment group without reusing the selection data
+- **Available:** The two Phase 30 evaluations produce intervals, but with 6 and 8 independent holdout points: a coverage estimate from eight points has a binomial half-width of roughly +/-0.3, so it cannot support a coverage guarantee.
+- **Gap type:** insufficient
+- **Severity:** major - the claim is supportable only with a stated limitation that a user would notice
+- **How it could be closed:** More independent experiments, or an external evaluation set with documented protocol. Neither exists for the crops served here.
+- **Current status:** open; intervals are reported as descriptive and no coverage is advertised. The removed harvest workflow's interval spanned a factor of 29, which is a measured statement about how little the data supports.
 
 ## The two that matter most
 

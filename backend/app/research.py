@@ -109,7 +109,7 @@ def coverage():
             ("Plant growth", "NASA closed-chamber canopy measurements acquired from NTRS technical reports; no orbital growth time series exists", "NTRS TM 102788 (wheat, 86-day chamber study), N90-16689 (wheat CO2 dynamics); external WUR lettuce endpoints (not NASA)", "Assumption-based habitat simulator; the acquired chamber data is quotable and citable but is not fitted into the simulator", "The chamber studies are ground-based at Kennedy Space Center: they do not validate a Moon, Mars or ISS growth curve for lettuce, tomato or radish."),
             ("Biomass", "Direct NASA training data available", "OSD-655 VEG04A", "Exploratory mizuna regression only", "14 harvested pillow endpoints; retrospective irrigation input."),
             ("Harvest yield", "Direct NASA training data available", "OSD-655 VEG04A", "Exploratory mizuna regression only", "No transfer to lettuce/tomato/radish."),
-            ("Gravity effects", "NASA data available but no molecular model passed validation", "OSD-436, OSD-7, OSD-120; OSD-411 reorientation tested and rejected", "Heuristic simulator factor", "Molecular responses cannot calibrate edible-yield gravity factors; a 90-degree ground reorientation is not partial gravity."),
+            ("Gravity effects", "removed in Phase 30: no dataset measures crop yield across fractional gravity", "OSD-436, OSD-7, OSD-120; OSD-411 reorientation tested and rejected", "no longer modelled - the gravity factor, input and control were removed", "Molecular responses cannot calibrate edible-yield gravity factors, a 90-degree ground reorientation is not partial gravity, and OSDR partial-gravity signals are confounded with flight run. Nothing replaced the placeholder coefficient."),
             ("Radiation effects", "NASA molecular data available and modelled", "OSD-46 (Arabidopsis, gamma vs Fe-56), OSD-782 (dose, evaluated and rejected)", "Molecular-response classification; the habitat simulator still uses a heuristic factor", "Classifiers identify the applied condition, not absorbed dose, damage severity or yield; dose prediction failed validation and is not served."),
             ("Water consumption", "NASA canopy water-exchange measurements acquired from NTRS technical reports", "NTRS TM 102788, N91-20026 (soybean stand); OSD-655 irrigation logs", "Canopy-based water estimate in the simulator; the chamber measurements are cited, not fitted", "Chamber transpiration is ground-based and cultivar-specific; irrigation records still measure water supplied, not demand."),
             ("Water recovery", "NASA research exists but raw measurements are unavailable", "NASA BPC/CELSS literature", "User-configured loop efficiency", "Recovery fraction is a scenario assumption, not learned."),
@@ -808,7 +808,7 @@ def evidence_summary():
              "reason": "binary per-tray labels, no severity, no control arm"},
         ],
         "assumedTargets": [
-            "gravity, radiation, light-intensity, temperature and humidity response curve shapes",
+            "radiation, light-intensity, temperature and humidity response curve shapes",
             "crop growth duration, harvest index, dry-matter fraction and peak water demand",
             "water recovery efficiency (checked against a measured lower bound; retained)",
             "carbon fraction of dry mass (within 20 % of a measured CO2 balance; retained)",

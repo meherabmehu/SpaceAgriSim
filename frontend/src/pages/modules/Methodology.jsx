@@ -38,9 +38,11 @@ export function Methodology({ config, result }) {
           Habitat simulations have no empirically calibrated prediction
           interval. Radiation quality, chronic stress, nutrient deficiencies,
           disease, power budgets, maturity delays, and engineered water delivery
-          are incompletely represented. Partial-gravity yield curves are
-          assumptions. The interface reports methods and missing coverage rather
-          than an invented confidence percentage.
+          are incompletely represented. Partial-gravity yield curves are not
+          modelled at all: Phase 30 removed the gravity input and its placeholder
+          coefficient because no open dataset measures crop yield across
+          fractional gravity. The interface reports methods and missing coverage
+          rather than an invented confidence percentage.
         </p>
         <h3>Official sources and reproducibility</h3>
         <p>

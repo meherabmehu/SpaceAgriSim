@@ -28,7 +28,7 @@ from app.simulation.engine import SimulationInput, run_simulation  # noqa: E402
 from app.simulation.serializers import to_response  # noqa: E402
 
 BASE = {
-    "crop": "lettuce", "gravity": 1.0, "radiation": 0.3, "waterAvailability": 100,
+    "crop": "lettuce", "radiation": 0.3, "waterAvailability": 100,
     "lightHours": 16, "co2Level": 1000, "simulationDays": 30, "growingArea": 10,
     "earthComparisonMode": "matched", "lightIntensity": 300, "temperature": 22,
     "humidity": 60, "lightSpectrum": "balanced", "waterRecyclingEfficiency": 90,
@@ -45,7 +45,7 @@ WATCHED = (
 def simulate(**overrides):
     request = SimulationRequest(**{**BASE, **overrides})
     params = SimulationInput(
-        crop=request.crop, gravity=request.gravity, radiation=request.radiation,
+        crop=request.crop, radiation=request.radiation,
         water_availability=request.waterAvailability, light_hours=request.lightHours,
         co2_level=request.co2Level, simulation_days=request.simulationDays,
         growing_area=request.growingArea, earth_comparison_mode=request.earthComparisonMode,
@@ -61,7 +61,7 @@ def simulate(**overrides):
 # 1. every input must reach a calculation
 # ---------------------------------------------------------------------------------------
 ALTERNATIVES = {
-    "crop": "tomato", "gravity": 0.38, "radiation": 1.5, "waterAvailability": 40,
+    "crop": "tomato", "radiation": 1.5, "waterAvailability": 40,
     "lightHours": 12, "co2Level": 2000, "simulationDays": 45, "growingArea": 25,
     "earthComparisonMode": "baseline", "lightIntensity": 600, "temperature": 30,
     "humidity": 85, "waterRecyclingEfficiency": 60, "lightSpectrum": "red-blue",
@@ -198,17 +198,19 @@ def test_water_and_gas_outputs_are_separate_fields_with_separate_units():
         assert isinstance(payload[name], (int, float))
 
 
-def test_gravity_alone_does_not_move_the_water_numbers():
-    """Reduced gravity is modelled as a growth penalty only.
+def test_gravity_is_no_longer_an_input_at_all():
+    """Phase 30 removed the fractional-gravity response; this is the anti-regression test.
 
-    No dataset here supports a transpiration response to fractional gravity, so the absence of an
-    effect is the honest state - it is asserted so that a future change to that assumption is a
-    deliberate decision rather than an accident.
+    The old placeholder penalty (15 % growth lost at 0 g) had no measurement behind it. If a
+    future change reintroduces a gravity term it must fail here rather than reappear silently.
     """
-    earth = simulate()
-    mars = simulate(gravity=0.38)
-    assert mars["waterUsed"] == pytest.approx(earth["waterUsed"])
-    assert mars["cropYield"] < earth["cropYield"]
+    with pytest.raises(Exception) as excinfo:
+        SimulationRequest(**{**BASE, "gravity": 0.38})
+    assert "gravity was removed in Phase 30" in str(excinfo.value)
+    earth = simulate(radiation=0.01)
+    mars_radiation = simulate(radiation=0.2)
+    assert mars_radiation["cropYield"] < earth["cropYield"]
+    assert "gravity" not in earth and "gravity" not in earth["inputs"]
 
 
 def test_radiation_alone_does_not_move_the_water_numbers():
@@ -222,7 +224,6 @@ def test_radiation_alone_does_not_move_the_water_numbers():
 # 5. unsupported conditions are exposed, and incoherent input is refused
 # ---------------------------------------------------------------------------------------
 @pytest.mark.parametrize("overrides,expected", [
-    ({"gravity": 0.38}, "assumed penalty"),
     ({"co2Level": 3000}, "supraoptimal"),
     ({"lightSpectrum": "red-blue"}, "annotation"),
 ])

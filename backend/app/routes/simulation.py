@@ -24,7 +24,6 @@ def simulate(request: SimulationRequest) -> SimulationResponse:
     """Run the Phase 1 simulation for one crop under the given conditions."""
     params = SimulationInput(
         crop=request.crop,
-        gravity=request.gravity,
         radiation=request.radiation,
         water_availability=request.waterAvailability,
         light_hours=request.lightHours,
@@ -66,7 +65,6 @@ def simulation_config() -> SimulationConfigResponse:
         defaultCrop=constants.DEFAULT_CROP,
         parameters=constants.PARAMETER_RANGES,
         durationOptions=constants.SIMULATION_DURATION_OPTIONS,
-        gravityPresets=constants.GRAVITY_PRESETS,
         radiationPresets=constants.RADIATION_PRESETS,
         presetNote=constants.PRESET_NOTE,
         disclaimer=PHASE_1_DISCLAIMER,

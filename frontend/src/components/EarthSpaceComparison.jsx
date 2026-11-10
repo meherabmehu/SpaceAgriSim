@@ -10,7 +10,7 @@ const MODES = [
 
 const MODE_HELP = {
   matched:
-    'Matched resources: the Earth run keeps your water, light and CO₂ settings, so the difference isolates gravity and radiation.',
+    'Matched resources: the Earth run keeps your water, light and CO₂ settings, so the difference isolates the chronic dose rate. Gravity is not modelled at all since Phase 30.',
   baseline:
     'Earth baseline: the Earth run uses reference resources (100 % water, the crop’s optimal photoperiod, ambient 420 ppm CO₂), so resource settings also show up in the gap.',
 }
@@ -59,7 +59,7 @@ export default function EarthSpaceComparison({ result, mode, onModeChange }) {
               <p className="mt-2 text-[14px] leading-snug text-slate-500">
                 Bars show each driver’s modelled effect on growth relative to reference conditions (1 g, background radiation, full water,
                 optimal light, ambient CO₂) — assumed Phase 1 response curves, not measured values. The small figure is how many percentage points of the Earth‑vs‑space gap it explains once the
-                earlier drivers are applied (gravity → radiation → water → light → CO₂); those points add up exactly to the combined
+                earlier drivers are applied (radiation → water → light → CO₂); those points add up exactly to the combined
                 difference. Growth is linear in the combined factor, so the space‑to‑Earth ratio is simply the two combined factors divided.
                 {mode === 'matched' && ' In matched mode the Earth run keeps your water, light and CO₂, so its own factor is not ×1.00 — those drivers support growth in both runs but explain none of the gap.'}
               </p>

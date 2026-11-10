@@ -108,20 +108,6 @@ def describe_assumptions() -> list[dict]:
             "constants": {"logisticSteepness": constants.LOGISTIC_STEEPNESS},
         },
         {
-            "key": "gravity",
-            "title": "Gravity response",
-            "formula": "factor = 1 − penalty × sensitivity × (1 − g) for g < 1; 1 − hyperPenalty × (g − 1) for g > 1",
-            "note": (
-                "Linear growth penalty as gravity drops from 1 g to 0 g, with a smaller penalty above "
-                "1 g. The magnitude is a placeholder; real microgravity effects on biomass are modest "
-                "and mixed in the literature."
-            ),
-            "constants": {
-                "microgravityPenalty": constants.MICROGRAVITY_GROWTH_PENALTY,
-                "hypergravityPenaltyPerG": constants.HYPERGRAVITY_PENALTY_PER_G,
-            },
-        },
-        {
             "key": "radiation",
             "title": "Radiation response",
             "formula": "factor = exp(−decay × sensitivity × (dose − earthBackground))",
@@ -221,14 +207,13 @@ def describe_assumptions() -> list[dict]:
         {
             "key": "earthReference",
             "title": "Earth reference run",
-            "formula": "Earth run = 1 g + background radiation; matched keeps your resources, baseline resets them",
+            "formula": "Earth run = background radiation; matched keeps your resources, baseline resets them",
             "note": (
-                "Matched resources isolates gravity and radiation by giving the Earth run the same "
+                "Matched resources isolates radiation by giving the Earth run the same "
                 "water, light and CO₂. Earth baseline compares against reference resources instead "
                 "(full water, the crop's optimal photoperiod, ambient CO₂)."
             ),
             "constants": {
-                "earthGravityG": constants.EARTH_REFERENCE_GRAVITY_G,
                 "earthBackgroundMgyPerDay": constants.EARTH_BACKGROUND_RADIATION_MGY_PER_DAY,
                 "referenceWaterPercent": constants.EARTH_REFERENCE_WATER_AVAILABILITY,
                 "ambientCo2Ppm": constants.EARTH_AMBIENT_CO2_PPM,

@@ -1,4 +1,9 @@
-"""Phase 28: the two complete workflows, tested from the outside in.
+"""Phase 28 workflows, tested from the outside in, as Phase 30 left them.
+
+Two of the three original workflows are unchanged in shape: water demand and the measured
+light-stress comparison. The third - harvest prediction - was removed in Phase 30 because no
+harvest model met the 30 % independent-error criterion, and its tests were replaced with tests
+that prove the capability is gone rather than quietly broken.
 
 These tests are written against the HTTP surface, because the contract a user actually relies on is
 the response body. Every assertion is one of three kinds:
@@ -26,6 +31,8 @@ from app.workflows import units
 
 HARVEST = "/api/workflows/harvest-prediction"
 WATER = "/api/workflows/water-demand"
+CEA = "/api/workflows/light-stress/controlled-environment"
+CEA_SELECTION = {"factor": "co2Ppm", "band": "ambient"}
 
 DHAKA = {
     "crop": "lettuce", "growingAreaM2": 10.0, "daysAfterTransplant": 20,
@@ -35,6 +42,8 @@ DHAKA = {
 }
 HOT = {**DHAKA, "label": "hot", "tmaxC": 38.0, "tminC": 27.0,
        "relativeHumidityPct": 35.0, "solarRadiationMJm2": 26.0, "windSpeedMs": 3.5}
+# The harvest workflow's input schema was removed with the workflow; these are kept only to prove
+# that a request shaped like the old control set is now rejected rather than served.
 GROWTH = {
     "daysAfterTransplant": 21.0, "airTemperature": 24.0, "rootTemperature": 24.0,
     "ppfd": 400.0, "photoperiodHours": 16.0, "plantDensityPerM2": 25.0,
@@ -44,18 +53,27 @@ GROWTH = {
 # ----------------------------------------------------------------- the catalogue
 
 
-def test_catalogue_lists_every_complete_workflow_and_the_gap(client):
-    """Phase 29 added a third: the catalogue must grow without the completed two changing shape."""
+def test_catalogue_lists_every_workflow_and_its_honest_status(client):
+    """Phase 30: two workflows are complete, and the third is carried as unavailable.
+
+    The catalogue is the platform's own statement of what it can do. A removed capability must
+    stay visible here as removed, not disappear into a 404 a user cannot interpret.
+    """
     body = client.get("/api/workflows").json()
     ids = [item["id"] for item in body["workflows"]]
     assert ids == ["water-demand", "light-stress", "harvest-prediction"]
-    assert all(item["status"] == "complete" for item in body["workflows"])
+
+    status = {item["id"]: item["status"] for item in body["workflows"]}
+    assert status == {"water-demand": "complete", "light-stress": "complete",
+                      "harvest-prediction": "unavailable"}
 
     harvest = next(item for item in body["workflows"] if item["id"] == "harvest-prediction")
-    # The model's own status is carried in the catalogue: a workflow can be complete while the
-    # model behind it is not validated, and the API must not conflate the two.
-    assert harvest["modelStatus"] == "trained-exploratory"
-    assert harvest["modelValidatedForForecasting"] is False
+    assert harvest["operationalForecast"] is False
+    assert harvest["capabilityAvailable"] is False
+    assert harvest["removedInPhase"] == 30
+    assert "30 %" in harvest["removedBecause"]
+    # A removed workflow advertises no run endpoint, so nothing can point at a dead route.
+    assert "run" not in harvest["endpoints"]
 
     gaps = {gap["id"]: gap for gap in body["documentedGaps"]}
     # The gap was narrowed from "no environmental-stress workflow" to "no response surface" when the
@@ -105,17 +123,19 @@ def _unit_names(payload):
     return found
 
 
-def test_units_returned_by_both_workflows_are_registered(client):
+def test_units_returned_by_every_workflow_are_registered(client):
     water = client.post(WATER + "/run", json={"scenarios": [DHAKA]}).json()
-    harvest = client.post(HARVEST + "/run", json={"scenarios": [GROWTH]}).json()
-    for payload in (water, harvest):
+    light = client.post("/api/workflows/light-stress/run",
+                        json={"scenarios": [{"regime": "control"}]}).json()
+    cea = client.post(CEA + "/run", json={"selections": [CEA_SELECTION]}).json()
+    for payload in (water, light, cea):
         for name in _unit_names(payload):
             assert name in units.UNITS, f"unregistered unit {name!r}"
 
 
 def test_every_quantity_in_the_units_map_has_a_dimension(client):
     for path, body in ((WATER + "/run", {"scenarios": [DHAKA]}),
-                       (HARVEST + "/run", {"scenarios": [GROWTH]})):
+                       (CEA + "/run", {"selections": [CEA_SELECTION]})):
         payload = client.post(path, json=body).json()
         assert payload["units"], f"{path} returned no units map"
         for field, meta in payload["units"].items():
@@ -281,163 +301,201 @@ def test_water_caps_the_number_of_scenarios(client):
     assert client.post(WATER + "/run", json=body).status_code == 422
 
 
-# ---------------------------------------------------------------- harvest workflow
+# ------------------------------------------------ harvest: the removed capability
+#
+# Phase 28 shipped a harvest forecast whose model had not passed validation. Phase 30 evaluated
+# it properly - leave-one-study-out over published studies the model had never seen - and it
+# missed the 30 % criterion by more than a factor of ten, so the forecast was removed. These
+# tests replace the Phase 28 tests one for one: they assert the capability is *gone*, not that a
+# screen is missing.
 
 
-def test_harvest_prediction_equals_the_served_model(client):
-    """The workflow must not re-implement the model; it must call it."""
-    body = client.post(HARVEST + "/run", json={"scenarios": [GROWTH]}).json()
-    scenario = body["scenarios"][0]
-    dli = GROWTH["ppfd"] * GROWTH["photoperiodHours"] * 3600.0 / 1e6
-    model = research.load_model(body["model"]["id"])
-    raw, _ = research.predict_values(model, [GROWTH["daysAfterTransplant"],
-                                             GROWTH["airTemperature"],
-                                             GROWTH["rootTemperature"], dli])
-    per_area = research.inverse_target_transform(model, raw)
-    assert scenario["prediction"]["perAreaYieldGPerM2"] == pytest.approx(round(per_area, 1))
-    assert scenario["prediction"]["freshShootMassGPerPlant"] == pytest.approx(
-        per_area / GROWTH["plantDensityPerM2"], abs=0.01)
+def test_harvest_run_is_gone_and_says_why(client):
+    """A removed endpoint answers 410 with a reason, not 404 and not a stale forecast."""
+    response = client.post(HARVEST + "/run", json={"scenarios": [GROWTH]})
+    assert response.status_code == 410
+    detail = response.json()["detail"]
+    assert detail["status"] == "removed"
+    assert detail["removedInPhase"] == 30
+    assert "30 %" in detail["reason"]
+    # The record of the failure must remain reachable from the tombstone itself.
+    assert "parity" in detail["notReplacedBy"] and "capability" in detail["notReplacedBy"]
 
 
-def test_harvest_interval_brackets_the_prediction(client):
-    body = client.post(HARVEST + "/run", json={"scenarios": [GROWTH]}).json()
-    prediction = body["scenarios"][0]["prediction"]
-    assert prediction["intervalLowG"] < prediction["freshShootMassGPerPlant"] < prediction["intervalHighG"]
-    assert prediction["intervalOutOfFoldCoverage"] == pytest.approx(0.8993, abs=1e-3)
-    assert "descriptive" in prediction["intervalCoverageNote"]
+def test_harvest_capability_reports_unavailable_rather_than_a_model(client):
+    body = client.get(HARVEST + "/capability").json()
+    assert body["status"] == "unavailable"
+    assert body["capabilityAvailable"] is False
+    assert body["operationalForecast"] is False
+    assert body["removedInPhase"] == 30
+    # No served model may be advertised alongside a removed workflow.
+    assert "model" not in body
+    assert "fields" not in body
 
 
-def test_harvest_light_and_photoperiod_both_matter(client):
-    same_ppfd_shorter_day = {**GROWTH, "photoperiodHours": 12.0}
-    brighter = {**GROWTH, "ppfd": 600.0}
-    body = client.post(HARVEST + "/run",
-                       json={"scenarios": [GROWTH, same_ppfd_shorter_day, brighter]}).json()
-    base, short_day, bright = body["scenarios"]
-    assert short_day["prediction"]["dailyLightIntegralMolPerM2Day"] < base["prediction"]["dailyLightIntegralMolPerM2Day"]
-    assert short_day["prediction"]["freshShootMassGPerPlant"] < base["prediction"]["freshShootMassGPerPlant"]
-    assert bright["prediction"]["freshShootMassGPerPlant"] > base["prediction"]["freshShootMassGPerPlant"]
+def test_harvest_every_evaluation_is_kept_and_none_of_them_passed(client):
+    body = client.get(HARVEST + "/capability").json()
+    evaluations = {item["id"]: item for item in body["evaluations"]}
+    assert evaluations
+    judged = [item for item in evaluations.values() if item["passed"] is not None]
+    assert judged and all(item["passed"] is False for item in judged)
+    assert all(item["metrics"]["MAPE"] > body["acceptanceCriterionPct"]
+               for item in judged)
+    independent = [item for item in evaluations.values() if item["countsAsValidation"]]
+    assert len(independent) >= 2
+    for item in independent:
+        assert item["independent"] is True
+        assert item["metrics"]["n"] >= 1
 
 
-def test_harvest_density_converts_per_area_into_per_plant(client):
-    dense = {**GROWTH, "plantDensityPerM2": 50.0}
-    body = client.post(HARVEST + "/run", json={"scenarios": [GROWTH, dense]}).json()
-    base, dense_result = body["scenarios"]
-    assert dense_result["prediction"]["perAreaYieldGPerM2"] == pytest.approx(
-        base["prediction"]["perAreaYieldGPerM2"], rel=1e-6)
-    assert dense_result["prediction"]["freshShootMassGPerPlant"] == pytest.approx(
-        base["prediction"]["freshShootMassGPerPlant"] / 2.0, rel=1e-3)
+def test_harvest_development_error_is_never_counted_as_validation(client):
+    """A 42.65 % development figure is not a validation result and must be labelled so."""
+    body = client.get(HARVEST + "/capability").json()
+    development = [item for item in body["evaluations"] if item["id"] == "phase28-v3-development"]
+    assert development and development[0]["countsAsValidation"] is False
+    assert development[0]["passed"] is None
+    assert "cannot" in development[0]["protocol"].lower() or "not a validation" in (
+        development[0]["protocol"] + development[0].get("verdict", "")).lower()
+    for item in body["evaluations"]:
+        if item["countsAsValidation"]:
+            assert item["independent"] is True
 
 
-def test_harvest_warns_outside_the_measured_domain_instead_of_refusing(client):
-    hot = {**GROWTH, "airTemperature": 35.0, "rootTemperature": 35.0}
-    body = client.post(HARVEST + "/run", json={"scenarios": [hot]}).json()
-    scenario = body["scenarios"][0]
-    assert scenario["validation"]["insideTrainingDomain"] is False
-    assert scenario["validation"]["warnings"]
-    assert any("airTemperature" in warning for warning in scenario["validation"]["warnings"])
-    # One warning per out-of-range feature, not a duplicate from the model layer.
-    assert len(scenario["validation"]["warnings"]) == len(set(scenario["validation"]["warnings"]))
-    assert scenario["prediction"]["freshShootMassGPerPlant"] > 0
-
-
-def test_harvest_warns_when_density_leaves_the_identity_range(client):
-    body = client.post(HARVEST + "/run",
-                       json={"scenarios": [{**GROWTH, "plantDensityPerM2": 500.0}]}).json()
-    scenario = body["scenarios"][0]
-    assert scenario["prediction"]["densityInsideSupportedRange"] is False
-    assert any("plantDensityPerM2" in warning for warning in scenario["validation"]["warnings"])
-
-
-def test_harvest_keeps_the_failed_predecessor_visible(client):
-    body = client.post(HARVEST + "/run", json={"scenarios": [GROWTH]}).json()
-    record = body["scenarios"][0]["recordPrediction"]
-    assert record["modelId"] == "lettuce-earth-growth-v2"
-    assert record["freshShootMassGPerPlant"] > 0
-    # v2 cannot express photoperiod or density; saying so is the point of showing it at all.
-    assert set(record["ignoresInputs"]) == {"photoperiodHours", "plantDensityPerM2"}
-
-
-def test_harvest_reports_the_failed_independent_holdout(client):
-    body = client.post(HARVEST + "/run", json={"scenarios": [GROWTH]}).json()
-    independent = body["validation"]["independentCheck"]
-    assert independent["passed"] is False
-    assert independent["acceptanceCriterionPct"] == 30.0
-    assert independent["metrics"]["MAPE"] > 30.0
-    assert "not validated for harvest forecasting" in independent["verdict"]
-    assert body["modelValidatedForForecasting"] is False
-    # The workflow itself is complete; only the model is unvalidated.
-    assert body["workflowComplete"] is True
-
-
-def test_harvest_does_not_count_development_data_as_validation(client):
-    body = client.post(HARVEST + "/run", json={"scenarios": [GROWTH]}).json()
-    development = body["validation"]["developmentCheck"]
-    assert development["countsAsValidation"] is False
-    assert development["usedForModelSelection"] is True
-
-
-def test_harvest_comparison_refuses_to_overclaim_a_difference(client):
-    body = client.post(HARVEST + "/run",
-                       json={"scenarios": [GROWTH, {**GROWTH, "daysAfterTransplant": 22.0}]}).json()
-    delta = body["comparison"]["deltas"][0]
-    assert delta["intervalsOverlap"] in (True, False)
-    if delta["intervalsOverlap"]:
-        assert delta["distinguishableAtStatedCoverage"] is False
-        assert "cannot tell these two scenarios apart" in delta["note"]
-
-
-def test_harvest_parity_matches_the_artifact_and_labels_the_sets(client):
+def test_harvest_parity_still_shows_measured_against_predicted(client):
+    """The measured-versus-model record is the part that survives, and it must stay honest."""
     body = client.get(HARVEST + "/parity").json()
-    model = research.load_model(body["modelId"])
-    development = model["validation"]["development"]["scored"]
-    independent = model["validation"]["independent"]["scored"]
-    assert len(body["points"]) == len(development) + len(independent) == 7
-    sets = {point["set"] for point in body["points"]}
-    assert sets == {"development", "independent"}
-    for point in body["points"]:
-        expected = "independent" if point["set"] == "independent" else "development"
-        assert point["countsAsValidation"] is (expected == "independent")
+    assert body["operationalForecast"] is False
     assert body["passed"] is False
+    assert body["points"] and all(point["ratio"] > 0 for point in body["points"])
+    sets = {point["set"] for point in body["points"]}
+    assert sets <= {"development", "independent"}
+    for point in body["points"]:
+        assert point["countsAsValidation"] is (point["set"] == "independent")
+        assert point["measuredG"] > 0 and point["predictedG"] > 0
+    assert body["crossStudy"]["passed"] is False
     assert "overpredicts" in body["caveat"]
 
 
-def test_harvest_requires_every_feature(client):
-    response = client.post(HARVEST + "/run", json={"scenarios": [{"daysAfterTransplant": 21}]})
-    assert response.status_code == 422
-    partial = client.post(HARVEST + "/run", json={"scenarios": [{
-        "daysAfterTransplant": 21, "airTemperature": 24, "rootTemperature": 24}]})
-    assert partial.status_code == 422
+def test_the_old_harvest_controls_are_not_silently_ignored(client):
+    """The failure mode this platform has had: a control that validates and does nothing."""
+    for body in ({"scenarios": [GROWTH]}, {"scenarios": [{"ppfdUmol": 400}]}, {}):
+        assert client.post(HARVEST + "/run", json=body).status_code == 410
 
 
-def test_harvest_rejects_unknown_fields_rather_than_ignoring_them(client):
-    """A typo must not silently leave a control unwired — the failure this platform has had."""
-    response = client.post(HARVEST + "/run", json={"scenarios": [{**GROWTH, "ppfdUmol": 400}]})
-    assert response.status_code == 422
+# ------------------------------------- controlled-environment wheat (measured, no model)
 
 
-def test_harvest_capability_explains_every_control(client):
-    body = client.get(HARVEST + "/capability").json()
-    assert body["intervalAvailable"] is True
-    assert body["unmeasuredCrops"] == ["tomato", "radish"]
-    for field in body["fields"]:
-        assert field["unit"] in units.UNITS
-        assert field["why"].strip()
-        assert field["max"] > field["min"]
+def test_cea_capability_is_measured_and_advertises_no_model(client):
+    body = client.get(CEA + "/capability").json()
+    assert body["evidenceClass"] == "measured-observation"
+    assert body["isSimulation"] is False
+    assert body["isModelPrediction"] is False
+    assert body["dataset"]["doi"] == "10.5281/zenodo.17764612"
+    assert body["dataset"]["license"] == "CC BY 4.0"
+    model = body["predictiveModel"]
+    assert model["attempted"] is True
+    assert model["served"] is False
+    assert model["criterion"] == 30.0
+    assert model["holdoutMapePct"] > model["criterion"]
+    # An attempted-and-failed response surface must remain inspectable, not be deleted.
+    assert model["evidenceFile"].endswith(".json")
+    for factor in body["factors"]:
+        assert factor["publicName"] and factor["unit"] in units.UNITS
+        assert sum(band["experiments"] for band in factor["bands"]) == body["dataset"]["experiments"]
 
 
-def test_harvest_run_is_deterministic(client):
-    first = client.post(HARVEST + "/run", json={"scenarios": [GROWTH]}).json()
-    second = client.post(HARVEST + "/run", json={"scenarios": [GROWTH]}).json()
-    assert first["scenarios"][0]["prediction"] == second["scenarios"][0]["prediction"]
+def test_cea_bands_partition_the_measured_experiments(client):
+    body = client.get(CEA + "/capability").json()
+    for factor in body["factors"]:
+        bands = [band["id"] for band in factor["bands"]]
+        assert len(bands) == len(set(bands))
+        assert all(band["experiments"] >= 0 for band in factor["bands"])
+        assert sum(band["experiments"] for band in factor["bands"]) == body["dataset"]["experiments"]
+
+
+def test_cea_factors_are_mapped_by_public_name(client):
+    """Regression: the factor list exposed meanPpfdUmolPerM2S while the API accepted ppfdUmolPerM2S."""
+    capability = client.get(CEA + "/capability").json()
+    public = {factor["publicName"] for factor in capability["factors"]}
+    offered = set(capability["fields"][0]["options"])
+    assert offered == public
+    for name in public:
+        band = capability["fields"][1]["options"][name][0]
+        response = client.post(CEA + "/run", json={"selections": [{"factor": name, "band": band}]})
+        assert response.status_code == 200, name
+
+
+def test_cea_returns_measured_group_summaries_without_a_claim_of_causation(client):
+    body = client.post(CEA + "/run", json={"selections": [
+        {"factor": "co2Ppm", "band": "ambient"},
+        {"factor": "ppfdUmolPerM2S", "band": "high"},
+    ]}).json()
+    assert body["status"] == "complete"
+    assert body["isModelPrediction"] is False
+    groups = {group["band"]: group for group in body["groups"]}
+    ambient, high = groups["ambient"], groups["high"]
+    assert ambient["measured"]["n"] == 29 and high["measured"]["n"] == 7
+    for group in (ambient, high):
+        measured = group["measured"]
+        assert measured["meanCiLow"] < measured["mean"] < measured["meanCiHigh"]
+        assert measured["min"] <= measured["median"] <= measured["max"]
+        assert group["unit"] == "kg/m2"
+        # Every experiment id in a group is a real experiment, and the count matches.
+        assert len(group["experiments"]) == measured["n"]
+    assert high["measured"]["mean"] > ambient["measured"]["mean"]
+    # The comparison is a measured difference, not a modelled effect, and it says so.
+    difference = body["differences"][0]
+    assert "not" in difference["note"].lower()
+    assert body["method"]["unitOfIndependence"].startswith("experiment")
+    assert "no significance test" in body["method"]["noTest"]
+
+
+def test_cea_never_presents_the_dli_association_as_a_response_function(client):
+    body = client.post(CEA + "/run", json={"selections": [CEA_SELECTION]}).json()
+    relationship = body["dliRelationship"]
+    assert -1.0 <= relationship["pearson"] <= 1.0
+    assert -1.0 <= relationship["spearman"] <= 1.0
+    assert "not a response function" in relationship["note"]
+    assert body["predictiveModel"]["served"] is False
+
+
+def test_cea_provenance_names_the_hash_verified_source(client):
+    body = client.post(CEA + "/run", json={"selections": [CEA_SELECTION]}).json()
+    provenance = body["provenance"]
+    assert len(provenance["rawFileSha256"]) == 64
+    assert provenance["verifiedAgainstManifest"] is True
+    assert provenance["source"]["doi"] == "10.5281/zenodo.17764612"
+    assert provenance["experimentRows"] == len({point["experimentId"]
+                                                for point in body["dliRelationship"]["points"]})
+    group_experiments = {experiment for group in body["groups"]
+                         for experiment in group["experiments"]}
+    assert group_experiments <= {point["experimentId"]
+                                 for point in body["dliRelationship"]["points"]}
+
+
+def test_cea_rejects_an_unknown_factor_band_and_too_many_selections(client):
+    for body in ({"selections": [{"factor": "vpdKpa", "band": "ambient"}]},
+                 {"selections": [{"factor": "co2Ppm", "band": "extreme"}]},
+                 {"selections": [CEA_SELECTION] * 7},
+                 {"selections": []},
+                 {"selections": [{**CEA_SELECTION, "crop": "wheat"}]}):
+        assert client.post(CEA + "/run", json=body).status_code == 422
+
+
+def test_cea_run_is_deterministic(client):
+    first = client.post(CEA + "/run", json={"selections": [CEA_SELECTION]}).json()
+    second = client.post(CEA + "/run", json={"selections": [CEA_SELECTION]}).json()
+    assert first["groups"] == second["groups"]
+    assert first["rows"] == second["rows"]
 
 
 def test_workflow_outputs_are_finite_and_unit_aware(client):
-    harvest = client.post(HARVEST + "/run", json={"scenarios": [GROWTH]}).json()
-    prediction = harvest["scenarios"][0]["prediction"]
-    for key in ("freshShootMassGPerPlant", "perAreaYieldGPerM2", "intervalLowG",
-                "intervalHighG", "dailyLightIntegralMolPerM2Day"):
-        assert math.isfinite(prediction[key])
-        assert key in harvest["units"], f"{key} has no declared unit"
+    cea = client.post(CEA + "/run", json={"selections": [CEA_SELECTION]}).json()
+    group = cea["groups"][0]
+    for key in ("mean", "median", "sd", "min", "max", "meanCiLow", "meanCiHigh"):
+        assert math.isfinite(group["measured"][key])
+    assert cea["units"]["grainYieldKgPerM2"]["unit"] == group["unit"] == "kg/m2"
+    assert cea["units"]["grainYieldKgPerM2"]["registered"] is True
     water = client.post(WATER + "/run", json={"scenarios": [DHAKA]}).json()
     assert "et0MmPerDay" in water["units"]
     assert water["units"]["et0MmPerDay"]["unit"] == "mm/day"

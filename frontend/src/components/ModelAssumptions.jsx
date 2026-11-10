@@ -61,7 +61,7 @@ export default function ModelAssumptions({ assumptions = [], modelStatus, discla
                 <div className="rounded border border-line bg-space-800/50 px-3 py-2">
                   <dt className="label-tech">Assumed in Phase 1</dt>
                   <dd className="mt-1 text-[13px] leading-relaxed text-slate-400">
-                    Crop baselines per m², the shape of every response curve (gravity, radiation, water, light, CO₂), the logistic growth
+                    Crop baselines per m², the shape of every response curve (radiation, water, light, CO₂), the logistic growth
                     curve, 90 % water recovery and a fixed carbon fraction for CO₂ / O₂. Presets are rounded “‑like” reference points.
                   </dd>
                 </div>

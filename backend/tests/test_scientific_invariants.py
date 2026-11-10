@@ -16,9 +16,9 @@ from app.simulation.crops import get_crop, list_crops
 CROPS = list_crops()
 
 
-def run(crop, days, area=1.0, gravity=0.38, radiation=0.3, water_availability=70.0):
+def run(crop, days, area=1.0, radiation=0.3, water_availability=70.0):
     return engine.run_simulation(engine.SimulationInput(
-        crop=crop.key, gravity=gravity, radiation=radiation,
+        crop=crop.key, radiation=radiation,
         water_availability=water_availability, light_hours=16.0, co2_level=1000.0,
         simulation_days=days, growing_area=area,
     ))
@@ -145,13 +145,13 @@ def test_area_scaling_is_linear(crop):
 @pytest.mark.parametrize("crop", CROPS, ids=lambda c: c.key)
 def test_earth_reference_never_worse_than_space(crop):
     """Under equal resources, the Earth reference must not yield less."""
-    result = run(crop, 90, gravity=0.38, radiation=0.3)
+    result = run(crop, 90, radiation=0.3)
     assert result.earth.crop_yield_g >= result.space.crop_yield_g - 1e-6
 
 
 def test_growth_factor_bounds():
     crop = get_crop("lettuce")
-    earth = run(crop, 30, gravity=1.0, radiation=0.01, water_availability=100.0)
+    earth = run(crop, 30, radiation=0.01, water_availability=100.0)
     for key, value in earth.space.factors.items():
         if key == "combined":
             continue
@@ -161,12 +161,12 @@ def test_growth_factor_bounds():
 def test_relative_humidity_affects_water_demand():
     """Higher VPD (drier air) must increase demand, not decrease it."""
     dry = engine.run_simulation(engine.SimulationInput(
-        crop="lettuce", gravity=1.0, radiation=0.01, water_availability=100.0,
+        crop="lettuce", radiation=0.01, water_availability=100.0,
         light_hours=16.0, co2_level=1000.0, simulation_days=35, growing_area=1.0,
         temperature=28.0, humidity=30.0,
     )).space
     humid = engine.run_simulation(engine.SimulationInput(
-        crop="lettuce", gravity=1.0, radiation=0.01, water_availability=100.0,
+        crop="lettuce", radiation=0.01, water_availability=100.0,
         light_hours=16.0, co2_level=1000.0, simulation_days=35, growing_area=1.0,
         temperature=28.0, humidity=85.0,
     )).space

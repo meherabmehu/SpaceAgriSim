@@ -107,7 +107,7 @@ def test_sqlite_is_not_in_the_url_the_server_sees(pg):
 # Scenario lifecycle
 # ---------------------------------------------------------------------------
 def _configuration(**overrides) -> str:
-    body = {"crop": "lettuce", "simulationDays": 35, "gravity": 1.0, "radiation": 0.01,
+    body = {"crop": "lettuce", "simulationDays": 35, "radiation": 0.01,
             "waterAvailability": 100.0, "lightHours": 16.0, "co2Level": 420.0,
             "growingArea": 10.0, "earthComparisonMode": "matched", "lightIntensity": 400.0,
             "temperature": 22.0, "humidity": 65.0, "waterRecyclingEfficiency": 90.0,

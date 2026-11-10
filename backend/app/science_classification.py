@@ -310,7 +310,8 @@ FEATURES: list[Feature] = [
             "engine is described as hypothetical exploration, never a validated forecast."
         ),
         notes=[
-            "gravity and radiation response coefficients remain unsupported assumptions.",
+            "radiation response coefficients remain unsupported assumptions; the gravity "
+            "coefficient was removed in Phase 30 rather than kept as a placeholder.",
             "O2 is derived stoichiometrically from CO2 (6 CO2 + 6 H2O -> C6H12O6 + 6 O2), not measured.",
             "Water recovery 0.90 is conservative against a measured 0.924 lower bound from a leaking chamber.",
         ],
@@ -383,13 +384,26 @@ FEATURES: list[Feature] = [
     ),
     Feature(
         id="gravity-response",
-        name="Microgravity growth penalty",
-        surface="simulate -> gravity factor",
+        name="Microgravity growth penalty (removed)",
+        surface="none",
         category=5,
-        status="served-assumed",
-        evidence="Placeholder magnitude: 15 % growth lost at 0 g. No partial-gravity plant dataset was recovered.",
-        user_facing="Listed among the model's assumptions with its constant value shown.",
-        notes=["Blocked by unavailable scientific evidence; not calibratable from the current corpus."],
+        status="removed",
+        evidence=(
+            "Removed in Phase 30. The penalty was a placeholder coefficient: no open dataset measures "
+            "crop yield or biomass across fractional gravity, the ISS fractional-gravity work measures "
+            "gene expression and morphology, and a ground reorientation is not partial gravity. A "
+            "coefficient with no measurement behind it cannot stay in a served model."
+        ),
+        user_facing=(
+            "There is no gravity input, no gravity control and no gravity factor. /api/simulate "
+            "rejects a request that carries one and names this decision; the mission surface no "
+            "longer offers gravity presets."
+        ),
+        notes=[
+            "The dataset gap is recorded as 'fractional-gravity' in data/research/dataset_gap_matrix.json.",
+            "Nothing in the simulator now changes with gravity, so an Earth/Moon/Mars comparison "
+            "isolates radiation and resources only.",
+        ],
     ),
     Feature(
         id="radiation-response",

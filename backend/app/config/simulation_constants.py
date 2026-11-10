@@ -14,7 +14,6 @@ Units used throughout the engine:
     biomass   -> grams of fresh weight (per square metre unless scaled by area)
     water     -> litres
     CO2 / O2  -> grams
-    gravity   -> g (Earth = 1.0)
     radiation -> mGy per day (absorbed dose rate)
     light     -> hours of light per day (photoperiod)
     CO2 level -> ppm
@@ -34,7 +33,6 @@ from __future__ import annotations
 # peak_water_l_per_day      water demand per m^2 at full canopy
 # optimal_light_hours       photoperiod at which the light factor equals 1.0
 # radiation_sensitivity     multiplier on the radiation penalty (1.0 = average)
-# microgravity_sensitivity  multiplier on the reduced-gravity penalty (1.0 = average)
 CROP_BASELINES: dict[str, dict] = {
     "lettuce": {
         "name": "Lettuce",
@@ -47,7 +45,6 @@ CROP_BASELINES: dict[str, dict] = {
         "peak_water_l_per_day": 2.5,
         "optimal_light_hours": 16.0,
         "radiation_sensitivity": 1.0,
-        "microgravity_sensitivity": 1.0,
     },
     "tomato": {
         "name": "Tomato",
@@ -60,7 +57,6 @@ CROP_BASELINES: dict[str, dict] = {
         "peak_water_l_per_day": 4.5,
         "optimal_light_hours": 16.0,
         "radiation_sensitivity": 1.2,
-        "microgravity_sensitivity": 1.2,
     },
     "radish": {
         "name": "Radish",
@@ -73,7 +69,6 @@ CROP_BASELINES: dict[str, dict] = {
         "peak_water_l_per_day": 2.0,
         "optimal_light_hours": 14.0,
         "radiation_sensitivity": 0.9,
-        "microgravity_sensitivity": 0.9,
     },
 }
 
@@ -82,12 +77,15 @@ DEFAULT_CROP = "lettuce"
 # ---------------------------------------------------------------------------
 # Earth reference conditions
 # ---------------------------------------------------------------------------
-# The Earth scenario always uses Earth gravity and background radiation.
-# By default ("matched" mode) it keeps the user's water / light / CO2 settings
-# so the Earth-vs-space difference isolates the space environment itself.
-# In "baseline" mode it also resets those resources to the reference values
-# below, which makes the Earth yield equal to the crop's baseline biomass.
-EARTH_REFERENCE_GRAVITY_G = 1.0
+# The Earth reference run uses background radiation. By default ("matched" mode) it keeps the user's
+# water / light / CO2 settings so the Earth-vs-space difference isolates the environment itself. In
+# "baseline" mode it also resets those resources to the reference values below, which makes the Earth
+# yield equal to the crop's baseline biomass.
+#
+# Phase 30 removed the fractional-gravity response entirely: there is no gravity multiplier, no
+# gravity input and no gravity control anywhere in the simulator. No open dataset measures crop yield
+# across gravity levels, so any coefficient would have been invented. The gap is recorded in
+# data/research/dataset_gap_matrix.json and docs/PHASE30_REMOVED_CAPABILITIES.md.
 EARTH_BACKGROUND_RADIATION_MGY_PER_DAY = 0.01
 EARTH_AMBIENT_CO2_PPM = 420.0  # also the reference point of the CO2 response curve
 EARTH_REFERENCE_WATER_AVAILABILITY = 100.0
@@ -95,19 +93,6 @@ EARTH_REFERENCE_WATER_AVAILABILITY = 100.0
 # ---------------------------------------------------------------------------
 # Environment response constants
 # ---------------------------------------------------------------------------
-# Gravity: linear penalty as gravity drops from 1 g to 0 g, plus a smaller
-# penalty for hypergravity above 1 g.
-#
-# ASSUMPTION, NOT A MEASUREMENT. A search of NASA sources on 2026-11-09 found no crop
-# fresh-weight dataset across fractional gravity: the ISS fractional-gravity work (EMCS,
-# Seedling Growth, OSD-346) measures gene expression and morphology, and the published
-# conclusions are that Mars-level gravity may not limit plant development and that microgravity
-# effects on biomass are modest and mixed. This magnitude is a scenario coefficient so the
-# world comparison has something to show, and it is not presented as measured anywhere in the
-# product surface.
-MICROGRAVITY_GROWTH_PENALTY = 0.15  # growth lost at 0 g (before crop sensitivity)
-HYPERGRAVITY_PENALTY_PER_G = 0.10  # growth lost per g above 1 g
-
 # Radiation: exponential decay of growth with dose rate above Earth background.
 #
 # ASSUMPTION, NOT A MEASUREMENT. No crop-yield dataset at habitat-relevant chronic dose rates was
@@ -192,7 +177,6 @@ CREW_MEMBER_CO2_KG_PER_DAY = 1.0
 # Input parameter ranges (single source of truth for API validation and UI)
 # ---------------------------------------------------------------------------
 PARAMETER_RANGES: dict[str, dict] = {
-    "gravity": {"min": 0.0, "max": 2.0, "step": 0.01, "default": 0.0, "unit": "g"},
     "radiation": {"min": 0.0, "max": 3.0, "step": 0.01, "default": 0.3, "unit": "mGy/day"},
     "waterAvailability": {"min": 0.0, "max": 100.0, "step": 1.0, "default": 100.0, "unit": "%"},
     "lightHours": {"min": 0.0, "max": 24.0, "step": 0.5, "default": 16.0, "unit": "h/day"},
@@ -206,12 +190,6 @@ SIMULATION_DURATION_OPTIONS = [7, 14, 30, 60, 90]
 # Scenario presets for the UI. The values are rounded, order-of-magnitude
 # reference points (Phase 1 assumptions), which is why the labels say
 # "-like": they stand for a class of environment, not a measured mission.
-GRAVITY_PRESETS = [
-    {"label": "Microgravity", "value": 0.0, "description": "Free fall, e.g. an orbiting station"},
-    {"label": "Moon-like", "value": 0.16, "description": "About one sixth of Earth gravity"},
-    {"label": "Mars-like", "value": 0.38, "description": "About 38 % of Earth gravity"},
-    {"label": "Earth-like", "value": 1.0, "description": "Earth surface reference"},
-]
 
 RADIATION_PRESETS = [
     {"label": "Earth surface-like", "value": 0.01, "description": "Natural background dose rate"},

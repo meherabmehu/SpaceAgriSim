@@ -42,7 +42,7 @@ def _dataset_meta() -> dict:
 
 
 def _simulate(**overrides) -> SimulationInput:
-    defaults = dict(crop="lettuce", gravity=0.0, radiation=0.3, water_availability=100,
+    defaults = dict(crop="lettuce", radiation=0.3, water_availability=100,
                     light_hours=16, co2_level=1000, simulation_days=30, growing_area=10)
     defaults.update(overrides)
     return SimulationInput(**defaults)
@@ -467,7 +467,7 @@ def test_workflow_refuses_to_run_the_emulator_through_the_json_loader(client):
 
 def test_simulate_accepts_the_optional_flux_fields_and_reports_the_basis(client):
     body = client.post("/api/simulate", json={
-        "crop": "lettuce", "gravity": 0, "radiation": 0.3, "waterAvailability": 100,
+        "crop": "lettuce", "radiation": 0.3, "waterAvailability": 100,
         "lightHours": 16, "co2Level": 1000, "simulationDays": 30, "growingArea": 10,
         "et0MmPerDay": 4.0}).json()
     assert body["demandBasis"]["basis"] == "et0-reference"
@@ -478,7 +478,7 @@ def test_simulate_accepts_the_optional_flux_fields_and_reports_the_basis(client)
 
 def test_simulate_default_response_unchanged_and_says_so(client):
     body = client.post("/api/simulate", json={
-        "crop": "lettuce", "gravity": 0, "radiation": 0.3, "waterAvailability": 100,
+        "crop": "lettuce", "radiation": 0.3, "waterAvailability": 100,
         "lightHours": 16, "co2Level": 1000, "simulationDays": 30, "growingArea": 10}).json()
     assert body["demandBasis"]["basis"] == "crop-relative"
     assert body["demandBasis"]["et0MmPerDay"] is None
@@ -504,22 +504,24 @@ def test_emulator_is_classified_as_a_mechanistic_calculation():
 
 # --------------------------------------------------------------------------- catalogue + audit
 def test_catalogue_counts_match_the_documented_class_counts():
-    """28 since Phase 26 added five acquired experimental datasets.
+    """30 since Phase 30 acquired two more measured datasets (both class A, both served).
 
     Each of the five was downloaded, hashed against the publisher's own checksum and preprocessed
     before it entered the catalogue; none was added to raise a count. The class assignments are
     deliberately mixed - A for the ones that drive a committed artefact, B for the ones usable but
     unconsumed, C for the twenty-plant open-field tomato trial, D for the tree gas-exchange series -
     because a class is an answer about usability, not a trophy. Phase 29 promoted the green-light
-    trial to A once a workflow served it; nothing else moved.
+    trial to A once a workflow served it. Phase 30 added the controlled-environment wheat series
+    and the lettuce light-use-efficiency compilation, both class A: the first is served as a
+    measured comparison, the second was used to evaluate - and fail - the harvest model.
     """
     payload = json.loads((ROOT / "data" / "research" / "dataset_catalog.json").read_text())
-    assert len(payload["datasets"]) == 28
+    assert len(payload["datasets"]) == 30
     counts = {}
     for dataset in payload["datasets"]:
         counts[dataset["usabilityClass"]] = counts.get(dataset["usabilityClass"], 0) + 1
-    # Phase 29 moved the green-light trial from B to A: it is now consumed by a delivered workflow.
-    assert counts == {"A": 3, "B": 6, "C": 9, "D": 4, "E": 5, "F": 1}
+    # Phase 30 added two class-A acquisitions; no existing class moved.
+    assert counts == {"A": 5, "B": 6, "C": 9, "D": 4, "E": 5, "F": 1}
 
 
 def test_only_the_imported_datasets_have_an_open_commercial_licence():

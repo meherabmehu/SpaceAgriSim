@@ -8,7 +8,6 @@ The growth model in `engine.py` simply multiplies them together:
     finalGrowth = baselineGrowth
                   x lightFactor
                   x waterFactor
-                  x gravityFactor
                   x radiationFactor
                   x co2Factor
 
@@ -31,23 +30,6 @@ def _clamp(value: float, low: float = 0.0, high: float | None = None) -> float:
     if high is not None and value > high:
         return high
     return value
-
-
-def gravity_factor(gravity_g: float, crop: CropProfile) -> float:
-    """
-    Reduced gravity (0 g .. 1 g): linear penalty that reaches
-    MICROGRAVITY_GROWTH_PENALTY x crop sensitivity at 0 g.
-    Hypergravity (> 1 g): linear penalty of HYPERGRAVITY_PENALTY_PER_G per g.
-
-    Example (average crop): 1 g -> 1.00, 0.38 g (Mars) -> 0.907, 0 g -> 0.85
-    """
-    if gravity_g < constants.EARTH_REFERENCE_GRAVITY_G:
-        shortfall = constants.EARTH_REFERENCE_GRAVITY_G - gravity_g
-        penalty = constants.MICROGRAVITY_GROWTH_PENALTY * crop.microgravity_sensitivity * shortfall
-    else:
-        excess = gravity_g - constants.EARTH_REFERENCE_GRAVITY_G
-        penalty = constants.HYPERGRAVITY_PENALTY_PER_G * excess
-    return _clamp(1.0 - penalty)
 
 
 def radiation_factor(radiation_mgy_per_day: float, crop: CropProfile) -> float:
@@ -120,7 +102,6 @@ def co2_factor(co2_ppm: float) -> float:
 
 def combined_growth_factor(
     crop: CropProfile,
-    gravity_g: float,
     radiation_mgy_per_day: float,
     water_availability_percent: float,
     light_hours: float,
@@ -137,7 +118,6 @@ def combined_growth_factor(
     factors = {
         "light": light_factor(light_hours, crop),
         "water": water_factor(water_availability_percent),
-        "gravity": gravity_factor(gravity_g, crop),
         "radiation": radiation_factor(radiation_mgy_per_day, crop),
         "co2": co2_factor(co2_ppm),
         "intensity": intensity_factor(light_intensity),

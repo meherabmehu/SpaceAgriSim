@@ -319,14 +319,13 @@ def test_served_model_was_not_silently_replaced():
     assert not (ROOT / "ml" / "artifacts" / "lettuce-earth-growth-v4.json").exists()
 
 
-def test_water_and_harvest_contracts_survive_phase29(client):
-    """Both Phase 28 workflows must still answer with the same envelope."""
+def test_water_contract_survives_phase29_and_harvest_is_gone(client):
+    """Phase 30 changed this contract on purpose: harvest forecasting was removed."""
     harvest = client.post("/api/workflows/harvest-prediction/run", json={"scenarios": [
         {"daysAfterTransplant": 21, "airTemperature": 24, "rootTemperature": 24, "ppfd": 400,
-         "photoperiodHours": 16, "plantDensityPerM2": 25}]}).json()
-    assert harvest["workflowComplete"] is True
-    assert harvest["modelValidatedForForecasting"] is False
-    assert harvest["scenarios"][0]["recordPrediction"]["modelId"] == "lettuce-earth-growth-v2"
+         "photoperiodHours": 16, "plantDensityPerM2": 25}]})
+    assert harvest.status_code == 410
+    assert harvest.json()["detail"]["removedInPhase"] == 30
 
     water = client.post(WATER + "/run", json={"scenarios": [WATER_SCENARIO]}).json()
     assert water["status"] == "complete"

@@ -59,11 +59,8 @@ export function Comparison({ params }) {
               <strong>{number(run.result.estimatedOxygenProduced)} g</strong>
             </div>
             <div className="stat-pair">
-              <span>Gravity / dose</span>
-              <strong>
-                {run.result.inputs.gravity} g / {run.result.inputs.radiation}{" "}
-                mGy/day
-              </strong>
+              <span>Chronic dose</span>
+              <strong>{run.result.inputs.radiation} mGy/day</strong>
             </div>
             <div className="stat-pair">
               <span>Uncertainty</span>

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-07T15:05:28.376963+00:00",
+  "generatedAt": "2026-11-10T17:35:36.375606+00:00",
   "phase": 7,
   "purpose": "Check every simulator parameter the recovered NASA measurements can speak to, apply only same-quantity same-crop calibrations, and prove mechanically that no output changed.",
   "applyPolicy": "A calibration is applied only when the measurement is the same physical quantity on the same class of crop. Zero Phase 7 measurements meet that bar for the three modelled crops, so zero parameters changed. The checks are still recorded because 'we looked and it holds' is a different claim from 'we did not look'.",
@@ -177,9 +177,24 @@
     "failures": [],
     "allPassed": true
   },
+  "deliberateChanges": [
+    {
+      "phase": 30,
+      "what": "the fractional-gravity input, factor and control were removed",
+      "why": "no open dataset measures crop yield or biomass across fractional gravity, so the 15 %-at-0 g growth penalty was an invented coefficient. Its removal deletes a factor from the fingerprint and replaces the gravity axis of the scenario grid with a radiation axis, so the combined hash changes.",
+      "fingerprintBefore": "d9165881105535e2a733650450123eb6fbfbfd0b86d4b9796261ade72855c596",
+      "fingerprintAfter": "49cb0c6c7ede271ed44d4570f6978fbea988eaa2118557ed7a25598041a450f7",
+      "cropsAffected": [
+        "lettuce",
+        "tomato",
+        "radish"
+      ],
+      "direction": "outputs rise, because the removed penalty no longer discounts space-case growth"
+    }
+  ],
   "outputFingerprint": {
     "grid": "27 scenarios x 3 crops x space/earth blocks",
-    "sha256": "d9165881105535e2a733650450123eb6fbfbfd0b86d4b9796261ade72855c596",
+    "sha256": "49cb0c6c7ede271ed44d4570f6978fbea988eaa2118557ed7a25598041a450f7",
     "fieldsHashed": [
       "crop_yield_g",
       "growth_rate_g_per_day",

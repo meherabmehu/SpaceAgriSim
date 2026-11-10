@@ -23,7 +23,7 @@ from app.main import app
 PASSWORD = "CorrectHorseBattery9!"
 
 CONFIGURATION = {
-    "crop": "lettuce", "simulationDays": 35, "gravity": 1.0, "radiation": 0.01,
+    "crop": "lettuce", "simulationDays": 35, "radiation": 0.01,
     "waterAvailability": 100.0, "lightHours": 16.0, "co2Level": 420.0, "growingArea": 10.0,
     "earthComparisonMode": "matched", "lightIntensity": 400.0, "temperature": 22.0,
     "humidity": 65.0, "waterRecyclingEfficiency": 90.0, "lightSpectrum": "balanced",
@@ -162,11 +162,12 @@ def test_an_invalid_configuration_is_rejected_and_nothing_is_stored(client):
     before = len(client.get("/api/scenarios", headers=headers).json()["scenarios"])
     created = _create(client, headers)
     rejected = client.patch(f"/api/scenarios/{created['id']}",
-                            json={"configuration": {**CONFIGURATION, "gravity": 9.0}},
+                            json={"configuration": {**CONFIGURATION, "waterAvailability": 500.0}},
                             headers=headers)
     assert rejected.status_code == 422
     after = client.get(f"/api/scenarios/{created['id']}", headers=headers).json()
-    assert after["configuration"]["gravity"] == 1.0
+    assert after["configuration"]["waterAvailability"] == 100.0
+    assert "gravity" not in after["configuration"]
     assert len(client.get("/api/scenarios", headers=headers).json()["scenarios"]) == before + 1
 
 

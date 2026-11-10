@@ -2,7 +2,6 @@ import { authorizationHeader } from "./auth";
 
 export interface MissionParameters {
   crop: string;
-  gravity: number;
   radiation: number;
   waterAvailability: number;
   lightHours: number;

@@ -78,7 +78,7 @@ def test_water_balance_is_bounded_and_conserved_in_accounting(client):
 
 
 def test_all_public_life_support_outputs_are_finite_and_nonnegative(client):
-    result=estimate(client,gravity=.38,radiation=1.2,waterAvailability=47,lightHours=18,co2Level=900,simulationDays=90)
+    result=estimate(client,radiation=1.2,waterAvailability=47,lightHours=18,co2Level=900,simulationDays=90)
     for value in [
         result["cropYield"], result["space"]["harvestedYield"], result["space"]["standingBiomass"],
         result["waterUsed"], result["waterRecovered"], result["co2Removed"], result["estimatedOxygenProduced"],

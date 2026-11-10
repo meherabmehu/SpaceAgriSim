@@ -10,20 +10,21 @@ Phase 26 asked what each feature may **claim**. This asks whether a user can act
 | `partial` | implemented for some inputs or some of the layer's meaning |
 | `absent` | missing, and usable if built |
 | `not-applicable` | the layer does not apply to this kind of feature |
+| `retired` | removed in Phase 30 - the capability is gone and a test proves it is gone |
 
 ## Layer coverage
 
 | Layer | present | partial | absent | n/a |
 | --- | --- | --- | --- | --- |
-| `data` — A dataset, artefact or documented assumption the calculation reads | 6 | 1 | 5 | 0 |
-| `method` — The model or closed-form calculation | 5 | 3 | 4 | 0 |
-| `service` — The backend module that assembles the result | 8 | 0 | 4 | 0 |
-| `endpoint` — The HTTP route a client calls | 7 | 1 | 4 | 0 |
-| `inputCheck` — Request validation that rejects impossible inputs | 9 | 0 | 0 | 3 |
-| `outputCheck` — Validation that the result is physically coherent | 1 | 5 | 0 | 6 |
-| `uncertainty` — A quantified spread, or an explicit statement that none exists | 1 | 2 | 5 | 4 |
+| `data` — A dataset, artefact or documented assumption the calculation reads | 5 | 1 | 4 | 0 |
+| `method` — The model or closed-form calculation | 4 | 3 | 3 | 0 |
+| `service` — The backend module that assembles the result | 6 | 0 | 4 | 0 |
+| `endpoint` — The HTTP route a client calls | 6 | 0 | 4 | 0 |
+| `inputCheck` — Request validation that rejects impossible inputs | 8 | 0 | 0 | 3 |
+| `outputCheck` — Validation that the result is physically coherent | 1 | 4 | 0 | 6 |
+| `uncertainty` — A quantified spread, or an explicit statement that none exists | 1 | 1 | 4 | 5 |
 | `provenance` — Sources and their limits travel with the answer | 9 | 1 | 0 | 2 |
-| `frontend` — A screen a user can reach and read | 7 | 1 | 4 | 0 |
+| `frontend` — A screen a user can reach and read | 6 | 1 | 3 | 0 |
 | `tests` — Automated tests covering the path | 10 | 0 | 0 | 2 |
 
 ## Per feature
@@ -32,13 +33,13 @@ Phase 26 asked what each feature may **claim**. This asks whether a user can act
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Measured crop water use, compared against the platform's demand ✅ | `research-ready` | pres | pres | pres | pres | pres | pres | pres | pres | pres | pres |
 | 2 | The ET0 target is itself correct | `research-ready` | pres | pres | pres | pres | pres | part | part | pres | pres | pres |
-| 3 | Predicted harvest mass per plant | `research-ready` | pres | pres | pres | pres | pres | part | part | pres | pres | pres |
-| 4 | Response to specific LED spectra and photoperiods | `experimental` | pres | abse | abse | abse | pres | not- | not- | pres | part | pres |
+| 3 | Predicted harvest mass per plant | `removed` | reti | reti | reti | reti | reti | reti | reti | pres | reti | pres |
+| 4 | Response to specific LED spectra and photoperiods | `experimental` | pres | part | abse | abse | pres | not- | not- | pres | part | pres |
 | 5 | Nutrient solution management | `experimental` | part | abse | abse | abse | not- | not- | not- | pres | abse | pres |
 | 6 | Heat-stress and VPD excursion claims | `research-ready` | pres | pres | pres | pres | pres | part | abse | part | pres | pres |
 | 7 | Cultivar-specific growth parameters | `experimental` | abse | part | pres | pres | pres | not- | abse | pres | pres | pres |
 | 8 | Energy and mass cost of a described mission | `experimental` | pres | pres | pres | pres | pres | part | abse | pres | pres | pres |
-| 9 | Effect of Mars or lunar gravity on crop growth | `data-blocked` | abse | part | pres | part | pres | not- | abse | pres | abse | pres |
+| 9 | Effect of Mars or lunar gravity on crop growth | `removed` | reti | reti | reti | reti | pres | not- | not- | pres | reti | pres |
 | 10 | Root-zone water status | `data-blocked` | abse | part | pres | pres | pres | part | abse | pres | pres | pres |
 | 11 | Plant health or growth stage from imagery | `data-blocked` | abse | abse | abse | abse | not- | not- | not- | not- | abse | not- |
 | 12 | Siting for a future climate | `data-blocked` | abse | abse | abse | abse | not- | not- | not- | not- | abse | not- |
@@ -85,20 +86,20 @@ Readiness tier: `research-ready` · Phase 27: audited only
 
 ### 3. Predicted harvest mass per plant
 
-Readiness tier: `research-ready` · Phase 27: audited only
+Readiness tier: `removed` · Phase 27: audited only
 
 | Layer | State | Note |
 | --- | --- | --- |
-| `data` | `present` |  |
-| `method` | `present` |  |
-| `service` | `present` |  |
-| `endpoint` | `present` | POST /api/predict/lettuce-earth-growth-v2 and -v3 |
-| `inputCheck` | `present` | typed ranges on every field; extra fields forbidden |
-| `outputCheck` | `partial` | no guard against extrapolation beyond the training envelope |
-| `uncertainty` | `partial` | leave-one-experiment-out error is reported; per-prediction interval is not |
-| `provenance` | `present` |  |
-| `frontend` | `present` |  |
-| `tests` | `present` |  |
+| `data` | `retired` | the evaluation data is kept; the served model is not |
+| `method` | `retired` | the model and its failed evaluation are recorded, not served |
+| `service` | `retired` |  |
+| `endpoint` | `retired` | POST .../run answers 410; GET .../capability and .../parity remain |
+| `inputCheck` | `retired` |  |
+| `outputCheck` | `retired` |  |
+| `uncertainty` | `retired` | the interval used to span a factor of 29; it is no longer served |
+| `provenance` | `present` | the removal reason and every failed evaluation stay readable |
+| `frontend` | `retired` | the run tab is gone; the evidence tab shows the measured record |
+| `tests` | `present` | the tests assert the capability is unavailable, not that a screen exists |
 
 ### 4. Response to specific LED spectra and photoperiods
 
@@ -106,8 +107,8 @@ Readiness tier: `experimental` · Phase 27: audited only
 
 | Layer | State | Note |
 | --- | --- | --- |
-| `data` | `present` |  |
-| `method` | `absent` | no model consumes the spectrum table; the simulator annotates only |
+| `data` | `present` | two measured datasets: four spectral regimes in lettuce, and 39 controlled-environment wheat runs varying PPFD, photoperiod, CO2 and temperature |
+| `method` | `partial` | measured group comparison ships; the fitted response surface failed its sealed holdout (297.46 % MAPE) and is not served |
 | `service` | `absent` |  |
 | `endpoint` | `absent` |  |
 | `inputCheck` | `present` | lightSpectrum is a Literal of three values |
@@ -187,20 +188,20 @@ Readiness tier: `experimental` · Phase 27: audited only
 
 ### 9. Effect of Mars or lunar gravity on crop growth
 
-Readiness tier: `data-blocked` · Phase 27: audited only
+Readiness tier: `removed` · Phase 27: audited only
 
 | Layer | State | Note |
 | --- | --- | --- |
-| `data` | `absent` | no fractional-gravity growth dataset exists |
-| `method` | `partial` | an assumed sensitivity coefficient, documented as an assumption |
-| `service` | `present` |  |
-| `endpoint` | `partial` | the endpoint accepts gravity; the UI deliberately does not expose it |
-| `inputCheck` | `present` |  |
+| `data` | `retired` | no fractional-gravity growth dataset exists, and none was recoverable |
+| `method` | `retired` | gravity_factor() no longer exists; a test asserts its absence |
+| `service` | `retired` | the engine has no gravity term |
+| `endpoint` | `retired` | /api/simulate rejects a gravity field and names the decision |
+| `inputCheck` | `present` | extra='forbid' plus a model validator turn the field into a 422 |
 | `outputCheck` | `not-applicable` |  |
-| `uncertainty` | `absent` |  |
-| `provenance` | `present` | warns that reduced-gravity response is an assumed penalty |
-| `frontend` | `absent` | removed on purpose: no data behind the response curve |
-| `tests` | `present` |  |
+| `uncertainty` | `not-applicable` |  |
+| `provenance` | `present` | the radiation warning states that gravity is not modelled at all |
+| `frontend` | `retired` | the gravity control and its presets were removed |
+| `tests` | `present` | the tests assert the input is refused and the factor is absent |
 
 ### 10. Root-zone water status
 

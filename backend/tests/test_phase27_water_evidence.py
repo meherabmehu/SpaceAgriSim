@@ -199,7 +199,7 @@ def test_a_larger_light_scale_scales_the_demand_linearly(client):
     {"crop": "lettuce", "lightScale": 0},
     {"crop": "lettuce", "lightScale": 99},
     {"crop": "mizuna"},
-    {"crop": "lettuce", "gravity": 0.3},
+    {"crop": "lettuce", "gravity": 0.3},  # removed in Phase 30
 ])
 def test_invalid_inputs_are_rejected_with_422(client, body):
     assert client.post("/api/water-use-evidence/compare", json=body).status_code == 422

@@ -13,8 +13,9 @@ Twelve named capabilities, audited against the evidence that exists in this repo
 | `experimental` | implemented and internally evaluated; no independent validation exists |
 | `data-blocked` | no obtainable dataset can move this feature; the block is the data's absence |
 | `unsupported` | the product must not make the claim at all |
+| `removed` | the capability was withdrawn in Phase 30 and no surface remains that claims it |
 
-**12 features: production-ready: 0, research-ready: 4, experimental: 4, data-blocked: 4, unsupported: 0. 2 of 12 moved in Phase 26.**
+**12 features: production-ready: 0, research-ready: 3, experimental: 4, data-blocked: 3, unsupported: 0, removed: 2. 4 of 12 moved in Phase 26.**
 
 ## Readiness
 
@@ -22,9 +23,9 @@ Twelve named capabilities, audited against the evidence that exists in this repo
 | --- | --- | --- | --- | --- |
 | 1 | Predicted crop water use in litres per plant per day | `research-ready` **(moved)** | `data-blocked` | 3 artefacts, 1 datasets |
 | 2 | The claim that the ET0 target is itself correct | `research-ready` | `research-ready` | 2 artefacts, 4 datasets |
-| 3 | Predicted harvest mass per plant | `research-ready` | `research-ready` | 4 artefacts, 3 datasets |
+| 3 | Predicted harvest mass per plant | `removed` **(moved)** | `research-ready` | 3 artefacts, 1 datasets |
 | 4 | Response to specific LED spectra and photoperiods | `experimental` | `experimental` | 3 artefacts, 1 datasets |
-| 5 | Effect of Mars or lunar gravity on crop growth | `data-blocked` | `data-blocked` | 2 artefacts, 0 datasets |
+| 5 | Effect of Mars or lunar gravity on crop growth | `removed` **(moved)** | `data-blocked` | 2 artefacts, 0 datasets |
 | 6 | Root-zone water status in a hydroponic or substrate system | `data-blocked` | `data-blocked` | 1 artefacts, 0 datasets |
 | 7 | Heat-stress and VPD excursion claims | `research-ready` | `research-ready` | 2 artefacts, 2 datasets |
 | 8 | Cultivar-specific growth parameters | `experimental` | `experimental` | 2 artefacts, 0 datasets |
@@ -39,9 +40,9 @@ Twelve named capabilities, audited against the evidence that exists in this repo
 | --- | --- | --- |
 | Predicted crop water use in litres per plant per day | `zenodo-schroder-2021-lettuce-pot` | 380 pot-days from 35 published pots, 7 treatments, 11 weighings |
 | The claim that the ET0 target is itself correct | `nasa-power-daily`, `era5-land`, `era5-hourly-0p25`, `noaa-isd-lite` | four independent reanalysis and station sources over matched days |
-| Predicted harvest mass per plant | `zenodo-greenlight-2024-lettuce`, `zenodo-schroder-2021-lettuce-pot`, `zenodo-ledphotoperiod-2025-tomato` | 252 hydroponic lettuce plants, 35 greenhouse lettuce pots, 20 open-field tomato plants |
+| Predicted harvest mass per plant | `zenodo-kilowatts-lettuce-lue` | 53 published treatment means from 40 studies, used as an evaluation set |
 | Response to specific LED spectra and photoperiods | `zenodo-greenlight-2024-lettuce` | 252 plants across four fixed spectra at constant 200 umol/m2/s and 16 h |
-| Effect of Mars or lunar gravity on crop growth | — | nothing: no fractional-gravity plant growth dataset exists in this repository |
+| Effect of Mars or lunar gravity on crop growth | — | nothing: no fractional-gravity plant yield dataset exists |
 | Root-zone water status in a hydroponic or substrate system | — | nothing: no root-zone water-potential series exists in-repo. The Schroeder trial's water-holding-capacity sheet is a static substrate property, not a root-zone time series. |
 | Heat-stress and VPD excursion claims | `era5-hourly-0p25`, `noaa-isd-lite` | hourly reanalysis and station records at grid and station resolution |
 | Cultivar-specific growth parameters | — | three crop profiles (lettuce, tomato, radish) with no cultivar field |
@@ -93,23 +94,21 @@ Evidence artefacts: `ml/evaluation/et0_dataset_quality.json`, `docs/ERA5_LAND_IN
 
 ### 3. Predicted harvest mass per plant
 
-**Tier: `research-ready`** (unchanged in Phase 26)
+**Tier: `removed`** (was `research-ready` before Phase 26)
 
-Measured on: 252 hydroponic lettuce plants, 35 greenhouse lettuce pots, 20 open-field tomato plants
+Measured on: 53 published treatment means from 40 studies, used as an evaluation set
 
 Supports:
-- leave-one-experiment-out lettuce harvest prediction (v2 R2 0.8699 / MAE 34.9 g)
-- per-plant harvest mass for two independent lettuce experiments
+- a measured-versus-model parity record that shows the model overpredicting
 
 Does not support:
-- any controlled-environment tomato or mizuna harvest prediction
-- a spaceflight yield claim: no spaceflight harvest label exists in-repo
+- any harvest forecast, for any crop
 
-What would move it: a controlled-environment tomato or mizuna harvest trial with per-plant labels and documented conditions
+What would move it: nothing, in this phase: the capability is removed rather than blocked
 
-Blocking evidence: no such open dataset was found in this phase's search
+Blocking evidence: the independent error is more than ten times the criterion
 
-Evidence artefacts: `ml/evaluation/lettuce_splits.json`, `ml/evaluation/lettuce_out_of_fold.csv`, `data/processed/phase26/greenlight2024_lettuce_harvest.csv`, `data/processed/phase26/schroder2021_lettuce_biomass.csv`
+Evidence artefacts: `ml/evaluation/phase30_harvest_crossstudy.json`, `data/processed/phase30/lettuce_multistudy.csv`, `backend/tests/test_phase30_removed_capabilities.py`
 
 ### 4. Response to specific LED spectra and photoperiods
 
@@ -133,22 +132,21 @@ Evidence artefacts: `data/processed/phase26/greenlight2024_lettuce_harvest.csv`,
 
 ### 5. Effect of Mars or lunar gravity on crop growth
 
-**Tier: `data-blocked`** (unchanged in Phase 26)
+**Tier: `removed`** (was `data-blocked` before Phase 26)
 
-Measured on: nothing: no fractional-gravity plant growth dataset exists in this repository
+Measured on: nothing: no fractional-gravity plant yield dataset exists
 
 Supports:
-- a bounded response curve whose sensitivity coefficient is a modelling assumption
+- nothing - the simulator has no gravity term
 
 Does not support:
-- any quantitative Mars- or lunar-gravity yield prediction
-- the conflation of clinostat, ground analog and spaceflight data, none of which is present
+- any gravity-related yield statement
 
-What would move it: a fractional-gravity growth experiment; none exists openly at the replication needed
+What would move it: a replicated fractional-gravity yield experiment; none exists openly
 
-Blocking evidence: no open dataset; a measurement to commission, not to download
+Blocking evidence: no open dataset, and none was recoverable in the Phase 30 search
 
-Evidence artefacts: `backend/app/simulation/factors.py`, `docs/MODEL_LIMITATIONS.md`
+Evidence artefacts: `backend/tests/test_phase30_removed_capabilities.py`, `docs/PHASE30_REMOVED_CAPABILITIES.md`
 
 ### 6. Root-zone water status in a hydroponic or substrate system
 
@@ -282,4 +280,4 @@ Evidence artefacts: `docs/DATASET_GAP_MATRIX.md`
 
 No feature reached `production-ready` in this phase and none was promoted on the strength of a new download. The two tiers that moved each gained a specific, cited artefact: `measured-eta` gained the first measured crop water use in the repository, and `nutrient-balance` gained a licensed nutrient-uptake workbook. Both movements are modest by design - in both cases the acquisition made the feature *legitimately discussable*, not *solved*.
 
-4 features remain `data-blocked`. That count fell by one in this phase, and only because a licensed nutrient-uptake workbook was actually downloaded and verified. The remaining blocks do not shrink, because the datasets that would clear them do not exist under an open licence and a catalogue entry cannot be invented.
+3 features remain `data-blocked`. That count fell by one in this phase, and only because a licensed nutrient-uptake workbook was actually downloaded and verified. The remaining blocks do not shrink, because the datasets that would clear them do not exist under an open licence and a catalogue entry cannot be invented.

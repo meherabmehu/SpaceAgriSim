@@ -8,7 +8,7 @@ import { formatDay, formatMass, formatPercent, formatVolume, relativeChangePerce
  * "what changed" comparison). No hard-coded numbers.
  */
 
-const FACTOR_NAMES = { gravity: 'reduced gravity', radiation: 'radiation', water: 'water shortage', light: 'photoperiod', co2: 'CO₂ enrichment' }
+const FACTOR_NAMES = { radiation: 'radiation', water: 'water shortage', light: 'photoperiod', co2: 'CO₂ enrichment' }
 
 /** One-sentence summary of the current result. */
 export function missionInsight(result) {
@@ -85,7 +85,6 @@ export function whatIfDeltas(baseline, current) {
 
 const PARAM_LABELS = {
   crop: 'Crop',
-  gravity: 'Gravity',
   radiation: 'Radiation',
   waterAvailability: 'Water availability',
   lightHours: 'Photoperiod',

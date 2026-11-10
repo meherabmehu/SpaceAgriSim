@@ -14,7 +14,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 
-from app.models.simulation import SimulationRequest
+from app.models.simulation import SimulationRequest, strip_removed_fields
 from app.routes.simulation import simulate
 from app import mailer, observability, storage
 from app.config.settings import settings
@@ -37,8 +37,12 @@ def run(request: SimulationRequest):
 @router.post("/compare")
 def compare(request: SimulationRequest):
     scenarios = []
-    for name, gravity, radiation in [("Earth", 1.0, 0.01), ("Moon", 0.16, 0.5), ("Mars", 0.38, 0.2)]:
-        params = request.model_copy(update={"gravity": gravity, "radiation": radiation})
+    # Phase 30 removed the fractional-gravity response, so a "Moon" or "Mars" scenario can no longer
+    # differ from Earth by gravity. What still differs is the radiation environment, which is what
+    # these named cases vary - and each name says so.
+    for name, radiation in [("Earth background", 0.01), ("Lunar surface", 0.5),
+                            ("Mars surface", 0.2)]:
+        params = request.model_copy(update={"radiation": radiation})
         scenarios.append({"name": name, "result": run(params)})
     scenarios.append({"name": "Custom habitat", "result": run(request)})
     return {"scenarios": scenarios, "method": "matched-resource hypothetical habitats", "limitations": LIMITATIONS}
@@ -111,7 +115,7 @@ def optimize(request: SimulationRequest):
             "candidateCount":len(candidates),"method":"bounded discrete Pareto search",
             "constraints":{"lightHours":[12,16,18],"waterAvailability":[70,85,100],
                            "co2Level":[420,800,1200],"lightIntensity":[200,300,450],
-                           "fixed":["crop","gravity","radiation","temperature","humidity","growingArea","simulationDays","waterRecyclingEfficiency"]},
+                           "fixed":["crop","radiation","temperature","humidity","growingArea","simulationDays","waterRecyclingEfficiency"]},
             "limitations":LIMITATIONS+["Discrete candidate frontier, not a global optimum. Recommendation prioritizes yield; light input is not a modeled power demand."]}
 
 
@@ -274,7 +278,7 @@ def shared_scenario(token: str):
             "expiresAt": row["expires_at"],
             # Reproduced from the stored configuration rather than stored alongside it, so a
             # shared page always shows what the current model produces for that input.
-            "result": run(SimulationRequest(**configuration)),
+            "result": run(SimulationRequest(**strip_removed_fields(configuration))),
             "scope": "public read-only share", "disclaimer": SHARE_DISCLAIMER,
             "limitations": LIMITATIONS}
 

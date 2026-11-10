@@ -7,7 +7,6 @@ from app.simulation.engine import SimulationInput, run_simulation
 def make_input(**overrides):
     base = dict(
         crop="lettuce",
-        gravity=0.0,
         radiation=0.3,
         water_availability=100.0,
         light_hours=16.0,
@@ -29,7 +28,7 @@ def test_space_yield_lower_than_earth_in_microgravity_with_radiation():
 
 
 def test_earth_conditions_give_identical_scenarios():
-    result = run_simulation(make_input(gravity=1.0, radiation=0.01))
+    result = run_simulation(make_input(radiation=0.01))
     assert result.space.crop_yield_g == pytest.approx(result.earth.crop_yield_g)
     assert result.yield_difference_percent == pytest.approx(0.0)
 

@@ -4,6 +4,7 @@ import {
   CheckCircle2,
   Droplets,
   FlaskConical,
+  Leaf,
   Play,
   Plus,
   ShieldCheck,
@@ -15,7 +16,7 @@ import { api } from "../../services/platformApi.ts";
 import { Limitations, JsonDetails, useResource, RequestState } from "./moduleSupport.jsx";
 
 /**
- * Two complete scientific workflows, operated end to end from the browser.
+ * Two complete scientific workflows plus two measured panels, operated from the browser.
  *
  * Why this page exists
  * --------------------
@@ -39,8 +40,9 @@ import { Limitations, JsonDetails, useResource, RequestState } from "./moduleSup
 
 const TABS = [
   { id: "water", label: "Water demand & irrigation", icon: Droplets },
-  { id: "harvest", label: "Crop growth & harvest", icon: Sprout },
+  { id: "harvest", label: "Harvest evidence (removed)", icon: Sprout },
   { id: "light", label: "Light quality & stress", icon: FlaskConical },
+  { id: "cea", label: "Controlled environment (wheat)", icon: Leaf },
 ];
 
 function Pill({ tone = "muted", children }) {
@@ -599,277 +601,145 @@ export function WaterDemandWorkflow() {
   );
 }
 
-/* --------------------------------------------------------------- harvest prediction */
+/* ------------------------------------------------------- harvest: the removed capability */
 
-const HARVEST_PRESETS = [
-  {
-    label: "Plant factory, 16 h",
-    values: {
-      daysAfterTransplant: 21, airTemperature: 24, rootTemperature: 24, ppfd: 400,
-      photoperiodHours: 16, plantDensityPerM2: 25,
-    },
-  },
-  {
-    label: "Shorter photoperiod, 12 h",
-    values: {
-      daysAfterTransplant: 21, airTemperature: 24, rootTemperature: 24, ppfd: 400,
-      photoperiodHours: 12, plantDensityPerM2: 25,
-    },
-  },
-];
-
+/**
+ * This tab used to run a lettuce harvest forecast. Phase 30 evaluated that model the only way that
+ * counts - leave-one-study-out over published studies it had never seen - and it missed the 30 %
+ * criterion by more than a factor of ten, with the mean baseline selected out of fold. The forecast
+ * was removed rather than kept behind a warning, so this panel has no run control at all: it shows
+ * the decision, every evaluation that failed, and the measured-versus-predicted record that
+ * survives, because a failed model is still evidence about the data.
+ */
 export function HarvestWorkflow() {
   const capability = useResource("/workflows/harvest-prediction/capability");
   const parity = useResource("/workflows/harvest-prediction/parity");
-  const fields = useMemo(() => capability.data?.fields || [], [capability.data]);
-  const runner = useWorkflow("harvest-prediction", fields);
-  const { scenarios, update, add, remove } = useScenarioState(
-    HARVEST_PRESETS, fields, "harvest");
 
-  const result = runner.data;
-  const rows = useMemo(() => result?.comparison?.rows || [], [result]);
+  const evaluation = capability.data?.evaluations || [];
+  const points = parity.data?.points || [];
 
   return (
-    <div className="workflow-panel" aria-label="Harvest prediction workflow">
+    <div className="workflow-panel" aria-label="Harvest evidence panel">
       <RequestState state={capability} />
       {capability.data ? (
-        <Card
-          title="1 · Growth stage and environment"
-          label="Input"
-          action={<Pill tone="warn">model status: trained-exploratory</Pill>}
-        >
-          <p className="fine">
-            The selected model is <strong>{capability.data.modelId}</strong>. It predicts fresh yield
-            per square metre from the daily light integral and divides by the density you state. The
-            daily light integral is derived from PPFD × photoperiod, so the two light controls act
-            together — a 16 h plant factory and a 12 h greenhouse at the same PPFD are different
-            inputs, which is exactly what the predecessor model could not represent.
-          </p>
-
-          <ScenarioEditor
-            scenarios={scenarios}
-            fields={fields}
-            max={capability.data.maxScenarios}
-            disabled={runner.loading}
-            onChange={update}
-            onAdd={add}
-            onRemove={remove}
-          />
-
-          <div className="module-actions">
-            <button
-              type="button"
-              className="primary-button"
-              onClick={() => runner.run(scenarios)}
-              disabled={runner.loading || !scenarios.length}
-            >
-              <Play size={15} /> {runner.loading ? "Running the model…" : "Run harvest prediction"}
-            </button>
-            <span className="muted fine">
-              Runs the served artifact byte-for-byte, with its conformal interval and its domain checks.
-            </span>
-          </div>
-          {runner.loading ? <div className="skeleton" role="status">Running the lettuce model…</div> : null}
-          {runner.error ? <div className="error-banner" role="alert">{runner.error}</div> : null}
-        </Card>
-      ) : null}
-
-      {result ? (
         <>
           <Card
-            title="2 · Results"
-            label="Output"
-            action={
-              result.modelValidatedForForecasting ? (
-                <Pill tone="ok">holdout passed</Pill>
-              ) : (
-                <Pill tone="warn">holdout failed · not a forecast</Pill>
-              )
-            }
+            title="1 · What this workflow was, and why it is gone"
+            label="DECISION"
+            action={<Pill tone="warn">removed in Phase 30 · no forecast is served</Pill>}
           >
-            <p className="fine">{result.statusNote}</p>
-            <div className="data-table-wrap">
-              <table className="data-table">
-                <caption className="sr-only">Predicted fresh shoot mass per plant by scenario</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">Scenario</th>
-                    <th scope="col">DLI (mol/m2/day)</th>
-                    <th scope="col">g/m2</th>
-                    <th scope="col">g/plant</th>
-                    <th scope="col">Interval (g/plant)</th>
-                    <th scope="col">Previous model (g/plant)</th>
-                    <th scope="col">Warnings</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.scenarios.map((scenario) => (
-                    <tr key={scenario.label}>
-                      <th scope="row">{scenario.label}</th>
-                      <td>{number(scenario.prediction.dailyLightIntegralMolPerM2Day)}</td>
-                      <td>{number(scenario.prediction.perAreaYieldGPerM2, 0)}</td>
-                      <td>{number(scenario.prediction.freshShootMassGPerPlant, 2)}</td>
-                      <td>
-                        {number(scenario.prediction.intervalLowG, 1)} – {number(scenario.prediction.intervalHighG, 1)}
-                      </td>
-                      <td>{number(scenario.recordPrediction.freshShootMassGPerPlant, 1)}</td>
-                      <td>
-                        {scenario.validation.warnings.length ? (
-                          <span className="pill pill-warn">{scenario.validation.warnings.length}</span>
-                        ) : (
-                          <span className="pill pill-ok">in domain</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <IntervalBars
-              rows={rows.map((row) => ({
-                label: row.label,
-                value: row.predictionG,
-                low: row.intervalLowG,
-                high: row.intervalHighG,
-              }))}
-              unit="g/plant"
-              valueKey="value"
-              lowKey="low"
-              highKey="high"
-              label="Fresh shoot mass per plant with its 90 % conformal interval"
-              ariaLabel="Predicted fresh shoot mass per plant by scenario with intervals"
-            />
-
-            {result.scenarios.map((scenario) =>
-              scenario.validation.warnings.length ? (
-                <div className="workflow-warning" role="status" key={`warn-${scenario.label}`}>
-                  <AlertTriangle size={15} />
-                  <div>
-                    <strong>{scenario.label}</strong>
-                    <ul>
-                      {scenario.validation.warnings.map((warning) => (
-                        <li key={warning}>{warning}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              ) : null,
-            )}
-
-            {result.comparison.deltas.length ? (
-              <div className="data-table-wrap">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Comparison</th>
-                      <th scope="col">Δ (g/plant)</th>
-                      <th scope="col">Δ (%)</th>
-                      <th scope="col">Intervals overlap</th>
-                      <th scope="col">Reading</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {result.comparison.deltas.map((delta) => (
-                      <tr key={delta.label}>
-                        <th scope="row">{delta.label} vs {delta.vs}</th>
-                        <td>{number(delta.predictionDeltaG, 2)}</td>
-                        <td>{number(delta.predictionPctDelta)}</td>
-                        <td>{delta.intervalsOverlap ? "yes" : "no"}</td>
-                        <td className="fine">{delta.note}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            <p className="fine">
+              The harvest forecast did not meet the project&apos;s independent-error criterion and has
+              been withdrawn, not hidden behind a warning. Nothing on this page predicts a harvest
+              mass: there is no run button, and the endpoint that used to produce one answers with a
+              formal removal notice instead of a number.
+            </p>
+            <dl className="kv-list">
+              <div>
+                <dt>Criterion</dt>
+                <dd>{number(capability.data.acceptanceCriterionPct, 0)} % MAPE on independent data, unchanged</dd>
               </div>
-            ) : null}
+              <div>
+                <dt>Operational forecast</dt>
+                <dd>{capability.data.operationalForecast ? "yes" : "no"}</dd>
+              </div>
+              <div>
+                <dt>Reason</dt>
+                <dd>{capability.data.reason}</dd>
+              </div>
+            </dl>
           </Card>
 
-          <Card title="3 · How well this model actually does" label="Validation">
-            <div className="stat-pair">
-              <div>
-                <span className="muted">Internal, leave-one-experiment-out</span>
-                <strong>MAE {number(result.validation.internalMetrics?.MAE)} g/m2</strong>
-              </div>
-              <div>
-                <span className="muted">Independent holdout, Touliatos 2016</span>
-                <strong>
-                  {number(result.validation.independentCheck?.metrics?.MAPE)} % MAPE vs{" "}
-                  {result.validation.independentCheck?.acceptanceCriterionPct} % criterion
-                </strong>
-              </div>
-              <div>
-                <span className="muted">Verdict fixed in advance</span>
-                <strong>{result.validation.independentCheck?.passed ? "passed" : "failed"}</strong>
-              </div>
-            </div>
-            <p className="fine">{result.validation.independentCheck?.verdict}</p>
-            <p className="fine">{result.validation.developmentCheck?.why}</p>
-
-            {parity.data ? (
-              <div className="data-table-wrap">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Observation</th>
-                      <th scope="col">Set</th>
-                      <th scope="col">Measured (g)</th>
-                      <th scope="col">Predicted (g)</th>
-                      <th scope="col">Ratio</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {parity.data.points.map((point) => (
-                      <tr key={point.id}>
-                        <th scope="row">{point.id}</th>
-                        <td>
-                          {point.set === "independent" ? (
-                            <span className="pill pill-warn">independent · counted</span>
-                          ) : (
-                            <span className="pill">development · not counted</span>
-                          )}
-                        </td>
-                        <td>{number(point.measuredG)}</td>
-                        <td>{number(point.predictedG)}</td>
-                        <td>{number(point.ratio, 2)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <RequestState state={parity} />
-            )}
-            <p className="fine">{parity.data?.caveat}</p>
-
+          <Card
+            title="2 · Every evaluation, including the ones that failed"
+            label="VALIDATION RECORD"
+            action={<Pill tone={evaluation.some((item) => item.passed) ? "warn" : "ok"}>
+              {evaluation.filter((item) => item.countsAsValidation).length} independent · none passed
+            </Pill>}
+          >
             <div className="data-table-wrap">
               <table className="data-table">
+                <caption className="sr-only">Independent and development evaluations of the withdrawn model</caption>
                 <thead>
                   <tr>
-                    <th scope="col">Evidence layer</th>
-                    <th scope="col">What</th>
-                    <th scope="col">Measured?</th>
-                    <th scope="col">Provenance</th>
+                    <th scope="col">Evaluation</th>
+                    <th scope="col">Protocol</th>
+                    <th scope="col">n</th>
+                    <th scope="col">MAPE</th>
+                    <th scope="col">Counts as validation</th>
+                    <th scope="col">Passed</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {result.evidence.layers.map((layer) => (
-                    <tr key={layer.what}>
-                      <th scope="row">{layer.kind}</th>
-                      <td>{layer.what}</td>
-                      <td>{layer.isMeasurement ? "yes" : "no"}</td>
-                      <td className="fine">{layer.provenance}</td>
+                  {evaluation.map((item) => (
+                    <tr key={item.id}>
+                      <th scope="row">{item.id}</th>
+                      <td>{item.protocol}</td>
+                      <td>{item.metrics.n ?? "—"}</td>
+                      <td>{item.metrics.MAPE === null || item.metrics.MAPE === undefined
+                        ? "—" : `${number(item.metrics.MAPE, 1)} %`}</td>
+                      <td>{item.countsAsValidation ? "yes" : "no — development only"}</td>
+                      <td>
+                        {item.passed === null || item.passed === undefined
+                          ? <span className="pill">not scored</span>
+                          : item.passed
+                            ? <span className="pill pill-ok">passed</span>
+                            : <span className="pill pill-warn">failed</span>}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
             <p className="fine">
-              Controls the model does not use: {result.method.notUsed.join(", ")}.{" "}
-              {result.method.notUsedNote}
+              A development figure is not a validation figure. The rows marked &quot;not scored&quot;
+              informed model selection, so they cannot be quoted as evidence that the model works.
             </p>
-            <Limitations items={result.limitations} />
-            <JsonDetails data={result} />
+            <Limitations items={capability.data.limitations || []} />
+            <JsonDetails data={capability.data} />
+          </Card>
+
+          <Card
+            title="3 · Measured versus what the model said"
+            label="PARITY"
+            action={<Pill tone="warn">{points.length} measured points</Pill>}
+          >
+            <RequestState state={parity} />
+            {points.length ? (
+              <>
+                <div className="data-table-wrap">
+                  <table className="data-table">
+                    <caption className="sr-only">Measured harvest mass against the withdrawn model&apos;s output</caption>
+                    <thead>
+                      <tr>
+                        <th scope="col">Observation</th>
+                        <th scope="col">Set</th>
+                        <th scope="col">Measured (g/plant)</th>
+                        <th scope="col">Model said (g/plant)</th>
+                        <th scope="col">Ratio</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {points.map((point) => (
+                        <tr key={point.id}>
+                          <th scope="row">{point.id}</th>
+                          <td>
+                            {point.set}
+                            {point.countsAsValidation ? null : <span className="muted"> · development</span>}
+                          </td>
+                          <td>{number(point.measuredG, 1)}</td>
+                          <td>{number(point.predictedG, 1)}</td>
+                          <td>{number(point.ratio, 2)}×</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="fine">{parity.data.caveat}</p>
+                <Limitations items={parity.data.limitations || []} />
+                <JsonDetails data={parity.data} />
+              </>
+            ) : null}
           </Card>
         </>
       ) : null}
@@ -877,8 +747,161 @@ export function HarvestWorkflow() {
   );
 }
 
+/* ------------------------------------- controlled-environment wheat: measured, no model */
 
-/* ------------------------------------------------------------ light quality & stress */
+/**
+ * The Phase 30 acquisition that answered half of the light/CO2/temperature gap: 39 chamber runs of
+ * wheat with measured grain yield and a logged environment. A response surface was fitted to it and
+ * failed its sealed holdout, so this panel reports measured group summaries - mean yield per band
+ * with a between-experiment interval - and states that it is not a response function.
+ */
+export function CeaEvidenceWorkflow() {
+  const capability = useResource("/workflows/light-stress/controlled-environment/capability");
+  const [selection, setSelection] = useState({ factor: "co2Ppm", band: "ambient" });
+  const [state, setState] = useState({ data: null, error: "", loading: false });
+
+  const bands = capability.data?.fields?.[1]?.options || {};
+  const factorOptions = capability.data?.fields?.[0]?.options || [];
+  const bandOptions = bands[selection.factor] || [];
+
+  const run = async () => {
+    setState({ data: null, error: "", loading: true });
+    try {
+      const payload = await api("/workflows/light-stress/controlled-environment/run", {
+        selections: [selection],
+      });
+      setState({ data: payload, error: "", loading: false });
+    } catch (error) {
+      setState({ data: null, error: error.message, loading: false });
+    }
+  };
+
+  const result = state.data;
+
+  return (
+    <div className="workflow-panel" aria-label="Controlled-environment wheat evidence">
+      <RequestState state={capability} />
+      {capability.data ? (
+        <>
+          <Card
+            title="1 · Pick an environmental factor and a band"
+            label="MEASURED GROUP"
+            action={<Pill tone="ok">measured · no prediction</Pill>}
+          >
+            <p className="fine">
+              {capability.data.dataset.experiments} controlled-environment experiments of{" "}
+              {capability.data.crop.name} cv. {capability.data.crop.cultivar},{" "}
+              {capability.data.dataset.subplotRows} destructive harvest sub-plots, from{" "}
+              <a href={capability.data.dataset.doi} rel="noreferrer noopener" target="_blank">
+                {capability.data.dataset.doi}
+              </a>{" "}
+              ({capability.data.dataset.license}). You choose a real partition of the experiments; the
+              panel reports what those runs measured.
+            </p>
+            <div className="field-row">
+              <label className="field" htmlFor="cea-factor">
+                <span className="field-heading">Factor</span>
+                <select
+                  id="cea-factor"
+                  value={selection.factor}
+                  onChange={(event) => {
+                    const factor = event.target.value;
+                    setSelection({ factor, band: bands[factor][0] });
+                  }}
+                >
+                  {factorOptions.map((name) => <option key={name} value={name}>{name}</option>)}
+                </select>
+              </label>
+              <label className="field" htmlFor="cea-band">
+                <span className="field-heading">Band</span>
+                <select
+                  id="cea-band"
+                  value={selection.band}
+                  onChange={(event) => setSelection({ ...selection, band: event.target.value })}
+                >
+                  {bandOptions.map((name) => <option key={name} value={name}>{name}</option>)}
+                </select>
+              </label>
+            </div>
+            <div className="module-actions">
+              <button type="button" className="primary-button" onClick={run} disabled={state.loading}>
+                <Play size={15} /> {state.loading ? "Reading the measured table…" : "Show measured results"}
+              </button>
+              <span className="muted fine">
+                Anything outside the measured bands is not offered: this panel partitions experiments,
+                it does not extrapolate.
+              </span>
+            </div>
+            {state.error ? <div className="error-banner" role="alert">{state.error}</div> : null}
+          </Card>
+
+          <Card
+            title="2 · What the model attempt found"
+            label="ATTEMPTED SURFACE"
+            action={<Pill tone="warn">not served</Pill>}
+          >
+            <p className="fine">{capability.data.predictiveModel.reason}</p>
+            <dl className="kv-list">
+              <div><dt>Criterion</dt><dd>{number(capability.data.predictiveModel.criterion, 0)} % MAPE</dd></div>
+              <div><dt>Selected candidate</dt><dd>{capability.data.predictiveModel.selected}</dd></div>
+              <div><dt>Holdout MAPE</dt><dd>{number(capability.data.predictiveModel.holdoutMapePct, 2)} %</dd></div>
+              <div><dt>Holdout R²</dt><dd>{number(capability.data.predictiveModel.holdoutR2, 4)}</dd></div>
+              <div><dt>Sealed experiments</dt><dd>{capability.data.predictiveModel.holdoutExperiments}</dd></div>
+            </dl>
+          </Card>
+
+          {result ? (
+            <Card
+              title="3 · Measured results for that band"
+              label="OUTPUT"
+              action={<Pill tone="ok">measured observation</Pill>}
+            >
+              <div className="data-table-wrap">
+                <table className="data-table">
+                  <caption className="sr-only">Measured grain yield for the selected band</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Band</th>
+                      <th scope="col">Experiments</th>
+                      <th scope="col">Mean (kg/m2)</th>
+                      <th scope="col">95 % interval on the mean</th>
+                      <th scope="col">Median</th>
+                      <th scope="col">Range</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {result.groups.map((group) => (
+                      <tr key={`${group.factor}-${group.band}`}>
+                        <th scope="row">{group.label}</th>
+                        <td>{group.measured.n}</td>
+                        <td>{number(group.measured.mean, 3)}</td>
+                        <td>
+                          {number(group.measured.meanCiLow, 3)} – {number(group.measured.meanCiHigh, 3)}
+                        </td>
+                        <td>{number(group.measured.median, 3)}</td>
+                        <td>
+                          {number(group.measured.min, 3)} – {number(group.measured.max, 3)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="fine">
+                Daily light integral against measured yield across all experiments: Pearson{" "}
+                {number(result.dliRelationship.pearson, 3)}, Spearman{" "}
+                {number(result.dliRelationship.spearman, 3)}. {result.dliRelationship.note}
+              </p>
+              <p className="fine">{result.method.noTest}</p>
+              <Limitations items={result.limitations} />
+              <JsonDetails data={result} />
+            </Card>
+          ) : null}
+        </>
+      ) : null}
+    </div>
+  );
+}
 
 const DAY_OPTIONS = [
   { value: 35, label: "Harvest day 35" },
@@ -1287,19 +1310,21 @@ export function GuidedWorkflows() {
         label="END-TO-END SCIENCE"
         action={
           <div className="badge-row">
-            <Pill tone="ok"><CheckCircle2 size={12} /> 3 complete</Pill>
-            <Pill tone="warn"><ShieldCheck size={12} /> 1 documented gap</Pill>
+            <Pill tone="ok"><CheckCircle2 size={12} /> 2 complete</Pill>
+            <Pill tone="ok"><CheckCircle2 size={12} /> 1 measured panel</Pill>
+            <Pill tone="warn"><ShieldCheck size={12} /> 1 removed · 1 documented gap</Pill>
           </div>
         }
       >
         <p className="fine">
-          Three workflows a user can complete without touching the API: enter parameters, run the
-          real calculation, compare scenarios, and read the measured evidence, the uncertainty and
-          the limitations. Two of them compute — a reference water balance and a trained model. The
-          third, light quality and stress, reports measured groups from one published experiment and
-          predicts nothing: its data vary spectral composition only, so there is no continuous
-          response surface in spectrum, PPFD, CO₂ or temperature to draw, and one is not invented.
-          That missing surface stays a documented gap.
+          Two workflows a user can complete without touching the API — a reference water balance and
+          a measured light-quality comparison — plus a measured controlled-environment panel and one
+          honest tombstone. Phase 30 removed harvest forecasting: the model missed the unchanged 30 %
+          independent-error criterion by more than a factor of ten on published studies it had never
+          seen, so the tab now shows the evidence and the decision rather than a prediction. The
+          response surface for PPFD, CO₂ and temperature is still a documented gap: the wheat series
+          was acquired and fitted, the fit failed its sealed holdout by an order of magnitude, and no
+          surface is served.
         </p>
         <div className="scenario-tabs workflow-tabs" role="tablist" aria-label="Workflow">
           {TABS.map(({ id, label, icon: Icon }) => (
@@ -1320,6 +1345,7 @@ export function GuidedWorkflows() {
       {tab === "water" ? <WaterDemandWorkflow /> : null}
       {tab === "harvest" ? <HarvestWorkflow /> : null}
       {tab === "light" ? <LightStressWorkflow /> : null}
+      {tab === "cea" ? <CeaEvidenceWorkflow /> : null}
     </div>
   );
 }

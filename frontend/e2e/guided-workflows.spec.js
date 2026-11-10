@@ -1,7 +1,8 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * The two guided workflows, driven the way a researcher would drive them, on three viewports.
+ * The guided workflows as Phase 30 left them: two run end to end, one is a measured panel, and the
+ * harvest tab is an evidence-only tombstone with no run control at all.
  *
  * These are journeys, not smoke tests. Each test enters parameters through the rendered controls,
  * presses the run button, and then checks the numbers on screen against the same numbers the API
@@ -34,8 +35,16 @@ async function openWorkflows(page, testInfo) {
 
 async function openHarvest(page, testInfo) {
   await openWorkflows(page, testInfo);
-  await page.getByRole("tab", { name: /Crop growth & harvest/ }).click();
-  await expect(page.getByRole("heading", { name: "1 · Growth stage and environment" })).toBeVisible();
+  await page.getByRole("tab", { name: /Harvest evidence \(removed\)/ }).click();
+  await expect(page.getByRole("heading", { name: /1 · What this workflow was, and why it is gone/ }))
+    .toBeVisible();
+}
+
+async function openCea(page, testInfo) {
+  await openWorkflows(page, testInfo);
+  await page.getByRole("tab", { name: /Controlled environment \(wheat\)/ }).click();
+  await expect(page.getByRole("heading", { name: /1 · Pick an environmental factor and a band/ }))
+    .toBeVisible();
 }
 
 test("water demand workflow runs from the page and matches the API", async ({ page, request }, testInfo) => {
@@ -118,70 +127,87 @@ test("water demand refuses a crop it has no measurement for", async ({ page }, t
   await expect(page.getByRole("heading", { name: "3 · The measured evidence, beside the estimate" })).toBeVisible();
 });
 
-test("harvest workflow runs the model and shows the interval and the failed holdout", async ({ page, request }, testInfo) => {
-  const errors = [];
-  page.on("pageerror", (error) => errors.push(error.message));
+test("harvest tab states the removal, shows every failed evaluation and offers no run control",
+  async ({ page, request }, testInfo) => {
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
 
-  await openHarvest(page, testInfo);
-  await expect(page.getByText(/model status: trained-exploratory/)).toBeVisible();
+    await openHarvest(page, testInfo);
 
-  await page.getByRole("button", { name: /Run harvest prediction/ }).click();
-  await expect(page.getByRole("heading", { name: "2 · Results" })).toBeVisible();
-  await expect(page.getByText("holdout failed · not a forecast")).toBeVisible();
+    // The decision is stated before any table, and there is nothing to press.
+    await expect(page.getByText("removed in Phase 30 · no forecast is served")).toBeVisible();
+    await expect(page.getByRole("button", { name: /Run harvest/i })).toHaveCount(0);
+    await expect(page.getByRole("spinbutton")).toHaveCount(0);
 
-  const api = await request.post("/api/workflows/harvest-prediction/run", {
-    data: {
-      scenarios: [
-        { label: "Plant factory, 16 h", daysAfterTransplant: 21, airTemperature: 24, rootTemperature: 24, ppfd: 400, photoperiodHours: 16, plantDensityPerM2: 25 },
-        { label: "Shorter photoperiod, 12 h", daysAfterTransplant: 21, airTemperature: 24, rootTemperature: 24, ppfd: 400, photoperiodHours: 12, plantDensityPerM2: 25 },
-      ],
-    },
+    // The validation record carries the independent evaluations and their failed verdicts.
+    await expect(page.getByRole("heading", { name: /2 · Every evaluation/ })).toBeVisible();
+    const evaluations = page.locator(".workflow-panel table").first().locator("tbody tr");
+    await expect(evaluations).not.toHaveCount(0);
+    await expect(page.getByText("failed", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText(/not scored/).first()).toBeVisible();
+
+    // And the API agrees that the capability is gone: the run endpoint is a formal tombstone.
+    const capability = await (await request.get("/api/workflows/harvest-prediction/capability")).json();
+    expect(capability.status).toBe("unavailable");
+    expect(capability.operationalForecast).toBe(false);
+    const removed = await request.post("/api/workflows/harvest-prediction/run", { data: { scenarios: [] } });
+    expect(removed.status()).toBe(410);
+
+    // The parity table on screen is the API's parity table, not a redrawn one.
+    const parity = await (await request.get("/api/workflows/harvest-prediction/parity")).json();
+    const points = page.locator(".workflow-panel table").nth(1).locator("tbody tr");
+    await expect(points).toHaveCount(parity.points.length);
+    const shownRatio = await cellNumber(points.first(), 3);
+    expect(shownRatio).toBeCloseTo(parity.points[0].ratio, 1);
+
+    await testInfo.attach("harvest-evidence", {
+      body: await page.screenshot({ fullPage: true }),
+      contentType: "image/png",
+    });
+    expect(errors).toEqual([]);
   });
-  expect(api.status()).toBe(200);
-  const body = await api.json();
-  const baseline = body.scenarios[0].prediction.freshShootMassGPerPlant;
 
-  const rows = page.locator(".workflow-panel table").first().locator("tbody tr");
-  await expect(rows).toHaveCount(2);
-  const shownBaseline = await cellNumber(rows.first(), 2);
-  expect(shownBaseline).toBeCloseTo(baseline, 1);
+test("controlled-environment panel reports the measured band and matches the API",
+  async ({ page, request }, testInfo) => {
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
 
-  // The photoperiod control genuinely changed the answer: the shorter day gives less mass.
-  const shorter = await cellNumber(rows.nth(1), 2);
-  expect(shorter).toBeLessThan(baseline);
+    await openCea(page, testInfo);
+    await expect(page.getByText(/measured · no prediction/)).toBeVisible();
+    // The attempted response surface is disclosed as not served, above the results.
+    await expect(page.getByText(/not served/).first()).toBeVisible();
 
-  // The independent holdout is reported as failed, with the criterion it failed.
-  await expect(page.getByText(/Independent holdout, Touliatos 2016/)).toBeVisible();
-  await expect(page.getByText("failed", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText(/development · not counted/).first()).toBeVisible();
+    await page.getByRole("button", { name: /Show measured results/ }).click();
+    await expect(page.getByRole("heading", { name: /3 · Measured results for that band/ })).toBeVisible();
 
-  await testInfo.attach("harvest-results", {
-    body: await page.screenshot({ fullPage: true }),
-    contentType: "image/png",
+    const api = await request.post("/api/workflows/light-stress/controlled-environment/run", {
+      data: { selections: [{ factor: "co2Ppm", band: "ambient" }] },
+    });
+    expect(api.status()).toBe(200);
+    const body = await api.json();
+    const group = body.groups[0];
+
+    const row = page.locator(".workflow-panel table").last().locator("tbody tr").first();
+    await expect(page.locator(".workflow-panel table").last().locator("tbody tr"))
+      .toHaveCount(body.groups.length);
+    expect(await cellNumber(row, 0)).toBe(group.measured.n);
+    expect(await cellNumber(row, 1)).toBeCloseTo(group.measured.mean, 3);
+
+    // Nothing on the page may offer a prediction for a factor the data cannot support.
+    await expect(page.getByRole("button", { name: /predict/i })).toHaveCount(0);
+
+    await testInfo.attach("cea-measured", {
+      body: await page.screenshot({ fullPage: true }),
+      contentType: "image/png",
+    });
+    expect(errors).toEqual([]);
   });
-  expect(errors).toEqual([]);
-});
 
-test("harvest workflow flags an environment outside the measured domain", async ({ page }, testInfo) => {
+test("the harvest tombstone behaves on a phone viewport", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile", "desktop and tablet are covered above");
   await openHarvest(page, testInfo);
-  const air = page.getByRole("spinbutton", { name: "Air temperature", exact: true });
-  await air.fill("35");
-  await air.blur();
-  await page.getByRole("button", { name: /Run harvest prediction/ }).click();
-  await expect(page.getByRole("heading", { name: "2 · Results" })).toBeVisible();
-  await expect(page.getByText(/outside the measured training range/).first()).toBeVisible();
-});
-
-test("harvest workflow adds a third scenario and compares it", async ({ page }, testInfo) => {
-  await openHarvest(page, testInfo);
-  await page.getByRole("button", { name: /Add scenario/ }).click();
-  await expect(page.getByRole("tab", { name: /Scenario 3/ })).toBeVisible();
-  const densityFields = page.getByRole("spinbutton", { name: "Planting density", exact: true });
-  await densityFields.last().fill("50");
-  await page.getByRole("button", { name: /Run harvest prediction/ }).click();
-  const rows = page.locator(".workflow-panel table").first().locator("tbody tr");
-  await expect(rows).toHaveCount(3);
-  await expect(page.getByText(/vs Plant factory, 16 h/)).toHaveCount(2);
+  await expect(page.getByText("removed in Phase 30 · no forecast is served")).toBeVisible();
+  await expect(page.getByRole("button", { name: /Run harvest/i })).toHaveCount(0);
 });
 
 /* ------------------------------------------------ light quality & stress (Phase 29) */

@@ -40,6 +40,7 @@ TIERS = {
     "experimental": "implemented and internally evaluated; no independent validation exists",
     "data-blocked": "no obtainable dataset can move this feature; the block is the data's absence",
     "unsupported": "the product must not make the claim at all",
+    "removed": "the capability was withdrawn in Phase 30 and no surface remains that claims it",
 }
 
 # Each feature: what it claims, which tier it reaches, and the artefacts that justify the tier.
@@ -103,29 +104,30 @@ FEATURES: list[dict[str, Any]] = [
         "order": 3,
         "claim": "Predicted harvest mass per plant",
         "previousTier": "research-ready",
-        "tier": "research-ready",
-        "tierChanged": False,
+        "tier": "removed",
+        "tierChanged": True,
+        "phase30": (
+            "The served forecast was withdrawn. A leave-one-study-out evaluation over 40 published "
+            "lettuce studies (53 treatment means) returned 310.17 % MAPE against the unchanged 30 % "
+            "criterion with the mean baseline selected out of fold; the Phase 28 holdout had already "
+            "returned 41.59 %. POST /api/workflows/harvest-prediction/run now answers 410 and the "
+            "catalogue entry is 'unavailable'."
+        ),
         "evidence": [
-            "ml/evaluation/lettuce_splits.json",
-            "ml/evaluation/lettuce_out_of_fold.csv",
-            "data/processed/phase26/greenlight2024_lettuce_harvest.csv",
-            "data/processed/phase26/schroder2021_lettuce_biomass.csv",
+            "ml/evaluation/phase30_harvest_crossstudy.json",
+            "data/processed/phase30/lettuce_multistudy.csv",
+            "backend/tests/test_phase30_removed_capabilities.py",
         ],
-        "datasets": ["zenodo-greenlight-2024-lettuce", "zenodo-schroder-2021-lettuce-pot",
-                     "zenodo-ledphotoperiod-2025-tomato"],
-        "measuredOn": "252 hydroponic lettuce plants, 35 greenhouse lettuce pots, 20 open-field "
-                      "tomato plants",
+        "datasets": ["zenodo-kilowatts-lettuce-lue"],
+        "measuredOn": "53 published treatment means from 40 studies, used as an evaluation set",
         "whatItSupports": [
-            "leave-one-experiment-out lettuce harvest prediction (v2 R2 0.8699 / MAE 34.9 g)",
-            "per-plant harvest mass for two independent lettuce experiments",
+            "a measured-versus-model parity record that shows the model overpredicting",
         ],
         "whatItDoesNotSupport": [
-            "any controlled-environment tomato or mizuna harvest prediction",
-            "a spaceflight yield claim: no spaceflight harvest label exists in-repo",
+            "any harvest forecast, for any crop",
         ],
-        "whatWouldMoveIt": "a controlled-environment tomato or mizuna harvest trial with per-plant "
-                           "labels and documented conditions",
-        "blockingEvidence": "no such open dataset was found in this phase's search",
+        "whatWouldMoveIt": "nothing, in this phase: the capability is removed rather than blocked",
+        "blockingEvidence": "the independent error is more than ten times the criterion",
     },
     {
         "id": "led-spectrum-response",
@@ -158,22 +160,26 @@ FEATURES: list[dict[str, Any]] = [
         "order": 5,
         "claim": "Effect of Mars or lunar gravity on crop growth",
         "previousTier": "data-blocked",
-        "tier": "data-blocked",
-        "tierChanged": False,
-        "evidence": ["backend/app/simulation/factors.py", "docs/MODEL_LIMITATIONS.md"],
+        "tier": "removed",
+        "tierChanged": True,
+        "phase30": (
+            "The growth penalty, input field, presets, impact step and UI control were removed. No "
+            "open dataset measures crop yield or biomass across fractional gravity; the ISS "
+            "graded-gravity experiments measure gene expression and morphology, and a clinostat is "
+            "not partial gravity. Keeping the coefficient would have kept an invented number."
+        ),
+        "evidence": ["backend/tests/test_phase30_removed_capabilities.py",
+                     "docs/PHASE30_REMOVED_CAPABILITIES.md"],
         "datasets": [],
-        "measuredOn": "nothing: no fractional-gravity plant growth dataset exists in this repository",
+        "measuredOn": "nothing: no fractional-gravity plant yield dataset exists",
         "whatItSupports": [
-            "a bounded response curve whose sensitivity coefficient is a modelling assumption",
+            "nothing - the simulator has no gravity term",
         ],
         "whatItDoesNotSupport": [
-            "any quantitative Mars- or lunar-gravity yield prediction",
-            "the conflation of clinostat, ground analog and spaceflight data, none of which is "
-            "present",
+            "any gravity-related yield statement",
         ],
-        "whatWouldMoveIt": "a fractional-gravity growth experiment; none exists openly at the "
-                           "replication needed",
-        "blockingEvidence": "no open dataset; a measurement to commission, not to download",
+        "whatWouldMoveIt": "a replicated fractional-gravity yield experiment; none exists openly",
+        "blockingEvidence": "no open dataset, and none was recoverable in the Phase 30 search",
     },
     {
         "id": "substrate-water",
@@ -325,7 +331,8 @@ FEATURES: list[dict[str, Any]] = [
     },
 ]
 
-TIER_ORDER = ["production-ready", "research-ready", "experimental", "data-blocked", "unsupported"]
+TIER_ORDER = ["production-ready", "research-ready", "experimental", "data-blocked",
+              "unsupported", "removed"]
 
 
 def _catalogue_ids() -> set[str]:
