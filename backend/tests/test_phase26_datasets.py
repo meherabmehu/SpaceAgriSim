@@ -257,3 +257,98 @@ def test_validation_never_calls_a_pot_measurement_microgravity(validation):
     text = json.dumps(validation).lower()
     assert "no microgravity" in text
     assert "microgravity" not in validation["measuredSide"]["measurementBasis"].lower()
+
+
+# ---------------------------------------------------------------------------------------
+# the Phase 26 readiness audit
+# ---------------------------------------------------------------------------------------
+READINESS = REPO_ROOT / "data" / "research" / "phase26" / "feature_readiness.json"
+
+
+@pytest.fixture(scope="module")
+def readiness() -> dict:
+    if not READINESS.is_file():
+        pytest.skip("readiness audit not built")
+    return json.loads(READINESS.read_text(encoding="utf-8"))
+
+
+def test_readiness_audits_all_twelve_named_features(readiness):
+    assert len(readiness["features"]) == 12
+    ids = [feature["id"] for feature in readiness["features"]]
+    assert len(ids) == len(set(ids))
+
+
+def test_readiness_uses_only_defined_tiers(readiness):
+    allowed = set(readiness["tierDefinitions"])
+    for feature in readiness["features"]:
+        assert feature["tier"] in allowed, feature["id"]
+
+
+def test_readiness_counts_agree_with_the_features(readiness):
+    counted: dict[str, int] = {}
+    for feature in readiness["features"]:
+        counted[feature["tier"]] = counted.get(feature["tier"], 0) + 1
+    assert readiness["counts"]["byTier"] == counted
+    assert readiness["counts"]["features"] == 12
+    assert readiness["counts"]["moved"] == sum(
+        1 for feature in readiness["features"] if feature["tierChanged"])
+
+
+def test_no_feature_is_claimed_production_ready(readiness):
+    """Nothing in this phase earned it; the assert fails loudly if someone promotes one."""
+    assert readiness["counts"]["byTier"].get("production-ready", 0) == 0
+
+
+def test_a_moved_tier_actually_moved(readiness):
+    for feature in readiness["features"]:
+        if feature["tierChanged"]:
+            assert feature["previousTier"] != feature["tier"], feature["id"]
+
+
+def test_every_named_evidence_path_exists(readiness):
+    for feature in readiness["features"]:
+        for path in feature["evidence"]:
+            assert (REPO_ROOT / path).exists(), f"{feature['id']}: {path}"
+
+
+def test_data_blocked_features_name_no_acquired_dataset(readiness):
+    catalogue = json.loads(
+        (REPO_ROOT / "data" / "research" / "dataset_catalog.json").read_text())
+    acquired = {d["id"] for d in catalogue["datasets"] if d.get("imported")}
+    for feature in readiness["features"]:
+        if feature["tier"] == "data-blocked":
+            assert not (set(feature["datasets"]) & acquired), feature["id"]
+            assert feature["blockingEvidence"], feature["id"]
+
+
+def test_every_data_blocked_feature_says_what_it_does_not_support(readiness):
+    for feature in readiness["features"]:
+        assert feature["whatItDoesNotSupport"], feature["id"]
+        assert feature["whatWouldMoveIt"], feature["id"]
+
+
+def test_readiness_markdown_is_not_stale():
+    import subprocess
+    result = subprocess.run([sys.executable, "ml/research/build_feature_readiness.py", "--check"],
+                            cwd=REPO_ROOT, capture_output=True, text=True)
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_the_readiness_builder_refuses_a_tier_its_evidence_does_not_reach(tmp_path):
+    """The guard itself: a fabricated tier must not be writable."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "bfr", REPO_ROOT / "ml" / "research" / "build_feature_readiness.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    fabricated = [{
+        "id": "made-up", "order": 99, "claim": "A claim with no data",
+        "previousTier": "data-blocked", "tier": "production-ready", "tierChanged": True,
+        "evidence": ["docs/DOES_NOT_EXIST.md"], "datasets": [],
+        "measuredOn": "nothing", "whatItSupports": [], "whatItDoesNotSupport": ["everything"],
+        "whatWouldMoveIt": "data", "blockingEvidence": None,
+    }]
+    problems = module.validate(fabricated)
+    assert any("evidence path missing" in problem for problem in problems)
+    assert any("no dataset behind it" in problem for problem in problems)
