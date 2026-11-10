@@ -369,7 +369,7 @@ Branch `phase26-dataset-expansion`, based on `main` at `34056cf`. Read
 | Catalogue | 23 datasets (A:1 B:5 C:8 D:3 E:5 F:1) | **28** (A:2 B:7 C:9 D:4 E:5 F:1) |
 | Verified licences | 9 | **14** |
 | Acquired Phase 26 datasets | 0 | 5, all hash-verified against publisher MD5 |
-| Measured crop water use in-repo | none | **345 pot-days, 35 published greenhouse lettuce pots** |
+| Measured crop water use in-repo | none | **380 pot-days, 35 published greenhouse lettuce pots** |
 | Gap matrix | 12 gaps, none closed | 12 gaps, none closed; `measured-eta` now `partially-addressed`, severity still `blocking` |
 | Feature readiness | no audit existed | 12 features audited; 0 production-ready, 4 research-ready, 4 experimental, 4 data-blocked |
 | Backend tests | 950 passed, 24 skipped | **988 passed, 24 skipped** |

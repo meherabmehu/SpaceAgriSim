@@ -37,7 +37,7 @@ Twelve named capabilities, audited against the evidence that exists in this repo
 
 | Feature | Datasets | Measured on |
 | --- | --- | --- |
-| Predicted crop water use in litres per plant per day | `zenodo-schroder-2021-lettuce-pot` | 345 pot-days from 35 published pots, 7 treatments, 13 weighings |
+| Predicted crop water use in litres per plant per day | `zenodo-schroder-2021-lettuce-pot` | 380 pot-days from 35 published pots, 7 treatments, 11 weighings |
 | The claim that the ET0 target is itself correct | `nasa-power-daily`, `era5-land`, `era5-hourly-0p25`, `noaa-isd-lite` | four independent reanalysis and station sources over matched days |
 | Predicted harvest mass per plant | `zenodo-greenlight-2024-lettuce`, `zenodo-schroder-2021-lettuce-pot`, `zenodo-ledphotoperiod-2025-tomato` | 252 hydroponic lettuce plants, 35 greenhouse lettuce pots, 20 open-field tomato plants |
 | Response to specific LED spectra and photoperiods | `zenodo-greenlight-2024-lettuce` | 252 plants across four fixed spectra at constant 200 umol/m2/s and 16 h |
@@ -54,10 +54,10 @@ Twelve named capabilities, audited against the evidence that exists in this repo
 
 **Tier: `research-ready`** (was `data-blocked` before Phase 26)
 
-Measured on: 345 pot-days from 35 published pots, 7 treatments, 13 weighings
+Measured on: 380 pot-days from 35 published pots, 7 treatments, 11 weighings
 
 Supports:
-- the seasonal shape of lettuce water demand (Spearman 0.72 across 13 days)
+- the seasonal shape of lettuce water demand (Spearman 0.7909 across 11 days)
 - a per-plant, per-day water-use benchmark that any future change must be compared with
 
 Does not support:

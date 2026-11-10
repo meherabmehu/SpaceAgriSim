@@ -88,7 +88,11 @@ def _metrics(measured: list[float], predicted: list[float]) -> dict[str, Any]:
 def load() -> tuple[pd.DataFrame, pd.DataFrame]:
     et = pd.read_csv(PROCESSED / "schroder2021_lettuce_et.csv")
     et = et[(et["inPublication"]) & (~et["flagAboveIrrigationCeiling"])]
-    et = et.dropna(subset=["dayNumber", "etRateMlPerDayRecomputed"])
+    # `etRateMlPerDay` is the recomputed whole-day rate, falling back to the workbook's own daily
+    # column for each pot's first interval. Using the recomputed column alone silently dropped a
+    # whole measurement date (day 7), which made an earlier version of this artefact report 10
+    # dates where the trial has 11.
+    et = et.dropna(subset=["dayNumber", "etRateMlPerDay"])
     biomass = pd.read_csv(PROCESSED / "schroder2021_lettuce_biomass.csv")
     return et, biomass
 
@@ -109,10 +113,10 @@ def main() -> int:
             "potId": record["potId"],
             "treatment": record["treatment"],
             "dayNumber": day,
-            "measuredMlPerDay": float(record["etRateMlPerDayRecomputed"]),
+            "measuredMlPerDay": float(record["etRateMlPerDay"]),
             "simulatedMlPerDay": demand_l * 1000.0,
             "growthFraction": progress,
-            "measuredMmPerDayOnPotArea": float(record["etRateMlPerDayRecomputed"]) / POT_AREA_M2 / 1000.0,
+            "measuredMmPerDayOnPotArea": float(record["etRateMlPerDay"]) / POT_AREA_M2 / 1000.0,
             "simulatedMmPerDayOnPotArea": demand_l / POT_AREA_M2,
             "harvestFreshG": per_treatment_mass.get(record["treatment"]),
         })
@@ -262,6 +266,9 @@ def main() -> int:
             "pots": int(frame["potId"].nunique()),
             "treatments": sorted(frame["treatment"].unique().tolist()),
             "days": sorted(int(d) for d in frame["dayNumber"].unique()),
+            "measurementDates": int(frame["dayNumber"].nunique()),
+            "rateSource": (frame.get("etRateSource").value_counts().to_dict()
+                           if "etRateSource" in frame else {}),
             "measurementBasis": "gravimetric pot evapotranspiration (plant plus substrate)",
             "excluded": {
                 "flagAboveIrrigationCeiling": "6 pot-days above the study's 350 mL/pot/day ceiling",

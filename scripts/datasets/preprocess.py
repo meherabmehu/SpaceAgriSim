@@ -184,6 +184,15 @@ def preprocess_schroder() -> list[Path]:
     recomputed = et["etTotalMl"] / elapsed
     et["elapsedDaysSincePrevious"] = elapsed
     et["etRateMlPerDayRecomputed"] = recomputed
+
+    # The first interval of every pot has no previous weighing, so no recomputed rate exists for
+    # it - 55 of 604 rows, and a whole measurement date (day 7) vanished from the daily aggregate
+    # because of it. That date is a real measurement, so it is kept: the workbook's own per-day
+    # column covers the first interval, and where the recomputed rate is unavailable the source
+    # rate is used. The column says which one it is, per row.
+    et["etRateMlPerDay"] = et["etRateMlPerDayRecomputed"].fillna(et["etRateMlPerDayFromSource"])
+    et["etRateSource"] = ["recomputed" if not pd.isna(value) else "workbook-daily-column"
+                          for value in et["etRateMlPerDayRecomputed"]]
     # The workbook holds 11 treatments; the legend marks four autoclaved variants as
     # "further treatments not used in publication". They stay in the table, tagged, because
     # deleting published-but-unused rows would hide that they exist.
@@ -210,14 +219,16 @@ def preprocess_schroder() -> list[Path]:
     }
     # Grouped means per treatment and day, which is what a validation compares against.
     daily = (et.groupby(["treatment", "date", "dayNumber"], as_index=False)
-               .agg(etRateMlPerDayMean=("etRateMlPerDayRecomputed", "mean"),
+               .agg(etRateMlPerDayMean=("etRateMlPerDay", "mean"),
                     etRateMlPerDaySd=("etRateMlPerDayRecomputed", "std"),
                     pots=("potId", "nunique")))
     paths = [_write(et, "schroder2021_lettuce_et", "schroder2021", {
         "units": {"etTotalMl": "mL per pot over the interval",
                   "etRateMlPerDayRecomputed": "mL per pot per day (derived: total / elapsed days)",
                   "etRateMlPerDayFromSource": "mL per pot per day (the workbook's own column)"},
-        "derivations": ["etRateMlPerDayRecomputed", "elapsedDaysSincePrevious"],
+        "derivations": ["etRateMlPerDayRecomputed", "elapsedDaysSincePrevious",
+                        "etRateMlPerDay (recomputed where a previous weighing exists, otherwise "
+                        "the workbook's own per-day column)", "etRateSource"],
         "excludedRows": excluded,
         "flaggedRows": int(et["flagAboveIrrigationCeiling"].sum()),
         "flagRule": ("rate above 350 mL per pot per day, the study's own published irrigation "

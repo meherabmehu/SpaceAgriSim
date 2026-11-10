@@ -32,11 +32,11 @@ third-party measurement, and it is described as such everywhere it appears:
 
 | Quantity | Value | What it is |
 | --- | --- | --- |
-| Spearman across 13 measurement days | **0.72** | shape agreement, denominator-free |
-| Pearson across 13 measurement days | 0.48 | the same, penalised for level |
-| pooled predicted/measured ratio | 0.143 | per pot, uncalibrated |
-| fitted single scale, LOO-treatment range | 6.34 (5.88–6.61) | one free parameter, reported beside the uncalibrated numbers |
-| per-gram ratio | 0.145 | fresh-mass denominator |
+| Spearman across 11 measurement days | **0.7909** | shape agreement, denominator-free |
+| Pearson across 11 measurement days | 0.5631 | the same, penalised for level |
+| pooled predicted/measured ratio | 0.1401 | per pot, uncalibrated |
+| fitted single scale, LOO-treatment range | 6.38 (5.93–6.65) | one free parameter, reported beside the uncalibrated numbers |
+| per-gram ratio | 0.1416 | fresh-mass denominator |
 
 None of these is accuracy, none is presented as accuracy, and the artefact carries a `notClaimed`
 list that says so.

@@ -169,6 +169,33 @@ def test_et_rate_column_is_per_day_and_not_per_hour():
     assert 0.9 < ratio < 1.1, f"source rate is not a per-day rate (median ratio {ratio:.3f})"
 
 
+def test_every_pot_day_has_a_usable_rate_including_the_first_interval():
+    """Regression guard for a defect found in Phase 27.
+
+    The recomputed whole-day rate cannot exist for a pot's first weighing, and using it alone
+    dropped 55 of 604 rows and an entire measurement date from the daily aggregate. The trial has
+    11 measurement dates; a table or artefact that reports fewer is wrong.
+    """
+    et = _read("schroder2021_lettuce_et")
+    assert et["etRateMlPerDay"].isna().sum() == 0
+    assert set(et["etRateSource"].unique()) == {"recomputed", "workbook-daily-column"}
+    assert (et["etRateSource"] == "workbook-daily-column").sum() == et["potId"].nunique()
+    daily = _read("schroder2021_lettuce_et_daily")
+    assert daily["date"].nunique() == 11
+    assert daily["etRateMlPerDayMean"].isna().sum() == 0
+
+
+def test_validation_uses_every_measurement_date():
+    if not VALIDATION.is_file():
+        pytest.skip("ET validation artefact not present")
+    payload = json.loads(VALIDATION.read_text(encoding="utf-8"))
+    assert payload["measuredSide"]["measurementDates"] == 11
+    assert payload["shape"]["points"] == 11
+    et = _read("schroder2021_lettuce_et")
+    published = et[et["inPublication"] & ~et["flagAboveIrrigationCeiling"]]
+    assert payload["measuredSide"]["records"] == len(published)
+
+
 def test_et_per_day_is_the_interval_total_divided_by_elapsed_days():
     et = _read("schroder2021_lettuce_et").dropna(subset=["elapsedDaysSincePrevious"])
     recomputed = et["etTotalMl"] / et["elapsedDaysSincePrevious"]

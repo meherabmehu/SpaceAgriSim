@@ -58,9 +58,9 @@ FEATURES: list[dict[str, Any]] = [
             "backend/app/simulation/water.py",
         ],
         "datasets": ["zenodo-schroder-2021-lettuce-pot"],
-        "measuredOn": "345 pot-days from 35 published pots, 7 treatments, 13 weighings",
+        "measuredOn": "380 pot-days from 35 published pots, 7 treatments, 11 weighings",
         "whatItSupports": [
-            "the seasonal shape of lettuce water demand (Spearman 0.72 across 13 days)",
+            "the seasonal shape of lettuce water demand (Spearman 0.7909 across 11 days)",
             "a per-plant, per-day water-use benchmark that any future change must be compared with",
         ],
         "whatItDoesNotSupport": [

@@ -46,10 +46,10 @@ Supporting regeneration: `data/research/dataset_catalog.json` + `DATASET_CATALOG
 
 - **Catalogue 23 → 28.** Five datasets acquired, all hash-verified against the publisher's own
   declared size and MD5, all CC BY 4.0, all non-NASA. Classes A:2 B:7 C:9 D:4 E:5 F:1.
-- **First measured crop water use in the repository.** 345 pot-days from 35 published greenhouse
+- **First measured crop water use in the repository.** 380 pot-days from 35 published greenhouse
   lettuce pots, compared against the unmodified platform water path.
-- **Shape agrees, level does not.** Spearman 0.72 across 13 measurement days; the level discrepancy
-  reverses sign between a pot-surface denominator (0.24×) and a canopy-area denominator (2.75×),
+- **Shape agrees, level does not.** Spearman 0.7909 across 11 measurement days; the level discrepancy
+  reverses sign between a pot-surface denominator (0.247×) and a canopy-area denominator (2.871×),
   and neither denominator is published. No constant was changed.
 - **`measured-eta` stays `blocking`** and moves only to `partially-addressed`, with the one clause it
   closed and the four blockers that remain written into the gap matrix.
