@@ -1,0 +1,5 @@
+regime,sourceLabel,description,greenFractionPct,greenFractionIsApproximate,greenRegimeFixed,relativePlantingDensity,confoundsSpectrumWithDensity,spectrumVariesDuringExperiment,greenFractionByWeekPct,ppfdUmolPerM2S,photoperiodHours,dailyLightIntegralMolPerM2Day,crop,cultivar,harvestDaysAfterSowing
+control,Control,Red-blue dominant control spectrum,5.08,True,True,1.0,False,False,,200.0,16.0,11.52,lettuce,Red Batavia,35
+t1,T1,"Fixed green-enriched spectrum, 24 % green throughout",24.0,False,True,1.0,False,False,,200.0,16.0,11.52,lettuce,Red Batavia,35
+t2,T2,"Incrementally increasing green: 16 % week 1, 24 % week 2, 32 % week 3",24.0,False,False,1.0,False,True,"[16.0, 24.0, 32.0]",200.0,16.0,11.52,lettuce,Red Batavia,35
+t3,T3,Same incremental spectrum as T2 at 25 % higher planting density,24.0,False,False,1.25,True,True,"[16.0, 24.0, 32.0]",200.0,16.0,11.52,lettuce,Red Batavia,35

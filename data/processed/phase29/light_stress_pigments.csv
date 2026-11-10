@@ -1,0 +1,169 @@
+studyId,regime,leafPosition,trait,unit,value
+zenodo-greenlight-2024-lettuce,control,upper,chlorophyllAMgPerGFw,mg·g⁻¹ FW,1.657911818
+zenodo-greenlight-2024-lettuce,control,upper,chlorophyllAMgPerGFw,mg·g⁻¹ FW,1.624742727
+zenodo-greenlight-2024-lettuce,control,upper,chlorophyllAMgPerGFw,mg·g⁻¹ FW,1.5990525
+zenodo-greenlight-2024-lettuce,control,lower,chlorophyllAMgPerGFw,mg·g⁻¹ FW,1.1940555
+zenodo-greenlight-2024-lettuce,control,lower,chlorophyllAMgPerGFw,mg·g⁻¹ FW,1.207635
+zenodo-greenlight-2024-lettuce,control,lower,chlorophyllAMgPerGFw,mg·g⁻¹ FW,1.234621364
+zenodo-greenlight-2024-lettuce,t1,upper,chlorophyllAMgPerGFw,mg·g⁻¹ FW,1.510366071
+zenodo-greenlight-2024-lettuce,t1,upper,chlorophyllAMgPerGFw,mg·g⁻¹ FW,1.342877727
+zenodo-greenlight-2024-lettuce,t1,upper,chlorophyllAMgPerGFw,mg·g⁻¹ FW,1.345992
+zenodo-greenlight-2024-lettuce,t1,lower,chlorophyllAMgPerGFw,mg·g⁻¹ FW,1.179384
+zenodo-greenlight-2024-lettuce,t1,lower,chlorophyllAMgPerGFw,mg·g⁻¹ FW,1.180068333
+zenodo-greenlight-2024-lettuce,t1,lower,chlorophyllAMgPerGFw,mg·g⁻¹ FW,1.183419
+zenodo-greenlight-2024-lettuce,t2,upper,chlorophyllAMgPerGFw,mg·g⁻¹ FW,1.49961375
+zenodo-greenlight-2024-lettuce,t2,upper,chlorophyllAMgPerGFw,mg·g⁻¹ FW,1.483673077
+zenodo-greenlight-2024-lettuce,t2,upper,chlorophyllAMgPerGFw,mg·g⁻¹ FW,1.522328333
+zenodo-greenlight-2024-lettuce,t2,lower,chlorophyllAMgPerGFw,mg·g⁻¹ FW,1.2851775
+zenodo-greenlight-2024-lettuce,t2,lower,chlorophyllAMgPerGFw,mg·g⁻¹ FW,1.333125
+zenodo-greenlight-2024-lettuce,t2,lower,chlorophyllAMgPerGFw,mg·g⁻¹ FW,1.2483675
+zenodo-greenlight-2024-lettuce,t3,upper,chlorophyllAMgPerGFw,mg·g⁻¹ FW,1.291891364
+zenodo-greenlight-2024-lettuce,t3,upper,chlorophyllAMgPerGFw,mg·g⁻¹ FW,1.294212273
+zenodo-greenlight-2024-lettuce,t3,upper,chlorophyllAMgPerGFw,mg·g⁻¹ FW,1.29210625
+zenodo-greenlight-2024-lettuce,t3,lower,chlorophyllAMgPerGFw,mg·g⁻¹ FW,1.1830925
+zenodo-greenlight-2024-lettuce,t3,lower,chlorophyllAMgPerGFw,mg·g⁻¹ FW,1.1808525
+zenodo-greenlight-2024-lettuce,t3,lower,chlorophyllAMgPerGFw,mg·g⁻¹ FW,1.1863425
+zenodo-greenlight-2024-lettuce,control,upper,chlorophyllBMgPerGFw,mg·g⁻¹ FW,0.470547273
+zenodo-greenlight-2024-lettuce,control,upper,chlorophyllBMgPerGFw,mg·g⁻¹ FW,0.47082
+zenodo-greenlight-2024-lettuce,control,upper,chlorophyllBMgPerGFw,mg·g⁻¹ FW,0.413067
+zenodo-greenlight-2024-lettuce,control,lower,chlorophyllBMgPerGFw,mg·g⁻¹ FW,0.338841
+zenodo-greenlight-2024-lettuce,control,lower,chlorophyllBMgPerGFw,mg·g⁻¹ FW,0.409422
+zenodo-greenlight-2024-lettuce,control,lower,chlorophyllBMgPerGFw,mg·g⁻¹ FW,0.378564545
+zenodo-greenlight-2024-lettuce,t1,upper,chlorophyllBMgPerGFw,mg·g⁻¹ FW,0.441053571
+zenodo-greenlight-2024-lettuce,t1,upper,chlorophyllBMgPerGFw,mg·g⁻¹ FW,0.437260909
+zenodo-greenlight-2024-lettuce,t1,upper,chlorophyllBMgPerGFw,mg·g⁻¹ FW,0.434022
+zenodo-greenlight-2024-lettuce,t1,lower,chlorophyllBMgPerGFw,mg·g⁻¹ FW,0.455982
+zenodo-greenlight-2024-lettuce,t1,lower,chlorophyllBMgPerGFw,mg·g⁻¹ FW,0.426883333
+zenodo-greenlight-2024-lettuce,t1,lower,chlorophyllBMgPerGFw,mg·g⁻¹ FW,0.421632
+zenodo-greenlight-2024-lettuce,t2,upper,chlorophyllBMgPerGFw,mg·g⁻¹ FW,0.47025
+zenodo-greenlight-2024-lettuce,t2,upper,chlorophyllBMgPerGFw,mg·g⁻¹ FW,0.527630769
+zenodo-greenlight-2024-lettuce,t2,upper,chlorophyllBMgPerGFw,mg·g⁻¹ FW,0.486983333
+zenodo-greenlight-2024-lettuce,t2,lower,chlorophyllBMgPerGFw,mg·g⁻¹ FW,0.463005
+zenodo-greenlight-2024-lettuce,t2,lower,chlorophyllBMgPerGFw,mg·g⁻¹ FW,0.4330125
+zenodo-greenlight-2024-lettuce,t2,lower,chlorophyllBMgPerGFw,mg·g⁻¹ FW,0.427275
+zenodo-greenlight-2024-lettuce,t3,upper,chlorophyllBMgPerGFw,mg·g⁻¹ FW,0.441111818
+zenodo-greenlight-2024-lettuce,t3,upper,chlorophyllBMgPerGFw,mg·g⁻¹ FW,0.505982727
+zenodo-greenlight-2024-lettuce,t3,upper,chlorophyllBMgPerGFw,mg·g⁻¹ FW,0.4686675
+zenodo-greenlight-2024-lettuce,t3,lower,chlorophyllBMgPerGFw,mg·g⁻¹ FW,0.478715
+zenodo-greenlight-2024-lettuce,t3,lower,chlorophyllBMgPerGFw,mg·g⁻¹ FW,0.435723
+zenodo-greenlight-2024-lettuce,t3,lower,chlorophyllBMgPerGFw,mg·g⁻¹ FW,0.466563
+zenodo-greenlight-2024-lettuce,control,upper,totalChlorophyllMgPerGFw,mg·g⁻¹ FW,2.128459091
+zenodo-greenlight-2024-lettuce,control,upper,totalChlorophyllMgPerGFw,mg·g⁻¹ FW,2.095562727
+zenodo-greenlight-2024-lettuce,control,upper,totalChlorophyllMgPerGFw,mg·g⁻¹ FW,2.0121195
+zenodo-greenlight-2024-lettuce,control,lower,totalChlorophyllMgPerGFw,mg·g⁻¹ FW,1.5328965
+zenodo-greenlight-2024-lettuce,control,lower,totalChlorophyllMgPerGFw,mg·g⁻¹ FW,1.617057
+zenodo-greenlight-2024-lettuce,control,lower,totalChlorophyllMgPerGFw,mg·g⁻¹ FW,1.613185909
+zenodo-greenlight-2024-lettuce,t1,upper,totalChlorophyllMgPerGFw,mg·g⁻¹ FW,1.951419643
+zenodo-greenlight-2024-lettuce,t1,upper,totalChlorophyllMgPerGFw,mg·g⁻¹ FW,1.780138636
+zenodo-greenlight-2024-lettuce,t1,upper,totalChlorophyllMgPerGFw,mg·g⁻¹ FW,1.780014
+zenodo-greenlight-2024-lettuce,t1,lower,totalChlorophyllMgPerGFw,mg·g⁻¹ FW,1.635366
+zenodo-greenlight-2024-lettuce,t1,lower,totalChlorophyllMgPerGFw,mg·g⁻¹ FW,1.606951667
+zenodo-greenlight-2024-lettuce,t1,lower,totalChlorophyllMgPerGFw,mg·g⁻¹ FW,1.605051
+zenodo-greenlight-2024-lettuce,t2,upper,totalChlorophyllMgPerGFw,mg·g⁻¹ FW,1.96986375
+zenodo-greenlight-2024-lettuce,t2,upper,totalChlorophyllMgPerGFw,mg·g⁻¹ FW,2.011303846
+zenodo-greenlight-2024-lettuce,t2,upper,totalChlorophyllMgPerGFw,mg·g⁻¹ FW,2.009311667
+zenodo-greenlight-2024-lettuce,t2,lower,totalChlorophyllMgPerGFw,mg·g⁻¹ FW,1.7481825
+zenodo-greenlight-2024-lettuce,t2,lower,totalChlorophyllMgPerGFw,mg·g⁻¹ FW,1.7661375
+zenodo-greenlight-2024-lettuce,t2,lower,totalChlorophyllMgPerGFw,mg·g⁻¹ FW,1.6756425
+zenodo-greenlight-2024-lettuce,t3,upper,totalChlorophyllMgPerGFw,mg·g⁻¹ FW,1.733003182
+zenodo-greenlight-2024-lettuce,t3,upper,totalChlorophyllMgPerGFw,mg·g⁻¹ FW,1.800195
+zenodo-greenlight-2024-lettuce,t3,upper,totalChlorophyllMgPerGFw,mg·g⁻¹ FW,1.76077375
+zenodo-greenlight-2024-lettuce,t3,lower,totalChlorophyllMgPerGFw,mg·g⁻¹ FW,1.6618075
+zenodo-greenlight-2024-lettuce,t3,lower,totalChlorophyllMgPerGFw,mg·g⁻¹ FW,1.6165755
+zenodo-greenlight-2024-lettuce,t3,lower,totalChlorophyllMgPerGFw,mg·g⁻¹ FW,1.6529055
+zenodo-greenlight-2024-lettuce,control,upper,totalCarotenoidsMgPerGFw,mg·g⁻¹ FW,0.939249465
+zenodo-greenlight-2024-lettuce,control,upper,totalCarotenoidsMgPerGFw,mg·g⁻¹ FW,0.954928874
+zenodo-greenlight-2024-lettuce,control,upper,totalCarotenoidsMgPerGFw,mg·g⁻¹ FW,0.928345632
+zenodo-greenlight-2024-lettuce,control,lower,totalCarotenoidsMgPerGFw,mg·g⁻¹ FW,0.738274989
+zenodo-greenlight-2024-lettuce,control,lower,totalCarotenoidsMgPerGFw,mg·g⁻¹ FW,0.756783757
+zenodo-greenlight-2024-lettuce,control,lower,totalCarotenoidsMgPerGFw,mg·g⁻¹ FW,0.740192767
+zenodo-greenlight-2024-lettuce,t1,upper,totalCarotenoidsMgPerGFw,mg·g⁻¹ FW,1.11509823
+zenodo-greenlight-2024-lettuce,t1,upper,totalCarotenoidsMgPerGFw,mg·g⁻¹ FW,1.141172521
+zenodo-greenlight-2024-lettuce,t1,upper,totalCarotenoidsMgPerGFw,mg·g⁻¹ FW,1.101408197
+zenodo-greenlight-2024-lettuce,t1,lower,totalCarotenoidsMgPerGFw,mg·g⁻¹ FW,0.878472065
+zenodo-greenlight-2024-lettuce,t1,lower,totalCarotenoidsMgPerGFw,mg·g⁻¹ FW,0.906515314
+zenodo-greenlight-2024-lettuce,t1,lower,totalCarotenoidsMgPerGFw,mg·g⁻¹ FW,0.88372119
+zenodo-greenlight-2024-lettuce,t2,upper,totalCarotenoidsMgPerGFw,mg·g⁻¹ FW,1.115867734
+zenodo-greenlight-2024-lettuce,t2,upper,totalCarotenoidsMgPerGFw,mg·g⁻¹ FW,1.106911033
+zenodo-greenlight-2024-lettuce,t2,upper,totalCarotenoidsMgPerGFw,mg·g⁻¹ FW,1.13532729
+zenodo-greenlight-2024-lettuce,t2,lower,totalCarotenoidsMgPerGFw,mg·g⁻¹ FW,1.000924055
+zenodo-greenlight-2024-lettuce,t2,lower,totalCarotenoidsMgPerGFw,mg·g⁻¹ FW,0.939156411
+zenodo-greenlight-2024-lettuce,t2,lower,totalCarotenoidsMgPerGFw,mg·g⁻¹ FW,0.983972817
+zenodo-greenlight-2024-lettuce,t3,upper,totalCarotenoidsMgPerGFw,mg·g⁻¹ FW,0.989435449
+zenodo-greenlight-2024-lettuce,t3,upper,totalCarotenoidsMgPerGFw,mg·g⁻¹ FW,1.030957031
+zenodo-greenlight-2024-lettuce,t3,upper,totalCarotenoidsMgPerGFw,mg·g⁻¹ FW,0.996943729
+zenodo-greenlight-2024-lettuce,t3,lower,totalCarotenoidsMgPerGFw,mg·g⁻¹ FW,0.887516336
+zenodo-greenlight-2024-lettuce,t3,lower,totalCarotenoidsMgPerGFw,mg·g⁻¹ FW,0.906612753
+zenodo-greenlight-2024-lettuce,t3,lower,totalCarotenoidsMgPerGFw,mg·g⁻¹ FW,0.908126829
+zenodo-greenlight-2024-lettuce,control,upper,totalFlavonoidsMgQePerGFw,mg QE·g⁻¹ FW,1.22085048
+zenodo-greenlight-2024-lettuce,control,upper,totalFlavonoidsMgQePerGFw,mg QE·g⁻¹ FW,1.211705533
+zenodo-greenlight-2024-lettuce,control,upper,totalFlavonoidsMgQePerGFw,mg QE·g⁻¹ FW,1.188843164
+zenodo-greenlight-2024-lettuce,control,lower,totalFlavonoidsMgQePerGFw,mg QE·g⁻¹ FW,1.015089163
+zenodo-greenlight-2024-lettuce,control,lower,totalFlavonoidsMgQePerGFw,mg QE·g⁻¹ FW,0.983081847
+zenodo-greenlight-2024-lettuce,control,lower,totalFlavonoidsMgQePerGFw,mg QE·g⁻¹ FW,0.996799268
+zenodo-greenlight-2024-lettuce,t1,upper,totalFlavonoidsMgQePerGFw,mg QE·g⁻¹ FW,0.891632373
+zenodo-greenlight-2024-lettuce,t1,upper,totalFlavonoidsMgQePerGFw,mg QE·g⁻¹ FW,0.900777321
+zenodo-greenlight-2024-lettuce,t1,upper,totalFlavonoidsMgQePerGFw,mg QE·g⁻¹ FW,0.85048011
+zenodo-greenlight-2024-lettuce,t1,lower,totalFlavonoidsMgQePerGFw,mg QE·g⁻¹ FW,0.672153635
+zenodo-greenlight-2024-lettuce,t1,lower,totalFlavonoidsMgQePerGFw,mg QE·g⁻¹ FW,0.713305898
+zenodo-greenlight-2024-lettuce,t1,lower,totalFlavonoidsMgQePerGFw,mg QE·g⁻¹ FW,0.69044353
+zenodo-greenlight-2024-lettuce,t2,upper,totalFlavonoidsMgQePerGFw,mg QE·g⁻¹ FW,1.188843164
+zenodo-greenlight-2024-lettuce,t2,upper,totalFlavonoidsMgQePerGFw,mg QE·g⁻¹ FW,1.170553269
+zenodo-greenlight-2024-lettuce,t2,upper,totalFlavonoidsMgQePerGFw,mg QE·g⁻¹ FW,1.156835848
+zenodo-greenlight-2024-lettuce,t2,lower,totalFlavonoidsMgQePerGFw,mg QE·g⁻¹ FW,0.960219479
+zenodo-greenlight-2024-lettuce,t2,lower,totalFlavonoidsMgQePerGFw,mg QE·g⁻¹ FW,0.946502058
+zenodo-greenlight-2024-lettuce,t2,lower,totalFlavonoidsMgQePerGFw,mg QE·g⁻¹ FW,0.919067215
+zenodo-greenlight-2024-lettuce,t3,upper,totalFlavonoidsMgQePerGFw,mg QE·g⁻¹ FW,0.827617741
+zenodo-greenlight-2024-lettuce,t3,upper,totalFlavonoidsMgQePerGFw,mg QE·g⁻¹ FW,0.832190215
+zenodo-greenlight-2024-lettuce,t3,upper,totalFlavonoidsMgQePerGFw,mg QE·g⁻¹ FW,0.864197531
+zenodo-greenlight-2024-lettuce,t3,lower,totalFlavonoidsMgQePerGFw,mg QE·g⁻¹ FW,0.640146319
+zenodo-greenlight-2024-lettuce,t3,lower,totalFlavonoidsMgQePerGFw,mg QE·g⁻¹ FW,0.580704161
+zenodo-greenlight-2024-lettuce,t3,lower,totalFlavonoidsMgQePerGFw,mg QE·g⁻¹ FW,0.612711477
+zenodo-greenlight-2024-lettuce,control,upper,totalPolyphenolsMgGaePerGFw,mg GAE·g⁻¹ FW,3.00722801
+zenodo-greenlight-2024-lettuce,control,upper,totalPolyphenolsMgGaePerGFw,mg GAE·g⁻¹ FW,2.986169557
+zenodo-greenlight-2024-lettuce,control,upper,totalPolyphenolsMgGaePerGFw,mg GAE·g⁻¹ FW,2.935387966
+zenodo-greenlight-2024-lettuce,control,lower,totalPolyphenolsMgGaePerGFw,mg GAE·g⁻¹ FW,2.402978025
+zenodo-greenlight-2024-lettuce,control,lower,totalPolyphenolsMgGaePerGFw,mg GAE·g⁻¹ FW,2.491729698
+zenodo-greenlight-2024-lettuce,control,lower,totalPolyphenolsMgGaePerGFw,mg GAE·g⁻¹ FW,2.412649876
+zenodo-greenlight-2024-lettuce,t1,upper,totalPolyphenolsMgGaePerGFw,mg GAE·g⁻¹ FW,2.002996339
+zenodo-greenlight-2024-lettuce,t1,upper,totalPolyphenolsMgGaePerGFw,mg GAE·g⁻¹ FW,2.023879125
+zenodo-greenlight-2024-lettuce,t1,upper,totalPolyphenolsMgGaePerGFw,mg GAE·g⁻¹ FW,2.093917209
+zenodo-greenlight-2024-lettuce,t1,lower,totalPolyphenolsMgGaePerGFw,mg GAE·g⁻¹ FW,1.646545729
+zenodo-greenlight-2024-lettuce,t1,lower,totalPolyphenolsMgGaePerGFw,mg GAE·g⁻¹ FW,1.593118986
+zenodo-greenlight-2024-lettuce,t1,lower,totalPolyphenolsMgGaePerGFw,mg GAE·g⁻¹ FW,1.604209738
+zenodo-greenlight-2024-lettuce,t2,upper,totalPolyphenolsMgGaePerGFw,mg GAE·g⁻¹ FW,3.077907497
+zenodo-greenlight-2024-lettuce,t2,upper,totalPolyphenolsMgGaePerGFw,mg GAE·g⁻¹ FW,3.058665907
+zenodo-greenlight-2024-lettuce,t2,upper,totalPolyphenolsMgGaePerGFw,mg GAE·g⁻¹ FW,3.111450834
+zenodo-greenlight-2024-lettuce,t2,lower,totalPolyphenolsMgGaePerGFw,mg GAE·g⁻¹ FW,2.440484096
+zenodo-greenlight-2024-lettuce,t2,lower,totalPolyphenolsMgGaePerGFw,mg GAE·g⁻¹ FW,2.360091614
+zenodo-greenlight-2024-lettuce,t2,lower,totalPolyphenolsMgGaePerGFw,mg GAE·g⁻¹ FW,2.376505308
+zenodo-greenlight-2024-lettuce,t3,upper,totalPolyphenolsMgGaePerGFw,mg GAE·g⁻¹ FW,1.9360569
+zenodo-greenlight-2024-lettuce,t3,upper,totalPolyphenolsMgGaePerGFw,mg GAE·g⁻¹ FW,1.972015728
+zenodo-greenlight-2024-lettuce,t3,upper,totalPolyphenolsMgGaePerGFw,mg GAE·g⁻¹ FW,1.909878943
+zenodo-greenlight-2024-lettuce,t3,lower,totalPolyphenolsMgGaePerGFw,mg GAE·g⁻¹ FW,1.587675527
+zenodo-greenlight-2024-lettuce,t3,lower,totalPolyphenolsMgGaePerGFw,mg GAE·g⁻¹ FW,1.496751203
+zenodo-greenlight-2024-lettuce,t3,lower,totalPolyphenolsMgGaePerGFw,mg GAE·g⁻¹ FW,1.53686991
+zenodo-greenlight-2024-lettuce,control,upper,antioxidantActivityUmQe,μM QE,77.61152034
+zenodo-greenlight-2024-lettuce,control,upper,antioxidantActivityUmQe,μM QE,79.67917684
+zenodo-greenlight-2024-lettuce,control,upper,antioxidantActivityUmQe,μM QE,79.43911897
+zenodo-greenlight-2024-lettuce,control,lower,antioxidantActivityUmQe,μM QE,62.36761227
+zenodo-greenlight-2024-lettuce,control,lower,antioxidantActivityUmQe,μM QE,60.83469134
+zenodo-greenlight-2024-lettuce,control,lower,antioxidantActivityUmQe,μM QE,58.79896687
+zenodo-greenlight-2024-lettuce,t1,upper,antioxidantActivityUmQe,μM QE,49.53344688
+zenodo-greenlight-2024-lettuce,t1,upper,antioxidantActivityUmQe,μM QE,50.57856592
+zenodo-greenlight-2024-lettuce,t1,upper,antioxidantActivityUmQe,μM QE,49.04742304
+zenodo-greenlight-2024-lettuce,t1,lower,antioxidantActivityUmQe,μM QE,39.60752197
+zenodo-greenlight-2024-lettuce,t1,lower,antioxidantActivityUmQe,μM QE,40.94259393
+zenodo-greenlight-2024-lettuce,t1,lower,antioxidantActivityUmQe,μM QE,40.38032845
+zenodo-greenlight-2024-lettuce,t2,upper,antioxidantActivityUmQe,μM QE,79.6246963
+zenodo-greenlight-2024-lettuce,t2,upper,antioxidantActivityUmQe,μM QE,78.18927099
+zenodo-greenlight-2024-lettuce,t2,upper,antioxidantActivityUmQe,μM QE,78.63753001
+zenodo-greenlight-2024-lettuce,t2,lower,antioxidantActivityUmQe,μM QE,61.51653956
+zenodo-greenlight-2024-lettuce,t2,lower,antioxidantActivityUmQe,μM QE,61.44997364
+zenodo-greenlight-2024-lettuce,t2,lower,antioxidantActivityUmQe,μM QE,61.60223448
+zenodo-greenlight-2024-lettuce,t3,upper,antioxidantActivityUmQe,μM QE,50.14558013
+zenodo-greenlight-2024-lettuce,t3,upper,antioxidantActivityUmQe,μM QE,49.16195461
+zenodo-greenlight-2024-lettuce,t3,upper,antioxidantActivityUmQe,μM QE,50.72439492
+zenodo-greenlight-2024-lettuce,t3,lower,antioxidantActivityUmQe,μM QE,39.91376522
+zenodo-greenlight-2024-lettuce,t3,lower,antioxidantActivityUmQe,μM QE,41.848724
+zenodo-greenlight-2024-lettuce,t3,lower,antioxidantActivityUmQe,μM QE,39.45981364
