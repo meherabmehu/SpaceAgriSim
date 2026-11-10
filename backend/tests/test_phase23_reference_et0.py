@@ -508,16 +508,18 @@ def test_catalogue_counts_match_the_documented_class_counts():
 
     Each of the five was downloaded, hashed against the publisher's own checksum and preprocessed
     before it entered the catalogue; none was added to raise a count. The class assignments are
-    deliberately mixed - A for the one that now drives a committed validation artefact, B for the
-    two that are usable but unconsumed, C for the twenty-plant open-field tomato trial, D for the
-    tree gas-exchange series - because a class is an answer about usability, not a trophy.
+    deliberately mixed - A for the ones that drive a committed artefact, B for the ones usable but
+    unconsumed, C for the twenty-plant open-field tomato trial, D for the tree gas-exchange series -
+    because a class is an answer about usability, not a trophy. Phase 29 promoted the green-light
+    trial to A once a workflow served it; nothing else moved.
     """
     payload = json.loads((ROOT / "data" / "research" / "dataset_catalog.json").read_text())
     assert len(payload["datasets"]) == 28
     counts = {}
     for dataset in payload["datasets"]:
         counts[dataset["usabilityClass"]] = counts.get(dataset["usabilityClass"], 0) + 1
-    assert counts == {"A": 2, "B": 7, "C": 9, "D": 4, "E": 5, "F": 1}
+    # Phase 29 moved the green-light trial from B to A: it is now consumed by a delivered workflow.
+    assert counts == {"A": 3, "B": 6, "C": 9, "D": 4, "E": 5, "F": 1}
 
 
 def test_only_the_imported_datasets_have_an_open_commercial_licence():

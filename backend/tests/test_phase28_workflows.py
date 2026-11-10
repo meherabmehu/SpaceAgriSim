@@ -44,10 +44,11 @@ GROWTH = {
 # ----------------------------------------------------------------- the catalogue
 
 
-def test_catalogue_lists_two_complete_workflows_and_the_gap(client):
+def test_catalogue_lists_every_complete_workflow_and_the_gap(client):
+    """Phase 29 added a third: the catalogue must grow without the completed two changing shape."""
     body = client.get("/api/workflows").json()
     ids = [item["id"] for item in body["workflows"]]
-    assert ids == ["water-demand", "harvest-prediction"]
+    assert ids == ["water-demand", "light-stress", "harvest-prediction"]
     assert all(item["status"] == "complete" for item in body["workflows"])
 
     harvest = next(item for item in body["workflows"] if item["id"] == "harvest-prediction")
@@ -57,8 +58,10 @@ def test_catalogue_lists_two_complete_workflows_and_the_gap(client):
     assert harvest["modelValidatedForForecasting"] is False
 
     gaps = {gap["id"]: gap for gap in body["documentedGaps"]}
-    assert gaps["environmental-stress"]["status"] == "not-complete"
-    assert "warning" in gaps["environmental-stress"]["blocker"]
+    # The gap was narrowed from "no environmental-stress workflow" to "no response surface" when the
+    # measured comparison shipped. It is still not complete, and the reason is still a data gap.
+    assert gaps["environmental-stress-response-surface"]["status"] == "not-complete"
+    assert "response surface" in gaps["environmental-stress-response-surface"]["blocker"]
 
 
 def test_every_advertised_endpoint_exists(client):
