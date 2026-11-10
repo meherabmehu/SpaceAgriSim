@@ -219,6 +219,19 @@ def benchmark() -> dict[str, Any]:
                      "It is not a confidence interval on the model, and it does not include "
                      "method error, harvest-date error or the missing geometry."),
         },
+        "measurementPattern": {
+            "note": (
+                "The measured series is not smooth. It steps from 89 mL/pot/day on day 16 to 204 "
+                "on day 17, a factor of 2.3 between consecutive weighings one day apart, and the "
+                "between-pot spread is widest on exactly that date. A plant cannot change its "
+                "water use that fast, so the intervals are not equivalent: irrigation events, "
+                "weighing times and substrate water storage all land differently in a one-day "
+                "interval than in a three-day one. The comparison therefore aggregates over the "
+                "trial and reports rank agreement, which a step of this size cannot manufacture."),
+            "largestOneDayStepMlPerPot": 115.77,
+            "widestBetweenPotSdMlPerDay": 46.4,
+            "status": "recorded, not smoothed: the raw series is served as measured",
+        },
         "cropScope": ["lettuce"],
         "environmentScope": "greenhouse, pot culture, Earth gravity",
     }

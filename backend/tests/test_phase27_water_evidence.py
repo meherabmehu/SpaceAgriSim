@@ -85,6 +85,21 @@ def test_benchmark_limitations_include_the_geometry_and_the_gravity_caveats(benc
     assert "no reference et0" in text
 
 
+def test_benchmark_records_the_measurement_pattern_instead_of_smoothing_it(benchmark_payload):
+    """The raw series steps by a factor of 2.3 between two consecutive days.
+
+    That is a fact about the trial's intervals, not noise to be filtered, and a reader comparing
+    curves needs to know it before concluding anything about the model.
+    """
+    pattern = benchmark_payload["measurementPattern"]
+    assert "not smooth" in pattern["note"]
+    assert pattern["largestOneDayStepMlPerPot"] > 100
+    assert "not smoothed" in pattern["status"]
+    values = [entry["measuredMlPerPotPerDay"] for entry in benchmark_payload["series"]]
+    steps = [b - a for a, b in zip(values, values[1:])]
+    assert max(steps) == pytest.approx(pattern["largestOneDayStepMlPerPot"], abs=0.01)
+
+
 def test_benchmark_endpoint_returns_the_same_payload(client, benchmark_payload):
     if not BENCHMARK.is_file():
         pytest.skip("benchmark table not present")

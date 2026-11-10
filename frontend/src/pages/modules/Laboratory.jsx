@@ -1,6 +1,7 @@
 import { Card, number } from "../missionUI.jsx";
 import { GrowthPlot } from "../../charts/GrowthPlot.jsx";
 import { Limitations, JsonDetails } from "./moduleSupport.jsx";
+import { WaterEvidencePanel } from "./WaterEvidencePanel.jsx";
 import { RefreshCw, FlaskConical } from "lucide-react";
 // Gravity and the radiation dose rate are deliberately not user controls here.
 //
@@ -180,6 +181,7 @@ export function Laboratory({ params, setParam, config, result, resetParams }) {
               </strong>
             </div>
           </Card>
+          <WaterEvidencePanel params={params} />
           {result?.warnings?.length > 0 && (
             <Limitations items={result.warnings} />
           )}
