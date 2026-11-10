@@ -10,7 +10,8 @@ that tree; nothing in this report is a plan, and no gate is claimed that was not
 | | Value |
 |---|---|
 | Start (remote `main`, verified) | `e3f41b684759727c7d6c159faa184a81e61cd419` |
-| Final | the commit that adds this report (see `git log -1` on `main` after the push) |
+| Delivery commit (code + this report) | `f1e5fd7806a3f390caa0039e6c75600517e6830e` |
+| Final (this line added in a report-only follow-up commit) | `git log -1 --format=%H` on `main` |
 | Branch | `main`, fast-forward history, Phase 30 work preserved |
 
 ---
