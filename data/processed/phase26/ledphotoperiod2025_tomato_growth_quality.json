@@ -1,0 +1,50 @@
+{
+  "table": "ledphotoperiod2025_tomato_growth.csv",
+  "rows": 180,
+  "columns": [
+    "studyId",
+    "plantId",
+    "group",
+    "variety",
+    "week",
+    "flower_number",
+    "fruit_number",
+    "height_cm",
+    "leaf_number",
+    "stem_diameter_mm",
+    "stem_number"
+  ],
+  "generatedAt": "2026-11-10T12:27:50.128210+00:00",
+  "study": {
+    "datasetId": "zenodo-ledphotoperiod-2025-tomato",
+    "doi": "10.5281/zenodo.23759737",
+    "citation": "Supplemental LED Lighting for Photoperiod Extension in Open-Field Cultivation Using a Portable Platform (Zenodo record 23759737)",
+    "license": "CC BY 4.0",
+    "evidenceCategory": "controlled-environment experiment",
+    "environment": "open field"
+  },
+  "source": {
+    "datasetSha256": "b5e8357ae1ae4b31420c7c25e22603ad85f53fe919b8bd3775ddc9553adba7cb",
+    "note": "hash recorded by scripts/datasets/acquire.py at download time"
+  },
+  "units": {
+    "height_cm": "cm",
+    "leaf_number": "count",
+    "stem_number": "count",
+    "stem_diameter_mm": "mm"
+  },
+  "perPlant": true,
+  "plants": 20,
+  "weeks": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "note": "weekly non-destructive growth of tagged plants in an open agricultural field. The environment is ambient, not controlled."
+}
