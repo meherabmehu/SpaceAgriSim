@@ -397,3 +397,43 @@ Branch `phase26-dataset-expansion`, based on `main` at `34056cf`. Read
 
 No Render operation of any kind; no production database access; no migration; no threshold change; no
 model promotion; no UI or API change; no dataset counted that was not downloaded and verified.
+
+---
+
+## L. Phase 27 — integration, PostgreSQL reliability and one complete feature
+
+Read `docs/PHASE27_DELIVERY_REPORT.md`, `docs/PHASE27_INTEGRATION_REPORT.md` and
+`docs/PHASE27_FEATURE_AUDIT.md`.
+
+### L.1 Headline
+
+| Area | Before Phase 27 | After |
+|---|---|---|
+| PostgreSQL tests executed | **0 of 24** (all skipped) | **24 of 24**, in a new CI service-container job |
+| Backend tests | 988 passed / 24 skipped | **1093 passed / 0 skipped** |
+| Phase 26 water-use figures | 10 dates used, prose said 13 | **11 dates**, numbers regenerated |
+| Complete end-to-end features | 0 of 12 | **1 of 12** (measured water use) |
+| Duplicated calculations | harvest formula defined twice | one definition, pinned by a test |
+| Frontend E2E | 89 passing | **93 passing** across three viewports |
+
+### L.2 What changed
+
+**PostgreSQL.** `.github/workflows/ci.yml` gained a `postgres` job with a real `postgres:17`
+service container, health checks, `postgresql-client` for the backup/restore test, and a gate that
+**fails the build if any test skips**. Locally reproduced against PostgreSQL 17.11: 1012 passed, 0
+skipped. The one failure found was in the test server's configuration (`--auth=trust` made a
+wrong-password test unable to fail), not in the product; the server was reconfigured and the test
+passed unmodified.
+
+**Feature.** `GET /api/water-use-evidence` and `POST /api/water-use-evidence/compare`, plus a panel
+inside the existing simulation lab. 24 backend tests, 4 browser tests, provenance, limitations and a
+verdict that is never "validated".
+
+**Engine.** 46 executable integrity tests. Two real findings: a duplicated harvest formula (fixed)
+and, in the audit itself, a unit test that had been comparing the wrong quantities (fixed).
+
+### L.3 Not done, on purpose
+
+No Render deployment or configuration change. No production database access or migration. No model
+retrained or promoted. No experimental feature promoted to production-ready. No acceptance threshold
+relaxed. No dataset acquired to raise a count.
