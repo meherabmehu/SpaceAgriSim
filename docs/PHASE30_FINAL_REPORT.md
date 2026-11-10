@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | Phase start commit | `6b93fc1` (Phase 29, verified as remote `main` HEAD before any work) |
-| Final commit | `5b5facf` — pushed to `origin/main` and re-read from the remote (`git ls-remote origin main` → `5b5facfe893c53c937c0207f6b4577a342b3ddf4`) |
+| Delivered commits | `5b5facf` (all Phase 30 work), `6de45ce` (this report pinned to it). Remote `refs/heads/main` re-read after the push: `6de45ce42d9d577e2a89a47ccc88efa4e6c469f0` |
 | Branch | `main` |
 | Production changes | **none** — no Render deploy, no environment variables, no service settings, no production database, no paid resources |
 
@@ -227,6 +227,6 @@ a documented multi-source failure with the capability removed.
 
 ---
 
-**Final commit:** `5b5facf`, on `main`, verified against the remote after the push
-(`refs/heads/main = 5b5facfe893c53c937c0207f6b4577a342b3ddf4`). Working tree clean apart from this
-document's own pinning commit.
+**Final commits:** `5b5facf` carries the work; `6de45ce` carries this report. Both are on `main`,
+pushed, and the remote was re-read afterwards: `git ls-remote origin main` →
+`6de45ce42d9d577e2a89a47ccc88efa4e6c469f0`. Working tree clean.
