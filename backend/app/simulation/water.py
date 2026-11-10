@@ -75,9 +75,18 @@ def daily_water_demand_l(
     light_scale: float,
 ) -> float:
     """Water a healthy canopy at this growth stage would want (before shortage)."""
+    return crop.peak_water_l_per_day * growing_area_m2 * light_scale * canopy_scale(growth_fraction)
+
+
+def canopy_scale(growth_fraction: float) -> float:
+    """How much of a full canopy is transpiring, with the seedling floor applied.
+
+    A germinating seedling still loses water, so the scale never reaches zero: it runs from
+    SEEDLING_ACTIVITY_FRACTION at sow to 1.0 at full cover. Exported because a caller showing the
+    ET0-reference equation needs this term to reproduce the answer.
+    """
     seedling = constants.SEEDLING_ACTIVITY_FRACTION
-    canopy_scale = seedling + (1.0 - seedling) * growth_fraction
-    return crop.peak_water_l_per_day * growing_area_m2 * light_scale * canopy_scale
+    return seedling + (1.0 - seedling) * growth_fraction
 
 
 def et0_reference_demand_l(
@@ -87,9 +96,8 @@ def et0_reference_demand_l(
     growing_area_m2: float,
 ) -> float:
     """Water demand of a canopy from a reference ET0 flux (litres per day)."""
-    seedling = constants.SEEDLING_ACTIVITY_FRACTION
-    canopy_scale = seedling + (1.0 - seedling) * growth_fraction
-    return (et0_mm_per_day * crop_coefficient * growing_area_m2 * canopy_scale
+    scale = canopy_scale(growth_fraction)
+    return (et0_mm_per_day * crop_coefficient * growing_area_m2 * scale
             * constants.ET0_MM_PER_M2_TO_LITRES)
 
 

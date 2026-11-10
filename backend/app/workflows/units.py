@@ -1,0 +1,99 @@
+"""Machine-readable units, defined once.
+
+The platform has always carried units in field names (`waterUsed` is litres, `co2Removed` grams)
+and in prose descriptions. A client that wants to label an axis or convert a value therefore has to
+read English, which is exactly the kind of implicit contract that breaks silently when someone adds
+a field.
+
+Every quantity a workflow returns is registered here with its canonical unit, the dimension it
+belongs to, and a note on anything a reader could get wrong. The workflows expose a `units` map
+alongside their numbers, so a chart library, a CSV export or a validation script can be unit-aware
+without parsing descriptions.
+
+This module does not convert anything. Converting silently is the failure mode it exists to
+prevent: a value is always reported in the unit its producer measured or computed it in, and the
+conversion, if needed, is the caller's explicit choice.
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+# canonical unit -> (dimension, description, cautions)
+UNITS: dict[str, tuple[str, str, list[str]]] = {
+    "mm/day": ("flux", "millimetres of water depth per day",
+               ["a depth, not a volume: converting to litres needs an area",
+                "1 mm over 1 m2 is exactly 1 L"]),
+    "L/day": ("flow", "litres of water per day", ["volume at the plant or canopy, not at the meter"]),
+    "L": ("volume", "litres of water", []),
+    "L/m2/day": ("flux", "litres of water per square metre of surface per day",
+                 ["the surface matters: canopy area and ground area give different answers"]),
+    "mL/pot/day": ("flow", "millilitres of water per pot per day",
+                   ["per pot, and the pot's surface area is what makes it a flux"]),
+    "mL": ("volume", "millilitres of water", []),
+    "g/m2": ("mass flux", "grams of fresh mass per square metre of growing area",
+             ["this is an areal yield, not a per-plant mass: dividing by density assumes the "
+              "per-area yield is independent of density, which the model itself warns is not "
+              "true above ~200 plants/m2"]),
+    "g/plant": ("mass", "grams of fresh shoot mass per plant",
+                ["fresh mass, not dry mass and not edible yield per square metre"]),
+    "g": ("mass", "grams", []),
+    "degC": ("temperature", "degrees Celsius", []),
+    "K": ("temperature", "kelvin", []),
+    "kPa": ("pressure", "kilopascal", ["VPD is a pressure deficit, not a concentration"]),
+    "Pa": ("pressure", "pascal", []),
+    "%": ("fraction", "percent", ["fractions in the API are 0-1 unless the field name says Pct"]),
+    "fraction": ("dimensionless", "a ratio in the closed interval [0, 1]", []),
+    "m2": ("area", "square metres",
+           ["ground area and canopy area are different quantities with the same unit"]),
+    "m/s": ("speed", "metres per second", ["wind is at 2 m height in FAO-56, not at 10 m"]),
+    "MJ/m2/day": ("energy flux", "megajoules of radiant energy per square metre per day",
+                  ["solar radiation is not PAR and is not ionising radiation"]),
+    "mol/m2/day": ("photon flux", "moles of photosynthetically active photons per square metre per day",
+                   ["PAR only; this is not total solar radiation"]),
+    "umol/m2/s": ("photon flux density", "micromoles of photons per square metre per second", []),
+    "day": ("time", "days", ["calendar days of crop cycle, counted from the stated origin"]),
+    "h/day": ("time", "hours per day", []),
+    "degree": ("angle", "decimal degrees", ["latitude north positive"]),
+    "m": ("length", "metres above mean sea level", []),
+    "plant": ("count", "number of plants", []),
+    "plant/m2": ("count density", "plants per square metre of growing area",
+                 ["the model does not learn how per-area yield changes with density; it only "
+                  "divides by it"]),
+    "ppm": ("mole fraction", "parts per million by volume in air", []),
+    "dimensionless": ("dimensionless", "a pure number", []),
+}
+
+DIMENSIONS = sorted({entry[0] for entry in UNITS.values()})
+
+
+def describe(unit: str) -> dict[str, Any]:
+    """One unit's metadata. Unknown units are reported as unknown, never guessed."""
+    if unit not in UNITS:
+        return {"unit": unit, "dimension": "unknown", "description": "",
+                "cautions": ["this unit is not registered, so its dimension is unknown"],
+                "registered": False}
+    dimension, description, cautions = UNITS[unit]
+    return {"unit": unit, "dimension": dimension, "description": description,
+            "cautions": cautions, "registered": True}
+
+
+def block(**quantities: str) -> dict[str, dict[str, Any]]:
+    """A units map for a response: field name -> unit metadata.
+
+    Usage: ``units=units.block(waterDemandLD="L/day", et0MmPerDay="mm/day")``
+    """
+    out: dict[str, dict[str, Any]] = {}
+    for field, unit in quantities.items():
+        out[field] = describe(unit)
+    return out
+
+
+def registry() -> dict[str, Any]:
+    """Every unit the platform names, with its dimension."""
+    return {
+        "units": {name: describe(name) for name in sorted(UNITS)},
+        "dimensions": DIMENSIONS,
+        "note": ("Values are always reported in the unit their producer used. Nothing here "
+                 "converts; a conversion is the caller's explicit choice."),
+    }

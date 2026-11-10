@@ -28,6 +28,7 @@ import {
   Wind,
   UserRound,
   Workflow,
+  Waypoints,
   X,
 } from "lucide-react";
 import { useSimulationConfig } from "../hooks/useSimulationConfig.js";
@@ -53,6 +54,7 @@ const NAV = [
   ["laboratory", "Simulation lab", FlaskConical],
   ["predictions", "AI prediction center", Atom],
   ["workflow", "Scientific workflow", Workflow],
+  ["workflows", "Guided workflows", Waypoints],
   ["assistant", "Research assistant", MessageSquare],
   ["greenhouse", "3D greenhouse", Box],
   ["comparison", "World comparison", Globe2],

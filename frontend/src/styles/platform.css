@@ -2160,3 +2160,131 @@
     gap: 10px;
   }
 }
+
+/* ------------------------------------------------------------------ Phase 28: workflows */
+/*
+ * The guided workflows are two panels of cards rather than a new page shell: the mission header,
+ * navigation and card vocabulary are unchanged. Everything below is layout the existing classes did
+ * not cover — a scenario strip, a compact range field, an inline interval plot and a warning block.
+ */
+.module-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.workflow-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.scenario-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0 4px;
+}
+.scenario-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 11px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: transparent;
+  color: #a3b9bf;
+  font-size: 12px;
+  cursor: pointer;
+}
+.scenario-tabs button.active {
+  border-color: rgba(74, 222, 128, 0.6);
+  color: #dff6e8;
+  box-shadow: 0 0 0 1px rgba(74, 222, 128, 0.3) inset;
+}
+.scenario-tabs button.add {
+  border-style: dashed;
+}
+.scenario-remove {
+  display: inline-flex;
+  margin-left: 4px;
+  color: #829ba8;
+}
+.scenario-remove:hover {
+  color: #f6c21f;
+}
+.workflow-inputs {
+  margin-top: 12px;
+}
+.workflow-field select {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border-radius: 10px;
+  border: 1px solid var(--line, rgba(148, 163, 184, 0.24));
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+/* In these panels the label sits above its value: the quantities have long names and a
+   right-aligned inline value reads as one run-on sentence. */
+.workflow-panel .stat-pair {
+  flex-wrap: wrap;
+}
+.workflow-panel .stat-pair > div {
+  flex: 1 1 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.workflow-panel .stat-pair strong {
+  text-align: left;
+}
+/* The plot has a fixed coordinate system so its labels stay legible, which means it scrolls
+   horizontally inside the card rather than shrinking below readability on a narrow screen. */
+.workflow-bars-wrap {
+  overflow-x: auto;
+  margin-top: 14px;
+}
+.workflow-bars {
+  width: 100%;
+  min-width: 520px;
+  height: auto;
+}
+.workflow-warning {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  background: rgba(251, 191, 36, 0.08);
+  color: #e8d3a1;
+  font-size: 12px;
+}
+.workflow-warning ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+.workflow-tabs {
+  margin-top: 18px;
+}
+@media (max-width: 720px) {
+  .control-grid {
+    grid-template-columns: 1fr;
+  }
+  /* In these panels the label sits above its value: the quantities have long names and a
+   right-aligned inline value reads as one run-on sentence. */
+.workflow-panel .stat-pair {
+  flex-wrap: wrap;
+}
+.workflow-panel .stat-pair > div {
+  flex: 1 1 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.workflow-panel .stat-pair strong {
+  text-align: left;
+}
+.workflow-bars {
+    min-width: 0;
+  }
+}
