@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | Phase start commit | `6b93fc1` (Phase 29, verified as remote `main` HEAD before any work) |
-| Delivered commits | `5b5facf` (all Phase 30 work), `6de45ce` (this report pinned to it). Remote `refs/heads/main` re-read after the push: `6de45ce42d9d577e2a89a47ccc88efa4e6c469f0` |
+| Work commit | `5b5facf` — every dataset, model, removal, test, matrix and document in this phase; later commits only edit this report |
 | Branch | `main` |
 | Production changes | **none** — no Render deploy, no environment variables, no service settings, no production database, no paid resources |
 
@@ -227,6 +227,7 @@ a documented multi-source failure with the capability removed.
 
 ---
 
-**Final commits:** `5b5facf` carries the work; `6de45ce` carries this report. Both are on `main`,
-pushed, and the remote was re-read afterwards: `git ls-remote origin main` →
-`6de45ce42d9d577e2a89a47ccc88efa4e6c469f0`. Working tree clean.
+**Delivery:** the work is in commit `5b5facf` on `main`; the commits after it only maintain this
+document. The push was verified by re-reading the remote (`git ls-remote origin main`) and the
+working tree is clean. The exact remote HEAD at hand-over is reported in the delivery message, not
+here, because writing a commit's own hash into a file changes that hash.
