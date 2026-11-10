@@ -89,11 +89,10 @@ def audit() -> dict:
     rows: list[dict] = []
     registered_names: set[str] = set()
     superseded_names: set[str] = set()
-    # Cards for models served by their own runtime are legitimate artifacts here, but only
-    # because they are declared. The declaration is checked below, and an undeclared card is
-    # still an orphan.
-    external_cards = {Path(service["card"]).name
-                      for service in research.EXTERNAL_SERVICES.values()}
+    # Artifacts that are deliberately retained but not served. Declared in `research` so an
+    # undeclared leftover card is still an orphan, and checked below so a "retained" artifact can
+    # never quietly keep a catalogue row.
+    retained_cards = {f"{model_id}.json" for model_id in research.RETIRED_MODEL_IDS}
 
     # ---------------------------------------------------------------- 1. checksums
     for entry in registry["models"]:
@@ -193,19 +192,32 @@ def audit() -> dict:
 
         # ------------------------------------------------ 7/8. classification + explanation
         entry_classification = science_classification.feature_by_id(model_id)
-        check(f"classification:{model_id}", entry_classification is not None,
-              "no science classification entry")
         in_catalogue = model_id in catalogue
-        check(f"catalogue:{model_id}", in_catalogue, "registered model missing from the workflow catalogue")
-        if entry_classification is not None and in_catalogue:
-            category = entry_classification.category
-            run_status = catalogue[model_id]["runStatus"]
-            if category == 6:
-                check(f"retired-not-runnable:{model_id}", run_status == "retired",
-                      f"category 6 model reports runStatus={run_status}")
-            else:
+        if model_id in research.RETIRED_MODEL_IDS:
+            # Phase 31: a withdrawn model keeps its artifact and its evaluation, but must be
+            # invisible to every served surface. These three checks are the whole guarantee.
+            check(f"retained-not-served:{model_id}", not in_catalogue,
+                  "withdrawn model still has a workflow catalogue row")
+            check(f"retained-not-classified:{model_id}", entry_classification is None,
+                  "withdrawn model still has a science classification entry")
+            check(f"retained-not-served-by-api:{model_id}",
+                  model_id not in {row["id"] for row in research.model_registry()["models"]},
+                  "withdrawn model still appears in GET /api/models")
+            check(f"retained-not-routed:{model_id}",
+                  f"/api/predict/{model_id}" not in mounted_paths(),
+                  f"/api/predict/{model_id} is still mounted")
+        else:
+            check(f"classification:{model_id}", entry_classification is not None,
+                  "no science classification entry")
+            check(f"catalogue:{model_id}", in_catalogue,
+                  "registered model missing from the workflow catalogue")
+            if entry_classification is not None and in_catalogue:
+                category = entry_classification.category
+                run_status = catalogue[model_id]["runStatus"]
                 check(f"served-not-retired:{model_id}", run_status in ("runnable", "unavailable"),
                       f"category {category} model reports runStatus={run_status}")
+                check(f"served-model-not-category-6:{model_id}", category != 6,
+                      "a served model is classified as an unsupported prediction")
         explanation_flag = catalogue.get(model_id, {}).get("explanationAvailable")
         explanation_file = ARTIFACTS / f"{model_id}-explanation.json"
         check(f"explanation-flag:{model_id}", bool(explanation_flag) == explanation_file.is_file(),
@@ -244,72 +256,34 @@ def audit() -> dict:
             continue
         if path.name in registered_names or path.name in superseded_names:
             continue
-        if path.name in external_cards:
+        if path.name in retained_cards:
             continue
         check(f"artifact-registered:{path.name}", False, "artifact on disk is neither registered nor superseded")
     check("no-orphan-artifacts", not any(c["check"].startswith("artifact-registered:") for c in CHECKS),
           "every artifact is registered or explicitly superseded")
 
-    # --------------------------------------- 11. models served by their own runtime
-    for model_id, service in research.EXTERNAL_SERVICES.items():
-        card_path = ROOT / service["card"]
-        check(f"external-card-exists:{model_id}", card_path.is_file(), service["card"])
-        if not card_path.is_file():
-            continue
-        card = json.loads(card_path.read_text(encoding="utf-8"))
-        row = catalogue.get(model_id) or {}
-        # The whole point of the declaration is that such a model cannot be parked somewhere
-        # unreachable: the catalogue must name the surface that serves it, and that surface must
-        # exist in the mounted app.
-        check(f"external-run-status:{model_id}", row.get("runStatus") == "external-service",
-              f"catalogue runStatus={row.get('runStatus')}")
-        check(f"external-endpoint-named:{model_id}",
-              bool(service.get("endpoint")) and service["endpoint"].startswith("/api/"),
-              str(service.get("endpoint")))
-        # Routers are nested, so the app's own OpenAPI document is the honest answer to "is this
-        # path actually reachable" rather than walking `app.routes`.
-        from app.main import app as mounted_app
+    # ---------------------------------- 11. served calculations (no fitted parameters)
+    #
+    # The reference-ET0 calculation replaced the fitted emulator in Phase 31. It is a published
+    # equation, so it has no artifact to checksum and no held-out R2: the check is that it is
+    # catalogued as a calculation, that its own worked examples still pass, and that the withdrawn
+    # surrogate is nowhere in the served set.
+    calculations = research.model_registry().get("calculations") or []
+    check("calculation-catalogued:reference-et0",
+          any(row.get("id") == "reference-et0" for row in calculations),
+          f"calculations={[row.get('id') for row in calculations]}")
+    for row in calculations:
+        check(f"calculation-examples-pass:{row['id']}",
+              bool(row.get("allPublishedExamplesWithinTolerance")),
+              "FAO-56 worked examples did not all pass")
+        check(f"calculation-not-a-model:{row['id']}",
+              row.get("kind") == "calculation" and row.get("id") not in catalogue,
+              "a calculation must not appear as a model")
+    check("withdrawn-surrogate-not-served:et0-emulator-v1",
+          "et0-emulator-v1" not in {row["id"] for row in research.model_registry()["models"]}
+          and "et0-emulator-v1" not in catalogue,
+          "the withdrawn ET0 emulator is still reachable in the served registry")
 
-        mounted = set(mounted_app.openapi().get("paths") or {})
-        check(f"external-endpoint-mounted:{model_id}",
-              service["endpoint"] in mounted,
-              f"{service['endpoint']} is declared but not routed")
-        check(f"external-card-endpoint-mounted:{model_id}",
-              service["cardEndpoint"] in mounted,
-              f"{service['cardEndpoint']} is declared but not routed")
-        check(f"external-classified:{model_id}",
-              science_classification.feature_by_id(model_id) is not None,
-              "served model with no science classification")
-        service_class = science_classification.feature_by_id(model_id)
-        if service_class is not None:
-            check(f"external-not-unsupported:{model_id}", service_class.category != 6,
-                  f"category {service_class.category}")
-        # A surrogate that has not passed its gates must not claim to be deployed.
-        gates = (card.get("validation") or {}).get("acceptanceGate") or []
-        failed = [gate["criterion"] for gate in gates if not gate.get("passed")]
-        check(f"external-gates-recorded:{model_id}", bool(gates), f"{len(gates)} criteria")
-        check(f"external-deployment-matches-gates:{model_id}",
-              (not failed and card.get("deployed") is True)
-              or (bool(failed) and card.get("deployed") is False),
-              f"failed={failed} deployed={card.get('deployed')}")
-        metrics = card.get("metrics") or {}
-        check(f"external-metrics-present:{model_id}",
-              all(key in metrics for key in ("mae", "rmse", "n")), str(sorted(metrics)))
-        baseline = (card.get("baselineMetrics") or {}).get("hargreaves") or {}
-        check(f"external-baseline-present:{model_id}", "mae" in baseline, "no baseline to compare")
-        # The direction of every criterion is declared, so a "lower is better" metric can never be
-        # read as an improvement.
-        criteria = card.get("criteria") or {}
-        check(f"external-criteria-direction:{model_id}",
-              bool(criteria.get("mae")) and "lower" in str(criteria.get("mae")).lower(),
-              str(criteria))
-        check(f"external-model-binary-present:{model_id}",
-              (card_path.parent / f"{model_id}.joblib").is_file()
-              or (card_path.parent / f"{model_id}.pkl").is_file(),
-              "card without a fitted model beside it")
-        registry_row = next((item for item in research.model_registry()["models"]
-                             if item["id"] == model_id), {})
-        et0_status_checks(model_id, card, registry_row)
 
     # ------------------------------------------------ 9. superseded / excluded handling
     for entry in registry["models"]:
@@ -371,7 +345,6 @@ def audit() -> dict:
     import app.simulation.factors as simulation_factors
     from app.config import simulation_constants
     from app.models.simulation import SimulationRequest
-    from app.workflows import harvest as harvest_workflow
 
     check("removed:gravity-field-absent", "gravity" not in SimulationRequest.model_fields,
           "the simulation request must not accept a gravity input")
@@ -384,45 +357,36 @@ def audit() -> dict:
 
     from app.routes.workflows import workflow_catalogue
     catalogue_workflows = workflow_catalogue()["workflows"]
-    harvest_entry = next((item for item in catalogue_workflows
-                          if item["id"] == "harvest-prediction"), None)
-    check("removed:harvest-catalogue-entry-present", harvest_entry is not None,
-          "the removed workflow must stay visible as removed, not disappear")
-    if harvest_entry is not None:
-        check("removed:harvest-catalogue-not-complete", harvest_entry["status"] != "complete",
-              harvest_entry["status"])
-        check("removed:harvest-no-run-endpoint", "run" not in harvest_entry["endpoints"],
-              "an unavailable workflow must not advertise a run endpoint")
-        check("removed:harvest-forecast-flag", harvest_entry.get("operationalForecast") is False,
-              "operationalForecast must be false")
+    catalogue_ids = [item["id"] for item in catalogue_workflows]
+    # Phase 31 changed this from "the removed workflow stays visible as removed" to "the removed
+    # workflow is gone". A catalogue entry and a capability endpoint that can only describe their
+    # own removal are still a retired feature in the product.
+    check("removed:harvest-catalogue-entry-absent", "harvest-prediction" not in catalogue_ids,
+          f"catalogue ids: {catalogue_ids}")
+    for route in ("/api/workflows/harvest-prediction/run",
+                  "/api/workflows/harvest-prediction/capability",
+                  "/api/workflows/harvest-prediction/parity"):
+        check(f"removed:not-mounted:{route}", route not in mounted_paths(),
+              "a removed workflow route is still mounted")
+    check("removed:harvest-module-deleted",
+          not (ROOT / "backend" / "app" / "workflows" / "harvest.py").exists(),
+          "backend/app/workflows/harvest.py still exists")
+    retained = sorted((ROOT / "ml" / "evaluation").glob("*harvest*.json"))
+    check("removed:harvest-evaluations-retained", bool(retained),
+          f"{len(retained)} evaluation file(s) retained")
 
-    harvest_capability = harvest_workflow.capability()
-    check("removed:harvest-capability-unavailable",
-          harvest_capability["status"] == "unavailable"
-          and harvest_capability["capabilityAvailable"] is False,
-          harvest_capability["status"])
-    check("removed:harvest-evaluations-retained",
-          len(harvest_capability["evaluations"]) >= 2
-          and all(item["passed"] is not True for item in harvest_capability["evaluations"]),
-          f"{len(harvest_capability['evaluations'])} evaluations, none passing")
-    check("removed:harvest-no-served-model",
-          "model" not in harvest_capability and "fields" not in harvest_capability,
-          "a removed workflow must not expose a served model or an input schema")
-
-    for workflow_id in ("harvest-prediction", "water-demand", "light-stress"):
-        entry = next(item for item in catalogue_workflows if item["id"] == workflow_id)
+    # Everything the catalogue does advertise must actually be mounted.
+    for entry in catalogue_workflows:
         for name, endpoint in entry["endpoints"].items():
             route = endpoint.split(" ", 1)[1]
-            mounted = route in mounted_paths()
-            check(f"removed:endpoint-mounted:{workflow_id}:{name}", mounted,
+            check(f"workflow-endpoint-mounted:{entry['id']}:{name}", route in mounted_paths(),
                   f"{endpoint} is advertised but not mounted")
 
     summary = {
         "registeredModels": len(registry["models"]),
         "auditedModels": len(rows),
         "servedModels": sum(1 for row in rows if row["runStatus"] == "runnable"),
-        "externallyServedModels": sum(1 for row in rows
-                                      if row["runStatus"] == "external-service"),
+        "withdrawnArtifactsRetained": len(research.RETIRED_MODEL_IDS),
         "retiredModels": sum(1 for row in rows if row["runStatus"] == "retired"),
         "supersededModels": len(superseded_names),
         "withExplanations": sum(1 for row in rows if row["explanationAvailable"]),
@@ -457,25 +421,6 @@ def mounted_paths() -> set[str]:
     return set(fastapi_app.openapi().get("paths", {}))
 
 
-def et0_status_checks(model_id: str, card: dict, row: dict) -> bool:
-    """Level with the serving layer rather than re-deriving its answer.
-
-    `app.et0` already degrades to physics when the artifact is unreadable; the audit asserts that
-    the registry row reports the same availability, so a service that silently fell back would be
-    caught here as a disagreement between the card and the API.
-    """
-    from app import et0
-
-    status = et0.artifact_status()
-    check(f"external-availability-agrees:{model_id}",
-          bool(status.get("available")) == bool(row.get("artifactExists")),
-          f"service={status.get('available')} registry={row.get('artifactExists')}")
-    check(f"external-primary-is-physics:{model_id}",
-          "physics" in str(status.get("fallback") or "") or status.get("available") is False,
-          "the physics fallback is not described")
-    return bool(status.get("available"))
-
-
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--write", action="store_true", help="write the audit artifact")
@@ -485,6 +430,7 @@ def main() -> int:
     summary = report["summary"]
     print(f"models audited        {summary['auditedModels']}/{summary['registeredModels']}")
     print(f"served / retired      {summary['servedModels']} / {summary['retiredModels']}")
+    print(f"withdrawn retained    {summary['withdrawnArtifactsRetained']}")
     print(f"superseded kept       {summary['supersededModels']}")
     print(f"with explanations     {summary['withExplanations']}")
     print(f"documented gaps       {summary['documentedGaps']}")

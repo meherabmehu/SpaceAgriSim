@@ -1,5 +1,12 @@
 # Scientific Model Audit
 
+> **Phase 31 status note (2026-11-09).** This document records the evidence as of the phase
+> that produced it and is kept as a historical record. Three models described in it are no longer
+> served: `mizuna-harvest-v1`, `mizuna-microbial-load-v1` and `et0-emulator-v1`. Their artifacts and
+> evaluations are retained, and the reasons for withdrawal are in
+> [`PHASE31_REMOVED_MODELS.md`](PHASE31_REMOVED_MODELS.md). Read the model catalogue at
+> `/api/models` (or `python3 scripts/audit_models.py`) for what the application serves now.
+
 SpaceAgriSim, 2026-11-09. Every model that produces a number a user can see, audited against the
 same ten questions: purpose, formulation, inputs, outputs, data source, calibration, validation,
 limitations, missing variables, improvement path.

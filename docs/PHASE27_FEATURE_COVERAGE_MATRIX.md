@@ -92,13 +92,13 @@ Readiness tier: `removed` · Phase 27: audited only
 | --- | --- | --- |
 | `data` | `retired` | the evaluation data is kept; the served model is not |
 | `method` | `retired` | the model and its failed evaluation are recorded, not served |
-| `service` | `retired` |  |
+| `service` | `retired` | the module itself was deleted in Phase 31; the record is kept |
 | `endpoint` | `retired` | POST .../run answers 410; GET .../capability and .../parity remain |
 | `inputCheck` | `retired` |  |
 | `outputCheck` | `retired` |  |
 | `uncertainty` | `retired` | the interval used to span a factor of 29; it is no longer served |
 | `provenance` | `present` | the removal reason and every failed evaluation stay readable |
-| `frontend` | `retired` | the run tab is gone; the evidence tab shows the measured record |
+| `frontend` | `retired` | the tab is gone; the record lives in docs/PHASE31_REMOVED_MODELS.md |
 | `tests` | `present` | the tests assert the capability is unavailable, not that a screen exists |
 
 ### 4. Response to specific LED spectra and photoperiods
@@ -200,7 +200,7 @@ Readiness tier: `removed` · Phase 27: audited only
 | `outputCheck` | `not-applicable` |  |
 | `uncertainty` | `not-applicable` |  |
 | `provenance` | `present` | the radiation warning states that gravity is not modelled at all |
-| `frontend` | `retired` | the gravity control and its presets were removed |
+| `frontend` | `retired` | the gravity control and its presets were removed; the component that carried them was dead code and was deleted in Phase 31 |
 | `tests` | `present` | the tests assert the input is refused and the factor is absent |
 
 ### 10. Root-zone water status

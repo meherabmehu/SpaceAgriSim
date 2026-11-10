@@ -20,7 +20,7 @@ from typing import Any, Literal
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.workflows import cea_evidence, harvest, light_stress, units, water_demand
+from app.workflows import cea_evidence, light_stress, units, water_demand
 
 router = APIRouter(tags=["workflows"], prefix="/workflows")
 
@@ -111,23 +111,6 @@ def workflow_catalogue() -> dict[str, Any]:
                     "run": "POST /api/workflows/light-stress/run",
                 },
             },
-            {
-                "id": "harvest-prediction",
-                "title": "Crop growth and harvest prediction (lettuce)",
-                "status": "unavailable",
-                "capabilityAvailable": False,
-                "operationalForecast": False,
-                "removedInPhase": 30,
-                "removedBecause": ("no harvest model met the independent 30 % error criterion: 41.6 % "
-                                   "on the Phase 28 holdout and over 300 % on eight unseen published "
-                                   "lettuce studies"),
-                "measures": "nothing predictive; the measured-versus-model record is still available",
-                "measuredEvidence": True,
-                "endpoints": {
-                    "capability": "GET /api/workflows/harvest-prediction/capability",
-                    "parity": "GET /api/workflows/harvest-prediction/parity",
-                },
-            },
         ],
         "documentedGaps": [
             {
@@ -144,11 +127,15 @@ def workflow_catalogue() -> dict[str, Any]:
                                        "and reported photoperiod, temperature and density."),
             },
         ],
-        "note": ("A workflow is listed complete only when input, execution, comparison, evidence, "
-                 "uncertainty and interface are all implemented and tested. Three are: two "
-                 "model/calculation workflows and one measured-comparison workflow whose evidence "
-                 "class is stated in every response. The response surface that Phase 28 recorded as "
-                 "blocked is still blocked, and the reason is below."),
+        "note": ("A workflow is listed only when input, execution, comparison, evidence, "
+                 "uncertainty and interface are all implemented and tested; anything else is a "
+                 "documented gap rather than a placeholder entry. Three workflows meet that bar: "
+                 "two model/calculation workflows and one measured-comparison workflow whose "
+                 "evidence class is stated in every response. Phase 31 removed the "
+                 "harvest-prediction entry: a workflow with no run path is not a workflow, and the "
+                 "evaluations that failed it remain committed under ml/evaluation and in docs. The "
+                 "response surface that Phase 28 recorded as blocked is still blocked, and the "
+                 "reason is below."),
     }
 
 
@@ -197,33 +184,3 @@ def cea_capability() -> dict[str, Any]:
 def cea_run(request: CeaRunRequest) -> dict[str, Any]:
     selections = [item.model_dump() for item in request.selections]
     return cea_evidence.run(selections)
-
-
-@router.get("/harvest-prediction/capability")
-def harvest_capability() -> dict[str, Any]:
-    return harvest.capability()
-
-
-@router.get("/harvest-prediction/parity")
-def harvest_parity() -> dict[str, Any]:
-    return harvest.parity()
-
-
-@router.post("/harvest-prediction/run", status_code=410, deprecated=True,
-             responses={410: {"description": "Removed in Phase 30; no forecast replacement."}})
-def harvest_run_removed() -> dict[str, Any]:
-    """Tombstone for the retired forecast endpoint.
-
-    Kept as an explicit 410 rather than a 404 so a caller who built against it learns why it is gone
-    and what did not replace it. The endpoint stores nothing and computes nothing.
-    """
-    raise HTTPException(status_code=410, detail={
-        "capability": "harvest-forecast",
-        "status": "removed",
-        "removedInPhase": 30,
-        "reason": ("no harvest model met the 30 % independent-error criterion: 41.6 % on the Phase 28 "
-                   "holdout and over 300 % MAPE on eight unseen published lettuce studies"),
-        "notReplacedBy": ("there is no forecast replacement; the measured-versus-model record is at "
-                          "GET /api/workflows/harvest-prediction/parity and the decision record is at "
-                          "GET /api/workflows/harvest-prediction/capability"),
-    })

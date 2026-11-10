@@ -30,6 +30,13 @@ from app import research
 from app.workflows import units
 
 HARVEST = "/api/workflows/harvest-prediction"
+
+
+def _mounted_paths() -> set[str]:
+    """The real application's own OpenAPI document, not this file's trimmed test app."""
+    from app.main import app as full_app
+
+    return set(full_app.openapi()["paths"])
 WATER = "/api/workflows/water-demand"
 CEA = "/api/workflows/light-stress/controlled-environment"
 CEA_SELECTION = {"factor": "co2Ppm", "band": "ambient"}
@@ -53,27 +60,23 @@ GROWTH = {
 # ----------------------------------------------------------------- the catalogue
 
 
-def test_catalogue_lists_every_workflow_and_its_honest_status(client):
-    """Phase 30: two workflows are complete, and the third is carried as unavailable.
+def test_catalogue_lists_only_workflows_that_can_be_completed(client):
+    """Phase 31: the catalogue is the set of workflows a user can actually complete.
 
-    The catalogue is the platform's own statement of what it can do. A removed capability must
-    stay visible here as removed, not disappear into a 404 a user cannot interpret.
+    Phase 30 carried the removed harvest forecast as an "unavailable" entry. That entry has now
+    gone too: a catalogue row whose only content is "this was removed" is still a retired feature
+    in the product, and the failure record it pointed at lives in ml/evaluation and in docs.
     """
     body = client.get("/api/workflows").json()
     ids = [item["id"] for item in body["workflows"]]
-    assert ids == ["water-demand", "light-stress", "harvest-prediction"]
-
-    status = {item["id"]: item["status"] for item in body["workflows"]}
-    assert status == {"water-demand": "complete", "light-stress": "complete",
-                      "harvest-prediction": "unavailable"}
-
-    harvest = next(item for item in body["workflows"] if item["id"] == "harvest-prediction")
-    assert harvest["operationalForecast"] is False
-    assert harvest["capabilityAvailable"] is False
-    assert harvest["removedInPhase"] == 30
-    assert "30 %" in harvest["removedBecause"]
-    # A removed workflow advertises no run endpoint, so nothing can point at a dead route.
-    assert "run" not in harvest["endpoints"]
+    assert ids == ["water-demand", "light-stress"]
+    assert all(item["status"] == "complete" for item in body["workflows"])
+    assert "harvest-prediction" not in ids
+    # Every advertised endpoint must be mounted, or the catalogue is advertising a dead route.
+    for item in body["workflows"]:
+        for endpoint in item["endpoints"].values():
+            path = endpoint.split(" ", 1)[1]
+            assert path in _mounted_paths(), path
 
     gaps = {gap["id"]: gap for gap in body["documentedGaps"]}
     # The gap was narrowed from "no environmental-stress workflow" to "no response surface" when the
@@ -217,17 +220,18 @@ def test_water_growth_stage_moves_both_equations(client):
 def test_water_names_the_fallback_method_when_radiation_is_missing(client):
     """Without radiation and wind there is no Penman-Monteith, and the response names what it used.
 
-    The project's own study found the trained emulator beats Hargreaves on an unseen site, so the
-    fallback order is emulator first, physics second; the test accepts either and demands the
-    response say which. Pinning "hargreaves" here would have encoded a false claim.
+    There is exactly one fallback: the published Hargreaves-Samani equation. Phase 31 removed the
+    fitted emulator from the serving path, so a response can no longer answer with a learned
+    estimate here - which is why this test now pins the method rather than accepting either.
     """
     no_radiation = {k: v for k, v in DHAKA.items() if k not in ("solarRadiationMJm2", "windSpeedMs")}
     body = client.post(WATER + "/run", json={"scenarios": [no_radiation]}).json()
     scenario = body["scenarios"][0]
-    assert scenario["et0"]["primaryMethod"] in ("emulator", "hargreaves")
-    assert scenario["et0"]["primaryMethod"] != "penman-monteith"
+    assert scenario["et0"]["primaryMethod"] == "hargreaves"
+    assert "emulator" not in scenario["et0"]["methods"]
     assert scenario["et0"]["terms"]["radiationMm"] is None
-    assert scenario["et0"]["methods"]["hargreaves"]["requires"] == "temperature and latitude only"
+    assert scenario["et0"]["methods"]["hargreaves"]["requires"] == (
+        "daily tmax, tmin, latitude and day of year")
     assert scenario["et0"]["valueMmPerDay"] > 0
 
 
@@ -305,81 +309,32 @@ def test_water_caps_the_number_of_scenarios(client):
 #
 # Phase 28 shipped a harvest forecast whose model had not passed validation. Phase 30 evaluated
 # it properly - leave-one-study-out over published studies the model had never seen - and it
-# missed the 30 % criterion by more than a factor of ten, so the forecast was removed. These
-# tests replace the Phase 28 tests one for one: they assert the capability is *gone*, not that a
-# screen is missing.
+# missed the 30 % criterion by more than a factor of ten, so the forecast was removed. Phase 31
+# removed the remaining capability/parity endpoints and the UI tab as well: nothing is served, and
+# nothing advertises a removed capability. The evaluations stay committed as data.
 
 
-def test_harvest_run_is_gone_and_says_why(client):
-    """A removed endpoint answers 410 with a reason, not 404 and not a stale forecast."""
-    response = client.post(HARVEST + "/run", json={"scenarios": [GROWTH]})
-    assert response.status_code == 410
-    detail = response.json()["detail"]
-    assert detail["status"] == "removed"
-    assert detail["removedInPhase"] == 30
-    assert "30 %" in detail["reason"]
-    # The record of the failure must remain reachable from the tombstone itself.
-    assert "parity" in detail["notReplacedBy"] and "capability" in detail["notReplacedBy"]
+def test_the_harvest_surface_is_entirely_gone(client):
+    for suffix in ("/run", "/capability", "/parity"):
+        assert client.post(HARVEST + suffix, json={"scenarios": [GROWTH]}).status_code == 404
+        assert client.get(HARVEST + suffix).status_code == 404
+    assert not [p for p in _mounted_paths() if "harvest-prediction" in p]
 
 
-def test_harvest_capability_reports_unavailable_rather_than_a_model(client):
-    body = client.get(HARVEST + "/capability").json()
-    assert body["status"] == "unavailable"
-    assert body["capabilityAvailable"] is False
-    assert body["operationalForecast"] is False
-    assert body["removedInPhase"] == 30
-    # No served model may be advertised alongside a removed workflow.
-    assert "model" not in body
-    assert "fields" not in body
+def test_the_harvest_failure_record_is_retained_as_data(client):
+    """Removal must not erase the reason. The record is in the repository, not in the API."""
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[2]
+    records = list((root / "ml" / "evaluation").glob("*harvest*.json"))
+    assert records, "harvest evaluation records must remain committed"
+    assert (root / "docs" / "PHASE31_REMOVED_MODELS.md").is_file()
 
 
-def test_harvest_every_evaluation_is_kept_and_none_of_them_passed(client):
-    body = client.get(HARVEST + "/capability").json()
-    evaluations = {item["id"]: item for item in body["evaluations"]}
-    assert evaluations
-    judged = [item for item in evaluations.values() if item["passed"] is not None]
-    assert judged and all(item["passed"] is False for item in judged)
-    assert all(item["metrics"]["MAPE"] > body["acceptanceCriterionPct"]
-               for item in judged)
-    independent = [item for item in evaluations.values() if item["countsAsValidation"]]
-    assert len(independent) >= 2
-    for item in independent:
-        assert item["independent"] is True
-        assert item["metrics"]["n"] >= 1
-
-
-def test_harvest_development_error_is_never_counted_as_validation(client):
-    """A 42.65 % development figure is not a validation result and must be labelled so."""
-    body = client.get(HARVEST + "/capability").json()
-    development = [item for item in body["evaluations"] if item["id"] == "phase28-v3-development"]
-    assert development and development[0]["countsAsValidation"] is False
-    assert development[0]["passed"] is None
-    assert "cannot" in development[0]["protocol"].lower() or "not a validation" in (
-        development[0]["protocol"] + development[0].get("verdict", "")).lower()
-    for item in body["evaluations"]:
-        if item["countsAsValidation"]:
-            assert item["independent"] is True
-
-
-def test_harvest_parity_still_shows_measured_against_predicted(client):
-    """The measured-versus-model record is the part that survives, and it must stay honest."""
-    body = client.get(HARVEST + "/parity").json()
-    assert body["operationalForecast"] is False
-    assert body["passed"] is False
-    assert body["points"] and all(point["ratio"] > 0 for point in body["points"])
-    sets = {point["set"] for point in body["points"]}
-    assert sets <= {"development", "independent"}
-    for point in body["points"]:
-        assert point["countsAsValidation"] is (point["set"] == "independent")
-        assert point["measuredG"] > 0 and point["predictedG"] > 0
-    assert body["crossStudy"]["passed"] is False
-    assert "overpredicts" in body["caveat"]
-
-
-def test_the_old_harvest_controls_are_not_silently_ignored(client):
+def test_the_old_harvest_controls_cannot_reach_anything(client):
     """The failure mode this platform has had: a control that validates and does nothing."""
     for body in ({"scenarios": [GROWTH]}, {"scenarios": [{"ppfdUmol": 400}]}, {}):
-        assert client.post(HARVEST + "/run", json=body).status_code == 410
+        assert client.post(HARVEST + "/run", json=body).status_code == 404
 
 
 # ------------------------------------- controlled-environment wheat (measured, no model)

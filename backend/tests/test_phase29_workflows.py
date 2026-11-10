@@ -320,12 +320,11 @@ def test_served_model_was_not_silently_replaced():
 
 
 def test_water_contract_survives_phase29_and_harvest_is_gone(client):
-    """Phase 30 changed this contract on purpose: harvest forecasting was removed."""
+    """Phase 30 removed the forecast; Phase 31 removed the route and the catalogue entry too."""
     harvest = client.post("/api/workflows/harvest-prediction/run", json={"scenarios": [
         {"daysAfterTransplant": 21, "airTemperature": 24, "rootTemperature": 24, "ppfd": 400,
          "photoperiodHours": 16, "plantDensityPerM2": 25}]})
-    assert harvest.status_code == 410
-    assert harvest.json()["detail"]["removedInPhase"] == 30
+    assert harvest.status_code == 404
 
     water = client.post(WATER + "/run", json={"scenarios": [WATER_SCENARIO]}).json()
     assert water["status"] == "complete"

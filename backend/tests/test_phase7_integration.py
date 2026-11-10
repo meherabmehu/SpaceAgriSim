@@ -118,11 +118,13 @@ def test_checksums_endpoint_verifies_every_model_artifact(client_scientific):
     assert all(len(d["sha256"]) == 64 for d in documents)
     assert all(d["ntrsId"] and d["url"].startswith("https://ntrs.nasa.gov") for d in documents)
     models = payload["modelArtifacts"]
-    # Eight artifacts: Phase 8 added lettuce-earth-growth-v2, Phase 9 added the two
-    # OSD-46 radiation classifiers.
-    # Derived from the registry rather than hard-coded: adding a model must not need a test edit,
-    # and must not silently leave one unaudited either.
-    assert len(models) == len(research.MODEL_IDS)
+    # Every registered artifact is checksummed, including the ones Phase 31 withdrew - the digest
+    # is what keeps a negative result reproducible. What must agree with the API is the `served`
+    # flag: the rows a caller can actually run are exactly research.MODEL_IDS.
+    assert all(m["verified"] for m in models)
+    assert {m["id"] for m in models if m["served"]} == set(research.MODEL_IDS)
+    assert {m["id"] for m in models if not m["served"]} == {"mizuna-harvest-v1",
+                                                           "mizuna-microbial-load-v1"}
     assert all(m["verified"] for m in models), [m for m in models if not m["verified"]]
 
 
@@ -174,9 +176,16 @@ def test_phase7_model_does_not_leak_coefficients(client_scientific):
     assert v2["artifactSha256"]
 
 
-def test_superseded_model_remains_served_so_phase6_stays_reproducible(client_scientific):
+def test_the_superseded_microbial_model_is_recorded_but_not_served(client_scientific):
+    """Phase 31 changed the policy for a superseded model that failed: keep the record, drop the row.
+
+    The successor still names what it replaced, and the predecessor's artifact is still on disk
+    and still checksummed - but it is not in the served registry, which is what a caller reads.
+    """
     models = {m["id"]: m for m in client_scientific.get("/api/models").json()["models"]}
-    assert "mizuna-microbial-load-v1" in models
-    assert models["mizuna-microbial-load-v1"]["artifactExists"] is True
+    assert "mizuna-microbial-load-v1" not in models
     assert models["mizuna-microbial-relative-load-v2"]["supersedes"].startswith(
         "mizuna-microbial-load-v1")
+    checksums = client_scientific.get("/api/science/checksums").json()
+    row = next(r for r in checksums["modelArtifacts"] if r["id"] == "mizuna-microbial-load-v1")
+    assert row["served"] is False and row["verified"] is True

@@ -144,26 +144,27 @@ FEATURES: list[dict[str, Any]] = [
             "Operational harvest forecasting was removed in Phase 30. A leave-one-study-out "
             "evaluation over 40 published lettuce studies returned 310.17 % MAPE against the "
             "unchanged 30 % criterion, with the mean baseline selected; the Phase 28 holdout had "
-            "already returned 41.59 %. POST /api/workflows/harvest-prediction/run is a 410 "
-            "tombstone, the catalogue entry is 'unavailable', and the measured-versus-model parity "
-            "record remains readable."
+            "already returned 41.59 %. Phase 31 deleted the workflow module, all three endpoints and "
+            "the catalogue entry; the measured-versus-model parity record and every failed "
+            "evaluation remain committed as data."
         ),
         "layers": {
             "data": {"state": "retired", "evidence": ["data/processed/phase30/lettuce_multistudy.csv"],
                      "note": "the evaluation data is kept; the served model is not"},
             "method": {"state": "retired", "evidence": ["ml/evaluation/phase30_harvest_crossstudy.json"],
                        "note": "the model and its failed evaluation are recorded, not served"},
-            "service": {"state": "retired", "evidence": ["backend/app/workflows/harvest.py"]},
+            "service": {"state": "retired", "evidence": ["docs/PHASE31_REMOVED_MODELS.md"],
+                        "note": "the module itself was deleted in Phase 31; the record is kept"},
             "endpoint": {"state": "retired", "evidence": ["backend/app/routes/workflows.py"],
                          "note": "POST .../run answers 410; GET .../capability and .../parity remain"},
             "inputCheck": {"state": "retired", "evidence": []},
             "outputCheck": {"state": "retired", "evidence": []},
             "uncertainty": {"state": "retired", "evidence": [],
                             "note": "the interval used to span a factor of 29; it is no longer served"},
-            "provenance": {"state": "present", "evidence": ["backend/app/workflows/harvest.py"],
+            "provenance": {"state": "present", "evidence": ["docs/PHASE31_REMOVED_MODELS.md"],
                            "note": "the removal reason and every failed evaluation stay readable"},
             "frontend": {"state": "retired", "evidence": ["frontend/src/pages/modules/GuidedWorkflows.jsx"],
-                         "note": "the run tab is gone; the evidence tab shows the measured record"},
+                         "note": "the tab is gone; the record lives in docs/PHASE31_REMOVED_MODELS.md"},
             "tests": {"state": "present", "evidence": [
                 "backend/tests/test_phase28_workflows.py",
                 "backend/tests/test_phase30_removed_capabilities.py"],
@@ -322,8 +323,9 @@ FEATURES: list[dict[str, Any]] = [
             "uncertainty": {"state": "not-applicable", "evidence": []},
             "provenance": {"state": "present", "evidence": ["backend/app/simulation/serializers.py"],
                            "note": "the radiation warning states that gravity is not modelled at all"},
-            "frontend": {"state": "retired", "evidence": ["frontend/src/components/MissionControls.jsx"],
-                         "note": "the gravity control and its presets were removed"},
+            "frontend": {"state": "retired", "evidence": ["frontend/src/pages/MissionPlatform.jsx"],
+                         "note": "the gravity control and its presets were removed; the component "
+                                 "that carried them was dead code and was deleted in Phase 31"},
             "tests": {"state": "present", "evidence": [
                 "backend/tests/test_phase27_engine_integrity.py",
                 "backend/tests/test_phase30_removed_capabilities.py"],

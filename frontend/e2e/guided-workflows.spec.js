@@ -2,7 +2,8 @@ import { test, expect } from "@playwright/test";
 
 /**
  * The guided workflows as Phase 30 left them: two run end to end, one is a measured panel, and the
- * harvest tab is an evidence-only tombstone with no run control at all.
+ * and Phase 31 removed the harvest tab entirely - so this file asserts that the harvested-forecast
+ * surface is absent from the page and from the API, rather than asserting what a tombstone says.
  *
  * These are journeys, not smoke tests. Each test enters parameters through the rendered controls,
  * presses the run button, and then checks the numbers on screen against the same numbers the API
@@ -33,11 +34,11 @@ async function openWorkflows(page, testInfo) {
   await expect(page.getByRole("heading", { name: "Guided scientific workflows" })).toBeVisible();
 }
 
-async function openHarvest(page, testInfo) {
+async function openHarvestGone(page, testInfo) {
   await openWorkflows(page, testInfo);
-  await page.getByRole("tab", { name: /Harvest evidence \(removed\)/ }).click();
-  await expect(page.getByRole("heading", { name: /1 · What this workflow was, and why it is gone/ }))
-    .toBeVisible();
+  // Nothing to open: the tab must not exist, and the page must not offer the capability.
+  await expect(page.getByRole("tab", { name: /Harvest/i })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /Run harvest/i })).toHaveCount(0);
 }
 
 async function openCea(page, testInfo) {
@@ -127,46 +128,6 @@ test("water demand refuses a crop it has no measurement for", async ({ page }, t
   await expect(page.getByRole("heading", { name: "3 · The measured evidence, beside the estimate" })).toBeVisible();
 });
 
-test("harvest tab states the removal, shows every failed evaluation and offers no run control",
-  async ({ page, request }, testInfo) => {
-    const errors = [];
-    page.on("pageerror", (error) => errors.push(error.message));
-
-    await openHarvest(page, testInfo);
-
-    // The decision is stated before any table, and there is nothing to press.
-    await expect(page.getByText("removed in Phase 30 · no forecast is served")).toBeVisible();
-    await expect(page.getByRole("button", { name: /Run harvest/i })).toHaveCount(0);
-    await expect(page.getByRole("spinbutton")).toHaveCount(0);
-
-    // The validation record carries the independent evaluations and their failed verdicts.
-    await expect(page.getByRole("heading", { name: /2 · Every evaluation/ })).toBeVisible();
-    const evaluations = page.locator(".workflow-panel table").first().locator("tbody tr");
-    await expect(evaluations).not.toHaveCount(0);
-    await expect(page.getByText("failed", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText(/not scored/).first()).toBeVisible();
-
-    // And the API agrees that the capability is gone: the run endpoint is a formal tombstone.
-    const capability = await (await request.get("/api/workflows/harvest-prediction/capability")).json();
-    expect(capability.status).toBe("unavailable");
-    expect(capability.operationalForecast).toBe(false);
-    const removed = await request.post("/api/workflows/harvest-prediction/run", { data: { scenarios: [] } });
-    expect(removed.status()).toBe(410);
-
-    // The parity table on screen is the API's parity table, not a redrawn one.
-    const parity = await (await request.get("/api/workflows/harvest-prediction/parity")).json();
-    const points = page.locator(".workflow-panel table").nth(1).locator("tbody tr");
-    await expect(points).toHaveCount(parity.points.length);
-    const shownRatio = await cellNumber(points.first(), 3);
-    expect(shownRatio).toBeCloseTo(parity.points[0].ratio, 1);
-
-    await testInfo.attach("harvest-evidence", {
-      body: await page.screenshot({ fullPage: true }),
-      contentType: "image/png",
-    });
-    expect(errors).toEqual([]);
-  });
-
 test("controlled-environment panel reports the measured band and matches the API",
   async ({ page, request }, testInfo) => {
     const errors = [];
@@ -203,11 +164,27 @@ test("controlled-environment panel reports the measured band and matches the API
     expect(errors).toEqual([]);
   });
 
-test("the harvest tombstone behaves on a phone viewport", async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== "mobile", "desktop and tablet are covered above");
-  await openHarvest(page, testInfo);
-  await expect(page.getByText("removed in Phase 30 · no forecast is served")).toBeVisible();
-  await expect(page.getByRole("button", { name: /Run harvest/i })).toHaveCount(0);
+test("the removed harvest workflow is absent from the page and the API", async ({ page, request }, testInfo) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+
+  await openHarvestGone(page, testInfo);
+
+  // The workflow catalogue lists only what a user can complete.
+  const catalogue = await (await request.get("/api/workflows")).json();
+  expect(catalogue.workflows.map((item) => item.id)).toEqual(["water-demand", "light-stress"]);
+
+  // And the removed endpoints are gone, not tombstoned.
+  for (const suffix of ["/run", "/capability", "/parity"]) {
+    const response = await request.get(`/api/workflows/harvest-prediction${suffix}`);
+    expect(response.status()).toBe(404);
+  }
+
+  await testInfo.attach("no-harvest-tab", {
+    body: await page.screenshot({ fullPage: true }),
+    contentType: "image/png",
+  });
+  expect(errors).toEqual([]);
 });
 
 /* ------------------------------------------------ light quality & stress (Phase 29) */

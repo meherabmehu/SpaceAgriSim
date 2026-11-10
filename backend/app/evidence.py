@@ -487,6 +487,22 @@ def _methodology_passages(quarantine: list) -> list[Passage]:
           "regression is category 3 from external measured data and is no longer served as a "
           "harvest forecast, because its independent evaluations failed."),
          "docs/SIMULATION_METHODOLOGY.md"),
+        ("method-withdrawn-models",
+         "Methodology: mizuna harvest mass and absolute microbial load are not served",
+         ("Phase 31 withdrew two models from the platform rather than keeping them as cards. "
+          "mizuna-harvest-v1 (NASA OSD-655) predicted mizuna harvest fresh mass per pillow: its "
+          "held-out R2 was -0.333 against a training-mean baseline of -0.138, i.e. worse than "
+          "predicting the mean, on 14 usable samples from a single experiment whose two arms also "
+          "differ in target definition. mizuna-microbial-load-v1 (NASA OSD-780) predicted absolute "
+          "leaf microbial load: leave-one-campaign-out R2 was -0.55 for VEG-04A and -0.58 for "
+          "VEG-04B, worse than the mean on both, because the campaign offset is what fails to "
+          "transfer. Neither has an endpoint, a catalogue row or a dashboard card any more, and "
+          "there is no replacement harvest predictor. The within-campaign relative microbial model "
+          "mizuna-microbial-relative-load-v2 remains served and is the only microbial prediction. "
+          "The fitted ET0 emulator was withdrawn in the same phase: it was trained on derived "
+          "FAO-56 output, was about 19 % worse than Hargreaves-Samani on an unseen site, and only "
+          "the FAO-56 physics is served now."),
+         "docs/PHASE31_REMOVED_MODELS.md"),
         ("method-classification", "Methodology: the six-category scientific classification",
          ("Every prediction surface is classified into one of six categories: 1 NASA-measured "
           "and directly supported; 2 NASA-calibrated with compatible measurements; 3 "

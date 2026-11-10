@@ -63,29 +63,21 @@ def test_dataset_search_detail_preview_and_unknown(scientific_client):
 
 def test_model_registry_requires_actual_verified_artifacts(scientific_client):
     models = scientific_client.get("/api/models").json()["models"]
-    # Phase 6 added mizuna-microbial-load-v1 (NASA OSD-780 plate counts). Phase 7
-    # added mizuna-microbial-relative-load-v2, which supersedes v1's estimand; v1
-    # stays registered and on disk so the Phase 6 claim remains reproducible.
-    # Phase 8 added lettuce-earth-growth-v2, a gradient-boosting successor that
-    # beat the registered random forest on identical folds. v1 stays registered and
-    # on disk so the Phase 7 result remains reproducible.
-    # Phase 9 added two NASA OSD-46 radiation classifiers. The two Phase 9
-    # candidates that failed their pre-specified evaluation (OSD-782 dose,
-    # OSD-411 gravity) are deliberately absent: they were excluded from the
-    # registry rather than tuned until they appeared to work.
-    # CATALOGUE_MODEL_IDS, not MODEL_IDS: Phase 23 added et0-emulator-v1, which is served by its
-    # own runtime (app.et0) and therefore ships no entry in the JSON registry. Both sets have to
-    # agree with what the API serves, and this is the assertion that keeps them honest.
-    assert len(models) == len(research.CATALOGUE_MODEL_IDS)
+    # Phase 31: the served set is exactly the artifacts that met their evidence bar. The two
+    # candidates that failed their pre-specified evaluation (OSD-782 dose, OSD-411 gravity) are
+    # absent because they were never registered, and the three withdrawn artifacts (mizuna harvest
+    # mass, absolute microbial load, ET0 emulator) are absent because they were removed from every
+    # served surface - their files and evaluations remain on disk as documented negative results.
+    assert len(models) == len(research.CATALOGUE_MODEL_IDS) == len(research.MODEL_IDS)
     assert {m["id"] for m in models} == {
-        "mizuna-harvest-v1", "tomato-flight-response-v1",
-        "lettuce-earth-growth-v1", "lettuce-earth-growth-v2",
-        "mizuna-microbial-load-v1", "mizuna-microbial-relative-load-v2",
+        "tomato-flight-response-v1",
+        "lettuce-earth-growth-v1", "lettuce-earth-growth-v2", "lettuce-earth-growth-v3",
+        "mizuna-microbial-relative-load-v2",
         "radiation-quality-osd46-v1", "radiation-exposure-osd46-v1",
-        "lettuce-earth-growth-v3", "et0-emulator-v1",
     }
-    assert "radiation-dose-osd782-v1" not in {m["id"] for m in models}
-    assert "gravity-reorientation-osd411-v1" not in {m["id"] for m in models}
+    for removed in ("radiation-dose-osd782-v1", "gravity-reorientation-osd411-v1",
+                    *research.RETIRED_MODEL_IDS):
+        assert removed not in {m["id"] for m in models}
     assert all(m["artifactExists"] for m in models)
     for model in models:
         assert model["status"] == "trained-exploratory"
@@ -93,42 +85,66 @@ def test_model_registry_requires_actual_verified_artifacts(scientific_client):
         assert model["limitations"]
         assert model["artifactSha256"] and len(model["artifactSha256"]) == 64
         assert model["domain"]
+        # Every served model states provenance structurally, and the counts are derived from it.
+        assert model["provenance"]["category"] in {"nasa-measured", "external-measured"}
+        assert model["provenance"]["study"] and model["provenance"]["repository"]
+
+    counts = scientific_client.get("/api/models").json()["counts"]
+    assert counts["models"] == len(models)
+    assert counts["nasaMeasured"] == sum(
+        1 for m in models if m["provenance"]["category"] == "nasa-measured")
+    assert counts["externalMeasured"] == sum(
+        1 for m in models if m["provenance"]["category"] == "external-measured")
+    assert counts["nasaMeasured"] + counts["externalMeasured"] == counts["models"]
+    assert "retiredRegistered" not in counts or counts.get("retiredRegistered", 0) == 0
+
     v2 = next(m for m in models if m["id"] == "mizuna-microbial-relative-load-v2")
     assert v2["supersedes"] == "mizuna-microbial-load-v1 (kept, not overwritten)"
-    # The re-scoped estimand is what makes held-out-study transfer positive; the
-    # artifact must carry both the old and the new held-out numbers.
+    # The re-scoped estimand is what makes held-out-study transfer positive; the artifact must
+    # carry both the old and the new held-out numbers.
     assert v2["estimandChange"]["v1HeldOutR2"]["VEG04B"] < 0
     assert all(v > 0 for v in v2["transferSummary"]["v2HeldOutR2"].values())
     # Absolute-scale predictions must not be offered without a campaign reference.
     assert v2["absoluteScaleProtocol"]["required"]
-    # Recalibrating the interval did not promote the model: it is still trained on
-    # two campaigns and still experimental. What changed is that the statement about
-    # the interval is now measured rather than disclaimed.
     assert v2["evidenceStatus"] == "experimental"
     assert v2["interval"]["empiricallyCalibrated"] is True
     assert v2["interval"]["empiricalCoverage"] >= v2["interval"]["nominalCoverage"] - 0.02
     assert v2["uncertainty"]["exchangeabilityUnit"].startswith("biological group")
     assert v2["uncertainty"]["caveat"].strip()
 
-    regression = next(m for m in models if m["id"] == "mizuna-harvest-v1")
-    assert regression["metrics"]["R2"] < 0  # Honest failed-to-beat-baseline evaluation.
-    assert regression["predictionStatus"] == "baseline-only"
-    assert regression["baselineComparison"]["outperformsBaselineMAE"] is False
+
+def test_withdrawn_models_are_gone_from_every_served_surface(scientific_client):
+    """Phase 31: removal means absent, not "present with a warning attached"."""
+    registry = scientific_client.get("/api/models").json()
+    served = {m["id"] for m in registry["models"]}
+    from app import workflow
+    catalogue = {row["modelId"] for row in workflow.model_catalogue()["models"]}
+    for model_id in research.RETIRED_MODEL_IDS:
+        assert model_id not in served
+        assert model_id not in catalogue
+        # No prediction route survives, and the request schema went with it.
+        assert scientific_client.post(f"/api/predict/{model_id}", json={}).status_code == 404
+        assert f"/api/predict/{model_id}" not in {
+            path for path in scientific_client.get("/openapi.json").json()["paths"]}
 
 
-def test_mizuna_prediction_units_interval_and_domain(scientific_client):
-    inputs = {"crop": "mizuna", "waterSuppliedL": 1.5, "establishedPlants": 2, "environment": "flight", "spectrum": "red"}
-    result = scientific_client.post("/api/predict/mizuna-harvest-v1", json=inputs)
-    assert result.status_code == 200
-    result = result.json()
-    assert result["unit"] == "g fresh mass/pillow"
-    assert result["interval"]["low"] <= result["prediction"] <= result["interval"]["high"]
-    assert "uncalibrated" in result["interval"]["kind"]
-    assert result["outOfDistribution"] is False
-    assert scientific_client.post("/api/predict/mizuna-harvest-v1", json=inputs | {"waterSuppliedL": 8}).json()["outOfDistribution"] is True
-    assert scientific_client.post("/api/predict/mizuna-harvest-v1", json=inputs | {"crop": "lettuce"}).status_code == 422
-    assert scientific_client.post("/api/predict/mizuna-harvest-v1", json=inputs | {"waterSuppliedL": -1}).status_code == 422
-    assert scientific_client.post("/api/predict/mizuna-harvest-v1", json=inputs | {"madeUpFeature": 1}).status_code == 422
+def test_withdrawn_artifacts_are_still_on_disk_and_still_checksummed():
+    """A withdrawal must not become a deletion: the negative result has to stay reproducible."""
+    import hashlib
+
+    registry = json.loads((research.ROOT / "ml" / "artifacts" / "registry.json").read_text())
+    by_id = {row["id"]: row for row in registry["models"]}
+    for model_id in research.RETIRED_MODEL_IDS:
+        path = research.ROOT / "ml" / "artifacts" / f"{model_id}.json"
+        assert path.is_file(), model_id
+        # Two of the three are registered artifacts with a recorded digest; the ET0 emulator
+        # shipped a card only (its bundle is a joblib), so it has no registry row to compare with.
+        if model_id in by_id:
+            assert hashlib.sha256(path.read_bytes()).hexdigest() == by_id[model_id]["sha256"], model_id
+        else:
+            assert model_id == "et0-emulator-v1"
+            assert (research.ROOT / "ml" / "artifacts" / f"{model_id}.joblib").is_file()
+        assert research.RETIRED_MODEL_IDS[model_id].strip()
 
 
 def test_molecular_prediction_schema_is_not_environmental_sliders(scientific_client):
@@ -145,7 +161,7 @@ def test_molecular_prediction_schema_is_not_environmental_sliders(scientific_cli
 
 
 def test_model_checksum_corruption_rejected(tmp_path, monkeypatch):
-    model_id = "mizuna-harvest-v1"
+    model_id = "lettuce-earth-growth-v2"
     original = research.ARTIFACTS
     (tmp_path / "registry.json").write_bytes((original / "registry.json").read_bytes())
     (tmp_path / f"{model_id}.json").write_text('{"tampered": true}')
@@ -191,90 +207,42 @@ def test_lettuce_external_model_scope_and_experiment_splits(scientific_client):
 # ---------------------------------------------------------------------------
 # Phase 6: NASA OSD-780 microbial load model and evidence surface
 # ---------------------------------------------------------------------------
-def test_microbial_model_is_registered_with_honest_evidence(scientific_client):
-    models = {m["id"]: m for m in scientific_client.get("/api/models").json()["models"]}
-    model = models["mizuna-microbial-load-v1"]
-    assert model["sourceStudy"] == "OSD-780"
-    assert model["samples"] == 123
-    assert model["groups"] == 35
-    assert model["target"].startswith("log10(1 + CFU per gram")
-    # It beats the baseline in pooled data but does not transfer, so it must not
-    # be advertised as validated.
-    assert model["evidenceStatus"] == "experimental"
-    assert model["evidenceBasis"]["beatsBaselineWithinPooledData"] is True
-    assert model["evidenceBasis"]["transfersToHeldOutExperiment"] is False
-    # The interval is now group-level conformal, and the artifact must carry both the
-    # measured coverage and the campaign caveat rather than a bare radius.
-    assert model["interval"]["empiricallyCalibrated"] is True
-    assert model["interval"]["empiricalCoverage"] >= model["interval"]["nominalCoverage"] - 0.02
-    assert "group-level cross-conformal" in model["interval"]["kind"]
-    assert model["interval"]["caveat"].strip()
-    assert "uncalibrated" not in model["interval"]["kind"].lower()
-    # Leave-one-experiment-out must be negative for both campaigns.
-    for held_out in ("VEG04A", "VEG04B"):
-        assert model["leaveOneExperimentOut"][held_out]["R2"] < 0
-    # The biomass category error must be forbidden in the prose.
-    assert any("not harvest biomass" in note.lower() for note in model["limitations"])
+def test_absolute_microbial_load_model_is_not_served_at_all(scientific_client):
+    """Phase 31 removed the surface; the evidence that it failed has to survive the removal.
 
-
-def test_absolute_microbial_prediction_is_retired(scientific_client):
-    """Phase 8 retires the absolute-load prediction; the evidence must survive.
-
-    The Phase 6 endpoint answered 200 with a number that its own leave-one-
-    experiment-out evaluation showed to be worse than the training mean on both
-    held-out campaigns. Phase 8 policy is that such a surface must not answer with
-    a prediction, so it now returns 410 Gone and states why. The artifact itself
-    stays registered so the Phase 6/7 result remains reproducible.
+    Phase 8 answered 410 with the leave-one-campaign-out numbers. A 410 is still a public promise
+    that the surface exists and is worth asking about, and the dashboard still counted it, so
+    Phase 31 deleted the route instead. What is asserted here is that the withdrawal is total on
+    the served side and that the failure record is still on disk and still readable.
     """
     base = {
         "experiment": "VEG04B", "environment": "flight", "spectrum": "red",
         "sanitised": True, "freshWeightG": 5.4, "harvestIndex": 1,
     }
-    result = scientific_client.post("/api/predict/mizuna-microbial-load-v1", json=base)
-    assert result.status_code == 410
-    detail = result.json()["detail"]
-    assert detail["error"] == "retired-prediction"
-    assert detail["modelId"] == "mizuna-microbial-load-v1"
-    assert detail["evidence"]["transfersToHeldOutExperiment"] is False
-    # Both held-out campaigns must still be reported as failing to transfer.
-    r2 = detail["evidence"]["leaveOneExperimentOutR2"]
-    assert set(r2) == {"VEG04A", "VEG04B"}
-    assert all(value < 0 for value in r2.values())
-    assert detail["replacement"] == "/api/predict/mizuna-microbial-relative-load-v2"
-    # No predicted number may be present anywhere in the retired response.
-    assert "prediction" not in result.json()["detail"]
-
-    # The artifact is retained, not deleted.
-    models = {m["id"]: m for m in scientific_client.get("/api/models").json()["models"]}
-    assert models["mizuna-microbial-load-v1"]["artifactExists"] is True
-
-
-def test_retired_endpoint_is_documented_as_deprecated(scientific_client):
-    """A caller reading OpenAPI must be told the endpoint is withdrawn."""
+    assert scientific_client.post(
+        "/api/predict/mizuna-microbial-load-v1", json=base).status_code == 404
     schema = scientific_client.get("/openapi.json").json()
-    operation = schema["paths"]["/api/predict/mizuna-microbial-load-v1"]["post"]
-    assert operation["deprecated"] is True
-    assert "410" in operation["responses"]
+    assert "/api/predict/mizuna-microbial-load-v1" not in schema["paths"]
+    models = {m["id"]: m for m in scientific_client.get("/api/models").json()["models"]}
+    assert "mizuna-microbial-load-v1" not in models
+
+    # The artifact that produced the negative result is retained and unchanged.
+    artifact = json.loads((research.ROOT / "ml" / "artifacts" /
+                           "mizuna-microbial-load-v1.json").read_text())
+    for held_out in ("VEG04A", "VEG04B"):
+        assert artifact["leaveOneExperimentOut"][held_out]["R2"] < 0
+    assert artifact["evidenceBasis"]["transfersToHeldOutExperiment"] is False
+    assert any("not harvest biomass" in note.lower() for note in artifact["limitations"])
 
 
-def test_microbial_prediction_rejects_invalid_input(scientific_client):
-    base = {
-        "experiment": "VEG04A", "environment": "flight", "spectrum": "red",
-        "sanitised": False, "freshWeightG": 5.0, "harvestIndex": 1,
-    }
-    # Unknown campaign, impossible harvest index, negative mass, extra fields.
-    assert scientific_client.post(
-        "/api/predict/mizuna-microbial-load-v1",
-        json=base | {"experiment": "VEG04C"}).status_code == 422
-    assert scientific_client.post(
-        "/api/predict/mizuna-microbial-load-v1",
-        json=base | {"harvestIndex": 0}).status_code == 422
-    assert scientific_client.post(
-        "/api/predict/mizuna-microbial-load-v1",
-        json=base | {"freshWeightG": -1}).status_code == 422
-    assert scientific_client.post(
-        "/api/predict/mizuna-microbial-load-v1",
-        json=base | {"gravity": 0.38}).status_code == 422
+def test_the_relative_model_still_carries_the_reason_its_predecessor_was_withdrawn():
+    """The successor must say what it replaced and why, or the removal looks unexplained."""
+    reason = research.RETIRED_MODEL_IDS["mizuna-microbial-load-v1"]
+    assert "VEG-04A" in reason or "VEG04A" in reason
+    assert "-0.55" in reason and "-0.58" in reason
+    artifact = json.loads((research.ROOT / "ml" / "artifacts" /
+                           "mizuna-microbial-relative-load-v2.json").read_text())
+    assert artifact["supersedes"].startswith("mizuna-microbial-load-v1")
 
 
 def test_relative_microbial_model_flags_out_of_domain(scientific_client):
@@ -319,7 +287,10 @@ def test_science_evidence_separates_measured_from_assumed(scientific_client):
         assert term in measured and term not in blocked
     for term in ("radiation", "gravity", "o2 evolution"):
         assert term in blocked and term not in measured
-    assert payload["modelEvidenceStatus"]["mizuna-harvest-v1"] == "baseline-only"
+    # Phase 31: a withdrawn model is not a status row either. The evidence surface reports only
+    # what is served, and the withdrawal reasons live in research.RETIRED_MODEL_IDS + docs.
+    for withdrawn in research.RETIRED_MODEL_IDS:
+        assert withdrawn not in payload["modelEvidenceStatus"]
 
 
 def test_scientific_summary_never_claims_validation(scientific_client):
@@ -330,3 +301,39 @@ def test_scientific_summary_never_claims_validation(scientific_client):
     assert payload["platformMaturity"] == "research-and-education"
     assert len(payload["models"]) == len(research.CATALOGUE_MODEL_IDS)
     assert payload["calibration"]["invariantsAllPassed"] is True
+
+
+def test_every_served_model_states_a_recorded_source_and_the_counts_add_up():
+    """Dashboard category counts must be reproducible from the rows they summarise.
+
+    Phase 31 removed the free-text `sourceType` scrape: two served models had no `sourceType` in
+    their artifact and were displayed as "source not recorded" while the counts still claimed
+    every model was attributed. Each row now carries the recorded provenance label, and the
+    counts are recomputed here from the rows rather than trusted.
+    """
+    registry = research.model_registry()
+    rows = registry["models"]
+    nasa = external = 0
+    for row in rows:
+        assert row["sourceType"], row["id"]
+        assert row["provenance"]["category"] in {"nasa-measured", "external-measured"}
+        assert row["provenance"]["repository"]
+        assert row["sourceType"] == row["provenance"]["label"]
+        if row["provenance"]["category"] == "nasa-measured":
+            nasa += 1
+        else:
+            external += 1
+    counts = registry["counts"]
+    assert counts["models"] == len(rows) == nasa + external
+    assert counts["nasaMeasured"] == nasa
+    assert counts["externalMeasured"] == external
+    assert "not recorded" not in json.dumps(rows).lower().replace("not recorded for this model", "")
+
+
+def test_withdrawn_models_are_not_in_the_served_catalogue():
+    """A withdrawn model is absent, not retired-in-place: no row, no route, no label."""
+    for model_id in ("mizuna-microbial-load-v1", "mizuna-harvest-v1"):
+        assert model_id not in research.CATALOGUE_MODEL_IDS
+        assert model_id not in research.PROVENANCE
+        with pytest.raises((KeyError, FileNotFoundError, ValueError)):
+            research.load_model(model_id)

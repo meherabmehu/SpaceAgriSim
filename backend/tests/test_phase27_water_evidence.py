@@ -301,3 +301,25 @@ def test_coverage_markdown_is_not_stale():
     result = subprocess.run([sys.executable, "ml/research/build_feature_coverage.py", "--check"],
                             cwd=REPO_ROOT, capture_output=True, text=True)
     assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_identification_block_states_a_rank_claim_and_no_correction(client):
+    """The comparison's scope, asserted so a later phase cannot upgrade it into a validation.
+
+    Phase 31 had to resolve the dashboard's "Shape supported - level not identified" line. The
+    evidence supports a rank claim and nothing about level, so the contract is pinned here: the
+    identification block must say the level is unidentified, must offer no correction, and must
+    name the missing measurement rather than an assumption that was silently adopted.
+    """
+    response = client.post("/api/water-use-evidence/compare", json={"crop": "lettuce", "lightScale": 1.0})
+    assert response.status_code == 200
+    payload = response.json()
+    identification = payload["identification"]
+    assert identification["levelIdentified"] is False
+    assert identification["shapeSupported"] is True
+    assert payload["isValidation"] is False
+    assert "no correction is applied" in identification["claim"]
+    assert identification["identifiableWith"].strip() == identification["identifiableWith"]
+    assert "0.247" in identification["denominatorSpread"] and "2.7" in identification["denominatorSpread"]
+    # No field of the comparison may carry a fitted scale factor that would move the level.
+    assert "correction" not in payload and "scaleFactor" not in payload["totals"]

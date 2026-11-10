@@ -13,7 +13,7 @@ import { useResource, RequestState, Limitations } from "./moduleSupport.jsx";
  * panel puts the platform's own demand curve beside that measurement.
  *
  * The panel is deliberately built to make the honest answer the visible one. It shows a verdict of
- * "shape agrees, level not identified" rather than a green tick, it draws the measured between-pot
+ * "rank agreement only" rather than a green tick, it draws the measured between-pot
  * spread as a band so the reader can see how wide the measurement itself is, and it lists the
  * geometry the study does not publish. A comparison that showed only one denominator would be
  * choosing the answer on the user's behalf.
@@ -22,7 +22,14 @@ import { useResource, RequestState, Limitations } from "./moduleSupport.jsx";
  */
 
 const VERDICT_STYLES = {
-  "shape-only": { tone: "warn", icon: TriangleAlert, label: "Shape supported · level not identified" },
+  "shape-only": {
+    tone: "warn",
+    icon: TriangleAlert,
+    // Phase 31: stated as the scope of the comparison rather than as a shortfall. The panel makes
+    // one claim - rank agreement - and says so in the label instead of asking the reader to
+    // resolve a caution.
+    label: "Rank agreement only · absolute level not identifiable from this trial",
+  },
   "level-mismatch": { tone: "warn", icon: TriangleAlert, label: "Not supported by this benchmark" },
   "not-applicable": { tone: "muted", icon: Scale, label: "No measurement for this crop" },
 };
@@ -130,6 +137,18 @@ export function WaterEvidencePanel({ params }) {
             <div>
               <strong>{verdict?.label}</strong>
               <p>{data.verdictMeaning}</p>
+              {data.identification && (
+                <>
+                  <p className="fine">
+                    {data.identification.claim} {data.identification.denominatorSpread}{" "}
+                    {data.identification.whyNotAssumed}
+                  </p>
+                  <p className="fine">
+                    <strong>Would be identifiable with:</strong>{" "}
+                    {data.identification.identifiableWith}
+                  </p>
+                </>
+              )}
             </div>
           </div>
 
@@ -152,7 +171,7 @@ export function WaterEvidencePanel({ params }) {
             <strong>{number(data.totals.simulatedMlPerPot, 0)} mL/pot</strong>
           </div>
           <div className="stat-pair">
-            <span>Platform ÷ measured</span>
+            <span>Platform ÷ measured (assumed pot area — not a bias estimate)</span>
             <strong>{(data.totals.simulatedOverMeasured ?? 0).toFixed(3)}×</strong>
           </div>
           <div className="stat-pair">
@@ -164,8 +183,8 @@ export function WaterEvidencePanel({ params }) {
             <strong>±{(data.uncertainty.relativeSpread * 100).toFixed(1)} %</strong>
           </div>
           <div className="stat-pair">
-            <span>Level inside that spread?</span>
-            <strong>{data.uncertainty.withinMeasuredSpread ? "yes" : "no"}</strong>
+            <span>Level identified?</span>
+            <strong>{data.identification?.levelIdentified ? "yes" : "no"}</strong>
           </div>
 
           <label className="field water-evidence-control">

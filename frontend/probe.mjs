@@ -1,0 +1,11 @@
+import { chromium } from '@playwright/test';
+const b = await chromium.launch({ args: ['--no-sandbox'] });
+const p = await b.newPage();
+p.on('console', m => console.log('console:', m.type(), m.text().slice(0,200)));
+p.on('requestfailed', r => console.log('failed:', r.url(), r.failure()?.errorText));
+await p.goto('http://127.0.0.1:5173/#dashboard');
+await p.waitForTimeout(6000);
+console.log('connection text:', await p.locator('.connection').innerText().catch(e => 'ERR '+e.message));
+console.log('banners:', await p.locator('.error-banner').allInnerTexts());
+console.log('notes:', await p.locator('.fallback-note').allInnerTexts());
+await b.close();

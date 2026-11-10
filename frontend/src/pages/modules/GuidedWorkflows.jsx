@@ -8,7 +8,6 @@ import {
   Play,
   Plus,
   ShieldCheck,
-  Sprout,
   Trash2,
 } from "lucide-react";
 import { Card, number } from "../missionUI.jsx";
@@ -23,8 +22,8 @@ import { Limitations, JsonDetails, useResource, RequestState } from "./moduleSup
  * The platform already had the pieces: a reference-ET0 implementation, a validated water-use
  * benchmark, a lettuce model with a calibrated interval, and a generic "run one model" endpoint.
  * What it did not have was a journey. A user who wanted to know how much water a crop needs had to
- * know which endpoint to call and which equations existed; a user who wanted a harvest estimate had
- * to know a model id and its exact feature schema.
+ * know which endpoint to call and which equations existed; a user who wanted a water balance had to
+ * know a model id and its exact feature schema.
  *
  * Each panel here does the whole job: labelled inputs with units, ranges and a reason for each
  * control, a real backend run, several scenarios compared side by side, the measured evidence laid
@@ -33,14 +32,13 @@ import { Limitations, JsonDetails, useResource, RequestState } from "./moduleSup
  *
  * What this page deliberately does not do
  * ---------------------------------------
- * It does not draw a passing verdict the science does not support. The harvest panel shows a model
- * whose independent holdout failed a pre-registered 30 % criterion, and the panel says so above the
- * result rather than in a footnote.
+ * It does not draw a passing verdict the science does not support, and it does not keep a removed
+ * capability in the navigation: Phase 31 deleted the harvest tab rather than leave a page whose only
+ * content was the reason it no longer runs.
  */
 
 const TABS = [
   { id: "water", label: "Water demand & irrigation", icon: Droplets },
-  { id: "harvest", label: "Harvest evidence (removed)", icon: Sprout },
   { id: "light", label: "Light quality & stress", icon: FlaskConical },
   { id: "cea", label: "Controlled environment (wheat)", icon: Leaf },
 ];
@@ -594,152 +592,6 @@ export function WaterDemandWorkflow() {
             <p className="fine">{result.evidence.distinction}</p>
             <Limitations items={result.limitations} />
             <JsonDetails data={result} />
-          </Card>
-        </>
-      ) : null}
-    </div>
-  );
-}
-
-/* ------------------------------------------------------- harvest: the removed capability */
-
-/**
- * This tab used to run a lettuce harvest forecast. Phase 30 evaluated that model the only way that
- * counts - leave-one-study-out over published studies it had never seen - and it missed the 30 %
- * criterion by more than a factor of ten, with the mean baseline selected out of fold. The forecast
- * was removed rather than kept behind a warning, so this panel has no run control at all: it shows
- * the decision, every evaluation that failed, and the measured-versus-predicted record that
- * survives, because a failed model is still evidence about the data.
- */
-export function HarvestWorkflow() {
-  const capability = useResource("/workflows/harvest-prediction/capability");
-  const parity = useResource("/workflows/harvest-prediction/parity");
-
-  const evaluation = capability.data?.evaluations || [];
-  const points = parity.data?.points || [];
-
-  return (
-    <div className="workflow-panel" aria-label="Harvest evidence panel">
-      <RequestState state={capability} />
-      {capability.data ? (
-        <>
-          <Card
-            title="1 · What this workflow was, and why it is gone"
-            label="DECISION"
-            action={<Pill tone="warn">removed in Phase 30 · no forecast is served</Pill>}
-          >
-            <p className="fine">
-              The harvest forecast did not meet the project&apos;s independent-error criterion and has
-              been withdrawn, not hidden behind a warning. Nothing on this page predicts a harvest
-              mass: there is no run button, and the endpoint that used to produce one answers with a
-              formal removal notice instead of a number.
-            </p>
-            <dl className="kv-list">
-              <div>
-                <dt>Criterion</dt>
-                <dd>{number(capability.data.acceptanceCriterionPct, 0)} % MAPE on independent data, unchanged</dd>
-              </div>
-              <div>
-                <dt>Operational forecast</dt>
-                <dd>{capability.data.operationalForecast ? "yes" : "no"}</dd>
-              </div>
-              <div>
-                <dt>Reason</dt>
-                <dd>{capability.data.reason}</dd>
-              </div>
-            </dl>
-          </Card>
-
-          <Card
-            title="2 · Every evaluation, including the ones that failed"
-            label="VALIDATION RECORD"
-            action={<Pill tone={evaluation.some((item) => item.passed) ? "warn" : "ok"}>
-              {evaluation.filter((item) => item.countsAsValidation).length} independent · none passed
-            </Pill>}
-          >
-            <div className="data-table-wrap">
-              <table className="data-table">
-                <caption className="sr-only">Independent and development evaluations of the withdrawn model</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">Evaluation</th>
-                    <th scope="col">Protocol</th>
-                    <th scope="col">n</th>
-                    <th scope="col">MAPE</th>
-                    <th scope="col">Counts as validation</th>
-                    <th scope="col">Passed</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {evaluation.map((item) => (
-                    <tr key={item.id}>
-                      <th scope="row">{item.id}</th>
-                      <td>{item.protocol}</td>
-                      <td>{item.metrics.n ?? "—"}</td>
-                      <td>{item.metrics.MAPE === null || item.metrics.MAPE === undefined
-                        ? "—" : `${number(item.metrics.MAPE, 1)} %`}</td>
-                      <td>{item.countsAsValidation ? "yes" : "no — development only"}</td>
-                      <td>
-                        {item.passed === null || item.passed === undefined
-                          ? <span className="pill">not scored</span>
-                          : item.passed
-                            ? <span className="pill pill-ok">passed</span>
-                            : <span className="pill pill-warn">failed</span>}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <p className="fine">
-              A development figure is not a validation figure. The rows marked &quot;not scored&quot;
-              informed model selection, so they cannot be quoted as evidence that the model works.
-            </p>
-            <Limitations items={capability.data.limitations || []} />
-            <JsonDetails data={capability.data} />
-          </Card>
-
-          <Card
-            title="3 · Measured versus what the model said"
-            label="PARITY"
-            action={<Pill tone="warn">{points.length} measured points</Pill>}
-          >
-            <RequestState state={parity} />
-            {points.length ? (
-              <>
-                <div className="data-table-wrap">
-                  <table className="data-table">
-                    <caption className="sr-only">Measured harvest mass against the withdrawn model&apos;s output</caption>
-                    <thead>
-                      <tr>
-                        <th scope="col">Observation</th>
-                        <th scope="col">Set</th>
-                        <th scope="col">Measured (g/plant)</th>
-                        <th scope="col">Model said (g/plant)</th>
-                        <th scope="col">Ratio</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {points.map((point) => (
-                        <tr key={point.id}>
-                          <th scope="row">{point.id}</th>
-                          <td>
-                            {point.set}
-                            {point.countsAsValidation ? null : <span className="muted"> · development</span>}
-                          </td>
-                          <td>{number(point.measuredG, 1)}</td>
-                          <td>{number(point.predictedG, 1)}</td>
-                          <td>{number(point.ratio, 2)}×</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                <p className="fine">{parity.data.caveat}</p>
-                <Limitations items={parity.data.limitations || []} />
-                <JsonDetails data={parity.data} />
-              </>
-            ) : null}
           </Card>
         </>
       ) : null}
@@ -1312,19 +1164,21 @@ export function GuidedWorkflows() {
           <div className="badge-row">
             <Pill tone="ok"><CheckCircle2 size={12} /> 2 complete</Pill>
             <Pill tone="ok"><CheckCircle2 size={12} /> 1 measured panel</Pill>
-            <Pill tone="warn"><ShieldCheck size={12} /> 1 removed · 1 documented gap</Pill>
+            <Pill tone="warn"><ShieldCheck size={12} /> 1 documented gap</Pill>
           </div>
         }
       >
         <p className="fine">
           Two workflows a user can complete without touching the API — a reference water balance and
-          a measured light-quality comparison — plus a measured controlled-environment panel and one
-          honest tombstone. Phase 30 removed harvest forecasting: the model missed the unchanged 30 %
-          independent-error criterion by more than a factor of ten on published studies it had never
-          seen, so the tab now shows the evidence and the decision rather than a prediction. The
-          response surface for PPFD, CO₂ and temperature is still a documented gap: the wheat series
-          was acquired and fitted, the fit failed its sealed holdout by an order of magnitude, and no
-          surface is served.
+          a measured light-quality comparison — plus a measured controlled-environment panel. Phase 31
+          removed the harvest tab entirely: it had no run path left (the lettuce forecast missed the
+          unchanged 30 % independent-error criterion by more than a factor of ten on published studies
+          it had never seen), and a tab that can only say &quot;this was removed&quot; is still a
+          retired feature in the navigation. The failed evaluations stay committed under
+          ml/evaluation and are summarised in docs/PHASE31_REMOVED_MODELS.md. The response surface for
+          PPFD, CO₂ and temperature is still a documented gap: the wheat series was acquired and
+          fitted, the fit failed its sealed holdout by an order of magnitude, and no surface is
+          served.
         </p>
         <div className="scenario-tabs workflow-tabs" role="tablist" aria-label="Workflow">
           {TABS.map(({ id, label, icon: Icon }) => (
@@ -1343,7 +1197,6 @@ export function GuidedWorkflows() {
       </Card>
 
       {tab === "water" ? <WaterDemandWorkflow /> : null}
-      {tab === "harvest" ? <HarvestWorkflow /> : null}
       {tab === "light" ? <LightStressWorkflow /> : null}
       {tab === "cea" ? <CeaEvidenceWorkflow /> : null}
     </div>

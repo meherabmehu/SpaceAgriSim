@@ -30,6 +30,9 @@ def _normalise(entries: list[dict]) -> list[dict]:
     for entry in entries:
         entry.setdefault("evidence", None)
         entry.setdefault("sources", [])
+        # `/api/config` serialises through a response model and `/api/assumptions` does not, so a
+        # key that only one path emits makes the two answers disagree. Every component states it.
+        entry.setdefault("validation", None)
     return entries
 
 
@@ -42,7 +45,7 @@ def reference_et0_component() -> dict:
     """
     from app import et0
 
-    status = et0.artifact_status()
+    status = et0.physics_status()
     return {
         "key": "reference-et0",
         "title": "Reference-flux water demand (optional)",
@@ -65,13 +68,16 @@ def reference_et0_component() -> dict:
             "NASA POWER daily agroclimatology, community AG (reanalysis, citation requested)",
         ],
         "evidence": (
-            "ET0 is a computed standard for a hypothetical reference surface. It is not a "
-            "measurement of the modelled crop's water use, and the emulator that can speed it up "
-            "lost to Hargreaves-Samani on an unseen site in this project's own study"
-            if status.get("available") else
-            "ET0 is a computed standard for a hypothetical reference surface. The learned "
-            "emulator artifact is not available in this deployment, so only the physics is served."
+            "ET0 is a computed standard for a hypothetical reference surface, not a measurement "
+            "of the modelled crop's water use. It is implemented as FAO-56 Penman-Monteith, "
+            "checked against the manual's worked examples, with Hargreaves-Samani when radiation "
+            "or wind is absent. The fitted emulator that used to be offered beside it was removed "
+            "in Phase 31: it was trained on derived ET0 and lost to Hargreaves on an unseen site."
         ),
+        "validation": {
+            "workedExamplesWithinTolerance": status.get("allExamplesWithinTolerance"),
+            "measuredEt0Benchmark": status.get("measuredEt0Validation"),
+        },
     }
 
 

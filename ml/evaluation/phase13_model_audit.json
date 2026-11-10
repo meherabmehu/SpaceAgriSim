@@ -66,6 +66,11 @@
    "passed": true
   },
   {
+   "check": "served-model-not-category-6:lettuce-earth-growth-v1",
+   "detail": "a served model is classified as an unsupported prediction",
+   "passed": true
+  },
+  {
    "check": "explanation-flag:lettuce-earth-growth-v1",
    "detail": "flag=False file=lettuce-earth-growth-v1-explanation.json exists=False",
    "passed": true
@@ -116,23 +121,28 @@
    "passed": true
   },
   {
-   "check": "classification:mizuna-harvest-v1",
-   "detail": "no science classification entry",
+   "check": "retained-not-served:mizuna-harvest-v1",
+   "detail": "withdrawn model still has a workflow catalogue row",
    "passed": true
   },
   {
-   "check": "catalogue:mizuna-harvest-v1",
-   "detail": "registered model missing from the workflow catalogue",
+   "check": "retained-not-classified:mizuna-harvest-v1",
+   "detail": "withdrawn model still has a science classification entry",
    "passed": true
   },
   {
-   "check": "served-not-retired:mizuna-harvest-v1",
-   "detail": "category 3 model reports runStatus=runnable",
+   "check": "retained-not-served-by-api:mizuna-harvest-v1",
+   "detail": "withdrawn model still appears in GET /api/models",
+   "passed": true
+  },
+  {
+   "check": "retained-not-routed:mizuna-harvest-v1",
+   "detail": "/api/predict/mizuna-harvest-v1 is still mounted",
    "passed": true
   },
   {
    "check": "explanation-flag:mizuna-harvest-v1",
-   "detail": "flag=False file=mizuna-harvest-v1-explanation.json exists=False",
+   "detail": "flag=None file=mizuna-harvest-v1-explanation.json exists=False",
    "passed": true
   },
   {
@@ -186,23 +196,28 @@
    "passed": true
   },
   {
-   "check": "classification:mizuna-microbial-load-v1",
-   "detail": "no science classification entry",
+   "check": "retained-not-served:mizuna-microbial-load-v1",
+   "detail": "withdrawn model still has a workflow catalogue row",
    "passed": true
   },
   {
-   "check": "catalogue:mizuna-microbial-load-v1",
-   "detail": "registered model missing from the workflow catalogue",
+   "check": "retained-not-classified:mizuna-microbial-load-v1",
+   "detail": "withdrawn model still has a science classification entry",
    "passed": true
   },
   {
-   "check": "retired-not-runnable:mizuna-microbial-load-v1",
-   "detail": "category 6 model reports runStatus=retired",
+   "check": "retained-not-served-by-api:mizuna-microbial-load-v1",
+   "detail": "withdrawn model still appears in GET /api/models",
+   "passed": true
+  },
+  {
+   "check": "retained-not-routed:mizuna-microbial-load-v1",
+   "detail": "/api/predict/mizuna-microbial-load-v1 is still mounted",
    "passed": true
   },
   {
    "check": "explanation-flag:mizuna-microbial-load-v1",
-   "detail": "flag=False file=mizuna-microbial-load-v1-explanation.json exists=False",
+   "detail": "flag=None file=mizuna-microbial-load-v1-explanation.json exists=False",
    "passed": true
   },
   {
@@ -258,6 +273,11 @@
   {
    "check": "served-not-retired:tomato-flight-response-v1",
    "detail": "category 3 model reports runStatus=runnable",
+   "passed": true
+  },
+  {
+   "check": "served-model-not-category-6:tomato-flight-response-v1",
+   "detail": "a served model is classified as an unsupported prediction",
    "passed": true
   },
   {
@@ -323,6 +343,11 @@
   {
    "check": "served-not-retired:mizuna-microbial-relative-load-v2",
    "detail": "category 3 model reports runStatus=runnable",
+   "passed": true
+  },
+  {
+   "check": "served-model-not-category-6:mizuna-microbial-relative-load-v2",
+   "detail": "a served model is classified as an unsupported prediction",
    "passed": true
   },
   {
@@ -396,6 +421,11 @@
    "passed": true
   },
   {
+   "check": "served-model-not-category-6:lettuce-earth-growth-v2",
+   "detail": "a served model is classified as an unsupported prediction",
+   "passed": true
+  },
+  {
    "check": "explanation-flag:lettuce-earth-growth-v2",
    "detail": "flag=False file=lettuce-earth-growth-v2-explanation.json exists=False",
    "passed": true
@@ -453,6 +483,11 @@
   {
    "check": "served-not-retired:radiation-quality-osd46-v1",
    "detail": "category 3 model reports runStatus=runnable",
+   "passed": true
+  },
+  {
+   "check": "served-model-not-category-6:radiation-quality-osd46-v1",
+   "detail": "a served model is classified as an unsupported prediction",
    "passed": true
   },
   {
@@ -516,6 +551,11 @@
    "passed": true
   },
   {
+   "check": "served-model-not-category-6:radiation-exposure-osd46-v1",
+   "detail": "a served model is classified as an unsupported prediction",
+   "passed": true
+  },
+  {
    "check": "explanation-flag:radiation-exposure-osd46-v1",
    "detail": "flag=True file=radiation-exposure-osd46-v1-explanation.json exists=True",
    "passed": true
@@ -576,6 +616,11 @@
    "passed": true
   },
   {
+   "check": "served-model-not-category-6:lettuce-earth-growth-v3",
+   "detail": "a served model is classified as an unsupported prediction",
+   "passed": true
+  },
+  {
    "check": "explanation-flag:lettuce-earth-growth-v3",
    "detail": "flag=False file=lettuce-earth-growth-v3-explanation.json exists=False",
    "passed": true
@@ -586,78 +631,23 @@
    "passed": true
   },
   {
-   "check": "external-card-exists:et0-emulator-v1",
-   "detail": "ml/artifacts/et0-emulator-v1.json",
+   "check": "calculation-catalogued:reference-et0",
+   "detail": "calculations=['reference-et0']",
    "passed": true
   },
   {
-   "check": "external-run-status:et0-emulator-v1",
-   "detail": "catalogue runStatus=external-service",
+   "check": "calculation-examples-pass:reference-et0",
+   "detail": "FAO-56 worked examples did not all pass",
    "passed": true
   },
   {
-   "check": "external-endpoint-named:et0-emulator-v1",
-   "detail": "/api/reference-et0/estimate",
+   "check": "calculation-not-a-model:reference-et0",
+   "detail": "a calculation must not appear as a model",
    "passed": true
   },
   {
-   "check": "external-endpoint-mounted:et0-emulator-v1",
-   "detail": "/api/reference-et0/estimate is declared but not routed",
-   "passed": true
-  },
-  {
-   "check": "external-card-endpoint-mounted:et0-emulator-v1",
-   "detail": "/api/reference-et0/model is declared but not routed",
-   "passed": true
-  },
-  {
-   "check": "external-classified:et0-emulator-v1",
-   "detail": "served model with no science classification",
-   "passed": true
-  },
-  {
-   "check": "external-not-unsupported:et0-emulator-v1",
-   "detail": "category 4",
-   "passed": true
-  },
-  {
-   "check": "external-gates-recorded:et0-emulator-v1",
-   "detail": "4 criteria",
-   "passed": true
-  },
-  {
-   "check": "external-deployment-matches-gates:et0-emulator-v1",
-   "detail": "failed=['crossSiteGeneralisation'] deployed=False",
-   "passed": true
-  },
-  {
-   "check": "external-metrics-present:et0-emulator-v1",
-   "detail": "['bias', 'mae', 'n', 'r2', 'rmse']",
-   "passed": true
-  },
-  {
-   "check": "external-baseline-present:et0-emulator-v1",
-   "detail": "no baseline to compare",
-   "passed": true
-  },
-  {
-   "check": "external-criteria-direction:et0-emulator-v1",
-   "detail": "{'mae': 'lower is better', 'rmse': 'lower is better', 'bias': 'lower is better', 'r2': 'higher'}",
-   "passed": true
-  },
-  {
-   "check": "external-model-binary-present:et0-emulator-v1",
-   "detail": "card without a fitted model beside it",
-   "passed": true
-  },
-  {
-   "check": "external-availability-agrees:et0-emulator-v1",
-   "detail": "service=True registry=True",
-   "passed": true
-  },
-  {
-   "check": "external-primary-is-physics:et0-emulator-v1",
-   "detail": "the physics fallback is not described",
+   "check": "withdrawn-surrogate-not-served:et0-emulator-v1",
+   "detail": "the withdrawn ET0 emulator is still reachable in the served registry",
    "passed": true
   },
   {
@@ -682,7 +672,7 @@
   },
   {
    "check": "unsupported-targets-declared",
-   "detail": "5 targets named as not modelled",
+   "detail": "7 targets named as not modelled",
    "passed": true
   },
   {
@@ -721,67 +711,52 @@
    "passed": true
   },
   {
-   "check": "removed:harvest-catalogue-entry-present",
-   "detail": "the removed workflow must stay visible as removed, not disappear",
+   "check": "removed:harvest-catalogue-entry-absent",
+   "detail": "catalogue ids: ['water-demand', 'light-stress']",
    "passed": true
   },
   {
-   "check": "removed:harvest-catalogue-not-complete",
-   "detail": "unavailable",
+   "check": "removed:not-mounted:/api/workflows/harvest-prediction/run",
+   "detail": "a removed workflow route is still mounted",
    "passed": true
   },
   {
-   "check": "removed:harvest-no-run-endpoint",
-   "detail": "an unavailable workflow must not advertise a run endpoint",
+   "check": "removed:not-mounted:/api/workflows/harvest-prediction/capability",
+   "detail": "a removed workflow route is still mounted",
    "passed": true
   },
   {
-   "check": "removed:harvest-forecast-flag",
-   "detail": "operationalForecast must be false",
+   "check": "removed:not-mounted:/api/workflows/harvest-prediction/parity",
+   "detail": "a removed workflow route is still mounted",
    "passed": true
   },
   {
-   "check": "removed:harvest-capability-unavailable",
-   "detail": "unavailable",
+   "check": "removed:harvest-module-deleted",
+   "detail": "backend/app/workflows/harvest.py still exists",
    "passed": true
   },
   {
    "check": "removed:harvest-evaluations-retained",
-   "detail": "4 evaluations, none passing",
+   "detail": "4 evaluation file(s) retained",
    "passed": true
   },
   {
-   "check": "removed:harvest-no-served-model",
-   "detail": "a removed workflow must not expose a served model or an input schema",
-   "passed": true
-  },
-  {
-   "check": "removed:endpoint-mounted:harvest-prediction:capability",
-   "detail": "GET /api/workflows/harvest-prediction/capability is advertised but not mounted",
-   "passed": true
-  },
-  {
-   "check": "removed:endpoint-mounted:harvest-prediction:parity",
-   "detail": "GET /api/workflows/harvest-prediction/parity is advertised but not mounted",
-   "passed": true
-  },
-  {
-   "check": "removed:endpoint-mounted:water-demand:capability",
+   "check": "workflow-endpoint-mounted:water-demand:capability",
    "detail": "GET /api/workflows/water-demand/capability is advertised but not mounted",
    "passed": true
   },
   {
-   "check": "removed:endpoint-mounted:water-demand:run",
+   "check": "workflow-endpoint-mounted:water-demand:run",
    "detail": "POST /api/workflows/water-demand/run is advertised but not mounted",
    "passed": true
   },
   {
-   "check": "removed:endpoint-mounted:light-stress:capability",
+   "check": "workflow-endpoint-mounted:light-stress:capability",
    "detail": "GET /api/workflows/light-stress/capability is advertised but not mounted",
    "passed": true
   },
   {
-   "check": "removed:endpoint-mounted:light-stress:run",
+   "check": "workflow-endpoint-mounted:light-stress:run",
    "detail": "POST /api/workflows/light-stress/run is advertised but not mounted",
    "passed": true
   }
@@ -903,7 +878,7 @@
    "severity": "documentation"
   }
  ],
- "generatedAt": "2026-11-10T17:52:45.369903+00:00",
+ "generatedAt": "2026-11-10T19:30:57.585260+00:00",
  "models": [
   {
    "baselineMetrics": {
@@ -962,16 +937,9 @@
     "R2": -0.13836340373596334,
     "RMSE": 17.419824540924623
    },
-   "calibration": {
-    "calibrated": false,
-    "measuredCoverage": null,
-    "statement": "No measured interval coverage is recorded for this model."
-   },
+   "calibration": null,
    "checksumMatches": true,
-   "classification": {
-    "category": 3,
-    "name": "Experimentally supported by non-NASA data"
-   },
+   "classification": null,
    "explanationAvailable": false,
    "features": 4,
    "groups": 10,
@@ -992,7 +960,7 @@
     "trainedAt": "2026-11-07T14:32:42.218887+00:00",
     "validation": "Nested 4-fold GroupKFold, paired pillow numbers kept together; inner 3-fold alpha search. One experiment only; folds do not establish cross-study generalization."
    },
-   "runStatus": "runnable",
+   "runStatus": null,
    "samples": 14,
    "sha256": "78029d6d9a93946bdaf50427f697a463a805f3c588a4deb17afb61314cf22f38",
    "status": "trained-exploratory",
@@ -1009,20 +977,9 @@
     "R2": -0.0072463063573193764,
     "RMSE": 2.098104470338046
    },
-   "calibration": {
-    "calibrated": false,
-    "measuredCoverage": 0.9919,
-    "measuredOn": "held-out biological groups",
-    "measuredWidth": 7.2621,
-    "method": "group_level",
-    "nominalCoverage": 0.9,
-    "statement": "Coverage is a measurement on held-out groups, not a guarantee: repeated tissues from one unit and a small number of campaigns are not a sample of future campaigns."
-   },
+   "calibration": null,
    "checksumMatches": true,
-   "classification": {
-    "category": 6,
-    "name": "Unsupported scientific prediction"
-   },
+   "classification": null,
    "explanationAvailable": false,
    "features": 6,
    "groups": 35,
@@ -1043,7 +1000,7 @@
     "trainedAt": "2026-11-07T14:30:58.930043+00:00",
     "validation": "4-fold GroupKFold grouped by pillow (biological replicate), with a nested 3-fold grouped alpha search. Gene-to-fold leakage is impossible because all samples from one pillow stay in one fold. A separate leave-one-experiment-out diagnostic holds out an entire VEG-04A or VEG-04B campaign."
    },
-   "runStatus": "retired",
+   "runStatus": null,
    "samples": 123,
    "sha256": "9868c660351f906ede6001ea7e2eb8d5fd2fc7b60b1c393c3dec94017db8cfff",
    "status": "trained-exploratory",
@@ -1675,14 +1632,14 @@
  "summary": {
   "auditedModels": 9,
   "checksFailed": 0,
-  "checksRun": 157,
+  "checksRun": 152,
   "documentedGaps": 19,
-  "externallyServedModels": 0,
   "registeredModels": 9,
-  "retiredModels": 1,
-  "servedModels": 8,
+  "retiredModels": 0,
+  "servedModels": 7,
   "supersededModels": 2,
-  "withExplanations": 2
+  "withExplanations": 2,
+  "withdrawnArtifactsRetained": 3
  },
  "task": "model-audit"
 }

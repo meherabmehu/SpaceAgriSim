@@ -30,6 +30,16 @@ export default defineConfig({
       },
     },
   },
+  preview: {
+    // The browser suite runs against the production build, so the same proxy the dev server uses
+    // has to exist here; without it `/api` would 404 under `vite preview`.
+    proxy: {
+      '/api': {
+        target: process.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000',
+        changeOrigin: true,
+      },
+    },
+  },
   build: {
     rollupOptions: {
       output: {

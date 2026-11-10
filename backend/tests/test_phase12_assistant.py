@@ -199,9 +199,12 @@ def test_evidence_detail_returns_the_full_record(client):
 # --------------------------------------------------------------------------
 def test_corpus_is_built_from_the_verified_artifacts(client):
     stats = client.get("/api/assistant/corpus").json()
-    registry_models = len(evidence._read_json(
+    from app import research
+    # The corpus carries the models the API actually serves. The registry on disk also holds the
+    # three artifacts Phase 31 withdrew, and those are not models in the product any more.
+    assert stats["byKind"]["models"] >= len(research.MODEL_IDS)
+    assert stats["byKind"]["models"] <= len(evidence._read_json(
         evidence.ARTIFACTS / "registry.json")["models"])
-    assert stats["byKind"]["models"] >= registry_models
     from app import research
     # `research.manifest()` is the application's single source of dataset truth: it merges
     # the pinned manifest with the Phase 2 candidate list. The corpus must match that, not
@@ -256,37 +259,41 @@ def test_every_served_model_carries_its_scientific_classification(client):
         assert record["evidence"]
 
 
-def test_a_category_six_model_refuses_to_predict(client):
-    """Category 6 means "must not be served as a prediction".
+def test_no_served_model_is_a_category_six_surface(client):
+    """Category 6 means "must not be served as a prediction" - so it is not in the served set.
 
-    `mizuna-microbial-load-v1` is deliberately still registered so the Phase 6 result
-    stays reproducible, and its endpoint still exists so a caller gets an explanation
-    instead of a 404. The invariant is therefore not "absent" but "cannot return a
-    number": it must answer 410 with measured evidence.
+    Phase 8 answered 410 for the absolute microbial-load surface; Phase 31 removed it instead.
+    The invariant tested here is the stronger one: nothing served is classified category 6, and
+    the withdrawn surface answers 404 rather than a tombstone that still advertises itself.
     """
     models = client.get("/api/models").json()["models"]
-    retired = [m for m in models if m["scientificClassification"]["category"] == 6]
-    assert [m["id"] for m in retired] == ["mizuna-microbial-load-v1"]
+    assert [m["id"] for m in models if m["scientificClassification"]["category"] == 6] == []
     response = client.post("/api/predict/mizuna-microbial-load-v1", json={
         "experiment": "VEG04A", "environment": "flight", "spectrum": "red",
         "sanitised": False, "freshWeightG": 5.9, "harvestIndex": 1})
-    assert response.status_code == 410
-    detail = response.json()["detail"]
-    assert detail["error"] == "retired-prediction"
-    assert "R2" in str(detail) or "r2" in str(detail).lower()
+    assert response.status_code == 404
 
 
 def test_nasa_trained_models_are_distinguishable_from_earth_only(client):
     """The distinction the brief asks for has to exist in the payload, not in prose."""
-    models = client.get("/api/models").json()["models"]
-    nasa = {m["id"] for m in models
-            if (m.get("sourceType") or "").startswith("NASA")}
-    earth = {m["id"] for m in models
-             if "not NASA" in (m.get("sourceType") or "")}
-    assert nasa == {"mizuna-microbial-load-v1", "mizuna-microbial-relative-load-v2",
+    payload = client.get("/api/models").json()
+    models = payload["models"]
+    # Phase 31: the distinction is served as structured provenance, not inferred from free-text
+    # artifact metadata - four of the previous ten entries had no sourceType at all, and the ET0
+    # emulator was counted as NASA-derived although it was fitted on a *derived* product.
+    nasa = {m["id"] for m in models if m["provenance"]["category"] == "nasa-measured"}
+    earth = {m["id"] for m in models if m["provenance"]["category"] == "external-measured"}
+    assert nasa == {"mizuna-microbial-relative-load-v2", "tomato-flight-response-v1",
                     "radiation-quality-osd46-v1", "radiation-exposure-osd46-v1"}
-    assert earth == {"lettuce-earth-growth-v1", "lettuce-earth-growth-v2"}
+    assert earth == {"lettuce-earth-growth-v1", "lettuce-earth-growth-v2",
+                     "lettuce-earth-growth-v3"}
     assert nasa.isdisjoint(earth)
+    assert payload["counts"]["nasaMeasured"] == len(nasa)
+    assert payload["counts"]["externalMeasured"] == len(earth)
+    # Each claim names the study and the repository it came from.
+    for model in models:
+        assert model["provenance"]["study"]
+        assert model["provenance"]["repository"]
 
 
 def test_calibration_is_never_claimed_as_validated(client):

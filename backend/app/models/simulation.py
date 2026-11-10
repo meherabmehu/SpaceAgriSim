@@ -339,6 +339,10 @@ class ModelAssumption(BaseModel):
     # inventing one.
     evidence: str | None = None
     sources: list[str] = []
+    # The reference-ET0 component reports which of its published checks passed and whether a
+    # measured benchmark exists at all. Typed here rather than left off the response model so
+    # /api/config and /api/assumptions cannot disagree about what they were told.
+    validation: dict | None = None
 
 
 class ModelStatus(BaseModel):

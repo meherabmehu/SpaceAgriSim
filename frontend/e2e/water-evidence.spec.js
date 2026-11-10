@@ -43,16 +43,26 @@ test("measured water-use panel shows the benchmark, the verdict and its provenan
   const apiBody = await api.json();
   expect(apiBody.measurementDates).toBe(11);
 
-  // The verdict is deliberately not a green tick.
+  // The verdict is deliberately not a green tick: it names the claim that the trial supports
+  // (rank agreement) and the one it does not (the absolute level).
   await expect(
-    page.getByText("Shape supported · level not identified"),
+    page.getByText("Rank agreement only · absolute level not identifiable from this trial"),
   ).toBeVisible();
   // Rank agreement is shown with the number of dates it came from: 11.
   await expect(page.getByText(/Rank agreement across 11 dates/)).toBeVisible();
   await expect(page.getByText(/ρ = 0\.79/)).toBeVisible();
   // The measured spread is labelled as a spread, in per cent.
   await expect(page.getByText(/Measured between-pot spread/)).toBeVisible();
-  await expect(page.getByText("Level inside that spread?")).toBeVisible();
+  // The level is stated as unidentified rather than left to the reader, and the panel names what
+  // would settle it instead of adopting an assumed denominator.
+  await expect(page.getByText("Level identified?", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText(/pot diameter or plant spacing/),
+  ).toBeVisible();
+  // The assumed-denominator ratio is called out as not-a-bias-estimate where it is shown.
+  await expect(
+    page.getByText(/assumed pot area — not a bias estimate/),
+  ).toBeVisible();
 
   // Provenance travels with the numbers.
   await expect(

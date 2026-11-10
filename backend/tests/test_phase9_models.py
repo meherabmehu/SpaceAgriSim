@@ -321,11 +321,8 @@ def test_every_modelled_study_is_in_the_dataset_explorer():
     external = {(research.read_json(research.DATA / "metadata" / "external_lettuce.json")
                  or {}).get("id", "WUR-lettuce")}
     for entry in research.model_registry()["models"]:
-        if entry["id"] in research.EXTERNAL_SERVICES:
-            # Served by app.et0, so it has a model card rather than a JSON artifact and cites no
-            # study in this catalogue. Skipping it here is not a hole: its provenance is asserted
-            # in test_phase23_reference_et0.py.
-            continue
+        # Every served model is a loaded JSON artifact now: the reference-ET0 surface is a
+        # calculation rather than a model, and the three withdrawn artifacts are not served.
         study = research.load_model(entry["id"]).get("sourceStudy")
         if not study:
             continue

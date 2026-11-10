@@ -250,7 +250,7 @@
       "readinessTier": "removed",
       "phase27Status": "audited only",
       "phase30Status": "removed",
-      "removal": "Operational harvest forecasting was removed in Phase 30. A leave-one-study-out evaluation over 40 published lettuce studies returned 310.17 % MAPE against the unchanged 30 % criterion, with the mean baseline selected; the Phase 28 holdout had already returned 41.59 %. POST /api/workflows/harvest-prediction/run is a 410 tombstone, the catalogue entry is 'unavailable', and the measured-versus-model parity record remains readable.",
+      "removal": "Operational harvest forecasting was removed in Phase 30. A leave-one-study-out evaluation over 40 published lettuce studies returned 310.17 % MAPE against the unchanged 30 % criterion, with the mean baseline selected; the Phase 28 holdout had already returned 41.59 %. Phase 31 deleted the workflow module, all three endpoints and the catalogue entry; the measured-versus-model parity record and every failed evaluation remain committed as data.",
       "layers": {
         "data": {
           "state": "retired",
@@ -269,8 +269,9 @@
         "service": {
           "state": "retired",
           "evidence": [
-            "backend/app/workflows/harvest.py"
-          ]
+            "docs/PHASE31_REMOVED_MODELS.md"
+          ],
+          "note": "the module itself was deleted in Phase 31; the record is kept"
         },
         "endpoint": {
           "state": "retired",
@@ -295,7 +296,7 @@
         "provenance": {
           "state": "present",
           "evidence": [
-            "backend/app/workflows/harvest.py"
+            "docs/PHASE31_REMOVED_MODELS.md"
           ],
           "note": "the removal reason and every failed evaluation stay readable"
         },
@@ -304,7 +305,7 @@
           "evidence": [
             "frontend/src/pages/modules/GuidedWorkflows.jsx"
           ],
-          "note": "the run tab is gone; the evidence tab shows the measured record"
+          "note": "the tab is gone; the record lives in docs/PHASE31_REMOVED_MODELS.md"
         },
         "tests": {
           "state": "present",
@@ -707,9 +708,9 @@
         "frontend": {
           "state": "retired",
           "evidence": [
-            "frontend/src/components/MissionControls.jsx"
+            "frontend/src/pages/MissionPlatform.jsx"
           ],
-          "note": "the gravity control and its presets were removed"
+          "note": "the gravity control and its presets were removed; the component that carried them was dead code and was deleted in Phase 31"
         },
         "tests": {
           "state": "present",

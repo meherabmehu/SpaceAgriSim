@@ -27,10 +27,12 @@ def scientific_client():
     return TestClient(app)
 
 
+# Phase 31 removed mizuna-microbial-load-v1 from the served set, so it no longer has an interval
+# to check here; its calibrated interval is still recorded in its retained artifact, and the
+# withdrawal reason is asserted in test_research.py.
 SERVED_INTERVAL_MODELS = (
     "lettuce-earth-growth-v1",
     "lettuce-earth-growth-v2",
-    "mizuna-microbial-load-v1",
     "mizuna-microbial-relative-load-v2",
 )
 
@@ -60,6 +62,7 @@ def test_recalibration_did_not_promote_any_model():
     registry = json.loads((ROOT / "ml" / "artifacts" / "registry.json").read_text())
     statuses = {m["id"]: json.loads((ROOT / m["artifact"]).read_text()).get("status")
                 for m in registry["models"]}
+    # A withdrawn artifact keeps its exploratory status: removal is not a promotion either.
     assert statuses["mizuna-microbial-load-v1"] == "trained-exploratory"
     assert statuses["mizuna-microbial-relative-load-v2"] == "trained-exploratory"
     assert statuses["lettuce-earth-growth-v1"] == "trained-exploratory"

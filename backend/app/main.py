@@ -5,6 +5,8 @@ Run locally with:
     uvicorn app.main:app --reload --port 8000
 """
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -13,7 +15,36 @@ from app.routes import account, admin, assistant, auth, explorer, health, simula
 from app.routes.errors import register_error_handlers
 from app.middleware import RequestGuard
 
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    """Warm the configuration path before the first client asks for it.
+
+    The dashboard's first request is `GET /api/config`, and on a hosted free instance it lands
+    during cold start. Everything that endpoint touches - the crop table, the assumption
+    description (which recomputes the FAO-56 worked examples), simulation constants and the
+    scenario-history settings - used to be built lazily on that first request, so the one request
+    that decides whether the UI shows live control ranges was also the slowest one in the process.
+    Building it here moves that cost into startup, where Render's health check already waits for it,
+    and leaves the endpoint with a dictionary to serialise.
+
+    Deliberately best-effort: a warm-up failure must not stop the app from starting, because the
+    endpoint itself still works on demand and /api/ready reports the real state.
+    """
+    import logging
+
+    try:
+        from app.routes.simulation import simulation_config
+
+        simulation_config()
+        app.state.config_warmed = True
+    except Exception as error:  # noqa: BLE001 - startup must survive a warm-up failure
+        logging.getLogger(__name__).warning("config warm-up failed: %s", error)
+        app.state.config_warmed = False
+    yield
+
+
 app = FastAPI(
+    lifespan=lifespan,
     title=settings.app_name,
     version=settings.app_version,
     description=(

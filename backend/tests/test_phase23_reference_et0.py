@@ -143,59 +143,30 @@ def test_service_serves_physics_when_radiation_and_wind_are_supplied():
         terms["et0MmPerDay"], abs=0.01)
 
 
-def test_service_falls_back_to_the_emulator_when_radiation_is_missing():
+def test_service_falls_back_to_the_published_equation_when_radiation_is_missing():
+    """Phase 31: no learned fallback. Missing inputs select Hargreaves, and the gap is named."""
     result = et0.estimate(tmax_c=30.0, tmin_c=18.0, day_of_year=200, latitude=23.8,
                           elevation_m=10.0, tdew_c=12.0)
     assert result["methods"]["penmanMonteith"] is None
-    assert result["primaryMethod"] in {"emulator", "hargreaves"}
-    # Both alternatives are always present, so the caller can compare rather than trust one.
+    assert result["primaryMethod"] == "hargreaves"
     assert result["methods"]["hargreaves"]["et0MmPerDay"] > 0
+    assert result["methodSelection"]["usedFallback"] is True
+    assert set(result["methodSelection"]["missingInputs"]) == {"solarRadiationMJm2", "windSpeedMs"}
+    # The removed surrogate must not come back as a third key.
+    assert "emulator" not in result["methods"]
 
 
-def test_emulator_flags_inputs_outside_its_training_envelope():
-    inside = et0.estimate(tmax_c=25.0, tmin_c=15.0, day_of_year=200, latitude=40.0,
-                          elevation_m=100.0, tdew_c=10.0)
-    outside = et0.estimate(tmax_c=25.0, tmin_c=15.0, day_of_year=200, latitude=-78.0,
-                           elevation_m=3000.0, tdew_c=10.0)
-    assert inside["methods"]["emulator"]["outOfDistribution"] is False
-    assert outside["methods"]["emulator"]["outOfDistribution"] is True
-    assert outside["methods"]["emulator"]["outsideFeatures"]
-
-
-def test_service_degrades_to_physics_when_the_artifact_is_unreadable(monkeypatch, tmp_path):
-    monkeypatch.setattr(et0, "ARTIFACT_MODEL", tmp_path / "not-there.joblib")
-    et0.load_artifact.cache_clear()
-    try:
-        result = et0.estimate(tmax_c=25.0, tmin_c=15.0, day_of_year=200, latitude=40.0,
-                              elevation_m=100.0, tdew_c=10.0, solar_radiation_mj=20.0,
-                              wind_speed_ms=2.0)
-        assert result["methods"]["emulator"] is None
-        assert result["primaryMethod"] == "penman-monteith"
-        assert result["et0MmPerDay"] > 0
-        assert et0.artifact_status()["available"] is False
-    finally:
-        et0.load_artifact.cache_clear()
-
-
-def test_artifact_diagnostics_name_the_actual_failure(monkeypatch, tmp_path):
-    """A missing file and a missing package fail the same way but need different fixes."""
-    healthy = et0.load_diagnostics()
-    assert healthy["cardFilePresent"] and healthy["modelFilePresent"]
-    assert all(healthy["packages"].values())
-
-    monkeypatch.setattr(et0, "ARTIFACT_MODEL", tmp_path / "absent.joblib")
-    et0._LAST_LOAD_ERROR.clear()
-    et0.load_artifact.cache_clear()
-    try:
-        status = et0.artifact_status()
-        assert status["available"] is False
-        assert "not present in this deployment" in status["reason"]
-        assert status["diagnostics"]["modelFilePresent"] is False
-        assert status["diagnostics"]["cardFilePresent"] is True
-        # The physics fallback is described even when nothing is available.
-        assert "Hargreaves" in status["fallback"]
-    finally:
-        et0.load_artifact.cache_clear()
+def test_no_learned_et0_estimate_is_returned_on_any_input_path():
+    """A regression surrogate trained on a derived target is not served, with or without inputs."""
+    for kwargs in ({"tmax_c": 25.0, "tmin_c": 15.0, "day_of_year": 200, "latitude": 40.0,
+                    "elevation_m": 100.0, "tdew_c": 10.0},
+                   {"tmax_c": 25.0, "tmin_c": 15.0, "day_of_year": 200, "latitude": -78.0,
+                    "elevation_m": 3000.0, "tdew_c": 10.0, "solar_radiation_mj": 20.0,
+                    "wind_speed_ms": 2.0}):
+        result = et0.estimate(**kwargs)
+        assert "emulator" not in result["methods"]
+        assert not hasattr(et0, "load_artifact")
+        assert not hasattr(et0, "artifact_status")
 
 
 def test_service_refuses_to_guess_the_vapour_pressure():
@@ -299,80 +270,43 @@ def test_quality_report_records_no_issues_and_states_the_drops():
     assert "never clipped" in report["removed"]["policy"]
 
 
-# --------------------------------------------------------------------------- emulator honesty
-def test_emulator_card_is_exploratory_and_not_deployed():
+# ------------------------------------------------------------------ withdrawn surrogate record
+def test_the_withdrawn_emulator_card_is_retained_as_a_negative_result():
+    """Its artifact stays so the withdrawal can be re-checked; it must stay undeployed.
+
+    A retained card is only safe if it says, in its own record, that it failed. These assertions
+    read the artifact rather than a document, so the evidence and the file cannot drift.
+    """
     card = _card()
     assert card["status"] == "trained-exploratory"
     assert card["deployed"] is False
-    assert card["productionModelChanged"] is False
-
-
-def test_emulator_records_the_gate_it_fails():
-    gates = {gate["criterion"]: gate for gate in _card()["validation"]["acceptanceGate"]}
+    gates = {gate["criterion"]: gate for gate in card["validation"]["acceptanceGate"]}
     assert gates["crossSiteGeneralisation"]["passed"] is False
     assert gates["crossSiteGeneralisation"]["observed"] < 0
-    assert gates["beatsHargreavesTemporal"]["passed"] is True
-    assert gates["intervalCoverage"]["passed"] is True
-
-
-def test_emulator_is_better_than_hargreaves_only_on_the_temporal_holdout():
-    card = _card()
-    assert card["metrics"]["mae"] < card["baselineMetrics"]["hargreaves"]["mae"]
-    assert card["improvementOverHargreaves"]["crossSitePct"] < 0
-
-
-def test_emulator_does_not_beat_hargreaves_on_most_unseen_sites():
-    won, total = _card()["validation"]["losoSitesBeatingHargreaves"].split("/")
+    won, total = card["validation"]["losoSitesBeatingHargreaves"].split("/")
     assert int(won) < int(total)
-
-
-def test_emulator_declares_metric_directions():
-    criteria = _card()["criteria"]
-    assert "lower" in criteria["mae"].lower()
-    assert "higher" in criteria["r2"].lower()
-
-
-def test_emulator_training_data_precedes_its_holdout():
-    card = _card()
-    holdout = card["evaluation"]["temporalHoldout"]["start"]
-    assert card["trainingData"]["lastDay"] >= holdout
-    # The holdout starts after every training day that was used for fitting, which the split in
-    # the trainer asserts; here the record itself must state the same boundary.
-    assert holdout == "2024-01-01"
-    assert card["trainingData"]["sha256"] == _dataset_meta()["sha256"]
-
-
-def test_emulator_limitations_name_what_it_is_not():
-    blob = " ".join(_card()["limitations"]).lower()
+    assert card["improvementOverHargreaves"]["crossSitePct"] < 0
+    blob = " ".join(card["limitations"]).lower()
     assert "not measured" in blob or "computed, not measured" in blob
-    assert "microgravity" in blob
 
 
-def test_runtime_requirements_can_load_the_emulator():
-    """The runtime image ships the artifact, so it must also ship the code that reads it.
-
-    The first production deploy proved the failure mode: `ml/artifacts/et0-emulator-v1.joblib` was
-    in the image, `joblib` was not, and the service answered every request from FAO-56 physics while
-    the model card said `available: false`. It degraded correctly and silently - which is exactly
-    why this assertion parses the runtime requirement file rather than trusting the image.
-    """
-    requirements = (ROOT / "backend" / "requirements.txt").read_text(encoding="utf-8")
-    names = {line.split("[")[0].split(">")[0].split("=")[0].split("<")[0].strip().lower()
-             for line in requirements.splitlines()
-             if line.strip() and not line.strip().startswith("#")}
-    for package in ("scikit-learn", "joblib", "numpy"):
-        assert package in names, f"{package} missing from backend/requirements.txt (runtime)"
+def test_the_withdrawal_reason_is_recorded_next_to_the_served_set():
+    assert "et0-emulator-v1" in research.RETIRED_MODEL_IDS
+    assert "et0-emulator-v1" not in research.MODEL_IDS
+    reason = research.RETIRED_MODEL_IDS["et0-emulator-v1"].lower()
+    assert "hargreaves" in reason and "derived" in reason
 
 
-def test_runtime_pins_match_the_environment_that_wrote_the_bundle():
+def test_runtime_pins_match_the_environment_that_wrote_the_artifacts():
     """A scikit-learn pickle only loads where the module layout it recorded still exists.
 
-    The second production deploy of this feature failed on exactly this: the runtime resolved a
-    1.5-era scikit-learn, the bundle referenced `sklearn._loss`, and the service fell back to
-    physics with "No module named '_loss'". Ranges are right for a developer install and wrong for
-    a persisted estimator, so the runtime pins are compared with the artifact's own record.
+    The served models are still serialised trees, so the runtime pins are still compared with the
+    artifacts' own recorded environment - the check outlived the emulator it was written for.
     """
-    trained = _card()["environment"]
+    registry = json.loads((ROOT / "ml" / "artifacts" / "registry.json").read_text())
+    # The registry records the library the artifacts were trained with under its import name.
+    trained = {"scikit-learn": registry["environment"]["sklearn"],
+               "numpy": registry["environment"]["numpy"]}
     requirements = (ROOT / "backend" / "requirements.txt").read_text(encoding="utf-8")
     pins = {}
     for line in requirements.splitlines():
@@ -380,34 +314,8 @@ def test_runtime_pins_match_the_environment_that_wrote_the_bundle():
         if "==" in line:
             name, version = line.split("==", 1)
             pins[name.strip().lower()] = version.strip()
-    assert pins.get("scikit-learn") == trained["scikit-learn"]
-    assert pins.get("numpy") == trained["numpy"]
-    training_pins = (ROOT / "ml" / "requirements-training.txt").read_text(encoding="utf-8")
-    assert f"scikit-learn=={trained['scikit-learn']}" in training_pins
-
-
-def test_failed_load_reports_both_scikit_learn_versions(monkeypatch, tmp_path):
-    """When an unpickle fails, the diagnosis names the version mismatch, not just the exception."""
-    broken = tmp_path / "broken.joblib"
-    broken.write_bytes(b"not a pickle")
-    monkeypatch.setattr(et0, "ARTIFACT_MODEL", broken)
-    et0._LAST_LOAD_ERROR.clear()
-    et0.load_artifact.cache_clear()
-    try:
-        status = et0.artifact_status()
-        assert status["available"] is False
-        assert status["diagnostics"]["lastLoadError"]
-        assert status["diagnostics"]["runtimeScikitLearn"] is not None
-        assert status["diagnostics"]["trainedScikitLearn"] == _card()["environment"]["scikit-learn"]
-    finally:
-        et0.load_artifact.cache_clear()
-
-
-def test_emulator_features_match_the_served_bundle():
-    bundle = json.loads(json.dumps(_card()["features"]))
-    assert bundle == ["T2M_MAX", "T2M_MIN", "T2MDEW", "latitude", "elevationM",
-                      "doySin", "doyCos", "raMj", "daylightHours"]
-    assert et0.artifact_status()["features"] == bundle
+    for package in ("scikit-learn", "numpy"):
+        assert pins.get(package) == trained[package], package
 
 
 # --------------------------------------------------------------------------- API integration
@@ -430,39 +338,33 @@ def test_reference_endpoint_needs_a_vapour_pressure_input(client):
 
 def test_model_card_endpoint_publishes_the_published_example_checks(client):
     body = client.get("/api/reference-et0/model").json()
-    assert body["available"] is True
-    assert body["physics"]["allExamplesWithinTolerance"] is True
-    assert len(body["physics"]["publishedExamples"]) == 3
-    assert body["validation"]["gatesPassed"] == 3
-    assert body["validation"]["gatesTotal"] == 4
+    assert body["kind"] == "calculation"
+    assert body["allExamplesWithinTolerance"] is True
+    assert len(body["publishedExamples"]) == 3
+    assert all(row["withinTolerance"] for row in body["publishedExamples"])
+    # The card must not claim a measured-ET0 validation it does not have.
+    assert body["measuredEt0Validation"]["available"] is False
+    assert body["removedSurrogate"]["modelId"] == "et0-emulator-v1"
+    assert body["provenance"]["standard"].startswith("FAO-56")
 
 
-def test_model_registry_lists_the_emulator_with_its_failures(client):
-    models = {m["id"]: m for m in client.get("/api/models").json()["models"]}
-    assert "et0-emulator-v1" in models
-    row = models["et0-emulator-v1"]
-    assert row["servedBy"] == "app.et0"
-    assert row["deployed"] is False
-    assert row["scientificClassification"]["category"] == 4
-    assert row["baselineComparison"]["measuredOn"].startswith("temporal holdout")
+def test_the_withdrawn_emulator_is_absent_from_the_registry_and_the_catalogue(client):
+    """Phase 31: absent, not present-and-flagged. A retired card is still a card."""
+    registry = client.get("/api/models").json()
+    assert "et0-emulator-v1" not in {m["id"] for m in registry["models"]}
+    calculations = {row["id"]: row for row in registry["calculations"]}
+    assert calculations["reference-et0"]["kind"] == "calculation"
 
-
-def test_workflow_catalogue_marks_the_emulator_as_an_external_service(client):
     rows = client.get("/api/workflow/models").json()["models"]
-    row = next(r for r in rows if r["modelId"] == "et0-emulator-v1")
-    assert row["runStatus"] == "external-service"
-    assert row["servedAt"] == "/api/reference-et0/estimate"
-    assert row["inputFamily"] == "weather"
+    assert "et0-emulator-v1" not in {r["modelId"] for r in rows}
+    assert "weather" not in client.get("/api/workflow/models").json()["families"]
 
 
-def test_workflow_refuses_to_run_the_emulator_through_the_json_loader(client):
+def test_the_withdrawn_emulator_cannot_be_run_through_the_workflow(client):
     response = client.post("/api/workflow/run",
                            json={"modelId": "et0-emulator-v1", "inputs": {}})
-    assert response.status_code == 409
-    body = response.json()["detail"]
-    assert body["error"] == "external-service"
-    assert body["endpoint"] == "/api/reference-et0/estimate"
-    assert body["cardEndpoint"] == "/api/reference-et0/model"
+    assert response.status_code in {404, 409, 422}
+    assert response.status_code != 200
 
 
 def test_simulate_accepts_the_optional_flux_fields_and_reports_the_basis(client):
@@ -494,12 +396,16 @@ def test_config_describes_the_reference_et0_component(client):
     assert "not a measurement" in component["evidence"].lower()
 
 
-def test_emulator_is_classified_as_a_mechanistic_calculation():
-    feature = science_classification.feature_by_id("et0-emulator-v1")
+def test_reference_et0_is_classified_as_a_mechanistic_calculation():
+    feature = science_classification.feature_by_id("reference-et0")
     assert feature is not None
     assert feature.category == 4
-    assert "worse than Hargreaves" in feature.evidence
-    assert any("microgravity" in note for note in feature.notes)
+    assert feature.status.startswith("served")
+    blob = " ".join([feature.evidence, *feature.notes]).lower()
+    assert "no measured" in blob or "not a measurement" in blob or "not validated" in blob
+    assert "microgravity" in blob
+    # The removed surrogate must not be a served surface in its own right.
+    assert science_classification.feature_by_id("et0-emulator-v1") is None
 
 
 # --------------------------------------------------------------------------- catalogue + audit
@@ -550,13 +456,13 @@ def test_dataset_can_be_rebuilt_to_the_same_checksum():
     assert result.returncode == 0, result.stdout + result.stderr
 
 
-def test_model_audit_passes_with_the_external_service_declared():
+def test_model_audit_passes_after_the_phase31_withdrawals():
     result = subprocess.run([sys.executable, "scripts/audit_models.py"],
                             cwd=ROOT, capture_output=True, text=True)
     assert result.returncode == 0, result.stdout[-2000:]
 
 
-def test_registry_verifier_passes_with_the_external_service_declared():
+def test_registry_verifier_passes_after_the_phase31_withdrawals():
     result = subprocess.run([sys.executable, "scripts/verify_model_registry.py"],
                             cwd=ROOT, capture_output=True, text=True)
     assert result.returncode == 0, result.stdout[-2000:]

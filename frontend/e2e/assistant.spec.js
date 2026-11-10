@@ -82,7 +82,7 @@ test("the dataset explorer refuses to present OSD-320 as a second study", async 
   await expect(page.getByText("OSD-320 dropped · duplicate-measurement")).toBeVisible();
 });
 
-test("model cards state classification, calibration and retirement", async ({
+test("model cards state classification, calibration and provenance without retired rows", async ({
   page,
 }, testInfo) => {
   await ready(page, "dashboard");
@@ -93,6 +93,11 @@ test("model cards state classification, calibration and retirement", async ({
   await expect(
     page.getByRole("heading", { name: "Scientific status of every served model" }),
   ).toBeVisible();
-  await expect(page.getByText("retired", { exact: true })).toBeVisible();
+  // Phase 31 withdrew the retired models rather than labelling them: no card may describe a
+  // model as "retired", and every remaining card must state where its training measurements
+  // came from.
+  await expect(page.getByText("retired", { exact: true })).toHaveCount(0);
+  await expect(page.getByText(/NASA-measured/).first()).toBeVisible();
+  await expect(page.getByText(/Non-NASA measured/).first()).toBeVisible();
   await expect(page.getByText(/Calibrated probabilities/).first()).toBeVisible();
 });

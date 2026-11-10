@@ -30,7 +30,7 @@ from app import research, science_classification  # noqa: E402
 from app.config import simulation_constants as constants  # noqa: E402
 from app.models.simulation import SimulationRequest, strip_removed_fields  # noqa: E402
 from app.simulation import engine, factors  # noqa: E402
-from app.workflows import harvest, units  # noqa: E402
+from app.workflows import units  # noqa: E402
 
 HARVEST = "/api/workflows/harvest-prediction"
 REMOVAL_MESSAGE = "removed in Phase 30"
@@ -132,58 +132,47 @@ def test_the_assistant_does_not_offer_to_explain_a_gravity_assumption(client):
                                                                         "insufficient-evidence"}
 
 
-# -------------------------------------------------------- harvest: no model, no run, no claims
+# ------------------------------------- harvest: no model, no run, no route, no catalogue row
+#
+# Phase 30 removed the forecast itself and left capability/parity endpoints plus a tab. Phase 31
+# removed those too: a workflow entry that can only explain its own removal is still a workflow
+# entry in the navigation. The evaluations survive in ml/evaluation and in the Phase 30 reports.
 
 
-def test_the_harvest_run_endpoint_is_a_tombstone(client):
-    for body in ({"scenarios": []}, {"scenarios": [{"ppfd": 400}]}, {}):
-        response = client.post(HARVEST + "/run", json=body)
-        assert response.status_code == 410
-        detail = response.json()["detail"]
-        assert detail["status"] == "removed"
-        assert detail["removedInPhase"] == 30
-        assert "30 %" in detail["reason"]
+def test_the_harvest_prediction_surface_is_gone(client):
+    """No route, no catalogue entry, no tombstone: 404 from an endpoint that does not exist."""
+    for suffix in ("/run", "/capability", "/parity"):
+        assert client.get(HARVEST + suffix).status_code == 404, suffix
+        assert client.post(HARVEST + suffix, json={}).status_code == 404, suffix
 
 
-def test_nothing_serves_a_harvest_prediction(client):
-    stated = client.get(HARVEST + "/capability").json()
-    assert stated["status"] == "unavailable"
-    assert stated["operationalForecast"] is False
-    # The workflow module must not expose a predict/run entry point any more.
-    assert not hasattr(harvest, "run") or harvest.run.__doc__ is None
-    public = {name for name in dir(harvest) if not name.startswith("_")}
-    assert "run" not in public
-
-
-def test_the_old_harvest_model_artifacts_are_not_reachable_through_a_workflow(client):
-    """A registered exploratory artifact may exist; a workflow may not serve it."""
+def test_the_workflow_catalogue_has_no_harvest_entry(client):
     body = client.get("/api/workflows").json()
-    harvest_entry = next(item for item in body["workflows"] if item["id"] == "harvest-prediction")
-    assert harvest_entry["status"] == "unavailable"
-    assert "run" not in harvest_entry["endpoints"]
-    assert harvest_entry["modelValidatedForForecasting"] is not True if (
-        "modelValidatedForForecasting" in harvest_entry) else True
-
-
-def test_the_catalogue_no_longer_calls_harvest_a_complete_workflow(client):
-    body = client.get("/api/workflows").json()
+    ids = [item["id"] for item in body["workflows"]]
+    assert "harvest-prediction" not in ids
     complete = [item["id"] for item in body["workflows"] if item["status"] == "complete"]
-    assert "harvest-prediction" not in complete
     assert sorted(complete) == ["light-stress", "water-demand"]
+    # The note must not promise an entry that no longer exists.
+    assert "harvest-prediction" in body["note"]
 
 
-def test_the_harvest_evidence_that_survives_is_measured_data_only(client):
-    parity = client.get(HARVEST + "/parity").json()
-    assert parity["operationalForecast"] is False
-    assert parity["passed"] is False
+def test_the_removed_harvest_module_is_not_importable():
+    """Dead code is a way for a removed capability to come back; the module is deleted."""
+    import importlib
+
+    with pytest.raises(ImportError):
+        importlib.import_module("app.workflows.harvest")
+
+
+def test_the_harvest_evidence_that_survives_is_measured_data_only():
+    """The failure record stays committed as data, outside the served API."""
+    evaluations = list((ROOT / "ml" / "evaluation").glob("*harvest*.json"))
+    assert evaluations, "the harvest evaluation records must be retained"
     registry = research.model_registry()
-    models = registry["models"] if isinstance(registry, dict) else registry
-    for model in models:
-        identifier = model.get("id") if isinstance(model, dict) else model
-        if "lettuce" not in str(identifier):
+    for model in registry["models"]:
+        if "lettuce" not in str(model.get("id")):
             continue
-        record = research.load_model(identifier)
-        assert record.get("status") != "production", identifier
+        assert research.load_model(model["id"]).get("status") != "production"
 
 
 def test_the_units_registry_does_not_advertise_a_withdrawn_output():

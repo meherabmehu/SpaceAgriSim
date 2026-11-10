@@ -178,28 +178,9 @@ function DatasetDetail({ id }) {
   );
 }
 export function Predictions({ models, registryError }) {
-  const [inputs, setInputs] = useState({
-    crop: "mizuna",
-    waterSuppliedL: 1.5,
-    establishedPlants: 2,
-    environment: "flight",
-    spectrum: "red",
-  });
-  const [prediction, setPrediction] = useState(null);
-  const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
-  const predict = async () => {
-    setBusy(true);
-    setError("");
-    setPrediction(null);
-    try {
-      setPrediction(await api("/predict/mizuna-harvest-v1", inputs));
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setBusy(false);
-    }
-  };
+  // Phase 31 removed the mizuna harvest form from this panel: its model was worse than
+  // predicting the training mean (held-out R2 -0.333 vs -0.138) and was withdrawn from the
+  // API, the registry and the workflow catalogue. What remains here runs only served models.
   return (
     <>
       <div className="module-intro">
@@ -269,107 +250,6 @@ export function Predictions({ models, registryError }) {
       </div>
       {!models && !registryError && (
         <div className="empty-state">Loading model registry…</div>
-      )}
-      {models?.models?.some(
-        (m) => m.id === "mizuna-harvest-v1" && m.artifactExists,
-      ) && (
-        <Card
-          title="Mizuna harvest experiment"
-          label="OSD-655 · EXPLORATORY REGRESSION"
-        >
-          <p className="prose">
-            Predict fresh harvest mass per plant pillow using the measured
-            VEG-04A experimental domain. This model cannot recommend irrigation
-            or infer causality.
-          </p>
-          <div className="control-grid">
-            <label className="field">
-              Total water supplied (L)
-              <input
-                type="number"
-                min="0"
-                max="20"
-                step="0.1"
-                value={inputs.waterSuppliedL}
-                onChange={(e) =>
-                  setInputs({
-                    ...inputs,
-                    waterSuppliedL: Number(e.target.value),
-                  })
-                }
-              />
-            </label>
-            <label className="field">
-              Established plants
-              <input
-                type="number"
-                min="1"
-                max="6"
-                step="1"
-                value={inputs.establishedPlants}
-                onChange={(e) =>
-                  setInputs({
-                    ...inputs,
-                    establishedPlants: Number(e.target.value),
-                  })
-                }
-              />
-            </label>
-            <label className="field">
-              Experimental environment
-              <select
-                value={inputs.environment}
-                onChange={(e) =>
-                  setInputs({ ...inputs, environment: e.target.value })
-                }
-              >
-                <option value="flight">Flight</option>
-                <option value="ground">Ground</option>
-              </select>
-            </label>
-            <label className="field">
-              Study lighting group
-              <select
-                value={inputs.spectrum}
-                onChange={(e) =>
-                  setInputs({ ...inputs, spectrum: e.target.value })
-                }
-              >
-                <option value="red">Red group</option>
-                <option value="blue">Blue group</option>
-              </select>
-            </label>
-          </div>
-          <div className="module-actions">
-            <button
-              className="primary-button"
-              onClick={predict}
-              disabled={busy}
-            >
-              {busy ? "Predicting…" : "Run saved model"}
-              <ArrowRight size={14} />
-            </button>
-          </div>
-          {error && (
-            <div className="error-banner" role="alert">
-              {error}
-            </div>
-          )}
-          {prediction && (
-            <>
-              <div className="comparison-value">
-                {number(prediction.prediction)} <small>{prediction.unit}</small>
-              </div>
-              <p className="muted fine">
-                Empirical residual range: {number(prediction.interval?.low)}–
-                {number(prediction.interval?.high)} g. Uncalibrated; not a
-                confidence guarantee.
-              </p>
-              <Limitations items={prediction.warnings} />
-              <JsonDetails data={prediction} />
-            </>
-          )}
-        </Card>
       )}
       {models?.models?.some(
         (m) => m.id === "tomato-flight-response-v1" && m.artifactExists,

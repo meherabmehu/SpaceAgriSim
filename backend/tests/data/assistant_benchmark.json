@@ -243,11 +243,10 @@
     {
       "id": "limit-01",
       "category": "scientific_limitations",
-      "question": "What are the limitations of the mizuna harvest model?",
+      "question": "Is there a served mizuna harvest model, and why not?",
       "expectStatus": "grounded",
       "mustCiteAny": [
-        "mizuna-harvest-v1",
-        "OSD-655"
+        "method-withdrawn-models"
       ],
       "mustMentionEntities": []
     },

@@ -18,47 +18,123 @@ ARTIFACTS = (BUNDLE if BUNDLE.exists() else ROOT) / "ml" / "artifacts"
 # handled rather than assumed.
 EVALUATION = (BUNDLE / "ml" / "evaluation") if (BUNDLE / "ml" / "evaluation").is_dir() else (ROOT / "ml" / "evaluation")
 MODEL_IDS = {
-    "mizuna-harvest-v1",
     "tomato-flight-response-v1",
     "lettuce-earth-growth-v1",
     "lettuce-earth-growth-v2",
     # Phase 19: per-area fresh-yield model with density and photoperiod as inputs. Served beside
     # v2, which stays byte-identical so its failed external check remains reproducible.
     "lettuce-earth-growth-v3",
-    "mizuna-microbial-load-v1",
     "mizuna-microbial-relative-load-v2",
     # Phase 9: NASA OSD-46 radiation response models.
     "radiation-quality-osd46-v1",
     "radiation-exposure-osd46-v1",
 }
 
-# Models served by their own runtime rather than by the JSON artifact loader above.
+# Artifacts that are kept, checksummed and documented but are **not served**.
 #
-# `et0-emulator-v1` is a scikit-learn bundle behind a prediction service, not a table of trees
-# this module can walk. Two things follow, and both are enforced elsewhere:
-#   * it is NOT in MODEL_IDS, so `load_model` never tries to open it as JSON;
-#   * it IS in CATALOGUE_MODEL_IDS, so the registry, the workflow catalogue, the science
-#     classification and the audit all see the same set of models the API serves.
-# A model that is served but invisible is the failure mode this exists to prevent.
-EXTERNAL_SERVICES: dict[str, dict] = {
-    "et0-emulator-v1": {
-        "name": "ET0 emulator v1 (surrogate of FAO-56 reference ET0)",
-        "endpoint": "/api/reference-et0/estimate",
-        "cardEndpoint": "/api/reference-et0/model",
-        "card": "ml/artifacts/et0-emulator-v1.json",
-        "servedBy": "app.et0",
-        "inputFamily": "weather",
-        "target": "FAO-56 reference evapotranspiration",
-        "outputUnit": "mm/day",
-        "status": "trained-exploratory",
-        "why": ("It is a fitted scikit-learn estimator, not a coefficient table, and it is served "
-                "beside the FAO-56 equation it approximates rather than instead of it: it loses "
-                "to Hargreaves-Samani on an unseen site, so the physics is the primary number."),
+# Phase 31 removed each of these from every user-facing surface: no catalogue row, no workflow
+# input family, no science-classification entry and no prediction route. The artifacts and their
+# evaluations stay on disk because deleting them would destroy the reproducibility of a published
+# negative result - the reason each was withdrawn is exactly what a later reader needs to re-run.
+RETIRED_MODEL_IDS = {
+    "et0-emulator-v1": (
+        "Fitted surrogate of FAO-56 reference ET0, trained on a *derived* target and about 19 % "
+        "worse than Hargreaves-Samani on leave-one-site-out. It was also preferred as the primary "
+        "number when radiation and wind were absent, i.e. the service could answer with its least "
+        "transferable estimate. The FAO-56 equation it approximates is computable from the same "
+        "inputs, so the surrogate adds error and no information; only the physics is served."
+    ),
+    "mizuna-harvest-v1": (
+        "Held-out R2 -0.333 against a training-mean baseline of -0.138: worse than predicting the "
+        "mean, on 14 samples from a single experiment. Served as a live 'Predict' form until "
+        "Phase 31 withdrew the form, the route and the guided workflow."
+    ),
+    "mizuna-microbial-load-v1": (
+        "Absolute leaf microbial load does not transfer to an unseen campaign: leave-one-campaign-"
+        "out R2 -0.55 (VEG-04A) and -0.58 (VEG-04B), worse than the training mean on both. Its "
+        "within-campaign relative successor is served instead."
+    ),
+}
+
+# Provenance, stated structurally rather than scraped out of an artifact's free-text `sourceType`.
+#
+# Phase 31 replaced the regex over `sourceType` that produced the dashboard's model-source counts.
+# Four of the ten catalogued entries had no `sourceType` at all, so they were reported as "source
+# type not recorded", and one of the entries that the dashboard counted as NASA-derived was an
+# emulator fitted on a *derived* ET0 product rather than on a measurement. A model is called
+# NASA-measured here only when the measurements it was trained on were produced by a NASA
+# experiment, retrieved from a NASA repository, and named below with the study id.
+PROVENANCE: dict[str, dict] = {
+    "lettuce-earth-growth-v1": {
+        "category": "external-measured",
+        "label": "Non-NASA measured (WUR)",
+        "institution": "Wageningen University & Research",
+        "study": "WUR lettuce dataset (1648 plants, 4 experiments)",
+        "repository": "Wageningen University & Research supplementary data",
+        "why": "Measured shoot fresh mass from a controlled-environment lettuce experiment.",
+    },
+    "lettuce-earth-growth-v2": {
+        "category": "external-measured",
+        "label": "Non-NASA measured (WUR)",
+        "institution": "Wageningen University & Research",
+        "study": "WUR lettuce dataset (1648 plants, 4 experiments)",
+        "repository": "Wageningen University & Research supplementary data",
+        "why": "Same measured dataset as v1, different learner, identical folds.",
+    },
+    "lettuce-earth-growth-v3": {
+        "category": "external-measured",
+        "label": "Non-NASA measured (WUR)",
+        "institution": "Wageningen University & Research",
+        "study": "WUR lettuce dataset (per-area fresh yield)",
+        "repository": "Wageningen University & Research supplementary data",
+        "why": "Measured fresh mass per growing area; no NASA data involved.",
+    },
+    "mizuna-microbial-relative-load-v2": {
+        "category": "nasa-measured",
+        "label": "NASA-measured (OSDR OSD-780)",
+        "institution": "NASA Kennedy Space Center (VEG-04A/B)",
+        "study": "NASA OSDR OSD-780 / ALSDA VEG-04A and VEG-04B plate counts",
+        "repository": "NASA Open Science Data Repository",
+        "why": ("Trained on microbial plate counts measured on ISS-grown mizuna and their ground "
+                "controls, retrieved from NASA's own repository."),
+    },
+    "tomato-flight-response-v1": {
+        "category": "nasa-measured",
+        "label": "NASA-measured (OSDR OSD-767)",
+        "institution": "NASA (OSDR OSD-767)",
+        "study": "NASA OSDR OSD-767 tomato transcriptomics",
+        "repository": "NASA Open Science Data Repository",
+        "why": "Trained on NASA's own tomato flight-versus-ground expression measurements.",
+    },
+    "radiation-quality-osd46-v1": {
+        "category": "nasa-measured",
+        "label": "NASA-measured (GeneLab GLDS-46)",
+        "institution": "NASA GeneLab (OSD-46)",
+        "study": "NASA OSDR OSD-46 / GeneLab GLDS-46 Arabidopsis radiation microarray",
+        "repository": "NASA Open Science Data Repository",
+        "why": "Trained on NASA GeneLab microarray measurements of irradiated Arabidopsis.",
+    },
+    "radiation-exposure-osd46-v1": {
+        "category": "nasa-measured",
+        "label": "NASA-measured (GeneLab GLDS-46)",
+        "institution": "NASA GeneLab (OSD-46)",
+        "study": "NASA OSDR OSD-46 / GeneLab GLDS-46 Arabidopsis radiation microarray",
+        "repository": "NASA Open Science Data Repository",
+        "why": "Same NASA measurement set as the radiation-quality model.",
     },
 }
-EXTERNAL_SERVICES_BY_NAME = {item["name"]: model_id
-                             for model_id, item in EXTERNAL_SERVICES.items()}
-CATALOGUE_MODEL_IDS = MODEL_IDS | set(EXTERNAL_SERVICES)
+
+# The catalogue is exactly the set of models this module can load and serve. The reference-ET0
+# calculation is not a model and is catalogued separately by `app.et0.physics_status()`.
+CATALOGUE_MODEL_IDS = MODEL_IDS
+
+
+def provenance_for(model_id: str) -> dict:
+    """Structured provenance for a served model. Unrecorded is an error, not a silent default."""
+    record = PROVENANCE.get(model_id)
+    if record is None:
+        raise KeyError(f"{model_id} has no recorded provenance")
+    return dict(record, sourceType=record["label"])
 
 
 def read_json(path):
@@ -315,142 +391,103 @@ def _classification_record(model_id):
     }
 
 
-def _external_calibration(card_path: Path) -> dict:
-    """Measured interval coverage for an externally served model, straight from its card."""
-    uncertainty = {}
-    if card_path.is_file():
-        uncertainty = read_json(card_path).get("uncertainty") or {}
-    return {
-        "calibrated": False,
-        "nominalCoverage": 95.0 if uncertainty else None,
-        "measuredCoverage": uncertainty.get("coverageOnHoldoutPct"),
-        "measuredWidth": uncertainty.get("halfWidthMm"),
-        "method": uncertainty.get("method", "unknown"),
-        "measuredOn": "temporal holdout 2024-01-01..2025-10-31",
-        "statement": ("Coverage is measured on held-out days, not guaranteed, and a 95 % interval "
-                      "on a computed target says nothing about a real crop."),
-    }
+def calculation_registry() -> list[dict]:
+    """Served calculations: published physics, no fitted parameters.
 
-
-def external_model_row(model_id: str) -> dict:
-    """Registry row for a model served by its own runtime.
-
-    Everything in it comes from the shipped model card, so the row cannot say more than the
-    artifact does. When the card is missing the row says so instead of disappearing - a model
-    that silently vanishes from the registry is worse than one that reports itself unavailable.
+    Kept out of `models` on purpose. A mechanistic calculation and a trained estimator are
+    different kinds of claim, and a catalogue that mixes them lets a reader assume the equation
+    has a held-out R2 and the model is as reliable as the equation.
     """
     from app import et0
 
-    service = EXTERNAL_SERVICES[model_id]
-    card_path = ROOT / service["card"]
-    status = et0.artifact_status()
-    base = {
-        "id": model_id,
-        "name": service["name"],
-        "status": status.get("status") or service["status"],
-        "deployed": bool(status.get("deployed", False)),
-        "servedBy": service["servedBy"],
-        "servedAt": service["endpoint"],
-        "target": service["target"],
-        "unit": service["outputUnit"],
-        "domain": ("Daily weather for a mid-latitude to equatorial site: " + ", ".join(
-                      f"{name} {bounds['min']}..{bounds['max']}"
-                      for name, bounds in (status.get("domainBounds") or {}).items())
-                  if status.get("domainBounds") else
-                  "Unknown: the artifact that records the training envelope is not available."),
-        "domainBounds": status.get("domainBounds"),
-        "artifactExists": bool(status.get("available")),
-        "artifactSha256": (hashlib.sha256(card_path.read_bytes()).hexdigest()
-                           if card_path.is_file() else None),
+    status = et0.physics_status()
+    return [{
+        "id": status["id"],
+        "name": status["name"],
+        "kind": "calculation",
+        "servedAt": status["servedAt"],
+        "deployed": status["deployed"],
+        "methods": status["methods"],
+        "evidenceClass": status["evidenceClass"],
+        "allPublishedExamplesWithinTolerance": status["allExamplesWithinTolerance"],
+        "measuredEt0Validation": status["measuredEt0Validation"],
+        "limitations": status["limitations"],
+        "classification": _classification_record("reference-et0"),
+    }]
+
+
+def _served_row(model_id: str, model: dict, metrics: dict, baseline: dict,
+                evidence_status: str, registered: dict) -> dict:
+    """One catalogue row: the artifact's own facts plus the provenance recorded for it."""
+    public = {k: v for k, v in model.items() if k not in ("linear", "forest", "boostedTrees")}
+    provenance = provenance_for(model_id)
+    return public | {
+        "artifactExists": True,
+        "artifactSha256": registered.get("sha256"),
+        "predictionStatus": evidence_status,
+        "baselineComparison": _baseline_comparison(metrics, baseline),
         "scientificClassification": _classification_record(model_id),
-        "explanationAvailable": False,
-        "calibration": _external_calibration(card_path),
-    }
-    if not status.get("available"):
-        return base | {
-            "features": [],
-            "limitations": [status.get("reason") or "artifact unavailable"],
-            "baselineComparison": _baseline_comparison({}, {}),
-        }
-    metrics = status.get("metrics") or {}
-    baseline = (status.get("baselineMetrics") or {}).get("hargreaves") or {}
-    return base | {
-        "features": status.get("features") or [],
-        "metrics": metrics,
-        "baselineMetrics": status.get("baselineMetrics") or {},
-        "predictionStatus": "experimental",
-        # Temporal holdout only. The same model loses to this baseline on an unseen site, so the
-        # comparison is stated with the split it was measured on rather than as a bare verdict.
-        "baselineComparison": _baseline_comparison(
-            {"MAE": metrics.get("mae")}, {"MAE": baseline.get("mae")}) | {
-            "measuredOn": "temporal holdout 2024-01-01..2025-10-31",
-            "crossSiteVerdict": ((status.get("validation") or {})
-                                 .get("acceptanceGate") or []),
+        "calibration": _calibration_status().get(model_id) or {
+            "calibrated": False,
+            "measuredCoverage": None,
+            "statement": "No measured interval coverage is recorded for this model.",
         },
-        "validation": status.get("validation"),
-        "improvementOverHargreaves": status.get("deploymentDecision"),
-        "limitations": status.get("limitations") or [],
-        "trainingData": status.get("trainingData"),
+        "explanationAvailable": _explanation_available(model_id),
+        "provenance": provenance,
+        # `sourceType` is the recorded provenance label, so every served row carries one. The
+        # artifact's own free-text value is kept beside it (not used for counting) so a
+        # disagreement between the two is visible rather than averaged away.
+        "sourceType": provenance.get("label"),
+        "artifactSourceType": model.get("sourceType"),
+        "supersedes": model.get("supersedes") or registered.get("supersedes"),
     }
 
 
 def model_registry():
+    """Every served model, with its provenance and the evidence behind its label."""
     registry = read_json(ARTIFACTS / "registry.json")
     registered = {item["id"]: item for item in registry.get("models", [])}
     models = []
     for model_id in sorted(CATALOGUE_MODEL_IDS):
-        if model_id in EXTERNAL_SERVICES:
-            try:
-                models.append(external_model_row(model_id))
-            except Exception as error:  # noqa: BLE001 - never break the registry on one row
-                models.append({"id": model_id, "name": EXTERNAL_SERVICES[model_id]["name"],
-                               "status": "unavailable", "artifactExists": False,
-                               "servedBy": EXTERNAL_SERVICES[model_id]["servedBy"],
-                               "limitations": [f"{type(error).__name__}: {error}"]})
-            continue
         try:
             model = load_model(model_id)
-            # Keep executable coefficients/tree arrays private, but expose the
-            # information a researcher needs to judge applicability.
-            metrics = model.get("metrics", {})
-            baseline = model.get("baselineMetrics", {})
-            # Prefer the status the artifact computed from its own measured
-            # metrics; fall back to a conservative default. A model must never be
-            # able to acquire a confident label by omission.
             declared = model.get("evidenceStatus")
-            if model_id == "mizuna-harvest-v1":
-                # Target mixes two measurement definitions across arms; see
-                # docs/DATA_HARMONIZATION.md H1. Never promotable.
-                evidence_status = "baseline-only"
-            elif declared:
-                evidence_status = declared
-            elif model.get("status") == "trained-exploratory":
-                evidence_status = "experimental"
-            else:
-                evidence_status = "insufficient-evidence"
-            models.append({k: v for k, v in model.items() if k not in ("linear", "forest", "boostedTrees") } | {
-                "artifactExists": True,
-                "artifactSha256": registered.get(model_id, {}).get("sha256"),
-                "predictionStatus": evidence_status,
-                "baselineComparison": _baseline_comparison(metrics, baseline),
-                # Phase 12: the facts a researcher needs to judge applicability were
-                # already computed and were simply not being served together.
-                "scientificClassification": _classification_record(model_id),
-                "calibration": _calibration_status().get(model_id) or {
-                    "calibrated": False,
-                    "measuredCoverage": None,
-                    "statement": "No measured interval coverage is recorded for this model.",
-                },
-                "explanationAvailable": _explanation_available(model_id),
-                # The artifact's own `supersedes` note is more specific than the registry
-                # id (it records that the predecessor is kept rather than overwritten), so
-                # the registry value only fills a gap and never overwrites it.
-                "supersedes": model.get("supersedes")
-                              or registered.get(model_id, {}).get("supersedes"),
-            })
+            evidence_status = (declared if declared else
+                               "experimental" if model.get("status") == "trained-exploratory"
+                               else "insufficient-evidence")
+            models.append(_served_row(model_id, model, model.get("metrics") or {},
+                                      model.get("baselineMetrics") or {},
+                                      evidence_status, registered.get(model_id) or {}))
         except (FileNotFoundError, KeyError, ValueError, json.JSONDecodeError):
-            models.append({"id": model_id, "name": model_id, "status": "unavailable", "artifactExists": False, "limitations": ["Verified model artifact not available; run the offline training pipeline."]})
-    return {"models": models, "simulatorMode": "Assumption-based mathematical estimates; separate from NASA-trained crop-specific and molecular models", "unsupportedTargets": ["Lettuce/tomato/radish ML yield", "measured water demand", "measured gas exchange", "disease image classification", "lunar/Martian predictive validation"]}
+            models.append({"id": model_id, "name": model_id, "status": "unavailable",
+                           "artifactExists": False,
+                           "limitations": ["Verified model artifact not available; run the offline training pipeline."]})
+    nasa = sum(1 for row in models
+               if (row.get("provenance") or {}).get("category") == "nasa-measured")
+    external = sum(1 for row in models
+                   if (row.get("provenance") or {}).get("category") == "external-measured")
+    return {
+        "models": models,
+        "calculations": calculation_registry(),
+        "counts": {
+            "models": len(models),
+            "nasaMeasured": nasa,
+            "externalMeasured": external,
+            "basis": ("Counted from each served model's recorded provenance, not from free-text "
+                      "artifact metadata. Retired models are not catalogued: their artifacts are "
+                      "kept as documented negative results."),
+        },
+        "simulatorMode": "Assumption-based mathematical estimates; separate from measured crop-specific and molecular models",
+        "unsupportedTargets": [
+            "Lettuce/tomato/radish ML yield",
+            "measured water demand",
+            "measured gas exchange",
+            "disease image classification",
+            "lunar/Martian predictive validation",
+            "mizuna harvest mass (single-experiment design; withdrawn)",
+            "absolute leaf microbial load (does not transfer across campaigns; withdrawn)",
+        ],
+    }
 
 
 def predict_probabilities(model, values):
@@ -702,7 +739,11 @@ def source_checksums():
         if path.is_file():
             verified = hashlib.sha256(path.read_bytes()).hexdigest() == item["sha256"]
         models.append({"id": item["id"], "sha256": item["sha256"],
-                       "supersedes": item.get("supersedes"), "verified": verified})
+                       "supersedes": item.get("supersedes"), "verified": verified,
+                       # Phase 31: an artifact can be retained without being served. The digest is
+                       # what makes a withdrawn result reproducible, so it stays listed - but a
+                       # caller must be able to tell which rows the API will actually run.
+                       "served": item["id"] in MODEL_IDS})
     report_path = ROOT / "data" / "metadata" / "ntrs_extraction_report.json"
     return {
         "schemaVersion": 1,
@@ -777,7 +818,7 @@ def evidence_summary():
             statuses[model_id] = "unavailable"
             continue
         statuses[model_id] = model.get("evidenceStatus") or (
-            "baseline-only" if model_id == "mizuna-harvest-v1" else "experimental")
+"experimental")
     return {
         "schemaVersion": 2,
         "modelEvidenceStatus": statuses,

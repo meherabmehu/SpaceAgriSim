@@ -380,6 +380,27 @@ def compare(crop_key: str, heat: float, growing_area_m2: float = POT_AREA_M2) ->
         "verdict": verdict,
         "verdictMeaning": VERDICTS[verdict],
         "isValidation": False,
+        # Phase 31: the level question is answered explicitly rather than left in a warning.
+        # The trial publishes pot volume but not pot diameter, pot spacing or canopy area, so the
+        # same daily water loss maps to anything from ~0.25x to ~2.7x the platform's flux
+        # depending on which denominator one assumes. A ratio computed under an assumed geometry
+        # cannot identify a bias, so it is reported as a shape comparison only.
+        "identification": {
+            "levelIdentified": False,
+            "shapeSupported": shape_supported,
+            "claim": ("Rank agreement between the measured seasonal water-use curve and the "
+                      "platform demand curve. The absolute level is not identified by this trial "
+                      "and no correction is applied to the simulator."),
+            "identifiableWith": (
+                "Per-day weather for the trial plus its pot diameter or plant spacing."),
+            "denominatorSpread": (
+                "The measured daily loss is 0.247x the platform flux on the pot-surface "
+                "assumption and 2.7x on the canopy-area assumption; both denominators are "
+                "assumptions, so the sign of any bias is indeterminate."),
+            "whyNotAssumed": (
+                "Choosing either denominator would decide the answer before the comparison was "
+                "made, and the trial publishes neither."),
+        },
         "benchmarkCrop": "lettuce",
         "requestedCrop": crop_key,
         "inputs": {

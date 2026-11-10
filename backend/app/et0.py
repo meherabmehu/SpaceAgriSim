@@ -1,43 +1,46 @@
-"""Reference-ET0 service: physics, learned surrogate, and the honest answer between them.
+"""Reference-ET0 service: published physics, and nothing learned on top of it.
 
-Three sources of a number, in order of authority:
+Two sources of a number, in order of authority:
 
     1. FAO-56 Penman-Monteith - published physics, no free parameters, checked against the worked
-       examples in its own source document. Served whenever radiation and wind are supplied.
-    2. Hargreaves-Samani - published physics, temperature and latitude only. The fallback, and the
-       value that generalises better across sites than anything learned here.
-    3. et0-emulator-v1 - a fitted surrogate of (1). Beats Hargreaves on held-out days from the
-       training sites and loses to it on unseen sites, so it is never returned alone.
+       examples in its own source document. Computed whenever radiation and wind are supplied.
+    2. Hargreaves-Samani - published physics, temperature and latitude only. Used when the
+       Penman-Monteith inputs are incomplete, because it is the published equation that the
+       missing inputs do not affect.
 
-The service degrades instead of failing: no artifact -> physics only; no scikit-learn -> physics
-only; unreadable artifact -> physics only. It never raises because a model file is missing,
-because ET0 has a correct answer without any model at all.
+Phase 31 removed the fitted ET0 surrogate (`et0-emulator-v1`) from the served pathway. It was a
+regression model trained on FAO-56 ET0 derived from NASA POWER reanalysis - not on measured ET0 -
+and on leave-one-site-out it was about 19 % worse than Hargreaves-Samani. Worse, when radiation
+and wind were absent it became the *primary* number in preference to Hargreaves, i.e. the service
+could return its least transferable estimate as the answer. A surrogate of an equation that is
+already computable from the same inputs adds approximation error and no information, so it is no
+longer served. Its artifact and evaluation remain in `ml/artifacts` and `ml/evaluation` as a
+recorded negative result; `/api/reference-et0/model` documents the physics instead.
+
+What is served here is a *computed standard* for a hypothetical reference grass surface. It is
+never a measurement, and never a measurement of any crop's water use.
+
+Note on the remaining inputs: the weather values a caller supplies are typically reanalysis
+(NASA POWER) rather than station observations. The service labels that distinction in every
+response instead of implying measured weather.
 """
 from __future__ import annotations
 
-import json
 import logging
 import math
-import warnings
-from functools import lru_cache
-from pathlib import Path
 
 from app.simulation import et0_fao56
 
 logger = logging.getLogger(__name__)
 
-# Why the last load attempt failed, so a deployment can be diagnosed from the API rather than
-# from the build log. A single "artifact missing or unreadable" answer cannot distinguish a file
-# that was not copied into the image from a dependency that was not installed, and those two have
-# completely different fixes.
-_LAST_LOAD_ERROR: dict = {}
-
-ROOT = Path(__file__).resolve().parents[2]
-ARTIFACT_JSON = ROOT / "ml" / "artifacts" / "et0-emulator-v1.json"
-ARTIFACT_MODEL = ROOT / "ml" / "artifacts" / "et0-emulator-v1.joblib"
-
 MAGNUS_A = 17.27
 MAGNUS_B = 237.3
+
+# Which inputs each method needs, published so a UI can say why a method was not available.
+METHOD_REQUIREMENTS = {
+    "penman-monteith": "daily tmax, tmin, dew point (or RH), solar radiation and wind speed",
+    "hargreaves": "daily tmax, tmin, latitude and day of year",
+}
 
 
 def _dewpoint_from_rh(t_celsius: float, rh_percent: float) -> float:
@@ -47,146 +50,58 @@ def _dewpoint_from_rh(t_celsius: float, rh_percent: float) -> float:
     return (MAGNUS_B * gamma) / (MAGNUS_A - gamma)
 
 
-@lru_cache(maxsize=1)
-def load_artifact() -> tuple[dict, dict] | None:
-    """Load the JSON card and the pickled model. Returns None when either is unusable.
+def physics_status() -> dict:
+    """The model card for the served ET0 calculation.
 
-    Cached because the artifact is immutable for the life of the process; `cache_clear()` is the
-    documented way to force a reload (the tests use it).
+    Everything here is a property of the published method or of this implementation of it, so the
+    card cannot claim more than the code does. The worked-example results are recomputed on each
+    call rather than stored, because a stored result is a claim about an older version of the code.
     """
-    if not ARTIFACT_JSON.is_file() or not ARTIFACT_MODEL.is_file():
-        return None
-    try:
-        card = json.loads(ARTIFACT_JSON.read_text(encoding="utf-8"))
-        import joblib
-        bundle = joblib.load(ARTIFACT_MODEL)
-        if not bundle.get("features") or bundle.get("model") is None:
-            raise ValueError("bundle is missing its feature list or model")
-        return card, bundle
-    except Exception as error:  # noqa: BLE001 - any failure means "physics only"
-        _LAST_LOAD_ERROR.clear()
-        _LAST_LOAD_ERROR.update({
-            "error": f"{type(error).__name__}: {error}",
-            "stage": "load",
-            "runtimeScikitLearn": _version_of("sklearn"),
-            "trainedScikitLearn": card.get("environment", {}).get("scikit-learn")
-            if isinstance(card, dict) else None,
-        })
-        logger.warning("ET0 emulator artifact unusable, serving physics only: %s", error)
-        return None
-
-
-def _version_of(package: str) -> str | None:
-    try:
-        return __import__(package).__version__
-    except Exception:  # noqa: BLE001 - an unimportable package has no version to report
-        return None
-
-
-def load_diagnostics() -> dict:
-    """What the loader can see, without attempting a second load.
-
-    Deliberately reports the two failures separately: a missing file means the artifact was not
-    shipped, a missing package means the runtime image is incomplete. The first production deploy
-    of this feature was the second case, and the single generic message hid it for several minutes.
-    """
-    packages = {}
-    for name in ("joblib", "sklearn", "numpy"):
-        try:
-            __import__(name)
-            packages[name] = True
-        except Exception:  # noqa: BLE001 - an unimportable package is the finding
-            packages[name] = False
-    return {
-        "cardFilePresent": ARTIFACT_JSON.is_file(),
-        "modelFilePresent": ARTIFACT_MODEL.is_file(),
-        # Not relative_to(ROOT): under a test monkeypatch the path may point outside the tree, and
-        # a diagnostic that raises on the path it is meant to report is worse than useless.
-        "cardPath": str(ARTIFACT_JSON),
-        "modelPath": str(ARTIFACT_MODEL),
-        "packages": packages,
-        "lastLoadError": _LAST_LOAD_ERROR.get("error"),
-        "runtimeScikitLearn": _LAST_LOAD_ERROR.get("runtimeScikitLearn"),
-        "trainedScikitLearn": _LAST_LOAD_ERROR.get("trainedScikitLearn"),
-    }
-
-
-def artifact_status() -> dict:
-    """Availability and the gate results that decide how the artifact may be used."""
-    loaded = load_artifact()
-    if loaded is None:
-        diagnostics = load_diagnostics()
-        if not (diagnostics["cardFilePresent"] and diagnostics["modelFilePresent"]):
-            reason = ("the emulator artifact is not present in this deployment; the service "
-                      "serves FAO-56 physics only")
-        elif not all(diagnostics["packages"].values()):
-            missing = [name for name, present in diagnostics["packages"].items() if not present]
-            reason = (f"the runtime image is missing {', '.join(missing)}, so the emulator bundle "
-                      "cannot be loaded; the service serves FAO-56 physics only")
-        else:
-            reason = (f"the emulator bundle could not be loaded ({diagnostics['lastLoadError']}); "
-                      "the service serves FAO-56 physics only")
-        return {
-            "available": False,
-            "modelId": "et0-emulator-v1",
-            "reason": reason,
-            "diagnostics": diagnostics,
-            "fallback": ("FAO-56 Penman-Monteith when radiation and wind are supplied, else "
-                         "Hargreaves-Samani"),
+    published = [
+        {key: row[key] for key in ("example", "publishedMmPerDay", "computedMmPerDay",
+                                   "ra", "rs")} | {
+            "differenceMmPerDay": round(row["computedMmPerDay"] - row["publishedMmPerDay"], 4),
+            "withinTolerance": bool(row.get("withinTolerance")),
         }
-    card, bundle = loaded
+        for row in et0_fao56.run_published_examples()
+    ]
     return {
-        "available": True,
-        "fallback": ("FAO-56 Penman-Monteith is the primary number whenever radiation and wind "
-                     "are supplied; the emulator is offered beside it. When they are missing the "
-                     "physics is Hargreaves-Samani."),
-        "modelId": card.get("modelId"),
-        "status": card.get("status"),
-        "deployed": card.get("deployed"),
-        "deploymentDecision": card.get("deploymentDecision"),
-        "features": bundle.get("features"),
-        "variant": bundle.get("variant"),
-        # The recorded training envelope; the service flags any input outside it, and the registry
-        # row publishes it so a caller can see the domain before asking for a number.
-        "domainBounds": bundle.get("oodBounds"),
-        "intervalMm": bundle.get("halfWidthMm"),
-        "validation": {
-            "acceptanceGate": (card.get("validation") or {}).get("acceptanceGate"),
-            "gatesPassed": (card.get("validation") or {}).get("gatesPassed"),
-            "gatesTotal": (card.get("validation") or {}).get("gatesTotal"),
-            "losoSitesBeatingHargreaves": (card.get("validation") or {}).get(
-                "losoSitesBeatingHargreaves"),
-            "improvementOverHargreaves": card.get("improvementOverHargreaves"),
-            "evaluation": card.get("evaluation"),
+        "id": "reference-et0",
+        "name": "FAO-56 reference evapotranspiration (Penman-Monteith, with Hargreaves-Samani)",
+        "kind": "calculation",
+        "standard": "FAO-56 Penman-Monteith daily reference evapotranspiration (FAO-56 eq. 6)",
+        "implementation": "app.simulation.et0_fao56",
+        "servedAt": "/api/reference-et0/estimate",
+        "deployed": True,
+        "methods": dict(METHOD_REQUIREMENTS),
+        "publishedExamples": published,
+        "allExamplesWithinTolerance": all(row["withinTolerance"] for row in published),
+        "evidenceClass": "computed standard, not a measurement",
+        "measuredEt0Validation": {
+            "available": False,
+            "statement": (
+                "No measured-ET0 station benchmark is bundled, so the implementation is validated "
+                "against the FAO-56 manual's worked examples only. That validates the arithmetic, "
+                "not the weather it is fed."
+            ),
         },
-        "metrics": card.get("metrics"),
-        "baselineMetrics": card.get("baselineMetrics"),
-        "trainingData": card.get("trainingData"),
-        "limitations": card.get("limitations"),
-    }
-
-
-def _emulator_estimate(card: dict, bundle: dict, features: dict) -> dict:
-    import numpy as np
-
-    bounds = bundle.get("oodBounds") or {}
-    outside = [name for name, limit in bounds.items()
-               if name in features
-               and (features[name] < limit["min"] or features[name] > limit["max"])]
-    vector = np.asarray([[features[name] for name in bundle["features"]]], dtype=float)
-    # The model was fitted on a DataFrame, so predicting from a bare array emits a feature-name
-    # warning. Column order is pinned by the artifact's own feature list.
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", UserWarning)
-        value = float(bundle["model"].predict(vector)[0])
-    half_width = float(bundle.get("halfWidthMm") or 0.0)
-    return {
-        "et0MmPerDay": round(value, 3),
-        "intervalMm": [round(max(value - half_width, 0.0), 3), round(value + half_width, 3)],
-        "intervalCoveragePct": (card.get("uncertainty") or {}).get("coverageOnHoldoutPct"),
-        "outOfDistribution": bool(outside),
-        "outsideFeatures": outside,
-        "modelId": card.get("modelId"),
+        "removedSurrogate": {
+            "modelId": "et0-emulator-v1",
+            "removedIn": "Phase 31",
+            "reason": (
+                "Fitted on FAO-56 ET0 derived from NASA POWER reanalysis, about 19 % worse than "
+                "Hargreaves-Samani on leave-one-site-out, and preferred as the primary number "
+                "when radiation and wind were missing. A surrogate of an equation that is "
+                "computable from the same inputs adds error and no information."
+            ),
+            "retainedFor": "ml/artifacts/et0-emulator-v1.json and ml/evaluation, as a negative result.",
+        },
+        "limitations": [
+            "ET0 is a computed flux for a reference grass surface, not a measurement of a crop's water use.",
+            "Penman-Monteith needs radiation and wind; without them only Hargreaves-Samani is computed and the response says so.",
+            "Reanalysis weather is not station weather; the response labels which inputs were supplied.",
+            "Reference ET0 is the flux a water balance starts from; it is not crop water demand until a crop coefficient is applied.",
+        ],
     }
 
 
@@ -203,7 +118,7 @@ def estimate(
     wind_speed_ms: float | None = None,
     pressure_kpa: float | None = None,
 ) -> dict:
-    """ET0 from whichever methods the inputs allow, with the primary method named."""
+    """ET0 from whichever published method the inputs allow, with the method named."""
     tmean = (tmax_c + tmin_c) / 2.0
 
     if tdew_c is None:
@@ -234,39 +149,27 @@ def estimate(
             "aeroTermMm": round(result["aeroTermMm"], 3),
             "vpdKpa": round(result["vpdKpa"], 3),
             "netRadiationMJm2": round(result["netRadiationMJm2"], 3),
-            "requires": "solar radiation and wind speed",
+            "requires": METHOD_REQUIREMENTS["penman-monteith"],
         }
 
     hargreaves = et0_fao56.hargreaves_et0(tmax_c, tmin_c, ra_mj)
     hargreaves_block = {
         "et0MmPerDay": round(hargreaves["et0MmPerDay"], 3),
-        "requires": "temperature and latitude only",
-        "note": "better than the emulator on an unseen site in this project's own study",
+        "requires": METHOD_REQUIREMENTS["hargreaves"],
+        "note": ("Published temperature-based estimate. Used when radiation or wind is missing; "
+                 "it is less mechanistic than Penman-Monteith, not an alternative of equal "
+                 "standing."),
     }
-
-    loaded = load_artifact()
-    emulator = None
-    if loaded is not None:
-        card, bundle = loaded
-        features = {
-            "T2M_MAX": tmax_c, "T2M_MIN": tmin_c, "T2MDEW": tdew_used,
-            "doySin": math.sin(2 * math.pi * day_of_year / 365.0),
-            "doyCos": math.cos(2 * math.pi * day_of_year / 365.0),
-            "latitude": latitude, "elevationM": elevation_m,
-            "raMj": ra_mj, "daylightHours": daylight_hours,
-        }
-        try:
-            emulator = _emulator_estimate(card, bundle, features)
-        except Exception as error:  # noqa: BLE001 - never fail a physics question on a model
-            logger.warning("ET0 emulator prediction failed, using physics only: %s", error)
-            emulator = None
 
     if penman is not None:
         primary, value = "penman-monteith", penman["et0MmPerDay"]
-    elif emulator is not None:
-        primary, value = "emulator", emulator["et0MmPerDay"]
     else:
         primary, value = "hargreaves", hargreaves_block["et0MmPerDay"]
+
+    missing = [name for name, present in (
+        ("solarRadiationMJm2", solar_radiation_mj is not None),
+        ("windSpeedMs", wind_speed_ms is not None),
+    ) if not present]
 
     return {
         "primaryMethod": primary,
@@ -281,20 +184,30 @@ def estimate(
             "extraterrestrialRadiationMJm2": round(ra_mj, 3),
             "daylightHours": round(daylight_hours, 3),
         },
-        "methods": {"penmanMonteith": penman, "emulator": emulator,
-                    "hargreaves": hargreaves_block},
+        "methods": {"penmanMonteith": penman, "hargreaves": hargreaves_block},
+        "methodSelection": {
+            "primary": primary,
+            "usedFallback": penman is None,
+            "missingInputs": missing,
+            "reason": ("Radiation and wind were supplied, so the full Penman-Monteith equation "
+                       "was used." if penman is not None else
+                       f"Penman-Monteith needs {' and '.join(missing)}; only Hargreaves-Samani "
+                       "is computed."),
+        },
         "light": (et0_fao56.daily_light_integral(solar_radiation_mj)
                   if solar_radiation_mj is not None else None),
-        "evidenceClass": "computed standard + trained emulator, not a measurement",
+        "evidenceClass": "computed standard, not a measurement",
+        "weatherProvenance": {
+            "suppliedBy": "caller",
+            "isMeasured": False,
+            "statement": ("These are the weather inputs the caller supplied (typically NASA POWER "
+                          "reanalysis). The API does not verify them against a station and does "
+                          "not describe the result as measured ET0."),
+        },
         "limitations": [
-            ("Reference evapotranspiration is a computed standard, not a measurement of any "
-             "crop's water use."),
-            ("The emulator was validated against FAO-56 ET0 derived from NASA POWER reanalysis at "
-             "six sites; it is not validated for microgravity, low pressure, or LED-lit interiors."),
-            ("On an unseen site the emulator was about 19 % worse than Hargreaves-Samani, so both "
-             "values are returned and the emulator is flagged when the input falls outside its "
-             "training range."),
-            ("A real crop's water demand needs a crop coefficient (Kc) and a water-balance model; "
-             "ET0 is only the reference surface flux those steps start from."),
+            "Reference evapotranspiration is a computed standard, not a measurement of any crop's water use.",
+            "The implementation is validated against the FAO-56 manual's worked examples; no measured-ET0 station benchmark is bundled.",
+            "Not validated for microgravity, low pressure, or LED-lit interiors.",
+            "A real crop's water demand needs a crop coefficient (Kc) and a water-balance model; ET0 is only the reference surface flux those steps start from.",
         ],
     }

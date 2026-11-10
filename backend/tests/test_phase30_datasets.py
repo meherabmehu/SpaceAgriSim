@@ -221,21 +221,25 @@ def test_the_cea_evaluation_records_why_it_is_not_served():
     assert artifact["dataset"]["doi"] == "10.5281/zenodo.17764612"
 
 
-def test_both_artifacts_are_wired_to_the_served_surfaces():
-    """An evaluation nobody can reach is a file, not evidence."""
+def test_the_cea_artifact_is_wired_to_a_served_surface_and_the_harvest_one_is_recorded():
+    """An evaluation nobody can reach is a file, not evidence; one that advertised a removed
+    workflow was worse, which is why Phase 31 split these two cases.
+    """
     harvest = _json(HARVEST_EVAL)
     cea = _json(CEA_EVAL)
     capability = subprocess.run(
         [sys.executable, "-c",
          "import json,sys; sys.path.insert(0,'backend');"
-         "from app.workflows import harvest, cea_evidence;"
-         "print(json.dumps({'h': harvest.capability(), 'c': cea_evidence.capability()}))"],
+         "from app.workflows import cea_evidence;"
+         "print(json.dumps(cea_evidence.capability()))"],
         cwd=ROOT, capture_output=True, text=True)
     assert capability.returncode == 0, capability.stderr
     payload = json.loads(capability.stdout)
-    ids = {item["artifact"] for item in payload["h"]["evaluations"] if "artifact" in item}
-    assert "ml/evaluation/phase30_harvest_crossstudy.json" in ids
-    assert payload["c"]["predictiveModel"]["evidenceFile"] == \
+    assert payload["predictiveModel"]["evidenceFile"] == \
         "ml/evaluation/phase30_cea_wheat_response.json"
     assert cea["served"] is False
+    # The harvest evaluation is retained and still says it failed; it is reachable through the
+    # repository and docs/PHASE31_REMOVED_MODELS.md rather than through an API route.
     assert harvest["promoted"] is False
+    assert HARVEST_EVAL.is_file()
+    assert "harvest" in (ROOT / "docs" / "PHASE31_REMOVED_MODELS.md").read_text().lower()

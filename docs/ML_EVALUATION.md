@@ -1,5 +1,12 @@
 # ML Evaluation — Phase 6
 
+> **Phase 31 status note (2026-11-09).** This document records the evidence as of the phase
+> that produced it and is kept as a historical record. Three models described in it are no longer
+> served: `mizuna-harvest-v1`, `mizuna-microbial-load-v1` and `et0-emulator-v1`. Their artifacts and
+> evaluations are retained, and the reasons for withdrawal are in
+> [`PHASE31_REMOVED_MODELS.md`](PHASE31_REMOVED_MODELS.md). Read the model catalogue at
+> `/api/models` (or `python3 scripts/audit_models.py`) for what the application serves now.
+
 Detailed evaluation evidence. Summary metrics live in `docs/ML_TRAINING_REPORT.md`.
 
 ---

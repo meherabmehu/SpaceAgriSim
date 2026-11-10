@@ -77,7 +77,7 @@ const WORLDS = {
 };
 
 export default function MissionPlatform() {
-  const { config, source } = useSimulationConfig();
+  const { config, status: configStatus, error: configError, retry: retryConfig } = useSimulationConfig();
   const { params, setParam, resetParams } = useSimulationParams(config);
   const { result, error, isLoading, retry } = useSimulation(params);
   const [page, setPage] = useState(() => location.hash.slice(1) || "dashboard");
@@ -272,13 +272,17 @@ export default function MissionPlatform() {
             <strong>{title}</strong>
           </div>
           <div className="topbar-right">
-            <span className={`connection ${error ? "offline" : ""}`}>
+            <span className={`connection ${error || configStatus === "error" ? "offline" : ""}`}>
               <i />
               {error
                 ? "API unavailable"
-                : isLoading
-                  ? "Computing"
-                  : "API connected"}
+                : configStatus === "error"
+                  ? "Configuration unavailable"
+                  : isLoading
+                    ? "Computing"
+                    : configStatus === "live"
+                      ? "API connected"
+                      : "Connecting"}
             </span>
             <span className="research-tag">RESEARCH PREVIEW</span>
             {session ? (
@@ -339,11 +343,22 @@ export default function MissionPlatform() {
               <button onClick={retry}>Retry connection</button>
             </div>
           )}
-          {source === "fallback" && (
-            <p className="fallback-note">
-              Loading API configuration; bundled control ranges shown until
-              connected.
+          {configStatus === "loading" && (
+            <p className="fallback-note" role="status">
+              Connecting to the simulation API; control ranges load on connection.
             </p>
+          )}
+          {configStatus === "error" && (
+            <div className="error-banner" role="alert">
+              <Radio size={18} />
+              <span>
+                Control ranges could not be loaded
+                {configError?.message ? `: ${configError.message}` : "."}{" "}
+                The sliders are showing bundled placeholders rather than the API&apos;s
+                values, so running and saving are disabled until the API answers.
+              </span>
+              <button onClick={retryConfig}>Retry</button>
+            </div>
           )}
           <div
             className={`simulation-content ${isLoading ? "updating" : ""}`}
@@ -654,10 +669,20 @@ export default function MissionPlatform() {
             </span>
             <button
               onClick={saveScenario}
-              disabled={!result || isLoading || !!error || config.capabilities?.historyWritesEnabled === false}
-              title={config.capabilities?.historyWritesEnabled === false ? 'Hosted history is read only. Configure a durable database and enable history writes to save scenarios.' : 'Save current configuration to shared history'}
+              disabled={!result || isLoading || !!error || configStatus !== "live" || config.capabilities?.historyWritesEnabled === false}
+              title={
+                configStatus !== "live"
+                  ? "The API configuration has not loaded, so scenario saving is unavailable."
+                  : config.capabilities?.historyWritesEnabled === false
+                    ? "Hosted history is read only. Configure a durable database and enable history writes to save scenarios."
+                    : "Save current configuration to shared history"
+              }
             >
-              {config.capabilities?.historyWritesEnabled === false ? 'History read only' : 'Save scenario'}
+              {configStatus !== "live"
+                ? "Saving unavailable"
+                : config.capabilities?.historyWritesEnabled === false
+                  ? "History read only"
+                  : "Save scenario"}
               <ChevronRight size={13} />
             </button>
           </footer>

@@ -64,6 +64,11 @@ def test_api_metrics_match_the_artifacts_exactly(report):
 
     served = {model["id"]: model for model in research.model_registry()["models"]}
     for row in report["models"]:
+        if row["id"] in research.RETIRED_MODEL_IDS:
+            # Withdrawn artifacts are still audited and still checksummed, but they publish no
+            # metrics through the API - which is the point of withdrawing them.
+            assert row["id"] not in served
+            continue
         numeric = {name: value for name, value in served[row["id"]]["metrics"].items()
                    if isinstance(value, (int, float))}
         assert numeric == row["metrics"], row["id"]
@@ -82,12 +87,32 @@ def test_superseded_predecessors_are_kept_not_overwritten(report):
         assert (ARTIFACTS / f"{predecessor}.json").is_file()
 
 
-def test_retired_models_are_not_served_and_nothing_else_is_retired(report):
-    retired = [row["id"] for row in report["models"] if row["runStatus"] == "retired"]
-    assert retired == ["mizuna-microbial-load-v1"]
+def test_no_served_model_is_retired_and_every_withdrawal_is_recorded(report):
+    """Phase 31: the retired state no longer exists in the served set - removal replaced it."""
+    assert [row["id"] for row in report["models"] if row["runStatus"] == "retired"] == []
     for row in report["models"]:
         if row["classification"]:
-            assert (row["runStatus"] == "retired") == (row["classification"]["category"] == 6)
+            assert row["classification"]["category"] != 6, row["id"]
+            assert row["runStatus"] != "retired", row["id"]
+
+    from app import research
+    # The two withdrawn models that were registered artifacts are audited (checksummed, provenance
+    # checked) and appear with no catalogue status. The ET0 emulator only ever shipped a card, so
+    # it is covered by the named checks rather than by a model row.
+    withdrawn = {row["id"] for row in report["models"] if row["id"] in research.RETIRED_MODEL_IDS}
+    assert withdrawn == {"mizuna-harvest-v1", "mizuna-microbial-load-v1"}
+    checks = {entry["check"]: entry["passed"] for entry in report["checks"]}
+    assert checks["withdrawn-surrogate-not-served:et0-emulator-v1"] is True
+    assert checks["retained-not-served-by-api:mizuna-harvest-v1"] is True
+    assert checks["retained-not-served-by-api:mizuna-microbial-load-v1"] is True
+    assert checks["retained-not-routed:mizuna-harvest-v1"] is True
+    assert checks["retained-not-routed:mizuna-microbial-load-v1"] is True
+    for row in report["models"]:
+        if row["id"] in research.RETIRED_MODEL_IDS:
+            # Retained, checksummed, and invisible to every served surface.
+            assert row["runStatus"] is None and row["classification"] is None, row["id"]
+            assert row["checksumMatches"] is True, row["id"]
+            assert research.RETIRED_MODEL_IDS[row["id"]].strip()
 
 
 def test_no_classifier_is_presented_as_calibrated(report):

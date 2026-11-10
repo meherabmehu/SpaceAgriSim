@@ -114,27 +114,6 @@ FEATURES: list[Feature] = [
             "Still external Earth data, not NASA data, and still not space-crop calibrated.",
         ],
     ),
-    Feature(
-        id="mizuna-microbial-load-v1",
-        name="Mizuna absolute leaf microbial load (VEG-04A/B)",
-        surface="POST /api/predict/mizuna-microbial-load-v1",
-        category=6,
-        status="retired-as-prediction",
-        evidence=(
-            "NASA OSD-780 measured plate counts, but leave-one-experiment-out R2 is "
-            "-0.55 and -0.58: worse than predicting the training mean."
-        ),
-        user_facing=(
-            "The predictive endpoint now returns HTTP 410 with the measured transfer "
-            "failure. The artifact stays registered so the Phase 6 result remains "
-            "reproducible."
-        ),
-        notes=[
-            "Absolute load for an unseen campaign is not identifiable from the features.",
-            "Phase 7 showed the campaign offset, not the flight/ground effect, is what fails to transfer.",
-            "Superseded for prediction by mizuna-microbial-relative-load-v2.",
-        ],
-    ),
     # ---------------------- category 4/5: mechanistic ------------------------
     Feature(
         id="mizuna-microbial-relative-load-v2",
@@ -228,19 +207,6 @@ FEATURES: list[Feature] = [
             "cultivar by more than the light effect.",
             "Still Earth data, still trained-exploratory, still not a space-crop prediction.",
         ],
-    ),
-    Feature(
-        id="mizuna-harvest-v1",
-        name="Mizuna harvest fresh mass per pillow",
-        surface="POST /api/predict/mizuna-harvest-v1",
-        category=3,
-        status="served-baseline-only",
-        evidence=(
-            "14 usable OSD-655 endpoints. The target definition differs between the "
-            "two arms (DATA_HARMONIZATION.md H1)."
-        ),
-        user_facing="Labelled exploratory; the registry pins it at 'baseline-only' and never promotes it.",
-        notes=["Cannot recommend irrigation and cannot infer causality."],
     ),
     Feature(
         id="tomato-flight-response-v1",
@@ -357,26 +323,27 @@ FEATURES: list[Feature] = [
     ),
     # ------------------------- category 4: mechanistic ----------------------
     Feature(
-        id="et0-emulator-v1",
-        name="Reference ET0 emulator (gradient-boosted surrogate of FAO-56)",
+        id="reference-et0",
+        name="FAO-56 reference evapotranspiration (Penman-Monteith; Hargreaves-Samani fallback)",
         surface="GET /api/reference-et0/estimate, POST /api/simulate (et0MmPerDay)",
         category=4,
         status="served-mechanistic",
         evidence=(
-            "Category 4, not 1 or 3. The target it reproduces is FAO-56 Penman-Monteith "
-            "reference ET0 computed from NASA POWER reanalysis weather - a standard, not a "
-            "measurement - and its error is measured against that computed standard. It was "
-            "never compared with a lysimeter, a sap-flow sensor or a flux tower. On a "
-            "leave-one-site-out test it is about 14 % worse than Hargreaves-Samani, so the "
-            "FAO-56 equation remains the primary number and the emulator is offered beside it."
+            "Category 4, not 1 or 3. FAO-56 Penman-Monteith is a published equation with no fitted "
+            "parameters, implemented here and checked against the manual's own worked examples "
+            "(FAO-56 eq. 6). When radiation or wind is missing the published Hargreaves-Samani "
+            "equation is used and named. Neither is a measurement: no lysimeter, sap-flow or "
+            "flux-tower ET0 benchmark is bundled, and the weather input is typically NASA POWER "
+            "reanalysis rather than a station record."
         ),
         user_facing=(
-            "Served with the physics alternatives, the acceptance gates it failed, a conformal "
-            "interval, and an out-of-distribution flag when an input leaves its training range."
+            "Served with the method named, the inputs each method needs, which inputs were missing, "
+            "and a statement that the result is computed rather than measured."
         ),
         notes=[
-            "The label is computed from reanalysis, so a perfect score would prove it learned "
-            "the equation, not that it predicts a crop's water use.",
+            "Phase 31 removed the fitted ET0 surrogate (et0-emulator-v1): it was trained on derived "
+            "FAO-56 ET0, was about 19 % worse than Hargreaves-Samani on leave-one-site-out, and was "
+            "preferred as the primary number when radiation and wind were absent.",
             "Not validated for microgravity, low pressure or LED-lit interiors.",
             "Water demand from ET0 still needs a crop coefficient; Kc defaults to 1.0, which "
             "describes the reference surface rather than a crop.",

@@ -4,24 +4,31 @@ import { api } from "../../services/platformApi.ts";
 import { useResource, RequestState, JsonDetails } from "./moduleSupport.jsx";
 import { Layers3, ShieldAlert, ShieldCheck } from "lucide-react";
 
-// The category name and service statement are taken from the API rather than restated
-// here, so the panel cannot drift from app/science_classification.py.
+// Provenance comes from the API as a structured record (`provenance.category`), not from a regex
+// over free-text artifact metadata. Phase 31 replaced that regex: four of the previous ten entries
+// had no `sourceType` at all and were reported as "source type not recorded", and the ET0 emulator
+// was counted as NASA-derived although it had been fitted on a *derived* product.
 function sourceLabel(model) {
-  const sourceType = model.sourceType || "";
-  if (/^NASA/i.test(sourceType)) return "NASA OSDR training data";
-  if (/not NASA/i.test(sourceType)) return "external data, not NASA";
-  if (model.sourceStudy) return `source type not recorded (${model.sourceStudy})`;
-  return "source type not recorded";
+  const provenance = model.provenance || {};
+  if (provenance.label) return provenance.label;
+  if (model.sourceStudy) return `source not recorded (${model.sourceStudy})`;
+  return "source not recorded";
 }
 
 function isNasaDerived(model) {
-  return /^NASA/i.test(model.sourceType || "");
+  return (model.provenance || {}).category === "nasa-measured";
 }
 
 export function ScientificStatusPanel() {
   const state = useResource("/workflow/models");
   const models = state.data?.models || [];
   const nasa = models.filter(isNasaDerived);
+  const external = models.filter(
+    (model) => (model.provenance || {}).category === "external-measured",
+  );
+  const unrecorded = models.filter(
+    (model) => !(model.provenance || {}).category,
+  );
   return (
     <Card
       title="Scientific status of every served model"
@@ -32,18 +39,20 @@ export function ScientificStatusPanel() {
       {models.length > 0 && (
         <>
           <p className="prose">
-            {nasa.length} of {models.length} models were trained on NASA OSDR data. The
-            rest record a different or unstated source and are labelled as such: not
-            every served model is NASA-trained. No served model reports calibrated
-            probabilities, so the measured interval coverage below is an evaluation
-            result and not a promise about a future campaign.
+            {nasa.length} of {models.length} served models were trained on measurements
+            produced by NASA experiments and retrieved from a NASA repository;{" "}
+            {external.length} were trained on non-NASA measured data. Each card names the
+            study and the repository. No served model reports calibrated probabilities, so
+            the measured interval coverage below is an evaluation result and not a promise
+            about a future campaign. Models withdrawn in Phase 31 are not listed here: their
+            artifacts and evaluations are kept as documented negative results.
           </p>
           <div className="badge-row">
-            <span className="pill green">{nasa.length} NASA-trained</span>
-            <span className="pill">{models.length - nasa.length} other sources</span>
-            <span className="pill amber">
-              {models.filter((model) => model.runStatus === "retired").length} retired
-            </span>
+            <span className="pill green">{nasa.length} NASA-measured</span>
+            <span className="pill">{external.length} non-NASA measured</span>
+            {unrecorded.length > 0 && (
+              <span className="pill amber">{unrecorded.length} source unrecorded</span>
+            )}
           </div>
           <div className="module-grid">
             {models.map((model) => (
@@ -93,11 +102,6 @@ export function ScientificStatusPanel() {
                   <span>Feature explanations</span>
                   <strong>{model.explanationAvailable ? "available" : "not available"}</strong>
                 </div>
-                {model.retiredReason && (
-                  <div className="warning-box">
-                    <p>{model.retiredReason}</p>
-                  </div>
-                )}
                 <p className="muted fine">{model.inputFamilyDescription}</p>
               </Card>
             ))}

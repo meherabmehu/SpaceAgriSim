@@ -48,7 +48,10 @@ def test_catalogue_lists_every_served_model_with_its_family(client):
     payload = client.get("/api/workflow/models").json()
     ids = {row["modelId"] for row in payload["models"]}
     assert len(ids) == len(research.CATALOGUE_MODEL_IDS)
-    assert "mizuna-microbial-load-v1" in ids  # retired but kept reproducible
+    # Phase 31: the catalogue is the served set exactly. A withdrawn model has no row at all -
+    # "retired" as a runStatus was itself a visible card, which is what Phase 31 forbids.
+    assert set(ids) == set(research.MODEL_IDS)
+    assert not [model_id for model_id in research.RETIRED_MODEL_IDS if model_id in ids]
 
     families = {row["modelId"]: row["inputFamily"] for row in payload["models"]}
     assert families["radiation-quality-osd46-v1"] == "gene-expression"
@@ -57,18 +60,14 @@ def test_catalogue_lists_every_served_model_with_its_family(client):
     assert families["mizuna-microbial-relative-load-v2"] == "microbial"
 
 
-def test_catalogue_never_marks_a_retired_model_runnable(client):
+def test_the_catalogue_has_no_retired_or_external_service_rows(client):
+    """Two states only: runnable, or unavailable. Nothing else may appear in a served list."""
     rows = client.get("/api/workflow/models").json()["models"]
-    retired = [row for row in rows if row["runStatus"] == "retired"]
-    assert [row["modelId"] for row in retired] == ["mizuna-microbial-load-v1"]
-    assert retired[0]["runStatus"] == "retired"
-    # `external-service` is the third legitimate state: served, but by its own endpoint rather
-    # than by this workflow. It is never reported as runnable here, and the row names where it is.
-    assert all(row["runStatus"] in {"runnable", "external-service"}
-               for row in rows if row["modelId"] != "mizuna-microbial-load-v1")
-    external = [row for row in rows if row["runStatus"] == "external-service"]
-    assert [row["modelId"] for row in external] == ["et0-emulator-v1"]
-    assert external[0]["servedAt"] == "/api/reference-et0/estimate"
+    assert {row["runStatus"] for row in rows} <= {"runnable", "unavailable"}
+    assert [row["modelId"] for row in rows if row["runStatus"] != "runnable"] == []
+    # Every row names a model the API will actually run, and none of them is a withdrawn id.
+    for row in rows:
+        assert row["modelId"] in research.MODEL_IDS
 
 
 def test_catalogue_carries_classification_and_calibration_status(client):
@@ -174,12 +173,11 @@ def test_unknown_model_is_not_found(client):
     assert response.status_code == 404
 
 
-def test_retired_model_returns_gone_with_its_reasoning(client):
-    response = _run(client, "mizuna-microbial-load-v1", {"experiment": 1})
-    assert response.status_code == 410
-    detail = response.json()["detail"]
-    assert detail["error"] == "retired-model"
-    assert detail["message"]
+def test_a_withdrawn_model_is_not_found_by_the_workflow(client):
+    """Phase 31: removal, not a 410. A tombstone is still an advertised surface."""
+    for model_id in research.RETIRED_MODEL_IDS:
+        response = _run(client, model_id, {"experiment": 1})
+        assert response.status_code == 404, (model_id, response.status_code)
 
 
 # ----------------------------------------------------------------------------- run
@@ -305,11 +303,11 @@ def test_owner_can_delete_their_analysis_and_only_once(client):
 
 def test_retired_or_invalid_run_is_never_saved(client):
     headers = _headers(client, "invalidrun")
-    for model_id, inputs in (("mizuna-microbial-load-v1", {"experiment": 1}),
+    for model_id, inputs in (("mizuna-microbial-load-v1", {"experiment": 1}),  # withdrawn: 404
                              ("lettuce-earth-growth-v2", {**LETTUCE, "airTemperature": 900})):
         assert client.post("/api/workflow/run", headers=headers,
                            json={"modelId": model_id, "inputs": inputs,
-                                 "save": True}).status_code in (410, 422)
+                                 "save": True}).status_code in (404, 410, 422)
     assert client.get("/api/analyses", headers=headers).json()["analyses"] == []
 
 

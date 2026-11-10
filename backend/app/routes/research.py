@@ -15,15 +15,6 @@ from app.simulation import et0_fao56
 router = APIRouter(tags=["scientific data and models"])
 
 
-class HarvestPredictionRequest(BaseModel):
-    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
-    crop: Literal["mizuna"] = "mizuna"
-    waterSuppliedL: float = Field(ge=0, le=10)
-    establishedPlants: int = Field(ge=0, le=10)
-    environment: Literal["flight", "ground"]
-    spectrum: Literal["red", "blue"]
-
-
 class WaterUseComparisonRequest(BaseModel):
     """A live simulation's water demand, held against the measured lettuce benchmark.
 
@@ -350,11 +341,12 @@ def reference_et0_estimate(
     pressureKpa: float | None = Query(default=None, ge=50.0, le=110.0,
                                       description="Surface pressure, kPa (optional)"),
 ):
-    """Reference ET0 for one day, by every method the supplied inputs allow.
+    """Reference ET0 for one day, by the published method the supplied inputs allow.
 
-    FAO-56 Penman-Monteith needs radiation and wind. When either is missing the endpoint does
-    not guess: it returns Hargreaves-Samani (temperature and latitude only) as the primary
-    number, the emulator beside it, and the reason the physics was not available.
+    FAO-56 Penman-Monteith needs radiation and wind. When either is missing the endpoint does not
+    guess and does not fall back to anything learned: it computes Hargreaves-Samani (temperature
+    and latitude only), names it as the primary method, and reports which inputs were missing and
+    why. The result is a computed standard, never a measured ET0.
     """
     if tdewC is None and relativeHumidityPct is None:
         raise HTTPException(status_code=422,
@@ -374,34 +366,23 @@ def reference_et0_estimate(
 
 @router.get("/reference-et0/model")
 def reference_et0_model():
-    """The model card: what the emulator is, what it failed, and how it is served."""
-    card = et0.artifact_status()
-    published = [
-        {key: row[key] for key in ("example", "publishedMmPerDay", "computedMmPerDay",
-                                  "differenceMmPerDay", "withinTolerance")}
-        for row in et0_fao56.run_published_examples()
-    ]
-    return card | {
-        "physics": {
-            "module": "app.simulation.et0_fao56",
-            "standard": "FAO-56 Penman-Monteith daily reference evapotranspiration (eq. 6)",
-            "publishedExamples": published,
-            "allExamplesWithinTolerance": all(row["withinTolerance"] for row in published),
-            "note": ("These check the implementation against the source document's own worked "
-                     "examples. They validate the code, not the reanalysis weather it is fed."),
-        },
-        "serving": {
-            "primary": ("penman-monteith when radiation and wind are supplied, else "
-                        "hargreaves-samani"),
-            "emulatorRole": ("offered beside the physics, never instead of it; flagged when an "
-                             "input leaves its training range"),
-            "waterDemand": ("POST /api/simulate accepts et0MmPerDay and cropCoefficient and "
-                            "reports demandBasis"),
-        },
+    """The model card for the served ET0 calculation.
+
+    Phase 31 removed the fitted ET0 surrogate from the served pathway and replaced this card with
+    the physics: the standard, the inputs each method needs, the FAO-56 worked examples recomputed
+    on this call, and an explicit statement that no measured-ET0 benchmark is bundled.
+    """
+    return et0.physics_status() | {
+        "servedAt": "/api/reference-et0/estimate",
+        "waterDemand": ("POST /api/simulate accepts et0MmPerDay and cropCoefficient and reports "
+                        "demandBasis"),
         "provenance": {
-            "trainingData": "data/processed/et0_dataset.csv (NASA POWER, community AG)",
+            "standard": "FAO-56 chapter 4 (Allen et al., 1998), eq. 6",
+            "hargreaves": "Hargreaves & Samani (1985), temperature-based ET0",
+            "weatherInputs": ("Supplied by the caller and typically NASA POWER community AG "
+                              "reanalysis; reanalysis is not a station measurement."),
             "weatherLicense": "NASA POWER: no restrictions, citation requested",
-            "reproduce": "python3 ml/research/{acquire_power_climate,build_et0_dataset,train_et0_emulator}.py",
+            "workedExamples": "app.simulation.et0_fao56.run_published_examples(), asserted in tests",
         },
     }
 
@@ -593,15 +574,11 @@ def external_datasets():
     return {'datasets':[research.read_json(path)] if path.exists() else [],'note':'External scientific sources; separate from NASA study registry.'}
 
 
-@router.post("/predict/mizuna-harvest-v1")
-def predict_harvest(request: HarvestPredictionRequest):
-    model = artifact("mizuna-harvest-v1")
-    value, warnings = research.predict_values(model, [request.waterSuppliedL, request.establishedPlants, int(request.environment == "flight"), int(request.spectrum == "blue")])
-    if value < 0:
-        warnings.append("Linear estimate was negative and clipped to zero; do not interpret as a supported operating condition.")
-    value = max(0., value)
-    radius = model["interval"]["radius"]
-    return {"modelId": model["id"], "prediction": value, "unit": model["unit"], "method": model["method"], "sourceStudy": model["sourceStudy"], "interval": {"low": max(0., value-radius), "high": value+radius, "kind": model["interval"]["kind"]}, "outOfDistribution": bool(warnings), "warnings": warnings + model["limitations"], "inputs": request.model_dump()}
+# Phase 31 removed POST /api/predict/mizuna-harvest-v1. Held-out R2 was -0.333 against a
+# baseline of -0.138, i.e. the model was worse than predicting the training mean, on 14
+# samples from a single experiment. It was still reachable as a live form in the UI, so
+# the route, the form and the guided workflow were removed together rather than left
+# behind an error. The artifact and its evaluation remain as a recorded negative result.
 
 
 @router.get("/models/tomato-flight-response-v1/example")
@@ -624,68 +601,12 @@ def predict_molecular(request: MolecularPredictionRequest):
 
 
 # ---------------------------------------------------------------------------
-# Phase 6: NASA OSD-780 edible-leaf microbial load
+# Phase 7: NASA OSD-780 edible-leaf microbial load (within-campaign relative)
+#
+# Phase 31 removed the absolute-load surface entirely: no route, no request model,
+# no catalogue entry, no workflow input family. The artifact and its evaluation
+# remain in ml/artifacts and ml/evaluation as a documented negative result.
 # ---------------------------------------------------------------------------
-class MicrobialPredictionRequest(BaseModel):
-    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
-    experiment: Literal["VEG04A", "VEG04B"] = Field(
-        description="VEG-04 campaign; the model does not transfer across campaigns, so this is a required input")
-    environment: Literal["flight", "ground"]
-    spectrum: Literal["red", "blue"]
-    sanitised: bool = Field(description="Sampled after sanitisation (clean) or before (unclean)")
-    freshWeightG: float = Field(ge=0, le=50, description="Mass of the tissue subsample weighed for the assay, in grams. NOT harvest biomass.")
-    harvestIndex: int = Field(ge=1, le=5, description="VEG-04B harvest number; 1 for VEG-04A")
-
-
-@router.post(
-    "/predict/mizuna-microbial-load-v1",
-    deprecated=True,
-    responses={410: {"description": "Retired as a predictive feature by the Phase 8 "
-                                   "scientific integrity audit; see detail for evidence."}},
-)
-def predict_microbial(request: MicrobialPredictionRequest):
-    """Retired: absolute leaf microbial load is not predictable for an unseen campaign.
-
-    The Phase 6 artifact is retained and still registered, because deleting it would
-    destroy the reproducibility of the reported result. What has been withdrawn is the
-    *claim to predict*: leave-one-campaign-out R2 is -0.55 (VEG-04A held out) and -0.58
-    (VEG-04B held out), i.e. worse than predicting the training mean, on both held-out
-    campaigns. Phase 7 established that the campaign offset - not the flight/ground
-    effect - is the component that fails to transfer.
-
-    Phase 8's policy is that a surface whose only honest description is "worse than the
-    mean" must not answer 200 with a number. It keeps request validation so that a
-    malformed call still fails with 422, and returns 410 Gone with the measured
-    evidence instead of a prediction.
-
-    Use /predict/mizuna-microbial-relative-load-v2, which predicts the within-campaign
-    standardised load (held-out R2 +0.444 / +0.373, permutation p = 0.000).
-    """
-    model = artifact("mizuna-microbial-load-v1")
-    raise HTTPException(status_code=410, detail={
-        "error": "retired-prediction",
-        "modelId": model["id"],
-        "reason": (
-            "Absolute microbial load does not transfer to an unseen experiment; the "
-            "model is worse than the training mean on both held-out campaigns."
-        ),
-        "evidence": {
-            "leaveOneExperimentOutR2": {
-                campaign: result.get("R2")
-                for campaign, result in (model.get("leaveOneExperimentOut") or {}).items()
-            },
-            "transfersToHeldOutExperiment": bool(
-                (model.get("evidenceBasis") or {}).get("transfersToHeldOutExperiment", False)),
-        },
-        "retainedFor": (
-            "The registered artifact and its evaluation remain available via GET /api/models "
-            "so the Phase 6/7 result stays reproducible."
-        ),
-        "replacement": "/api/predict/mizuna-microbial-relative-load-v2",
-        "classification": "category 6 - unsupported scientific prediction",
-    })
-
-
 class MicrobialRelativePredictionRequest(BaseModel):
     """Inputs for the Phase 7 re-scoped microbial model.
 

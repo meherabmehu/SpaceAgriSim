@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-09T20:48:06.086848+00:00",
+  "generatedAt": "2026-11-10T19:30:57.787377+00:00",
   "phase": 7,
   "registrySchemaVersion": 1,
   "modelCount": 9,
@@ -132,6 +132,21 @@
       "detail": "b5d1532dac10 vs recorded b5d1532dac10"
     },
     {
+      "check": "withdrawn model is not served: et0-emulator-v1",
+      "passed": true,
+      "detail": "a withdrawn artifact is still in the served model set"
+    },
+    {
+      "check": "withdrawn model is not served: mizuna-harvest-v1",
+      "passed": true,
+      "detail": "a withdrawn artifact is still in the served model set"
+    },
+    {
+      "check": "withdrawn model is not served: mizuna-microbial-load-v1",
+      "passed": true,
+      "detail": "a withdrawn artifact is still in the served model set"
+    },
+    {
       "check": "no unregistered model artifacts",
       "passed": true,
       "detail": "orphans=[]"
@@ -170,16 +185,6 @@
       "check": "api can load: lettuce-earth-growth-v3",
       "passed": true,
       "detail": "?"
-    },
-    {
-      "check": "api can load: mizuna-harvest-v1",
-      "passed": true,
-      "detail": "?"
-    },
-    {
-      "check": "api can load: mizuna-microbial-load-v1",
-      "passed": true,
-      "detail": "experimental"
     },
     {
       "check": "api can load: mizuna-microbial-relative-load-v2",
@@ -337,54 +342,49 @@
       "detail": "Fails the 30% criterion; the improvement over v2 is real but the model is not validated for harvest "
     },
     {
-      "check": "external card exists: et0-emulator-v1",
+      "check": "withdrawn model is not in the served catalogue: et0-emulator-v1",
       "passed": true,
-      "detail": "ml/artifacts/et0-emulator-v1.json"
+      "detail": "withdrawn model still has a catalogue row"
     },
     {
-      "check": "service loads the card: et0-emulator-v1",
+      "check": "withdrawn model is not in GET /api/models: et0-emulator-v1",
       "passed": true,
-      "detail": "loaded"
+      "detail": "withdrawn model still appears in the served registry"
     },
     {
-      "check": "gates are recorded per criterion: et0-emulator-v1",
+      "check": "withdrawn model is not in the served catalogue: mizuna-harvest-v1",
       "passed": true,
-      "detail": "4 criteria"
+      "detail": "withdrawn model still has a catalogue row"
     },
     {
-      "check": "gate verdict matches its own numbers (beatsHargreavesTemporal): et0-emulator-v1",
+      "check": "withdrawn model is not in GET /api/models: mizuna-harvest-v1",
       "passed": true,
-      "detail": "observed=30.74 threshold=> 0 % lower MAE passed=True"
+      "detail": "withdrawn model still appears in the served registry"
     },
     {
-      "check": "gate verdict matches its own numbers (beatsClimatology): et0-emulator-v1",
+      "check": "withdrawn model is not in the served catalogue: mizuna-microbial-load-v1",
       "passed": true,
-      "detail": "observed=36.96 threshold=> 0 % lower MAE passed=True"
+      "detail": "withdrawn model still has a catalogue row"
     },
     {
-      "check": "gate verdict matches its own numbers (crossSiteGeneralisation): et0-emulator-v1",
+      "check": "withdrawn model is not in GET /api/models: mizuna-microbial-load-v1",
       "passed": true,
-      "detail": "observed=-13.82 threshold=> 0 % lower pooled MAE across LOSO passed=False"
+      "detail": "withdrawn model still appears in the served registry"
     },
     {
-      "check": "gate verdict matches its own numbers (intervalCoverage): et0-emulator-v1",
+      "check": "reference ET0 is catalogued as a calculation",
       "passed": true,
-      "detail": "observed=91.99 threshold=90-98 % empirical coverage passed=True"
+      "detail": "['reference-et0']"
     },
     {
-      "check": "metric directions are declared: et0-emulator-v1",
+      "check": "published examples pass: reference-et0",
       "passed": true,
-      "detail": "['bias', 'mae', 'r2', 'rmse']"
+      "detail": "FAO-56 worked examples did not all pass"
     },
     {
-      "check": "failed gates forbid deployment: et0-emulator-v1",
+      "check": "no measured-ET0 claim: reference-et0",
       "passed": true,
-      "detail": "verdicts={'beatsHargreavesTemporal': True, 'beatsClimatology': True, 'crossSiteGeneralisation': False, 'intervalCoverage': True} deployed=False"
-    },
-    {
-      "check": "temporal gate matches the recorded metrics: et0-emulator-v1",
-      "passed": true,
-      "detail": "model=0.3981 baseline=0.5748"
+      "detail": "a measured ET0 benchmark is claimed but none is bundled"
     }
   ],
   "passed": true,

@@ -1,0 +1,14 @@
+import { chromium } from '@playwright/test';
+const b = await chromium.launch({ args: ['--no-sandbox'] });
+const p = await b.newPage();
+p.on('console', m => console.log('console:', m.type(), m.text().slice(0,300)));
+p.on('pageerror', e => console.log('pageerror:', e.message.slice(0,400)));
+await p.goto('http://127.0.0.1:5173/#dashboard');
+await p.waitForTimeout(3000);
+console.log('connected:', await p.getByText('API connected', { exact: true }).count());
+await p.getByRole('button', { name: 'Open simulation lab' }).click();
+await p.waitForTimeout(4000);
+console.log('url:', p.url());
+console.log('h1/h2:', await p.locator('h1,h2').allInnerTexts());
+console.log('body:', (await p.locator('body').innerText()).slice(0,600));
+await b.close();
