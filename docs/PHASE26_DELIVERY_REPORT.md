@@ -1,6 +1,8 @@
 # Phase 26 delivery report — scientific dataset expansion and feature restoration
 
 **Branch:** `phase26-dataset-expansion`, based on `main` at `34056cf` (Phase 25 delivery).
+**Merged into `main`:** merge commit `0c1d4ae` (`--no-ff`), verified on the remote ref and
+re-verified from a fresh `--depth 1` clone of `main` (988 passed / 24 skipped).
 **Scope executed:** dataset discovery, acquisition with verification, preprocessing, one measured
 water-use validation, catalogue and gap-matrix regeneration, a twelve-feature readiness audit,
 tests and documentation. **No Render operation was performed and no Render configuration was
@@ -16,7 +18,8 @@ touched.** No production database was accessed and no migration was written.
 | `6e8c49d` | phase26: compare platform water demand against measured lettuce ET |
 | `d3b10d6` | phase26: catalogue 23 → 28 from hash-verified acquisitions |
 | `bb6df81` | phase26: audited feature readiness with a builder that refuses to overclaim |
-| *(this commit)* | phase26: reports and delivery record |
+| `ccf2ca6` | phase26: dataset expansion, feature restoration and model reports |
+| `0c1d4ae` | Merge branch 'phase26-dataset-expansion' into `main` |
 
 Every SHA above was verified against the remote ref with `git ls-remote` immediately after pushing.
 
@@ -82,8 +85,9 @@ to survive its own first attempt at exactly that failure mode.
 
 ## 6. Remaining manual steps
 
-1. **Merge or review** `phase26-dataset-expansion`; it is pushed and verified but not merged into
-   `main`.
+1. ~~Merge or review `phase26-dataset-expansion`.~~ **Done:** merged into `main` as `0c1d4ae`
+   (fast-forward-able, merged with `--no-ff` so the phase is revertable as one unit). The branch
+   ref is left in place and can be deleted whenever the owner prefers.
 2. **Deployment is out of scope for this phase** and was not attempted. Any deployment decision
    belongs to the owner.
 3. **PostgreSQL suite** still cannot run in this sandbox (no server on 5432); the 24 skips are
@@ -92,6 +96,13 @@ to survive its own first attempt at exactly that failure mode.
    blocking gap, and the new validation artefact now says exactly which two numbers it would need.
 5. **Do not** promote the weather-driven water path to default, and **do not** treat
    `phase26_measured_et_validation.json` as a validation score for any model.
+
+## 6a. Merge record
+
+`main` moved `34056cf` → `0c1d4ae`. The merge was a clean ancestor merge (no conflicts, no
+resolution needed), the full backend suite was run **before** pushing and again from a fresh clone
+**after**, and the eleven deliverables were confirmed present on the merged tree. No force-push, no
+history rewrite, and the branch was not deleted.
 
 ## 7. Verification commands
 
