@@ -45,7 +45,7 @@ def render(matrix: dict) -> str:
     lines = [
         "# SpaceAgriSim Dataset Gap Matrix",
         "",
-        f"Generated from `data/research/dataset_gap_matrix.json` on {date.today().isoformat()} "
+        f"Generated from `data/research/dataset_gap_matrix.json` on {matrix['generatedOn']} "
         "by `ml/research/build_gap_matrix.py`. Edit the JSON, not this file.",
         "",
         matrix["scope"],

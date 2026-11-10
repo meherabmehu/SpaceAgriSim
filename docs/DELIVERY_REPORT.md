@@ -354,3 +354,46 @@ and the CI backend job also runs SQLite in memory. §G's "not run" list still ap
    unchanged.
 4. **Commission the water-use trial** (§I step 6) — still the only route to closing the blocking gap.
 5. **Do not** promote the weather-driven water path to default (§I step 7).
+
+---
+
+## K. Phase 26 — scientific dataset expansion and feature restoration
+
+Branch `phase26-dataset-expansion`, based on `main` at `34056cf`. Read
+`docs/PHASE26_DELIVERY_REPORT.md` for the full record; the summary is here.
+
+### K.1 What changed
+
+| Area | Before | After |
+|---|---|---|
+| Catalogue | 23 datasets (A:1 B:5 C:8 D:3 E:5 F:1) | **28** (A:2 B:7 C:9 D:4 E:5 F:1) |
+| Verified licences | 9 | **14** |
+| Acquired Phase 26 datasets | 0 | 5, all hash-verified against publisher MD5 |
+| Measured crop water use in-repo | none | **345 pot-days, 35 published greenhouse lettuce pots** |
+| Gap matrix | 12 gaps, none closed | 12 gaps, none closed; `measured-eta` now `partially-addressed`, severity still `blocking` |
+| Feature readiness | no audit existed | 12 features audited; 0 production-ready, 4 research-ready, 4 experimental, 4 data-blocked |
+| Backend tests | 950 passed, 24 skipped | **988 passed, 24 skipped** |
+| Models retrained | — | **none** (no training-grade data arrived; see §3 of the model report) |
+
+### K.2 New scripts and artefacts
+
+`scripts/datasets/{registry,acquire,preprocess}.py`,
+`ml/research/validate_measured_et.py`, `ml/research/build_feature_readiness.py`,
+`data/processed/phase26/` (8 tables + 8 quality files),
+`data/metadata/phase26_acquisition_manifest.json`,
+`ml/evaluation/phase26_measured_et_validation.json`,
+`docs/PHASE26_FEATURE_COVERAGE_MATRIX.md` and the three Phase 26 reports.
+
+### K.3 Two corrections made to existing machinery
+
+1. **Gap-matrix reproducibility bug.** The renderer stamped `date.today()` into the committed
+   markdown, so `--check` failed on any day after generation. The date now comes from a
+   `generatedOn` field in the artefact. This was a latent failure, not a deliberate change.
+2. **Catalogue count test.** Updated from a hard-coded 23 to a hard-coded 28 with exact per-class
+   counts. The strict equality assertion is retained — it is the guard against count inflation — and
+   the test's docstring now justifies each class assignment.
+
+### K.4 Not done, on purpose
+
+No Render operation of any kind; no production database access; no migration; no threshold change; no
+model promotion; no UI or API change; no dataset counted that was not downloaded and verified.

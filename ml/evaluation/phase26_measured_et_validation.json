@@ -1,0 +1,325 @@
+{
+  "phase": 26,
+  "check": "measured-eta",
+  "title": "Platform crop-relative water demand vs measured greenhouse lettuce evapotranspiration",
+  "status": "evaluated",
+  "generatedAt": "2026-11-10T12:30:06.960541+00:00",
+  "measuredSide": {
+    "source": "data/processed/phase26/schroder2021_lettuce_et.csv",
+    "doi": "10.5281/zenodo.5550230",
+    "license": "CC BY 4.0",
+    "records": 345,
+    "pots": 35,
+    "treatments": [
+      "SC",
+      "TC-F",
+      "TC-G",
+      "TC-G2",
+      "TC-G3",
+      "VC-C",
+      "VC-P"
+    ],
+    "days": [
+      9,
+      11,
+      14,
+      16,
+      17,
+      19,
+      21,
+      23,
+      25,
+      28
+    ],
+    "measurementBasis": "gravimetric pot evapotranspiration (plant plus substrate)",
+    "excluded": {
+      "flagAboveIrrigationCeiling": "6 pot-days above the study's 350 mL/pot/day ceiling",
+      "outOfPublication": "4 autoclaved treatments marked unused by the publication"
+    }
+  },
+  "simulatedSide": {
+    "path": "water.daily_water_demand_l(crop, growth_fraction, area_m2, light_scale)",
+    "demandBasis": "crop-relative",
+    "crop": "lettuce",
+    "peakWaterLPerM2PerDay": 2.5,
+    "growthCurve": "growth.logistic_progress(day, 35), steepness 10.0",
+    "seedlingActivityFraction": 0.15,
+    "potAreaAssumptionM2": 0.0112,
+    "potVolumeL": 2.2,
+    "constantsChanged": []
+  },
+  "scalePerPot": {
+    "pooled": {
+      "n": 345,
+      "bias": -101.454133,
+      "mae": 101.454133,
+      "rmse": 113.842675,
+      "r2": -3.4626,
+      "pearson": 0.3706,
+      "measuredMean": 118.39372,
+      "predictedMean": 16.939587,
+      "ratioPredictedToMeasured": 0.1431
+    },
+    "byTreatment": {
+      "SC": {
+        "n": 50,
+        "bias": -111.67798,
+        "mae": 111.67798,
+        "rmse": 120.845803,
+        "r2": -5.0089,
+        "pearson": 0.4929,
+        "measuredMean": 128.636667,
+        "predictedMean": 16.958687,
+        "ratioPredictedToMeasured": 0.1318
+      },
+      "TC-F": {
+        "n": 50,
+        "bias": -78.681313,
+        "mae": 78.681313,
+        "rmse": 86.803647,
+        "r2": -3.9372,
+        "pearson": 0.4152,
+        "measuredMean": 95.64,
+        "predictedMean": 16.958687,
+        "ratioPredictedToMeasured": 0.1773
+      },
+      "TC-G": {
+        "n": 50,
+        "bias": -73.624647,
+        "mae": 73.624647,
+        "rmse": 82.231948,
+        "r2": -3.7885,
+        "pearson": 0.2263,
+        "measuredMean": 90.583333,
+        "predictedMean": 16.958687,
+        "ratioPredictedToMeasured": 0.1872
+      },
+      "TC-G2": {
+        "n": 49,
+        "bias": -101.24241,
+        "mae": 101.24241,
+        "rmse": 111.475451,
+        "r2": -4.0791,
+        "pearson": 0.4482,
+        "measuredMean": 118.166667,
+        "predictedMean": 16.924257,
+        "ratioPredictedToMeasured": 0.1432
+      },
+      "TC-G3": {
+        "n": 50,
+        "bias": -99.84798,
+        "mae": 99.84798,
+        "rmse": 108.565127,
+        "r2": -4.7848,
+        "pearson": 0.4187,
+        "measuredMean": 116.806667,
+        "predictedMean": 16.958687,
+        "ratioPredictedToMeasured": 0.1452
+      },
+      "VC-C": {
+        "n": 46,
+        "bias": -156.767453,
+        "mae": 156.767453,
+        "rmse": 168.90575,
+        "r2": -5.5605,
+        "pearson": 0.4632,
+        "measuredMean": 173.619565,
+        "predictedMean": 16.852112,
+        "ratioPredictedToMeasured": 0.0971
+      },
+      "VC-P": {
+        "n": 50,
+        "bias": -92.75798,
+        "mae": 92.75798,
+        "rmse": 101.552671,
+        "r2": -4.277,
+        "pearson": 0.4663,
+        "measuredMean": 109.716667,
+        "predictedMean": 16.958687,
+        "ratioPredictedToMeasured": 0.1546
+      }
+    },
+    "fittedSingleScale": 6.3346,
+    "fittedScaleDispersion": {
+      "min": 5.8778,
+      "max": 6.6113,
+      "spread": 0.7335
+    },
+    "leaveOneTreatmentOut": {
+      "SC": {
+        "n": 50,
+        "bias": -22.947879,
+        "mae": 36.850098,
+        "rmse": 52.858002,
+        "r2": -0.1496,
+        "pearson": 0.4929,
+        "measuredMean": 128.636667,
+        "predictedMean": 105.688788,
+        "ratioPredictedToMeasured": 0.8216,
+        "fittedScaleOnOtherTreatments": 6.2321
+      },
+      "TC-F": {
+        "n": 50,
+        "bias": 15.281255,
+        "mae": 40.28758,
+        "rmse": 49.559203,
+        "r2": -0.6094,
+        "pearson": 0.4152,
+        "measuredMean": 95.64,
+        "predictedMean": 110.921255,
+        "ratioPredictedToMeasured": 1.1598,
+        "fittedScaleOnOtherTreatments": 6.5407
+      },
+      "TC-G": {
+        "n": 50,
+        "bias": 21.535828,
+        "mae": 48.973099,
+        "rmse": 57.798576,
+        "r2": -1.3657,
+        "pearson": 0.2263,
+        "measuredMean": 90.583333,
+        "predictedMean": 112.119162,
+        "ratioPredictedToMeasured": 1.2377,
+        "fittedScaleOnOtherTreatments": 6.6113
+      },
+      "TC-G2": {
+        "n": 49,
+        "bias": -11.047135,
+        "mae": 39.307337,
+        "rmse": 51.483586,
+        "r2": -0.0833,
+        "pearson": 0.4482,
+        "measuredMean": 118.166667,
+        "predictedMean": 107.119532,
+        "ratioPredictedToMeasured": 0.9065,
+        "fittedScaleOnOtherTreatments": 6.3293
+      },
+      "TC-G3": {
+        "n": 50,
+        "bias": -9.089045,
+        "mae": 39.071214,
+        "rmse": 49.883111,
+        "r2": -0.2213,
+        "pearson": 0.4187,
+        "measuredMean": 116.806667,
+        "predictedMean": 107.717622,
+        "ratioPredictedToMeasured": 0.9222,
+        "fittedScaleOnOtherTreatments": 6.3518
+      },
+      "VC-C": {
+        "n": 46,
+        "bias": -74.565912,
+        "mae": 79.937844,
+        "rmse": 95.592346,
+        "r2": -1.1013,
+        "pearson": 0.4632,
+        "measuredMean": 173.619565,
+        "predictedMean": 99.053653,
+        "ratioPredictedToMeasured": 0.5705,
+        "fittedScaleOnOtherTreatments": 5.8778
+      },
+      "VC-P": {
+        "n": 50,
+        "bias": -1.085502,
+        "mae": 35.86554,
+        "rmse": 46.759468,
+        "r2": -0.1188,
+        "pearson": 0.4663,
+        "measuredMean": 109.716667,
+        "predictedMean": 108.631165,
+        "ratioPredictedToMeasured": 0.9901,
+        "fittedScaleOnOtherTreatments": 6.4056
+      }
+    },
+    "interpretation": "On the pot-surface denominator the platform's crop-relative demand is about a seventh of the measured pot water use, and the fitted scale is consistent across treatments (a 0.73 spread over a 6.34 level), so it is not a per-treatment artefact - but see denominatorSensitivity, where the same data on a canopy-area denominator reverses the sign of the discrepancy. Note what the scaled fit cannot be read as: a fitted scale of N is not evidence that peak water use is N times the profile value, because the same constant also absorbs the pot-area assumption, the untranspiring substrate surface, and the fact that evapotranspiration includes evaporation."
+  },
+  "shape": {
+    "points": 10,
+    "spearmanAcrossDays": 0.7212,
+    "pearsonAcrossDays": 0.4758,
+    "measuredTrendMlPerDayPerDay": 3.7859,
+    "note": "A high rank correlation with a large level error means the growth curve has the right season but the wrong magnitude; the two findings must be read together."
+  },
+  "perGramFreshMass": {
+    "n": 345,
+    "bias": -0.592568,
+    "mae": 0.592568,
+    "rmse": 0.685147,
+    "r2": -2.399,
+    "pearson": 0.5739,
+    "measuredMean": 0.692791,
+    "predictedMean": 0.100224,
+    "ratioPredictedToMeasured": 0.1447,
+    "treatmentHarvestFreshG": {
+      "SC": 103.86,
+      "TC-F": 187.16,
+      "TC-F-A": 193.8,
+      "TC-G": 160.66,
+      "TC-G-A": 185.92,
+      "TC-G2": 207.8,
+      "TC-G3": 209.46,
+      "VC-C": 243.94,
+      "VC-C-A": 232.88,
+      "VC-P": 157.38,
+      "VC-P-A": 173.38
+    },
+    "interpretation": "Fresh mass is the denominator the dataset actually supports: it is measured per plant, it is what the platform's growth model predicts, and it does not depend on the unpublished pot diameter. It does not remove the evaporation component."
+  },
+  "denominatorSensitivity": {
+    "leafArea": {
+      "source": "data/processed/phase26/greenlight2024_lettuce_harvest.csv (different experiment, different cultivar, so a cross-experiment order-of-magnitude check only)",
+      "reportedColumn": "leafAreaMm2",
+      "suspectedUnitError": "the sheet's 'leafAreaMm2' mean is 1298, which read literally is 0.0013 m2 for a 48 g lettuce with 20 leaves of 158 x 123 mm. Reconstructing 20 leaves of the simultaneously reported dimensions gives ~1350 cm2, so the column is numerically consistent with cm2 and off by 100x against its own unit label. Treated here as cm2 and labelled as an inference, not as a correction of the publisher's file.",
+      "leafAreaM2": 0.13
+    },
+    "denominators": {
+      "potSurfaceAssumption": {
+        "areaM2": 0.0112,
+        "measuredLPerM2PerDay": 10.571,
+        "profilePeakLPerM2PerDay": 2.5,
+        "profileOverMeasured": 0.236,
+        "profileIsHigher": false,
+        "basis": "the 0.0112 m2 pot-surface assumption"
+      },
+      "canopyLeafArea": {
+        "areaM2": 0.13,
+        "measuredLPerM2PerDay": 0.911,
+        "profilePeakLPerM2PerDay": 2.5,
+        "profileOverMeasured": 2.745,
+        "profileIsHigher": true,
+        "basis": "cross-experiment leaf area (order-of-magnitude check only)"
+      },
+      "freshMass": {
+        "unit": "mL per g fresh mass per day",
+        "measured": 0.6331,
+        "simulated": 0.0906,
+        "profileOverMeasured": 0.1447,
+        "basis": "fresh mass at harvest, no area needed"
+      }
+    },
+    "conclusion": "Against the platform's own 2.5 L/m2/day lettuce flux: on the pot-surface assumption measured water use is 4x the profile, and on a canopy-area assumption it is 0.37x the profile - the sign of the finding reverses with the denominator the study does not publish. The spread between those two readings is larger than either discrepancy. This dataset therefore cannot identify a level correction, and no constant may be changed on the strength of it. What does survive is the shape, which is denominator-free.",
+    "consequenceForThePlatform": [
+      "water.profile peak_water_l_per_day left unchanged",
+      "no crop coefficient published",
+      "the demand path is documented as unvalidated in level and partially supported in shape"
+    ]
+  },
+  "canItCloseTheGap": {
+    "gap": "measured-eta",
+    "conclusion": "not closed",
+    "why": [
+      "evapotranspiration is measured; transpiration is not separated from substrate evaporation",
+      "no per-day weather is published for the trial, so no reference ET0 and no crop coefficient can be derived",
+      "one cultivar, one greenhouse, four weeks, pot culture: this is a benchmark, not an operating-condition dataset",
+      "the trial ran on Earth; nothing here is a reduced-gravity observation"
+    ],
+    "blockedBy": "an unpublished geometric quantity (pot spacing / canopy area) that no downstream analysis can recover from this file",
+    "whatItDoesClose": "the 'no measured crop water use exists anywhere in the repository' half of the gap. A per-plant, per-day, replicated measurement now exists in-repo with its licence and hash, and the platform's water demand is compared against it in a committed, reproducible artefact. The gap's remaining blockers are the ones listed above, and they are not addressable from this dataset."
+  },
+  "notClaimed": [
+    "no crop coefficient is published or implied",
+    "no validation accuracy: this is an out-of-sample comparison against a third-party measurement, not a model score",
+    "no microgravity or spaceflight relevance",
+    "no claim that the simulator was corrected: the profile constants are untouched"
+  ]
+}

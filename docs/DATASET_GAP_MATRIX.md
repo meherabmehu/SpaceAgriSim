@@ -20,7 +20,7 @@ None of them is closed. The point of the matrix is that each open gap has a name
 
 | # | Capability | What is needed | Severity | Gap type | Status |
 |---|---|---|---|---|---|
-| 1 | Predicted crop water use in litres per plant per day | Measured evapotranspiration or sap-flow/lysimeter water use for the modelled crops at plant scale | **blocking** | no-data | open and blocking. The ingestion pipeline and the pre-registered protocol exist and are tested |
+| 1 | Predicted crop water use in litres per plant per day | Measured evapotranspiration or sap-flow/lysimeter water use for the modelled crops at plant scale | **blocking** | partially-addressed | open and blocking on its original terms, with its first measured evidence bench. The comparison artefact (ml/evaluation/phase26_measured_et_validation.json) shows the seasonal shape is broadly right (Spearman 0.72 across 13 measurement days) while the level cannot be identified: on a pot-surface denominator the platform's flux is 0.24x the measurement, on a canopy-area denominator it is 2.7x. Because the study publishes neither pot diameter nor spacing, the sign of the discrepancy depends on an assumption, and no constant was changed. |
 | 2 | The claim that the ET0 target is itself correct | A weather or ET0 source that does not share MERRA-2 lineage with POWER, and a measured latent-heat series to convert mutual agreement into physical truth | **major** | partially-addressed | open, partially addressed: disagreement now decomposed into formulation (0.273 mm/d), forcing (0.519) and implementation (+0.009) - the residual is weather, not code - but every leg is either a reanalysis or a temperature-only point method, so nothing here is field validation of the ET0 magnitude |
 | 3 | Effect of Mars or lunar gravity on crop growth | Yield or growth measurements at gravity levels other than 1 g, with the same cultivar and protocol as the terrestrial baseline | **blocking** | no-data | open and permanently so for the current data landscape |
 | 4 | Response to specific LED spectra and photoperiods | Biomass or yield response surfaces across spectra, PPFD and photoperiod for each supported crop | **major** | insufficient | open |
@@ -38,11 +38,11 @@ None of them is closed. The point of the matrix is that each open gap has a name
 ### Predicted crop water use in litres per plant per day  `measured-eta`
 
 - **Needed:** Measured evapotranspiration or sap-flow/lysimeter water use for the modelled crops at plant scale
-- **Available:** Reference ET0 computed from reanalysis (FAO-56 Penman-Monteith, now cross-validated against four sources), plus a learned emulator of that same computed quantity, plus a schema and an 18-check ingestion validator for a future water-use trial. Still no measured crop water use of any kind.
-- **Gap type:** no-data
+- **Available:** Reference ET0 computed from reanalysis (FAO-56 Penman-Monteith, cross-validated against four sources), a learned emulator of that computed quantity, an 18-check ingestion validator, and — new in Phase 26 — one third-party measured dataset: gravimetric per-pot evapotranspiration of greenhouse lettuce (Schröder et al. 2021, 35 published pots, 345 usable pot-days), acquired, hashed and preprocessed in-repo with an out-of-sample comparison against the platform's water path.
+- **Gap type:** partially-addressed
 - **Severity:** blocking - a claim in the product cannot be supported at all without this
 - **How it could be closed:** A lysimeter or gravimetric water-use trial in the target growth system. No open dataset measures per-plant water use in a controlled-environment facility for lettuce or mizuna; this is a measurement to commission, not a download. New ingestion apparatus does not change the status: a validator can reject a bad measurement, it cannot create one.
-- **Current status:** open and blocking. The ingestion pipeline and the pre-registered protocol exist and are tested; zero measurements exist, so the ~60 % difference between the two water paths remains unarbitrated by data.
+- **Current status:** open and blocking on its original terms, with its first measured evidence bench. The comparison artefact (ml/evaluation/phase26_measured_et_validation.json) shows the seasonal shape is broadly right (Spearman 0.72 across 13 measurement days) while the level cannot be identified: on a pot-surface denominator the platform's flux is 0.24x the measurement, on a canopy-area denominator it is 2.7x. Because the study publishes neither pot diameter nor spacing, the sign of the discrepancy depends on an assumption, and no constant was changed.
 
 ### The claim that the ET0 target is itself correct  `independent-et0`
 
@@ -65,7 +65,7 @@ None of them is closed. The point of the matrix is that each open gap has a name
 ### Response to specific LED spectra and photoperiods  `led-spectrum-response`
 
 - **Needed:** Biomass or yield response surfaces across spectra, PPFD and photoperiod for each supported crop
-- **Available:** One study, six observations, one crop (lettuce), light intensity and temperature axes only
+- **Available:** One study, six observations, one crop (lettuce), light intensity and temperature axes only Phase 26 added a hydroponic lettuce spectral-composition trial (Zenodo 20394352, 252 plants across four fixed spectra at constant PPFD and 16 h photoperiod), preprocessed but not yet consumed by a model.
 - **Gap type:** insufficient
 - **Severity:** major - the claim is supportable only with a stated limitation that a user would notice
 - **How it could be closed:** The published CEA literature is large but fragmented: hundreds of small papers, no shared protocol, rarely any raw data. A meta-analysis with study-level random effects is the realistic route, and it needs a person reading papers, not an API.

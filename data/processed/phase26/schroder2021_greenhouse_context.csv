@@ -1,0 +1,5 @@
+studyId,variable,value,note
+schroder2021,airTemperatureDayMeanC,26.6,"published in the article text; max 43.3, min 15.1"
+schroder2021,airTemperatureNightMeanC,20.7,"published in the article text; max 38.9, min 14.8"
+schroder2021,relativeHumidityMeanPct,57.9,published in the article text
+schroder2021,irrigationRangeMlPerPotPerDay,,published range 50-350 mL per pot per day; not a per-day series
