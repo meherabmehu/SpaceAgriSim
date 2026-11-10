@@ -1,5 +1,6 @@
 {
   "generatedBy": "ml/research/build_gap_matrix.py",
+  "generatedOn": "2026-11-09",
   "scope": "Every capability SpaceAgriSim claims or is asked about, matched against the data that would actually be needed to support it. A gap here is a statement about evidence, not a to-do list: several will stay open on purpose because the data does not exist at any price.",
   "gaps": [
     {
