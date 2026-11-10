@@ -2288,3 +2288,87 @@
     min-width: 0;
   }
 }
+
+/* ------------------------------------------------ light quality & stress (Phase 29) */
+/* The regime editor lays its scenarios out as columns so two treatments can be compared
+   without scrolling between them, and collapses to one column where that would be too narrow. */
+.workflow-scenario-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+  margin: 14px 0;
+}
+.workflow-scenario {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(15, 32, 39, 0.32);
+}
+.workflow-scenario > header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.scenario-name {
+  flex: 1;
+  min-width: 0;
+  padding: 0.35rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+}
+.scenario-name:hover,
+.scenario-name:focus {
+  border-color: var(--line, rgba(148, 163, 184, 0.32));
+}
+.workflow-fieldset {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+.workflow-fieldset legend {
+  padding: 0 6px;
+  color: #a3b9bf;
+  font-size: 12px;
+}
+.workflow-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+/* A checkbox styled as a chip keeps a long trait list readable; the input itself stays a real
+   checkbox so keyboard and screen-reader behaviour is unchanged. */
+.workflow-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  color: #a3b9bf;
+  font-size: 12px;
+  cursor: pointer;
+}
+.workflow-chip.on {
+  border-color: rgba(74, 222, 128, 0.55);
+  color: #dff6e8;
+  background: rgba(74, 222, 128, 0.1);
+}
+.workflow-chip input {
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  accent-color: #4ade80;
+}
+@media (max-width: 720px) {
+  .workflow-scenario-grid {
+    grid-template-columns: 1fr;
+  }
+}

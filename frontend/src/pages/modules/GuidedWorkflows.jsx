@@ -3,6 +3,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   Droplets,
+  FlaskConical,
   Play,
   Plus,
   ShieldCheck,
@@ -39,6 +40,7 @@ import { Limitations, JsonDetails, useResource, RequestState } from "./moduleSup
 const TABS = [
   { id: "water", label: "Water demand & irrigation", icon: Droplets },
   { id: "harvest", label: "Crop growth & harvest", icon: Sprout },
+  { id: "light", label: "Light quality & stress", icon: FlaskConical },
 ];
 
 function Pill({ tone = "muted", children }) {
@@ -875,6 +877,405 @@ export function HarvestWorkflow() {
   );
 }
 
+
+/* ------------------------------------------------------------ light quality & stress */
+
+const DAY_OPTIONS = [
+  { value: 35, label: "Harvest day 35" },
+  { value: 28, label: "Fluorescence day 28" },
+];
+
+const LIGHT_DEFAULT_TRAITS = ["freshWeightG", "fvPOverFmP", "phiNO"];
+
+/**
+ * The third workflow.
+ *
+ * It is built to the same shape as the other two — inputs with units and reasons, a real backend
+ * run, side-by-side comparison, evidence, limitations — with one deliberate difference: there is no
+ * prediction anywhere on this panel. Every number is the mean of measurements made in one published
+ * experiment, and the panel says that at the top rather than in a footnote, because a user who
+ * expects a simulator needs to know before they read the table, not after.
+ */
+export function LightStressWorkflow() {
+  const capability = useResource("/workflows/light-stress/capability");
+  const traits = useMemo(() => capability.data?.fields?.[1]?.options || [], [capability.data]);
+  const regimes = useMemo(() => capability.data?.regimes || [], [capability.data]);
+  const [selections, setSelections] = useState(null);
+  const [chosenTraits, setChosenTraits] = useState(LIGHT_DEFAULT_TRAITS);
+  const [state, setState] = useState({ data: null, error: "", loading: false, at: null });
+
+  const starting = useMemo(
+    () => [
+      { key: "light-0", label: "Control", regime: "control", daysAfterSowing: 35 },
+      { key: "light-1", label: "T2 · increasing green", regime: "t2", daysAfterSowing: 35 },
+    ],
+    [],
+  );
+  const scenarios = selections ?? starting;
+
+  const setScenario = (index, patch) => {
+    setSelections((current) => (current ?? starting).map(
+      (item, i) => (i === index ? { ...item, ...patch } : item)));
+  };
+  const addScenario = () => {
+    setSelections((current) => {
+      const source = current ?? starting;
+      const used = new Set(source.map((item) => item.regime));
+      const next = regimes.find((candidate) => !used.has(candidate.regime)) || regimes[0];
+      return [...source, {
+        key: `light-${Date.now()}`, label: next?.label?.split(":")[0] || "Regime",
+        regime: next?.regime || "control", daysAfterSowing: 35,
+      }];
+    });
+  };
+  const removeScenario = (index) => {
+    setSelections((current) => (current ?? starting).filter((_, i) => i !== index));
+  };
+
+  const run = useCallback(async () => {
+    setState({ data: null, error: "", loading: true, at: null });
+    try {
+      const payload = await api("/workflows/light-stress/run", {
+        scenarios: scenarios.map((scenario) => ({
+          label: scenario.label,
+          regime: scenario.regime,
+          traits: chosenTraits,
+          daysAfterSowing: scenario.daysAfterSowing,
+        })),
+      });
+      setState({ data: payload, error: "", loading: false, at: new Date().toLocaleTimeString() });
+    } catch (error) {
+      setState({ data: null, error: error.message, loading: false, at: null });
+    }
+  }, [scenarios, chosenTraits]);
+
+  const result = state.data;
+
+  return (
+    <div className="workflow-panel" aria-label="Light quality and stress workflow">
+      <RequestState state={capability} />
+      {capability.data ? (
+        <>
+          <div className="workflow-warning" role="note">
+            <FlaskConical size={15} />
+            <div>
+              <strong>Measured, not simulated.</strong> This workflow reports groups of plants that
+              were actually grown and measured in one published experiment
+              ({capability.data.crop.cultivar}, {capability.data.fixedConditions.ppfdUmolPerM2S}{" "}
+              µmol/m²/s, {capability.data.fixedConditions.photoperiodHours} h). It has no model, no
+              response surface and no prediction for a treatment that was not run.
+            </div>
+          </div>
+
+          <Card
+            title="1 · Choose the regimes to compare"
+            label="Input"
+            action={<Pill tone="ok">{regimes.length} measured regimes</Pill>}
+          >
+            <p className="fine">
+              Each regime is a measured group. The experiment varied only the spectral composition
+              of the light; PPFD, photoperiod, temperature and CO₂ were held constant, so this panel
+              offers no control for them — moving them here would be a fabricated result, not a
+              feature.
+            </p>
+
+            <div className="workflow-scenario-grid">
+              {scenarios.map((scenario, index) => (
+                <section className="workflow-scenario" key={scenario.key}>
+                  <header>
+                    <input
+                      className="scenario-name"
+                      aria-label={`Scenario ${index + 1} name`}
+                      value={scenario.label}
+                      onChange={(event) => setScenario(index, { label: event.target.value })}
+                    />
+                    {scenarios.length > 1 ? (
+                      <button
+                        type="button"
+                        className="ghost-button"
+                        onClick={() => removeScenario(index)}
+                        aria-label={`Remove ${scenario.label}`}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    ) : null}
+                  </header>
+                  <label className="field workflow-field" htmlFor={`light-regime-${index}`}>
+                    <span className="field-heading"><span>Regime</span></span>
+                    <select
+                      id={`light-regime-${index}`}
+                      aria-label={`Regime for ${scenario.label}`}
+                      value={scenario.regime}
+                      onChange={(event) => setScenario(index, { regime: event.target.value })}
+                    >
+                      {regimes.map((regime) => (
+                        <option key={regime.regime} value={regime.regime}>
+                          {regime.regime.toUpperCase()} · {regime.greenFractionPct}% green
+                          {regime.confoundsSpectrumWithDensity ? " · 1.25× density" : ""}
+                        </option>
+                      ))}
+                    </select>
+                    <small>
+                      {regimes.find((regime) => regime.regime === scenario.regime)?.label}
+                    </small>
+                  </label>
+                  <label className="field workflow-field" htmlFor={`light-day-${index}`}>
+                    <span className="field-heading"><span>Measurement day</span></span>
+                    <select
+                      id={`light-day-${index}`}
+                      aria-label={`Measurement day for ${scenario.label}`}
+                      value={scenario.daysAfterSowing}
+                      onChange={(event) =>
+                        setScenario(index, { daysAfterSowing: Number(event.target.value) })}
+                    >
+                      {DAY_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
+                      ))}
+                    </select>
+                    <small>
+                      Fluorescence and SPAD were read on days 28 and 35; harvest traits were measured
+                      at day 35 only, so the day control has no effect on them.
+                    </small>
+                  </label>
+                </section>
+              ))}
+            </div>
+
+            <div className="module-actions">
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={addScenario}
+                disabled={state.loading || scenarios.length >= capability.data.maxScenarios}
+              >
+                <Plus size={14} /> Add regime
+              </button>
+              <span className="muted fine">
+                Up to {capability.data.maxScenarios} regimes per comparison.
+              </span>
+            </div>
+
+            <fieldset className="workflow-fieldset">
+              <legend>Traits to report</legend>
+              <div className="workflow-chip-row">
+                {traits.map((trait) => {
+                  const checked = chosenTraits.includes(trait.value);
+                  return (
+                    <label
+                      key={trait.value}
+                      className={checked ? "workflow-chip on" : "workflow-chip"}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() =>
+                          setChosenTraits((current) =>
+                            current.includes(trait.value)
+                              ? current.filter((value) => value !== trait.value)
+                              : [...current, trait.value])}
+                      />
+                      {trait.label} <span className="muted">({trait.unit})</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </fieldset>
+
+            <div className="module-actions">
+              <button
+                type="button"
+                className="primary-button"
+                onClick={run}
+                disabled={state.loading || !chosenTraits.length || !scenarios.length}
+              >
+                <Play size={15} />
+                {state.loading ? "Summarising the measurements…" : "Compare regimes"}
+              </button>
+              <span className="muted fine">
+                Reads the processed tables built from the deposited workbook; no value is computed in
+                the browser.
+              </span>
+            </div>
+            {state.loading ? (
+              <div className="skeleton" role="status">Reading measured groups…</div>
+            ) : null}
+            {state.error ? <div className="error-banner" role="alert">{state.error}</div> : null}
+          </Card>
+
+          {result ? (
+            <>
+              <Card
+                title="2 · Measured means and spread"
+                label="Output"
+                action={<Pill tone="ok">read {state.at}</Pill>}
+              >
+                <div className="data-table-wrap">
+                  <table className="data-table">
+                    <caption className="sr-only">
+                      Measured group means with bootstrap intervals, by regime and trait
+                    </caption>
+                    <thead>
+                      <tr>
+                        <th scope="col">Regime</th>
+                        <th scope="col">Trait</th>
+                        <th scope="col">n</th>
+                        <th scope="col">Mean ± SD</th>
+                        <th scope="col">90 % CI of the mean</th>
+                        <th scope="col">Day</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {result.comparison.rows.map((row) => (
+                        <tr key={`${row.regime}-${row.trait}`}>
+                          <th scope="row">{row.label}</th>
+                          <td>{row.traitLabel} <span className="muted">({row.unit})</span></td>
+                          <td>{row.n}</td>
+                          <td>{number(row.mean)} ± {number(row.standardDeviation)}</td>
+                          <td>{number(row.ciLow)} – {number(row.ciHigh)}</td>
+                          <td>{row.daysAfterSowing ?? "harvest"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {result.comparison.deltas.length ? (
+                  <>
+                    <h3>Difference from the control</h3>
+                    <div className="data-table-wrap">
+                      <table className="data-table">
+                        <thead>
+                          <tr>
+                            <th scope="col">Comparison</th>
+                            <th scope="col">Trait</th>
+                            <th scope="col">Δ</th>
+                            <th scope="col">Δ (%)</th>
+                            <th scope="col">Intervals separated</th>
+                            <th scope="col">Reading</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {result.comparison.deltas.map((delta) => (
+                            <tr key={`${delta.label}-${delta.trait}`}>
+                              <th scope="row">{delta.label} vs {delta.comparedWith}</th>
+                              <td>{delta.traitLabel}</td>
+                              <td>{number(delta.difference)} <span className="muted">{delta.unit}</span></td>
+                              <td>
+                                {delta.relativeDifferenceMeaningful === false
+                                  ? <span className="muted">not meaningful</span>
+                                  : `${number(delta.relativeDifference * 100, 1)}`}
+                              </td>
+                              <td>
+                                {delta.meansAreSeparated ? (
+                                  <span className="pill pill-ok">yes</span>
+                                ) : (
+                                  <span className="pill pill-warn">no</span>
+                                )}
+                              </td>
+                              <td className="fine">{delta.note}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                ) : null}
+
+                {result.scenarios.map((scenario) => {
+                  const welch = scenario.traits
+                    .map((trait) => ({ trait, test: trait.versusControl?.welch }))
+                    .filter((entry) => entry.test);
+                  if (!welch.length) return null;
+                  return (
+                    <div className="workflow-warning" role="status" key={`welch-${scenario.regime}`}>
+                      <AlertTriangle size={15} />
+                      <div>
+                        <strong>{scenario.label} — within-experiment tests</strong>
+                        <ul>
+                          {welch.map(({ trait, test }) => (
+                            <li key={trait.trait}>
+                              {trait.label}: Welch t = {number(test.t, 2)}, df ={" "}
+                              {number(test.degreesOfFreedom, 1)}, p = {number(test.pValue, 4)};
+                              Hedges g = {number(trait.versusControl.hedgesG, 2)}.
+                            </li>
+                          ))}
+                        </ul>
+                        <p className="fine">{result.method.pseudoReplication}. A p-value here is a
+                          within-experiment quantity, not a repeatability claim.</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </Card>
+
+              <Card title="3 · Evidence, conditions and what is not supported" label="Provenance">
+                <div className="stat-pair">
+                  <div>
+                    <span className="muted">Source</span>
+                    <strong>{result.provenance.source.dataset}</strong>
+                  </div>
+                  <div>
+                    <span className="muted">DOI · licence</span>
+                    <strong>{result.provenance.source.doi} · {result.provenance.source.license}</strong>
+                  </div>
+                  <div>
+                    <span className="muted">Raw file SHA-256 verified</span>
+                    <strong>{result.provenance.verifiedAgainstManifest ? "yes" : "no"}</strong>
+                  </div>
+                  <div>
+                    <span className="muted">Measurement basis</span>
+                    <strong>{result.provenance.source.measurementBasis}</strong>
+                  </div>
+                </div>
+                <p className="fine">
+                  {result.provenance.source.citation}. Raw file{" "}
+                  <code>{result.provenance.rawFileSha256.slice(0, 16)}…</code>; processed tables{" "}
+                  {result.provenance.processedFiles.map((file) => file.split("/").pop()).join(", ")}.
+                </p>
+
+                <h3>Factors this workflow can and cannot move</h3>
+                <div className="data-table-wrap">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Factor</th>
+                        <th scope="col">Supported</th>
+                        <th scope="col">Why</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {result.factors.map((factor) => (
+                        <tr key={factor.factor}>
+                          <th scope="row">{factor.factor}</th>
+                          <td>
+                            {factor.supported ? (
+                              <span className="pill pill-ok">yes</span>
+                            ) : (
+                              <span className="pill pill-warn">no</span>
+                            )}
+                          </td>
+                          <td className="fine">{factor.limitation}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="fine">
+                  Method: {result.method.name}. Bootstrap resamples {result.method.bootstrapResamples},
+                  seed {result.method.bootstrapSeed}. Composite stress score:{" "}
+                  {result.method.compositeScore}.
+                </p>
+                <Limitations items={result.limitations} />
+                <JsonDetails data={result} />
+              </Card>
+            </>
+          ) : null}
+        </>
+      ) : null}
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------------------- page */
 
 export function GuidedWorkflows() {
@@ -886,17 +1287,19 @@ export function GuidedWorkflows() {
         label="END-TO-END SCIENCE"
         action={
           <div className="badge-row">
-            <Pill tone="ok"><CheckCircle2 size={12} /> 2 complete</Pill>
+            <Pill tone="ok"><CheckCircle2 size={12} /> 3 complete</Pill>
             <Pill tone="warn"><ShieldCheck size={12} /> 1 documented gap</Pill>
           </div>
         }
       >
         <p className="fine">
-          Two workflows a user can complete without touching the API: enter parameters, run the real
-          calculation, compare scenarios, and read the measured evidence, the uncertainty and the
-          limitations. A third candidate — environmental stress — is not offered, because no
-          validated response surface for spectrum, CO₂ or irradiance stress exists in this
-          repository. Shipping a slider that moves a warning string is not a workflow.
+          Three workflows a user can complete without touching the API: enter parameters, run the
+          real calculation, compare scenarios, and read the measured evidence, the uncertainty and
+          the limitations. Two of them compute — a reference water balance and a trained model. The
+          third, light quality and stress, reports measured groups from one published experiment and
+          predicts nothing: its data vary spectral composition only, so there is no continuous
+          response surface in spectrum, PPFD, CO₂ or temperature to draw, and one is not invented.
+          That missing surface stays a documented gap.
         </p>
         <div className="scenario-tabs workflow-tabs" role="tablist" aria-label="Workflow">
           {TABS.map(({ id, label, icon: Icon }) => (
@@ -914,7 +1317,9 @@ export function GuidedWorkflows() {
         </div>
       </Card>
 
-      {tab === "water" ? <WaterDemandWorkflow /> : <HarvestWorkflow />}
+      {tab === "water" ? <WaterDemandWorkflow /> : null}
+      {tab === "harvest" ? <HarvestWorkflow /> : null}
+      {tab === "light" ? <LightStressWorkflow /> : null}
     </div>
   );
 }

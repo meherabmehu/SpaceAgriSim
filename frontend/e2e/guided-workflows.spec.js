@@ -10,10 +10,16 @@ import { test, expect } from "@playwright/test";
  * environment must produce a visible statement rather than a silently different number.
  */
 
-/** Read a cell as a number, ignoring the thousands separators the page formats with. */
+/**
+ * Read a cell as a number, ignoring the thousands separators the page formats with.
+ *
+ * Some cells carry a second quantity after the first ("44.38 ± 13.14"), so the first numeric token
+ * is what is read; a cell that contains no number at all returns NaN and the assertion says so.
+ */
 async function cellNumber(row, index) {
   const text = await row.locator("td").nth(index).innerText();
-  return Number(text.replace(/,/g, "").trim());
+  const match = text.replace(/,/g, "").match(/-?\d+(\.\d+)?/);
+  return match ? Number(match[0]) : NaN;
 }
 
 async function openWorkflows(page, testInfo) {
@@ -176,4 +182,101 @@ test("harvest workflow adds a third scenario and compares it", async ({ page }, 
   const rows = page.locator(".workflow-panel table").first().locator("tbody tr");
   await expect(rows).toHaveCount(3);
   await expect(page.getByText(/vs Plant factory, 16 h/)).toHaveCount(2);
+});
+
+/* ------------------------------------------------ light quality & stress (Phase 29) */
+
+async function openLightStress(page, testInfo) {
+  await openWorkflows(page, testInfo);
+  await page.getByRole("tab", { name: /Light quality & stress/ }).click();
+  await expect(page.getByRole("heading", { name: "1 · Choose the regimes to compare" }))
+    .toBeVisible();
+}
+
+test("light stress workflow reports measured groups and matches the API", async ({ page, request }, testInfo) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+
+  await openLightStress(page, testInfo);
+  // The panel must say what it is before the user reads any number.
+  await expect(page.getByText(/Measured, not simulated/)).toBeVisible();
+
+  await page.getByRole("button", { name: /Compare regimes/ }).click();
+  await expect(page.getByRole("heading", { name: "2 · Measured means and spread" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "3 · Evidence, conditions and what is not supported" }))
+    .toBeVisible();
+
+  const api = await request.post("/api/workflows/light-stress/run", {
+    data: {
+      scenarios: [
+        { label: "Control", regime: "control", daysAfterSowing: 35,
+          traits: ["freshWeightG", "fvPOverFmP", "phiNO"] },
+        { label: "T2 · increasing green", regime: "t2", daysAfterSowing: 35,
+          traits: ["freshWeightG", "fvPOverFmP", "phiNO"] },
+      ],
+    },
+  });
+  expect(api.status()).toBe(200);
+  const body = await api.json();
+  const controlFresh = body.comparison.rows
+    .find((row) => row.regime === "control" && row.trait === "freshWeightG");
+
+  const rows = page.locator(".workflow-panel table").first().locator("tbody tr");
+  await expect(rows).toHaveCount(body.comparison.rows.length);
+  // Cells only: trait, n, mean, interval, day. The mean is the third cell; the page rounds for
+  // display, so the check is numeric rather than a string match.
+  const shown = await cellNumber(rows.first(), 2);
+  expect(shown).toBeCloseTo(controlFresh.mean, 1);
+
+  // Provenance is on the page, not only in the payload.
+  await expect(page.getByText(/10\.5281\/zenodo\.20394352/).first()).toBeVisible();
+  await expect(page.getByText(/CC BY 4\.0/).first()).toBeVisible();
+  await expect(page.getByText(/Raw file SHA-256 verified/)).toBeVisible();
+  await expect(page.getByText("no", { exact: true }).first()).toBeVisible();
+  // No composite stress score is offered, and the page says why.
+  await expect(page.getByText(/Composite stress score/)).toBeVisible();
+
+  // The stress panel is taller than the mobile viewport's capture ceiling, so the phone screenshot
+  // is the visible viewport rather than the whole page.
+  await testInfo.attach("light-stress-results", {
+    body: await page.screenshot({ fullPage: testInfo.project.name !== "mobile" }),
+    contentType: "image/png",
+  });
+  expect(errors).toEqual([]);
+});
+
+test("light stress comparison separates the signals that held and the one that did not", async ({ page }, testInfo) => {
+  await openLightStress(page, testInfo);
+  await page.getByRole("button", { name: /Compare regimes/ }).click();
+  await expect(page.getByRole("heading", { name: "2 · Measured means and spread" })).toBeVisible();
+  // A delta table with the overlap verdict, and at least one pair of intervals that overlaps.
+  await expect(page.getByText(/Difference from the control/)).toBeVisible();
+  await expect(page.getByText(/T2 · increasing green vs/).first()).toBeVisible();
+  await expect(page.getByText("no", { exact: true }).first()).toBeVisible();
+});
+
+test("light stress flags the regime that changes two things at once", async ({ page }, testInfo) => {
+  await openLightStress(page, testInfo);
+  await page.getByRole("combobox", { name: /Regime for Control/ }).selectOption("t3");
+  await page.getByRole("button", { name: /Compare regimes/ }).click();
+  await expect(page.getByRole("heading", { name: "2 · Measured means and spread" })).toBeVisible();
+  // The confound is stated in the evidence notes, which are collapsed until opened.
+  await page.getByText(/Evidence notes/).first().click();
+  await expect(page.getByText(/t3 changes two things at once/).first()).toBeVisible();
+});
+
+test("light stress lets traits be turned off and adds a third regime", async ({ page }, testInfo) => {
+  await openLightStress(page, testInfo);
+  const chips = page.locator(".workflow-chip");
+  await expect(chips.first()).toBeVisible();
+  await page.getByRole("checkbox", { name: /Fresh weight/ }).uncheck();
+  await page.getByRole("button", { name: /Add regime/ }).click();
+  await page.getByRole("button", { name: /Compare regimes/ }).click();
+  await expect(page.getByRole("heading", { name: "2 · Measured means and spread" })).toBeVisible();
+  const rows = page.locator(".workflow-panel table").first().locator("tbody tr");
+  const count = await rows.count();
+  // Three regimes x two remaining traits.
+  expect(count).toBe(6);
+  // The deselected trait is gone from the results table, not merely dimmed in the picker.
+  await expect(page.locator(".workflow-panel table").first()).not.toContainText("Fresh weight");
 });
