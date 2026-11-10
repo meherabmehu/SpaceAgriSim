@@ -118,7 +118,10 @@ def simulate_growth(
     growing_area_m2 scales the per-m^2 baseline to the actual growing area
     """
     cycle_length = crop.growth_duration_days
-    potential_harvest_g = crop.harvest_biomass_g * growth_factor * growing_area_m2
+    # This used to repeat the formula that `potential_harvest_g()` below already defines, so the
+    # two could drift apart without any test noticing. Phase 27's integrity audit flagged it; the
+    # single definition is now the only one.
+    cycle_harvest_g = potential_harvest_g(crop, growth_factor, growing_area_m2)
 
     points: list[DailyGrowthPoint] = []
     harvested_total = 0.0
@@ -134,10 +137,10 @@ def simulate_growth(
 
         # Add the previous cycle's harvest to the running total once we move on.
         completed_cycles = (day - 1) // cycle_length if day > 0 else 0
-        harvested_total = completed_cycles * potential_harvest_g
+        harvested_total = completed_cycles * cycle_harvest_g
 
         fraction = logistic_progress(day_in_cycle, cycle_length)
-        standing = potential_harvest_g * fraction
+        standing = cycle_harvest_g * fraction
 
         # Harvest happens at the end of the harvest day, so the harvested total
         # already includes this cycle on that day while the curve still shows
@@ -153,7 +156,7 @@ def simulate_growth(
                 biomass_g=standing,
                 cumulative_biomass_g=harvested_total + standing,
                 growth_fraction=fraction,
-                harvested_g=harvests_done * potential_harvest_g,
+                harvested_g=harvests_done * cycle_harvest_g,
                 is_harvest_day=is_harvest_day,
                 # harvested_total counts only cycles completed BEFORE this day,
                 # so it is exactly the harvest-through-previous-day cut-off.
