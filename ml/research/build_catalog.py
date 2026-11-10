@@ -590,13 +590,15 @@ DATASETS = [
         "licenseUrl": "https://zenodo.org/records/20394352",
         "licenseEvidence": "verified",
         "commercialUse": "permitted with attribution",
-        "usabilityClass": "B",
-        "classReason": "Acquired and preprocessed into data/processed/phase26. Usable, but it "
-                       "manipulates spectral composition only, so it cannot support a "
-                       "light-intensity claim and does not yet train anything.",
+        "usabilityClass": "A",
+        "classReason": "Acquired, preprocessed and served: Phase 29 rebuilt it into "
+                       "data/processed/phase29 and the light-stress workflow reports its measured "
+                       "groups with intervals and provenance. It manipulates spectral composition "
+                       "only, so it cannot support a light-intensity claim and still trains nothing.",
         "imported": True,
-        "importNote": "data/processed/phase26/greenlight2024_lettuce_harvest.csv and "
-                      "_fluorescence.csv",
+        "importNote": "data/processed/phase29/light_stress_harvest.csv, "
+                      "_photosynthesis.csv, _pigments.csv and light_spectrum_treatments.csv "
+                      "(supersedes the phase26 extracts)",
         "caveat": "The leafAreaMm2 column is numerically consistent with cm^2 rather than mm^2 "
                   "(a 48 g lettuce with 20 leaves of 158 x 123 mm implies ~1350 cm^2). Recorded "
                   "as an inference in the table's quality file, not corrected in the source.",

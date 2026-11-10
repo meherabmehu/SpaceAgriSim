@@ -4,14 +4,14 @@ Generated from `data/research/dataset_catalog.json` on 2026-11-09 by `ml/researc
 
 Every dataset the project has evaluated, with the licence evidence behind its class. The class answers one question: could this support a claim the product makes, under the licence it is actually distributed with?
 
-**28 datasets evaluated.** A: 2, B: 7, C: 9, D: 4, E: 5, F: 1.
+**28 datasets evaluated.** A: 3, B: 6, C: 9, D: 4, E: 5, F: 1.
 
 ## Classes
 
 | Class | Meaning | Datasets |
 |---|---|---|
-| **A** | acquired and used in this repository | 2 |
-| **B** | usable after preprocessing - open licence, relevant variables, usable scale | 7 |
+| **A** | acquired and used in this repository | 3 |
+| **B** | usable after preprocessing - open licence, relevant variables, usable scale | 6 |
 | **C** | external validation only - wrong task, sensor or size for training | 9 |
 | **D** | scientific reference only - open and correct, but cannot validate this product | 4 |
 | **E** | needs an agreement or a licence decision before use | 5 |
@@ -53,7 +53,7 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 | [NASA NEX-GDDP-CMIP6 statistically downscaled climate projections](#nasa-nex-gddp-cmip6) | **D** | open (NASA NEX); model-specific citation requested | permitted | no |
 | [PlantWild in-the-wild plant image dataset](#plantwild) | **F** | CC BY-NC-ND 4.0 - non-commercial, no derivatives | not permitted (non-commercial, no derivatives) | no |
 | [Greenhouse lettuce pot experiment with gravimetric evapotranspiration (Schroeder et al. 2021)](#zenodo-schroder-2021-lettuce-pot) | **A** | CC BY 4.0 | permitted with attribution | yes |
-| [Green-light spectral composition trial in hydroponic lettuce](#zenodo-greenlight-2024-lettuce) | **B** | CC BY 4.0 | permitted with attribution | yes |
+| [Green-light spectral composition trial in hydroponic lettuce](#zenodo-greenlight-2024-lettuce) | **A** | CC BY 4.0 | permitted with attribution | yes |
 | [Portable-platform LED photoperiod extension trial in open-field tomato](#zenodo-ledphotoperiod-2025-tomato) | **C** | CC BY 4.0 | permitted with attribution | yes |
 | [Tomato hydroponic nutrient-uptake and yield trial (Halbert-Howard et al. 2020)](#zenodo-halbert-2020-tomato-hydroponic) | **B** | CC BY 4.0 | permitted with attribution | no |
 | [Leaf gas-exchange series for Corymbia calophylla (marri)](#zenodo-marri-2021-gasexchange) | **D** | CC BY 4.0 | permitted with attribution | no |
@@ -446,8 +446,8 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 
 ### Green-light spectral composition trial in hydroponic lettuce  `zenodo-greenlight-2024-lettuce`
 
-- **Class:** B - usable after preprocessing - open licence, relevant variables, usable scale
-- **Why this class:** Acquired and preprocessed into data/processed/phase26. Usable, but it manipulates spectral composition only, so it cannot support a light-intensity claim and does not yet train anything.
+- **Class:** A - acquired and used in this repository
+- **Why this class:** Acquired, preprocessed and served: Phase 29 rebuilt it into data/processed/phase29 and the light-stress workflow reports its measured groups with intervals and provenance. It manipulates spectral composition only, so it cannot support a light-intensity claim and still trains nothing.
 - **Publisher:** Zenodo
 - **URL:** https://doi.org/10.5281/zenodo.20394352
 - **Format:** XLSX, 4 sheets
@@ -457,7 +457,7 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 - **Licence:** CC BY 4.0
 - **Licence evidence:** verified (https://zenodo.org/records/20394352)
 - **Commercial use:** permitted with attribution
-- **Imported:** yes - data/processed/phase26/greenlight2024_lettuce_harvest.csv and _fluorescence.csv
+- **Imported:** yes - data/processed/phase29/light_stress_harvest.csv, _photosynthesis.csv, _pigments.csv and light_spectrum_treatments.csv (supersedes the phase26 extracts)
 - **Caveat:** The leafAreaMm2 column is numerically consistent with cm^2 rather than mm^2 (a 48 g lettuce with 20 leaves of 158 x 123 mm implies ~1350 cm^2). Recorded as an inference in the table's quality file, not corrected in the source.
 
 ### Portable-platform LED photoperiod extension trial in open-field tomato  `zenodo-ledphotoperiod-2025-tomato`

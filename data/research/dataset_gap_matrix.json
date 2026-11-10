@@ -62,22 +62,29 @@
       "id": "led-spectrum-response",
       "capability": "Response to specific LED spectra and photoperiods",
       "needed": "Biomass or yield response surfaces across spectra, PPFD and photoperiod for each supported crop",
-      "available": "One study, six observations, one crop (lettuce), light intensity and temperature axes only Phase 26 added a hydroponic lettuce spectral-composition trial (Zenodo 20394352, 252 plants across four fixed spectra at constant PPFD and 16 h photoperiod), preprocessed but not yet consumed by a model.",
+      "available": "The evidence base is one crop (lettuce) and one dedicated spectral trial. Phase 26 added a hydroponic spectral-composition trial (Zenodo 20394352, 252 plants across four fixed spectra at constant PPFD and 16 h photoperiod); Phase 29 rebuilt it into data/processed/phase29 and serves it as the measured light-stress workflow, which reports group means with bootstrap intervals, within-experiment tests and verified provenance. It remains a comparison of four named regimes, not a response surface: two regimes hold a fixed spectrum and one of those is the control, and one regime changes density as well.",
       "gapType": "insufficient",
       "severity": "major",
       "howCouldBeClosed": "The published CEA literature is large but fragmented: hundreds of small papers, no shared protocol, rarely any raw data. A meta-analysis with study-level random effects is the realistic route, and it needs a person reading papers, not an API.",
-      "currentStatus": "open; DLI is computed from measured irradiance and the light-response coefficient is a literature estimate with a stated range",
+      "currentStatus": "open for the surface, served for the comparison: the light-stress workflow is complete as a measured comparison over spectral composition at one PPFD and one photoperiod, and offers no control for PPFD, photoperiod, CO2, temperature or humidity because the experiment did not vary them. The environmental-stress-response-surface gap named in the workflow catalogue is this same gap and stays blocked.",
       "severityMeaning": "the claim is supportable only with a stated limitation that a user would notice",
       "evidenceAdded": {
-        "phase": 26,
+        "phase": 29,
         "datasets": [
           "zenodo-greenlight-2024-lettuce"
         ],
         "artefacts": [
-          "data/processed/phase26/greenlight2024_lettuce_harvest.csv"
+          "data/processed/phase29/light_stress_harvest.csv",
+          "data/processed/phase29/light_stress_photosynthesis.csv",
+          "data/processed/phase29/light_stress_pigments.csv",
+          "data/processed/phase29/light_spectrum_treatments.csv",
+          "data/processed/phase29/light_stress_quality.json",
+          "backend/app/workflows/light_stress.py",
+          "docs/PHASE29_ENVIRONMENTAL_STRESS_RESEARCH_REPORT.md",
+          "docs/PHASE29_ENVIRONMENTAL_STRESS_MODEL_REPORT.md"
         ],
         "severityUnchanged": "major",
-        "note": "spectrum is manipulated with PPFD held constant, so this dataset cannot separate a spectral effect from a total-light effect and does not address the photoperiod half of the gap"
+        "note": "a measured comparison is now a delivered workflow; a response surface is not, and cannot be fitted from four regimes of which only two hold a fixed spectrum. The photoperiod half of the gap still has no dataset at all."
       }
     },
     {
