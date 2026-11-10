@@ -40,7 +40,7 @@ from typing import Any
 
 from app import et0 as et0_service
 from app.config import simulation_constants as constants
-from app.simulation import crops, growth, water
+from app.simulation import crops, growth, irrigation, water
 from app.workflows import units
 
 SUPPORTED_CROPS = ("lettuce", "tomato", "radish")
@@ -86,6 +86,11 @@ LIMITATIONS = [
     ("Daily demand is reported for the growth stage supplied. The platform's growth curve is a "
      "logistic assumption, so the stage itself is a modelled quantity unless the user supplies "
      "a measured canopy cover."),
+    ("The irrigation schedule repeats the supplied single-day climate across the remaining cycle "
+     "and models no rain, runoff, capillary rise or pump losses. It is a reference calculation "
+     "with a storage term, not a weather forecast."),
+    ("A transpiration deficit is reported as a deficit. It is not converted into a yield loss, "
+     "because that conversion needs a crop yield-response factor this repository does not hold."),
 ]
 
 
@@ -215,6 +220,8 @@ def scenario(scenario_input: dict[str, Any]) -> dict[str, Any]:
                          "Only the ET0-reference path responds to the weather you supply."),
             },
         },
+        "irrigationSchedule": _irrigation_block(scenario_input, crop_key, cover, kc, et0_mm,
+                                                area_m2, day),
         "measuredBench": _measured_bench(crop_key, et0_mm, cover, area_m2, reference_l),
     }
 
@@ -272,6 +279,80 @@ def _measured_bench(crop_key: str, et0_mm: float, cover: float, area_m2: float,
     return payload
 
 
+def _irrigation_block(scenario_input: dict[str, Any], crop_key: str, cover: float,
+                      kc: float, et0_mm: float, area_m2: float, day: float) -> dict[str, Any]:
+    """The FAO-56 soil water balance, when the caller supplies the soil it needs.
+
+    This is the improvement Phase 29 makes to this workflow: a daily demand figure answers "how much
+    does the canopy want today", and this answers "how often, how much, and how many days short".
+    It is a reference calculation, not a measurement, and it says so.
+    """
+    taw = scenario_input.get("totalAvailableWaterMm")
+    if taw is None:
+        return {
+            "available": False,
+            "reason": ("supply totalAvailableWaterMm to run the FAO-56 soil water balance; without "
+                       "a root-zone storage term an irrigation schedule cannot be computed"),
+            "isReferenceCalculation": True,
+        }
+    crop = crops.get_crop(crop_key)
+    cycle = crop.growth_duration_days
+    days = int(max(0, math.ceil(cycle - day)))
+    if days == 0:
+        return {"available": False, "reason": "the crop is at the end of its cycle",
+                "isReferenceCalculation": True}
+
+    daily_et0 = [et0_mm] * days
+    canopy = [water.canopy_scale(_growth_fraction(day + offset, crop_key))
+              for offset in range(days)]
+    result = irrigation.simulate(
+        crop_key=crop_key,
+        daily_et0_mm=daily_et0,
+        canopy_fractions=canopy,
+        crop_coefficient=kc,
+        growing_area_m2=area_m2,
+        total_available_water_mm=float(taw),
+        initial_depletion_mm=float(scenario_input.get("initialDepletionMm") or 0.0),
+        irrigation_amount_mm=float(scenario_input.get("irrigationAmountMm") or 0.0),
+        irrigation_interval_days=int(scenario_input.get("irrigationIntervalDays") or 1),
+    )
+    requirement = irrigation.irrigation_requirement_mm(daily_et0, canopy, kc)
+    first = result.daily[0] if result.daily else {}
+    return {
+        "available": True,
+        "isReferenceCalculation": True,
+        "isMeasurement": False,
+        "method": "FAO-56 soil water balance (eq. 84-85) with a tabulated depletion fraction",
+        "assumptions": {
+            "climateHeldConstant": ("the supplied single-day climate is repeated over the remaining "
+                                    "cycle; supplying a daily weather series is a Phase 30 "
+                                    "candidate, and this response does not pretend to have one"),
+            "noRain": "controlled environment: no rain, runoff, capillary rise or water table",
+            "rootZone": "the caller supplies total available water in mm, which already integrates "
+                        "rooting depth and soil texture",
+        },
+        "parameters": {
+            "totalAvailableWaterMm": round(float(taw), 2),
+            "initialDepletionMm": round(float(scenario_input.get("initialDepletionMm") or 0.0), 2),
+            "irrigationAmountMm": round(float(scenario_input.get("irrigationAmountMm") or 0.0), 2),
+            "irrigationIntervalDays": int(scenario_input.get("irrigationIntervalDays") or 1),
+            "cropCoefficient": round(kc, 3),
+            "depletionFraction": irrigation.adjusted_depletion_fraction(crop_key, first.get("etcMm", 0)),
+        },
+        "totals": result.totals,
+        "requirementIfReplacedDaily": {"netIrrigationMm": round(requirement, 2),
+                                       "litres": round(requirement * area_m2, 2),
+                                       "note": ("the depth that would exactly replace crop ET over "
+                                                "the remaining cycle, i.e. the zero-deficit case")},
+        "stress": irrigation.stress_free_check(result),
+        "daily": result.daily[:120],
+        "dailyTruncated": days > 120,
+        "units": units.block(cropEtcMm="mm/day", actualEtaMm="mm/day", irrigationMm="mm",
+                             deepPercolationMm="mm", depletionEndMm="mm", tawMm="mm",
+                             stressCoefficientKs="dimensionless"),
+    }
+
+
 def compare(scenarios: list[dict[str, Any]]) -> dict[str, Any]:
     """Run every scenario and align them for comparison."""
     results = [scenario(item) for item in scenarios]
@@ -291,6 +372,10 @@ def compare(scenarios: list[dict[str, Any]]) -> dict[str, Any]:
             "demandCropRelativeLPerDay": item["demand"]["cropRelative"]["litresPerDay"],
             "mmPerDay": item["demand"]["et0Reference"]["mmPerDay"],
             "litresRemainingCycle": item["demand"]["et0Reference"]["litresRemainingCycle"],
+            "irrigationLitres": (item["irrigationSchedule"].get("totals") or {}).get("irrigationLitres"),
+            "stressDays": (item["irrigationSchedule"].get("totals") or {}).get("stressDays"),
+            "relativeTranspirationDeficit": (item["irrigationSchedule"].get("totals") or {})
+            .get("relativeTranspirationDeficit"),
         })
 
     deltas: list[dict[str, Any]] = []
@@ -428,12 +513,49 @@ def capability() -> dict[str, Any]:
          "min": 0.05, "max": 2.0, "step": 0.05, "kind": "number", "required": False,
          "why": "Optional override. The default is the FAO-56 tabulated value for the crop; 1.0 "
                 "describes the reference surface, not a crop."},
+        # ---- irrigation scheduling (Phase 29) ----
+        {"name": "totalAvailableWaterMm", "label": "Root-zone available water (TAW)", "unit": "mm",
+         "min": 1, "max": 400, "step": 1, "kind": "number", "required": False,
+         "requiredFor": "irrigationSchedule",
+         "why": "The storage term of the FAO-56 water balance: how much water the root zone holds "
+                "between field capacity and wilting point. Without it no schedule can be computed."},
+        {"name": "initialDepletionMm", "label": "Depletion at the start", "unit": "mm",
+         "min": 0, "max": 400, "step": 1, "kind": "number", "required": False,
+         "why": "How dry the root zone already is on day one. Sets whether the crop starts stressed."},
+        {"name": "irrigationAmountMm", "label": "Irrigation depth per event", "unit": "mm",
+         "min": 0, "max": 200, "step": 0.5, "kind": "number", "required": False,
+         "why": "Net depth delivered at the root zone per irrigation. Zero means no irrigation and "
+                "the schedule reports the deficit that results."},
+        {"name": "irrigationIntervalDays", "label": "Irrigation interval", "unit": "day",
+         "min": 1, "max": 30, "step": 1, "kind": "number", "required": False,
+         "why": "How often the event above is delivered. This is the control an irrigator actually "
+                "changes, and the schedule shows what it costs in stress days."},
     ]
     return {
         "workflow": "water-demand",
         "fields": fields,
         "fieldsNote": ("Every field carries its own unit and range so a form can be built from this "
                        "document instead of from the prose."),
+        "capabilities": {
+            "referenceEt0": True,
+            "twoDemandEquations": True,
+            "measuredBenchLettuceOnly": True,
+            "irrigationSchedule": {
+                "available": True,
+                "requiresFields": ["totalAvailableWaterMm"],
+                "method": "FAO-56 soil water balance (eq. 84-85)",
+                "returnsYieldClaim": False,
+                "note": ("an optional layer. The workflow is complete without it, and it adds a "
+                         "daily water balance and a stress-day count when a storage term is "
+                         "supplied."),
+            },
+            "dailyWeatherSeries": {
+                "available": False,
+                "reason": ("a per-day weather series would make the schedule a real forecast rather "
+                           "than a repeated single day; the endpoint accepts one climate per "
+                           "scenario, and this is stated as a limitation rather than approximated."),
+            },
+        },
         "crops": [
             {"key": key, "name": crops.get_crop(key).name,
              "cycleDays": crops.get_crop(key).growth_duration_days,

@@ -31,6 +31,7 @@ UNITS: dict[str, tuple[str, str, list[str]]] = {
     "mL/pot/day": ("flow", "millilitres of water per pot per day",
                    ["per pot, and the pot's surface area is what makes it a flux"]),
     "mL": ("volume", "millilitres of water", []),
+    "mm2": ("area", "square millimetres", ["leaf area per plant, not per square metre of bench"]),
     "g/m2": ("mass flux", "grams of fresh mass per square metre of growing area",
              ["this is an areal yield, not a per-plant mass: dividing by density assumes the "
               "per-area yield is independent of density, which the model itself warns is not "
@@ -62,6 +63,27 @@ UNITS: dict[str, tuple[str, str, list[str]]] = {
                   "divides by it"]),
     "ppm": ("mole fraction", "parts per million by volume in air", []),
     "dimensionless": ("dimensionless", "a pure number", []),
+    "g/plant": ("mass", "grams of fresh or dry mass per individual plant",
+                ["a per-plant mass is not an areal yield; multiplying by density assumes every "
+                 "plant occupies its nominal area and competes equally"]),
+    "mm": ("water depth", "millimetres of water depth, where 1 mm over 1 m2 is 1 litre",
+           ["a depth is not a volume: litres require an area, and this registry never multiplies "
+            "one by the other"]),
+    "mm2": ("area", "square millimetres of leaf surface",
+            ["leaf area is a surface, not a ground area; the two scale very differently"]),
+    "count": ("count", "a whole-number count of organs or events", []),
+    "mg/g fresh weight": ("concentration", "milligrams of a compound per gram of fresh mass",
+                          ["a fresh-mass basis, not dry mass; the two are not interchangeable"]),
+    "mg quercetin equiv/g FW": ("concentration", "milligrams of quercetin equivalents per gram "
+                                 "of fresh mass", ["an equivalent-mass basis defined by one assay"]),
+    "mg gallic acid equiv/g FW": ("concentration", "milligrams of gallic acid equivalents per gram "
+                                  "of fresh mass", ["an equivalent-mass basis defined by one assay"]),
+    "umol quercetin equiv": ("amount", "micromoles of quercetin equivalents in the extracted "
+                             "sample", ["a per-sample amount, not a concentration; the sample mass "
+                                        "is not in this table"]),
+    "spad-index": ("index", "a dimensionless relative chlorophyll index from a SPAD meter",
+                   ["an index, not a chlorophyll concentration; it cannot be converted to mg/g "
+                    "without a calibration this platform does not have"]),
 }
 
 DIMENSIONS = sorted({entry[0] for entry in UNITS.values()})

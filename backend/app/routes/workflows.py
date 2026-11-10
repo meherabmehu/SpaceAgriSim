@@ -20,7 +20,7 @@ from typing import Any, Literal
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.workflows import harvest, units, water_demand
+from app.workflows import harvest, light_stress, units, water_demand
 
 router = APIRouter(tags=["workflows"], prefix="/workflows")
 
@@ -43,6 +43,11 @@ class WaterScenario(BaseModel):
     elevationM: float = Field(ge=-500, le=9000)
     plantsPerM2: float | None = Field(default=None, gt=0, le=2000)
     cropCoefficient: float | None = Field(default=None, gt=0.05, le=2.0)
+    # ---- Phase 29: irrigation scheduling. All optional; the workflow is complete without them.
+    totalAvailableWaterMm: float | None = Field(default=None, gt=0, le=400)
+    initialDepletionMm: float | None = Field(default=None, ge=0, le=400)
+    irrigationAmountMm: float | None = Field(default=None, ge=0, le=200)
+    irrigationIntervalDays: int | None = Field(default=None, ge=1, le=30)
 
 
 class WaterRunRequest(BaseModel):
@@ -59,6 +64,19 @@ class HarvestScenario(BaseModel):
     ppfd: float = Field(ge=0, le=1000)
     photoperiodHours: float = Field(default=16.0, gt=0, le=24)
     plantDensityPerM2: float = Field(default=25.0, gt=0, le=2000)
+
+
+class LightStressScenario(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    label: str | None = Field(default=None, max_length=60)
+    regime: Literal["control", "t1", "t2", "t3"]
+    traits: list[str] | None = Field(default=None, max_length=12)
+    daysAfterSowing: Literal[28, 35] | None = Field(default=None)
+
+
+class LightStressRunRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    scenarios: list[LightStressScenario] = Field(min_length=1, max_length=MAX_SCENARIOS)
 
 
 class HarvestRunRequest(BaseModel):
@@ -84,6 +102,20 @@ def workflow_catalogue() -> dict[str, Any]:
                 },
             },
             {
+                "id": "light-stress",
+                "title": "Environmental stress and growth response under light quality (measured)",
+                "status": "complete",
+                "evidenceClass": "measured-observation",
+                "measures": "measured growth traits and photophysiological stress indicators across "
+                            "four spectral regimes",
+                "measuredEvidence": True,
+                "isSimulation": False,
+                "endpoints": {
+                    "capability": "GET /api/workflows/light-stress/capability",
+                    "run": "POST /api/workflows/light-stress/run",
+                },
+            },
+            {
                 "id": "harvest-prediction",
                 "title": "Crop growth and harvest prediction (lettuce)",
                 "status": "complete",
@@ -100,17 +132,24 @@ def workflow_catalogue() -> dict[str, Any]:
         ],
         "documentedGaps": [
             {
-                "id": "environmental-stress",
+                "id": "environmental-stress-response-surface",
                 "status": "not-complete",
-                "blocker": ("No validated response surface for light spectrum, CO2 or irradiance "
-                            "stress exists in the repository. The simulator moves a warning string "
-                            "for those controls, not an outcome, so a workflow built on them would "
-                            "present an assumption as a simulation."),
+                "blocker": ("A measured light-quality comparison now ships (workflow light-stress), "
+                            "but no validated *response surface* exists for CO2, PPFD or "
+                            "temperature stress in this repository: no controlled-environment "
+                            "dataset here varies those factors with measured biomass outcomes at "
+                            "three or more levels. CO2 in particular has no measured contrast "
+                            "anywhere in the catalogue."),
+                "whatWouldUnblockIt": ("A factorial controlled-environment experiment varying PPFD "
+                                       "and/or CO2 at three or more levels with per-plant biomass "
+                                       "and reported photoperiod, temperature and density."),
             },
         ],
         "note": ("A workflow is listed complete only when input, execution, comparison, evidence, "
-                 "uncertainty and interface are all implemented and tested. Two are. The third "
-                 "candidate is blocked on evidence, not on engineering effort."),
+                 "uncertainty and interface are all implemented and tested. Three are: two "
+                 "model/calculation workflows and one measured-comparison workflow whose evidence "
+                 "class is stated in every response. The response surface that Phase 28 recorded as "
+                 "blocked is still blocked, and the reason is below."),
     }
 
 
@@ -133,6 +172,20 @@ def water_run(request: WaterRunRequest) -> dict[str, Any]:
     except KeyError as error:  # unsupported crop cannot reach here: Literal validates it
         raise HTTPException(status_code=422, detail=str(error)) from error
     except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+
+
+@router.get("/light-stress/capability")
+def light_stress_capability() -> dict[str, Any]:
+    return light_stress.capability()
+
+
+@router.post("/light-stress/run")
+def light_stress_run(request: LightStressRunRequest) -> dict[str, Any]:
+    scenarios = [item.model_dump() for item in request.scenarios]
+    try:
+        return light_stress.compare(scenarios)
+    except KeyError as error:
         raise HTTPException(status_code=422, detail=str(error)) from error
 
 
