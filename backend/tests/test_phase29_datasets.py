@@ -12,6 +12,7 @@ import hashlib
 import json
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -53,15 +54,36 @@ def test_the_evidence_base_is_licensed_and_citable():
 
 
 def test_build_is_reproducible_and_writes_nothing_new():
-    """Re-running the builder must reproduce the same bytes for the design table."""
-    before = {path.name: hashlib.sha256(path.read_bytes()).hexdigest()
-              for path in PROCESSED.glob("*.csv")}
-    result = subprocess.run([sys.executable, "ml/research/build_light_stress_dataset.py"],
-                            cwd=ROOT, capture_output=True, text=True)
-    assert result.returncode == 0, result.stderr
-    after = {path.name: hashlib.sha256(path.read_bytes()).hexdigest()
-             for path in PROCESSED.glob("*.csv")}
-    assert after == before
+    """Re-running the builder reproduces every committed output, and touches nothing.
+
+    It builds into a temporary directory (`--out-dir`) rather than over the committed files. The
+    earlier version overwrote the committed outputs in place and compared only the four CSVs, so
+    (a) every suite run rewrote `generatedAt` in `light_stress_quality.json` and left the tree
+    dirty, and (b) the JSON - the file that carries the licence, the source digest and the
+    exclusion record - was never actually compared. This compares all five outputs and asserts
+    the committed files are byte-identical afterwards.
+    """
+    before = {path.name: path.read_bytes() for path in PROCESSED.iterdir()}
+    with tempfile.TemporaryDirectory() as tmp:
+        result = subprocess.run([sys.executable, "ml/research/build_light_stress_dataset.py",
+                                 "--out-dir", tmp],
+                                cwd=ROOT, capture_output=True, text=True)
+        assert result.returncode == 0, result.stderr
+        built = {path.name: path.read_bytes() for path in Path(tmp).iterdir()}
+
+    assert sorted(built) == sorted(before)
+    for name, body in built.items():
+        if name.endswith(".json"):
+            fresh = json.loads(body)
+            committed = json.loads(before[name])
+            fresh.pop("generatedAt", None)
+            committed.pop("generatedAt", None)
+            assert fresh == committed, name
+        else:
+            assert body == before[name], f"{name} does not reproduce byte-for-byte"
+
+    after = {path.name: path.read_bytes() for path in PROCESSED.iterdir()}
+    assert after == before, "the builder must not rewrite the committed outputs"
 
 
 def test_no_row_was_imputed_or_dropped():

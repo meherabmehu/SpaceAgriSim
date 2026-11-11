@@ -171,7 +171,7 @@ workflow without seeing the "no" rows.
 | Element | How it is fixed |
 |---|---|
 | Source | raw XLSX re-hashed against the acquisition manifest; mismatch fails the suite |
-| Preprocessing | `build_light_stress_dataset.py`, byte-reproducible; a test re-runs it and compares CSV hashes |
+| Preprocessing | `build_light_stress_dataset.py`, byte-reproducible; a test re-runs it into a temporary directory and compares all five outputs (four CSVs byte-for-byte, the quality record field-by-field) |
 | Bootstrap | 2000 resamples, seed 20261107, exposed in `method` |
 | Determinism | identical requests return identical numbers; asserted |
 | Tests | `backend/tests/test_phase29_workflows.py` (contract, statistics, provenance, units, refusals) and `backend/tests/test_phase29_datasets.py` (hash, build, design, replicates) |

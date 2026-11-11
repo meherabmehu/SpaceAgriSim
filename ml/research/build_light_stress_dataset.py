@@ -40,7 +40,7 @@ No value is imputed, no missing cell is filled from a mean, no unit is converted
 observation is removed except where the source marks it as not measured (an empty cell). Exclusion
 counts are reported per trait.
 
-Run: python ml/research/build_light_stress_dataset.py
+Run: python ml/research/build_light_stress_dataset.py [--out-dir DIR]
 """
 from __future__ import annotations
 
@@ -59,6 +59,23 @@ RAW = ROOT / "data" / "raw" / "phase26" / "zenodo-greenlight-2024-lettuce" / \
     "green_light_lettuce_open_data_(1).xlsx"
 MANIFEST = ROOT / "data" / "metadata" / "phase26_acquisition_manifest.json"
 OUT_DIR = ROOT / "data" / "processed" / "phase29"
+
+
+def out_dir_from_argv(argv: list[str]) -> Path:
+    """`--out-dir` lets a caller (the reproducibility test) build somewhere disposable.
+
+    Without it the only way to test that the builder is reproducible was to run it over the
+    committed outputs, which rewrote `generatedAt` and left the working tree dirty after every
+    suite run - noise that hides a real diff. The default stays the committed directory, so the
+    documented invocation and the Phase 29 layout are unchanged.
+    """
+    if "--out-dir" not in argv:
+        return OUT_DIR
+    try:
+        value = argv[argv.index("--out-dir") + 1]
+    except IndexError:
+        raise SystemExit("--out-dir needs a path")
+    return Path(value).resolve()
 
 DATASET_ID = "zenodo-greenlight-2024-lettuce"
 DOI = "10.5281/zenodo.20394352"
@@ -146,14 +163,15 @@ def verify_raw() -> dict:
 
 
 def main() -> None:
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    out_dir = out_dir_from_argv(sys.argv[1:])
+    out_dir.mkdir(parents=True, exist_ok=True)
     raw = verify_raw()
     label_to_regime = {t["sourceLabel"]: t["regime"] for t in TREATMENTS}
 
     design = pd.DataFrame(TREATMENTS)
     for key, value in COMMON_CONDITIONS.items():
         design[key] = value
-    design_path = OUT_DIR / "light_spectrum_treatments.csv"
+    design_path = out_dir / "light_spectrum_treatments.csv"
     design.to_csv(design_path, index=False)
 
     # ---- destructive harvest (long format in the source) -------------------------------
@@ -179,7 +197,7 @@ def main() -> None:
                 "value": float(record.Value),
             })
     harvest = pd.DataFrame(rows)
-    harvest_path = OUT_DIR / "light_stress_harvest.csv"
+    harvest_path = out_dir / "light_stress_harvest.csv"
     harvest.to_csv(harvest_path, index=False)
 
     # ---- photosynthesis (MultispeQ) -----------------------------------------------------
@@ -201,7 +219,7 @@ def main() -> None:
                 "value": float(record[column]),
             })
     photosynthesis = pd.DataFrame(photo_rows)
-    photo_path = OUT_DIR / "light_stress_photosynthesis.csv"
+    photo_path = out_dir / "light_stress_photosynthesis.csv"
     photosynthesis.to_csv(photo_path, index=False)
 
     # ---- pigments ------------------------------------------------------------------------
@@ -226,7 +244,7 @@ def main() -> None:
                 "value": float(record.Value),
             })
     pigments = pd.DataFrame(pigment_rows)
-    pigment_path = OUT_DIR / "light_stress_pigments.csv"
+    pigment_path = out_dir / "light_stress_pigments.csv"
     pigments.to_csv(pigment_path, index=False)
 
     quality = {
@@ -275,7 +293,7 @@ def main() -> None:
             "approximation.",
         ],
     }
-    save_json(OUT_DIR / "light_stress_quality.json", quality)
+    save_json(out_dir / "light_stress_quality.json", quality)
     print(json.dumps({"raw": raw, "rows": quality["records"], "exclusions": quality["exclusions"]},
                      indent=1)[:1800])
 
