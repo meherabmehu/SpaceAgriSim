@@ -67,17 +67,17 @@
       "fresh": "frontend/test-results/screenshots/radiation-desktop-radiation-quality-osd46-v1.png",
       "baselineSize": [
         1104,
-        628
+        674
       ],
       "freshSize": [
         1104,
-        628
+        674
       ],
       "sameSize": true,
       "changedPixels": 0,
-      "totalPixels": 693312,
+      "totalPixels": 744096,
       "changedPixelRatio": 0.0,
-      "maxChannelDelta": 1,
+      "maxChannelDelta": 0,
       "passed": true,
       "reason": "within tolerance"
     },
@@ -86,15 +86,15 @@
       "fresh": "frontend/test-results/screenshots/radiation-desktop-radiation-exposure-osd46-v1.png",
       "baselineSize": [
         1104,
-        627
+        674
       ],
       "freshSize": [
         1104,
-        627
+        674
       ],
       "sameSize": true,
       "changedPixels": 0,
-      "totalPixels": 692208,
+      "totalPixels": 744096,
       "changedPixelRatio": 0.0,
       "maxChannelDelta": 0,
       "passed": true,
@@ -105,15 +105,15 @@
       "fresh": "frontend/test-results/screenshots/radiation-tablet-radiation-quality-osd46-v1.png",
       "baselineSize": [
         580,
-        744
+        809
       ],
       "freshSize": [
         580,
-        744
+        809
       ],
       "sameSize": true,
       "changedPixels": 0,
-      "totalPixels": 431520,
+      "totalPixels": 469220,
       "changedPixelRatio": 0.0,
       "maxChannelDelta": 0,
       "passed": true,
@@ -124,15 +124,15 @@
       "fresh": "frontend/test-results/screenshots/radiation-tablet-radiation-exposure-osd46-v1.png",
       "baselineSize": [
         580,
-        712
+        777
       ],
       "freshSize": [
         580,
-        712
+        777
       ],
       "sameSize": true,
       "changedPixels": 0,
-      "totalPixels": 412960,
+      "totalPixels": 450660,
       "changedPixelRatio": 0.0,
       "maxChannelDelta": 0,
       "passed": true,
@@ -143,15 +143,15 @@
       "fresh": "frontend/test-results/screenshots/radiation-mobile-radiation-quality-osd46-v1.png",
       "baselineSize": [
         992,
-        2412
+        2628
       ],
       "freshSize": [
         992,
-        2412
+        2628
       ],
       "sameSize": true,
       "changedPixels": 0,
-      "totalPixels": 2392704,
+      "totalPixels": 2606976,
       "changedPixelRatio": 0.0,
       "maxChannelDelta": 0,
       "passed": true,
@@ -162,15 +162,15 @@
       "fresh": "frontend/test-results/screenshots/radiation-mobile-radiation-exposure-osd46-v1.png",
       "baselineSize": [
         992,
-        2378
+        2596
       ],
       "freshSize": [
         992,
-        2378
+        2596
       ],
       "sameSize": true,
       "changedPixels": 0,
-      "totalPixels": 2358976,
+      "totalPixels": 2575232,
       "changedPixelRatio": 0.0,
       "maxChannelDelta": 0,
       "passed": true,
@@ -228,6 +228,120 @@
       "sameSize": true,
       "changedPixels": 0,
       "totalPixels": 11060204,
+      "changedPixelRatio": 0.0,
+      "maxChannelDelta": 0,
+      "passed": true,
+      "reason": "within tolerance"
+    },
+    {
+      "baseline": "docs/screenshots/predictions-desktop.png",
+      "fresh": "frontend/test-results/screenshots/predictions-desktop.png",
+      "baselineSize": [
+        1440,
+        1100
+      ],
+      "freshSize": [
+        1440,
+        1100
+      ],
+      "sameSize": true,
+      "changedPixels": 0,
+      "totalPixels": 1584000,
+      "changedPixelRatio": 0.0,
+      "maxChannelDelta": 0,
+      "passed": true,
+      "reason": "within tolerance"
+    },
+    {
+      "baseline": "docs/screenshots/predictions-tablet.png",
+      "fresh": "frontend/test-results/screenshots/predictions-tablet.png",
+      "baselineSize": [
+        820,
+        1180
+      ],
+      "freshSize": [
+        820,
+        1180
+      ],
+      "sameSize": true,
+      "changedPixels": 0,
+      "totalPixels": 967600,
+      "changedPixelRatio": 0.0,
+      "maxChannelDelta": 0,
+      "passed": true,
+      "reason": "within tolerance"
+    },
+    {
+      "baseline": "docs/screenshots/predictions-mobile.png",
+      "fresh": "frontend/test-results/screenshots/predictions-mobile.png",
+      "baselineSize": [
+        1082,
+        2202
+      ],
+      "freshSize": [
+        1082,
+        2202
+      ],
+      "sameSize": true,
+      "changedPixels": 0,
+      "totalPixels": 2382564,
+      "changedPixelRatio": 0.0,
+      "maxChannelDelta": 0,
+      "passed": true,
+      "reason": "within tolerance"
+    },
+    {
+      "baseline": "docs/screenshots/benchmarks-desktop.png",
+      "fresh": "frontend/test-results/screenshots/benchmarks-desktop.png",
+      "baselineSize": [
+        1440,
+        1100
+      ],
+      "freshSize": [
+        1440,
+        1100
+      ],
+      "sameSize": true,
+      "changedPixels": 0,
+      "totalPixels": 1584000,
+      "changedPixelRatio": 0.0,
+      "maxChannelDelta": 0,
+      "passed": true,
+      "reason": "within tolerance"
+    },
+    {
+      "baseline": "docs/screenshots/benchmarks-tablet.png",
+      "fresh": "frontend/test-results/screenshots/benchmarks-tablet.png",
+      "baselineSize": [
+        820,
+        1180
+      ],
+      "freshSize": [
+        820,
+        1180
+      ],
+      "sameSize": true,
+      "changedPixels": 0,
+      "totalPixels": 967600,
+      "changedPixelRatio": 0.0,
+      "maxChannelDelta": 0,
+      "passed": true,
+      "reason": "within tolerance"
+    },
+    {
+      "baseline": "docs/screenshots/benchmarks-mobile.png",
+      "fresh": "frontend/test-results/screenshots/benchmarks-mobile.png",
+      "baselineSize": [
+        1082,
+        2202
+      ],
+      "freshSize": [
+        1082,
+        2202
+      ],
+      "sameSize": true,
+      "changedPixels": 0,
+      "totalPixels": 2382564,
       "changedPixelRatio": 0.0,
       "maxChannelDelta": 0,
       "passed": true,
