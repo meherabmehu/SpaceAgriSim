@@ -100,6 +100,14 @@ Artefacts: `ml/evaluation/phase34_probability_calibration.json`,
 
 Both are recorded because a measurement script with a unit bug produces a confident wrong number.
 
+### 3.4 Reproducibility re-check
+
+The studies were re-run from scratch in a rebuilt interpreter environment (fresh virtualenv,
+`pandas` 2.2.3 / `numpy` 2.3.5 / `scikit-learn` 1.6.1 per `ml/requirements-training.txt`) and the
+outputs compared against the committed files: **both evaluation JSONs reproduced identically**,
+apart from the `generatedAt` timestamp and the recorded environment block. Every number quoted
+above is therefore reproducible from the committed scripts, not just recorded once.
+
 ## 4. The five audit limitations
 
 | finding | outcome |
@@ -193,6 +201,7 @@ Measured with `npm run build:check` (no budget change, no warning suppression;
 | model audit | 9/9 models, 168 checks, 0 failed, 0 gaps, 7 resolved |
 | registry verification | 60/60 |
 | provenance verification | 9/9 artifacts |
+| measurement reproduction | both Phase 34 evaluation files identical on a rebuild |
 | feature readiness / coverage / gap matrix | all up to date (12 / 12 / 14) |
 | card-vs-evidence check | 5 cards recorded, no drift |
 | visual regression | 12/12 PASS, 0.000 % differing |
