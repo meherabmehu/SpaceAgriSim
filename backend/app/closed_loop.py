@@ -66,6 +66,16 @@ def payload() -> dict:
     ethylene = source["ethylene"]
     water = source["water"]
     peak = ethylene["production"]["peakProduction"]
+    # The chamber comparison used to be three stored literals - 297.3 ppb, a ratio computed from a
+    # second copy of 297.3, and the string "2.5x" inside the explanation. All three were the output
+    # of the call below at the time they were written, so the page was correct only until someone
+    # touched `ethylene_accumulation`. They are now derived from that one call, and
+    # `test_phase19_benchmarks_and_resync.py` recomputes them so drift cannot be silent.
+    chamber = ethylene_accumulation(
+        area_m2=20.0, days=28, volume_m3=113.0, rate_ml_per_m2_day=0.06)
+    measured_upper_ppb = 120.0
+    bounded_ppb = chamber["mixingRatioPpb"]
+    ratio_to_upper = round(bounded_ppb / measured_upper_ppb, 1)
     return {
         "available": True,
         "ethylene": {
@@ -77,19 +87,20 @@ def payload() -> dict:
             # Both ends of the measured range, so the reader sees the spread rather than one pick.
             "workedExamples": [
                 ethylene_accumulation(area_m2=1.0, days=28, volume_m3=10.0, rate_ml_per_m2_day=0.04),
-                ethylene_accumulation(area_m2=20.0, days=28, volume_m3=113.0, rate_ml_per_m2_day=0.06),
+                chamber,
             ],
             # NASA measured 40-120 ppb in that same 20 m2 / 113 m3 chamber, so the no-leak bound can
             # be checked against a real measurement instead of standing on its own.
             "chamberCheck": {
                 "chamber": "NASA CELSS Biomass Production Chamber, 20 m2 growing area, 113 m3 volume",
                 "measuredPpb": "40-120 (lettuce and wheat, per Wheeler et al. 1996)",
-                "boundedPpb": 297.3,
-                "ratioToUpperMeasured": round(297.3 / 120, 1),
-                "explanation": ("The no-leak, peak-rate bound lands 2.5x above the highest concentration "
-                                "NASA measured in that chamber, which is the right direction: the real "
-                                "chamber leaked about 10 % of its volume per day and wheat leaf rolling "
-                                "was removed by scrubbing. The bound is an upper limit, not a prediction."),
+                "boundedPpb": bounded_ppb,
+                "ratioToUpperMeasured": ratio_to_upper,
+                "explanation": (f"The no-leak, peak-rate bound lands {ratio_to_upper}x above the highest "
+                                "concentration NASA measured in that chamber, which is the right "
+                                "direction: the real chamber leaked about 10 % of its volume per day and "
+                                "wheat leaf rolling was removed by scrubbing. The bound is an upper "
+                                "limit, not a prediction."),
             },
             "workedExampleNote": (
                 f"Peak production is {peak['value']} {peak['unit']} ({peak['equivalent']}), "

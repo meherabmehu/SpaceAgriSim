@@ -309,6 +309,26 @@ def test_ethylene_accumulation_is_arithmetic_with_named_assumptions():
     assert abs(doubled["mixingRatioPpb"] * 2 - result["mixingRatioPpb"]) < 0.2
 
 
+def test_the_chamber_check_is_recomputed_from_the_arithmetic_it_claims(client):
+    """The comparison against NASA's measured chamber concentration must not be a stored number.
+
+    `boundedPpb`, `ratioToUpperMeasured` and the "2.5x" inside the explanation were literals. They
+    happened to be correct, and they would have stayed on the page after any change to
+    `ethylene_accumulation` - a wrong number presented as the output of the function beside it.
+    """
+    from app import closed_loop
+
+    check = client.get("/api/closed-loop").json()["ethylene"]["chamberCheck"]
+    recomputed = closed_loop.ethylene_accumulation(
+        area_m2=20.0, days=28, volume_m3=113.0, rate_ml_per_m2_day=0.06)
+    assert check["boundedPpb"] == recomputed["mixingRatioPpb"]
+    assert check["ratioToUpperMeasured"] == round(recomputed["mixingRatioPpb"] / 120.0, 1)
+    assert f"{check['ratioToUpperMeasured']}x" in check["explanation"]
+    # The worked example the explanation describes is the same object, not a second copy.
+    ethylene = client.get("/api/closed-loop").json()["ethylene"]
+    assert ethylene["workedExamples"][1] == recomputed
+
+
 def test_water_recovery_is_bounded_by_the_measured_iss_figure(client):
     water = client.get("/api/closed-loop").json()["water"]
     assert water["issRecovery"]["currentPct"] == 98
