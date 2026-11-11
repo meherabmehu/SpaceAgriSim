@@ -392,7 +392,6 @@ def validate(text: str, payload: dict) -> dict:
     if not checks["withinLength"]:
         reasons.append(f"length>{MAX_EXPLANATION_CHARS}")
 
-    lowered = candidate.lower()
     checks["noForbiddenAssertion"] = not forbidden_assertions(candidate)
     if not checks["noForbiddenAssertion"]:
         reasons.append("forbidden-assertion")

@@ -356,7 +356,6 @@ def _irrigation_block(scenario_input: dict[str, Any], crop_key: str, cover: floa
 def compare(scenarios: list[dict[str, Any]]) -> dict[str, Any]:
     """Run every scenario and align them for comparison."""
     results = [scenario(item) for item in scenarios]
-    labels = [item["label"] for item in results]
 
     rows = []
     for item in results:

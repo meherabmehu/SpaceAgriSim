@@ -7,7 +7,6 @@ per-field map while keeping the original `detail` for compatibility.
 """
 
 from fastapi import FastAPI, Request
-from starlette.responses import JSONResponse as _JSONResponse  # noqa: F401  (kept for typing parity)
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 import logging

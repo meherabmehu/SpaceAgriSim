@@ -28,3 +28,10 @@ pymupdf>=1.24
 # developer machine that already had it passed - the worst kind of difference between two
 # environments running the same suite.
 openpyxl>=3.1,<4
+
+# `test_source_hygiene.py` runs pyflakes over `backend/app` as a gate. Ten findings had accumulated
+# unseen because nothing in CI or the suite ever looked: dead imports in five modules, a computed
+# `labels` list that was never used, an f-string with no placeholders, and one `lowered` local in
+# `llm.py` that looked like it was meant to be passed to a case-insensitive check and was not.
+# Declaring the checker is what makes that gate runnable rather than aspirational.
+pyflakes>=3.2

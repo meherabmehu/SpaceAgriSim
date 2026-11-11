@@ -10,7 +10,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from app import (benchmarks, closed_loop, et0, external_validation, research,
                  science_classification, water_evidence)
-from app.simulation import et0_fao56
 
 router = APIRouter(tags=["scientific data and models"])
 

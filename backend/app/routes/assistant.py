@@ -12,12 +12,11 @@ rather than a question.
 """
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
 from app import assistant as assistant_module
 from app import evidence, llm
-from app.auth import current_user
 
 router = APIRouter(tags=["assistant"])
 

@@ -35,7 +35,6 @@ Units: water depths in millimetres, areas in square metres, volumes in litres. 1
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass, field
 from typing import Any
 

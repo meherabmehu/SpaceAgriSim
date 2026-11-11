@@ -13,7 +13,10 @@ source instead.
 from __future__ import annotations
 
 import ast
+import io
 from pathlib import Path
+
+import pytest
 
 APP = Path(__file__).resolve().parents[1] / "app"
 
@@ -139,3 +142,25 @@ def test_no_source_or_document_has_lost_its_unit_symbols():
         "a unit symbol was replaced by a question mark; restore µ, ², ° or the operator "
         "rather than shipping the mangled text:\n" + "\n".join(_mangled(sources))
     )
+
+
+def test_the_application_has_no_unused_imports_or_dead_locals():
+    """Run pyflakes over `backend/app` so dead code cannot accumulate unseen again.
+
+    Nothing in CI or the suite looked at this, and ten findings had built up: two unused imports in
+    `water_evidence.py`, one each in `simulation/irrigation.py`, `routes/errors.py`,
+    `routes/research.py` and `routes/assistant.py`, a `labels` list built in
+    `workflows/water_demand.py` and never read, an f-string with no placeholders in
+    `routes/workflow.py`, and a `lowered` local in `llm.py` assigned immediately above a
+    case-insensitive check and never passed to it.
+
+    None of them changed behaviour, which is exactly why they survived: a dead import is invisible
+    in a diff, and a dead local reads like a variable that is about to be used on the next line.
+    """
+    pytest.importorskip("pyflakes", reason="declared in backend/requirements-dev.txt")
+    api = pytest.importorskip("pyflakes.api", reason="pyflakes >= 3")
+    reporter_module = pytest.importorskip("pyflakes.reporter", reason="pyflakes >= 3")
+
+    out, err = io.StringIO(), io.StringIO()
+    count = api.checkRecursive([str(APP)], reporter_module.Reporter(out, err))
+    assert count == 0, "pyflakes found dead code in backend/app:\n" + out.getvalue() + err.getvalue()

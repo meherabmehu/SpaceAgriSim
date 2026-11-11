@@ -33,12 +33,10 @@ from __future__ import annotations
 
 import json
 import math
-from collections import Counter
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-from app.config import simulation_constants as constants
 from app.simulation import crops, growth, water
 
 ROOT = Path(__file__).resolve().parents[2]

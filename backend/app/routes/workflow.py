@@ -188,7 +188,7 @@ def export_analysis(analysis_id: str, fmt: Literal["json", "csv", "md"],
     elif fmt == "csv":
         lines = ["# SpaceAgriSim saved AI analysis",
                  "# Model output and model interpretation only - NOT a measurement",
-                 f"field,value",
+                 "field,value",
                  f"analysis_id,{analysis_id}",
                  f"title,\"{row['title']}\"",
                  f"model_id,{analysis['modelId']}",
