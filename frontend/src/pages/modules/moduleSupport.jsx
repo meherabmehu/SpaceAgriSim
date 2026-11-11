@@ -26,12 +26,22 @@ export function useResource(path, body) {
   }, [path, key]);
   return state;
 }
-export function RequestState({ state }) {
+/**
+ * The visible state of one request.
+ *
+ * `secondary` is for a resource that annotates a page rather than being its subject (the external
+ * validation verdict beside a model table, the closed-loop panel beside the benchmarks). Those used
+ * to be rendered as `{data && <Panel/>}`, so a failed request removed the panel and left no trace -
+ * which on this product means a failed *external* check could disappear from the page that exists to
+ * show it. A secondary resource therefore stays quiet while it loads, and still says so when it
+ * fails.
+ */
+export function RequestState({ state, secondary = false }) {
   return state.error ? (
     <div className="error-banner" role="alert">
       {state.error}
     </div>
-  ) : state.loading ? (
+  ) : state.loading && !secondary ? (
     <div className="skeleton" role="status">
       Loading verified API output…
     </div>

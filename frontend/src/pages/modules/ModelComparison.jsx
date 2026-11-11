@@ -43,6 +43,7 @@ export function ModelComparison() {
       </div>
 
       <RequestState state={state} />
+      <RequestState state={external} secondary />
 
       {rows.length > 0 && (
         <Card title="Served models" label={`${rows.length} ARTIFACT-BACKED MODELS`}>

@@ -112,8 +112,10 @@ export function Benchmarks() {
             </Card>
           )}
 
+          <RequestState state={closedLoop} secondary />
           {closedLoop.data?.available && <ClosedLoop body={closedLoop.data} />}
 
+          <RequestState state={external} secondary />
           {external.data && <ExternalValidation body={external.data} />}
 
           <Card title="How to read these tables" action={<Scale size={16} />}>
