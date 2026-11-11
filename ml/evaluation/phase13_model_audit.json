@@ -7,7 +7,7 @@
   },
   {
    "check": "checksum:lettuce-earth-growth-v1",
-   "detail": "registry=052dc2546ccf8370\u2026 disk=052dc2546ccf8370\u2026",
+   "detail": "registry=ba29bcc710aaf577\u2026 disk=ba29bcc710aaf577\u2026",
    "passed": true
   },
   {
@@ -51,6 +51,11 @@
    "passed": true
   },
   {
+   "check": "cross-campaign-measured:lettuce-earth-growth-v1",
+   "detail": "no independent-campaign coverage is recorded for a model claiming coverage",
+   "passed": true
+  },
+  {
    "check": "classification:lettuce-earth-growth-v1",
    "detail": "no science classification entry",
    "passed": true
@@ -82,7 +87,7 @@
   },
   {
    "check": "checksum:lettuce-earth-growth-v2",
-   "detail": "registry=0206b19256f95b8b\u2026 disk=0206b19256f95b8b\u2026",
+   "detail": "registry=18dd26f95461362f\u2026 disk=18dd26f95461362f\u2026",
    "passed": true
   },
   {
@@ -126,6 +131,11 @@
    "passed": true
   },
   {
+   "check": "cross-campaign-measured:lettuce-earth-growth-v2",
+   "detail": "no independent-campaign coverage is recorded for a model claiming coverage",
+   "passed": true
+  },
+  {
    "check": "classification:lettuce-earth-growth-v2",
    "detail": "no science classification entry",
    "passed": true
@@ -157,7 +167,7 @@
   },
   {
    "check": "checksum:lettuce-earth-growth-v3",
-   "detail": "registry=052c0b254d395cd7\u2026 disk=052c0b254d395cd7\u2026",
+   "detail": "registry=f01a9444bdc58650\u2026 disk=f01a9444bdc58650\u2026",
    "passed": true
   },
   {
@@ -187,7 +197,7 @@
   },
   {
    "check": "uncertainty:lettuce-earth-growth-v3",
-   "detail": "['coverageNote', 'kind', 'logResidualHigh', 'logResidualLow', 'outOfFoldCoverage']",
+   "detail": "['coverageNote', 'crossCampaign', 'kind', 'logResidualHigh', 'logResidualLow', 'outOfFoldCoverage']",
    "passed": true
   },
   {
@@ -292,7 +302,7 @@
   },
   {
    "check": "checksum:mizuna-microbial-load-v1",
-   "detail": "registry=39807034da0fe619\u2026 disk=39807034da0fe619\u2026",
+   "detail": "registry=5ad5079091a9bc8d\u2026 disk=5ad5079091a9bc8d\u2026",
    "passed": true
   },
   {
@@ -336,6 +346,11 @@
    "passed": true
   },
   {
+   "check": "cross-campaign-measured:mizuna-microbial-load-v1",
+   "detail": "no independent-campaign coverage is recorded for a model claiming coverage",
+   "passed": true
+  },
+  {
    "check": "retained-not-served:mizuna-microbial-load-v1",
    "detail": "withdrawn model still has a workflow catalogue row",
    "passed": true
@@ -367,7 +382,7 @@
   },
   {
    "check": "checksum:mizuna-microbial-relative-load-v2",
-   "detail": "registry=56c0399b39c61e07\u2026 disk=56c0399b39c61e07\u2026",
+   "detail": "registry=96a66faa99f9b24c\u2026 disk=96a66faa99f9b24c\u2026",
    "passed": true
   },
   {
@@ -403,6 +418,11 @@
   {
    "check": "calibration-measured:mizuna-microbial-relative-load-v2",
    "detail": "calibration is claimed without a measured coverage",
+   "passed": true
+  },
+  {
+   "check": "cross-campaign-measured:mizuna-microbial-relative-load-v2",
+   "detail": "no independent-campaign coverage is recorded for a model claiming coverage",
    "passed": true
   },
   {
@@ -607,7 +627,7 @@
   },
   {
    "check": "checksum:tomato-flight-response-v1",
-   "detail": "registry=db47150e3774f91f\u2026 disk=db47150e3774f91f\u2026",
+   "detail": "registry=b97f24e0988e4dcb\u2026 disk=b97f24e0988e4dcb\u2026",
    "passed": true
   },
   {
@@ -636,6 +656,16 @@
    "passed": true
   },
   {
+   "check": "calibration-measured:tomato-flight-response-v1",
+   "detail": "log loss 0.2827, Brier 0.081, ECE 0.1621 over 21 groups",
+   "passed": true
+  },
+  {
+   "check": "calibration-evidence-consistent:tomato-flight-response-v1",
+   "detail": "the calibration record's out-of-fold accuracy does not match the artifact",
+   "passed": true
+  },
+  {
    "check": "no-false-calibration-claim:tomato-flight-response-v1",
    "detail": "the served catalogue claims a calibrated classifier",
    "passed": true
@@ -643,6 +673,11 @@
   {
    "check": "served-capability-matches-calibration:tomato-flight-response-v1",
    "detail": "the card does not say what scaling the served model applies",
+   "passed": true
+  },
+  {
+   "check": "calibration-not-refitted-on-scored-data:tomato-flight-response-v1",
+   "detail": "temperature search is nested",
    "passed": true
   },
   {
@@ -807,39 +842,8 @@
   }
  ],
  "failures": [],
- "gaps": [
-  {
-   "detail": "measured coverage 0.9393 is within the documented campaigns, not across campaigns",
-   "field": "calibration-scope",
-   "model": "lettuce-earth-growth-v1",
-   "severity": "documentation"
-  },
-  {
-   "detail": "measured coverage 0.9606 is within the documented campaigns, not across campaigns",
-   "field": "calibration-scope",
-   "model": "lettuce-earth-growth-v2",
-   "severity": "documentation"
-  },
-  {
-   "detail": "measured coverage 0.9919 is within the documented campaigns, not across campaigns",
-   "field": "calibration-scope",
-   "model": "mizuna-microbial-load-v1",
-   "severity": "documentation"
-  },
-  {
-   "detail": "measured coverage 0.9919 is within the documented campaigns, not across campaigns",
-   "field": "calibration-scope",
-   "model": "mizuna-microbial-relative-load-v2",
-   "severity": "documentation"
-  },
-  {
-   "detail": "probabilities documented as uncalibrated",
-   "field": "calibration",
-   "model": "tomato-flight-response-v1",
-   "severity": "documentation"
-  }
- ],
- "generatedAt": "2026-11-11T06:35:18.870441+00:00",
+ "gaps": [],
+ "generatedAt": "2026-11-11T14:26:30.895086+00:00",
  "models": [
   {
    "baselineMetrics": {
@@ -883,7 +887,7 @@
    },
    "runStatus": "runnable",
    "samples": 1648,
-   "sha256": "052dc2546ccf837024d7b6a86ad5a22ab5a54d0461e312c3e6a5572be928a85f",
+   "sha256": "ba29bcc710aaf57718ded30ec4f5262d941ca150c4317858c7bd05c22733ee02",
    "status": "trained-exploratory",
    "supersedes": null,
    "target": "freshShootMassG",
@@ -934,7 +938,7 @@
    },
    "runStatus": "runnable",
    "samples": 1648,
-   "sha256": "0206b19256f95b8badb5d164ef884b4c526a61a03acbc11303beca1795bab5d9",
+   "sha256": "18dd26f95461362f65d0ec8ad6884c35e50ca943faf1a7e47f02e5dcd2b1edb4",
    "status": "trained-exploratory",
    "supersedes": "lettuce-earth-growth-v1 (kept, not overwritten)",
    "target": "freshShootMassG",
@@ -1113,7 +1117,7 @@
    },
    "runStatus": "runnable",
    "samples": 1648,
-   "sha256": "052c0b254d395cd78606148ad625c86f37ec114c2e89702a04d3ae98077ff394",
+   "sha256": "f01a9444bdc5865014ec1ad58048b6f64a6f729bd7eb6ecb69a31bdc5f9dc8b7",
    "status": "trained-exploratory",
    "supersedes": null,
    "target": "log(freshYieldGPerM2)",
@@ -1319,7 +1323,7 @@
    },
    "runStatus": null,
    "samples": 123,
-   "sha256": "39807034da0fe6191ef7b7ab72a0363d6586bacc21b910b0e3de319d46740e98",
+   "sha256": "5ad5079091a9bc8d663b46b2a077fc67eabeb54239957c9aa612295bb4fb1fe3",
    "status": "trained-exploratory",
    "supersedes": null,
    "target": "log10(1 + CFU per gram fresh leaf weight)",
@@ -1370,7 +1374,7 @@
    },
    "runStatus": "runnable",
    "samples": 123,
-   "sha256": "56c0399b39c61e07f3ff737479f2b76908a9eced25f633774e39e2a5c6cec6b4",
+   "sha256": "96a66faa99f9b24c6e9f569d70f6ed40701447d211103f8c9df685f3bd8e6a5d",
    "status": "trained-exploratory",
    "supersedes": "mizuna-microbial-load-v1 (kept, not overwritten)",
    "target": "z = (log10(1 + CFU/g) - campaign mean) / campaign sd",
@@ -1567,7 +1571,7 @@
    },
    "runStatus": "runnable",
    "samples": 36,
-   "sha256": "db47150e3774f91f49bcfea5a415b3873bab7ea5ce0d9c9b0ed7de201471cade",
+   "sha256": "b97f24e0988e4dcb1591b2390e7333460a2adeae71fb15329bf6f204626d2a76",
    "status": "trained-exploratory",
    "supersedes": null,
    "target": "recorded spaceflight experimental context",
@@ -1588,9 +1592,37 @@
    "sklearn": "1.6.1"
   },
   "schemaVersion": 1,
-  "trainedAt": "2026-11-11T06:34:05.234771+00:00"
+  "trainedAt": "2026-11-11T11:59:00.326446+00:00"
  },
  "resolvedGaps": [
+  {
+   "closedIn": "phase34",
+   "evidence": "ml/evaluation/phase34_cross_campaign_coverage.json",
+   "field": "calibration-scope",
+   "model": "lettuce-earth-growth-v1",
+   "resolution": "measured on an independent campaign: 0 of 6 observations covered, ratio median 3.655"
+  },
+  {
+   "closedIn": "phase34",
+   "evidence": "ml/evaluation/phase34_cross_campaign_coverage.json",
+   "field": "calibration-scope",
+   "model": "lettuce-earth-growth-v2",
+   "resolution": "measured on an independent campaign: 0 of 6 observations covered, ratio median 3.212"
+  },
+  {
+   "closedIn": "phase34",
+   "evidence": "ml/evaluation/phase34_cross_campaign_coverage.json",
+   "field": "calibration-scope",
+   "model": "mizuna-microbial-load-v1",
+   "resolution": "measured on an independent campaign: 107 of 123 observations covered, pooled 0.8699"
+  },
+  {
+   "closedIn": "phase34",
+   "evidence": "ml/evaluation/phase34_cross_campaign_coverage.json",
+   "field": "calibration-scope",
+   "model": "mizuna-microbial-relative-load-v2",
+   "resolution": "measured on an independent campaign: 110 of 123 observations covered, pooled 0.8943"
+  },
   {
    "closedIn": "phase32",
    "evidence": "ml/evaluation/phase32_radiation_calibration.json",
@@ -1604,15 +1636,26 @@
    "field": "calibration",
    "model": "radiation-quality-osd46-v1",
    "resolution": "measured on 22 biological groups: log loss 0.2228, Brier 0.1252, ECE 0.0926 (10 bins); served scaling 'none'"
+  },
+  {
+   "closedIn": "phase32",
+   "evidence": "ml/evaluation/phase32_radiation_calibration.json",
+   "field": "calibration",
+   "model": "tomato-flight-response-v1",
+   "resolution": "measured on 21 biological groups: log loss 0.2827, Brier 0.081, ECE 0.1621 (10 bins); served scaling 'none'"
   }
  ],
  "summary": {
   "auditedModels": 9,
   "checksFailed": 0,
-  "checksRun": 161,
-  "documentedGaps": 5,
+  "checksRun": 168,
+  "documentedGaps": 0,
   "registeredModels": 9,
-  "resolvedGaps": 2,
+  "resolvedByPhase": {
+   "phase32": 3,
+   "phase34": 4
+  },
+  "resolvedGaps": 7,
   "retiredModels": 0,
   "servedModels": 7,
   "supersededModels": 2,

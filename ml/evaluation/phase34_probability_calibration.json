@@ -1,0 +1,147 @@
+{
+  "schema": "spaceagrisim.probability_calibration/1",
+  "phase": 34,
+  "generatedBy": "ml/research/phase34_tomato_calibration.py",
+  "source": {
+    "model": "tomato-flight-response-v1",
+    "outOfFoldFile": "ml/evaluation/tomato_out_of_fold.csv",
+    "artifact": "ml/artifacts/tomato-flight-response-v1.json",
+    "study": "NASA OSDR OSD-767 (VEG-05 tomato transcriptome, flight versus ground)",
+    "licence": "Public OSDR access; retain study attribution and comply with OSDR terms; do not assume every contributed file is public domain.",
+    "licenceUrl": "https://science.nasa.gov/reference/osdr-help-terms-and-conditions/"
+  },
+  "independenceUnit": "biological group (plant): the two tissues sampled from one plant stay in one fold",
+  "rule": "Every scored probability is out of fold under the committed 4-fold stratified-group split. The hard-label accuracy is recomputed from those same probabilities and asserted equal to the artifact. No rescaling is fitted, because a nested fit would require refitting folds whose input expression matrix is not vendored in this repository; fitting on the scored rows themselves would be an in-sample number and is not reported.",
+  "models": {
+    "tomato-flight-response-v1": {
+      "classes": [
+        "ground",
+        "flight"
+      ],
+      "samples": 36,
+      "groups": 21,
+      "positiveRate": 0.5,
+      "hardLabelAccuracy": 0.9167,
+      "accuracyMatchesArtifact": true,
+      "probability": {
+        "logLoss": 0.2827,
+        "logLossInterval": {
+          "lower": 0.1881,
+          "upper": 0.3902,
+          "resamples": 2000,
+          "unit": "biological group (plant)"
+        },
+        "brier": 0.081,
+        "brierInterval": {
+          "lower": 0.044,
+          "upper": 0.1255,
+          "resamples": 2000,
+          "unit": "biological group (plant)"
+        },
+        "ece": 0.1621,
+        "eceInterval": {
+          "lower": 0.1357,
+          "upper": 0.2342,
+          "resamples": 2000,
+          "unit": "biological group (plant)"
+        },
+        "eceBins": 10,
+        "reliability": [
+          {
+            "low": 0.5,
+            "high": 0.55,
+            "count": 3,
+            "meanConfidence": 0.5286,
+            "accuracy": 0.6667,
+            "gap": 0.1381
+          },
+          {
+            "low": 0.55,
+            "high": 0.6,
+            "count": 3,
+            "meanConfidence": 0.5739,
+            "accuracy": 0.6667,
+            "gap": 0.0927
+          },
+          {
+            "low": 0.6,
+            "high": 0.65,
+            "count": 4,
+            "meanConfidence": 0.6169,
+            "accuracy": 1.0,
+            "gap": 0.3831
+          },
+          {
+            "low": 0.65,
+            "high": 0.7,
+            "count": 1,
+            "meanConfidence": 0.6524,
+            "accuracy": 0.0,
+            "gap": 0.6524
+          },
+          {
+            "low": 0.7,
+            "high": 0.75,
+            "count": 3,
+            "meanConfidence": 0.7299,
+            "accuracy": 1.0,
+            "gap": 0.2701
+          },
+          {
+            "low": 0.75,
+            "high": 0.8,
+            "count": 2,
+            "meanConfidence": 0.775,
+            "accuracy": 1.0,
+            "gap": 0.225
+          },
+          {
+            "low": 0.8,
+            "high": 0.85,
+            "count": 3,
+            "meanConfidence": 0.829,
+            "accuracy": 1.0,
+            "gap": 0.171
+          },
+          {
+            "low": 0.85,
+            "high": 0.9,
+            "count": 4,
+            "meanConfidence": 0.8772,
+            "accuracy": 1.0,
+            "gap": 0.1228
+          },
+          {
+            "low": 0.9,
+            "high": 0.95,
+            "count": 8,
+            "meanConfidence": 0.9251,
+            "accuracy": 1.0,
+            "gap": 0.0749
+          },
+          {
+            "low": 0.95,
+            "high": 1.0,
+            "count": 5,
+            "meanConfidence": 0.981,
+            "accuracy": 1.0,
+            "gap": 0.019
+          }
+        ],
+        "meanMaxProbability": 0.7908,
+        "confidenceBands": {
+          ">=0.9": {
+            "count": 7,
+            "wrong": 0
+          }
+        }
+      },
+      "temperatureScaling": {
+        "fitted": false,
+        "reason": "Not fitted. A temperature that is chosen on the same out-of-fold predictions it then scores is an in-sample number, and a nested fit cannot be reproduced because the expression matrix behind the committed folds is not vendored."
+      },
+      "servedScaling": "none",
+      "interpretation": "Out of fold, 36 samples from 21 plants: log loss 0.2827 (95 % plant-resampled interval 0.1881-0.3902), Brier 0.081, top-label ECE 0.1621 over 10 bins. 0 of 7 predictions at or above 0.9 were wrong. The ground/flight base rate is 0.5. Treat the score as a ranking of recorded flight context, not as the probability the class is correct, and not as a statement about plant health, stress or yield."
+    }
+  }
+}

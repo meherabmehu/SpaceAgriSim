@@ -1,6 +1,6 @@
 {
   "id": "lettuce-earth-growth-v2",
-  "name": "Lettuce Earth growth · WUR gradient boosting",
+  "name": "Lettuce Earth growth \u00b7 WUR gradient boosting",
   "version": "2.0.0",
   "status": "trained-exploratory",
   "supersedes": "lettuce-earth-growth-v1 (kept, not overwritten)",
@@ -196,7 +196,20 @@
     "empiricallyCalibrated": true,
     "calibrationGroups": 4,
     "caveat": "Four experiments. Coverage of 0.961 is over-covered and over-fitted to those four; treat the interval as descriptive of this dataset's spread.",
-    "supersedes": "Phase 9 90th-percentile residual range (uncalibrated)"
+    "supersedes": "Phase 9 90th-percentile residual range (uncalibrated)",
+    "crossCampaign": {
+      "campaign": "Wicharuck et al. 2024, PeerJ 12:e17085 (doi:10.7717/peerj.17085, CC BY 4.0)",
+      "observations": 6,
+      "covered": 0,
+      "achievedCoverage": 0.0,
+      "ratioMedian": 3.212,
+      "ratioRange": [
+        1.674,
+        5.375
+      ],
+      "evidence": "ml/evaluation/phase34_cross_campaign_coverage.json",
+      "statement": "Within the four WUR experiments the 90 % interval covered 0.9606. Against the independent PeerJ 2024 campaign it did not cover any of the 6 independent treatment means (prediction/measurement ratio median 3.212, range 1.674-5.375). The interval therefore describes the fitted campaign and must not be read as a 90 % coverage claim outside it. PeerJ 2024 was already used as a development check before this measurement, so it is a cross-campaign measurement, not an untouched holdout."
+    }
   },
   "limitations": [
     "Only Batavia Othilie lettuce on Earth; not calibrated for partial gravity or radiation.",
@@ -15635,7 +15648,7 @@
   "sourceLicenseUrl": "https://creativecommons.org/licenses/by/4.0/",
   "sourceCitation": "Meinen E., Carotti L., Graamans L., Puksic F., Butturini M., Stanghellini C. (2025). Data underlying the publication: Plant Factories Are Heating Up: Hunting for the Best Combination of Light Intensity, Air Temperature and Root-Zone Temperature in Lettuce Production. 4TU.ResearchData. https://doi.org/10.4121/5a7472f0-8a67-4ec0-84c9-9d032990d654.v1",
   "sourceRetrieved": "2026-11-09",
-  "servedScope": "Retrospective interpolation within four WUR plant-factory experiments (cv. Batavia Othilie, 2-29 days after transplant, PPFD 200-750, air and root 20-32 C). An independent check failed: against Wicharuck et al. 2024 (PeerJ 12:e17085, Thai greenhouse, 28 DAT) the model overpredicted by a median 3.2x, range 1.7x-5.4x. The 0.870 leave-one-study-out R2 is interpolation between four experiments, not transfer to a fifth.",
+  "servedScope": "Retrospective interpolation within four WUR plant-factory experiments (cv. Batavia Othilie, 2-29 days after transplant, PPFD 200-750, air and root 20-32 C). An independent check failed: against Wicharuck et al. 2024 (PeerJ 12:e17085, Thai greenhouse, 28 DAT) the model overpredicted by a median 3.2x, range 1.7x-5.4x. The 0.870 leave-one-study-out R2 is interpolation between four experiments, not transfer to a fifth. Cross-campaign coverage was measured: against the independent PeerJ 2024 campaign this model covered 0 of 6 treatment means (ratio median 3.212, range 1.674-5.375).",
   "operationalForecast": false,
   "harvestForecastClaim": "none",
   "archivalRecord": {

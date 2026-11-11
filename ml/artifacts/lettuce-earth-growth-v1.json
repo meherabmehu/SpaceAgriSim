@@ -1,6 +1,6 @@
 {
   "id": "lettuce-earth-growth-v1",
-  "name": "Lettuce Earth growth · WUR random forest",
+  "name": "Lettuce Earth growth \u00b7 WUR random forest",
   "version": "1.0.0",
   "status": "trained-exploratory",
   "trainedAt": "2026-11-07T14:34:06.980315+00:00",
@@ -63,7 +63,20 @@
     "empiricallyCalibrated": true,
     "calibrationGroups": 4,
     "caveat": "Four experiments. The interval describes this dataset's spread; it is not a guarantee for a new greenhouse.",
-    "supersedes": "Phase 9 90th-percentile residual range (uncalibrated)"
+    "supersedes": "Phase 9 90th-percentile residual range (uncalibrated)",
+    "crossCampaign": {
+      "campaign": "Wicharuck et al. 2024, PeerJ 12:e17085 (doi:10.7717/peerj.17085, CC BY 4.0)",
+      "observations": 6,
+      "covered": 0,
+      "achievedCoverage": 0.0,
+      "ratioMedian": 3.655,
+      "ratioRange": [
+        1.905,
+        5.493
+      ],
+      "evidence": "ml/evaluation/phase34_cross_campaign_coverage.json",
+      "statement": "Within the four WUR experiments the 90 % interval covered 0.9393. Against the independent PeerJ 2024 campaign it did not cover any of the 6 independent treatment means (prediction/measurement ratio median 3.655, range 1.905-5.493). The interval therefore describes the fitted campaign and must not be read as a 90 % coverage claim outside it. PeerJ 2024 was already used as a development check before this measurement, so it is a cross-campaign measurement, not an untouched holdout."
+    }
   },
   "limitations": [
     "Not NASA or spaceflight data.",
@@ -71,7 +84,7 @@
     "Plant identifiers are reused across experiments; split by whole experiment.",
     "Only Batavia Othilie lettuce on Earth; not calibrated for partial gravity or radiation.",
     "No inference for water stress, nutrient stress, CO2 response, other cultivars, or different photoperiods.",
-    "Measured domain is 2–29 days after transplant, air/root 20–32 C, PPFD 200–750 µmol/m²/s; treatment grid is sparse.",
+    "Measured domain is 2\u201329 days after transplant, air/root 20\u201332 C, PPFD 200\u2013750 \u00b5mol/m\u00b2/s; treatment grid is sparse.",
     "Environmental combinations omitted for tip burn are unsupported even inside marginal ranges.",
     "Fresh shoot mass per plant is not edible harvest per square meter; no planting-density conversion is assumed."
   ],
@@ -74277,7 +74290,7 @@
   "sourceLicenseUrl": "https://creativecommons.org/licenses/by/4.0/",
   "sourceCitation": "Meinen E., Carotti L., Graamans L., Puksic F., Butturini M., Stanghellini C. (2025). Data underlying the publication: Plant Factories Are Heating Up: Hunting for the Best Combination of Light Intensity, Air Temperature and Root-Zone Temperature in Lettuce Production. 4TU.ResearchData. https://doi.org/10.4121/5a7472f0-8a67-4ec0-84c9-9d032990d654.v1",
   "sourceRetrieved": "2026-11-09",
-  "servedScope": "Reproducibility only. Superseded by lettuce-earth-growth-v2, which was better on every held-out experiment; kept so an earlier published number can be regenerated, not for new predictions.",
+  "servedScope": "Reproducibility only. Superseded by lettuce-earth-growth-v2, which was better on every held-out experiment; kept so an earlier published number can be regenerated, not for new predictions. Cross-campaign coverage was measured: against the independent PeerJ 2024 campaign this model covered 0 of 6 treatment means (ratio median 3.655, range 1.905-5.493).",
   "operationalForecast": false,
   "harvestForecastClaim": "none",
   "archivalRecord": {

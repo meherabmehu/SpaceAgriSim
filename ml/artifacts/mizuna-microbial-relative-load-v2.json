@@ -177,7 +177,33 @@
     "empiricallyCalibrated": true,
     "calibrationGroups": 35,
     "caveat": "0.992 is the measured coverage across 35 pillows in two campaigns. Two campaigns are not a sample of campaigns; a third campaign's offset must come from its own baseline samples.",
-    "supersedes": "Phase 9 split conformal, which measured 0.849 and 0.811 against a nominal 0.90"
+    "supersedes": "Phase 9 split conformal, which measured 0.849 and 0.811 against a nominal 0.90",
+    "crossCampaign": {
+      "campaigns": [
+        "VEG04A",
+        "VEG04B"
+      ],
+      "method": "90th percentile of |residual| on the calibration campaign, applied unchanged to the other campaign; both directions reported, then pooled",
+      "directions": {
+        "calibratedOnVEG04A/evaluatedOnVEG04B": {
+          "radius": 1.1363,
+          "covered": 93,
+          "observations": 103,
+          "achievedCoverage": 0.9029
+        },
+        "calibratedOnVEG04B/evaluatedOnVEG04A": {
+          "radius": 1.1115,
+          "covered": 17,
+          "observations": 20,
+          "achievedCoverage": 0.85
+        }
+      },
+      "covered": 110,
+      "observations": 123,
+      "pooledAchievedCoverage": 0.8943,
+      "evidence": "ml/evaluation/phase34_cross_campaign_coverage.json",
+      "statement": "Within-campaign coverage over both VEG-04 campaigns is 0.9919. Calibrating the 90 % radius on one campaign and evaluating it on the other covers 110 of 123 samples (pooled 0.8943 across both directions). The campaign offset is not a function of the features, so this is the bound that matters when the model meets a third campaign."
+    }
   },
   "absoluteScaleProtocol": {
     "required": "To report an absolute log10 CFU/g prediction, the caller must supply the campaign's own mean and standard deviation from baseline samples taken in that campaign.",
@@ -26222,7 +26248,7 @@
   "sourceLicenseUrl": "https://science.nasa.gov/reference/osdr-help-terms-and-conditions/",
   "sourceCitation": "NASA Open Science Data Repository, OSD-780: VEG-04A mizuna microbial load (plate counts).",
   "sourceRetrieved": "2026-11-09",
-  "servedScope": "Relative microbial load within the VEG-04A campaigns only, with a conformal interval from the same campaigns. Measured coverage is within-campaign; there is no second campaign in the repository against which across-campaign coverage could be measured, and the response says so.",
+  "servedScope": "Relative microbial load within the two measured VEG-04 campaigns (VEG-04A and VEG-04B in OSD-780), with a conformal interval measured in both directions across them: covering one campaign's radius and evaluating it on the other covers 110 of 123 samples (pooled 0.894 against a nominal 0.90). Two campaigns are not a sample of campaigns, so a third campaign's offset still has to come from its own baseline samples.",
   "operationalForecast": false,
   "harvestForecastClaim": "none",
   "note": "No operational forecast. This card describes what the model reproduces inside the measured domain; it is not a prediction of a future or unmeasured crop."

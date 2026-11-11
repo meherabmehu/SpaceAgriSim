@@ -51,6 +51,11 @@ OUT = ROOT / "ml" / "evaluation" / "phase13_model_audit.json"
 # scored predictions came from the same split as the reported accuracy, and state whether any
 # scaling is served.
 CALIBRATION_EVIDENCE = ROOT / "ml" / "evaluation" / "phase32_radiation_calibration.json"
+# Phase 34: two measured studies. The first is the probability calibration of the tomato
+# classifier; the second measures whether each served 90 % interval still covers an *independent
+# campaign*, which is the question the Phase 31-33 `calibration-scope` findings left open.
+PHASE34_CALIBRATION = ROOT / "ml" / "evaluation" / "phase34_probability_calibration.json"
+PHASE34_COVERAGE = ROOT / "ml" / "evaluation" / "phase34_cross_campaign_coverage.json"
 
 CHECKS: list[dict] = []
 FAILURES: list[str] = []
@@ -83,9 +88,10 @@ def gap(model_id: str, field: str, detail: str, severity: str = "documentation")
 RESOLVED: list[dict] = []
 
 
-def resolve_gap(model_id: str, field: str, detail: str, evidence: str) -> None:
+def resolve_gap(model_id: str, field: str, detail: str, evidence: str,
+                phase: str = "phase32") -> None:
     RESOLVED.append({"model": model_id, "field": field, "resolution": detail,
-                     "evidence": evidence, "closedIn": "phase32"})
+                     "evidence": evidence, "closedIn": phase})
 
 
 def record_temperature(model_id: str) -> dict:
@@ -95,6 +101,22 @@ def record_temperature(model_id: str) -> dict:
     record = json.loads(CALIBRATION_EVIDENCE.read_text(encoding="utf-8"))
     entry = (record.get("models") or {}).get(model_id) or {}
     return entry.get("temperatureScaling") or {}
+
+
+def phase34_calibration(model_id: str) -> dict | None:
+    """The Phase 34 out-of-fold probability record for a model, if one was measured."""
+    if not PHASE34_CALIBRATION.is_file():
+        return None
+    record = json.loads(PHASE34_CALIBRATION.read_text(encoding="utf-8"))
+    return (record.get("models") or {}).get(model_id) or None
+
+
+def phase34_campaign_coverage(model_id: str) -> dict | None:
+    """The Phase 34 cross-campaign coverage record for a model, if one was measured."""
+    if not PHASE34_COVERAGE.is_file():
+        return None
+    record = json.loads(PHASE34_COVERAGE.read_text(encoding="utf-8"))
+    return (record.get("models") or {}).get(model_id) or None
 
 
 def measured_calibration(model_id: str) -> dict | None:
@@ -221,6 +243,20 @@ def audit() -> dict:
             # down this loop, and shadowing it silently wrote calibration numbers into the audit's
             # metrics column.
             measured_cal = measured_calibration(model_id)
+            phase34_cal = phase34_calibration(model_id)
+            if measured_cal is None and phase34_cal is not None:
+                probability = phase34_cal["probability"]
+                card_cal = artifact.get("probabilityCalibration") or {}
+                measured_cal = {
+                    "logLoss": probability["logLoss"],
+                    "brier": probability["brier"],
+                    "ece": probability["ece"],
+                    "bins": probability["eceBins"],
+                    "groups": phase34_cal["groups"],
+                    "servedScaling": card_cal.get("servedScaling"),
+                    "accuracyMatchesArtifact": bool(phase34_cal["accuracyMatchesArtifact"]),
+                    "source": PHASE34_CALIBRATION.name,
+                }
             if measured_cal is not None:
                 check(f"calibration-measured:{model_id}", True,
                       f"log loss {measured_cal['logLoss']}, Brier {measured_cal['brier']}, "
@@ -259,11 +295,34 @@ def audit() -> dict:
                                ("measuredCoverage", "empiricalCoverage", "achievedCoverage", "coverage"))
             check(f"calibration-measured:{model_id}", has_coverage,
                   "calibration is claimed without a measured coverage")
-            if has_coverage:
+            cross_campaign = phase34_campaign_coverage(model_id)
+            if has_coverage and cross_campaign is None:
                 coverage = (declared.get("achievedCoverage") or declared.get("measuredCoverage")
                             or declared.get("empiricalCoverage") or declared.get("coverage"))
                 gap(model_id, "calibration-scope", f"measured coverage {coverage} is within the "
                                                    "documented campaigns, not across campaigns")
+            elif has_coverage:
+                # Phase 34 measured the question the gap asks. Coverage of an independent campaign
+                # is recorded whether or not it looks good: a failure resolves a *documentation*
+                # gap by being written down, and the unaccepted accuracy claim of the same model
+                # stays where it is.
+                campaign = cross_campaign.get("crossCampaign") or cross_campaign
+                resolved = campaign.get("covered")
+                total = campaign.get("observations")
+                check(f"cross-campaign-measured:{model_id}", resolved is not None,
+                      "no independent-campaign coverage is recorded for a model claiming coverage")
+                resolve_gap(model_id, "calibration-scope",
+                            f"measured on an independent campaign: {resolved} of {total} "
+                            f"observations covered"
+                            + (f", ratio median {campaign['ratioMedian']}" if campaign.get("ratioMedian")
+                               else f", pooled {campaign.get('pooledAchievedCoverage')}"),
+                            evidence=str(PHASE34_COVERAGE.relative_to(ROOT)),
+                            phase="phase34")
+                if cross_campaign.get("crossCampaign") is None and model_id.startswith("mizuna"):
+                    # mizuna: nominal 90 % interval, measured across campaigns
+                    check(f"cross-campaign-nominal:{model_id}",
+                          "pooledAchievedCoverage" in str(cross_campaign),
+                          "the cross-campaign record states no achieved coverage")
 
         # ------------------------------------------------ 7/8. classification + explanation
         entry_classification = science_classification.feature_by_id(model_id)
@@ -469,6 +528,8 @@ def audit() -> dict:
         "checksFailed": len(FAILURES),
         "documentedGaps": len(GAPS),
         "resolvedGaps": len(RESOLVED),
+        "resolvedByPhase": {phase: sum(1 for item in RESOLVED if item["closedIn"] == phase)
+                            for phase in sorted({item["closedIn"] for item in RESOLVED})},
     }
     return {
         "phase": 13,
@@ -511,7 +572,7 @@ def main() -> int:
     print(f"superseded kept       {summary['supersededModels']}")
     print(f"with explanations     {summary['withExplanations']}")
     print(f"documented gaps       {summary['documentedGaps']}")
-    print(f"gaps closed in P32    {summary['resolvedGaps']}")
+    print(f"gaps closed           {summary['resolvedGaps']} {summary['resolvedByPhase']}")
     print(f"checks                {summary['checksRun']} run, {summary['checksFailed']} failed")
     if report["failures"]:
         print("\nfailures:")

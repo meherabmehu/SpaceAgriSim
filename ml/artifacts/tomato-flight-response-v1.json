@@ -581,10 +581,38 @@
   "note": "No operational forecast. This card describes what the model reproduces inside the measured domain; it is not a prediction of a future or unmeasured crop.",
   "probabilityCalibration": {
     "calibrated": false,
-    "measured": false,
-    "evidence": null,
+    "measured": true,
+    "evidence": "ml/evaluation/phase34_probability_calibration.json",
+    "method": "Every scored probability is out of fold under the committed 4-fold stratified-group split. The hard-label accuracy is recomputed from those same probabilities and asserted equal to the artifact. No rescaling is fitted, because a nested fit would require refitting folds whose input expression matrix is not vendored in this repository; fitting on the scored rows themselves would be an in-sample number and is not reported.",
+    "metrics": {
+      "logLoss": 0.2827,
+      "logLossInterval": {
+        "lower": 0.1881,
+        "upper": 0.3902,
+        "resamples": 2000,
+        "unit": "biological group (plant)"
+      },
+      "brier": 0.081,
+      "brierInterval": {
+        "lower": 0.044,
+        "upper": 0.1255,
+        "resamples": 2000,
+        "unit": "biological group (plant)"
+      },
+      "ece": 0.1621,
+      "eceBins": 10,
+      "eceInterval": {
+        "lower": 0.1357,
+        "upper": 0.2342,
+        "resamples": 2000,
+        "unit": "biological group (plant)"
+      },
+      "meanMaxProbability": 0.7908,
+      "samples": 36,
+      "groups": 21
+    },
     "servedScaling": "none",
-    "scope": "Not measured: no independent flight-versus-ground replication is available.",
-    "statement": "The class probabilities are uncalibrated scores. No calibration study has been run for this model, so the value ranks cases; it is not the probability that the class is correct."
+    "scope": "Measured out of fold over 21 plants in one OSD-767 experiment; the two tissues of a plant stay in one fold.",
+    "statement": "Out of fold, 36 samples from 21 plants: log loss 0.2827 (95 % plant-resampled interval 0.1881-0.3902), Brier 0.081, top-label ECE 0.1621 over 10 bins. 0 of 7 predictions at or above 0.9 were wrong. The ground/flight base rate is 0.5. Treat the score as a ranking of recorded flight context, not as the probability the class is correct, and not as a statement about plant health, stress or yield."
   }
 }

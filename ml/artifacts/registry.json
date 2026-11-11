@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "trainedAt": "2026-11-11T06:34:05.234771+00:00",
+  "trainedAt": "2026-11-11T11:59:00.326446+00:00",
   "environment": {
     "python": "3.13.16",
     "numpy": "2.3.5",
@@ -11,18 +11,18 @@
     {
       "id": "lettuce-earth-growth-v1",
       "artifact": "ml/artifacts/lettuce-earth-growth-v1.json",
-      "sha256": "052dc2546ccf837024d7b6a86ad5a22ab5a54d0461e312c3e6a5572be928a85f"
+      "sha256": "ba29bcc710aaf57718ded30ec4f5262d941ca150c4317858c7bd05c22733ee02"
     },
     {
       "id": "lettuce-earth-growth-v2",
       "artifact": "ml/artifacts/lettuce-earth-growth-v2.json",
-      "sha256": "0206b19256f95b8badb5d164ef884b4c526a61a03acbc11303beca1795bab5d9",
+      "sha256": "18dd26f95461362f65d0ec8ad6884c35e50ca943faf1a7e47f02e5dcd2b1edb4",
       "supersedes": "lettuce-earth-growth-v1"
     },
     {
       "id": "lettuce-earth-growth-v3",
       "artifact": "ml/artifacts/lettuce-earth-growth-v3.json",
-      "sha256": "052c0b254d395cd78606148ad625c86f37ec114c2e89702a04d3ae98077ff394",
+      "sha256": "f01a9444bdc5865014ec1ad58048b6f64a6f729bd7eb6ecb69a31bdc5f9dc8b7",
       "supersedes": "",
       "status": "trained-exploratory",
       "independentValidation": {
@@ -41,12 +41,12 @@
     {
       "id": "mizuna-microbial-load-v1",
       "artifact": "ml/artifacts/mizuna-microbial-load-v1.json",
-      "sha256": "39807034da0fe6191ef7b7ab72a0363d6586bacc21b910b0e3de319d46740e98"
+      "sha256": "5ad5079091a9bc8d663b46b2a077fc67eabeb54239957c9aa612295bb4fb1fe3"
     },
     {
       "id": "mizuna-microbial-relative-load-v2",
       "artifact": "ml/artifacts/mizuna-microbial-relative-load-v2.json",
-      "sha256": "56c0399b39c61e07f3ff737479f2b76908a9eced25f633774e39e2a5c6cec6b4",
+      "sha256": "96a66faa99f9b24c6e9f569d70f6ed40701447d211103f8c9df685f3bd8e6a5d",
       "supersedes": "mizuna-microbial-load-v1"
     },
     {
@@ -62,7 +62,7 @@
     {
       "id": "tomato-flight-response-v1",
       "artifact": "ml/artifacts/tomato-flight-response-v1.json",
-      "sha256": "db47150e3774f91f49bcfea5a415b3873bab7ea5ce0d9c9b0ed7de201471cade"
+      "sha256": "b97f24e0988e4dcb1591b2390e7333460a2adeae71fb15329bf6f204626d2a76"
     }
   ],
   "dataVersion": "e5a3967ac7c471a2a81ed71e6ac179e8ca01809d199a8739afc9b498b18fdc7c",

@@ -1,6 +1,6 @@
 {
   "id": "lettuce-earth-growth-v3",
-  "name": "Lettuce Earth fresh yield · per-area light-limited model (v3)",
+  "name": "Lettuce Earth fresh yield \u00b7 per-area light-limited model (v3)",
   "version": "3.0.0",
   "status": "trained-exploratory",
   "supersedes": null,
@@ -142,7 +142,20 @@
     "logResidualLow": -0.8205338774923219,
     "logResidualHigh": 0.8339666522127106,
     "outOfFoldCoverage": 0.8992718446601942,
-    "coverageNote": "Measured on the same out-of-fold predictions the quantiles come from, so it is descriptive, not independent evidence."
+    "coverageNote": "Measured on the same out-of-fold predictions the quantiles come from, so it is descriptive, not independent evidence.",
+    "crossCampaign": {
+      "campaign": "Wicharuck et al. 2024, PeerJ 12:e17085 (doi:10.7717/peerj.17085, CC BY 4.0)",
+      "observations": 6,
+      "covered": 6,
+      "achievedCoverage": 1.0,
+      "ratioMedian": 1.163,
+      "ratioRange": [
+        0.606,
+        1.863
+      ],
+      "evidence": "ml/evaluation/phase34_cross_campaign_coverage.json",
+      "statement": "Within the four WUR experiments the 90 % interval covered 0.8992718446601942. Against the independent PeerJ 2024 campaign it covered 6 of 6 independent treatment means (prediction/measurement ratio median 1.163, range 0.606-1.863). A wide interval covering six correlated greenhouse means is not evidence of accuracy: this model's declared independent holdout (Touliatos et al. 2016) missed its pre-registered 30 % MAPE criterion, and that failure stands. PeerJ 2024 was already used as a development check before this measurement, so it is a cross-campaign measurement, not an untouched holdout."
+    }
   },
   "domain": {
     "daysAfterTransplant": {
@@ -19469,7 +19482,7 @@
   "license": "CC BY 4.0, declared in the dataset's RO-Crate (data/metadata/wur_lettuce_rocrate.json)",
   "sourceLicenseUrl": "https://creativecommons.org/licenses/by/4.0/",
   "sourceRetrieved": "2026-11-09",
-  "servedScope": "Fresh yield per square metre inside the measured WUR domain, divided by the planting density the caller states. The pre-registered criterion was 30 % MAPE on an independent holdout; the model returned 41.6 % on Touliatos et al. 2016 data, so it is served as a research surface that reports its own failure, not as a forecast.",
+  "servedScope": "Fresh yield per square metre inside the measured WUR domain, divided by the planting density the caller states. The pre-registered criterion was 30 % MAPE on an independent holdout; the model returned 41.6 % on Touliatos et al. 2016 data, so it is served as a research surface that reports its own failure, not as a forecast. Cross-campaign coverage was measured: against the independent PeerJ 2024 campaign this model covered 6 of 6 treatment means (ratio median 1.163, range 0.606-1.863).",
   "operationalForecast": false,
   "harvestForecastClaim": "none",
   "archivalRecord": {
