@@ -10,17 +10,17 @@
       "fresh": "frontend/test-results/screenshots/mission-desktop.png",
       "baselineSize": [
         1440,
-        1569
+        1649
       ],
       "freshSize": [
         1440,
-        1569
+        1649
       ],
       "sameSize": true,
-      "changedPixels": 83,
-      "totalPixels": 2259360,
-      "changedPixelRatio": 3.7e-05,
-      "maxChannelDelta": 194,
+      "changedPixels": 0,
+      "totalPixels": 2374560,
+      "changedPixelRatio": 0.0,
+      "maxChannelDelta": 0,
       "passed": true,
       "reason": "within tolerance"
     },
@@ -29,17 +29,17 @@
       "fresh": "frontend/test-results/screenshots/mission-tablet.png",
       "baselineSize": [
         820,
-        2290
+        2468
       ],
       "freshSize": [
         820,
-        2290
+        2468
       ],
       "sameSize": true,
-      "changedPixels": 59,
-      "totalPixels": 1877800,
-      "changedPixelRatio": 3.1e-05,
-      "maxChannelDelta": 194,
+      "changedPixels": 0,
+      "totalPixels": 2023760,
+      "changedPixelRatio": 0.0,
+      "maxChannelDelta": 0,
       "passed": true,
       "reason": "within tolerance"
     },
@@ -48,17 +48,17 @@
       "fresh": "frontend/test-results/screenshots/mission-mobile.png",
       "baselineSize": [
         1082,
-        6032
+        6641
       ],
       "freshSize": [
         1082,
-        6032
+        6641
       ],
       "sameSize": true,
-      "changedPixels": 176,
-      "totalPixels": 6526624,
-      "changedPixelRatio": 2.7e-05,
-      "maxChannelDelta": 194,
+      "changedPixels": 0,
+      "totalPixels": 7185562,
+      "changedPixelRatio": 0.0,
+      "maxChannelDelta": 0,
       "passed": true,
       "reason": "within tolerance"
     },
@@ -66,18 +66,18 @@
       "baseline": "docs/screenshots/radiation-desktop-radiation-quality-osd46-v1.png",
       "fresh": "frontend/test-results/screenshots/radiation-desktop-radiation-quality-osd46-v1.png",
       "baselineSize": [
-        1128,
-        718
+        1104,
+        628
       ],
       "freshSize": [
-        1128,
-        718
+        1104,
+        628
       ],
       "sameSize": true,
       "changedPixels": 0,
-      "totalPixels": 809904,
+      "totalPixels": 693312,
       "changedPixelRatio": 0.0,
-      "maxChannelDelta": 0,
+      "maxChannelDelta": 1,
       "passed": true,
       "reason": "within tolerance"
     },
@@ -85,16 +85,16 @@
       "baseline": "docs/screenshots/radiation-desktop-radiation-exposure-osd46-v1.png",
       "fresh": "frontend/test-results/screenshots/radiation-desktop-radiation-exposure-osd46-v1.png",
       "baselineSize": [
-        1128,
-        695
+        1104,
+        627
       ],
       "freshSize": [
-        1128,
-        695
+        1104,
+        627
       ],
       "sameSize": true,
       "changedPixels": 0,
-      "totalPixels": 783960,
+      "totalPixels": 692208,
       "changedPixelRatio": 0.0,
       "maxChannelDelta": 0,
       "passed": true,
@@ -105,15 +105,15 @@
       "fresh": "frontend/test-results/screenshots/radiation-tablet-radiation-quality-osd46-v1.png",
       "baselineSize": [
         580,
-        851
+        744
       ],
       "freshSize": [
         580,
-        851
+        744
       ],
       "sameSize": true,
       "changedPixels": 0,
-      "totalPixels": 493580,
+      "totalPixels": 431520,
       "changedPixelRatio": 0.0,
       "maxChannelDelta": 0,
       "passed": true,
@@ -124,15 +124,15 @@
       "fresh": "frontend/test-results/screenshots/radiation-tablet-radiation-exposure-osd46-v1.png",
       "baselineSize": [
         580,
-        829
+        712
       ],
       "freshSize": [
         580,
-        829
+        712
       ],
       "sameSize": true,
       "changedPixels": 0,
-      "totalPixels": 480820,
+      "totalPixels": 412960,
       "changedPixelRatio": 0.0,
       "maxChannelDelta": 0,
       "passed": true,
@@ -143,15 +143,15 @@
       "fresh": "frontend/test-results/screenshots/radiation-mobile-radiation-quality-osd46-v1.png",
       "baselineSize": [
         992,
-        2935
+        2412
       ],
       "freshSize": [
         992,
-        2935
+        2412
       ],
       "sameSize": true,
       "changedPixels": 0,
-      "totalPixels": 2911520,
+      "totalPixels": 2392704,
       "changedPixelRatio": 0.0,
       "maxChannelDelta": 0,
       "passed": true,
@@ -162,15 +162,72 @@
       "fresh": "frontend/test-results/screenshots/radiation-mobile-radiation-exposure-osd46-v1.png",
       "baselineSize": [
         992,
-        2748
+        2378
       ],
       "freshSize": [
         992,
-        2748
+        2378
       ],
       "sameSize": true,
       "changedPixels": 0,
-      "totalPixels": 2726016,
+      "totalPixels": 2358976,
+      "changedPixelRatio": 0.0,
+      "maxChannelDelta": 0,
+      "passed": true,
+      "reason": "within tolerance"
+    },
+    {
+      "baseline": "docs/screenshots/water-evidence-desktop.png",
+      "fresh": "frontend/test-results/screenshots/water-evidence-desktop.png",
+      "baselineSize": [
+        1440,
+        2287
+      ],
+      "freshSize": [
+        1440,
+        2287
+      ],
+      "sameSize": true,
+      "changedPixels": 0,
+      "totalPixels": 3293280,
+      "changedPixelRatio": 0.0,
+      "maxChannelDelta": 0,
+      "passed": true,
+      "reason": "within tolerance"
+    },
+    {
+      "baseline": "docs/screenshots/water-evidence-tablet.png",
+      "fresh": "frontend/test-results/screenshots/water-evidence-tablet.png",
+      "baselineSize": [
+        820,
+        3268
+      ],
+      "freshSize": [
+        820,
+        3268
+      ],
+      "sameSize": true,
+      "changedPixels": 0,
+      "totalPixels": 2679760,
+      "changedPixelRatio": 0.0,
+      "maxChannelDelta": 0,
+      "passed": true,
+      "reason": "within tolerance"
+    },
+    {
+      "baseline": "docs/screenshots/water-evidence-mobile.png",
+      "fresh": "frontend/test-results/screenshots/water-evidence-mobile.png",
+      "baselineSize": [
+        1082,
+        10222
+      ],
+      "freshSize": [
+        1082,
+        10222
+      ],
+      "sameSize": true,
+      "changedPixels": 0,
+      "totalPixels": 11060204,
       "changedPixelRatio": 0.0,
       "maxChannelDelta": 0,
       "passed": true,

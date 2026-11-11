@@ -49,7 +49,12 @@ RADIATION_MODELS = ("radiation-quality-osd46-v1", "radiation-exposure-osd46-v1")
 RADIATION = tuple(f"radiation-{viewport}-{model}"
                   for viewport in ("desktop", "tablet", "mobile")
                   for model in RADIATION_MODELS)
-ALL_CAPTURES = VIEWPORTS + RADIATION
+# Phase 20 captured the water-use evidence panel but never gated it: the suite wrote
+# water-evidence-<viewport>.png and no comparison ever read the files, so a layout change on that
+# panel would have passed unnoticed. Phase 34 gives the three captures baselines taken from the
+# Phase 33 parent commit, which equals the Phase 34 candidate to within a hover ring.
+WATER = tuple(f"water-evidence-{viewport}" for viewport in ("desktop", "tablet", "mobile"))
+ALL_CAPTURES = VIEWPORTS + RADIATION + WATER
 
 
 def _dirty_baselines() -> list[str]:

@@ -1,5 +1,19 @@
 import { test, expect } from "@playwright/test";
 
+async function settleForCapture(page) {
+  // A screenshot taken while a control still has focus or a pointer is resting on it records the
+  // hover/focus ring, not the layout: the same page captured twice then differs by a few percent
+  // of the canvas for no design reason. Blur and park the pointer first so the baseline is a
+  // property of the page rather than of where the last click landed.
+  await page.evaluate(() => document.activeElement?.blur?.());
+  await page.mouse.move(0, 0);
+  // The controls animate their hover/focus styling, so a screenshot taken in the same frame as
+  // the blur records a mid-transition tint. Wait for the transition to finish rather than
+  // sampling it.
+  await page.waitForTimeout(300);
+}
+
+
 // The two Phase 9 NASA OSD-46 classifiers are served through the existing
 // prediction card pattern on the predictions page. These tests check the things
 // that actually matter to a reader: that the endpoints answer, that a centroid is
@@ -55,6 +69,7 @@ test("radiation classifier cards answer and disclose their scope", async ({
     // Captured so later phases can prove these cards did not drift. Written to the
     // gitignored output tree; the committed baseline is refreshed deliberately by
     // scripts/visual_regression.py --refresh and reviewed as a design change.
+    await settleForCapture(page);
     await panel.screenshot({
       path: `test-results/screenshots/radiation-${testInfo.project.name}-${model}.png`,
     });

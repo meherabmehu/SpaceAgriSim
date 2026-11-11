@@ -1,5 +1,19 @@
 import { test, expect } from "@playwright/test";
 
+async function settleForCapture(page) {
+  // A screenshot taken while a control still has focus or a pointer is resting on it records the
+  // hover/focus ring, not the layout: the same page captured twice then differs by a few percent
+  // of the canvas for no design reason. Blur and park the pointer first so the baseline is a
+  // property of the page rather than of where the last click landed.
+  await page.evaluate(() => document.activeElement?.blur?.());
+  await page.mouse.move(0, 0);
+  // The controls animate their hover/focus styling, so a screenshot taken in the same frame as
+  // the blur records a mid-transition tint. Wait for the transition to finish rather than
+  // sampling it.
+  await page.waitForTimeout(300);
+}
+
+
 async function ready(page, hash = "dashboard") {
   await page.goto(`/#${hash}`);
   await expect(page.getByText("API connected", { exact: true })).toBeVisible();
@@ -26,6 +40,7 @@ test("mission shell, real controls, and responsive navigation", async ({
   // Captured into the gitignored test-results tree, not over the committed
   // baselines in docs/screenshots. Writing over the baseline would make the
   // visual regression gate compare a file against itself and always pass.
+  await settleForCapture(page);
   await page.screenshot({
     path: `test-results/screenshots/mission-${testInfo.project.name}.png`,
     fullPage: true,
