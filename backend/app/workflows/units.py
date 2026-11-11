@@ -31,7 +31,9 @@ UNITS: dict[str, tuple[str, str, list[str]]] = {
     "mL/pot/day": ("flow", "millilitres of water per pot per day",
                    ["per pot, and the pot's surface area is what makes it a flux"]),
     "mL": ("volume", "millilitres of water", []),
-    "mm2": ("area", "square millimetres", ["leaf area per plant, not per square metre of bench"]),
+    "mm2": ("area", "square millimetres of leaf surface",
+            ["leaf area is a surface, not a ground area; the two scale very differently",
+             "leaf area per plant, not per square metre of bench: the two are not interchangeable"]),
     "kg/m2": ("mass flux", "kilograms of harvested grain per square metre of growing area",
               ["grain mass at field moisture as harvested, not dry matter and not edible "
                "fraction; wheat in the controlled-environment series, never converted to fresh "
@@ -40,8 +42,11 @@ UNITS: dict[str, tuple[str, str, list[str]]] = {
              ["this is an areal yield, not a per-plant mass: dividing by density assumes the "
               "per-area yield is independent of density, which the model itself warns is not "
               "true above ~200 plants/m2"]),
-    "g/plant": ("mass", "grams of fresh shoot mass per plant",
-                ["fresh mass, not dry mass and not edible yield per square metre"]),
+    "g/plant": ("mass", "grams of fresh or dry mass per individual plant",
+                ["a per-plant mass is not an areal yield; multiplying by density assumes every "
+                 "plant occupies its nominal area and competes equally",
+                 "fresh mass, dry mass and edible yield per square metre are three different "
+                 "quantities; the field name says which one was measured"]),
     "g": ("mass", "grams", []),
     "degC": ("temperature", "degrees Celsius", []),
     "K": ("temperature", "kelvin", []),
@@ -67,14 +72,12 @@ UNITS: dict[str, tuple[str, str, list[str]]] = {
                   "divides by it"]),
     "ppm": ("mole fraction", "parts per million by volume in air", []),
     "dimensionless": ("dimensionless", "a pure number", []),
-    "g/plant": ("mass", "grams of fresh or dry mass per individual plant",
-                ["a per-plant mass is not an areal yield; multiplying by density assumes every "
-                 "plant occupies its nominal area and competes equally"]),
     "mm": ("water depth", "millimetres of water depth, where 1 mm over 1 m2 is 1 litre",
            ["a depth is not a volume: litres require an area, and this registry never multiplies "
             "one by the other"]),
-    "mm2": ("area", "square millimetres of leaf surface",
-            ["leaf area is a surface, not a ground area; the two scale very differently"]),
+    # `g/plant` and `mm2` are defined once, above. A second definition of the same key in this
+    # literal silently replaced the first - Python keeps the last - so the registry served one
+    # wording and dropped the other's caution. There is one entry per unit by construction now.
     "count": ("count", "a whole-number count of organs or events", []),
     "mg/g fresh weight": ("concentration", "milligrams of a compound per gram of fresh mass",
                           ["a fresh-mass basis, not dry mass; the two are not interchangeable"]),
