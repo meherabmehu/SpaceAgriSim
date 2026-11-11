@@ -1,0 +1,82 @@
+PHASE 33 — DELIVERY RECORD
+==========================
+
+Scope
+-----
+Replace the three.js growth chamber with a dependency-free SVG chamber view, so the
+oversized-chunk warning disappears at its source instead of being suppressed, deleted or
+budget-raised. No other screen, route, API contract, dataset or model was touched. No Render
+resource, setting, environment variable or deployment was created, changed or read.
+
+Base
+----
+Branch `phase33/frontend` was cut from verified remote `main` at
+
+    bcd4ec506b2319c7b37a90459428c951f46f965a
+
+(confirmed with `git ls-remote` before the branch existed; that is the Phase 32 final commit).
+
+Commits on the branch
+---------------------
+    b233800  feat(frontend): replace three.js growth chamber with an SVG chamber view
+    2b28b9e  feat(frontend): polish the chamber view and record Phase 33
+
+Final SHA
+---------
+A commit cannot contain its own hash, and the merge commit's hash does not exist until the merge
+happens. So the authoritative final SHA is not written here; read it from the remote after this
+record is merged:
+
+    git ls-remote origin refs/heads/main
+
+The merge into `main` is a fast-forward from `bcd4ec5…`, so `main`'s history contains the two
+commits above unchanged, plus the merge record commit. Phase 32 history is preserved; nothing was
+rebased, amended or force-pushed.
+
+Gates run on this branch (all from a clean install)
+---------------------------------------------------
+    npm ci                                              clean, 0 vulnerabilities
+    npm run lint                                        0 problems
+    npm run typecheck                                   0 errors
+    npm run build                                       exit 0, NO warnings (no "(!)" lines)
+    npm run build:check                                 passed: no cycles, no oversized chunk
+                                                        anywhere, initial request 240 kB / 3 modules
+    npx playwright test                                 123 passed (41 tests x 3 viewports)
+    pytest backend/tests (SQLite)                       1212 passed, 24 skipped
+    pytest backend/tests (PostgreSQL 17.11)             1236 passed, 0 skipped
+    scripts/audit_models.py                             161 checks, 0 failed, 5 documented, 0 high
+    scripts/verify_model_registry.py                    60/60
+    ml/training/phase32_provenance.py --check           9 artifacts complete
+    ml/research/build_feature_coverage.py --check       up to date (12 features)
+    ml/research/build_feature_readiness.py --check      up to date (12 features)
+
+The 24 SQLite skips are the PostgreSQL-gated set documented in docs/PHASE32_SKIPPED_TESTS.md; the
+PostgreSQL run executes every one of them.
+
+Bundle
+------
+    total JavaScript     1667.35 kB / 480.20 kB gzip  ->  782.47 kB / 244.37 kB gzip
+    largest chunk        vendor-three 753.06 kB       ->  vendor-charts 402.65 kB
+    initial request      240 kB / 3 modules           ->  240 kB / 3 modules (unchanged)
+    removed deps         three, @react-three/fiber, @react-three/drei
+    chunkSizeWarningLimit  untouched (Vite default 500 kB); no warning is filtered
+
+Details, verbatim diagnostics and reproduction commands: docs/PHASE33_FRONTEND_BUNDLE.md
+Full narrative, preserved-behaviour mapping and limitations: docs/PHASE33_REPORT.md
+Screenshots: docs/screenshots/phase33/, plus the refreshed docs/screenshots/digital-twin.png
+
+Deployment
+----------
+Not performed by this phase, by instruction. Production deployment is handled by the project owner
+and ChatGPT. Nothing in this phase assumed, verified or claimed a deployment.
+
+Note on the visual-regression baselines
+---------------------------------------
+docs/screenshots/mission-*.png and the radiation baselines are older than the current layout and
+`scripts/visual_regression.py` reports canvas-size mismatches against them. Those mismatches are
+pre-existing: a build of the parent commit `bcd4ec5…` reproduces the same current layout, and a
+direct parent-vs-branch capture at 1440 px gives an identical 1440x1649 canvas with 0.0351 % of
+pixels differing. The baselines were deliberately NOT refreshed, because doing so would have
+recorded unrelated layout drift under this phase; the honest measurement is the parent-build one.
+ml/evaluation/phase9_visual_regression.json was left as committed rather than overwritten with a
+failing run that says nothing about Phase 33. Flagged for the next phase to handle deliberately.
