@@ -155,7 +155,7 @@ of the 19 audit gaps that concerned a missing `sourceUrl` / `sourceType` / `lice
 
 | Gate | Command | Result |
 | --- | --- | --- |
-| SQLite suite | `pytest backend/tests -q -p no:randomly -rs` | **1212 passed, 24 skipped, 0 failed** |
+| SQLite suite | `pytest backend/tests -q -p no:randomly -rs` | **1212 passed, 24 skipped, 0 failed**. With the PostgreSQL 17 client binaries on `PATH` the `pg_restore` skip also runs: **1213 passed, 23 skipped** |
 | PostgreSQL 17.11 suite | same, with `SPACEAGRISIM_TEST_POSTGRES_URL` | **1236 passed, 0 skipped, 0 failed** |
 | Skip accounting | `-rs`, every reason classified | 24 PostgreSQL-gated, 0 unexplained (`docs/PHASE32_SKIPPED_TESTS.md`) |
 | Model audit | `python scripts/audit_models.py --write` | **161 checks, 0 failed, 0 high-severity gaps** |
