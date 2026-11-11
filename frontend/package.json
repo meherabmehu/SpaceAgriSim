@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "build:check": "vite build && node scripts/check-bundle.mjs"
   },
   "dependencies": {
     "@react-three/fiber": "^9.7.0",
