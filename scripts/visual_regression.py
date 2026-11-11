@@ -54,7 +54,12 @@ RADIATION = tuple(f"radiation-{viewport}-{model}"
 # panel would have passed unnoticed. Phase 34 gives the three captures baselines taken from the
 # Phase 33 parent commit, which equals the Phase 34 candidate to within a hover ring.
 WATER = tuple(f"water-evidence-{viewport}" for viewport in ("desktop", "tablet", "mobile"))
-ALL_CAPTURES = VIEWPORTS + RADIATION + WATER
+# Phase 35: the two routes where a reader decides whether to trust a number. Their baselines were
+# established from the verified candidate after the parent commit was rebuilt and captured with the
+# same suite; ml/evaluation/phase35_visual_drift.json records what moved and why.
+SCREENS = tuple(f"{name}-{viewport}" for name in ("predictions", "benchmarks")
+                for viewport in ("desktop", "tablet", "mobile"))
+ALL_CAPTURES = VIEWPORTS + RADIATION + WATER + SCREENS
 
 
 def _dirty_baselines() -> list[str]:
