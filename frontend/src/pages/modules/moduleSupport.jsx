@@ -1,10 +1,22 @@
 import { useEffect, useState } from "react";
 import { api } from "../../services/platformApi.ts";
+
+// The resolved state a resource reports when it was never asked for. A module-level constant keeps
+// its identity stable, so a skipped resource cannot cause a render loop in a consumer effect.
+const skipped = { data: null, error: "", loading: false };
+
 // eslint-disable-next-line react-refresh/only-export-components
 export function useResource(path, body) {
   const key = JSON.stringify(body);
+  // A `null` path means "there is nothing to ask for yet" - the caller gates an authenticated
+  // resource on a session that does not exist. It used to be handed straight to `api()`, whose
+  // `${base}${path}` template produced the request `GET /apinull` (404 in every console, signed
+  // out, on the account page). A skipped resource is resolved with no data and no error, so the
+  // caller renders its own signed-out branch instead of a red banner.
+  const enabled = typeof path === "string" && path.length > 0;
   const [state, setState] = useState({ data: null, error: "", loading: true });
   useEffect(() => {
+    if (!enabled) return undefined;
     const controller = new AbortController();
     const timer = setTimeout(() => {
       setState({ data: null, error: "", loading: true });
@@ -23,8 +35,10 @@ export function useResource(path, body) {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [path, key]);
-  return state;
+  }, [path, key, enabled]);
+  // A skipped resource reports "resolved, nothing to show" without touching state, so the effect
+  // never sets state synchronously (that is a cascading render, and an ESLint error here).
+  return enabled ? state : skipped;
 }
 /**
  * The visible state of one request.

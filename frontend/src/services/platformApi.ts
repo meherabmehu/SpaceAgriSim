@@ -21,6 +21,11 @@ export async function api<T = Record<string, unknown>>(
   body?: unknown,
   signal?: AbortSignal,
 ): Promise<T> {
+  // A guard, not decoration: the resource hook used to pass a `null` path straight through and the
+  // template below turned it into the request `GET /apinull` (404 in the console, signed out). Any
+  // future caller that forgets to gate a resource now gets a named error instead of a phantom URL.
+  if (typeof path !== "string" || !path.startsWith("/"))
+    throw new Error(`Invalid API path: ${String(path)}`);
   const response = await fetch(`${base}${path}`, {
     method: body === undefined ? "GET" : "POST",
     signal,

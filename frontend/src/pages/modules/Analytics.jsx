@@ -17,8 +17,13 @@ export function Analytics({
   exportReport,
   setParam,
   setNotice,
+  session,
 }) {
-  const history = useResource("/scenarios");
+  // Saved scenarios are private account history: `GET /scenarios` is authenticated. The request
+  // used to be issued unconditionally, so a signed-out visitor got a red "Authentication is
+  // required" banner directly beside the sign-in prompt on the same card. The resource is now
+  // gated on the session, which is what `RequestState` and `useResource` expect.
+  const history = useResource(session ? "/scenarios" : null);
   const chart = result?.dailyLifeSupportData || [];
   const restore = (row) => {
     Object.entries(row.configuration).forEach(([key, value]) =>
@@ -84,28 +89,33 @@ export function Analytics({
         </div>
       </Card>
       <Card title="Saved scenarios" label="PRIVATE ACCOUNT HISTORY">
-        <p className="muted fine">
-          Sign in to view scenarios saved to your account. Do not store sensitive
-          information.
-        </p>
-        <RequestState state={history} />
-        {history.data?.scenarios?.length === 0 && (
-          <p className="empty-state">
-            Use “Save scenario” to retain your current configuration.
+        {session ? (
+          <>
+            <RequestState state={history} />
+            {history.data?.scenarios?.length === 0 && (
+              <p className="empty-state">
+                Use “Save scenario” to retain your current configuration.
+              </p>
+            )}
+            {history.data?.scenarios?.map((row) => (
+              <div className="stat-pair" key={row.id}>
+                <span>
+                  {row.name}
+                  <br />
+                  <small>{row.created_at}</small>
+                </span>
+                <button className="secondary-button" onClick={() => restore(row)}>
+                  Restore
+                </button>
+              </div>
+            ))}
+          </>
+        ) : (
+          <p className="muted fine">
+            Sign in to view scenarios saved to your account. Do not store
+            sensitive information.
           </p>
         )}
-        {history.data?.scenarios?.map((row) => (
-          <div className="stat-pair" key={row.id}>
-            <span>
-              {row.name}
-              <br />
-              <small>{row.created_at}</small>
-            </span>
-            <button className="secondary-button" onClick={() => restore(row)}>
-              Restore
-            </button>
-          </div>
-        ))}
         <JsonDetails title="Current reproducible configuration" data={params} />
       </Card>
     </>
