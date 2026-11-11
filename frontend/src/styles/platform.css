@@ -702,6 +702,17 @@
   border-color: #304c42;
   background: #1e342c44;
 }
+
+/* Suggestion chips are whole questions, not badges: they are buttons and their text has to be
+   able to wrap. `.pill` is `white-space: nowrap`, which is right for the short annotations it was
+   written for but pushed the chip row 6 px past the viewport at 412 px wide. Only interactive
+   pills wrap; the badge pills that annotate a card keep the single-line treatment. */
+.badge-row > button.pill {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: left;
+  max-width: 100%;
+}
 .chart-summary {
   display: flex;
   align-items: baseline;
