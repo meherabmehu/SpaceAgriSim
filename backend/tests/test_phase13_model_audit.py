@@ -121,10 +121,37 @@ def test_no_classifier_is_presented_as_calibrated(report):
         assert calibration.get("calibrated") is not True, row["id"]
 
 
-def test_calibration_gaps_are_reported_rather_than_hidden(report):
+def test_no_high_severity_gap_survives_the_phase_32_measurement(report):
+    """Phase 31 left two high-severity calibration gaps. Phase 32 measured them.
+
+    The assertion is not "the gap list is empty" - a documented limitation is a legitimate
+    outcome. It is that nothing high-severity is left open, and that the two that were closed
+    carry their measurement rather than a promise.
+    """
     high = [gap for gap in report["gaps"] if gap["severity"] == "high"]
-    assert {gap["model"] for gap in high} == {"radiation-quality-osd46-v1", "radiation-exposure-osd46-v1"}
-    assert all(gap["field"] == "calibration" for gap in high)
+    assert high == []
+    resolved = {(gap["model"], gap["field"]): gap for gap in report["resolvedGaps"]}
+    for model_id in ("radiation-quality-osd46-v1", "radiation-exposure-osd46-v1"):
+        resolution = resolved[(model_id, "calibration")]
+        assert "log loss" in resolution["resolution"]
+        assert "22 biological groups" in resolution["resolution"]
+        assert (ROOT / resolution["evidence"]).is_file()
+
+
+def test_the_calibration_record_proves_it_scored_a_different_fit(report):
+    """The measurement is only a calibration if it was not fitted and scored on one set."""
+    record = json.loads((ROOT / "ml/evaluation/phase32_radiation_calibration.json").read_text())
+    for model_id, entry in record["models"].items():
+        assert entry["accuracyMatchesArtifact"] is True, model_id
+        assert entry["probability"]["logLoss"] > 0
+        assert entry["probability"]["ece"] is not None
+        assert "nested" in entry["temperatureScaling"]["scheme"].lower()
+        assert entry["servedScaling"] in {"none", "temperature", "platt"}
+        # a probability that is not calibrated may not be labelled as one anywhere
+        from app import research as _research
+        row = next(m for m in _research.model_registry()["models"] if m["id"] == model_id)
+        assert (row.get("calibration") or {}).get("calibrated") is not True
+        assert row["probabilityCalibration"]["calibrated"] is False
 
 
 def test_dataset_safeguards_survive_the_audit(report):

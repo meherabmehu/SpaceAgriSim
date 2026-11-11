@@ -42,6 +42,26 @@ def main() -> int:
     import pandas
     import sklearn
 
+    previous_rows = {}
+    if REGISTRY.exists():
+        for row in json.loads(REGISTRY.read_text()).get("models", []):
+            if row.get("id"):
+                previous_rows[row["id"]] = row
+
+    def registry_row(card: dict) -> dict:
+        """The registry row for one artifact, preserving what the previous row recorded.
+
+        Rebinding this script to only id/artifact/sha256 deleted the `supersedes` chain, the
+        `status` and the recorded independent validation every time it ran - so a withdrawal would
+        quietly become an ordinary model after any retrain. Everything except the three fields
+        this script actually recomputes is carried forward from the previous row.
+        """
+        row = {"id": card["id"], "artifact": card["artifact"], "sha256": card["sha256"]}
+        for key, value in (previous_rows.get(card["id"]) or {}).items():
+            if key not in row:
+                row[key] = value
+        return row
+
     cards = []
     for path in sorted(ARTIFACTS.glob("*.json")):
         if not is_model_card(path.name):
@@ -78,8 +98,7 @@ def main() -> int:
             "pandas": pandas.__version__,
             "sklearn": sklearn.__version__,
         },
-        "models": [{"id": c["id"], "artifact": c["artifact"], "sha256": c["sha256"]}
-                   for c in cards],
+        "models": [registry_row(c) for c in cards],
     }
     # Preserve data-version digests if a previous registry recorded them.
     for key in ("dataVersion", "externalDataVersion", "externalTrainingEnvironment"):

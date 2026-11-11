@@ -1,6 +1,6 @@
 {
   "id": "mizuna-harvest-v1",
-  "name": "Mizuna harvest \u00b7 exploratory ridge",
+  "name": "Mizuna harvest · exploratory ridge",
   "version": "1.0.0",
   "status": "trained-exploratory",
   "trainedAt": "2026-11-07T14:32:42.218887+00:00",
@@ -89,5 +89,24 @@
       -0.45369601582403646
     ],
     "intercept": 44.62714285714286
-  }
+  },
+  "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-655",
+  "sourceType": "NASA OSDR (OSD-655) VEG-01/02 pick-and-eat harvest records",
+  "license": "Public OSDR access; retain study attribution and comply with OSDR terms; do not assume every contributed file is public domain.",
+  "sourceLicense": "Public OSDR access; retain study attribution and comply with OSDR terms; do not assume every contributed file is public domain.",
+  "sourceLicenseUrl": "https://science.nasa.gov/reference/osdr-help-terms-and-conditions/",
+  "sourceCitation": "NASA Open Science Data Repository, OSD-655: Pick-and-eat space crop production flight testing on the International Space Station.",
+  "sourceRetrieved": "2026-11-09",
+  "servedScope": "Withdrawn in Phase 31. Held-out R2 was -0.333, i.e. worse than predicting the mean, so no forecast of mizuna harvest is offered by any route, workflow, catalogue entry or assistant passage. The card is retained as a non-serving record of that evaluation.",
+  "operationalForecast": false,
+  "harvestForecastClaim": "none",
+  "archivalRecord": {
+    "retained": true,
+    "served": "no: withdrawn from every surface",
+    "files": [
+      "ml/artifacts/mizuna-harvest-v1.json"
+    ],
+    "reason": "A withdrawn model keeps its artifact and its evaluation so the withdrawal is auditable; backend/tests/test_phase32_no_forecast.py proves it is unreachable."
+  },
+  "note": "No operational forecast. This card describes what the model reproduces inside the measured domain; it is not a prediction of a future or unmeasured crop."
 }

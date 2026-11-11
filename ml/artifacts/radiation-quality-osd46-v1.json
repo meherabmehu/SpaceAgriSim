@@ -2721,5 +2721,24 @@
     "explanationArtifact": "ml/artifacts/radiation-quality-osd46-v1-explanation.json",
     "explanationMethod": "exact linear attribution of the served linear-softmax evaluator; the contributions reconstruct the served logits",
     "explanationIsSurrogate": false
+  },
+  "license": "Public OSDR access; retain study attribution and comply with OSDR terms; do not assume every contributed file is public domain.",
+  "sourceLicense": "Public OSDR access; retain study attribution and comply with OSDR terms; do not assume every contributed file is public domain.",
+  "sourceLicenseUrl": "https://science.nasa.gov/reference/osdr-help-terms-and-conditions/",
+  "sourceCitation": "NASA Open Science Data Repository, OSD-46: Gamma radiation and HZE treatment of seedlings in Arabidopsis (UC Davis / Brookhaven).",
+  "sourceRetrieved": "2026-11-09",
+  "sourceChecksum": "data/raw/OSD-46/GLDS-46_array_normalized_expression_probeset_GLmicroarray.csv sha256 f15c4179dbbebdfd39c53ffb906f6251ed1fc3fa3c926efc3c71c4736eefda27",
+  "servedScope": "Classification of the applied treatment (control / 100 Gy gamma / 30 Gy Fe-56) for Arabidopsis seedlings in OSD-46. Not a dose prediction, not a plant-health score, not a crop, and not spaceflight. Probabilities are measured, not calibrated, and the response reports the measurement.",
+  "operationalForecast": false,
+  "harvestForecastClaim": "none",
+  "note": "No operational forecast. This card describes what the model reproduces inside the measured domain; it is not a prediction of a future or unmeasured crop.",
+  "probabilityCalibration": {
+    "calibrated": false,
+    "measured": true,
+    "evidence": "ml/evaluation/phase32_radiation_calibration.json",
+    "method": "Leave-one-biological-group-out out-of-fold probabilities, the same split as the reported accuracy (recomputed and asserted equal). Log loss, Brier score and a 10-bin ECE were measured; a nested temperature search was run and reported.",
+    "servedScaling": "none",
+    "scope": "Measured within OSD-46 only. It does not transfer to other radiation qualities, doses, organisms or platforms.",
+    "statement": "The class probabilities are uncalibrated scores from a regularised logistic model, measured on 44 arrays from 22 biological groups. Read them as a ranking, not as a probability that the class is correct."
   }
 }

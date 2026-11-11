@@ -20,6 +20,20 @@ def stamp():
 
 
 def save_json(path, value):
+    # Phase 32: every served artifact carries its source URL, source type, licence, terms URL,
+    # citation, served scope and archival status. The values live in one reviewed table
+    # (ml/training/phase32_provenance.py) rather than in nine training scripts, so a retrain
+    # cannot drop them and a licence correction happens in one place. `apply` never overwrites a
+    # value the caller already set.
+    if isinstance(value, dict) and value.get("id"):
+        try:
+            import sys as _sys
+            from pathlib import Path as _Path
+            _sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / "ml" / "training"))
+            from phase32_provenance import apply as _apply_provenance
+            value = _apply_provenance(value)
+        except ImportError:  # pragma: no cover - the table is in-repo
+            pass
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, indent=2, ensure_ascii=True, allow_nan=False) + "\n", encoding="utf-8")
 

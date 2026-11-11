@@ -138,6 +138,7 @@ def model_catalogue() -> dict:
             "retiredReason": (classification.evidence if retired else None),
             "calibration": model.get("calibration"),
             "explanationAvailable": model.get("explanationAvailable"),
+            "probabilityCalibration": model.get("probabilityCalibration"),
             "sourceStudy": model.get("sourceStudy"),
             "sourceType": (model.get("provenance") or {}).get("label"),
             "provenance": model.get("provenance"),

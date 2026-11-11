@@ -567,5 +567,24 @@
     "Possible flight/ground batch confounding remains despite plant-grouped validation.",
     "Class probability is uncalibrated, not confidence or a medical/operational diagnostic.",
     "Requires laboratory RNA-seq, exact gene IDs and library normalization; environmental sliders are not compatible inputs."
-  ]
+  ],
+  "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-767",
+  "sourceType": "NASA OSDR (OSD-767) tomato transcriptome, flight versus ground",
+  "license": "Public OSDR access; retain study attribution and comply with OSDR terms; do not assume every contributed file is public domain.",
+  "sourceLicense": "Public OSDR access; retain study attribution and comply with OSDR terms; do not assume every contributed file is public domain.",
+  "sourceLicenseUrl": "https://science.nasa.gov/reference/osdr-help-terms-and-conditions/",
+  "sourceCitation": "NASA Open Science Data Repository, OSD-767: Stress and light spectral quality influence the transcriptome of a tomato cultivar.",
+  "sourceRetrieved": "2026-11-09",
+  "servedScope": "Classification of the recorded experimental context (flight versus ground) from tomato expression. Not a health score, not a yield prediction and not a stress diagnosis.",
+  "operationalForecast": false,
+  "harvestForecastClaim": "none",
+  "note": "No operational forecast. This card describes what the model reproduces inside the measured domain; it is not a prediction of a future or unmeasured crop.",
+  "probabilityCalibration": {
+    "calibrated": false,
+    "measured": false,
+    "evidence": null,
+    "servedScaling": "none",
+    "scope": "Not measured: no independent flight-versus-ground replication is available.",
+    "statement": "The class probabilities are uncalibrated scores. No calibration study has been run for this model, so the value ranks cases; it is not the probability that the class is correct."
+  }
 }

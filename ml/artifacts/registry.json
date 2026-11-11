@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "trainedAt": "2026-11-07T20:23:01.761929+00:00",
+  "trainedAt": "2026-11-11T06:34:05.234771+00:00",
   "environment": {
     "python": "3.13.16",
     "numpy": "2.3.5",
@@ -11,49 +11,18 @@
     {
       "id": "lettuce-earth-growth-v1",
       "artifact": "ml/artifacts/lettuce-earth-growth-v1.json",
-      "sha256": "b5af3819a4d55a1d9f7dd293886a72c692bbc57bf6d488bbcf45b1a4079491db"
-    },
-    {
-      "id": "mizuna-harvest-v1",
-      "artifact": "ml/artifacts/mizuna-harvest-v1.json",
-      "sha256": "78029d6d9a93946bdaf50427f697a463a805f3c588a4deb17afb61314cf22f38"
-    },
-    {
-      "id": "mizuna-microbial-load-v1",
-      "artifact": "ml/artifacts/mizuna-microbial-load-v1.json",
-      "sha256": "9868c660351f906ede6001ea7e2eb8d5fd2fc7b60b1c393c3dec94017db8cfff"
-    },
-    {
-      "id": "tomato-flight-response-v1",
-      "artifact": "ml/artifacts/tomato-flight-response-v1.json",
-      "sha256": "b1dd72b63130fccc6a334e3de286ae6774152291ce5fe00caf365d74cb10f593"
-    },
-    {
-      "id": "mizuna-microbial-relative-load-v2",
-      "artifact": "ml/artifacts/mizuna-microbial-relative-load-v2.json",
-      "sha256": "11ad54a2fcf24c040796f4cdd256f624d79b40e80f2f732096ba7b271cf5de39",
-      "supersedes": "mizuna-microbial-load-v1"
+      "sha256": "052dc2546ccf837024d7b6a86ad5a22ab5a54d0461e312c3e6a5572be928a85f"
     },
     {
       "id": "lettuce-earth-growth-v2",
       "artifact": "ml/artifacts/lettuce-earth-growth-v2.json",
-      "sha256": "9931f375baf5fa11c55e2647f1fd2b9c4775deb4166c1e0879932e8b004e1b7c",
+      "sha256": "0206b19256f95b8badb5d164ef884b4c526a61a03acbc11303beca1795bab5d9",
       "supersedes": "lettuce-earth-growth-v1"
-    },
-    {
-      "id": "radiation-quality-osd46-v1",
-      "artifact": "ml/artifacts/radiation-quality-osd46-v1.json",
-      "sha256": "5155d235b4511a2f28442f9f544cbbbc7f98a8f136fdcd45a771a9db5264d8eb"
-    },
-    {
-      "id": "radiation-exposure-osd46-v1",
-      "artifact": "ml/artifacts/radiation-exposure-osd46-v1.json",
-      "sha256": "dc7a324d3c55401bfbe1f3d8740cf4b70e1590efd3bd11d618c066808d565281"
     },
     {
       "id": "lettuce-earth-growth-v3",
       "artifact": "ml/artifacts/lettuce-earth-growth-v3.json",
-      "sha256": "b5d1532dac106d289b9498f705efa4c4cdf071d8dc81739c1f09ea3d206e946a",
+      "sha256": "052c0b254d395cd78606148ad625c86f37ec114c2e89702a04d3ae98077ff394",
       "supersedes": "",
       "status": "trained-exploratory",
       "independentValidation": {
@@ -63,6 +32,37 @@
         "passed": false,
         "criterionPct": 30.0
       }
+    },
+    {
+      "id": "mizuna-harvest-v1",
+      "artifact": "ml/artifacts/mizuna-harvest-v1.json",
+      "sha256": "5be2375b7bebca641be3b42e34108daff6609bf913f13e6d2664007b040b3744"
+    },
+    {
+      "id": "mizuna-microbial-load-v1",
+      "artifact": "ml/artifacts/mizuna-microbial-load-v1.json",
+      "sha256": "39807034da0fe6191ef7b7ab72a0363d6586bacc21b910b0e3de319d46740e98"
+    },
+    {
+      "id": "mizuna-microbial-relative-load-v2",
+      "artifact": "ml/artifacts/mizuna-microbial-relative-load-v2.json",
+      "sha256": "56c0399b39c61e07f3ff737479f2b76908a9eced25f633774e39e2a5c6cec6b4",
+      "supersedes": "mizuna-microbial-load-v1"
+    },
+    {
+      "id": "radiation-exposure-osd46-v1",
+      "artifact": "ml/artifacts/radiation-exposure-osd46-v1.json",
+      "sha256": "9e9f963f529636e5d49dd31f4f264bfd26a2e62342c31c20c1c53a949f9b77f6"
+    },
+    {
+      "id": "radiation-quality-osd46-v1",
+      "artifact": "ml/artifacts/radiation-quality-osd46-v1.json",
+      "sha256": "dd5f558045c6de0c45bf56dafb3acd23e3eeeb575134d01a4ebca5dbe375c830"
+    },
+    {
+      "id": "tomato-flight-response-v1",
+      "artifact": "ml/artifacts/tomato-flight-response-v1.json",
+      "sha256": "db47150e3774f91f49bcfea5a415b3873bab7ea5ce0d9c9b0ed7de201471cade"
     }
   ],
   "dataVersion": "e5a3967ac7c471a2a81ed71e6ac179e8ca01809d199a8739afc9b498b18fdc7c",

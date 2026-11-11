@@ -7,7 +7,7 @@
   },
   {
    "check": "checksum:lettuce-earth-growth-v1",
-   "detail": "registry=b5af3819a4d55a1d\u2026 disk=b5af3819a4d55a1d\u2026",
+   "detail": "registry=052dc2546ccf8370\u2026 disk=052dc2546ccf8370\u2026",
    "passed": true
   },
   {
@@ -76,13 +76,153 @@
    "passed": true
   },
   {
+   "check": "artifact-exists:lettuce-earth-growth-v2",
+   "detail": "ml/artifacts/lettuce-earth-growth-v2.json",
+   "passed": true
+  },
+  {
+   "check": "checksum:lettuce-earth-growth-v2",
+   "detail": "registry=0206b19256f95b8b\u2026 disk=0206b19256f95b8b\u2026",
+   "passed": true
+  },
+  {
+   "check": "provenance:lettuce-earth-growth-v2",
+   "detail": "complete",
+   "passed": true
+  },
+  {
+   "check": "limitations:lettuce-earth-growth-v2",
+   "detail": "7 recorded",
+   "passed": true
+  },
+  {
+   "check": "schema:lettuce-earth-growth-v2",
+   "detail": "4 features, target=freshShootMassG, unit=g fresh shoot mass/plant",
+   "passed": true
+  },
+  {
+   "check": "metrics-present:lettuce-earth-growth-v2",
+   "detail": "['MAE', 'R2', 'RMSE']",
+   "passed": true
+  },
+  {
+   "check": "metrics-no-null:lettuce-earth-growth-v2",
+   "detail": "all valued",
+   "passed": true
+  },
+  {
+   "check": "metrics-baseline:lettuce-earth-growth-v2",
+   "detail": "a regression model must report its baseline",
+   "passed": true
+  },
+  {
+   "check": "uncertainty:lettuce-earth-growth-v2",
+   "detail": "['achievedCoverage', 'calibrationGroups', 'calibrationResiduals', 'caveat', 'empiricallyCalibrated', 'evidence', 'exchangeabilityUnit', 'groupLevelRadiusForComparison', 'method', 'nominalCoverage', 'radius', 'rowLevelRadiusForComparison']",
+   "passed": true
+  },
+  {
+   "check": "calibration-measured:lettuce-earth-growth-v2",
+   "detail": "calibration is claimed without a measured coverage",
+   "passed": true
+  },
+  {
+   "check": "classification:lettuce-earth-growth-v2",
+   "detail": "no science classification entry",
+   "passed": true
+  },
+  {
+   "check": "catalogue:lettuce-earth-growth-v2",
+   "detail": "registered model missing from the workflow catalogue",
+   "passed": true
+  },
+  {
+   "check": "served-not-retired:lettuce-earth-growth-v2",
+   "detail": "category 3 model reports runStatus=runnable",
+   "passed": true
+  },
+  {
+   "check": "served-model-not-category-6:lettuce-earth-growth-v2",
+   "detail": "a served model is classified as an unsupported prediction",
+   "passed": true
+  },
+  {
+   "check": "explanation-flag:lettuce-earth-growth-v2",
+   "detail": "flag=False file=lettuce-earth-growth-v2-explanation.json exists=False",
+   "passed": true
+  },
+  {
+   "check": "artifact-exists:lettuce-earth-growth-v3",
+   "detail": "ml/artifacts/lettuce-earth-growth-v3.json",
+   "passed": true
+  },
+  {
+   "check": "checksum:lettuce-earth-growth-v3",
+   "detail": "registry=052c0b254d395cd7\u2026 disk=052c0b254d395cd7\u2026",
+   "passed": true
+  },
+  {
+   "check": "provenance:lettuce-earth-growth-v3",
+   "detail": "complete",
+   "passed": true
+  },
+  {
+   "check": "limitations:lettuce-earth-growth-v3",
+   "detail": "6 recorded",
+   "passed": true
+  },
+  {
+   "check": "schema:lettuce-earth-growth-v3",
+   "detail": "4 features, target=log(freshYieldGPerM2), unit=g fresh shoot mass per plant",
+   "passed": true
+  },
+  {
+   "check": "metrics-present:lettuce-earth-growth-v3",
+   "detail": "['MAE', 'MAPE', 'R2', 'RMSE', 'meanBiasError', 'n']",
+   "passed": true
+  },
+  {
+   "check": "metrics-no-null:lettuce-earth-growth-v3",
+   "detail": "all valued",
+   "passed": true
+  },
+  {
+   "check": "uncertainty:lettuce-earth-growth-v3",
+   "detail": "['coverageNote', 'kind', 'logResidualHigh', 'logResidualLow', 'outOfFoldCoverage']",
+   "passed": true
+  },
+  {
+   "check": "classification:lettuce-earth-growth-v3",
+   "detail": "no science classification entry",
+   "passed": true
+  },
+  {
+   "check": "catalogue:lettuce-earth-growth-v3",
+   "detail": "registered model missing from the workflow catalogue",
+   "passed": true
+  },
+  {
+   "check": "served-not-retired:lettuce-earth-growth-v3",
+   "detail": "category 3 model reports runStatus=runnable",
+   "passed": true
+  },
+  {
+   "check": "served-model-not-category-6:lettuce-earth-growth-v3",
+   "detail": "a served model is classified as an unsupported prediction",
+   "passed": true
+  },
+  {
+   "check": "explanation-flag:lettuce-earth-growth-v3",
+   "detail": "flag=False file=lettuce-earth-growth-v3-explanation.json exists=False",
+   "passed": true
+  },
+  {
    "check": "artifact-exists:mizuna-harvest-v1",
    "detail": "ml/artifacts/mizuna-harvest-v1.json",
    "passed": true
   },
   {
    "check": "checksum:mizuna-harvest-v1",
-   "detail": "registry=78029d6d9a93946b\u2026 disk=78029d6d9a93946b\u2026",
+   "detail": "registry=5be2375b7bebca64\u2026 disk=5be2375b7bebca64\u2026",
    "passed": true
   },
   {
@@ -152,7 +292,7 @@
   },
   {
    "check": "checksum:mizuna-microbial-load-v1",
-   "detail": "registry=9868c660351f906e\u2026 disk=9868c660351f906e\u2026",
+   "detail": "registry=39807034da0fe619\u2026 disk=39807034da0fe619\u2026",
    "passed": true
   },
   {
@@ -221,78 +361,13 @@
    "passed": true
   },
   {
-   "check": "artifact-exists:tomato-flight-response-v1",
-   "detail": "ml/artifacts/tomato-flight-response-v1.json",
-   "passed": true
-  },
-  {
-   "check": "checksum:tomato-flight-response-v1",
-   "detail": "registry=b1dd72b63130fccc\u2026 disk=b1dd72b63130fccc\u2026",
-   "passed": true
-  },
-  {
-   "check": "provenance:tomato-flight-response-v1",
-   "detail": "complete",
-   "passed": true
-  },
-  {
-   "check": "limitations:tomato-flight-response-v1",
-   "detail": "5 recorded",
-   "passed": true
-  },
-  {
-   "check": "schema:tomato-flight-response-v1",
-   "detail": "64 features, target=recorded spaceflight experimental context, unit=probability of recorded flight class (uncalibrated)",
-   "passed": true
-  },
-  {
-   "check": "metrics-present:tomato-flight-response-v1",
-   "detail": "['ROC_AUC', 'accuracy', 'baselineMacroF1', 'confusionMatrix', 'macroF1', 'precision', 'recall']",
-   "passed": true
-  },
-  {
-   "check": "metrics-no-null:tomato-flight-response-v1",
-   "detail": "all valued",
-   "passed": true
-  },
-  {
-   "check": "no-false-calibration-claim:tomato-flight-response-v1",
-   "detail": "the served catalogue claims a calibrated classifier",
-   "passed": true
-  },
-  {
-   "check": "classification:tomato-flight-response-v1",
-   "detail": "no science classification entry",
-   "passed": true
-  },
-  {
-   "check": "catalogue:tomato-flight-response-v1",
-   "detail": "registered model missing from the workflow catalogue",
-   "passed": true
-  },
-  {
-   "check": "served-not-retired:tomato-flight-response-v1",
-   "detail": "category 3 model reports runStatus=runnable",
-   "passed": true
-  },
-  {
-   "check": "served-model-not-category-6:tomato-flight-response-v1",
-   "detail": "a served model is classified as an unsupported prediction",
-   "passed": true
-  },
-  {
-   "check": "explanation-flag:tomato-flight-response-v1",
-   "detail": "flag=False file=tomato-flight-response-v1-explanation.json exists=False",
-   "passed": true
-  },
-  {
    "check": "artifact-exists:mizuna-microbial-relative-load-v2",
    "detail": "ml/artifacts/mizuna-microbial-relative-load-v2.json",
    "passed": true
   },
   {
    "check": "checksum:mizuna-microbial-relative-load-v2",
-   "detail": "registry=11ad54a2fcf24c04\u2026 disk=11ad54a2fcf24c04\u2026",
+   "detail": "registry=56c0399b39c61e07\u2026 disk=56c0399b39c61e07\u2026",
    "passed": true
   },
   {
@@ -356,153 +431,13 @@
    "passed": true
   },
   {
-   "check": "artifact-exists:lettuce-earth-growth-v2",
-   "detail": "ml/artifacts/lettuce-earth-growth-v2.json",
-   "passed": true
-  },
-  {
-   "check": "checksum:lettuce-earth-growth-v2",
-   "detail": "registry=9931f375baf5fa11\u2026 disk=9931f375baf5fa11\u2026",
-   "passed": true
-  },
-  {
-   "check": "provenance:lettuce-earth-growth-v2",
-   "detail": "complete",
-   "passed": true
-  },
-  {
-   "check": "limitations:lettuce-earth-growth-v2",
-   "detail": "7 recorded",
-   "passed": true
-  },
-  {
-   "check": "schema:lettuce-earth-growth-v2",
-   "detail": "4 features, target=freshShootMassG, unit=g fresh shoot mass/plant",
-   "passed": true
-  },
-  {
-   "check": "metrics-present:lettuce-earth-growth-v2",
-   "detail": "['MAE', 'R2', 'RMSE']",
-   "passed": true
-  },
-  {
-   "check": "metrics-no-null:lettuce-earth-growth-v2",
-   "detail": "all valued",
-   "passed": true
-  },
-  {
-   "check": "metrics-baseline:lettuce-earth-growth-v2",
-   "detail": "a regression model must report its baseline",
-   "passed": true
-  },
-  {
-   "check": "uncertainty:lettuce-earth-growth-v2",
-   "detail": "['achievedCoverage', 'calibrationGroups', 'calibrationResiduals', 'caveat', 'empiricallyCalibrated', 'evidence', 'exchangeabilityUnit', 'groupLevelRadiusForComparison', 'method', 'nominalCoverage', 'radius', 'rowLevelRadiusForComparison']",
-   "passed": true
-  },
-  {
-   "check": "calibration-measured:lettuce-earth-growth-v2",
-   "detail": "calibration is claimed without a measured coverage",
-   "passed": true
-  },
-  {
-   "check": "classification:lettuce-earth-growth-v2",
-   "detail": "no science classification entry",
-   "passed": true
-  },
-  {
-   "check": "catalogue:lettuce-earth-growth-v2",
-   "detail": "registered model missing from the workflow catalogue",
-   "passed": true
-  },
-  {
-   "check": "served-not-retired:lettuce-earth-growth-v2",
-   "detail": "category 3 model reports runStatus=runnable",
-   "passed": true
-  },
-  {
-   "check": "served-model-not-category-6:lettuce-earth-growth-v2",
-   "detail": "a served model is classified as an unsupported prediction",
-   "passed": true
-  },
-  {
-   "check": "explanation-flag:lettuce-earth-growth-v2",
-   "detail": "flag=False file=lettuce-earth-growth-v2-explanation.json exists=False",
-   "passed": true
-  },
-  {
-   "check": "artifact-exists:radiation-quality-osd46-v1",
-   "detail": "ml/artifacts/radiation-quality-osd46-v1.json",
-   "passed": true
-  },
-  {
-   "check": "checksum:radiation-quality-osd46-v1",
-   "detail": "registry=5155d235b4511a2f\u2026 disk=5155d235b4511a2f\u2026",
-   "passed": true
-  },
-  {
-   "check": "provenance:radiation-quality-osd46-v1",
-   "detail": "complete",
-   "passed": true
-  },
-  {
-   "check": "limitations:radiation-quality-osd46-v1",
-   "detail": "6 recorded",
-   "passed": true
-  },
-  {
-   "check": "schema:radiation-quality-osd46-v1",
-   "detail": "150 features, target=None, unit=None",
-   "passed": true
-  },
-  {
-   "check": "metrics-present:radiation-quality-osd46-v1",
-   "detail": "['accuracy', 'balancedAccuracy', 'bootstrapCi', 'classLabels', 'confusionMatrix', 'genesSharedAcrossFolds', 'macroF1', 'nGroups', 'nSamples', 'perClassRecall', 'singleClassHeldOutGroups', 'validationScheme']",
-   "passed": true
-  },
-  {
-   "check": "metrics-no-null:radiation-quality-osd46-v1",
-   "detail": "all valued",
-   "passed": true
-  },
-  {
-   "check": "no-false-calibration-claim:radiation-quality-osd46-v1",
-   "detail": "the served catalogue claims a calibrated classifier",
-   "passed": true
-  },
-  {
-   "check": "classification:radiation-quality-osd46-v1",
-   "detail": "no science classification entry",
-   "passed": true
-  },
-  {
-   "check": "catalogue:radiation-quality-osd46-v1",
-   "detail": "registered model missing from the workflow catalogue",
-   "passed": true
-  },
-  {
-   "check": "served-not-retired:radiation-quality-osd46-v1",
-   "detail": "category 3 model reports runStatus=runnable",
-   "passed": true
-  },
-  {
-   "check": "served-model-not-category-6:radiation-quality-osd46-v1",
-   "detail": "a served model is classified as an unsupported prediction",
-   "passed": true
-  },
-  {
-   "check": "explanation-flag:radiation-quality-osd46-v1",
-   "detail": "flag=True file=radiation-quality-osd46-v1-explanation.json exists=True",
-   "passed": true
-  },
-  {
    "check": "artifact-exists:radiation-exposure-osd46-v1",
    "detail": "ml/artifacts/radiation-exposure-osd46-v1.json",
    "passed": true
   },
   {
    "check": "checksum:radiation-exposure-osd46-v1",
-   "detail": "registry=dc7a324d3c55401b\u2026 disk=dc7a324d3c55401b\u2026",
+   "detail": "registry=9e9f963f529636e5\u2026 disk=9e9f963f529636e5\u2026",
    "passed": true
   },
   {
@@ -531,8 +466,28 @@
    "passed": true
   },
   {
+   "check": "calibration-measured:radiation-exposure-osd46-v1",
+   "detail": "log loss 0.1208, Brier 0.0788, ECE 0.075 over 22 groups",
+   "passed": true
+  },
+  {
+   "check": "calibration-evidence-consistent:radiation-exposure-osd46-v1",
+   "detail": "the calibration record's out-of-fold accuracy does not match the artifact",
+   "passed": true
+  },
+  {
    "check": "no-false-calibration-claim:radiation-exposure-osd46-v1",
    "detail": "the served catalogue claims a calibrated classifier",
+   "passed": true
+  },
+  {
+   "check": "served-capability-matches-calibration:radiation-exposure-osd46-v1",
+   "detail": "the card does not say what scaling the served model applies",
+   "passed": true
+  },
+  {
+   "check": "calibration-not-refitted-on-scored-data:radiation-exposure-osd46-v1",
+   "detail": "temperature search is nested",
    "passed": true
   },
   {
@@ -561,68 +516,158 @@
    "passed": true
   },
   {
-   "check": "artifact-exists:lettuce-earth-growth-v3",
-   "detail": "ml/artifacts/lettuce-earth-growth-v3.json",
+   "check": "artifact-exists:radiation-quality-osd46-v1",
+   "detail": "ml/artifacts/radiation-quality-osd46-v1.json",
    "passed": true
   },
   {
-   "check": "checksum:lettuce-earth-growth-v3",
-   "detail": "registry=b5d1532dac106d28\u2026 disk=b5d1532dac106d28\u2026",
+   "check": "checksum:radiation-quality-osd46-v1",
+   "detail": "registry=dd5f558045c6de0c\u2026 disk=dd5f558045c6de0c\u2026",
    "passed": true
   },
   {
-   "check": "provenance:lettuce-earth-growth-v3",
+   "check": "provenance:radiation-quality-osd46-v1",
    "detail": "complete",
    "passed": true
   },
   {
-   "check": "limitations:lettuce-earth-growth-v3",
+   "check": "limitations:radiation-quality-osd46-v1",
    "detail": "6 recorded",
    "passed": true
   },
   {
-   "check": "schema:lettuce-earth-growth-v3",
-   "detail": "4 features, target=log(freshYieldGPerM2), unit=g fresh shoot mass per plant",
+   "check": "schema:radiation-quality-osd46-v1",
+   "detail": "150 features, target=None, unit=None",
    "passed": true
   },
   {
-   "check": "metrics-present:lettuce-earth-growth-v3",
-   "detail": "['MAE', 'MAPE', 'R2', 'RMSE', 'meanBiasError', 'n']",
+   "check": "metrics-present:radiation-quality-osd46-v1",
+   "detail": "['accuracy', 'balancedAccuracy', 'bootstrapCi', 'classLabels', 'confusionMatrix', 'genesSharedAcrossFolds', 'macroF1', 'nGroups', 'nSamples', 'perClassRecall', 'singleClassHeldOutGroups', 'validationScheme']",
    "passed": true
   },
   {
-   "check": "metrics-no-null:lettuce-earth-growth-v3",
+   "check": "metrics-no-null:radiation-quality-osd46-v1",
    "detail": "all valued",
    "passed": true
   },
   {
-   "check": "uncertainty:lettuce-earth-growth-v3",
-   "detail": "['coverageNote', 'kind', 'logResidualHigh', 'logResidualLow', 'outOfFoldCoverage']",
+   "check": "calibration-measured:radiation-quality-osd46-v1",
+   "detail": "log loss 0.2228, Brier 0.1252, ECE 0.0926 over 22 groups",
    "passed": true
   },
   {
-   "check": "classification:lettuce-earth-growth-v3",
+   "check": "calibration-evidence-consistent:radiation-quality-osd46-v1",
+   "detail": "the calibration record's out-of-fold accuracy does not match the artifact",
+   "passed": true
+  },
+  {
+   "check": "no-false-calibration-claim:radiation-quality-osd46-v1",
+   "detail": "the served catalogue claims a calibrated classifier",
+   "passed": true
+  },
+  {
+   "check": "served-capability-matches-calibration:radiation-quality-osd46-v1",
+   "detail": "the card does not say what scaling the served model applies",
+   "passed": true
+  },
+  {
+   "check": "calibration-not-refitted-on-scored-data:radiation-quality-osd46-v1",
+   "detail": "temperature search is nested",
+   "passed": true
+  },
+  {
+   "check": "classification:radiation-quality-osd46-v1",
    "detail": "no science classification entry",
    "passed": true
   },
   {
-   "check": "catalogue:lettuce-earth-growth-v3",
+   "check": "catalogue:radiation-quality-osd46-v1",
    "detail": "registered model missing from the workflow catalogue",
    "passed": true
   },
   {
-   "check": "served-not-retired:lettuce-earth-growth-v3",
+   "check": "served-not-retired:radiation-quality-osd46-v1",
    "detail": "category 3 model reports runStatus=runnable",
    "passed": true
   },
   {
-   "check": "served-model-not-category-6:lettuce-earth-growth-v3",
+   "check": "served-model-not-category-6:radiation-quality-osd46-v1",
    "detail": "a served model is classified as an unsupported prediction",
    "passed": true
   },
   {
-   "check": "explanation-flag:lettuce-earth-growth-v3",
-   "detail": "flag=False file=lettuce-earth-growth-v3-explanation.json exists=False",
+   "check": "explanation-flag:radiation-quality-osd46-v1",
+   "detail": "flag=True file=radiation-quality-osd46-v1-explanation.json exists=True",
+   "passed": true
+  },
+  {
+   "check": "artifact-exists:tomato-flight-response-v1",
+   "detail": "ml/artifacts/tomato-flight-response-v1.json",
+   "passed": true
+  },
+  {
+   "check": "checksum:tomato-flight-response-v1",
+   "detail": "registry=db47150e3774f91f\u2026 disk=db47150e3774f91f\u2026",
+   "passed": true
+  },
+  {
+   "check": "provenance:tomato-flight-response-v1",
+   "detail": "complete",
+   "passed": true
+  },
+  {
+   "check": "limitations:tomato-flight-response-v1",
+   "detail": "5 recorded",
+   "passed": true
+  },
+  {
+   "check": "schema:tomato-flight-response-v1",
+   "detail": "64 features, target=recorded spaceflight experimental context, unit=probability of recorded flight class (uncalibrated)",
+   "passed": true
+  },
+  {
+   "check": "metrics-present:tomato-flight-response-v1",
+   "detail": "['ROC_AUC', 'accuracy', 'baselineMacroF1', 'confusionMatrix', 'macroF1', 'precision', 'recall']",
+   "passed": true
+  },
+  {
+   "check": "metrics-no-null:tomato-flight-response-v1",
+   "detail": "all valued",
+   "passed": true
+  },
+  {
+   "check": "no-false-calibration-claim:tomato-flight-response-v1",
+   "detail": "the served catalogue claims a calibrated classifier",
+   "passed": true
+  },
+  {
+   "check": "served-capability-matches-calibration:tomato-flight-response-v1",
+   "detail": "the card does not say what scaling the served model applies",
+   "passed": true
+  },
+  {
+   "check": "classification:tomato-flight-response-v1",
+   "detail": "no science classification entry",
+   "passed": true
+  },
+  {
+   "check": "catalogue:tomato-flight-response-v1",
+   "detail": "registered model missing from the workflow catalogue",
+   "passed": true
+  },
+  {
+   "check": "served-not-retired:tomato-flight-response-v1",
+   "detail": "category 3 model reports runStatus=runnable",
+   "passed": true
+  },
+  {
+   "check": "served-model-not-category-6:tomato-flight-response-v1",
+   "detail": "a served model is classified as an unsupported prediction",
+   "passed": true
+  },
+  {
+   "check": "explanation-flag:tomato-flight-response-v1",
+   "detail": "flag=False file=tomato-flight-response-v1-explanation.json exists=False",
    "passed": true
   },
   {
@@ -651,22 +696,22 @@
    "passed": true
   },
   {
-   "check": "predecessor-kept:mizuna-microbial-relative-load-v2",
-   "detail": "mizuna-microbial-load-v1.json was removed instead of kept",
-   "passed": true
-  },
-  {
-   "check": "predecessor-not-overwritten:mizuna-microbial-relative-load-v2",
-   "detail": "predecessor artifact looks like it was regenerated by the successor run",
-   "passed": true
-  },
-  {
    "check": "predecessor-kept:lettuce-earth-growth-v2",
    "detail": "lettuce-earth-growth-v1.json was removed instead of kept",
    "passed": true
   },
   {
    "check": "predecessor-not-overwritten:lettuce-earth-growth-v2",
+   "detail": "predecessor artifact looks like it was regenerated by the successor run",
+   "passed": true
+  },
+  {
+   "check": "predecessor-kept:mizuna-microbial-relative-load-v2",
+   "detail": "mizuna-microbial-load-v1.json was removed instead of kept",
+   "passed": true
+  },
+  {
+   "check": "predecessor-not-overwritten:mizuna-microbial-relative-load-v2",
    "detail": "predecessor artifact looks like it was regenerated by the successor run",
    "passed": true
   },
@@ -770,27 +815,9 @@
    "severity": "documentation"
   },
   {
-   "detail": "not recorded on the artifact (derivable: https://osdr.nasa.gov/bio/repo/data/studies/OSD-655)",
-   "field": "sourceUrl",
-   "model": "mizuna-harvest-v1",
-   "severity": "documentation"
-  },
-  {
-   "detail": "not recorded on the artifact",
-   "field": "sourceType",
-   "model": "mizuna-harvest-v1",
-   "severity": "documentation"
-  },
-  {
-   "detail": "not recorded on the artifact",
-   "field": "license",
-   "model": "mizuna-harvest-v1",
-   "severity": "documentation"
-  },
-  {
-   "detail": "not recorded on the artifact",
-   "field": "license",
-   "model": "mizuna-microbial-load-v1",
+   "detail": "measured coverage 0.9606 is within the documented campaigns, not across campaigns",
+   "field": "calibration-scope",
+   "model": "lettuce-earth-growth-v2",
    "severity": "documentation"
   },
   {
@@ -800,21 +827,9 @@
    "severity": "documentation"
   },
   {
-   "detail": "not recorded on the artifact (derivable: https://osdr.nasa.gov/bio/repo/data/studies/OSD-767)",
-   "field": "sourceUrl",
-   "model": "tomato-flight-response-v1",
-   "severity": "documentation"
-  },
-  {
-   "detail": "not recorded on the artifact",
-   "field": "sourceType",
-   "model": "tomato-flight-response-v1",
-   "severity": "documentation"
-  },
-  {
-   "detail": "not recorded on the artifact",
-   "field": "license",
-   "model": "tomato-flight-response-v1",
+   "detail": "measured coverage 0.9919 is within the documented campaigns, not across campaigns",
+   "field": "calibration-scope",
+   "model": "mizuna-microbial-relative-load-v2",
    "severity": "documentation"
   },
   {
@@ -822,63 +837,9 @@
    "field": "calibration",
    "model": "tomato-flight-response-v1",
    "severity": "documentation"
-  },
-  {
-   "detail": "not recorded on the artifact",
-   "field": "license",
-   "model": "mizuna-microbial-relative-load-v2",
-   "severity": "documentation"
-  },
-  {
-   "detail": "measured coverage 0.9919 is within the documented campaigns, not across campaigns",
-   "field": "calibration-scope",
-   "model": "mizuna-microbial-relative-load-v2",
-   "severity": "documentation"
-  },
-  {
-   "detail": "measured coverage 0.9606 is within the documented campaigns, not across campaigns",
-   "field": "calibration-scope",
-   "model": "lettuce-earth-growth-v2",
-   "severity": "documentation"
-  },
-  {
-   "detail": "not recorded on the artifact",
-   "field": "license",
-   "model": "radiation-quality-osd46-v1",
-   "severity": "documentation"
-  },
-  {
-   "detail": "the model card does not state whether class probabilities are calibrated; no calibration analysis is recorded for this classifier",
-   "field": "calibration",
-   "model": "radiation-quality-osd46-v1",
-   "severity": "high"
-  },
-  {
-   "detail": "not recorded on the artifact",
-   "field": "license",
-   "model": "radiation-exposure-osd46-v1",
-   "severity": "documentation"
-  },
-  {
-   "detail": "the model card does not state whether class probabilities are calibrated; no calibration analysis is recorded for this classifier",
-   "field": "calibration",
-   "model": "radiation-exposure-osd46-v1",
-   "severity": "high"
-  },
-  {
-   "detail": "not recorded on the artifact",
-   "field": "sourceType",
-   "model": "lettuce-earth-growth-v3",
-   "severity": "documentation"
-  },
-  {
-   "detail": "not recorded on the artifact",
-   "field": "license",
-   "model": "lettuce-earth-growth-v3",
-   "severity": "documentation"
   }
  ],
- "generatedAt": "2026-11-10T19:30:57.585260+00:00",
+ "generatedAt": "2026-11-11T06:35:18.870441+00:00",
  "models": [
   {
    "baselineMetrics": {
@@ -922,7 +883,7 @@
    },
    "runStatus": "runnable",
    "samples": 1648,
-   "sha256": "b5af3819a4d55a1d9f7dd293886a72c692bbc57bf6d488bbcf45b1a4079491db",
+   "sha256": "052dc2546ccf837024d7b6a86ad5a22ab5a54d0461e312c3e6a5572be928a85f",
    "status": "trained-exploratory",
    "supersedes": null,
    "target": "freshShootMassG",
@@ -930,183 +891,6 @@
    "unit": "g fresh shoot mass/plant",
    "validation": "Nested leave-one-experiment-out CV (4 outer folds, 3 inner folds); all plants/treatments from each experiment remain together. Independent-study validation unavailable.",
    "version": "1.0.0"
-  },
-  {
-   "baselineMetrics": {
-    "MAE": 14.409584415584415,
-    "R2": -0.13836340373596334,
-    "RMSE": 17.419824540924623
-   },
-   "calibration": null,
-   "checksumMatches": true,
-   "classification": null,
-   "explanationAvailable": false,
-   "features": 4,
-   "groups": 10,
-   "id": "mizuna-harvest-v1",
-   "limitations": 6,
-   "metrics": {
-    "MAE": 15.503016407381864,
-    "R2": -0.33340311313596915,
-    "RMSE": 18.853155340928144
-   },
-   "provenance": {
-    "license": null,
-    "method": "NASA-data-trained exploratory regression",
-    "seed": 42,
-    "sourceStudy": "OSD-655",
-    "sourceType": null,
-    "sourceUrl": null,
-    "trainedAt": "2026-11-07T14:32:42.218887+00:00",
-    "validation": "Nested 4-fold GroupKFold, paired pillow numbers kept together; inner 3-fold alpha search. One experiment only; folds do not establish cross-study generalization."
-   },
-   "runStatus": null,
-   "samples": 14,
-   "sha256": "78029d6d9a93946bdaf50427f697a463a805f3c588a4deb17afb61314cf22f38",
-   "status": "trained-exploratory",
-   "supersedes": null,
-   "target": "harvestFreshMassG",
-   "task": "Crop-specific fresh harvest mass regression",
-   "unit": "g fresh mass/pillow",
-   "validation": "Nested 4-fold GroupKFold, paired pillow numbers kept together; inner 3-fold alpha search. One experiment only; folds do not establish cross-study generalization.",
-   "version": "1.0.0"
-  },
-  {
-   "baselineMetrics": {
-    "MAE": 1.718346225785013,
-    "R2": -0.0072463063573193764,
-    "RMSE": 2.098104470338046
-   },
-   "calibration": null,
-   "checksumMatches": true,
-   "classification": null,
-   "explanationAvailable": false,
-   "features": 6,
-   "groups": 35,
-   "id": "mizuna-microbial-load-v1",
-   "limitations": 7,
-   "metrics": {
-    "MAE": 1.0865849313520286,
-    "R2": 0.5489527281649196,
-    "RMSE": 1.4040103119054692
-   },
-   "provenance": {
-    "license": null,
-    "method": "NASA-data-trained exploratory regression (ridge / random forest comparison)",
-    "seed": 42,
-    "sourceStudy": "OSD-780",
-    "sourceType": "NASA OSDR ALSDA plate-count measurement tables (LSDS-128)",
-    "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-780",
-    "trainedAt": "2026-11-07T14:30:58.930043+00:00",
-    "validation": "4-fold GroupKFold grouped by pillow (biological replicate), with a nested 3-fold grouped alpha search. Gene-to-fold leakage is impossible because all samples from one pillow stay in one fold. A separate leave-one-experiment-out diagnostic holds out an entire VEG-04A or VEG-04B campaign."
-   },
-   "runStatus": null,
-   "samples": 123,
-   "sha256": "9868c660351f906ede6001ea7e2eb8d5fd2fc7b60b1c393c3dec94017db8cfff",
-   "status": "trained-exploratory",
-   "supersedes": null,
-   "target": "log10(1 + CFU per gram fresh leaf weight)",
-   "task": "Culturable aerobic microbial load regression on edible leaf tissue",
-   "unit": "log10 CFU/g fresh weight",
-   "validation": "4-fold GroupKFold grouped by pillow (biological replicate), with a nested 3-fold grouped alpha search. Gene-to-fold leakage is impossible because all samples from one pillow stay in one fold. A separate leave-one-experiment-out diagnostic holds out an entire VEG-04A or VEG-04B campaign.",
-   "version": "1.0.0"
-  },
-  {
-   "baselineMetrics": null,
-   "calibration": {
-    "calibrated": false,
-    "measuredCoverage": null,
-    "statement": "No measured interval coverage is recorded for this model."
-   },
-   "checksumMatches": true,
-   "classification": {
-    "category": 3,
-    "name": "Experimentally supported by non-NASA data"
-   },
-   "explanationAvailable": false,
-   "features": 64,
-   "groups": 21,
-   "id": "tomato-flight-response-v1",
-   "limitations": 5,
-   "metrics": {
-    "ROC_AUC": 0.9753086419753086,
-    "accuracy": 0.9166666666666666,
-    "baselineMacroF1": 0.4444444444444444,
-    "macroF1": 0.916083916083916,
-    "precision": 1.0,
-    "recall": 0.8333333333333334
-   },
-   "provenance": {
-    "license": null,
-    "method": "NASA-data-trained exploratory molecular classification",
-    "seed": 42,
-    "sourceStudy": "OSD-767",
-    "sourceType": null,
-    "sourceUrl": null,
-    "trainedAt": "2026-11-07T14:32:46.822451+00:00",
-    "validation": "Nested stratified group CV (4 outer, 3 inner folds); all tissues from each plant stay in one fold. Gene selection and scaling fit inside each training fold."
-   },
-   "runStatus": "runnable",
-   "samples": 36,
-   "sha256": "b1dd72b63130fccc6a334e3de286ae6774152291ce5fe00caf365d74cb10f593",
-   "status": "trained-exploratory",
-   "supersedes": null,
-   "target": "recorded spaceflight experimental context",
-   "task": "Flight-versus-ground molecular context classification",
-   "unit": "probability of recorded flight class (uncalibrated)",
-   "validation": "Nested stratified group CV (4 outer, 3 inner folds); all tissues from each plant stay in one fold. Gene selection and scaling fit inside each training fold.",
-   "version": "1.0.0"
-  },
-  {
-   "baselineMetrics": {
-    "MAE": 0.8303342083753683,
-    "R2": -0.013024906769362854,
-    "RMSE": 0.9982749907043629
-   },
-   "calibration": {
-    "calibrated": false,
-    "measuredCoverage": 0.9919,
-    "measuredOn": "held-out biological groups",
-    "measuredWidth": 3.4015,
-    "method": "group_level",
-    "nominalCoverage": 0.9,
-    "statement": "Coverage is a measurement on held-out groups, not a guarantee: repeated tissues from one unit and a small number of campaigns are not a sample of future campaigns."
-   },
-   "checksumMatches": true,
-   "classification": {
-    "category": 3,
-    "name": "Experimentally supported by non-NASA data"
-   },
-   "explanationAvailable": false,
-   "features": 5,
-   "groups": 35,
-   "id": "mizuna-microbial-relative-load-v2",
-   "limitations": 7,
-   "metrics": {
-    "MAE": 0.5392828108720046,
-    "R2": 0.5086587456447216,
-    "RMSE": 0.6952351873046808
-   },
-   "provenance": {
-    "license": null,
-    "method": "NASA-data-trained random forest on a re-scoped estimand (baseline / ridge / gradient boosting compared)",
-    "seed": 42,
-    "sourceStudy": "OSD-780",
-    "sourceType": "NASA OSDR ALSDA plate-count measurement tables (LSDS-128)",
-    "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-780",
-    "trainedAt": "2026-11-07T15:03:41.205241+00:00",
-    "validation": null
-   },
-   "runStatus": "runnable",
-   "samples": 123,
-   "sha256": "11ad54a2fcf24c040796f4cdd256f624d79b40e80f2f732096ba7b271cf5de39",
-   "status": "trained-exploratory",
-   "supersedes": "mizuna-microbial-load-v1 (kept, not overwritten)",
-   "target": "z = (log10(1 + CFU/g) - campaign mean) / campaign sd",
-   "task": "Within-campaign relative culturable aerobic microbial load on edible leaf tissue",
-   "unit": "standard deviations of log10 CFU/g within the campaign",
-   "validation": null,
-   "version": "2.0.0"
   },
   {
    "baselineMetrics": {
@@ -1150,7 +934,7 @@
    },
    "runStatus": "runnable",
    "samples": 1648,
-   "sha256": "9931f375baf5fa11c55e2647f1fd2b9c4775deb4166c1e0879932e8b004e1b7c",
+   "sha256": "0206b19256f95b8badb5d164ef884b4c526a61a03acbc11303beca1795bab5d9",
    "status": "trained-exploratory",
    "supersedes": "lettuce-earth-growth-v1 (kept, not overwritten)",
    "target": "freshShootMassG",
@@ -1158,157 +942,6 @@
    "unit": "g fresh shoot mass/plant",
    "validation": "Leave-one-experiment-out CV (4 outer folds), identical folds for every learner including the baseline. Independent-study validation unavailable.",
    "version": "2.0.0"
-  },
-  {
-   "baselineMetrics": {
-    "accuracy": 0.0,
-    "balancedAccuracy": 0.0,
-    "classLabels": [
-     "control",
-     "gamma",
-     "hze"
-    ],
-    "confusionMatrix": [
-     [
-      0,
-      8,
-      0
-     ],
-     [
-      0,
-      0,
-      18
-     ],
-     [
-      0,
-      18,
-      0
-     ]
-    ],
-    "macroF1": 0.0,
-    "nGroups": 22,
-    "nSamples": 44,
-    "perClassRecall": {
-     "control": 0.0,
-     "gamma": 0.0,
-     "hze": 0.0
-    },
-    "validationScheme": "leave-one-biological-group-out"
-   },
-   "calibration": {
-    "calibrated": false,
-    "measuredCoverage": null,
-    "statement": "No measured interval coverage is recorded for this model."
-   },
-   "checksumMatches": true,
-   "classification": {
-    "category": 3,
-    "name": "Experimentally supported by non-NASA data"
-   },
-   "explanationAvailable": true,
-   "features": 150,
-   "groups": 22,
-   "id": "radiation-quality-osd46-v1",
-   "limitations": 6,
-   "metrics": {
-    "accuracy": 0.9318181818181818,
-    "balancedAccuracy": 0.8981481481481483,
-    "genesSharedAcrossFolds": 75,
-    "macroF1": 0.9063063063063064,
-    "nGroups": 22,
-    "nSamples": 44
-   },
-   "provenance": {
-    "license": null,
-    "method": "logistic_l2 with in-fold ANOVA gene selection",
-    "seed": 20261107,
-    "sourceStudy": "OSD-46",
-    "sourceType": "NASA OSDR microarray (GeneLab GLDS-46)",
-    "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-46",
-    "trainedAt": "2026-11-07T17:48:05.670824+00:00",
-    "validation": "Leave-one-biological-group-out cross-validation over 22 groups. Gene filtering and ANOVA selection fitted inside each training fold only. Labels permuted between groups for the null."
-   },
-   "runStatus": "runnable",
-   "samples": 44,
-   "sha256": "5155d235b4511a2f28442f9f544cbbbc7f98a8f136fdcd45a771a9db5264d8eb",
-   "status": "trained-exploratory",
-   "supersedes": null,
-   "target": null,
-   "task": "Three-class radiation quality classification from seedling expression",
-   "unit": null,
-   "validation": "Leave-one-biological-group-out cross-validation over 22 groups. Gene filtering and ANOVA selection fitted inside each training fold only. Labels permuted between groups for the null.",
-   "version": "1.0.0"
-  },
-  {
-   "baselineMetrics": {
-    "accuracy": 0.8181818181818182,
-    "balancedAccuracy": 0.5,
-    "classLabels": [
-     "control",
-     "irradiated"
-    ],
-    "confusionMatrix": [
-     [
-      0,
-      8
-     ],
-     [
-      0,
-      36
-     ]
-    ],
-    "macroF1": 0.45,
-    "nGroups": 22,
-    "nSamples": 44,
-    "perClassRecall": {
-     "control": 0.0,
-     "irradiated": 1.0
-    },
-    "validationScheme": "leave-one-biological-group-out"
-   },
-   "calibration": {
-    "calibrated": false,
-    "measuredCoverage": null,
-    "statement": "No measured interval coverage is recorded for this model."
-   },
-   "checksumMatches": true,
-   "classification": {
-    "category": 3,
-    "name": "Experimentally supported by non-NASA data"
-   },
-   "explanationAvailable": true,
-   "features": 150,
-   "groups": 22,
-   "id": "radiation-exposure-osd46-v1",
-   "limitations": 5,
-   "metrics": {
-    "accuracy": 0.9318181818181818,
-    "balancedAccuracy": 0.9097222222222222,
-    "genesSharedAcrossFolds": 95,
-    "macroF1": 0.8906379453189726,
-    "nGroups": 22,
-    "nSamples": 44
-   },
-   "provenance": {
-    "license": null,
-    "method": "logistic_l2 with in-fold ANOVA gene selection",
-    "seed": 20261107,
-    "sourceStudy": "OSD-46",
-    "sourceType": "NASA OSDR microarray (GeneLab GLDS-46)",
-    "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-46",
-    "trainedAt": "2026-11-07T17:48:06.465633+00:00",
-    "validation": "Leave-one-biological-group-out cross-validation over 22 groups. Gene filtering and ANOVA selection fitted inside each training fold only. Labels permuted between groups for the null."
-   },
-   "runStatus": "runnable",
-   "samples": 44,
-   "sha256": "dc7a324d3c55401bfbe1f3d8740cf4b70e1590efd3bd11d618c066808d565281",
-   "status": "trained-exploratory",
-   "supersedes": null,
-   "target": null,
-   "task": "Binary irradiated-versus-control classification from seedling expression",
-   "unit": null,
-   "validation": "Leave-one-biological-group-out cross-validation over 22 groups. Gene filtering and ANOVA selection fitted inside each training fold only. Labels permuted between groups for the null.",
-   "version": "1.0.0"
   },
   {
    "baselineMetrics": {
@@ -1343,11 +976,11 @@
     "n": 1648
    },
    "provenance": {
-    "license": null,
+    "license": "CC BY 4.0, declared in the dataset's RO-Crate (data/metadata/wur_lettuce_rocrate.json)",
     "method": "Boosted regression trees on log(fresh yield per m2). Light enters as daily light integral; per-plant mass is served as per-area yield divided by the plant density the caller states.",
     "seed": 42,
     "sourceStudy": "WUR-lettuce",
-    "sourceType": null,
+    "sourceType": "external scientific data (not NASA): 4TU.ResearchData experiment tables",
     "sourceUrl": "https://doi.org/10.4121/5a7472f0-8a67-4ec0-84c9-9d032990d654.v1",
     "trainedAt": "2026-11-09T13:43:29.547745+00:00",
     "validation": {
@@ -1480,7 +1113,7 @@
    },
    "runStatus": "runnable",
    "samples": 1648,
-   "sha256": "b5d1532dac106d289b9498f705efa4c4cdf071d8dc81739c1f09ea3d206e946a",
+   "sha256": "052c0b254d395cd78606148ad625c86f37ec114c2e89702a04d3ae98077ff394",
    "status": "trained-exploratory",
    "supersedes": null,
    "target": "log(freshYieldGPerM2)",
@@ -1614,6 +1247,334 @@
     }
    },
    "version": "3.0.0"
+  },
+  {
+   "baselineMetrics": {
+    "MAE": 14.409584415584415,
+    "R2": -0.13836340373596334,
+    "RMSE": 17.419824540924623
+   },
+   "calibration": null,
+   "checksumMatches": true,
+   "classification": null,
+   "explanationAvailable": false,
+   "features": 4,
+   "groups": 10,
+   "id": "mizuna-harvest-v1",
+   "limitations": 6,
+   "metrics": {
+    "MAE": 15.503016407381864,
+    "R2": -0.33340311313596915,
+    "RMSE": 18.853155340928144
+   },
+   "provenance": {
+    "license": "Public OSDR access; retain study attribution and comply with OSDR terms; do not assume every contributed file is public domain.",
+    "method": "NASA-data-trained exploratory regression",
+    "seed": 42,
+    "sourceStudy": "OSD-655",
+    "sourceType": "NASA OSDR (OSD-655) VEG-01/02 pick-and-eat harvest records",
+    "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-655",
+    "trainedAt": "2026-11-07T14:32:42.218887+00:00",
+    "validation": "Nested 4-fold GroupKFold, paired pillow numbers kept together; inner 3-fold alpha search. One experiment only; folds do not establish cross-study generalization."
+   },
+   "runStatus": null,
+   "samples": 14,
+   "sha256": "5be2375b7bebca641be3b42e34108daff6609bf913f13e6d2664007b040b3744",
+   "status": "trained-exploratory",
+   "supersedes": null,
+   "target": "harvestFreshMassG",
+   "task": "Crop-specific fresh harvest mass regression",
+   "unit": "g fresh mass/pillow",
+   "validation": "Nested 4-fold GroupKFold, paired pillow numbers kept together; inner 3-fold alpha search. One experiment only; folds do not establish cross-study generalization.",
+   "version": "1.0.0"
+  },
+  {
+   "baselineMetrics": {
+    "MAE": 1.718346225785013,
+    "R2": -0.0072463063573193764,
+    "RMSE": 2.098104470338046
+   },
+   "calibration": null,
+   "checksumMatches": true,
+   "classification": null,
+   "explanationAvailable": false,
+   "features": 6,
+   "groups": 35,
+   "id": "mizuna-microbial-load-v1",
+   "limitations": 7,
+   "metrics": {
+    "MAE": 1.0865849313520286,
+    "R2": 0.5489527281649196,
+    "RMSE": 1.4040103119054692
+   },
+   "provenance": {
+    "license": "Public OSDR access; retain study attribution and comply with OSDR terms; do not assume every contributed file is public domain.",
+    "method": "NASA-data-trained exploratory regression (ridge / random forest comparison)",
+    "seed": 42,
+    "sourceStudy": "OSD-780",
+    "sourceType": "NASA OSDR ALSDA plate-count measurement tables (LSDS-128)",
+    "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-780",
+    "trainedAt": "2026-11-07T14:30:58.930043+00:00",
+    "validation": "4-fold GroupKFold grouped by pillow (biological replicate), with a nested 3-fold grouped alpha search. Gene-to-fold leakage is impossible because all samples from one pillow stay in one fold. A separate leave-one-experiment-out diagnostic holds out an entire VEG-04A or VEG-04B campaign."
+   },
+   "runStatus": null,
+   "samples": 123,
+   "sha256": "39807034da0fe6191ef7b7ab72a0363d6586bacc21b910b0e3de319d46740e98",
+   "status": "trained-exploratory",
+   "supersedes": null,
+   "target": "log10(1 + CFU per gram fresh leaf weight)",
+   "task": "Culturable aerobic microbial load regression on edible leaf tissue",
+   "unit": "log10 CFU/g fresh weight",
+   "validation": "4-fold GroupKFold grouped by pillow (biological replicate), with a nested 3-fold grouped alpha search. Gene-to-fold leakage is impossible because all samples from one pillow stay in one fold. A separate leave-one-experiment-out diagnostic holds out an entire VEG-04A or VEG-04B campaign.",
+   "version": "1.0.0"
+  },
+  {
+   "baselineMetrics": {
+    "MAE": 0.8303342083753683,
+    "R2": -0.013024906769362854,
+    "RMSE": 0.9982749907043629
+   },
+   "calibration": {
+    "calibrated": false,
+    "measuredCoverage": 0.9919,
+    "measuredOn": "held-out biological groups",
+    "measuredWidth": 3.4015,
+    "method": "group_level",
+    "nominalCoverage": 0.9,
+    "statement": "Coverage is a measurement on held-out groups, not a guarantee: repeated tissues from one unit and a small number of campaigns are not a sample of future campaigns."
+   },
+   "checksumMatches": true,
+   "classification": {
+    "category": 3,
+    "name": "Experimentally supported by non-NASA data"
+   },
+   "explanationAvailable": false,
+   "features": 5,
+   "groups": 35,
+   "id": "mizuna-microbial-relative-load-v2",
+   "limitations": 7,
+   "metrics": {
+    "MAE": 0.5392828108720046,
+    "R2": 0.5086587456447216,
+    "RMSE": 0.6952351873046808
+   },
+   "provenance": {
+    "license": "Public OSDR access; retain study attribution and comply with OSDR terms; do not assume every contributed file is public domain.",
+    "method": "NASA-data-trained random forest on a re-scoped estimand (baseline / ridge / gradient boosting compared)",
+    "seed": 42,
+    "sourceStudy": "OSD-780",
+    "sourceType": "NASA OSDR ALSDA plate-count measurement tables (LSDS-128)",
+    "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-780",
+    "trainedAt": "2026-11-07T15:03:41.205241+00:00",
+    "validation": null
+   },
+   "runStatus": "runnable",
+   "samples": 123,
+   "sha256": "56c0399b39c61e07f3ff737479f2b76908a9eced25f633774e39e2a5c6cec6b4",
+   "status": "trained-exploratory",
+   "supersedes": "mizuna-microbial-load-v1 (kept, not overwritten)",
+   "target": "z = (log10(1 + CFU/g) - campaign mean) / campaign sd",
+   "task": "Within-campaign relative culturable aerobic microbial load on edible leaf tissue",
+   "unit": "standard deviations of log10 CFU/g within the campaign",
+   "validation": null,
+   "version": "2.0.0"
+  },
+  {
+   "baselineMetrics": {
+    "accuracy": 0.8181818181818182,
+    "balancedAccuracy": 0.5,
+    "classLabels": [
+     "control",
+     "irradiated"
+    ],
+    "confusionMatrix": [
+     [
+      0,
+      8
+     ],
+     [
+      0,
+      36
+     ]
+    ],
+    "macroF1": 0.45,
+    "nGroups": 22,
+    "nSamples": 44,
+    "perClassRecall": {
+     "control": 0.0,
+     "irradiated": 1.0
+    },
+    "validationScheme": "leave-one-biological-group-out"
+   },
+   "calibration": {
+    "calibrated": false,
+    "measuredCoverage": null,
+    "statement": "No measured interval coverage is recorded for this model."
+   },
+   "checksumMatches": true,
+   "classification": {
+    "category": 3,
+    "name": "Experimentally supported by non-NASA data"
+   },
+   "explanationAvailable": true,
+   "features": 150,
+   "groups": 22,
+   "id": "radiation-exposure-osd46-v1",
+   "limitations": 5,
+   "metrics": {
+    "accuracy": 0.9318181818181818,
+    "balancedAccuracy": 0.9097222222222222,
+    "genesSharedAcrossFolds": 95,
+    "macroF1": 0.8906379453189726,
+    "nGroups": 22,
+    "nSamples": 44
+   },
+   "provenance": {
+    "license": "Public OSDR access; retain study attribution and comply with OSDR terms; do not assume every contributed file is public domain.",
+    "method": "logistic_l2 with in-fold ANOVA gene selection",
+    "seed": 20261107,
+    "sourceStudy": "OSD-46",
+    "sourceType": "NASA OSDR microarray (GeneLab GLDS-46)",
+    "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-46",
+    "trainedAt": "2026-11-07T17:48:06.465633+00:00",
+    "validation": "Leave-one-biological-group-out cross-validation over 22 groups. Gene filtering and ANOVA selection fitted inside each training fold only. Labels permuted between groups for the null."
+   },
+   "runStatus": "runnable",
+   "samples": 44,
+   "sha256": "9e9f963f529636e5d49dd31f4f264bfd26a2e62342c31c20c1c53a949f9b77f6",
+   "status": "trained-exploratory",
+   "supersedes": null,
+   "target": null,
+   "task": "Binary irradiated-versus-control classification from seedling expression",
+   "unit": null,
+   "validation": "Leave-one-biological-group-out cross-validation over 22 groups. Gene filtering and ANOVA selection fitted inside each training fold only. Labels permuted between groups for the null.",
+   "version": "1.0.0"
+  },
+  {
+   "baselineMetrics": {
+    "accuracy": 0.0,
+    "balancedAccuracy": 0.0,
+    "classLabels": [
+     "control",
+     "gamma",
+     "hze"
+    ],
+    "confusionMatrix": [
+     [
+      0,
+      8,
+      0
+     ],
+     [
+      0,
+      0,
+      18
+     ],
+     [
+      0,
+      18,
+      0
+     ]
+    ],
+    "macroF1": 0.0,
+    "nGroups": 22,
+    "nSamples": 44,
+    "perClassRecall": {
+     "control": 0.0,
+     "gamma": 0.0,
+     "hze": 0.0
+    },
+    "validationScheme": "leave-one-biological-group-out"
+   },
+   "calibration": {
+    "calibrated": false,
+    "measuredCoverage": null,
+    "statement": "No measured interval coverage is recorded for this model."
+   },
+   "checksumMatches": true,
+   "classification": {
+    "category": 3,
+    "name": "Experimentally supported by non-NASA data"
+   },
+   "explanationAvailable": true,
+   "features": 150,
+   "groups": 22,
+   "id": "radiation-quality-osd46-v1",
+   "limitations": 6,
+   "metrics": {
+    "accuracy": 0.9318181818181818,
+    "balancedAccuracy": 0.8981481481481483,
+    "genesSharedAcrossFolds": 75,
+    "macroF1": 0.9063063063063064,
+    "nGroups": 22,
+    "nSamples": 44
+   },
+   "provenance": {
+    "license": "Public OSDR access; retain study attribution and comply with OSDR terms; do not assume every contributed file is public domain.",
+    "method": "logistic_l2 with in-fold ANOVA gene selection",
+    "seed": 20261107,
+    "sourceStudy": "OSD-46",
+    "sourceType": "NASA OSDR microarray (GeneLab GLDS-46)",
+    "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-46",
+    "trainedAt": "2026-11-07T17:48:05.670824+00:00",
+    "validation": "Leave-one-biological-group-out cross-validation over 22 groups. Gene filtering and ANOVA selection fitted inside each training fold only. Labels permuted between groups for the null."
+   },
+   "runStatus": "runnable",
+   "samples": 44,
+   "sha256": "dd5f558045c6de0c45bf56dafb3acd23e3eeeb575134d01a4ebca5dbe375c830",
+   "status": "trained-exploratory",
+   "supersedes": null,
+   "target": null,
+   "task": "Three-class radiation quality classification from seedling expression",
+   "unit": null,
+   "validation": "Leave-one-biological-group-out cross-validation over 22 groups. Gene filtering and ANOVA selection fitted inside each training fold only. Labels permuted between groups for the null.",
+   "version": "1.0.0"
+  },
+  {
+   "baselineMetrics": null,
+   "calibration": {
+    "calibrated": false,
+    "measuredCoverage": null,
+    "statement": "No measured interval coverage is recorded for this model."
+   },
+   "checksumMatches": true,
+   "classification": {
+    "category": 3,
+    "name": "Experimentally supported by non-NASA data"
+   },
+   "explanationAvailable": false,
+   "features": 64,
+   "groups": 21,
+   "id": "tomato-flight-response-v1",
+   "limitations": 5,
+   "metrics": {
+    "ROC_AUC": 0.9753086419753086,
+    "accuracy": 0.9166666666666666,
+    "baselineMacroF1": 0.4444444444444444,
+    "macroF1": 0.916083916083916,
+    "precision": 1.0,
+    "recall": 0.8333333333333334
+   },
+   "provenance": {
+    "license": "Public OSDR access; retain study attribution and comply with OSDR terms; do not assume every contributed file is public domain.",
+    "method": "NASA-data-trained exploratory molecular classification",
+    "seed": 42,
+    "sourceStudy": "OSD-767",
+    "sourceType": "NASA OSDR (OSD-767) tomato transcriptome, flight versus ground",
+    "sourceUrl": "https://osdr.nasa.gov/bio/repo/data/studies/OSD-767",
+    "trainedAt": "2026-11-07T14:32:46.822451+00:00",
+    "validation": "Nested stratified group CV (4 outer, 3 inner folds); all tissues from each plant stay in one fold. Gene selection and scaling fit inside each training fold."
+   },
+   "runStatus": "runnable",
+   "samples": 36,
+   "sha256": "db47150e3774f91f49bcfea5a415b3873bab7ea5ce0d9c9b0ed7de201471cade",
+   "status": "trained-exploratory",
+   "supersedes": null,
+   "target": "recorded spaceflight experimental context",
+   "task": "Flight-versus-ground molecular context classification",
+   "unit": "probability of recorded flight class (uncalibrated)",
+   "validation": "Nested stratified group CV (4 outer, 3 inner folds); all tissues from each plant stay in one fold. Gene selection and scaling fit inside each training fold.",
+   "version": "1.0.0"
   }
  ],
  "note": "Read-only audit. Checksums are recomputed from disk, metrics are read from the artifacts and never adjusted, and no model is retrained. A failure here means an artifact and its record disagree, not that a score is low.",
@@ -1627,14 +1588,31 @@
    "sklearn": "1.6.1"
   },
   "schemaVersion": 1,
-  "trainedAt": "2026-11-07T20:23:01.761929+00:00"
+  "trainedAt": "2026-11-11T06:34:05.234771+00:00"
  },
+ "resolvedGaps": [
+  {
+   "closedIn": "phase32",
+   "evidence": "ml/evaluation/phase32_radiation_calibration.json",
+   "field": "calibration",
+   "model": "radiation-exposure-osd46-v1",
+   "resolution": "measured on 22 biological groups: log loss 0.1208, Brier 0.0788, ECE 0.075 (10 bins); served scaling 'none'"
+  },
+  {
+   "closedIn": "phase32",
+   "evidence": "ml/evaluation/phase32_radiation_calibration.json",
+   "field": "calibration",
+   "model": "radiation-quality-osd46-v1",
+   "resolution": "measured on 22 biological groups: log loss 0.2228, Brier 0.1252, ECE 0.0926 (10 bins); served scaling 'none'"
+  }
+ ],
  "summary": {
   "auditedModels": 9,
   "checksFailed": 0,
-  "checksRun": 152,
-  "documentedGaps": 19,
+  "checksRun": 161,
+  "documentedGaps": 5,
   "registeredModels": 9,
+  "resolvedGaps": 2,
   "retiredModels": 0,
   "servedModels": 7,
   "supersededModels": 2,

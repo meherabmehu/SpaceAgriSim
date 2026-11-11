@@ -78,7 +78,7 @@ def predict_lettuce(request: LettucePredictionRequest):
     if request.airTemperature >= 28 and request.rootTemperature <= 24 and request.ppfd >= 400:
         warnings.append('Tip-burn treatment combinations were omitted in the published analysis; this region is unsupported.')
     radius=model['interval']['radius']
-    return {'modelId':model['id'],'prediction':value,'unit':model['unit'],'method':model['method'],'sourceStudy':'WUR-lettuce','sourceUrl':model['sourceUrl'],'interval':{'low':max(0,value-radius),'high':value+radius,'kind':model['interval']['kind']},'outOfDistribution':bool(warnings),'warnings':warnings+model['limitations'],'inputs':request.model_dump()}
+    return {'modelId':model['id'],'prediction':value,'unit':model['unit'],'method':model['method'],'sourceStudy':'WUR-lettuce','sourceUrl':model['sourceUrl'],'interval':{'low':max(0,value-radius),'high':value+radius,'kind':model['interval']['kind']},'outOfDistribution':bool(warnings),'warnings':warnings+model['limitations'],'inputs':request.model_dump(),'operationalForecast':False,'harvestForecastClaim':None,'scopeStatement':model.get('servedScope')}
 
 
 @router.post("/predict/lettuce-earth-growth-v3")
@@ -164,6 +164,13 @@ def predict_lettuce_v3(request: LettuceYieldPredictionRequest):
         "outOfDistribution": bool(warnings),
         "warnings": warnings + model["limitations"],
         "inputs": request.model_dump(),
+        # Phase 32: a prediction is served under a stated scope and never as an
+        # operational forecast. These three fields are asserted by
+        # backend/tests/test_phase32_no_forecast.py on every prediction route, so a
+        # future handler cannot quietly reintroduce a harvest forecast claim.
+        "operationalForecast": False,
+        "harvestForecastClaim": None,
+        "scopeStatement": model.get("servedScope"),
     }
 
 
@@ -212,6 +219,13 @@ def predict_lettuce_v2(request: LettucePredictionRequest):
         "outOfDistribution": bool(warnings),
         "warnings": warnings + model["limitations"],
         "inputs": request.model_dump(),
+        # Phase 32: a prediction is served under a stated scope and never as an
+        # operational forecast. These three fields are asserted by
+        # backend/tests/test_phase32_no_forecast.py on every prediction route, so a
+        # future handler cannot quietly reintroduce a harvest forecast claim.
+        "operationalForecast": False,
+        "harvestForecastClaim": None,
+        "scopeStatement": model.get("servedScope"),
     }
 
 
@@ -282,6 +296,16 @@ def _transcriptomic_prediction(model_id: str, request: TranscriptomicPredictionR
                           sorted(probabilities.items(), key=lambda kv: -kv[1])},
         "classLabels": model["classLabels"],
         "classDescription": model.get("classDescription", {}),
+        # Phase 32: a probability is only interpretable with its calibration attached, so the
+        # measurement travels with the numbers. `calibrated: false` is the honest verdict for
+        # these two classifiers; the block also carries what was measured, on how many
+        # biological groups, and the scope it holds in.
+        "probabilityCalibration": model.get("probabilityCalibration"),
+        # Phase 32: no transcriptomic classifier here predicts harvest, yield or health; the
+        # scope says so in the response rather than only in a document.
+        "operationalForecast": False,
+        "harvestForecastClaim": None,
+        "scopeStatement": model.get("servedScope"),
         "unit": "class label",
         "sourceStudy": model["sourceStudy"],
         "sourceUrl": model["sourceUrl"],
@@ -683,6 +707,13 @@ def predict_microbial_relative(request: MicrobialRelativePredictionRequest):
         "outOfDistribution": bool(warnings),
         "warnings": warnings + model["limitations"],
         "inputs": request.model_dump(),
+        # Phase 32: a prediction is served under a stated scope and never as an
+        # operational forecast. These three fields are asserted by
+        # backend/tests/test_phase32_no_forecast.py on every prediction route, so a
+        # future handler cannot quietly reintroduce a harvest forecast claim.
+        "operationalForecast": False,
+        "harvestForecastClaim": None,
+        "scopeStatement": model.get("servedScope"),
     }
     if request.campaignReference is None:
         payload["absoluteScale"]["note"] = (

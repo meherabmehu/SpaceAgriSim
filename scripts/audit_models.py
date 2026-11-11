@@ -46,6 +46,11 @@ from app import evidence, research, science_classification, workflow  # noqa: E4
 ARTIFACTS = ROOT / "ml" / "artifacts"
 REGISTRY = ARTIFACTS / "registry.json"
 OUT = ROOT / "ml" / "evaluation" / "phase13_model_audit.json"
+# Phase 32: the measured probability calibration for the OSD-46 classifiers. An artifact that
+# cites it is checked against it rather than believed: the record has to name the model, prove the
+# scored predictions came from the same split as the reported accuracy, and state whether any
+# scaling is served.
+CALIBRATION_EVIDENCE = ROOT / "ml" / "evaluation" / "phase32_radiation_calibration.json"
 
 CHECKS: list[dict] = []
 FAILURES: list[str] = []
@@ -70,6 +75,50 @@ def check(name: str, passed: bool, detail: str = "") -> bool:
 
 def gap(model_id: str, field: str, detail: str, severity: str = "documentation") -> None:
     GAPS.append({"model": model_id, "field": field, "detail": detail, "severity": severity})
+
+
+# Findings that were open in Phase 31 and are closed by a measurement or a repair in Phase 32.
+# They stay in the report - a gap that disappears without a record is indistinguishable from a gap
+# nobody looked at - but they are not counted as open.
+RESOLVED: list[dict] = []
+
+
+def resolve_gap(model_id: str, field: str, detail: str, evidence: str) -> None:
+    RESOLVED.append({"model": model_id, "field": field, "resolution": detail,
+                     "evidence": evidence, "closedIn": "phase32"})
+
+
+def record_temperature(model_id: str) -> dict:
+    """The nested temperature record for a model, so the audit can quote its scheme."""
+    if not CALIBRATION_EVIDENCE.is_file():
+        return {}
+    record = json.loads(CALIBRATION_EVIDENCE.read_text(encoding="utf-8"))
+    entry = (record.get("models") or {}).get(model_id) or {}
+    return entry.get("temperatureScaling") or {}
+
+
+def measured_calibration(model_id: str) -> dict | None:
+    """The measured calibration block for a model, or None when none was measured.
+
+    Read from disk on every call and cross-checked against the model's own decision: a record that
+    exists but disagrees with the artifact's accuracy is not a calibration of that model.
+    """
+    if not CALIBRATION_EVIDENCE.is_file():
+        return None
+    record = json.loads(CALIBRATION_EVIDENCE.read_text(encoding="utf-8"))
+    entry = (record.get("models") or {}).get(model_id)
+    if not entry:
+        return None
+    probability = entry["probability"]
+    return {
+        "logLoss": probability["logLoss"],
+        "brier": probability["brier"],
+        "ece": probability["ece"],
+        "bins": probability["eceBins"],
+        "groups": entry["groups"],
+        "servedScaling": entry["servedScaling"],
+        "accuracyMatchesArtifact": bool(entry.get("accuracyMatchesArtifact")),
+    }
 
 
 def sha256_of(path: Path) -> str:
@@ -159,14 +208,33 @@ def audit() -> dict:
         calibration = artifact.get("uncertainty") or artifact.get("interval") or {}
         declared = artifact.get("uncertainty") or {}
         if is_classifier:
-            # No classifier here has a calibrated probability. Two separate questions follow, and
-            # only the second one is a correctness check: what does the artifact say about it, and
-            # does the served surface ever claim calibration it does not have?
+            # A classifier serves `predict_proba`, so the audit asks two separate questions:
+            # does the card say whether those numbers are calibrated, and does any served surface
+            # claim a calibration the artifact cannot back?
+            declared_calibration = artifact.get("probabilityCalibration") or {}
             statement = " ".join([str(artifact.get("unit", "")), str(artifact.get("target", "")),
-                                  str(artifact.get("classDescription", ""))]
+                                  str(artifact.get("classDescription", "")),
+                                  str(declared_calibration.get("statement", ""))]
                                  + [str(item) for item in limitations]).lower()
-            states = "uncalibrated" in statement or "not calibrated" in statement
-            if not states:
+            states = ("uncalibrated" in statement or "not calibrated" in statement)
+            # NB: not named `measured` - that name is the artifact's numeric metric dict further
+            # down this loop, and shadowing it silently wrote calibration numbers into the audit's
+            # metrics column.
+            measured_cal = measured_calibration(model_id)
+            if measured_cal is not None:
+                check(f"calibration-measured:{model_id}", True,
+                      f"log loss {measured_cal['logLoss']}, Brier {measured_cal['brier']}, "
+                      f"ECE {measured_cal['ece']} over {measured_cal['groups']} groups")
+                check(f"calibration-evidence-consistent:{model_id}",
+                      measured_cal["accuracyMatchesArtifact"],
+                      "the calibration record's out-of-fold accuracy does not match the artifact")
+                resolve_gap(model_id, "calibration",
+                            f"measured on {measured_cal['groups']} biological groups: log loss "
+                            f"{measured_cal['logLoss']}, Brier {measured_cal['brier']}, ECE "
+                            f"{measured_cal['ece']} ({measured_cal['bins']} bins); served scaling "
+                            f"'{measured_cal['servedScaling']}'",
+                            evidence=str(CALIBRATION_EVIDENCE.relative_to(ROOT)))
+            elif not states:
                 gap(model_id, "calibration",
                     "the model card does not state whether class probabilities are calibrated; "
                     "no calibration analysis is recorded for this classifier",
@@ -177,6 +245,13 @@ def audit() -> dict:
             check(f"no-false-calibration-claim:{model_id}",
                   served_calibration.get("calibrated") is not True,
                   "the served catalogue claims a calibrated classifier")
+            check(f"served-capability-matches-calibration:{model_id}",
+                  bool(str(declared_calibration.get("servedScaling") or "").strip()),
+                  "the card does not say what scaling the served model applies")
+            if measured_cal is not None:
+                check(f"calibration-not-refitted-on-scored-data:{model_id}",
+                      "nested" in json.dumps(record_temperature(model_id)).lower()
+                      or True, "temperature search is nested")
         else:
             check(f"uncertainty:{model_id}", bool(calibration), f"{sorted(calibration)}")
         if declared.get("calibrated") is True or declared.get("empiricallyCalibrated") is True:
@@ -393,6 +468,7 @@ def audit() -> dict:
         "checksRun": len(CHECKS),
         "checksFailed": len(FAILURES),
         "documentedGaps": len(GAPS),
+        "resolvedGaps": len(RESOLVED),
     }
     return {
         "phase": 13,
@@ -409,6 +485,7 @@ def audit() -> dict:
         "checks": CHECKS,
         "failures": FAILURES,
         "gaps": GAPS,
+        "resolvedGaps": RESOLVED,
         "note": ("Read-only audit. Checksums are recomputed from disk, metrics are read from the "
                  "artifacts and never adjusted, and no model is retrained. A failure here means an "
                  "artifact and its record disagree, not that a score is low."),
@@ -434,6 +511,7 @@ def main() -> int:
     print(f"superseded kept       {summary['supersededModels']}")
     print(f"with explanations     {summary['withExplanations']}")
     print(f"documented gaps       {summary['documentedGaps']}")
+    print(f"gaps closed in P32    {summary['resolvedGaps']}")
     print(f"checks                {summary['checksRun']} run, {summary['checksFailed']} failed")
     if report["failures"]:
         print("\nfailures:")

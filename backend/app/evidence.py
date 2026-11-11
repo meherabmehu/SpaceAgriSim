@@ -324,6 +324,12 @@ def _model_passages(quarantine: list) -> list[Passage]:
                    f"{CATEGORY_NAMES[classification.category]}. "
                    f"Service allowance: {SERVICE_ALLOWED[classification.category]}. "
                    if classification else "")
+                # Phase 32: the scope the model is served under travels with every passage the
+                # assistant can quote. Without it a retrieval hit could describe a research
+                # surface as if it were an operational forecast, which is exactly the
+                # contradiction Phase 31 withdrew a model over.
+                + (f" Served scope: {_clean(model.get('servedScope'))}."
+                   if model.get("servedScope") else "")
                 + (f"Limitations: {' '.join(limitations[:4])}" if limitations else ""))
         verdict = screen(text)
         if not verdict["safe"]:

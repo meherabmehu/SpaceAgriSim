@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-10T19:30:57.787377+00:00",
+  "generatedAt": "2026-11-11T06:36:39.010138+00:00",
   "phase": 7,
   "registrySchemaVersion": 1,
   "modelCount": 9,
@@ -15,15 +15,15 @@
     "tomato-flight-response-v1"
   ],
   "artifactDigests": {
-    "lettuce-earth-growth-v1": "b5af3819a4d55a1d9f7dd293886a72c692bbc57bf6d488bbcf45b1a4079491db",
-    "mizuna-harvest-v1": "78029d6d9a93946bdaf50427f697a463a805f3c588a4deb17afb61314cf22f38",
-    "mizuna-microbial-load-v1": "9868c660351f906ede6001ea7e2eb8d5fd2fc7b60b1c393c3dec94017db8cfff",
-    "tomato-flight-response-v1": "b1dd72b63130fccc6a334e3de286ae6774152291ce5fe00caf365d74cb10f593",
-    "mizuna-microbial-relative-load-v2": "11ad54a2fcf24c040796f4cdd256f624d79b40e80f2f732096ba7b271cf5de39",
-    "lettuce-earth-growth-v2": "9931f375baf5fa11c55e2647f1fd2b9c4775deb4166c1e0879932e8b004e1b7c",
-    "radiation-quality-osd46-v1": "5155d235b4511a2f28442f9f544cbbbc7f98a8f136fdcd45a771a9db5264d8eb",
-    "radiation-exposure-osd46-v1": "dc7a324d3c55401bfbe1f3d8740cf4b70e1590efd3bd11d618c066808d565281",
-    "lettuce-earth-growth-v3": "b5d1532dac106d289b9498f705efa4c4cdf071d8dc81739c1f09ea3d206e946a"
+    "lettuce-earth-growth-v1": "052dc2546ccf837024d7b6a86ad5a22ab5a54d0461e312c3e6a5572be928a85f",
+    "lettuce-earth-growth-v2": "0206b19256f95b8badb5d164ef884b4c526a61a03acbc11303beca1795bab5d9",
+    "lettuce-earth-growth-v3": "052c0b254d395cd78606148ad625c86f37ec114c2e89702a04d3ae98077ff394",
+    "mizuna-harvest-v1": "5be2375b7bebca641be3b42e34108daff6609bf913f13e6d2664007b040b3744",
+    "mizuna-microbial-load-v1": "39807034da0fe6191ef7b7ab72a0363d6586bacc21b910b0e3de319d46740e98",
+    "mizuna-microbial-relative-load-v2": "56c0399b39c61e07f3ff737479f2b76908a9eced25f633774e39e2a5c6cec6b4",
+    "radiation-exposure-osd46-v1": "9e9f963f529636e5d49dd31f4f264bfd26a2e62342c31c20c1c53a949f9b77f6",
+    "radiation-quality-osd46-v1": "dd5f558045c6de0c45bf56dafb3acd23e3eeeb575134d01a4ebca5dbe375c830",
+    "tomato-flight-response-v1": "db47150e3774f91f49bcfea5a415b3873bab7ea5ce0d9c9b0ed7de201471cade"
   },
   "environment": {
     "study": "Touliatos D, Dodd IC, McAinsh M (2016) Vertical farming increases lettuce yield per unit area compared to conventional horizontal hydroponics. Food and Energy Security 5(3):184-191, doi:10.1002/fes3.83",
@@ -89,47 +89,47 @@
     {
       "check": "checksum matches: lettuce-earth-growth-v1",
       "passed": true,
-      "detail": "b5af3819a4d5 vs recorded b5af3819a4d5"
-    },
-    {
-      "check": "checksum matches: mizuna-harvest-v1",
-      "passed": true,
-      "detail": "78029d6d9a93 vs recorded 78029d6d9a93"
-    },
-    {
-      "check": "checksum matches: mizuna-microbial-load-v1",
-      "passed": true,
-      "detail": "9868c660351f vs recorded 9868c660351f"
-    },
-    {
-      "check": "checksum matches: tomato-flight-response-v1",
-      "passed": true,
-      "detail": "b1dd72b63130 vs recorded b1dd72b63130"
-    },
-    {
-      "check": "checksum matches: mizuna-microbial-relative-load-v2",
-      "passed": true,
-      "detail": "11ad54a2fcf2 vs recorded 11ad54a2fcf2"
+      "detail": "052dc2546ccf vs recorded 052dc2546ccf"
     },
     {
       "check": "checksum matches: lettuce-earth-growth-v2",
       "passed": true,
-      "detail": "9931f375baf5 vs recorded 9931f375baf5"
-    },
-    {
-      "check": "checksum matches: radiation-quality-osd46-v1",
-      "passed": true,
-      "detail": "5155d235b451 vs recorded 5155d235b451"
-    },
-    {
-      "check": "checksum matches: radiation-exposure-osd46-v1",
-      "passed": true,
-      "detail": "dc7a324d3c55 vs recorded dc7a324d3c55"
+      "detail": "0206b19256f9 vs recorded 0206b19256f9"
     },
     {
       "check": "checksum matches: lettuce-earth-growth-v3",
       "passed": true,
-      "detail": "b5d1532dac10 vs recorded b5d1532dac10"
+      "detail": "052c0b254d39 vs recorded 052c0b254d39"
+    },
+    {
+      "check": "checksum matches: mizuna-harvest-v1",
+      "passed": true,
+      "detail": "5be2375b7beb vs recorded 5be2375b7beb"
+    },
+    {
+      "check": "checksum matches: mizuna-microbial-load-v1",
+      "passed": true,
+      "detail": "39807034da0f vs recorded 39807034da0f"
+    },
+    {
+      "check": "checksum matches: mizuna-microbial-relative-load-v2",
+      "passed": true,
+      "detail": "56c0399b39c6 vs recorded 56c0399b39c6"
+    },
+    {
+      "check": "checksum matches: radiation-exposure-osd46-v1",
+      "passed": true,
+      "detail": "9e9f963f5296 vs recorded 9e9f963f5296"
+    },
+    {
+      "check": "checksum matches: radiation-quality-osd46-v1",
+      "passed": true,
+      "detail": "dd5f558045c6 vs recorded dd5f558045c6"
+    },
+    {
+      "check": "checksum matches: tomato-flight-response-v1",
+      "passed": true,
+      "detail": "db47150e3774 vs recorded db47150e3774"
     },
     {
       "check": "withdrawn model is not served: et0-emulator-v1",
@@ -152,16 +152,6 @@
       "detail": "orphans=[]"
     },
     {
-      "check": "superseded model still registered: mizuna-microbial-load-v1",
-      "passed": true,
-      "detail": "mizuna-microbial-relative-load-v2 supersedes mizuna-microbial-load-v1"
-    },
-    {
-      "check": "supersession is one-directional: mizuna-microbial-load-v1",
-      "passed": true,
-      "detail": "registered successor of mizuna-microbial-load-v1 is mizuna-microbial-relative-load-v2"
-    },
-    {
       "check": "superseded model still registered: lettuce-earth-growth-v1",
       "passed": true,
       "detail": "lettuce-earth-growth-v2 supersedes lettuce-earth-growth-v1"
@@ -170,6 +160,16 @@
       "check": "supersession is one-directional: lettuce-earth-growth-v1",
       "passed": true,
       "detail": "registered successor of lettuce-earth-growth-v1 is lettuce-earth-growth-v2"
+    },
+    {
+      "check": "superseded model still registered: mizuna-microbial-load-v1",
+      "passed": true,
+      "detail": "mizuna-microbial-relative-load-v2 supersedes mizuna-microbial-load-v1"
+    },
+    {
+      "check": "supersession is one-directional: mizuna-microbial-load-v1",
+      "passed": true,
+      "detail": "registered successor of mizuna-microbial-load-v1 is mizuna-microbial-relative-load-v2"
     },
     {
       "check": "api can load: lettuce-earth-growth-v1",
@@ -232,6 +232,26 @@
       "detail": "8 statements"
     },
     {
+      "check": "artifact reports metrics: lettuce-earth-growth-v2",
+      "passed": true,
+      "detail": "3 numeric metrics"
+    },
+    {
+      "check": "artifact reports limitations: lettuce-earth-growth-v2",
+      "passed": true,
+      "detail": "7 statements"
+    },
+    {
+      "check": "artifact reports metrics: lettuce-earth-growth-v3",
+      "passed": true,
+      "detail": "6 numeric metrics"
+    },
+    {
+      "check": "artifact reports limitations: lettuce-earth-growth-v3",
+      "passed": true,
+      "detail": "6 statements"
+    },
+    {
       "check": "artifact reports metrics: mizuna-harvest-v1",
       "passed": true,
       "detail": "3 numeric metrics"
@@ -252,16 +272,6 @@
       "detail": "7 statements"
     },
     {
-      "check": "artifact reports metrics: tomato-flight-response-v1",
-      "passed": true,
-      "detail": "6 numeric metrics"
-    },
-    {
-      "check": "artifact reports limitations: tomato-flight-response-v1",
-      "passed": true,
-      "detail": "5 statements"
-    },
-    {
       "check": "artifact reports metrics: mizuna-microbial-relative-load-v2",
       "passed": true,
       "detail": "3 numeric metrics"
@@ -270,26 +280,6 @@
       "check": "artifact reports limitations: mizuna-microbial-relative-load-v2",
       "passed": true,
       "detail": "7 statements"
-    },
-    {
-      "check": "artifact reports metrics: lettuce-earth-growth-v2",
-      "passed": true,
-      "detail": "3 numeric metrics"
-    },
-    {
-      "check": "artifact reports limitations: lettuce-earth-growth-v2",
-      "passed": true,
-      "detail": "7 statements"
-    },
-    {
-      "check": "artifact reports metrics: radiation-quality-osd46-v1",
-      "passed": true,
-      "detail": "6 numeric metrics"
-    },
-    {
-      "check": "artifact reports limitations: radiation-quality-osd46-v1",
-      "passed": true,
-      "detail": "6 statements"
     },
     {
       "check": "artifact reports metrics: radiation-exposure-osd46-v1",
@@ -302,14 +292,24 @@
       "detail": "5 statements"
     },
     {
-      "check": "artifact reports metrics: lettuce-earth-growth-v3",
+      "check": "artifact reports metrics: radiation-quality-osd46-v1",
       "passed": true,
       "detail": "6 numeric metrics"
     },
     {
-      "check": "artifact reports limitations: lettuce-earth-growth-v3",
+      "check": "artifact reports limitations: radiation-quality-osd46-v1",
       "passed": true,
       "detail": "6 statements"
+    },
+    {
+      "check": "artifact reports metrics: tomato-flight-response-v1",
+      "passed": true,
+      "detail": "6 numeric metrics"
+    },
+    {
+      "check": "artifact reports limitations: tomato-flight-response-v1",
+      "passed": true,
+      "detail": "5 statements"
     },
     {
       "check": "independent metric matches artifact: lettuce-earth-growth-v3",

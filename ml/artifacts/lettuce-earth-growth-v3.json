@@ -1,6 +1,6 @@
 {
   "id": "lettuce-earth-growth-v3",
-  "name": "Lettuce Earth fresh yield \u00b7 per-area light-limited model (v3)",
+  "name": "Lettuce Earth fresh yield · per-area light-limited model (v3)",
   "version": "3.0.0",
   "status": "trained-exploratory",
   "supersedes": null,
@@ -19464,5 +19464,22 @@
     "unit": "g fresh mass per m2",
     "needsDensity": true,
     "note": "The workflow passes the model's four recorded features, so it returns areal yield. Per-plant mass is areal yield divided by plantDensityPerM2; use POST /api/predict/lettuce-earth-growth-v3 to supply the density and the photoperiod that defines the daily light integral."
-  }
+  },
+  "sourceType": "external scientific data (not NASA): 4TU.ResearchData experiment tables",
+  "license": "CC BY 4.0, declared in the dataset's RO-Crate (data/metadata/wur_lettuce_rocrate.json)",
+  "sourceLicenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+  "sourceRetrieved": "2026-11-09",
+  "servedScope": "Fresh yield per square metre inside the measured WUR domain, divided by the planting density the caller states. The pre-registered criterion was 30 % MAPE on an independent holdout; the model returned 41.6 % on Touliatos et al. 2016 data, so it is served as a research surface that reports its own failure, not as a forecast.",
+  "operationalForecast": false,
+  "harvestForecastClaim": "none",
+  "archivalRecord": {
+    "retained": true,
+    "served": "research surface with the missed criterion stated",
+    "files": [
+      "ml/artifacts/lettuce-earth-growth-v3.json",
+      "ml/evaluation/phase29_harvest_diagnosis.json"
+    ],
+    "reason": "The pre-registered failure is published with the model; withdrawing it would also withdraw the evidence."
+  },
+  "note": "No operational forecast. This card describes what the model reproduces inside the measured domain; it is not a prediction of a future or unmeasured crop."
 }

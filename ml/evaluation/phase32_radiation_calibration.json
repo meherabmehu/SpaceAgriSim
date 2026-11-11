@@ -1,0 +1,309 @@
+{
+  "phase": 32,
+  "generatedBy": "ml/research/phase32_radiation_calibration.py",
+  "generatedOn": "2026-11-10",
+  "source": {
+    "study": "OSD-46 (GeneLab GLDS-46), Arabidopsis thaliana ATH1 array",
+    "file": "data/raw/OSD-46/GLDS-46_array_normalized_expression_probeset_GLmicroarray.csv",
+    "url": "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-46/version-6/array/GLDS-46_array_normalized_expression_probeset_GLmicroarray.csv",
+    "licence": "NASA OSDR open data (CC-BY-4.0 for OSD-46 data tables)"
+  },
+  "independenceUnit": "biological group (genotype x condition x dose x timepoint x age)",
+  "rule": "Every probability scored here is out of fold under leave-one-group-out, using the same split as the reported accuracy. Nothing is fitted to the scored predictions; the one fitted quantity (temperature) is selected in a nested scheme blind to the fold it scores.",
+  "models": {
+    "radiation-quality-osd46-v1": {
+      "classes": [
+        "control",
+        "gamma",
+        "hze"
+      ],
+      "samples": 44,
+      "groups": 22,
+      "hardLabelAccuracy": 0.9318,
+      "accuracyMatchesArtifact": true,
+      "probability": {
+        "logLoss": 0.2228,
+        "logLossInterval": {
+          "lower": 0.0698,
+          "upper": 0.4178,
+          "resamples": 2000,
+          "unit": "biological group"
+        },
+        "brier": 0.1252,
+        "brierInterval": {
+          "lower": 0.029,
+          "upper": 0.2552,
+          "resamples": 2000,
+          "unit": "biological group"
+        },
+        "ece": 0.0926,
+        "eceInterval": {
+          "lower": 0.0495,
+          "upper": 0.1743,
+          "resamples": 2000,
+          "unit": "biological group"
+        },
+        "eceBins": 10,
+        "reliability": [
+          {
+            "low": 0.3333,
+            "high": 0.4,
+            "count": 1,
+            "meanConfidence": 0.3818,
+            "accuracy": 0.0,
+            "gap": 0.3818
+          },
+          {
+            "low": 0.4,
+            "high": 0.4667,
+            "count": 0
+          },
+          {
+            "low": 0.4667,
+            "high": 0.5333,
+            "count": 2,
+            "meanConfidence": 0.5185,
+            "accuracy": 1.0,
+            "gap": 0.4815
+          },
+          {
+            "low": 0.5333,
+            "high": 0.6,
+            "count": 0
+          },
+          {
+            "low": 0.6,
+            "high": 0.6667,
+            "count": 4,
+            "meanConfidence": 0.6364,
+            "accuracy": 0.75,
+            "gap": 0.1136
+          },
+          {
+            "low": 0.6667,
+            "high": 0.7333,
+            "count": 0
+          },
+          {
+            "low": 0.7333,
+            "high": 0.8,
+            "count": 4,
+            "meanConfidence": 0.7533,
+            "accuracy": 1.0,
+            "gap": 0.2467
+          },
+          {
+            "low": 0.8,
+            "high": 0.8667,
+            "count": 1,
+            "meanConfidence": 0.8643,
+            "accuracy": 1.0,
+            "gap": 0.1357
+          },
+          {
+            "low": 0.8667,
+            "high": 0.9333,
+            "count": 4,
+            "meanConfidence": 0.8944,
+            "accuracy": 1.0,
+            "gap": 0.1056
+          },
+          {
+            "low": 0.9333,
+            "high": 1.0,
+            "count": 28,
+            "meanConfidence": 0.9904,
+            "accuracy": 0.9643,
+            "gap": 0.0262
+          }
+        ],
+        "meanMaxProbability": 0.8898
+      },
+      "temperatureScaling": {
+        "rawLogLoss": 0.2228,
+        "nestedScaledLogLoss": 0.4358,
+        "temperatures": {
+          "Wild Type|Fe-56 ion radiation|30|1.5|5": 0.75,
+          "Wild Type|Fe-56 ion radiation|30|12|5": 1.0,
+          "Wild Type|Fe-56 ion radiation|30|24|6": 1.0,
+          "Wild Type|Fe-56 ion radiation|30|3|5": 0.75,
+          "Wild Type|Fe-56 ion radiation|30|6|5": 1.0,
+          "Wild Type|gamma radiation|100|1.5|5": 0.75,
+          "Wild Type|gamma radiation|100|12|5": 1.0,
+          "Wild Type|gamma radiation|100|24|6": 1.0,
+          "Wild Type|gamma radiation|100|3|5": 0.75,
+          "Wild Type|gamma radiation|100|6|5": 1.0,
+          "Wild Type|non-irradiated|0|nan|5": 1.0,
+          "Wild Type|non-irradiated|0|nan|6": 0.25,
+          "atm-1|Fe-56 ion radiation|30|1.5|5": 0.75,
+          "atm-1|Fe-56 ion radiation|30|12|5": 1.0,
+          "atm-1|Fe-56 ion radiation|30|24|6": 0.75,
+          "atm-1|Fe-56 ion radiation|30|6|5": 1.0,
+          "atm-1|gamma radiation|100|1.5|5": 1.0,
+          "atm-1|gamma radiation|100|12|5": 0.75,
+          "atm-1|gamma radiation|100|24|6": 0.75,
+          "atm-1|gamma radiation|100|6|5": 0.75,
+          "atm-1|non-irradiated|0|nan|5": 1.5,
+          "atm-1|non-irradiated|0|nan|6": 1.5
+        },
+        "distinctTemperatures": 4,
+        "helps": false,
+        "scheme": "nested: the temperature for each outer held-out group is fitted on predictions from models that excluded both that group and the group being predicted, so no observation both chooses a temperature and is scored by it"
+      },
+      "servedScaling": "none",
+      "servedScalingReason": "The nested temperature search is reported for transparency but the served model applies no scaling: the temperatures it selects are not stable across outer folds, and shipping a constant fitted to 44 arrays would present a 22-group estimate as a property of the model.",
+      "interpretation": "Measured: a nested temperature did not improve log loss over the raw probabilities (0.4358 scaled vs 0.2228 raw), so the served model keeps its own scores. It is still described as a score, not a calibrated probability."
+    },
+    "radiation-exposure-osd46-v1": {
+      "classes": [
+        "control",
+        "irradiated"
+      ],
+      "samples": 44,
+      "groups": 22,
+      "hardLabelAccuracy": 0.9318,
+      "accuracyMatchesArtifact": true,
+      "probability": {
+        "logLoss": 0.1208,
+        "logLossInterval": {
+          "lower": 0.0282,
+          "upper": 0.2362,
+          "resamples": 2000,
+          "unit": "biological group"
+        },
+        "brier": 0.0788,
+        "brierInterval": {
+          "lower": 0.0105,
+          "upper": 0.1701,
+          "resamples": 2000,
+          "unit": "biological group"
+        },
+        "ece": 0.075,
+        "eceInterval": {
+          "lower": 0.0241,
+          "upper": 0.1455,
+          "resamples": 2000,
+          "unit": "biological group"
+        },
+        "eceBins": 10,
+        "reliability": [
+          {
+            "low": 0.5,
+            "high": 0.55,
+            "count": 1,
+            "meanConfidence": 0.5492,
+            "accuracy": 1.0,
+            "gap": 0.4508
+          },
+          {
+            "low": 0.55,
+            "high": 0.6,
+            "count": 2,
+            "meanConfidence": 0.5678,
+            "accuracy": 0.0,
+            "gap": 0.5678
+          },
+          {
+            "low": 0.6,
+            "high": 0.65,
+            "count": 0
+          },
+          {
+            "low": 0.65,
+            "high": 0.7,
+            "count": 2,
+            "meanConfidence": 0.6624,
+            "accuracy": 1.0,
+            "gap": 0.3376
+          },
+          {
+            "low": 0.7,
+            "high": 0.75,
+            "count": 2,
+            "meanConfidence": 0.7225,
+            "accuracy": 0.5,
+            "gap": 0.2225
+          },
+          {
+            "low": 0.75,
+            "high": 0.8,
+            "count": 0
+          },
+          {
+            "low": 0.8,
+            "high": 0.85,
+            "count": 1,
+            "meanConfidence": 0.805,
+            "accuracy": 1.0,
+            "gap": 0.195
+          },
+          {
+            "low": 0.85,
+            "high": 0.9,
+            "count": 1,
+            "meanConfidence": 0.8786,
+            "accuracy": 1.0,
+            "gap": 0.1214
+          },
+          {
+            "low": 0.9,
+            "high": 0.95,
+            "count": 2,
+            "meanConfidence": 0.9374,
+            "accuracy": 1.0,
+            "gap": 0.0626
+          },
+          {
+            "low": 0.95,
+            "high": 1.0,
+            "count": 33,
+            "meanConfidence": 0.9954,
+            "accuracy": 1.0,
+            "gap": 0.0046
+          }
+        ],
+        "meanMaxProbability": 0.9287
+      },
+      "temperatureScaling": {
+        "rawLogLoss": 0.1208,
+        "nestedScaledLogLoss": 0.1911,
+        "temperatures": {
+          "Wild Type|Fe-56 ion radiation|30|1.5|5": 1.0,
+          "Wild Type|Fe-56 ion radiation|30|12|5": 0.5,
+          "Wild Type|Fe-56 ion radiation|30|24|6": 0.75,
+          "Wild Type|Fe-56 ion radiation|30|3|5": 1.0,
+          "Wild Type|Fe-56 ion radiation|30|6|5": 0.75,
+          "Wild Type|gamma radiation|100|1.5|5": 0.75,
+          "Wild Type|gamma radiation|100|12|5": 0.75,
+          "Wild Type|gamma radiation|100|24|6": 0.5,
+          "Wild Type|gamma radiation|100|3|5": 0.5,
+          "Wild Type|gamma radiation|100|6|5": 0.75,
+          "Wild Type|non-irradiated|0|nan|5": 1.5,
+          "Wild Type|non-irradiated|0|nan|6": 0.75,
+          "atm-1|Fe-56 ion radiation|30|1.5|5": 0.25,
+          "atm-1|Fe-56 ion radiation|30|12|5": 0.75,
+          "atm-1|Fe-56 ion radiation|30|24|6": 1.0,
+          "atm-1|Fe-56 ion radiation|30|6|5": 0.75,
+          "atm-1|gamma radiation|100|1.5|5": 1.0,
+          "atm-1|gamma radiation|100|12|5": 0.75,
+          "atm-1|gamma radiation|100|24|6": 1.0,
+          "atm-1|gamma radiation|100|6|5": 0.75,
+          "atm-1|non-irradiated|0|nan|5": 1.0,
+          "atm-1|non-irradiated|0|nan|6": 1.0
+        },
+        "distinctTemperatures": 5,
+        "helps": false,
+        "scheme": "nested: the temperature for each outer held-out group is fitted on predictions from models that excluded both that group and the group being predicted, so no observation both chooses a temperature and is scored by it"
+      },
+      "servedScaling": "none",
+      "servedScalingReason": "The nested temperature search is reported for transparency but the served model applies no scaling: the temperatures it selects are not stable across outer folds, and shipping a constant fitted to 44 arrays would present a 22-group estimate as a property of the model.",
+      "interpretation": "Measured: a nested temperature did not improve log loss over the raw probabilities (0.1911 scaled vs 0.1208 raw), so the served model keeps its own scores. It is still described as a score, not a calibrated probability."
+    }
+  },
+  "limitations": [
+    "44 arrays from one study: every interval here is wide, and the intervals, not the point estimates, are the reportable quantity.",
+    "22 biological groups means a binned ECE with 10 bins has very few samples per bin; the reliability table is published with its counts so a reader can see how thin it is.",
+    "The control class is not balanced across array batches, so part of any miscalibration may be batch structure rather than model optimism.",
+    "Calibration is measured within these campaigns. It does not transfer to other radiation qualities, doses, organisms or platforms, and the served response says so."
+  ]
+}
