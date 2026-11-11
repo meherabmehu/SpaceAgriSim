@@ -80,6 +80,12 @@ refreshed in this pass, so the 0.000 % result means the delivered tree renders p
 tree that was delivered before it — the two UI-state fixes in `RequestState` are invisible in the
 default state by construction (they only change what happens when a request fails).
 
+One row of the committed report changed when it was regenerated: `mission-mobile` moved from
+`maxChannelDelta` 0 to 1 on a 6 641-pixel-tall canvas. No pixel exceeded the 16-level channel
+threshold, so changed pixels stayed at 0. That is rasterisation noise between two runs of the same
+layout — the reason the gate has a channel threshold rather than demanding byte equality — and it is
+recorded in the report rather than reverted.
+
 Playwright count: 150 before this pass, 6 added (`e2e/degraded.spec.js`: two tests × three viewports).
 
 ## 6. Repository hygiene
