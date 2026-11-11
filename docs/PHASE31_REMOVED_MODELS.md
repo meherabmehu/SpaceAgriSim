@@ -143,6 +143,13 @@ imported them: `ControlGroup`, `CropSelector`, `DurationSelector`, `ImpactBreakd
   support, with leave-one-biological-group-out validation and a stated domain.
 * **`mizuna-microbial-relative-load-v2`** stays, with `evidenceStatus: experimental` — never
   "validated", and never a calibrated probability.
+  *Update (Phase 35):* the status is now `validated-exploratory`. Its card already carried the rule
+  for that status; three of the four terms were true and the fourth — conformal coverage within five
+  points of nominal — was unmeasured until Phase 34 measured it at 0.8943 against a nominal 0.90.
+  The promotion is derived from that measurement, recorded in
+  `ml/evaluation/phase35_model_evidence.json`, and it still binds the number to a campaign that
+  supplies its own baseline samples. Nothing in this phase's reasoning about the withdrawn models
+  changed.
 * **The demand-curve comparison** stays as a *relative* comparison. The trial publishes neither pot
   diameter nor plant spacing, so the absolute level is not identifiable from it; the panel and the API
   now state that as the scope of the claim (`identification.levelIdentified = false`) rather than as a
