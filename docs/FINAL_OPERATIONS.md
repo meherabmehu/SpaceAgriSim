@@ -13,7 +13,7 @@ Five jobs, all green locally in the same order. `.github/workflows/ci.yml`:
 |---|---|---|
 | `backend` | installs `requirements-dev.txt`; runs `pytest -q backend/tests` on SQLite; `pip-audit` on **both** requirement files; `bandit -q -r backend/app` | audited only the runtime pins; no static analysis |
 | `postgres` | PostgreSQL 17 service; runs the suite against it and **fails if any test skips** | unchanged |
-| `science` | **new** — nine `--check` gates: model audit, registry verification, provenance, feature readiness, coverage, gap matrix, Phase 34 measurement sync, Phase 35 verdicts, screenshot dedupe | did not exist: every one of those gates was manual |
+| `science` | **new** — nine read-only gates: model audit (writes only with `--write`), registry verification, provenance, feature readiness, coverage, gap matrix, Phase 34 measurement sync, Phase 35 verdicts, screenshot dedupe | did not exist: every one of those gates was manual |
 | `frontend` | lint, typecheck, **`build:check`**, `npm audit --audit-level=high` | ran `npm run build`, which passes even when the bundle guard fails |
 | `browser` | Playwright across three viewports | unchanged (now 156 tests, was 150) |
 

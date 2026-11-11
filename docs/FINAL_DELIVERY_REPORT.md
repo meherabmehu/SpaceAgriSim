@@ -41,7 +41,8 @@ the fix:
    network was never touched. `docs/FINAL_SECURITY_REVIEW.md` §2.
 5. **The CI never ran the scientific gates and did not enforce the bundle budget.** A green CI said
    nothing about the model cards matching their evidence, and a `build` that merely compiled passed
-   the frontend job. New `science` job runs nine `--check` gates; the frontend job runs
+   the frontend job. New `science` job runs the nine evidence gates (all read-only: `--check` for the eight that take it,
+   and `audit_models.py`, which writes only with `--write`); the frontend job runs
    `build:check`; `bandit` now runs on the application code with a zero-finding gate.
    `docs/FINAL_OPERATIONS.md` §1.
 6. **Two units were defined twice, so the registry served one wording and discarded the other's

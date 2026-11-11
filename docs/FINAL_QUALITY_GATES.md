@@ -25,7 +25,8 @@ test skips, so a skip cannot hide a regression.
 
 ## 2. Scientific and evidence gates
 
-All nine are `--check` (verify, do not rewrite) and all nine now also run in CI's `science` job.
+All nine are read-only — the eight that take `--check` verify without rewriting, and `audit_models.py`
+writes its report only when given `--write` — and all nine now also run in CI's `science` job.
 
 | Gate | Command | Result |
 |---|---|---|
