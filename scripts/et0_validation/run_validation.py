@@ -109,7 +109,7 @@ def _safe_fetch(leg: str, site: Site, call: Callable[[], dict[str, Any]],
     try:
         return call()
     except MissingCredentialError as exc:
-        routes_not_run.setdefault(f"copernicus-cds-era5-land", {
+        routes_not_run.setdefault("copernicus-cds-era5-land", {
             "route": "copernicus-cds-era5-land",
             "leg": leg,
             "site": site.key,

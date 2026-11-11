@@ -120,7 +120,6 @@ def _write(table: pd.DataFrame, name: str, study: str, quality: dict[str, Any]) 
 # ---------------------------------------------------------------------------------------
 def preprocess_schroder() -> list[Path]:
     print("zenodo-schroder-2021-lettuce-pot")
-    workbook = pd.ExcelFile(SCHRODER)
 
     # ---- evapotranspiration: three-column blocks, one block per measurement date ----------
     sheet = pd.read_excel(SCHRODER, sheet_name="evapotranspiration", header=None)

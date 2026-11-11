@@ -89,7 +89,6 @@ def _predict(site: dict[str, Any], day: str, drivers: dict[str, float],
 
 def shapley_for_site(rows: list[dict[str, Any]], site: dict[str, Any]) -> dict[str, Any]:
     """Average marginal contributions over every ordering of the five drivers."""
-    values: dict[str, dict[str, list[float]]] = {"era5": {}, "power": {}}
     usable: list[dict[str, Any]] = []
     for row in rows:
         got = {source: {key: _float(row[column]) for key, column in COLUMNS[source].items()}

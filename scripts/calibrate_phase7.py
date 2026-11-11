@@ -151,7 +151,6 @@ def check_peak_water_demand() -> dict:
     wheat_mean = float(gas("stand_transpiration_mean_areal")["value"])    # 4.5 L/m2/day
     bpc_mean = float(bpc("stand_transpiration_areal_mean")["value"])      # 6.1 L/m2/day
     source_dli = float(bpc("daily_light_integral_phase4")["value"])       # 38 mol/m2/day
-    reference_dli = wheat_peak and source_dli
 
     crops = {}
     for key in ("lettuce", "tomato", "radish"):

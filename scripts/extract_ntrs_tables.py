@@ -611,7 +611,7 @@ def main() -> int:
               f"plants {row.totalPlants}")
     print(f"  water recovery (condensed/added): "
           f"{bpc_values['water_condensed_total'] / bpc_values['water_added_total']:.3f}")
-    print(f"\nwritten: data/processed/ntrs_wheat_*.csv, ntrs_bpc_water_balance.csv")
+    print("\nwritten: data/processed/ntrs_wheat_*.csv, ntrs_bpc_water_balance.csv")
     return 0
 
 
