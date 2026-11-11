@@ -13,7 +13,8 @@ serve silently:
 
 Exit code is non-zero on any failure.
 
-Run: python scripts/verify_model_registry.py
+Run: python scripts/verify_model_registry.py            # verify and rewrite the report
+     python scripts/verify_model_registry.py --check    # verify only, leave the tree untouched
 """
 from __future__ import annotations
 
@@ -53,7 +54,12 @@ def pinned_versions() -> dict[str, str]:
     return pins
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    # `--check` verifies without rewriting the report. Two things motivated it: CI should be able to
+    # run this gate without dirtying the working tree, and a timestamp-only diff in
+    # docs/phase7/registry_verification.json has twice been mistaken for a real change.
+    arguments = sys.argv[1:] if argv is None else argv
+    write = "--check" not in arguments and "--no-write" not in arguments
     registry = json.loads(REGISTRY.read_text())
     models = registry["models"]
 
@@ -236,14 +242,15 @@ def main() -> int:
         "passed": not FAILURES,
         "failures": FAILURES,
     }
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(payload, indent=2, ensure_ascii=True) + "\n")
+    if write:
+        OUT.parent.mkdir(parents=True, exist_ok=True)
+        OUT.write_text(json.dumps(payload, indent=2, ensure_ascii=True) + "\n")
 
     for entry in CHECKS:
         print(f"  [{'PASS' if entry['passed'] else 'FAIL'}] {entry['check']}"
               f"{(': ' + entry['detail']) if entry['detail'] else ''}")
     print(f"\n{len(CHECKS) - len(FAILURES)}/{len(CHECKS)} checks passed")
-    print(f"written: {OUT.relative_to(ROOT)}")
+    print(f"{'written' if write else 'verified without writing'}: {OUT.relative_to(ROOT)}")
     return 0 if not FAILURES else 1
 
 

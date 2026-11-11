@@ -1,7 +1,13 @@
 # Local development / test dependencies
 -r requirements.txt
 pytest>=8.0
+# Starlette's TestClient prefers `httpx2` when it is installed and emits a deprecation warning for
+# the `httpx` compatibility shim when it is not. The warning came from fastapi.testclient, not from
+# this project's code, but it printed on every run of a 1 235-test suite and made a real warning
+# indistinguishable from noise. Declared here (test tooling only, never in the runtime image) so the
+# suite is quiet by construction rather than by a filter.
 httpx>=0.27
+httpx2>=2.16,<3.0
 
 # The phase 7-11 tests exercise the analysis scripts directly (calibration, uncertainty, model
 # reproduction), so the scientific stack those scripts import is a test dependency, not just a

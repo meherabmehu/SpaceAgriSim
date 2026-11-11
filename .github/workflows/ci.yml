@@ -21,7 +21,15 @@ jobs:
           PYTHONPATH: backend
           SPACEAGRISIM_DATABASE_URL: 'sqlite:///:memory:'
       - run: python -m pip install pip-audit
-      - run: python -m pip_audit -r backend/requirements.txt
+      # Both files: the runtime pins are what ships, but a vulnerable test-only package is still a
+      # vulnerable path into a developer machine and a CI runner.
+      - run: python -m pip_audit -r backend/requirements.txt -r backend/requirements-dev.txt
+      # Static analysis for the application code itself. The gate fails on *any* finding, not on a
+      # severity floor: the five findings this repository has were each reviewed and marked on the
+      # line that raised them with the reason (`docs/FINAL_SECURITY_REVIEW.md` lists all five), so a
+      # new one is a signal rather than noise.
+      - run: python -m pip install bandit
+      - run: python -m bandit -q -r backend/app
 
   # The job above runs on SQLite, so every PostgreSQL test skips. A skip is not a pass: before
   # this job existed, 24 persistence, transaction, constraint and connection-failure tests were
@@ -96,6 +104,44 @@ jobs:
           from app.config.settings import resolve_database_url
           print("resolved:", resolve_database_url(os.environ["SPACEAGRISIM_TEST_POSTGRES_URL"], ""))
           PY
+  # The scientific gates live beside the suites rather than inside them: each is a script that
+  # recomputes a published number from the committed artifacts. Until this job existed they ran
+  # only when someone remembered to run them, which is how a model card drifts from its evidence
+  # without any test going red. Every script is stdlib-only and every step is `--check`, so the job
+  # proves the committed state rather than rewriting it.
+  science:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+      - run: python -m pip install -r backend/requirements-dev.txt
+      - name: Model audit (registry, cards, removed capabilities, evidence verdicts)
+        env:
+          PYTHONPATH: backend
+        run: python scripts/audit_models.py
+      - name: Registry checksums and training environment
+        env:
+          PYTHONPATH: backend
+        run: python scripts/verify_model_registry.py --check
+      - name: Provenance manifest
+        run: python ml/training/phase32_provenance.py --check
+      - name: Feature readiness
+        run: python ml/research/build_feature_readiness.py --check
+      - name: Feature coverage
+        run: python ml/research/build_feature_coverage.py --check
+      - name: Dataset gap matrix
+        run: python ml/research/build_gap_matrix.py --check
+      - name: Measured evidence to model cards
+        run: python ml/research/phase34_record_measurements.py --check
+      - name: Evidence verdicts
+        run: python ml/research/phase35_evidence_verdicts.py --check
+      - name: Screenshot store is deduplicated
+        run: python ml/research/dedupe_screenshots.py --check
+
   frontend:
     runs-on: ubuntu-latest
     defaults:
@@ -111,7 +157,10 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
-      - run: npm run build
+      # `build:check` runs the production build *and* the bundle guard (no import cycles, no
+      # oversized chunk, initial request within the 240 kB budget). A plain `build` would let a
+      # regression past as long as it compiled.
+      - run: npm run build:check
       - run: npm audit --audit-level=high
   browser:
     runs-on: ubuntu-latest
