@@ -21,3 +21,10 @@ scikit-learn>=1.4
 # PDF text extraction for the quote-verification tests (phase 16/18). Without it those checks
 # skip silently, which is how a quote can drift from its source without anyone noticing.
 pymupdf>=1.24
+
+# The phase 30 dataset gate shells out to `ml/research/build_phase30_datasets.py --check`, which
+# reads the two acquired workbooks with openpyxl. It was pinned in `ml/requirements-training.txt`
+# (the training stack) but not here, so a clean runner failed two dataset tests at import while a
+# developer machine that already had it passed - the worst kind of difference between two
+# environments running the same suite.
+openpyxl>=3.1,<4

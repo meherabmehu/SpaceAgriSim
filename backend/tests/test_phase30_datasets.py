@@ -14,6 +14,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -243,3 +244,27 @@ def test_the_cea_artifact_is_wired_to_a_served_surface_and_the_harvest_one_is_re
     assert harvest["promoted"] is False
     assert HARVEST_EVAL.is_file()
     assert "harvest" in (ROOT / "docs" / "PHASE31_REMOVED_MODELS.md").read_text().lower()
+
+
+def test_the_dev_requirements_declare_openpyxl_because_these_checks_read_workbooks():
+    """The suite must be runnable on a clean runner, not only where openpyxl happens to exist.
+
+    The dataset checks here shell out to `ml/research/build_phase30_datasets.py`, which loads both
+    acquired workbooks with openpyxl. The pin lived in `ml/requirements-training.txt` (the training
+    stack) but not in `backend/requirements-dev.txt`, so installing the declared test dependencies
+    left the suite failing at import in two tests - while a machine that had ever trained a model
+    passed. This asserts the declaration and the import that needs it stay in step.
+    """
+    requirements = (ROOT / "backend" / "requirements-dev.txt").read_text()
+    declared = {
+        # `openpyxl>=3.1,<4` -> `openpyxl`: the name ends at the first specifier character.
+        re.split(r"[<>=!~\[ (]", line.strip(), maxsplit=1)[0].lower()
+        for line in requirements.splitlines()
+        if line.strip() and not line.startswith(("#", "-"))
+    }
+    script = (ROOT / "ml" / "research" / "build_phase30_datasets.py").read_text()
+    assert "import openpyxl" in script, "the dataset gate no longer reads workbooks; drop the pin"
+    assert "openpyxl" in declared, (
+        "ml/research/build_phase30_datasets.py imports openpyxl, so "
+        "backend/requirements-dev.txt must declare it or a clean runner fails two dataset tests"
+    )
