@@ -73,12 +73,33 @@ class LettucePredictionRequest(BaseModel):
                                    "every held-out experiment."}},
 )
 def predict_lettuce(request: LettucePredictionRequest):
-    model=artifact('lettuce-earth-growth-v1')
-    value, warnings=research.predict_values(model,[request.daysAfterTransplant,request.airTemperature,request.rootTemperature,request.ppfd])
+    """Superseded v1 regression. Kept served so its failed external check stays reproducible."""
+    model = artifact("lettuce-earth-growth-v1")
+    value, warnings = research.predict_values(model, [
+        request.daysAfterTransplant, request.airTemperature,
+        request.rootTemperature, request.ppfd])
     if request.airTemperature >= 28 and request.rootTemperature <= 24 and request.ppfd >= 400:
-        warnings.append('Tip-burn treatment combinations were omitted in the published analysis; this region is unsupported.')
-    radius=model['interval']['radius']
-    return {'modelId':model['id'],'prediction':value,'unit':model['unit'],'method':model['method'],'sourceStudy':'WUR-lettuce','sourceUrl':model['sourceUrl'],'interval':{'low':max(0,value-radius),'high':value+radius,'kind':model['interval']['kind']},'outOfDistribution':bool(warnings),'warnings':warnings+model['limitations'],'inputs':request.model_dump(),'operationalForecast':False,'harvestForecastClaim':None,'scopeStatement':model.get('servedScope'),'evidenceVerdict':research.evidence_verdict(model['id'],model),'decisionGrade':research.evidence_verdict(model['id'],model)['decisionGrade'],'warnings':warnings+model['limitations']+research.verdict_warning(model['id'],model)}
+        warnings.append("Tip-burn treatment combinations were omitted in the published analysis; "
+                        "this region is unsupported.")
+    radius = model["interval"]["radius"]
+    return {
+        "modelId": model["id"],
+        "prediction": value,
+        "unit": model["unit"],
+        "method": model["method"],
+        "sourceStudy": "WUR-lettuce",
+        "sourceUrl": model["sourceUrl"],
+        "interval": {"low": max(0, value - radius), "high": value + radius,
+                     "kind": model["interval"]["kind"]},
+        "outOfDistribution": bool(warnings),
+        "warnings": (warnings + model["limitations"]
+                     + research.verdict_warning(model["id"], model)),
+        "inputs": request.model_dump(),
+        "operationalForecast": False,
+        "harvestForecastClaim": None,
+        "scopeStatement": model.get("servedScope"),
+        **research.verdict_fields(model["id"], model),
+    }
 
 
 @router.post("/predict/lettuce-earth-growth-v3")
@@ -175,8 +196,7 @@ def predict_lettuce_v3(request: LettuceYieldPredictionRequest):
         # every model that failed an independent check or was never checked independently, and the
         # warning list then carries the measured reason, so a caller cannot receive an
         # experimental estimate without its verdict attached.
-        "evidenceVerdict": research.evidence_verdict(model["id"], model),
-        "decisionGrade": research.evidence_verdict(model["id"], model)["decisionGrade"],
+        **research.verdict_fields(model["id"], model),
     }
 
 
@@ -236,8 +256,7 @@ def predict_lettuce_v2(request: LettucePredictionRequest):
         # every model that failed an independent check or was never checked independently, and the
         # warning list then carries the measured reason, so a caller cannot receive an
         # experimental estimate without its verdict attached.
-        "evidenceVerdict": research.evidence_verdict(model["id"], model),
-        "decisionGrade": research.evidence_verdict(model["id"], model)["decisionGrade"],
+        **research.verdict_fields(model["id"], model),
     }
 
 
@@ -345,8 +364,7 @@ def _transcriptomic_prediction(model_id: str, request: TranscriptomicPredictionR
         # Phase 35: these two classifiers have never been scored by an independent campaign, and the
         # verdict says so on every response rather than only in a document. `warnings` carries the
         # same sentence the other prediction routes emit, so no surface has to reconstruct it.
-        "evidenceVerdict": research.evidence_verdict(model["id"], model),
-        "decisionGrade": research.evidence_verdict(model["id"], model)["decisionGrade"],
+        **research.verdict_fields(model["id"], model),
         "warnings": (warnings + [spec["caveat"]] + model.get("limitations", [])
                      + research.verdict_warning(model["id"], model)),
         "inputsUsed": len(values),
@@ -716,7 +734,7 @@ def predict_molecular(request: MolecularPredictionRequest):
         raise HTTPException(422, "Each gene must be finite normalized log1p(CPM) between 0 and 20")
     logit, warnings = research.predict_values(model, values)
     probability = 1 / (1 + math.exp(-max(-700, min(700, logit))))
-    return {"modelId": model["id"], "prediction": "flight" if probability >= .5 else "ground", "probabilityFlight": probability, "calibrated": False, "sourceStudy": model["sourceStudy"], "method": model["method"], "outOfDistribution": bool(warnings), "warnings": warnings + model["limitations"] + research.verdict_warning(model["id"], model), "evidenceVerdict": research.evidence_verdict(model["id"], model), "decisionGrade": research.evidence_verdict(model["id"], model)["decisionGrade"]}
+    return {"modelId": model["id"], "prediction": "flight" if probability >= .5 else "ground", "probabilityFlight": probability, "calibrated": False, "sourceStudy": model["sourceStudy"], "method": model["method"], "outOfDistribution": bool(warnings), "warnings": warnings + model["limitations"] + research.verdict_warning(model["id"], model), **research.verdict_fields(model["id"], model)}
 
 
 # ---------------------------------------------------------------------------
@@ -813,8 +831,7 @@ def predict_microbial_relative(request: MicrobialRelativePredictionRequest):
         # every model that failed an independent check or was never checked independently, and the
         # warning list then carries the measured reason, so a caller cannot receive an
         # experimental estimate without its verdict attached.
-        "evidenceVerdict": research.evidence_verdict(model["id"], model),
-        "decisionGrade": research.evidence_verdict(model["id"], model)["decisionGrade"],
+        **research.verdict_fields(model["id"], model),
     }
     if request.campaignReference is None:
         payload["absoluteScale"]["note"] = (

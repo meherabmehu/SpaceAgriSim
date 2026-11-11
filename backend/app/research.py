@@ -488,6 +488,17 @@ def evidence_verdict(model_id: str, model: dict | None = None) -> dict:
     }
 
 
+def verdict_fields(model_id: str, model: dict | None = None) -> dict:
+    """The two fields every prediction response carries, built from one read of the verdict.
+
+    Phase 35 spelled these out at each call site; two of them computed the block twice inside a
+    single dict literal, and one of those literals also contained a second `warnings` key that
+    Python silently discarded. One helper means the response shape is written once.
+    """
+    verdict = evidence_verdict(model_id, model)
+    return {"evidenceVerdict": verdict, "decisionGrade": verdict["decisionGrade"]}
+
+
 def verdict_warning(model_id: str, model: dict | None = None) -> list[str]:
     """The sentence a prediction response must carry when the model is not decision grade."""
     verdict = evidence_verdict(model_id, model)
