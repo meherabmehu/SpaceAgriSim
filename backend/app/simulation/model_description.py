@@ -92,7 +92,7 @@ def describe_assumptions() -> list[dict]:
         reference_et0_component(),
         {"key": "intensity", "title": "PPFD response (assumed)",
          "formula": "factor = [I/(I+200)] / [300/(300+200)]",
-         "note": "Uncalibrated saturating response. Spectrum is annotation only; DLI = I * hours * 0.0036 mol/m?/day.",
+         "note": "Uncalibrated saturating response. Spectrum is annotation only; DLI = I * hours * 0.0036 mol/m²/day.",
          "constants": {"referencePPFD": 300.0, "halfSaturationPPFD": 200.0}},
         {"key": "temperature", "title": "Temperature response (assumed)",
          "formula": "factor = exp(-((T-22)/12)^2)",

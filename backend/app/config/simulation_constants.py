@@ -202,8 +202,8 @@ PRESET_NOTE = "Preset values are rounded Phase 1 reference points, not measured 
 
 # Extended control ranges. These are exploratory scenario bounds, not agronomic safety limits.
 PARAMETER_RANGES.update({
-    "lightIntensity": {"min": 0, "max": 1000, "step": 10, "default": 300, "unit": "?mol/m?/s"},
-    "temperature": {"min": 5, "max": 40, "step": 0.5, "default": 22, "unit": "?C"},
+    "lightIntensity": {"min": 0, "max": 1000, "step": 10, "default": 300, "unit": "µmol/m²/s"},
+    "temperature": {"min": 5, "max": 40, "step": 0.5, "default": 22, "unit": "°C"},
     "humidity": {"min": 10, "max": 100, "step": 1, "default": 60, "unit": "% RH"},
     # Bounded by what a real loop has demonstrated: the ISS recovers 98 % of the water it brings
     # aboard (93-94 % before the Brine Processor Assembly, 2023). A slider that allowed 100 %

@@ -132,12 +132,12 @@ def combined_growth_factor(
 
 
 def intensity_factor(ppfd: float) -> float:
-    """Assumed saturating PPFD response, normalized at 300 ?mol/m?/s."""
+    """Assumed saturating PPFD response, normalized at 300 µmol/m²/s."""
     return (ppfd / (ppfd + 200.0)) / (300.0 / 500.0) if ppfd > 0 else 0.0
 
 
 def temperature_factor(celsius: float) -> float:
-    """Exploratory Gaussian response at 22 C, width 12 C; not fitted crop physiology."""
+    """Exploratory Gaussian response at 22 °C, width 12 °C; not fitted crop physiology."""
     return math.exp(-((celsius - 22.0) / 12.0) ** 2)
 
 

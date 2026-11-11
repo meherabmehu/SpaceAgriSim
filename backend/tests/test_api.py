@@ -151,6 +151,21 @@ def test_comparison_includes_impact_breakdown(client):
     assert dry["cropYield"] == 0.0
 
 
+def test_config_units_keep_their_symbols(client):
+    """`GET /api/config` publishes the unit of every control and the advisor renders it verbatim.
+
+    `services/insights.js` builds its "what changed" lines as `f"{value} {unit}"` from this
+    payload, so a mangled unit is a mangled user-facing label, not just an API detail. A non-UTF-8
+    round trip had turned `µmol/m²/s` into `?mol/m?/s` and `°C` into `?C`.
+    """
+    parameters = client.get("/api/config").json()["parameters"]
+    assert parameters["lightIntensity"]["unit"] == "\u00b5mol/m\u00b2/s"
+    assert parameters["temperature"]["unit"] == "\u00b0C"
+    for name, spec in parameters.items():
+        unit = spec.get("unit", "")
+        assert "?" not in unit, f"{name} lost its unit symbols: {unit!r}"
+
+
 def test_config_describes_the_model_assumptions(client):
     body = client.get("/api/config").json()
     keys = [a["key"] for a in body["assumptions"]]

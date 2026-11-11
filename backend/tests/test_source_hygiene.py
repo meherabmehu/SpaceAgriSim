@@ -79,3 +79,63 @@ def test_the_file_that_was_fixed_stays_fixed():
     path = APP / "workflows" / "units.py"
     assert path.exists()
     assert _duplicate_literal_keys(path) == []
+
+
+# ---------------------------------------------------------------------------------------------------
+# Lost Unicode symbols.
+#
+# `GET /api/config` publishes the unit for every control, and `services/insights.js` renders that
+# unit verbatim in the advisor's "what changed" list. A non-UTF-8 round trip through an editor had
+# replaced `µ`, `²` and `°` with `?`, so the API served `?mol/m?/s` and `?C`, and the same loss hit
+# the docstrings in `simulation/factors.py` and `simulation/model_description.py` plus
+# `docs/SIMULATION_METHODOLOGY.md`. Nothing failed: `?` is a perfectly valid character. The runtime
+# assertion below pins the served values; the source scan stops the mangling coming back in the
+# prose that documents them.
+# ---------------------------------------------------------------------------------------------------
+
+# A question mark welded to a token that should carry a symbol. Deliberately narrow so that a
+# genuine interrogative (`... OSD-46?`), a JS ternary (`match ? a : b`) and a URL query
+# (`...pdf?attachment=true`) do not match.
+_LOST_SYMBOL = __import__("re").compile(
+    r"\?mol"                      # ?mol/m?/s          ->  µmol/m²/s
+    r"|\bm\?(?=[/\s.,)]|$)"      # mol/m?/day, area in m?,  ->  m²
+    r"|\d\?C\b|\"\?C\""          # 22?C, "unit": "?C"      ->  °C
+    r"|[A-Za-z]\?(?=[A-Z][a-z])"   # Penman?Monteith        ->  Penman–Monteith
+)
+_DOCS = APP.parent.parent / "docs"
+
+
+def _mangled(paths: list[Path]) -> list[str]:
+    offenders: list[str] = []
+    for path in paths:
+        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            if _LOST_SYMBOL.search(line):
+                offenders.append(f"{path}:{number}: {line.strip()[:120]}")
+    return offenders
+
+
+def test_the_lost_symbol_scan_is_not_vacuous():
+    for damaged in (
+        "PPFD in ?mol/m?/s",
+        "0.0036 mol/m?/day",
+        "cultivated area in m?,",
+        "relative to 22?C/60% RH",
+        '{"unit": "?C"}',
+        "the full Penman?Monteith model",
+    ):
+        assert _LOST_SYMBOL.search(damaged) is not None, damaged
+    for intact in (
+        "Is OSD-320 an independent replication of OSD-46?",
+        "return match ? match[0] : 'vendor'",
+        ".../report.pdf?attachment=true",
+        "PPFD in µmol/m²/s at 22 °C",
+    ):
+        assert _LOST_SYMBOL.search(intact) is None, intact
+
+
+def test_no_source_or_document_has_lost_its_unit_symbols():
+    sources = _python_sources() + sorted(_DOCS.glob("*.md"))
+    assert _mangled(sources) == [], (
+        "a unit symbol was replaced by a question mark; restore µ, ², ° or the operator "
+        "rather than shipping the mangled text:\n" + "\n".join(_mangled(sources))
+    )
