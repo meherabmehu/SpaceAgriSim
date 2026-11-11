@@ -269,3 +269,39 @@ def test_health_reports_that_no_external_model_is_configured():
     body = client.get("/api/assistant/health").json()
     assert body["externalModelConfigured"] is False
     assert body["mode"] == "deterministic-extractive"
+
+
+def test_http_provider_refuses_a_non_http_endpoint():
+    """The endpoint is configuration, but it is still a URL handed to urllib.
+
+    Without this check a mistyped `SPACEAGRISIM_LLM_ENDPOINT` - a bare path, or `file:///etc/passwd`
+    - reaches `urllib.request.urlopen`, which happily opens it, and the response body is then read
+    as a chat completion. The guard is asserted through `complete()` (the public entry point) so it
+    holds for every caller, and it asserts the network was never touched.
+    """
+    touched = []
+
+    def transport(payload, headers):
+        touched.append(payload)
+        return "unreachable"
+
+    for endpoint in ("/etc/passwd", "file:///etc/passwd", "ftp://example.invalid/x", ""):
+        config = llm.LLMConfig(provider="http", model="m", endpoint=endpoint)
+        provider = llm.HttpProvider(config, transport=transport)
+        with pytest.raises(llm.LLMUnavailable):
+            provider.complete(system="s", prompt="p", max_tokens=8)
+    assert touched == []
+
+
+def test_http_provider_accepts_https_and_http():
+    seen = []
+
+    def transport(payload, headers):
+        seen.append(payload["model"])
+        return "ok"
+
+    for endpoint in ("https://example.invalid/v1", "http://127.0.0.1:9999/v1"):
+        provider = llm.HttpProvider(
+            llm.LLMConfig(provider="http", model="m", endpoint=endpoint), transport=transport)
+        assert provider.complete(system="s", prompt="p", max_tokens=8) == "ok"
+    assert seen == ["m", "m"]

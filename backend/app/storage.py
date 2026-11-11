@@ -477,7 +477,9 @@ def storage_durability() -> dict:
                 "reason": "Rows live in a PostgreSQL database that outlives the application process.",
                 "remedy": ""}
     path = url.removeprefix("sqlite:///")
-    volatile = path == ":memory:" or path.startswith("/tmp") or path.startswith("/var/tmp")
+    # Not a temp-file creation: this is a string comparison against the configured database URL,
+    # used to tell the operator whether their data will survive a redeploy.
+    volatile = path == ":memory:" or path.startswith("/tmp") or path.startswith("/var/tmp")  # nosec B108
     if volatile:
         return {"dialect": dialect, "durable": False,
                 "reason": "SQLite file lives under /tmp, which a serverless platform discards",
@@ -717,7 +719,10 @@ def find_user_by_email(email: str):
 
 
 def create_user(email: str, password_hash: str):
-    row = {"id": str(uuid4()), "email": email, "password_hash": password_hash,
+    # Bandit's B105 matches the *column name* `password_hash`; the value stored is whatever hash the
+    # caller produced, never a literal. Marked on the reported line so the marker and the finding
+    # are in the same place.
+    row = {"id": str(uuid4()), "email": email, "password_hash": password_hash,  # nosec B105
            "created_at": datetime.now(timezone.utc).isoformat(), "disabled": False,
            "email_verified": False, "password_changed_at": None}
     with database().begin() as connection:

@@ -248,7 +248,9 @@ def _values(trait: str, regime: str, day: int | None = None,
 def _bootstrap_ci(values: list[float], resamples: int = BOOTSTRAP_RESAMPLES) -> tuple[float, float]:
     if len(values) < 3:
         return (float("nan"), float("nan"))
-    generator = random.Random(BOOTSTRAP_SEED + len(values))
+    # Seeded Mersenne Twister for a percentile bootstrap. Determinism is the requirement here (the
+    # interval must be a function of the data, not of when it ran), and nothing secret is drawn.
+    generator = random.Random(BOOTSTRAP_SEED + len(values))  # nosec B311
     means = [statistics.fmean(generator.choices(values, k=len(values))) for _ in range(resamples)]
     means.sort()
     return (means[int(0.025 * resamples)], means[int(0.975 * resamples)])
@@ -258,7 +260,8 @@ def _bootstrap_difference(a: list[float], b: list[float],
                           resamples: int = BOOTSTRAP_RESAMPLES) -> tuple[float, float]:
     if len(a) < 3 or len(b) < 3:
         return (float("nan"), float("nan"))
-    generator = random.Random(BOOTSTRAP_SEED + len(a) * 7 + len(b))
+    # Same seeded, non-cryptographic generator as `_bootstrap_ci`.
+    generator = random.Random(BOOTSTRAP_SEED + len(a) * 7 + len(b))  # nosec B311
     differences = []
     for _ in range(resamples):
         differences.append(statistics.fmean(generator.choices(b, k=len(b)))

@@ -45,6 +45,7 @@ import os
 import re
 import threading
 import urllib.error
+import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
 from typing import Protocol
@@ -219,20 +220,44 @@ class HttpProvider:
         # Injectable for tests; the default is the real network call.
         self._transport = transport or self._post
 
+    # The endpoint is operator configuration, not user input, but an unvalidated URL handed to
+    # urllib still reaches file:, ftp: and any other scheme urlopen knows. A typo that turns a
+    # missing "https://" into a local path would otherwise read from the host filesystem and paste
+    # the result into a model prompt. Only http(s) is allowed, and the check is here so it holds for
+    # every caller rather than at one call site.
+    ALLOWED_SCHEMES = ("http", "https")
+
+    def _validated_endpoint(self) -> str:
+        endpoint = (self._config.endpoint or "").strip()
+        scheme = urllib.parse.urlsplit(endpoint).scheme.lower()
+        if scheme not in self.ALLOWED_SCHEMES:
+            raise LLMUnavailable(
+                f"LLM endpoint scheme {scheme or '<none>'!r} is not allowed; "
+                "configure an http:// or https:// endpoint"
+            )
+        return endpoint
+
     def _post(self, payload: dict, headers: dict) -> str:
         request = urllib.request.Request(
-            self._config.endpoint,
+            self._validated_endpoint(),
             data=json.dumps(payload).encode("utf-8"),
             headers=headers,
             method="POST",
         )
-        with urllib.request.urlopen(request, timeout=self._config.timeout_seconds) as response:
+        # `_validated_endpoint()` above refuses anything that is not http/https and is asserted by
+        # test_http_provider_refuses_a_non_http_endpoint, so the scheme bandit asks about is already
+        # checked on the line that builds the request.
+        with urllib.request.urlopen(request, timeout=self._config.timeout_seconds) as response:  # nosec B310
             body = json.loads(response.read().decode("utf-8"))
         return ((body.get("choices") or [{}])[0].get("message") or {}).get("content") or ""
 
     def complete(self, *, system: str, prompt: str, max_tokens: int) -> str:
         if not self._config.endpoint or not self._config.model:
             raise LLMUnavailable("endpoint or model not configured")
+        # Validated here as well as in `_post`, because a test or a host may inject a transport and
+        # never reach `_post`: the refusal has to belong to the public entry point, not to one
+        # implementation of the network call.
+        self._validated_endpoint()
         headers = {"Content-Type": "application/json"}
         if self._config.api_key:
             headers["Authorization"] = f"Bearer {self._config.api_key}"
