@@ -35,7 +35,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 const CHAMBER = { w: 6.4, h: 2.9, d: 4.2 }
 const TRAY_Y = -0.85
-const VIEW = { width: 560, height: 320, scale: 42, cx: 280, cy: 196 }
+const VIEW = { width: 560, height: 360, scale: 48, cx: 280, cy: 166 }
 const HOME_VIEW = { azimuth: -34, elevation: 24, zoom: 1 }
 
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value))
@@ -316,8 +316,13 @@ export default function GrowthChamberView({ state, reduced = false, paused = fal
               )}
               {plant.leaves.map((shape) => (
                 <ellipse key={shape.key} cx={shape.cx} cy={shape.cy} rx={shape.rx} ry={shape.ry}
-                  transform={`rotate(${shape.angle} ${shape.cx} ${shape.cy})`} fill={leaf} opacity={shape.opacity} />
+                  transform={`rotate(${shape.angle} ${shape.cx} ${shape.cy})`}
+                  fill={mix(leaf, '#0a1424', shape.shade)} opacity={shape.opacity} />
               ))}
+              {plant.core && (
+                <ellipse cx={plant.core.cx} cy={plant.core.cy} rx={plant.core.rx} ry={plant.core.ry}
+                  fill={mix(leaf, '#d6f5c0', 0.45)} opacity="0.9" />
+              )}
               {plant.fruit && plant.fruit.map((dot) => (
                 <circle key={dot.key} cx={dot.cx} cy={dot.cy} r={dot.r} fill={ARCHETYPES[state.crop]?.fruit ?? '#d9534f'} />
               ))}
@@ -334,24 +339,30 @@ export default function GrowthChamberView({ state, reduced = false, paused = fal
             <line key={`branch-${index}`} x1={branch[0]} y1={branch[1]} x2={branch[2]} y2={branch[3]}
               stroke={waterColor} strokeWidth="1.4" opacity={0.4 + state.waterSupply * 0.5} />
           ))}
-          <line id="twin-water-line" x1={geometry.water.main[0]} y1={geometry.water.main[1]}
+          <line x1={geometry.water.main[0]} y1={geometry.water.main[1]}
             x2={geometry.water.main[2]} y2={geometry.water.main[3]}
             stroke={waterColor} strokeWidth="2.6" strokeLinecap="round" opacity={0.35 + state.waterSupply * 0.6} />
-          <polygon points={points(geometry.water.reservoir)} fill="#13203a" stroke={FRAME_DIM} strokeWidth="0.8" />
-          <polygon points={points(geometry.water.reservoirFill)} fill={waterColor} opacity="0.75" />
+          {/*
+            One droplet travelling along the supply line. The line is straight, so animating cx/cy
+            is enough and avoids <animateMotion><mpath>, which needs an id reference and silently
+            parks the droplet in the corner when the reference is not resolved.
+          */}
           {state.waterSupply > 0.02 && (
-            <circle r="2.4" fill={waterColor}>
-              {animate ? (
-                <animateMotion dur={`${(2.6 - state.waterSupply * 1.5).toFixed(2)}s`} repeatCount="indefinite">
-                  <mpath href="#twin-water-line" />
-                </animateMotion>
-              ) : (
-                <animateMotion dur="0s" fill="freeze">
-                  <mpath href="#twin-water-line" />
-                </animateMotion>
-              )}
+            <circle r="2.4" fill={waterColor} opacity={animate ? 1 : 0.85}>
+              <animate attributeName="cx"
+                values={`${geometry.water.main[0]};${geometry.water.main[2]}`}
+                dur={`${(2.6 - state.waterSupply * 1.5).toFixed(2)}s`} repeatCount="indefinite" />
+              <animate attributeName="cy"
+                values={`${geometry.water.main[1]};${geometry.water.main[3]}`}
+                dur={`${(2.6 - state.waterSupply * 1.5).toFixed(2)}s`} repeatCount="indefinite" />
             </circle>
           )}
+          {/* reservoir: shell, then the water line inside it, then the open rim */}
+          <polygon points={points(geometry.water.reservoir.shell.side)} fill="#101a2c" stroke={FRAME_DIM} strokeWidth="0.8" />
+          <polygon points={points(geometry.water.reservoir.shell.front)} fill="#16233a" stroke={FRAME_DIM} strokeWidth="0.8" />
+          <polygon points={points(geometry.water.reservoirFill.front)} fill={waterColor} opacity="0.85" />
+          <polygon points={points(geometry.water.reservoirFill.side)} fill={waterColor} opacity="0.6" />
+          <polygon points={points(geometry.water.reservoir.lid)} fill="#0b1526" stroke={FRAME_DIM} strokeWidth="0.8" />
         </g>
 
         {/* selection outline: which system the legend is describing */}
@@ -376,7 +387,7 @@ export default function GrowthChamberView({ state, reduced = false, paused = fal
             className="border-l border-line-strong px-2 py-0.5 font-mono text-[13px] tracking-wider text-slate-300 hover:bg-space-800 hover:text-accent">RESET</button>
         </span>
       </div>
-      <p className="pointer-events-none absolute bottom-2 right-3 font-mono text-[13px] tracking-wider text-slate-500">
+      <p className="pointer-events-none absolute bottom-2 right-3 hidden font-mono text-[13px] tracking-wider text-slate-500 sm:block">
         DRAG TO ORBIT · SCROLL TO ZOOM
       </p>
     </div>
@@ -532,7 +543,7 @@ function buildGeometry(state, project) {
               drawn += 1
               if (slot >= visibleLeaves) continue
               const angle = (i / ring.n) * 360 + ringIndex * 26 + noise(r * 11 + c * 17 + slot) * 18
-              const radius = ring.len * s * 15 * (0.86 + noise(slot + r * 3) * 0.28)
+              const radius = ring.len * s * 12 * (0.86 + noise(slot + r * 3) * 0.28)
               const tilt = clamp(1 - droop * 0.7 - ringIndex * 0.12, 0.25, 1)
               const rad = (angle * Math.PI) / 180
               leaves.push({
@@ -543,11 +554,12 @@ function buildGeometry(state, project) {
                 ry: Math.max(1.4, radius * 0.3 * tilt),
                 angle: Math.sin(rad) * 26,
                 opacity: 0.82 + noise(slot) * 0.18,
+                shade: ringIndex === 0 ? 0.3 : ringIndex === 1 ? 0.14 : 0.02,
               })
             }
           })
         } else {
-          const stemPx = 26 * s * archetype.stem
+          const stemPx = 22 * s * archetype.stem
           for (let tier = 0; tier < archetype.tiers; tier += 1) {
             const tierY = by - (stemPx * (0.3 + (0.7 * tier) / (archetype.tiers - 1)))
             for (let i = 0; i < archetype.leafletsPerTier; i += 1) {
@@ -556,7 +568,7 @@ function buildGeometry(state, project) {
               if (slot >= visibleLeaves) continue
               const angle = (i / archetype.leafletsPerTier) * 360 + tier * 46
               const rad = (angle * Math.PI) / 180
-              const len = 11 * s * (1 - tier * 0.1)
+              const len = 9.5 * s * (1 - tier * 0.1)
               leaves.push({
                 key: `${key}-${slot}`,
                 cx: bx + Math.cos(rad) * len * 0.5,
@@ -565,6 +577,7 @@ function buildGeometry(state, project) {
                 ry: Math.max(1.2, len * 0.26),
                 angle: Math.sin(rad) * 30,
                 opacity: 0.85,
+                shade: 0.1 + (tier % 2) * 0.12,
               })
             }
           }
@@ -577,19 +590,22 @@ function buildGeometry(state, project) {
           x: bx,
           y: by,
           visible: true,
-          stem: archetype.kind === 'vine' ? 26 * s * archetype.stem : 3 * s,
+          stem: archetype.kind === 'vine' ? 22 * s * archetype.stem : 3 * s,
           stemWidth: archetype.kind === 'vine' ? Math.max(1, 2.2 * s) : 1.2,
           leaves,
           fruit: fruitVisible
             ? [0, 1].map((n) => ({
                 key: `${key}-fruit-${n}`,
                 cx: bx + (n === 0 ? 4 : -3.5) * s,
-                cy: by - 26 * s * archetype.stem * (n === 0 ? 0.55 : 0.72),
+                cy: by - 22 * s * archetype.stem * (n === 0 ? 0.55 : 0.72),
                 r: 2.4 * s,
               }))
             : null,
           bulb: bulbVisible
             ? { cx: bx, cy: by + 1.5, rx: 4.6 * s, ry: 3.1 * s }
+            : null,
+          core: archetype.kind === 'rosette'
+            ? { cx: bx, cy: by - 3.5 * s, rx: 3.6 * s, ry: 2.2 * s }
             : null,
         })
       }
@@ -605,23 +621,25 @@ function buildGeometry(state, project) {
     const [bx, by] = project((w - 1.4) / 2, lineY, z)
     return [mx2, my2, bx, by]
   })
-  const reservoirWidth = 0.3
-  const reservoirDepth = 0.3
-  const reservoirX = -(w - 1.0) / 2
-  const reservoirZ = half.d - 0.35
-  const reservoir = [
-    [reservoirX - reservoirWidth, 0, reservoirZ - reservoirDepth],
-    [reservoirX, 0, reservoirZ - reservoirDepth],
-    [reservoirX, 0, reservoirZ + reservoirDepth],
-    [reservoirX - reservoirWidth, 0, reservoirZ + reservoirDepth],
-  ].map(([px, , pz]) => { const [sx, sy] = project(px, lineY - 0.25, pz); return [sx, sy] })
-  const fillHeight = 0.5 * clamp(state.waterSupply, 0.02, 1)
-  const reservoirFill = [
-    [reservoirX - reservoirWidth, 0, reservoirZ - reservoirDepth],
-    [reservoirX, 0, reservoirZ - reservoirDepth],
-    [reservoirX, 0, reservoirZ + reservoirDepth],
-    [reservoirX - reservoirWidth, 0, reservoirZ + reservoirDepth],
-  ].map(([px, , pz]) => { const [sx, sy] = project(px, lineY - 0.25 - 0.5 + fillHeight, pz); return [sx, sy] })
+  // Water reservoir: a small tank standing on the near-left deck, drawn as a real box so its fill
+  // level is legible instead of a flat sliver.
+  const tank = { x: half.w - 0.5, z: half.d - 0.5, hw: 0.26, hd: 0.26, base: -half.h + 0.02, tall: 0.8 }
+  const quad = (corners) => corners.map(([px, py, pz]) => { const [sx, sy] = project(tank.x + px, py, tank.z + pz); return [sx, sy] })
+  const { hw, hd } = tank
+  const tankFace = (yBottom, yTop) => ({
+    // visible sides of the box from this camera: the +z face and the +x face
+    front: quad([[-hw, yTop, hd], [hw, yTop, hd], [hw, yBottom, hd], [-hw, yBottom, hd]]),
+    side: quad([[hw, yTop, hd], [hw, yTop, -hd], [hw, yBottom, -hd], [hw, yBottom, hd]]),
+  })
+  const tankTopY = tank.base + tank.tall
+  const reservoir = {
+    ...tank,
+    top: tankFace(tankTopY, tankTopY),
+    shell: tankFace(tank.base, tankTopY),
+    lid: quad([[-hw, tankTopY, -hd], [hw, tankTopY, -hd], [hw, tankTopY, hd], [-hw, tankTopY, hd]]),
+  }
+  const fillFraction = clamp(state.waterSupply, 0.06, 1)
+  const reservoirFill = tankFace(tank.base, tank.base + tank.tall * fillFraction)
 
   // --------------------------------------------------------------- sensors
   const sensors = [
@@ -634,12 +652,12 @@ function buildGeometry(state, project) {
   const strip = (key, x, level, color, warning) => {
     const segments = 6
     const lit = Math.round(clamp(level, 0, 1) * segments)
-    const plateHalfW = 0.11
-    const plateHalfH = (0.14 * segments + 0.1) / 2
+    const plateHalfW = 0.13
+    const plateHalfH = (0.15 * segments + 0.12) / 2
     const plate = [
       [-plateHalfW, plateHalfH, 0], [plateHalfW, plateHalfH, 0],
       [plateHalfW, -plateHalfH, 0], [-plateHalfW, -plateHalfH, 0],
-    ].map(([px, py, pz]) => { const [sx, sy] = project(x + px, 0.35 + py, -half.d + 0.12 + pz); return [sx, sy] })
+    ].map(([px, py, pz]) => { const [sx, sy] = project(x + px, 0.2 + py, -half.d + 0.1 + pz); return [sx, sy] })
     const litColor = warning ? '#f0b13a' : color
     return {
       key,
@@ -649,7 +667,7 @@ function buildGeometry(state, project) {
         const poly = [
           [-0.07, y - 0.045, 0.01], [0.07, y - 0.045, 0.01],
           [0.07, y + 0.045, 0.01], [-0.07, y + 0.045, 0.01],
-        ].map(([px, py, pz]) => { const [sx, sy] = project(x + px, 0.35 + py, -half.d + 0.12 + pz); return [sx, sy] })
+        ].map(([px, py, pz]) => { const [sx, sy] = project(x + px, 0.2 + py, -half.d + 0.1 + pz); return [sx, sy] })
         return { index, on: index < lit, color: litColor, poly }
       }),
     }
@@ -664,7 +682,7 @@ function buildGeometry(state, project) {
   const highlights = {
     crops: trays.map((tray) => tray.top),
     lighting: lightBars.map((bar) => bar.chassis),
-    water: [reservoir, beamFloor],
+    water: [reservoir.shell.front, reservoir.shell.side, beamFloor],
     sensors: [],
   }
 

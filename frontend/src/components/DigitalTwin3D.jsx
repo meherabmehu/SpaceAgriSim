@@ -148,7 +148,7 @@ export default function DigitalTwin3D({ result }) {
             </div>
           )}
           {state && (
-            <p className="pointer-events-none absolute bottom-8 right-3 font-mono text-[13px] tracking-wider text-slate-500">
+            <p className="pointer-events-none absolute bottom-2 right-3 hidden max-w-[60%] text-right font-mono text-[13px] leading-tight tracking-wider text-slate-500 sm:bottom-9 sm:block">
               VISUALIZATION DRIVEN BY SIMULATION OUTPUTS
             </p>
           )}
@@ -197,6 +197,11 @@ export default function DigitalTwin3D({ result }) {
             </p>
           )}
         </aside>
+        {state && (
+          <p className="border-t border-line px-3 py-1 font-mono text-[12px] tracking-wider text-slate-500 sm:hidden">
+            VISUALIZATION DRIVEN BY SIMULATION OUTPUTS
+          </p>
+        )}
       </div>
     </Panel>
   )

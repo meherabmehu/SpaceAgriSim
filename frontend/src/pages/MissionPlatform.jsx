@@ -45,8 +45,10 @@ const GrowthPlot = lazy(() =>
   import("../charts/GrowthPlot.jsx").then((module) => ({ default: module.GrowthPlot })),
 );
 
-// Keep the greenhouse controls, its WebGL feature check, and Three.js out of
-// the mission shell until a researcher actually opens the greenhouse route.
+// Keep the growth chamber view out of the mission shell until a researcher
+// actually opens its route. Since Phase 33 it is plain SVG rather than a
+// three.js scene, so this split is now only about first paint, not about a
+// heavy library.
 const DigitalTwin3D = lazy(() => import("../components/DigitalTwin3D.jsx"));
 
 const NAV = [
@@ -56,7 +58,7 @@ const NAV = [
   ["workflow", "Scientific workflow", Workflow],
   ["workflows", "Guided workflows", Waypoints],
   ["assistant", "Research assistant", MessageSquare],
-  ["greenhouse", "3D greenhouse", Box],
+  ["greenhouse", "Growth chamber", Box],
   ["comparison", "World comparison", Globe2],
   ["crops", "Crop intelligence", Sprout],
   ["datasets", "NASA data explorer", Database],

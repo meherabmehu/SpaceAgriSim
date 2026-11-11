@@ -11,7 +11,7 @@ SpaceAgriSim is an evidence-aware workspace for exploring controlled-environment
 - A verified NASA OSDR inventory (25 NASA OSDR study records served: the 24-study provenance manifest plus the EDEN ISS analogue reviewed separately; 28 acquired files with checksums), provenance and data-quality views.
 - Offline-only model training and versioned artifacts. The application never trains a model from a browser request.
 - An Earth-only lettuce fresh-mass model trained on licensed WUR/4TU data, explicitly kept separate from NASA and spaceflight evidence.
-- A WebGL greenhouse with a usable 2D fallback, keyboard-accessible controls and responsive layouts.
+- An interactive SVG growth chamber (orbit, zoom, per-system inspection) with a 2D schematic fallback, keyboard-accessible controls and responsive layouts. It is drawn with plain SVG, so no WebGL or 3D library ships in the bundle.
 
 ## Evidence boundaries
 

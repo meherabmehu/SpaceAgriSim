@@ -4,7 +4,7 @@
 
 - Scientific-data acquisition, file checksums, preprocessing, model registries and offline training artifacts.
 - FastAPI scientific endpoints, simulation extensions, validated request models, reporting, scenario history and optimizer endpoints.
-- Responsive mission-control experience, research explorer, analysis/advisor views, comparison views, 3D greenhouse and accessible fallbacks.
+- Responsive mission-control experience, research explorer, analysis/advisor views, comparison views, interactive growth chamber (SVG, since Phase 33) and accessible fallbacks.
 - Docker/Compose, CI checks, Vercel multi-service configuration and runtime scientific-data packaging.
 - Documentation of architecture, API, provenance, methodology, gaps, evaluation, limitations and verification.
 

@@ -6,7 +6,7 @@ SpaceAgriSim retains the original Vite/React frontend and Python FastAPI scienti
 
 | Layer | Responsibility |
 | --- | --- |
-| `frontend/src` | Mission controls, charts, greenhouse, evidence browsing and API interactions |
+| `frontend/src` | Mission controls, charts, the SVG growth chamber, evidence browsing and API interactions |
 | `backend/app/models` | Pydantic input constraints and response contracts |
 | `backend/app/routes` | Simulation, mission services and research HTTP APIs |
 | `backend/app/simulation` | Framework-independent growth, environment, water, gas and comparison calculations |
