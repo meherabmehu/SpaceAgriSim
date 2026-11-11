@@ -8,16 +8,17 @@
  * (`vendor-charts -> vendor -> vendor-charts`) caused by a catch-all `vendor` bucket in the manual
  * chunk logic. The other is "some chunks are larger than 500 kB", and it cannot be fixed by
  * configuration: three.js is ~800 kB minified even when a module imports only
- * `{ WebGLRenderer, Scene }` (measured, see docs/PHASE32_FRONTEND_BUNDLE.md), so while the digital
- * twin is a three.js scene there is no chunking that brings it under the limit.
+ * `{ WebGLRenderer, Scene }` (measured, see docs/PHASE32_FRONTEND_BUNDLE.md). Phase 33 removed
+ * three.js and rebuilt the growth chamber in plain SVG, so that warning is gone at the source
+ * rather than hidden.
  *
- * Raising `build.chunkSizeWarningLimit` would hide it and changing nothing; leaving it as a
- * warning with no check is how a 900 kB chunk ends up on the critical path later. So this script
- * asserts the property that actually matters:
+ * Raising `build.chunkSizeWarningLimit` would hide it and change nothing; leaving an oversized
+ * chunk as an unfixed warning is how a 900 kB chunk ends up on the critical path later. So this
+ * script asserts the properties that actually matter:
  *
  *   1. no circular chunk in the built graph;
- *   2. every chunk above the budget is reached ONLY through a dynamic import, i.e. it is not
- *      downloaded on first paint of any route;
+ *   2. NO chunk anywhere in the bundle is above the size budget - not merely absent from the
+ *      initial path (Phase 33 tightened this from a note into a failure);
  *   3. the initial request (index.html + everything it statically imports) stays inside a small
  *      budget, so a regression in code-splitting fails here rather than in a user's browser.
  *
@@ -32,7 +33,11 @@ const DIST = join(ROOT, 'dist')
 const ASSETS = join(DIST, 'assets')
 
 const BIG_CHUNK_BUDGET = 500 * 1024 // the size Vite itself warns about
-const INITIAL_BUDGET = 260 * 1024 // index.html + its static import graph, minified
+// index.html + its static import graph, minified. Phase 32 measured 240 kB and the budget was
+// padded to 260 kB while three.js was still shipped lazily; Phase 33 removed the last oversized
+// library, so the budget now states the 240 kB target Phase 32 left behind.
+// 240 * 1024 = 245760 bytes.
+const INITIAL_BUDGET = 240 * 1024
 
 const failures = []
 const files = readdirSync(ASSETS).filter((name) => name.endsWith('.js'))
@@ -70,27 +75,16 @@ while (queue.length) {
 }
 const initialBytes = [...initial].reduce((total, file) => total + size(file), 0)
 
-// ------------------------------------------------------------------ 2. reachability of big chunks
-const reachable = new Set()
-const walk = [...entry]
-while (walk.length) {
-  const current = walk.shift()
-  if (reachable.has(current)) continue
-  reachable.add(current)
-  const { staticTargets, dynamicTargets } = importsOf(current)
-  for (const target of [...staticTargets, ...dynamicTargets]) {
-    if (!reachable.has(target)) walk.push(target)
-  }
-}
-
+// ------------------------------------------------------------------ 2. oversized chunks
 const big = files.filter((file) => size(file) > BIG_CHUNK_BUDGET).sort((a, b) => size(b) - size(a))
 for (const file of big) {
-  if (initial.has(file)) {
-    failures.push(
-      `${file} (${(size(file) / 1024).toFixed(0)} kB) is above the ${BIG_CHUNK_BUDGET / 1024} kB ` +
-      'budget and is statically imported by the entry, so every route downloads it',
-    )
-  }
+  failures.push(
+    `${file} (${(size(file) / 1024).toFixed(0)} kB) is above the ${BIG_CHUNK_BUDGET / 1024} kB ` +
+    'budget' +
+    (initial.has(file)
+      ? ' and is statically imported by the entry, so every route downloads it'
+      : '; being lazy is not an excuse, the bundle is supposed to contain no oversized chunk'),
+  )
 }
 
 // ------------------------------------------------------------------ 3. cycles
@@ -137,15 +131,9 @@ if (initialBytes > INITIAL_BUDGET) {
   )
 }
 
-if (big.length) {
-  console.log(`  note: ${big.length} chunk(s) exceed ${BIG_CHUNK_BUDGET / 1024} kB ` +
-    `(${big.map((file) => `${file} ${(size(file) / 1024).toFixed(0)} kB`).join(', ')}); ` +
-    'all are lazy-loaded, which is the property checked here')
-}
-
 if (failures.length) {
   console.error('\nbundle check FAILED:')
   for (const failure of failures) console.error(`  - ${failure}`)
   process.exit(1)
 }
-console.log('bundle check passed: no cycles, no oversized chunk on the initial path')
+console.log('bundle check passed: no cycles, no oversized chunk anywhere, initial request within budget')

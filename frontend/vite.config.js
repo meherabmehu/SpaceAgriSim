@@ -3,20 +3,16 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 // Long-lived dependencies get their own chunks so a deploy that only touches application code
-// leaves the browser's cached copy of React, the icon set and three.js untouched.
+// leaves the browser's cached copy of React and the icon set untouched.
 //
 // Only *named* groups are chunked. The previous catch-all `vendor` bucket created a dependency
 // cycle (vendor-charts -> vendor -> vendor-charts) and merged unrelated packages into one module.
 //
-// On the remaining size warning: three.js is ~800 kB minified even when a module imports only
-// {WebGLRenderer, Scene}, so no bundling choice below 500 kB exists while the 3D twin is a
-// three.js scene. The guarantee this project enforces instead is that no oversized chunk is on
-// the initial route - `npm run build:check` fails if one is statically reachable from the entry.
+// Phase 33: the growth chamber stopped being a three.js scene, so the vendor-three and vendor-r3f
+// groups are gone along with the libraries. Nothing in the app now ships a chunk above Vite's
+// 500 kB warning threshold; `npm run build:check` still fails if an oversized chunk becomes
+// statically reachable from the entry, or if the initial request grows past its budget.
 const VENDOR_GROUPS = [
-  // three.js and the React renderer for it are separate chunks: a scene change should not
-  // invalidate the 700 kB library, and the library should not be re-downloaded for a scene edit.
-  ['vendor-three', ['three']],
-  ['vendor-r3f', ['@react-three/fiber', '@react-three/drei']],
   ['vendor-react', ['react', 'react-dom', 'scheduler']],
   ['vendor-icons', ['lucide-react']],
   // Charts are only needed once a research view is opened, so they stay out of the first paint.

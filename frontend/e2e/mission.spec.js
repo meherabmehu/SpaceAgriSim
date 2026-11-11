@@ -151,6 +151,68 @@ test("deterministic advisor, constrained optimization, exports and fallback", as
     page.getByRole("status").filter({ hasText: /Supplied.*recovered/ }),
   ).toBeVisible();
 });
+// Phase 33 replaced the three.js chamber with a plain-SVG chamber view. This covers the
+// interactions the 3D scene provided: orbit, zoom, reset, keyboard, system inspection and the
+// chamber/schematic switch. The existing 2D-schematic assertions above still apply.
+test("growth chamber view orbits, zooms, resets and inspects systems", async ({
+  page,
+}) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await ready(page, "greenhouse");
+  const toggle = page.getByRole("switch");
+  const chamber = page.getByRole("img", {
+    name: "Isometric view of the growth chamber",
+  });
+  // a stored preference can leave the panel in schematic mode
+  if ((await toggle.getAttribute("aria-checked")) !== "true")
+    await toggle.click();
+  await expect(chamber).toBeVisible();
+
+  // the projection is a pure function of azimuth/elevation/zoom, so a changed frame geometry
+  // proves the view actually moved rather than only re-rendering
+  const frame = chamber.locator("polygon").first();
+  const home = await frame.getAttribute("points");
+  expect(home).toBeTruthy();
+
+  await page.getByRole("button", { name: "Rotate view right" }).click();
+  await expect.poll(() => frame.getAttribute("points")).not.toBe(home);
+
+  const orbited = await frame.getAttribute("points");
+  await page.getByRole("button", { name: "Zoom in" }).click();
+  await expect.poll(() => frame.getAttribute("points")).not.toBe(orbited);
+
+  await page.getByRole("button", { name: "Reset view" }).click();
+  await expect.poll(() => frame.getAttribute("points")).toBe(home);
+
+  // keyboard orbit: the svg is focusable and implements arrow keys
+  await chamber.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect.poll(() => frame.getAttribute("points")).not.toBe(home);
+  await page.keyboard.press("Home");
+  await expect.poll(() => frame.getAttribute("points")).toBe(home);
+
+  // inspecting a system swaps the legend text; these are the configured setpoints, not sensors
+  await page.getByRole("button", { name: "lighting", exact: true }).click();
+  await expect(
+    page.getByRole("status").filter({ hasText: /PPFD \d+ µmol\/m²\/s/ }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "sensors", exact: true }).click();
+  await expect(
+    page
+      .getByRole("status")
+      .filter({ hasText: /configured setpoints, not sensor measurements/ }),
+  ).toBeVisible();
+
+  // switching to the schematic and back keeps both views working
+  await toggle.click();
+  await expect(
+    page.getByRole("img", { name: "Schematic of the growth chamber" }),
+  ).toBeVisible();
+  await toggle.click();
+  await expect(chamber).toBeVisible();
+  expect(errors).toEqual([]);
+});
 test("API outages are explicit and retry recovers", async ({ page }) => {
   await page.route("**/api/simulate", (route) =>
     route.fulfill({

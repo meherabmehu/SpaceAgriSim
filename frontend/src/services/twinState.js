@@ -1,5 +1,5 @@
 /**
- * Maps a simulation result onto the visual state of the 3D growth chamber.
+ * Maps a simulation result onto the visual state of the growth chamber twin.
  *
  * Everything here is presentation: it rescales numbers the API already
  * returned into 0..1 intensities the scene can render. No simulation maths,
@@ -74,28 +74,4 @@ export function deriveTwinState(result) {
     standingBiomass: harvest.standingBiomass,
     spaceGrowthPercentage: result.comparison.spaceGrowthPercentage,
   }
-}
-
-/** Detects whether the browser can create a WebGL context. */
-export function webglAvailable() {
-  if (typeof document === 'undefined') return false
-  try {
-    const canvas = document.createElement('canvas')
-    return Boolean(canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl'))
-  } catch {
-    return false
-  }
-}
-
-/**
- * Rough capability check: small screens, save-data mode and very low core
- * counts default to the 2D view (the user can still switch 3D on).
- */
-export function deviceCanRender3D() {
-  if (typeof window === 'undefined') return false
-  const narrow = window.matchMedia('(max-width: 640px)').matches
-  const saveData = navigator.connection?.saveData === true
-  const cores = navigator.hardwareConcurrency ?? 4
-  const memory = navigator.deviceMemory ?? 4
-  return !narrow && !saveData && cores >= 2 && memory >= 2
 }

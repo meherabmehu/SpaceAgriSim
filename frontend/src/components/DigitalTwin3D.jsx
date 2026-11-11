@@ -1,10 +1,8 @@
-import { Component, Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
+import { Component, useEffect, useMemo, useRef, useState } from 'react'
 import Panel from './Panel.jsx'
-import { deriveTwinState, deviceCanRender3D, webglAvailable } from '../services/twinState.js'
+import GrowthChamberView from './GrowthChamberView.jsx'
+import { deriveTwinState } from '../services/twinState.js'
 import { formatDay, formatMass, formatNumber, formatPercent } from '../services/formatters.js'
-
-// three.js is only downloaded when the twin is switched on
-const GrowthChamberScene = lazy(() => import('../three/GrowthChamberScene.jsx'))
 
 const STORAGE_KEY = 'spaceagrisim.twin3d'
 
@@ -19,13 +17,14 @@ function readStoredPreference() {
 }
 
 /**
- * 3D is on by default when the browser has WebGL and the device looks capable;
- * an explicit user choice always wins. Weak devices and small screens start in 2D.
+ * The chamber view is on by default; an explicit user choice always wins.
+ *
+ * The stored value is the same key and the same 'on'/'off' vocabulary the previous 3D view used,
+ * so an existing preference survives the Phase 33 redesign instead of resetting.
  */
-function initialEnabled(webgl) {
+function initialEnabled() {
   const stored = readStoredPreference()
-  if (stored) return stored === 'on'
-  return webgl && deviceCanRender3D()
+  return stored ? stored === 'on' : true
 }
 
 const LEGEND = [
@@ -37,17 +36,22 @@ const LEGEND = [
 ]
 
 /**
- * SPACE GROWTH CHAMBER - 3D digital-twin visualization of the simulation.
+ * SPACE GROWTH CHAMBER - digital-twin visualization of the simulation.
  *
- * - on by default when WebGL is available and the device looks capable,
- *   with a clear 3D VIEW ON/OFF switch (choice is remembered)
- * - lazy-loads three.js / react-three-fiber
- * - falls back to a 2D schematic when WebGL is unavailable or the renderer fails
+ * - interactive isometric CHAMBER VIEW by default, with a clear CHAMBER VIEW / 2D SCHEMATIC
+ *   switch (choice is remembered)
+ * - both views are plain SVG: no WebGL, no renderer download, no 3D library
+ * - falls back to the 2D schematic if the chamber view throws
  * - reads only from the simulation result (via deriveTwinState)
+ *
+ * Phase 33 replaced the three.js scene that used to sit behind the switch. The scene needed
+ * `three` + `@react-three/fiber` + `@react-three/drei`, and `three` alone is ~750 kB minified
+ * (over 800 kB even for a module importing two classes), so it could not pass the bundle budget
+ * without either deleting the feature or hiding the warning. The chamber view keeps the same
+ * information and interactions at a fraction of the weight.
  */
 export default function DigitalTwin3D({ result }) {
-  const webgl = useMemo(() => webglAvailable(), [])
-  const [enabled, setEnabled] = useState(() => initialEnabled(webgl))
+  const [enabled, setEnabled] = useState(initialEnabled)
   const [reducedMotion, setReducedMotion] = useState(false)
   const [renderError, setRenderError] = useState(null)
   const [inView, setInView] = useState(true)
@@ -63,7 +67,7 @@ export default function DigitalTwin3D({ result }) {
     return () => media.removeEventListener('change', update)
   }, [])
 
-  // pause the render loop while the chamber is scrolled out of view
+  // stop the (declarative) animation while the chamber is scrolled out of view
   useEffect(() => {
     const node = viewportRef.current
     if (!node || typeof IntersectionObserver === 'undefined') return undefined
@@ -84,26 +88,27 @@ export default function DigitalTwin3D({ result }) {
     })
   }
 
-  const canRender3D = webgl && !renderError
+  const canRenderChamber = !renderError
 
   return (
     <Panel
       id="digital-twin"
       eyebrow="07"
       title="Space growth chamber"
-      subtitle="3D digital-twin visualization · driven by the simulation outputs, not by a model of its own"
+      subtitle="Digital-twin visualization · driven by the simulation outputs, not by a model of its own"
       padded={false}
       action={
         <button
           type="button"
           role="switch"
           aria-checked={enabled}
+          aria-label="Chamber view"
           onClick={toggle}
           className={`rounded border px-2.5 py-1 font-mono text-[14px] tracking-wider transition-colors ${
             enabled ? 'border-accent/60 bg-accent/10 text-accent' : 'border-line-strong text-slate-300 hover:border-accent/60 hover:text-accent'
           }`}
         >
-          3D VIEW {enabled ? 'ON' : 'OFF'}
+          {enabled ? 'CHAMBER VIEW' : '2D SCHEMATIC'}
         </button>
       }
     >
@@ -111,26 +116,30 @@ export default function DigitalTwin3D({ result }) {
         <div ref={viewportRef} className="relative min-h-[16rem] sm:min-h-[20rem] lg:min-h-[22rem]">
           {!state && <Placeholder text="Waiting for simulation…" />}
           {state && !enabled && (
-            <Placeholder text="3D view is off">
+            <Placeholder text="Chamber view is off">
               <SchematicTwin state={state} />
             </Placeholder>
           )}
-          {state && enabled && !canRender3D && (
+          {state && enabled && !canRenderChamber && (
             <div className="absolute inset-0 flex flex-col">
               <p className="border-b border-line bg-space-800/60 px-3 py-1.5 font-mono text-[14px] tracking-wider text-warn">
-                {renderError ? '3D RENDERER FAILED' : 'WEBGL UNAVAILABLE'} · SHOWING 2D SCHEMATIC
+                CHAMBER VIEW FAILED · SHOWING 2D SCHEMATIC
               </p>
               <div className="relative flex-1">
                 <SchematicTwin state={state} />
               </div>
             </div>
           )}
-          {state && enabled && canRender3D && (
+          {state && enabled && canRenderChamber && (
             <div className="absolute inset-0">
               <SceneErrorBoundary onError={setRenderError}>
-                <Suspense fallback={<Placeholder text="Loading 3D chamber…" />}>
-                  <GrowthChamberScene state={state} reduced={reducedMotion} paused={!inView} onInspect={setSelected} />
-                </Suspense>
+                <GrowthChamberView
+                  state={state}
+                  reduced={reducedMotion}
+                  paused={!inView}
+                  onInspect={setSelected}
+                  selected={selected}
+                />
               </SceneErrorBoundary>
               <div className="pointer-events-none absolute left-3 top-3 rounded border border-line bg-space-950/70 px-2 py-1 font-mono text-[14px] tracking-wider text-slate-300">
                 {formatDay(state.day)} · {harvestCaption(state)}
@@ -139,7 +148,7 @@ export default function DigitalTwin3D({ result }) {
             </div>
           )}
           {state && (
-            <p className="pointer-events-none absolute bottom-2 right-3 font-mono text-[13px] tracking-wider text-slate-500">
+            <p className="pointer-events-none absolute bottom-8 right-3 font-mono text-[13px] tracking-wider text-slate-500">
               VISUALIZATION DRIVEN BY SIMULATION OUTPUTS
             </p>
           )}
@@ -147,16 +156,28 @@ export default function DigitalTwin3D({ result }) {
 
         <aside className="border-t border-line px-4 py-3 lg:border-l lg:border-t-0" aria-label="Growth chamber legend">
           <p className="label-tech">Legend</p>
-          <p className="mt-2 text-xs text-slate-300">Drag to rotate · Scroll or pinch to zoom.</p>
-          <div className="mt-3 flex flex-wrap gap-2" aria-label="Inspect greenhouse components">
-            {['crops','lighting','water','sensors'].map(key=><button key={key} type="button" aria-pressed={selected===key} onClick={()=>setSelected(key)} className="rounded border border-line-strong px-2 py-1 text-xs text-accent">{key}</button>)}
+          <p className="mt-2 text-xs text-slate-300">Drag to orbit · scroll to zoom · arrow keys and +/− work too.</p>
+          <div className="mt-3 flex flex-wrap gap-2" aria-label="Inspect growth chamber components">
+            {['crops', 'lighting', 'water', 'sensors'].map((key) => (
+              <button
+                key={key}
+                type="button"
+                aria-pressed={selected === key}
+                onClick={() => setSelected(key)}
+                className={`rounded border px-2 py-1 text-xs ${selected === key ? 'border-accent/60 bg-accent/10 text-accent' : 'border-line-strong text-slate-300 hover:border-accent/60 hover:text-accent'}`}
+              >
+                {key}
+              </button>
+            ))}
           </div>
-          {result && <p className="mt-3 text-xs leading-relaxed text-slate-300" role="status">{
-            selected==='crops'?`Standing biomass ${formatMass(result.harvest.standingBiomass)}. Plant shapes are illustrative.`:
-            selected==='lighting'?`PPFD ${result.inputs.lightIntensity} µmol/m²/s, ${result.inputs.lightHours} h/day. Spectrum: ${result.inputs.lightSpectrum}.`:
-            selected==='water'?`Supplied ${formatNumber(result.waterUsed)} L; recovered ${formatNumber(result.waterRecovered)} L. Animated flow is illustrative.`:
-            `Temperature ${result.inputs.temperature} °C; humidity ${result.inputs.humidity}%; CO₂ ${result.inputs.co2Level} ppm. These are configured setpoints, not sensor measurements.`
-          }</p>}
+          {result && (
+            <p className="mt-3 text-xs leading-relaxed text-slate-300" role="status">
+              {selected === 'crops' ? `Standing biomass ${formatMass(result.harvest.standingBiomass)}. Plant shapes are illustrative.`
+                : selected === 'lighting' ? `PPFD ${result.inputs.lightIntensity} µmol/m²/s, ${result.inputs.lightHours} h/day. Spectrum: ${result.inputs.lightSpectrum}.`
+                  : selected === 'water' ? `Supplied ${formatNumber(result.waterUsed)} L; recovered ${formatNumber(result.waterRecovered)} L. Animated flow is illustrative.`
+                    : `Temperature ${result.inputs.temperature} °C; humidity ${result.inputs.humidity}%; CO₂ ${result.inputs.co2Level} ppm. These are configured setpoints, not sensor measurements.`}
+            </p>
+          )}
           <ul className="mt-2 space-y-2">
             {LEGEND.map((item) => (
               <li key={item.key} className="flex items-start gap-2 text-[13px]">
@@ -188,7 +209,7 @@ function harvestCaption(state) {
   return `${cycles} HARVEST${cycles === 1 ? '' : 'S'} · LAST ${formatDay(state.lastHarvestDay).toUpperCase()} · REGROWING`
 }
 
-/** Small amber tags that make the stress cues in the scene explicit. */
+/** Small amber tags that make the stress cues in the chamber explicit. */
 function StatusTags({ state }) {
   const tags = []
   if (state.noArea) tags.push('NO GROWING AREA')
@@ -218,7 +239,7 @@ function Placeholder({ text, children }) {
   )
 }
 
-/** 2D SVG schematic of the chamber, used before the 3D view is enabled and as the WebGL fallback. */
+/** 2D SVG front-elevation schematic of the chamber: the compact alternative to the chamber view. */
 function SchematicTwin({ state }) {
   const plants = []
   const rows = state.rows
@@ -263,7 +284,10 @@ function SchematicTwin({ state }) {
   )
 }
 
-
+/**
+ * Keeps one unexpected error in the chamber view from blanking the whole panel: the panel falls
+ * back to the schematic and says so. The view is plain SVG, so this is defensive only.
+ */
 class SceneErrorBoundary extends Component {
   constructor(props) {
     super(props)
