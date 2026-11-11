@@ -22,15 +22,17 @@ The simulator evaluates environmental response factors, scales crop-specific fre
 
 The research pipeline is independent: official NASA metadata → selected verified files → checksum and quality checks → a compatible measured target table → grouped model evaluation → versioned artifact. Molecular and microbial records are not paired with unrelated crop-yield labels. A trained model must retain its own target, units and input domain. Its existence does not validate the mission simulator.
 
+Validation evidence has its own path since Phase 34, and it runs the other way: `ml/research/*.py` loads the **shipped** artifact through the same code the API uses, measures it against an independent campaign or an out-of-fold split, writes `ml/evaluation/*.json`, and `ml/research/phase34_record_measurements.py` is the only writer that copies those numbers into a model card. `scripts/audit_models.py` then checks the card against the evidence file and `scripts/build_registry.py` re-seals the artifact hash. A served claim therefore has a script that produced it, a file that holds it, and an audit that fails when the two disagree.
+
 ## State and storage
 
 Current control state is held in React. Fetch operations support cancellation; stale responses must not replace current configuration. Server-side saved scenarios use a bounded SQLAlchemy table: SQLite for a local demonstration, or PostgreSQL through a configured database URL. Scenarios store reproducible input configuration and model version, not huge raw NASA files. Initial table creation is supported by the application; the PostgreSQL migration can be applied ahead of runtime with a restricted database role.
 
-History is a shared workspace feature. The application does not provide user authentication or tenant isolation. A public multi-user deployment needs an identity/gateway layer, quotas and retention policy before enabling unrestricted writes. CORS controls browser access and is not authentication.
+History is a shared workspace feature. Since Phase 19 the API also carries accounts (`/api/auth/register|login|me|logout`), verification and password-reset endpoints under `/api/account`, and read-only share links (`#shared/<token>`); saved scenarios are owned by their creator and access is checked per request, not inferred from the browser. Tenant isolation beyond per-user ownership is still not a tenancy boundary: a public multi-user deployment needs quotas and a retention policy before enabling unrestricted writes. CORS controls browser access and is not authentication.
 
 ## Rendering and operation
 
-The existing Three.js scene uses instanced leaves and inexpensive procedural geometry. It is an illustration driven by simulation state, not computational fluid dynamics or measured telemetry. Lazy loading, reduced-motion handling, offscreen rendering controls and a 2D fallback constrain device cost.
+The growth chamber is plain SVG, rebuilt in Phase 33: no Three.js, no WebGL and no 3D dependency ships in the bundle. It is an illustration driven by simulation state, not computational fluid dynamics or measured telemetry, and it keeps a reduced-motion path and a 2D fallback that a device can fall back on without losing information. The chart library is the only large third-party UI dependency left; it is a lazy chunk, so a page without a chart never downloads it.
 
 Local Vite proxies `/api` to FastAPI. Docker Compose places nginx before the API and preserves local scenario data in a named volume. Independent hosting uses a Vercel frontend and a Render API with an explicit public API URL and exact CORS origins. Acquisition and model training are offline processes; HTTP requests never run training.
 
