@@ -211,9 +211,33 @@ def to_response(result: SimulationResult, request: SimulationRequest) -> Simulat
         stress={"limitingFactor": min((k for k in space.factors if k != "combined"), key=lambda k: space.factors[k]),
                 "factors": {k: round(max(0, 1-v),4) for k,v in space.factors.items() if k != "combined"},
                 "method": "assumed response-factor deficits, not a trained health classifier"},
-        environment={"vaporPressureDeficitKpa": round(vapor_pressure_deficit(request.temperature, request.humidity), 3),
-                     "dailyLightIntegralMolM2": round(request.lightIntensity * request.lightHours * 0.0036, 3),
-                     "spectrumMode": "annotation only"},
+        # Phase 32: the coverage audit recorded this feature as having no uncertainty and no
+        # per-value provenance. Both are now stated with the number: VPD is computed from the
+        # scenario's own temperature and humidity with Tetens, no error propagation is performed,
+        # and the inputs are the caller's assumptions rather than a weather record. Saying that
+        # beside the value is the honest alternative to presenting three decimals as precision.
+        environment={
+            "vaporPressureDeficitKpa": round(vapor_pressure_deficit(request.temperature, request.humidity), 3),
+            "dailyLightIntegralMolM2": round(request.lightIntensity * request.lightHours * 0.0036, 3),
+            "spectrumMode": "annotation only",
+            "vaporPressureDeficit": {
+                "method": ("Tetens saturation vapour pressure from the scenario temperature and "
+                           "relative humidity"),
+                "inputsAreAssumptions": True,
+                "propagatedError": None,
+                "statement": ("A point value computed from the scenario's assumed temperature and "
+                              "humidity. No measurement error is propagated and no station record "
+                              "is attached, so it describes the scenario, not a place or a day."),
+            },
+            "dailyLightIntegral": {
+                "method": "lightIntensity x lightHours x 0.0036 (umol m-2 s-1 to mol m-2 d-1)",
+                "inputsAreAssumptions": True,
+                "propagatedError": None,
+                "statement": ("The integral of the scenario's constant PPFD over its photoperiod. "
+                              "A real canopy sees a varying flux; this is the setting, not a "
+                              "measurement."),
+            },
+        },
         cropYield=_r(space.crop_yield_g, 1),
         growthRate=_r(space.growth_rate_g_per_day, 2),
         waterUsed=_r(space.water_used_l, 2),
@@ -255,8 +279,32 @@ def to_response(result: SimulationResult, request: SimulationRequest) -> Simulat
         dailyWaterData=_daily_water(space),
         dailyLifeSupportData=_daily_life_support(space),
         demandBasis=_demand_basis(space, request),
+        # Phase 32: every headline scalar carries its unit in a machine-readable map as well as in
+        # its field name. Additive - a client written before this field existed is unaffected.
+        units=UNITS,
         disclaimer=PHASE_1_DISCLAIMER,
     )
+
+
+# One place for the units of every headline scalar. Duplicating them in field names is a
+# convention, not a contract; a client that charts a value needs to know what it is charting.
+UNITS = {
+    "cropYield": "g dry biomass per m2 over the scenario",
+    "growthRate": "g per day",
+    "waterUsed": "litres over the scenario",
+    "waterRecovered": "litres over the scenario",
+    "co2Removed": "g CO2 over the scenario",
+    "estimatedOxygenProduced": "g O2 over the scenario",
+    "spaceGrowthPercentage": "percent of the Earth reference yield",
+    "environment.vaporPressureDeficitKpa": "kPa",
+    "environment.dailyLightIntegralMolM2": "mol m-2 d-1",
+    "lifeSupport.crewO2DaysSupported": "crew-days of O2",
+    "lifeSupport.crewCo2DaysRemoved": "crew-days of CO2 removal",
+    "lifeSupport.waterRecoveryEfficiency": "fraction (0-1)",
+    "demandBasis.et0MmPerDay": "mm per day",
+    "harvest.harvestIndexPercent": "percent",
+    "harvest.edibleBiomassG": "g fresh mass per m2",
+}
 
 
 def _demand_basis(space: ScenarioResult, request: SimulationRequest) -> dict:

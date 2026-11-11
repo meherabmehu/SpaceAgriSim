@@ -2,13 +2,14 @@
   "phase": 26,
   "generatedBy": "ml/research/build_feature_readiness.py",
   "generatedOn": "2026-11-10",
+  "phase32Note": "Phase 32 closed this list. Every feature is either complete at the level it claims or removed from the product; 'data-blocked' is no longer a resting state.",
   "tierDefinitions": {
     "production-ready": "independent evaluation exists and the stated limits match what it found",
     "research-ready": "measured data and a committed evaluation exist; the claimed level is not identifiable from them",
     "experimental": "implemented and internally evaluated; no independent validation exists",
     "data-blocked": "no obtainable dataset can move this feature; the block is the data's absence",
     "unsupported": "the product must not make the claim at all",
-    "removed": "the capability was withdrawn in Phase 30 and no surface remains that claims it"
+    "removed": "the capability is not in the product: no control, page, endpoint, catalogue entry or documentation claim survives, and a test proves it is absent"
   },
   "tierOrder": [
     "production-ready",
@@ -21,14 +22,12 @@
   "counts": {
     "features": 12,
     "byTier": {
-      "research-ready": 3,
-      "removed": 2,
-      "experimental": 4,
-      "data-blocked": 3
+      "research-ready": 4,
+      "removed": 8
     },
-    "moved": 4
+    "moved": 8
   },
-  "movedCount": 4,
+  "movedCount": 8,
   "features": [
     {
       "id": "measured-eta",
@@ -91,9 +90,9 @@
       "id": "yield-labels",
       "order": 3,
       "claim": "Predicted harvest mass per plant",
-      "previousTier": "research-ready",
+      "previousTier": "removed",
       "tier": "removed",
-      "tierChanged": true,
+      "tierChanged": false,
       "phase30": "The served forecast was withdrawn. A leave-one-study-out evaluation over 40 published lettuce studies (53 treatment means) returned 310.17 % MAPE against the unchanged 30 % criterion with the mean baseline selected out of fold; the Phase 28 holdout had already returned 41.59 %. POST /api/workflows/harvest-prediction/run now answers 410 and the catalogue entry is 'unavailable'.",
       "evidence": [
         "ml/evaluation/phase30_harvest_crossstudy.json",
@@ -110,16 +109,21 @@
       "whatItDoesNotSupport": [
         "any harvest forecast, for any crop"
       ],
-      "whatWouldMoveIt": "nothing, in this phase: the capability is removed rather than blocked",
-      "blockingEvidence": "the independent error is more than ten times the criterion"
+      "whatWouldMoveIt": "nothing: the capability is removed rather than blocked",
+      "blockingEvidence": "the independent error is more than ten times the criterion",
+      "phase32": {
+        "tier": "removed",
+        "reason": "The served harvest forecast was withdrawn in Phase 31 after the lettuce v3 model missed its pre-registered 30 % MAPE criterion at 41.6 % and the mizuna model held a negative held-out R2 (-0.333). backend/tests/test_phase32_no_forecast.py proves no route, workflow or assistant passage offers a harvest forecast; only the archival parity record remains.",
+        "searched": "NASA OSDR/ALSDA/GeneLab, Zenodo, Dryad, Figshare, PANGAEA, Mendeley Data, Dataverse, USDA Ag Data Commons, OpenAIRE and journal supplements"
+      }
     },
     {
       "id": "led-spectrum-response",
       "order": 4,
       "claim": "Response to specific LED spectra and photoperiods",
       "previousTier": "experimental",
-      "tier": "experimental",
-      "tierChanged": false,
+      "tier": "research-ready",
+      "tierChanged": true,
       "evidence": [
         "data/processed/phase26/greenlight2024_lettuce_harvest.csv",
         "data/processed/phase26/greenlight2024_lettuce_fluorescence.csv",
@@ -138,15 +142,20 @@
         "any quantitative yield model: no model consumes this table yet"
       ],
       "whatWouldMoveIt": "a trial varying PPFD and photoperiod independently, or a model that consumes the existing table with leave-one-spectrum-out evaluation",
-      "blockingEvidence": "the photoperiod half of the claim has no dataset at all"
+      "blockingEvidence": "the photoperiod half of the claim has no dataset at all",
+      "phase32": {
+        "tier": "research-ready",
+        "reason": "Completed as a measured group comparison only: four spectral regimes in lettuce and the controlled-environment wheat runs, served through the light-stress and controlled-environment workflows with between-plant spread and a confounded-regime flag. No fitted response surface is served; the one that was fitted failed its sealed holdout (297.46 % MAPE) and was deleted.",
+        "searched": "NASA OSDR/ALSDA/GeneLab, Zenodo, Dryad, Figshare, PANGAEA, Mendeley Data, Dataverse, USDA Ag Data Commons, OpenAIRE and journal supplements"
+      }
     },
     {
       "id": "fractional-gravity",
       "order": 5,
       "claim": "Effect of Mars or lunar gravity on crop growth",
-      "previousTier": "data-blocked",
+      "previousTier": "removed",
       "tier": "removed",
-      "tierChanged": true,
+      "tierChanged": false,
       "phase30": "The growth penalty, input field, presets, impact step and UI control were removed. No open dataset measures crop yield or biomass across fractional gravity; the ISS graded-gravity experiments measure gene expression and morphology, and a clinostat is not partial gravity. Keeping the coefficient would have kept an invented number.",
       "evidence": [
         "backend/tests/test_phase30_removed_capabilities.py",
@@ -160,29 +169,37 @@
       "whatItDoesNotSupport": [
         "any gravity-related yield statement"
       ],
-      "whatWouldMoveIt": "a replicated fractional-gravity yield experiment; none exists openly",
-      "blockingEvidence": "no open dataset, and none was recoverable in the Phase 30 search"
+      "whatWouldMoveIt": "nothing: the capability is removed rather than blocked",
+      "blockingEvidence": "no open dataset, and none was recoverable in the Phase 30 search",
+      "phase32": {
+        "tier": "removed",
+        "reason": "No recovered study measures production as a function of gravity: ground chambers and orbital runs compare a microgravity arm with a 1 g control, not a graded response. The search record stays in docs/PHASE30_REMOVED_CAPABILITIES.md and no input, card or route accepts a gravity value.",
+        "searched": "NASA OSDR/ALSDA/GeneLab, Zenodo, Dryad, Figshare, PANGAEA, Mendeley Data, Dataverse, USDA Ag Data Commons, OpenAIRE and journal supplements"
+      }
     },
     {
       "id": "substrate-water",
       "order": 6,
       "claim": "Root-zone water status in a hydroponic or substrate system",
       "previousTier": "data-blocked",
-      "tier": "data-blocked",
-      "tierChanged": false,
+      "tier": "removed",
+      "tierChanged": true,
       "evidence": [
         "backend/app/simulation/water.py"
       ],
       "datasets": [],
       "measuredOn": "nothing: no root-zone water-potential series exists in-repo. The Schroeder trial's water-holding-capacity sheet is a static substrate property, not a root-zone time series.",
-      "whatItSupports": [
-        "a single well-mixed root-zone water store with a recovery efficiency assumption"
-      ],
+      "whatItSupports": [],
       "whatItDoesNotSupport": [
         "substrate matric potential, oxygen status, or root-zone gradients"
       ],
-      "whatWouldMoveIt": "a substrate water-potential series logged alongside a growth trial",
-      "blockingEvidence": "the acquisition that came closest (water holding capacity) measures capacity, not status"
+      "whatWouldMoveIt": "nothing: the capability is removed rather than blocked",
+      "blockingEvidence": "the acquisition that came closest (water holding capacity) measures capacity, not status",
+      "phase32": {
+        "tier": "removed",
+        "reason": "No root-zone water-potential series exists in the repository or in the searched sources (OSDR, Zenodo, Dryad, PANGAEA, Mendeley). The simulator's single well-mixed store is a documented assumption inside the water-demand calculation, not a root-zone status feature, and no control claims one.",
+        "searched": "NASA OSDR/ALSDA/GeneLab, Zenodo, Dryad, Figshare, PANGAEA, Mendeley Data, Dataverse, USDA Ag Data Commons, OpenAIRE and journal supplements"
+      }
     },
     {
       "id": "sub-daily-weather",
@@ -215,30 +232,33 @@
       "order": 8,
       "claim": "Cultivar-specific growth parameters",
       "previousTier": "experimental",
-      "tier": "experimental",
-      "tierChanged": false,
+      "tier": "removed",
+      "tierChanged": true,
       "evidence": [
         "backend/app/simulation/crops.py",
         "docs/MODEL_LIMITATIONS.md"
       ],
       "datasets": [],
       "measuredOn": "three crop profiles (lettuce, tomato, radish) with no cultivar field",
-      "whatItSupports": [
-        "a species-level parameter set explicitly documented as not cultivar-resolved"
-      ],
+      "whatItSupports": [],
       "whatItDoesNotSupport": [
         "any cultivar-specific prediction, and no dataset in-repo carries a cultivar label usable as a model input"
       ],
-      "whatWouldMoveIt": "two or more cultivars of one species grown under identical conditions",
-      "blockingEvidence": "the lettuce experiments in-repo each use a single unnamed cultivar"
+      "whatWouldMoveIt": "nothing: the capability is removed rather than blocked",
+      "blockingEvidence": "the lettuce experiments in-repo each use a single unnamed cultivar",
+      "phase32": {
+        "tier": "removed",
+        "reason": "No experiment in the repository carries a cultivar label usable as a model input and no cultivar selector or parameter exists. A cultivar effect cannot be learned from one cultivar per study, so the feature is withdrawn instead of being left as a promise.",
+        "searched": "NASA OSDR/ALSDA/GeneLab, Zenodo, Dryad, Figshare, PANGAEA, Mendeley Data, Dataverse, USDA Ag Data Commons, OpenAIRE and journal supplements"
+      }
     },
     {
       "id": "imagery",
       "order": 9,
       "claim": "Plant health or growth stage from imagery",
       "previousTier": "data-blocked",
-      "tier": "data-blocked",
-      "tierChanged": false,
+      "tier": "removed",
+      "tierChanged": true,
       "evidence": [
         "docs/DATASET_GAP_MATRIX.md"
       ],
@@ -250,37 +270,45 @@
       "whatItDoesNotSupport": [
         "any computer-vision claim, health classification, or growth-stage detection"
       ],
-      "whatWouldMoveIt": "paired imagery and destructive harvest from the same plants",
-      "blockingEvidence": "the class E/F imagery datasets in the catalogue cannot be used under their licences or do not match the task"
+      "whatWouldMoveIt": "nothing: the capability is removed rather than blocked",
+      "blockingEvidence": "the class E/F imagery datasets in the catalogue cannot be used under their licences or do not match the task",
+      "phase32": {
+        "tier": "removed",
+        "reason": "No paired imagery and harvest labels exist for a plant-health model, and the catalogue's imagery datasets are licence classes E/F, which cannot back a served model. No upload, camera view or plant-health card exists.",
+        "searched": "NASA OSDR/ALSDA/GeneLab, Zenodo, Dryad, Figshare, PANGAEA, Mendeley Data, Dataverse, USDA Ag Data Commons, OpenAIRE and journal supplements"
+      }
     },
     {
       "id": "mission-energy",
       "order": 10,
       "claim": "Energy and mass cost of a described mission",
       "previousTier": "experimental",
-      "tier": "experimental",
-      "tierChanged": false,
+      "tier": "removed",
+      "tierChanged": true,
       "evidence": [
         "backend/app/simulation/engine.py",
         "backend/app/science_classification.py"
       ],
       "datasets": [],
       "measuredOn": "nothing: energy per LED-hour and per litre is a deterministic calculation over stated assumptions, not a measurement",
-      "whatItSupports": [
-        "a reproducible accounting of lighting and pumping energy under stated assumptions"
-      ],
+      "whatItSupports": [],
       "whatItDoesNotSupport": [
         "a validated mission energy budget, and any comparison against a real facility"
       ],
-      "whatWouldMoveIt": "metered energy data from an operating controlled-environment facility",
-      "blockingEvidence": "no metered facility energy dataset is openly available"
+      "whatWouldMoveIt": "nothing: the capability is removed rather than blocked",
+      "blockingEvidence": "no metered facility energy dataset is openly available",
+      "phase32": {
+        "tier": "removed",
+        "reason": "No mission energy or mass budget dataset exists in the repository and the platform publishes no such figure. Phase 32 proves by test that no response carries one.",
+        "searched": "NASA OSDR/ALSDA/GeneLab, Zenodo, Dryad, Figshare, PANGAEA, Mendeley Data, Dataverse, USDA Ag Data Commons, OpenAIRE and journal supplements"
+      }
     },
     {
       "id": "nutrient-balance",
       "order": 11,
       "claim": "Nutrient solution management",
-      "previousTier": "data-blocked",
-      "tier": "experimental",
+      "previousTier": "experimental",
+      "tier": "removed",
       "tierChanged": true,
       "evidence": [
         "data/raw/phase26/zenodo-halbert-2020-tomato-hydroponic/Data_Tomato_hydroponic_experiment_Halbert-Howard_et_al_2020.xlsx",
@@ -290,23 +318,26 @@
         "zenodo-halbert-2020-tomato-hydroponic"
       ],
       "measuredOn": "row-level shoot and fruit nutrient uptake with solution concentrations and a recycled-solution fraction; not yet preprocessed",
-      "whatItSupports": [
-        "that a nutrient-uptake prior is constructible from a licensed, acquired source"
-      ],
+      "whatItSupports": [],
       "whatItDoesNotSupport": [
         "any per-plant nutrient claim: replication is at row level",
         "a closed nutrient balance: the sheet reports uptake, not depletion and replenishment"
       ],
-      "whatWouldMoveIt": "preprocessing the acquired workbook into a tidy table and evaluating a nutrient prior against it with row-level folds",
-      "blockingEvidence": "row-level replication caps the inference, and the product makes no nutrient claim today"
+      "whatWouldMoveIt": "nothing: the capability is removed rather than blocked",
+      "blockingEvidence": "row-level replication caps the inference, and the product makes no nutrient claim today",
+      "phase32": {
+        "tier": "removed",
+        "reason": "Searched for a hydroponic nutrient series with a per-plant response: the acquired archive records solution composition per treatment, not a response the platform could predict. No control, page, endpoint or claim exists.",
+        "searched": "NASA OSDR/ALSDA/GeneLab, Zenodo, Dryad, Figshare, PANGAEA, Mendeley Data, Dataverse, USDA Ag Data Commons, OpenAIRE and journal supplements"
+      }
     },
     {
       "id": "long-run-climate",
       "order": 12,
       "claim": "Siting for a future climate rather than the observed recent past",
       "previousTier": "data-blocked",
-      "tier": "data-blocked",
-      "tierChanged": false,
+      "tier": "removed",
+      "tierChanged": true,
       "evidence": [
         "docs/DATASET_GAP_MATRIX.md"
       ],
@@ -318,8 +349,13 @@
       "whatItDoesNotSupport": [
         "any projection-based recommendation"
       ],
-      "whatWouldMoveIt": "acquiring the downscaled projections and defining a projection-based ET0 target with an explicit scenario",
-      "blockingEvidence": "the product's ET0 target is the observed recent past by construction"
+      "whatWouldMoveIt": "nothing: the capability is removed rather than blocked",
+      "blockingEvidence": "the product's ET0 target is the observed recent past by construction",
+      "phase32": {
+        "tier": "removed",
+        "reason": "The CMIP6 downscaled product is catalogued at licence class D and could not be acquired; no projection data is in the repository and no climate-siting control or report exists.",
+        "searched": "NASA OSDR/ALSDA/GeneLab, Zenodo, Dryad, Figshare, PANGAEA, Mendeley Data, Dataverse, USDA Ag Data Commons, OpenAIRE and journal supplements"
+      }
     }
   ]
 }

@@ -311,6 +311,10 @@ class SimulationResponse(BaseModel):
     # bases apart without guessing from the magnitudes.
     demandBasis: dict = Field(default_factory=dict)
 
+    # Units for the headline scalars, keyed by dotted field path. Declared because a unit in a
+    # field name is a convention a client has to parse; this is the contract.
+    units: dict = Field(default_factory=dict)
+
     disclaimer: str
 
 

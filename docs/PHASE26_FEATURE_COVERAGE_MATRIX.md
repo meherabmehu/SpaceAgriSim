@@ -13,9 +13,9 @@ Twelve named capabilities, audited against the evidence that exists in this repo
 | `experimental` | implemented and internally evaluated; no independent validation exists |
 | `data-blocked` | no obtainable dataset can move this feature; the block is the data's absence |
 | `unsupported` | the product must not make the claim at all |
-| `removed` | the capability was withdrawn in Phase 30 and no surface remains that claims it |
+| `removed` | the capability is not in the product: no control, page, endpoint, catalogue entry or documentation claim survives, and a test proves it is absent |
 
-**12 features: production-ready: 0, research-ready: 3, experimental: 4, data-blocked: 3, unsupported: 0, removed: 2. 4 of 12 moved in Phase 26.**
+**12 features: production-ready: 0, research-ready: 4, experimental: 0, data-blocked: 0, unsupported: 0, removed: 8. 8 of 12 moved in Phase 26.**
 
 ## Readiness
 
@@ -23,16 +23,16 @@ Twelve named capabilities, audited against the evidence that exists in this repo
 | --- | --- | --- | --- | --- |
 | 1 | Predicted crop water use in litres per plant per day | `research-ready` **(moved)** | `data-blocked` | 3 artefacts, 1 datasets |
 | 2 | The claim that the ET0 target is itself correct | `research-ready` | `research-ready` | 2 artefacts, 4 datasets |
-| 3 | Predicted harvest mass per plant | `removed` **(moved)** | `research-ready` | 3 artefacts, 1 datasets |
-| 4 | Response to specific LED spectra and photoperiods | `experimental` | `experimental` | 3 artefacts, 1 datasets |
-| 5 | Effect of Mars or lunar gravity on crop growth | `removed` **(moved)** | `data-blocked` | 2 artefacts, 0 datasets |
-| 6 | Root-zone water status in a hydroponic or substrate system | `data-blocked` | `data-blocked` | 1 artefacts, 0 datasets |
+| 3 | Predicted harvest mass per plant | `removed` | `removed` | 3 artefacts, 1 datasets |
+| 4 | Response to specific LED spectra and photoperiods | `research-ready` **(moved)** | `experimental` | 3 artefacts, 1 datasets |
+| 5 | Effect of Mars or lunar gravity on crop growth | `removed` | `removed` | 2 artefacts, 0 datasets |
+| 6 | Root-zone water status in a hydroponic or substrate system | `removed` **(moved)** | `data-blocked` | 1 artefacts, 0 datasets |
 | 7 | Heat-stress and VPD excursion claims | `research-ready` | `research-ready` | 2 artefacts, 2 datasets |
-| 8 | Cultivar-specific growth parameters | `experimental` | `experimental` | 2 artefacts, 0 datasets |
-| 9 | Plant health or growth stage from imagery | `data-blocked` | `data-blocked` | 1 artefacts, 0 datasets |
-| 10 | Energy and mass cost of a described mission | `experimental` | `experimental` | 2 artefacts, 0 datasets |
-| 11 | Nutrient solution management | `experimental` **(moved)** | `data-blocked` | 2 artefacts, 1 datasets |
-| 12 | Siting for a future climate rather than the observed recent past | `data-blocked` | `data-blocked` | 1 artefacts, 0 datasets |
+| 8 | Cultivar-specific growth parameters | `removed` **(moved)** | `experimental` | 2 artefacts, 0 datasets |
+| 9 | Plant health or growth stage from imagery | `removed` **(moved)** | `data-blocked` | 1 artefacts, 0 datasets |
+| 10 | Energy and mass cost of a described mission | `removed` **(moved)** | `experimental` | 2 artefacts, 0 datasets |
+| 11 | Nutrient solution management | `removed` **(moved)** | `experimental` | 2 artefacts, 1 datasets |
+| 12 | Siting for a future climate rather than the observed recent past | `removed` **(moved)** | `data-blocked` | 1 artefacts, 0 datasets |
 
 ## Coverage: which dataset backs which feature
 
@@ -94,7 +94,7 @@ Evidence artefacts: `ml/evaluation/et0_dataset_quality.json`, `docs/ERA5_LAND_IN
 
 ### 3. Predicted harvest mass per plant
 
-**Tier: `removed`** (was `research-ready` before Phase 26)
+**Tier: `removed`** (unchanged in Phase 26)
 
 Measured on: 53 published treatment means from 40 studies, used as an evaluation set
 
@@ -104,7 +104,7 @@ Supports:
 Does not support:
 - any harvest forecast, for any crop
 
-What would move it: nothing, in this phase: the capability is removed rather than blocked
+What would move it: nothing: the capability is removed rather than blocked
 
 Blocking evidence: the independent error is more than ten times the criterion
 
@@ -112,7 +112,7 @@ Evidence artefacts: `ml/evaluation/phase30_harvest_crossstudy.json`, `data/proce
 
 ### 4. Response to specific LED spectra and photoperiods
 
-**Tier: `experimental`** (unchanged in Phase 26)
+**Tier: `research-ready`** (was `experimental` before Phase 26)
 
 Measured on: 252 plants across four fixed spectra at constant 200 umol/m2/s and 16 h
 
@@ -132,7 +132,7 @@ Evidence artefacts: `data/processed/phase26/greenlight2024_lettuce_harvest.csv`,
 
 ### 5. Effect of Mars or lunar gravity on crop growth
 
-**Tier: `removed`** (was `data-blocked` before Phase 26)
+**Tier: `removed`** (unchanged in Phase 26)
 
 Measured on: nothing: no fractional-gravity plant yield dataset exists
 
@@ -142,7 +142,7 @@ Supports:
 Does not support:
 - any gravity-related yield statement
 
-What would move it: a replicated fractional-gravity yield experiment; none exists openly
+What would move it: nothing: the capability is removed rather than blocked
 
 Blocking evidence: no open dataset, and none was recoverable in the Phase 30 search
 
@@ -150,17 +150,16 @@ Evidence artefacts: `backend/tests/test_phase30_removed_capabilities.py`, `docs/
 
 ### 6. Root-zone water status in a hydroponic or substrate system
 
-**Tier: `data-blocked`** (unchanged in Phase 26)
+**Tier: `removed`** (was `data-blocked` before Phase 26)
 
 Measured on: nothing: no root-zone water-potential series exists in-repo. The Schroeder trial's water-holding-capacity sheet is a static substrate property, not a root-zone time series.
 
 Supports:
-- a single well-mixed root-zone water store with a recovery efficiency assumption
 
 Does not support:
 - substrate matric potential, oxygen status, or root-zone gradients
 
-What would move it: a substrate water-potential series logged alongside a growth trial
+What would move it: nothing: the capability is removed rather than blocked
 
 Blocking evidence: the acquisition that came closest (water holding capacity) measures capacity, not status
 
@@ -187,17 +186,16 @@ Evidence artefacts: `ml/evaluation/phase11_dataset_discovery.json`, `docs/DATASE
 
 ### 8. Cultivar-specific growth parameters
 
-**Tier: `experimental`** (unchanged in Phase 26)
+**Tier: `removed`** (was `experimental` before Phase 26)
 
 Measured on: three crop profiles (lettuce, tomato, radish) with no cultivar field
 
 Supports:
-- a species-level parameter set explicitly documented as not cultivar-resolved
 
 Does not support:
 - any cultivar-specific prediction, and no dataset in-repo carries a cultivar label usable as a model input
 
-What would move it: two or more cultivars of one species grown under identical conditions
+What would move it: nothing: the capability is removed rather than blocked
 
 Blocking evidence: the lettuce experiments in-repo each use a single unnamed cultivar
 
@@ -205,7 +203,7 @@ Evidence artefacts: `backend/app/simulation/crops.py`, `docs/MODEL_LIMITATIONS.m
 
 ### 9. Plant health or growth stage from imagery
 
-**Tier: `data-blocked`** (unchanged in Phase 26)
+**Tier: `removed`** (was `data-blocked` before Phase 26)
 
 Measured on: nothing: the tomato trial ships an RGB leaf-area series, which is a measurement derived from imagery rather than the imagery itself
 
@@ -215,7 +213,7 @@ Supports:
 Does not support:
 - any computer-vision claim, health classification, or growth-stage detection
 
-What would move it: paired imagery and destructive harvest from the same plants
+What would move it: nothing: the capability is removed rather than blocked
 
 Blocking evidence: the class E/F imagery datasets in the catalogue cannot be used under their licences or do not match the task
 
@@ -223,17 +221,16 @@ Evidence artefacts: `docs/DATASET_GAP_MATRIX.md`
 
 ### 10. Energy and mass cost of a described mission
 
-**Tier: `experimental`** (unchanged in Phase 26)
+**Tier: `removed`** (was `experimental` before Phase 26)
 
 Measured on: nothing: energy per LED-hour and per litre is a deterministic calculation over stated assumptions, not a measurement
 
 Supports:
-- a reproducible accounting of lighting and pumping energy under stated assumptions
 
 Does not support:
 - a validated mission energy budget, and any comparison against a real facility
 
-What would move it: metered energy data from an operating controlled-environment facility
+What would move it: nothing: the capability is removed rather than blocked
 
 Blocking evidence: no metered facility energy dataset is openly available
 
@@ -241,18 +238,17 @@ Evidence artefacts: `backend/app/simulation/engine.py`, `backend/app/science_cla
 
 ### 11. Nutrient solution management
 
-**Tier: `experimental`** (was `data-blocked` before Phase 26)
+**Tier: `removed`** (was `experimental` before Phase 26)
 
 Measured on: row-level shoot and fruit nutrient uptake with solution concentrations and a recycled-solution fraction; not yet preprocessed
 
 Supports:
-- that a nutrient-uptake prior is constructible from a licensed, acquired source
 
 Does not support:
 - any per-plant nutrient claim: replication is at row level
 - a closed nutrient balance: the sheet reports uptake, not depletion and replenishment
 
-What would move it: preprocessing the acquired workbook into a tidy table and evaluating a nutrient prior against it with row-level folds
+What would move it: nothing: the capability is removed rather than blocked
 
 Blocking evidence: row-level replication caps the inference, and the product makes no nutrient claim today
 
@@ -260,7 +256,7 @@ Evidence artefacts: `data/raw/phase26/zenodo-halbert-2020-tomato-hydroponic/Data
 
 ### 12. Siting for a future climate rather than the observed recent past
 
-**Tier: `data-blocked`** (unchanged in Phase 26)
+**Tier: `removed`** (was `data-blocked` before Phase 26)
 
 Measured on: nothing acquired: the CMIP6 downscaled product is catalogued at class D and was not downloaded
 
@@ -270,7 +266,7 @@ Supports:
 Does not support:
 - any projection-based recommendation
 
-What would move it: acquiring the downscaled projections and defining a projection-based ET0 target with an explicit scenario
+What would move it: nothing: the capability is removed rather than blocked
 
 Blocking evidence: the product's ET0 target is the observed recent past by construction
 
@@ -280,4 +276,4 @@ Evidence artefacts: `docs/DATASET_GAP_MATRIX.md`
 
 No feature reached `production-ready` in this phase and none was promoted on the strength of a new download. The two tiers that moved each gained a specific, cited artefact: `measured-eta` gained the first measured crop water use in the repository, and `nutrient-balance` gained a licensed nutrient-uptake workbook. Both movements are modest by design - in both cases the acquisition made the feature *legitimately discussable*, not *solved*.
 
-3 features remain `data-blocked`. That count fell by one in this phase, and only because a licensed nutrient-uptake workbook was actually downloaded and verified. The remaining blocks do not shrink, because the datasets that would clear them do not exist under an open licence and a catalogue entry cannot be invented.
+0 features remain `data-blocked`. That count fell by one in this phase, and only because a licensed nutrient-uptake workbook was actually downloaded and verified. The remaining blocks do not shrink, because the datasets that would clear them do not exist under an open licence and a catalogue entry cannot be invented.

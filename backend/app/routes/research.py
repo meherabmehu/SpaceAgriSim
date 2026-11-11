@@ -388,6 +388,83 @@ def reference_et0_estimate(
         raise HTTPException(status_code=422, detail=str(error)) from error
 
 
+class ReferenceEt0Request(BaseModel):
+    """A whole-day ET0 request, so an impossible day can be rejected as a *payload*.
+
+    The estimate endpoint takes its weather as query parameters, which is right for a client
+    fetching one day; it is the wrong shape for validating a day that has already been read from
+    a file. This mirrors the same fields and calls the same published equations - it does not
+    re-implement them, and it deliberately does not call the estimate route function (whose
+    defaults are `Query` objects and would be passed through as sentinels).
+    """
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    tmaxC: float = Field(ge=-90, le=60)
+    tminC: float = Field(ge=-90, le=60)
+    latitude: float = Field(ge=-90, le=90)
+    dayOfYear: int = Field(ge=1, le=366)
+    elevationM: float = Field(default=0.0, ge=-500, le=6000)
+    tdewC: float | None = Field(default=None, ge=-100, le=60)
+    relativeHumidityPct: float | None = Field(default=None, ge=0.1, le=100)
+    solarRadiationMJm2: float | None = Field(default=None, ge=0, le=50)
+    windSpeedMs: float | None = Field(default=None, ge=0, le=70)
+    pressureKpa: float | None = Field(default=None, ge=50, le=110)
+
+
+def _et0_payload(request: ReferenceEt0Request) -> dict:
+    if request.tdewC is None and request.relativeHumidityPct is None:
+        raise HTTPException(status_code=422,
+                            detail="supply either tdewC or relativeHumidityPct to define vapour "
+                                   "pressure")
+    try:
+        return et0.estimate(
+            tmax_c=request.tmaxC, tmin_c=request.tminC, day_of_year=request.dayOfYear,
+            latitude=request.latitude, elevation_m=request.elevationM, tdew_c=request.tdewC,
+            relative_humidity_pct=request.relativeHumidityPct,
+            solar_radiation_mj=request.solarRadiationMJm2,
+            wind_speed_ms=request.windSpeedMs, pressure_kpa=request.pressureKpa)
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+
+
+@router.get("/reference-et0/validate")
+def reference_et0_validate(
+    tmaxC: float = Query(ge=-90.0, le=60.0),
+    tminC: float = Query(ge=-90.0, le=60.0),
+    latitude: float = Query(ge=-90.0, le=90.0),
+    dayOfYear: int | None = Query(default=None, ge=1, le=366),
+    elevationM: float = Query(default=0.0, ge=-500.0, le=6000.0),
+    tdewC: float | None = Query(default=None, ge=-100.0, le=60.0),
+    relativeHumidityPct: float | None = Query(default=None, ge=0.1, le=100.0),
+    solarRadiationMJm2: float | None = Query(default=None, ge=0.0, le=50.0),
+    windSpeedMs: float | None = Query(default=None, ge=0.0, le=70.0),
+    pressureKpa: float | None = Query(default=None, ge=50.0, le=110.0),
+):
+    """Compute reference ET0 and answer the question the number cannot answer itself.
+
+    A bad day - swapped temperatures, a solar flux for another planet - still produces a number
+    out of any equation. This endpoint returns the value alongside `outputCheck`, which states
+    whether the result is physically plausible and, when it is not, which rule it broke. The
+    value is never clamped: a corrected number would hide the input error.
+    """
+    request = ReferenceEt0Request(
+        tmaxC=tmaxC, tminC=tminC, latitude=latitude,
+        dayOfYear=dayOfYear or datetime.now(timezone.utc).timetuple().tm_yday,
+        elevationM=elevationM, tdewC=tdewC, relativeHumidityPct=relativeHumidityPct,
+        solarRadiationMJm2=solarRadiationMJm2, windSpeedMs=windSpeedMs,
+        pressureKpa=pressureKpa)
+    payload = _et0_payload(request)
+    payload["validatedInputs"] = request.model_dump()
+    return payload
+
+
+@router.post("/reference-et0/validate")
+def reference_et0_validate_body(request: ReferenceEt0Request):
+    """The same check for a whole day supplied as a payload, so a batch can be validated."""
+    payload = _et0_payload(request)
+    payload["validatedInputs"] = request.model_dump()
+    return payload
+
+
 @router.get("/reference-et0/model")
 def reference_et0_model():
     """The model card for the served ET0 calculation.

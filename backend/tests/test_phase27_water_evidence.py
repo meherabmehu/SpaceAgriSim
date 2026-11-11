@@ -269,8 +269,16 @@ def test_no_layer_is_present_without_evidence(coverage):
                 assert (REPO_ROOT / path).exists(), f"{feature['id']}.{name}: {path}"
 
 
-def test_exactly_one_feature_is_a_complete_phase27_workflow(coverage):
-    assert coverage["summary"]["completeWorkflows"] == ["measured-eta"]
+def test_the_complete_workflows_are_the_ones_phase_32_closed(coverage):
+    """Phase 27 shipped one complete workflow; Phase 32 closed the other three it had audited.
+
+    The set is pinned rather than counted, so a feature cannot become "complete" by having a
+    layer quietly re-labelled `not-applicable`.
+    """
+    assert set(coverage["summary"]["completeWorkflows"]) == {
+        "measured-eta", "independent-et0", "led-spectrum-response", "sub-daily-weather"}
+    assert coverage["summary"]["byDisposition"] == {
+        "complete": 3, "comparison-only": 1, "removed": 8}
 
 
 def test_the_completed_feature_has_no_missing_applicable_layer(coverage):
@@ -279,21 +287,37 @@ def test_the_completed_feature_has_no_missing_applicable_layer(coverage):
         assert entry["state"] in ("present", "not-applicable"), name
 
 
-def test_coverage_records_the_uncertainty_layer_as_the_weakest(coverage):
-    """The audit's central finding, asserted so a later phase cannot quietly lose it."""
+def test_every_retained_feature_now_covers_uncertainty_and_output_checks(coverage):
+    """Phase 27's central finding was that `uncertainty` and `outputCheck` were the weakest layers.
+
+    Phase 32 closed it: no retained feature is left with an `absent` uncertainty or output-check
+    layer. Removed features are exempt - there is no result to qualify.
+    """
     by_layer = coverage["summary"]["byLayer"]
-    assert by_layer["uncertainty"]["present"] <= 2
-    assert by_layer["uncertainty"]["absent"] >= 4
+    assert by_layer["uncertainty"].get("absent", 0) == 0
+    assert by_layer["outputCheck"].get("absent", 0) == 0
+    for feature in coverage["features"]:
+        if feature["phase32Disposition"] == "removed":
+            continue
+        for layer in ("uncertainty", "outputCheck", "inputCheck"):
+            assert feature["layers"][layer]["state"] in ("present", "not-applicable"), (
+                feature["id"], layer, feature["layers"][layer]["state"])
     assert by_layer["tests"]["present"] >= 10
 
 
-def test_coverage_lists_cross_cutting_gaps_with_evidence(coverage):
+def test_cross_cutting_gaps_carry_evidence_and_a_disposition(coverage):
+    """Every cross-cutting gap names its evidence and says what Phase 32 did about it.
+
+    A gap may not be left as an open `major` finding: it is either resolved in the product or
+    recorded as a limitation the response itself states.
+    """
     assert len(coverage["crossCuttingGaps"]) >= 5
     for gap in coverage["crossCuttingGaps"]:
         assert gap["evidence"]
-        assert gap["severity"] in {"major", "minor"}
+        assert gap["severity"] in {"resolved", "documented-limitation"}
+        assert gap["disposition"].strip()
         for path in gap["evidence"]:
-            assert (REPO_ROOT / path).exists(), gap["id"]
+            assert (REPO_ROOT / path).exists(), (gap["id"], path)
 
 
 def test_coverage_markdown_is_not_stale():

@@ -105,6 +105,14 @@ def physics_status() -> dict:
     }
 
 
+# Phase 32: the audit found that no output layer checked whether a number was physically
+# possible. Reference ET0 above this is not a dry day, it is a bad input - the highest daily
+# total in the FAO-56 worked examples is under 8 mm and the world record class is ~15 mm. A
+# value returned above the ceiling is *reported*, never clamped, because a clamp would turn a
+# detectable input error into a plausible-looking number.
+MAX_PLAUSIBLE_ET0_MM = 30.0
+
+
 def estimate(
     *,
     tmax_c: float,
@@ -166,6 +174,23 @@ def estimate(
     else:
         primary, value = "hargreaves", hargreaves_block["et0MmPerDay"]
 
+    # ---- output plausibility -------------------------------------------------------------
+    # Returned, not corrected. `plausible` is the verdict on the value above; the caller decides
+    # whether to show it, and cannot do so without seeing this.
+    implausibilities = []
+    if tmax_c < tmin_c:
+        implausibilities.append(
+            f"tmaxC is below tminC ({tmax_c} < {tmin_c}); the daily temperature range is negative, "
+            "which is not a physical day. The inputs are probably swapped.")
+    if value < 0:
+        implausibilities.append(
+            f"ET0 {value} mm/day is negative; a reference surface cannot condense more water than "
+            "it evaporates over a day at these inputs.")
+    if value > MAX_PLAUSIBLE_ET0_MM:
+        implausibilities.append(
+            f"ET0 {value} mm/day exceeds the physical ceiling of {MAX_PLAUSIBLE_ET0_MM} mm/day "
+            "used here; at this magnitude the inputs are wrong, not the weather exceptional.")
+
     missing = [name for name, present in (
         ("solarRadiationMJm2", solar_radiation_mj is not None),
         ("windSpeedMs", wind_speed_ms is not None),
@@ -193,6 +218,14 @@ def estimate(
                        "was used." if penman is not None else
                        f"Penman-Monteith needs {' and '.join(missing)}; only Hargreaves-Samani "
                        "is computed."),
+        },
+        "outputCheck": {
+            "plausible": not implausibilities,
+            "failures": implausibilities,
+            "rule": (f"0 <= ET0 <= {MAX_PLAUSIBLE_ET0_MM} mm/day and tmax >= tmin. A failed check "
+                     "is returned rather than silently clamped, so a bad input cannot produce a "
+                     "plausible-looking number."),
+            "physicalCeilingMmPerDay": MAX_PLAUSIBLE_ET0_MM,
         },
         "light": (et0_fao56.daily_light_integral(solar_radiation_mj)
                   if solar_radiation_mj is not None else None),

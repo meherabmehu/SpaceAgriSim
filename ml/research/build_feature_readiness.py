@@ -40,7 +40,8 @@ TIERS = {
     "experimental": "implemented and internally evaluated; no independent validation exists",
     "data-blocked": "no obtainable dataset can move this feature; the block is the data's absence",
     "unsupported": "the product must not make the claim at all",
-    "removed": "the capability was withdrawn in Phase 30 and no surface remains that claims it",
+    "removed": "the capability is not in the product: no control, page, endpoint, catalogue entry "
+               "or documentation claim survives, and a test proves it is absent",
 }
 
 # Each feature: what it claims, which tier it reaches, and the artefacts that justify the tier.
@@ -340,6 +341,80 @@ def _catalogue_ids() -> set[str]:
     return {dataset["id"] for dataset in payload["datasets"]}
 
 
+# ---------------------------------------------------------------------------------------------
+# Phase 32 dispositions.
+#
+# Phase 26 asked what each feature may claim and Phase 27 asked whether a user can walk through
+# it. Phase 32 closed the list: a feature is either complete at the level it claims, or it is
+# removed from the product. Nothing is left in a resting "blocked" state, because a blocked row
+# reads as a roadmap and the platform does not intend to build these.
+#
+# The tier and the reason live here rather than in the JSON so that regenerating this file cannot
+# silently restore a withdrawn claim.
+# ---------------------------------------------------------------------------------------------
+PHASE32 = {
+    "yield-labels": ("removed", (
+        "The served harvest forecast was withdrawn in Phase 31 after the lettuce v3 model missed "
+        "its pre-registered 30 % MAPE criterion at 41.6 % and the mizuna model held a negative "
+        "held-out R2 (-0.333). backend/tests/test_phase32_no_forecast.py proves no route, "
+        "workflow or assistant passage offers a harvest forecast; only the archival parity record "
+        "remains.")),
+    "nutrient-balance": ("removed", (
+        "Searched for a hydroponic nutrient series with a per-plant response: the acquired archive "
+        "records solution composition per treatment, not a response the platform could predict. No "
+        "control, page, endpoint or claim exists.")),
+    "cultivar-metadata": ("removed", (
+        "No experiment in the repository carries a cultivar label usable as a model input and no "
+        "cultivar selector or parameter exists. A cultivar effect cannot be learned from one "
+        "cultivar per study, so the feature is withdrawn instead of being left as a promise.")),
+    "mission-energy": ("removed", (
+        "No mission energy or mass budget dataset exists in the repository and the platform "
+        "publishes no such figure. Phase 32 proves by test that no response carries one.")),
+    "fractional-gravity": ("removed", (
+        "No recovered study measures production as a function of gravity: ground chambers and "
+        "orbital runs compare a microgravity arm with a 1 g control, not a graded response. The "
+        "search record stays in docs/PHASE30_REMOVED_CAPABILITIES.md and no input, card or route "
+        "accepts a gravity value.")),
+    "substrate-water": ("removed", (
+        "No root-zone water-potential series exists in the repository or in the searched sources "
+        "(OSDR, Zenodo, Dryad, PANGAEA, Mendeley). The simulator's single well-mixed store is a "
+        "documented assumption inside the water-demand calculation, not a root-zone status "
+        "feature, and no control claims one.")),
+    "imagery": ("removed", (
+        "No paired imagery and harvest labels exist for a plant-health model, and the catalogue's "
+        "imagery datasets are licence classes E/F, which cannot back a served model. No upload, "
+        "camera view or plant-health card exists.")),
+    "long-run-climate": ("removed", (
+        "The CMIP6 downscaled product is catalogued at licence class D and could not be acquired; "
+        "no projection data is in the repository and no climate-siting control or report exists.")),
+    "led-spectrum-response": ("research-ready", (
+        "Completed as a measured group comparison only: four spectral regimes in lettuce and the "
+        "controlled-environment wheat runs, served through the light-stress and "
+        "controlled-environment workflows with between-plant spread and a confounded-regime flag. "
+        "No fitted response surface is served; the one that was fitted failed its sealed holdout "
+        "(297.46 % MAPE) and was deleted.")),
+}
+
+SEARCHED = ("NASA OSDR/ALSDA/GeneLab, Zenodo, Dryad, Figshare, PANGAEA, Mendeley Data, Dataverse, "
+            "USDA Ag Data Commons, OpenAIRE and journal supplements")
+
+for _feature in FEATURES:
+    if _feature["id"] not in PHASE32:
+        continue
+    _tier, _reason = PHASE32[_feature["id"]]
+    _feature["previousTier"] = _feature["tier"]
+    _feature["tier"] = _tier
+    _feature["tierChanged"] = _feature["previousTier"] != _tier
+    _feature["phase32"] = {"tier": _tier, "reason": _reason, "searched": SEARCHED}
+    if _tier == "removed":
+        _feature["whatItSupports"] = [
+            item for item in _feature["whatItSupports"]
+            if any(word in item.lower() for word in ("record", "parity", "nothing"))
+        ]
+        _feature["whatWouldMoveIt"] = "nothing: the capability is removed rather than blocked"
+
+
+
 def validate(features: list[dict[str, Any]]) -> list[str]:
     """Refuse to write an audit whose tiers outrun its evidence."""
     problems: list[str] = []
@@ -480,6 +555,9 @@ def build() -> dict[str, Any]:
         "phase": 26,
         "generatedBy": "ml/research/build_feature_readiness.py",
         "generatedOn": GENERATED_ON,
+        "phase32Note": ("Phase 32 closed this list. Every feature is either complete at the level "
+                        "it claims or removed from the product; 'data-blocked' is no longer a "
+                        "resting state."),
         "tierDefinitions": TIERS,
         "tierOrder": TIER_ORDER,
         "counts": {

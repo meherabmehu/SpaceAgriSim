@@ -24,64 +24,55 @@
   "summary": {
     "byLayer": {
       "data": {
-        "present": 5,
-        "retired": 2,
-        "partial": 1,
-        "absent": 4
+        "present": 4,
+        "retired": 8
       },
       "method": {
         "present": 4,
-        "retired": 2,
-        "partial": 3,
-        "absent": 3
+        "retired": 8
       },
       "service": {
-        "present": 6,
-        "retired": 2,
-        "absent": 4
+        "present": 4,
+        "retired": 8
       },
       "endpoint": {
-        "present": 6,
-        "retired": 2,
-        "absent": 4
+        "present": 4,
+        "retired": 8
       },
       "inputCheck": {
-        "present": 8,
-        "retired": 1,
-        "not-applicable": 3
+        "present": 4,
+        "not-applicable": 8
       },
       "outputCheck": {
-        "present": 1,
-        "partial": 4,
-        "retired": 1,
-        "not-applicable": 6
+        "present": 4,
+        "not-applicable": 8
       },
       "uncertainty": {
-        "present": 1,
-        "partial": 1,
-        "retired": 1,
-        "not-applicable": 5,
-        "absent": 4
+        "present": 4,
+        "not-applicable": 8
       },
       "provenance": {
-        "present": 9,
-        "partial": 1,
-        "not-applicable": 2
+        "present": 12
       },
       "frontend": {
-        "present": 6,
-        "retired": 2,
-        "partial": 1,
-        "absent": 3
+        "present": 4,
+        "retired": 8
       },
       "tests": {
-        "present": 10,
-        "not-applicable": 2
+        "present": 12
       }
     },
     "completeWorkflows": [
-      "measured-eta"
+      "measured-eta",
+      "independent-et0",
+      "led-spectrum-response",
+      "sub-daily-weather"
     ],
+    "byDisposition": {
+      "complete": 3,
+      "removed": 8,
+      "comparison-only": 1
+    },
     "features": 12
   },
   "features": [
@@ -91,80 +82,82 @@
       "claim": "Measured crop water use, compared against the platform's demand",
       "readinessTier": "research-ready",
       "phase27Status": "completed",
+      "phase32Disposition": "complete",
       "layers": {
         "data": {
           "state": "present",
+          "note": "345 usable pot-days reduced to 11 treatment-mean dates, hash-verified",
           "evidence": [
             "data/processed/phase26/schroder2021_lettuce_et.csv",
             "data/metadata/phase26_acquisition_manifest.json"
-          ],
-          "note": "345 usable pot-days reduced to 11 treatment-mean dates, hash-verified"
+          ]
         },
         "method": {
           "state": "present",
+          "note": "the shipped crop-relative demand path, called unmodified",
           "evidence": [
             "backend/app/simulation/water.py"
-          ],
-          "note": "the shipped crop-relative demand path, called unmodified"
+          ]
         },
         "service": {
           "state": "present",
+          "note": "assembles the benchmark, the comparison, the uncertainty and the limits",
           "evidence": [
             "backend/app/water_evidence.py"
-          ],
-          "note": "assembles the benchmark, the comparison, the uncertainty and the limits"
+          ]
         },
         "endpoint": {
           "state": "present",
+          "note": "GET /api/water-use-evidence and POST /api/water-use-evidence/compare",
           "evidence": [
             "backend/app/routes/research.py"
-          ],
-          "note": "GET /api/water-use-evidence and POST /api/water-use-evidence/compare"
+          ]
         },
         "inputCheck": {
           "state": "present",
+          "note": "extra fields forbidden, area and light scale bounded, unknown crop 422",
           "evidence": [
             "backend/app/routes/research.py",
             "backend/tests/test_phase27_water_evidence.py"
-          ],
-          "note": "extra fields forbidden, area and light scale bounded, unknown crop 422"
+          ]
         },
         "outputCheck": {
           "state": "present",
+          "note": "the service must reproduce the independent pandas artefact's Spearman and pair count; every curve point must be positive and inside [0,1]; the surface refuses a level claim",
           "evidence": [
-            "backend/tests/test_phase27_water_evidence.py"
-          ],
-          "note": "the service must reproduce the independent pandas artefact's Spearman and pair count; every curve point must be positive and inside [0,1]"
+            "backend/tests/test_phase27_water_evidence.py",
+            "backend/tests/test_phase32_output_checks.py"
+          ]
         },
         "uncertainty": {
           "state": "present",
+          "note": "between-pot spread, measured; the three denominators shown side by side and an explicit statement that no confidence interval exists",
           "evidence": [
             "ml/evaluation/phase26_measured_et_validation.json"
-          ],
-          "note": "between-pot spread, measured; plus the three denominators shown side by side and the explicit statement that no confidence interval exists"
+          ]
         },
         "provenance": {
           "state": "present",
+          "note": "DOI, licence, processed path and per-file SHA-256, hashVerified computed",
           "evidence": [
             "data/research/dataset_catalog.json"
-          ],
-          "note": "DOI, licence, processed path and per-file SHA-256, with hashVerified computed"
+          ]
         },
         "frontend": {
           "state": "present",
+          "note": "inside the existing simulation lab; verdict, curve, spread, denominators",
           "evidence": [
             "frontend/src/pages/modules/WaterEvidencePanel.jsx",
             "frontend/e2e/water-evidence.spec.js"
-          ],
-          "note": "inside the existing simulation lab; verdict, curve, spread, denominators"
+          ]
         },
         "tests": {
           "state": "present",
+          "note": "backend suite and four browser tests across three viewports",
           "evidence": [
             "backend/tests/test_phase27_water_evidence.py",
             "frontend/e2e/water-evidence.spec.js"
-          ],
-          "note": "24 backend tests and 4 browser tests across three viewports"
+          ]
         }
       }
     },
@@ -173,72 +166,83 @@
       "order": 2,
       "claim": "The ET0 target is itself correct",
       "readinessTier": "research-ready",
-      "phase27Status": "audited only",
+      "phase27Status": "completed",
+      "phase32Disposition": "complete",
       "layers": {
         "data": {
           "state": "present",
+          "note": "FAO-56 published worked examples, transcribed with their source pages",
           "evidence": [
-            "data/raw/nasa_power/power_tucson_us.json",
-            "data/metadata/power_acquisition_manifest.json"
-          ],
-          "note": "POWER plus three cross-check sources"
+            "backend/tests/test_phase23_reference_et0.py"
+          ]
         },
         "method": {
           "state": "present",
+          "note": "FAO-56 Penman-Monteith with Hargreaves-Samani as the declared fallback; the fitted emulator was withdrawn in Phase 31",
           "evidence": [
+            "backend/app/et0.py",
             "backend/app/simulation/et0_fao56.py"
           ]
         },
         "service": {
           "state": "present",
+          "note": "one module selects the method and reports why",
           "evidence": [
             "backend/app/et0.py"
           ]
         },
         "endpoint": {
           "state": "present",
-          "evidence": [
-            "backend/app/routes/research.py"
-          ],
-          "note": "GET /api/reference-et0/estimate and /model"
-        },
-        "inputCheck": {
-          "state": "present",
+          "note": "GET /api/reference-et0/estimate, GET /api/reference-et0/model, and the Phase 32 validators GET/POST /api/reference-et0/validate",
           "evidence": [
             "backend/app/routes/research.py"
           ]
         },
-        "outputCheck": {
-          "state": "partial",
+        "inputCheck": {
+          "state": "present",
+          "note": "physical bounds on every weather input; 422 when vapour pressure is undefined; extra fields rejected",
           "evidence": [
-            "ml/evaluation/et0_dataset_quality.json"
-          ],
-          "note": "input-quality checks exist; no physical-plausibility gate on output"
+            "backend/app/routes/research.py",
+            "backend/tests/test_phase32_output_checks.py"
+          ]
+        },
+        "outputCheck": {
+          "state": "present",
+          "note": "Phase 32: the result carries a plausibility verdict - 0 <= ET0 <= 30 mm/day and tmax >= tmin - returned rather than clamped",
+          "evidence": [
+            "backend/app/et0.py",
+            "backend/tests/test_phase32_output_checks.py"
+          ]
         },
         "uncertainty": {
-          "state": "partial",
+          "state": "present",
+          "note": "the response states that no measured-ET0 benchmark is bundled, that no interval is computed, and that the weather inputs are the caller's",
           "evidence": [
-            "docs/ERA5_LAND_INDEPENDENT_VALIDATION.md"
-          ],
-          "note": "cross-source spread is reported; no confidence interval"
+            "backend/app/et0.py"
+          ]
         },
         "provenance": {
           "state": "present",
+          "note": "method selection, missing inputs, weather provenance and the computed-not-measured class travel with the number",
           "evidence": [
-            "data/research/dataset_catalog.json"
+            "backend/app/routes/research.py"
           ]
         },
         "frontend": {
           "state": "present",
+          "note": "the water-demand workflow shows daily ET0, its primary method and per-scenario deltas",
           "evidence": [
-            "frontend/src/pages/modules/Methodology.jsx"
-          ],
-          "note": "shown as method documentation, not as a per-simulation result"
+            "frontend/src/pages/modules/GuidedWorkflows.jsx",
+            "frontend/e2e/guided-workflows.spec.js"
+          ]
         },
         "tests": {
           "state": "present",
+          "note": "worked examples, fallback behaviour and the output gate",
           "evidence": [
-            "backend/tests/test_phase23_reference_et0.py"
+            "backend/tests/test_phase23_reference_et0.py",
+            "backend/tests/test_phase25_et0_validation.py",
+            "backend/tests/test_phase32_output_checks.py"
           ]
         }
       }
@@ -248,72 +252,66 @@
       "order": 3,
       "claim": "Predicted harvest mass per plant",
       "readinessTier": "removed",
-      "phase27Status": "audited only",
-      "phase30Status": "removed",
-      "removal": "Operational harvest forecasting was removed in Phase 30. A leave-one-study-out evaluation over 40 published lettuce studies returned 310.17 % MAPE against the unchanged 30 % criterion, with the mean baseline selected; the Phase 28 holdout had already returned 41.59 %. Phase 31 deleted the workflow module, all three endpoints and the catalogue entry; the measured-versus-model parity record and every failed evaluation remain committed as data.",
+      "phase27Status": "removed",
+      "phase32Disposition": "removed",
+      "removal": "Withdrawn in Phase 31. Lettuce v3 returned 41.6 % on its independent holdout against a pre-registered 30 % criterion, and mizuna-harvest-v1 held a held-out R2 of -0.333. The cards stay, with their failed evaluations, as non-serving records.",
       "layers": {
         "data": {
           "state": "retired",
+          "note": "no obtainable dataset supports this claim",
           "evidence": [
-            "data/processed/phase30/lettuce_multistudy.csv"
-          ],
-          "note": "the evaluation data is kept; the served model is not"
+            "docs/PHASE31_REMOVED_MODELS.md"
+          ]
         },
         "method": {
           "state": "retired",
-          "evidence": [
-            "ml/evaluation/phase30_harvest_crossstudy.json"
-          ],
-          "note": "the model and its failed evaluation are recorded, not served"
+          "note": "no implementation is served",
+          "evidence": []
         },
         "service": {
           "state": "retired",
-          "evidence": [
-            "docs/PHASE31_REMOVED_MODELS.md"
-          ],
-          "note": "the module itself was deleted in Phase 31; the record is kept"
+          "note": "no module assembles a result",
+          "evidence": []
         },
         "endpoint": {
           "state": "retired",
-          "evidence": [
-            "backend/app/routes/workflows.py"
-          ],
-          "note": "POST .../run answers 410; GET .../capability and .../parity remain"
+          "note": "no route accepts it",
+          "evidence": []
         },
         "inputCheck": {
-          "state": "retired",
+          "state": "not-applicable",
+          "note": "no request schema accepts these inputs",
           "evidence": []
         },
         "outputCheck": {
-          "state": "retired",
+          "state": "not-applicable",
+          "note": "no result is produced",
           "evidence": []
         },
         "uncertainty": {
-          "state": "retired",
-          "evidence": [],
-          "note": "the interval used to span a factor of 29; it is no longer served"
+          "state": "not-applicable",
+          "note": "no result is produced",
+          "evidence": []
         },
         "provenance": {
           "state": "present",
+          "note": "the removal register, the failed evaluations and the retired card all stay committed; every model passage the assistant can quote carries its served scope",
           "evidence": [
-            "docs/PHASE31_REMOVED_MODELS.md"
-          ],
-          "note": "the removal reason and every failed evaluation stay readable"
+            "docs/PHASE31_REMOVED_MODELS.md",
+            "ml/evaluation/phase30_harvest_crossstudy.json"
+          ]
         },
         "frontend": {
           "state": "retired",
-          "evidence": [
-            "frontend/src/pages/modules/GuidedWorkflows.jsx"
-          ],
-          "note": "the tab is gone; the record lives in docs/PHASE31_REMOVED_MODELS.md"
+          "note": "no control, page or panel presents it",
+          "evidence": []
         },
         "tests": {
           "state": "present",
+          "note": "no route, OpenAPI operation, catalogue row, request schema, assistant passage or workflow offers a harvest forecast",
           "evidence": [
-            "backend/tests/test_phase28_workflows.py",
-            "backend/tests/test_phase30_removed_capabilities.py"
-          ],
-          "note": "the tests assert the capability is unavailable, not that a screen exists"
+            "backend/tests/test_phase32_no_forecast.py"
+          ]
         }
       }
     },
@@ -321,67 +319,84 @@
       "id": "led-spectrum-response",
       "order": 4,
       "claim": "Response to specific LED spectra and photoperiods",
-      "readinessTier": "experimental",
-      "phase27Status": "audited only",
+      "readinessTier": "research-ready",
+      "phase27Status": "completed",
+      "phase32Disposition": "comparison-only",
       "layers": {
         "data": {
           "state": "present",
+          "note": "two measured datasets: four spectral regimes in lettuce, and the controlled-environment wheat runs varying PPFD, photoperiod, CO2 and temperature",
           "evidence": [
             "data/processed/phase29/light_stress_harvest.csv",
             "data/processed/phase30/cea_wheat_experiments.csv"
-          ],
-          "note": "two measured datasets: four spectral regimes in lettuce, and 39 controlled-environment wheat runs varying PPFD, photoperiod, CO2 and temperature"
+          ]
         },
         "method": {
-          "state": "partial",
+          "state": "present",
+          "note": "a measured group comparison. The fitted response surface failed its sealed holdout (297.46 % MAPE) and was deleted in Phase 30 rather than served behind a caveat",
           "evidence": [
             "backend/app/workflows/light_stress.py",
             "backend/app/workflows/cea_evidence.py"
-          ],
-          "note": "measured group comparison ships; the fitted response surface failed its sealed holdout (297.46 % MAPE) and is not served"
+          ]
         },
         "service": {
-          "state": "absent",
-          "evidence": []
+          "state": "present",
+          "note": "both workflows assemble measured group summaries with their design caveats; a regime that changes spectrum and density at once is flagged",
+          "evidence": [
+            "backend/app/workflows/light_stress.py",
+            "backend/app/workflows/cea_evidence.py"
+          ]
         },
         "endpoint": {
-          "state": "absent",
-          "evidence": []
+          "state": "present",
+          "note": "GET/POST /api/workflows/light-stress/{capability,run} and the /controlled-environment equivalents",
+          "evidence": [
+            "backend/app/routes/workflows.py"
+          ]
         },
         "inputCheck": {
           "state": "present",
+          "note": "regime is a Literal of the measured regimes; traits and daysAfterSowing are bounded; extra fields forbidden",
           "evidence": [
-            "backend/app/models/simulation.py"
-          ],
-          "note": "lightSpectrum is a Literal of three values"
+            "backend/app/routes/workflows.py"
+          ]
         },
         "outputCheck": {
-          "state": "not-applicable",
-          "evidence": []
+          "state": "present",
+          "note": "every reported group must exist in the measured table, and a group with a confounded design carries the flag",
+          "evidence": [
+            "backend/app/workflows/light_stress.py"
+          ]
         },
         "uncertainty": {
-          "state": "not-applicable",
-          "evidence": []
+          "state": "present",
+          "note": "between-plant spread per regime, from the measured replicates; no interval is extrapolated beyond the measured groups",
+          "evidence": [
+            "backend/app/workflows/light_stress.py"
+          ]
         },
         "provenance": {
           "state": "present",
+          "note": "each regime names its source study, licence and design caveat",
           "evidence": [
-            "data/research/dataset_catalog.json"
+            "data/processed/phase29/light_stress_quality.json"
           ]
         },
         "frontend": {
-          "state": "partial",
+          "state": "present",
+          "note": "the guided workflows render the measured groups and their spread",
           "evidence": [
-            "frontend/src/pages/modules/Laboratory.jsx"
-          ],
-          "note": "the selector says it is an annotation and infers no response"
+            "frontend/src/pages/modules/GuidedWorkflows.jsx",
+            "frontend/e2e/guided-workflows.spec.js"
+          ]
         },
         "tests": {
           "state": "present",
+          "note": "the workflows are tested against the measured table",
           "evidence": [
-            "backend/tests/test_phase26_datasets.py"
-          ],
-          "note": "the dataset is tested; the feature is not implemented"
+            "backend/tests/test_phase29_workflows.py",
+            "backend/tests/test_phase30_datasets.py"
+          ]
         }
       }
     },
@@ -389,56 +404,67 @@
       "id": "nutrient-balance",
       "order": 5,
       "claim": "Nutrient solution management",
-      "readinessTier": "experimental",
-      "phase27Status": "audited only",
+      "readinessTier": "removed",
+      "phase27Status": "removed",
+      "phase32Disposition": "removed",
+      "removal": "No hydroponic nutrient series with a per-plant response is obtainable: the acquired archives record solution composition per treatment, not a response the platform could model. No control, page, endpoint or claim exists.",
       "layers": {
         "data": {
-          "state": "partial",
+          "state": "retired",
+          "note": "no obtainable dataset supports this claim",
           "evidence": [
-            "data/raw/phase26/zenodo-halbert-2020-tomato-hydroponic/"
-          ],
-          "note": "acquired and verified, not preprocessed into a table"
+            "docs/PHASE27_FEATURE_AUDIT.md"
+          ]
         },
         "method": {
-          "state": "absent",
+          "state": "retired",
+          "note": "no implementation is served",
           "evidence": []
         },
         "service": {
-          "state": "absent",
+          "state": "retired",
+          "note": "no module assembles a result",
           "evidence": []
         },
         "endpoint": {
-          "state": "absent",
+          "state": "retired",
+          "note": "no route accepts it",
           "evidence": []
         },
         "inputCheck": {
           "state": "not-applicable",
+          "note": "no request schema accepts these inputs",
           "evidence": []
         },
         "outputCheck": {
           "state": "not-applicable",
+          "note": "no result is produced",
           "evidence": []
         },
         "uncertainty": {
           "state": "not-applicable",
+          "note": "no result is produced",
           "evidence": []
         },
         "provenance": {
           "state": "present",
+          "note": "No hydroponic nutrient series with a per-plant response is obtainable: the acquired archives record solution composition per treatment, not a response the platform could model. No control, page, endpoint or claim exists.",
           "evidence": [
-            "data/research/dataset_catalog.json"
+            "docs/PHASE27_FEATURE_AUDIT.md"
           ]
         },
         "frontend": {
-          "state": "absent",
+          "state": "retired",
+          "note": "no control, page or panel presents it",
           "evidence": []
         },
         "tests": {
           "state": "present",
+          "note": "the removal is asserted, not assumed",
           "evidence": [
-            "backend/tests/test_phase26_datasets.py"
-          ],
-          "note": "acquisition is tested; no nutrient feature exists"
+            "backend/tests/test_phase32_removed_features.py",
+            "backend/tests/test_phase30_removed_capabilities.py"
+          ]
         }
       }
     },
@@ -447,68 +473,79 @@
       "order": 6,
       "claim": "Heat-stress and VPD excursion claims",
       "readinessTier": "research-ready",
-      "phase27Status": "audited only",
+      "phase27Status": "completed",
+      "phase32Disposition": "complete",
       "layers": {
         "data": {
           "state": "present",
+          "note": "the scenario's own temperature, humidity and light, which are the caller's assumptions and are labelled as such",
           "evidence": [
-            "data/raw/nasa_power/power_tucson_us.json"
+            "backend/app/simulation/serializers.py"
           ]
         },
         "method": {
           "state": "present",
+          "note": "Tetens saturation vapour pressure; the light integral is PPFD x hours",
           "evidence": [
-            "backend/app/simulation/gas_exchange.py"
-          ],
-          "note": "VPD is computed per scenario from temperature and humidity"
+            "backend/app/simulation/factors.py",
+            "backend/app/simulation/serializers.py"
+          ]
         },
         "service": {
           "state": "present",
+          "note": "assembled in the simulation response",
           "evidence": [
             "backend/app/simulation/serializers.py"
           ]
         },
         "endpoint": {
           "state": "present",
+          "note": "POST /api/simulate",
           "evidence": [
             "backend/app/routes/simulation.py"
-          ],
-          "note": "environment.vaporPressureDeficitKpa on /api/simulate"
+          ]
         },
         "inputCheck": {
           "state": "present",
+          "note": "temperature, humidity and light bounds are enforced",
           "evidence": [
             "backend/app/models/simulation.py"
           ]
         },
         "outputCheck": {
-          "state": "partial",
+          "state": "present",
+          "note": "Phase 32: VPD and the light integral each carry a method, an assumptions flag and a statement that no error is propagated",
           "evidence": [
-            "backend/tests/test_engine.py"
+            "backend/app/simulation/serializers.py",
+            "backend/tests/test_phase32_output_checks.py"
           ]
         },
         "uncertainty": {
-          "state": "absent",
-          "evidence": [],
-          "note": "the reported VPD is a point value with no stated source error"
-        },
-        "provenance": {
-          "state": "partial",
+          "state": "present",
+          "note": "explicit: `propagatedError: null` plus a sentence saying the value describes a scenario, not a place or a day",
           "evidence": [
             "backend/app/simulation/serializers.py"
-          ],
-          "note": "method named; the weather source is not attached per value"
+          ]
+        },
+        "provenance": {
+          "state": "present",
+          "note": "the VPD method and the assumption flag travel with the number",
+          "evidence": [
+            "backend/app/simulation/serializers.py"
+          ]
         },
         "frontend": {
           "state": "present",
+          "note": "the environment panel and the digital-twin state read these values",
           "evidence": [
-            "frontend/src/pages/modules/Laboratory.jsx"
+            "frontend/src/components/DigitalTwin3D.jsx"
           ]
         },
         "tests": {
           "state": "present",
+          "note": "the output-check suite asserts the statements and the units map",
           "evidence": [
-            "backend/tests/test_engine.py"
+            "backend/tests/test_phase32_output_checks.py"
           ]
         }
       }
@@ -517,65 +554,65 @@
       "id": "cultivar-metadata",
       "order": 7,
       "claim": "Cultivar-specific growth parameters",
-      "readinessTier": "experimental",
-      "phase27Status": "audited only",
+      "readinessTier": "removed",
+      "phase27Status": "removed",
+      "phase32Disposition": "removed",
+      "removal": "No experiment in the repository carries a cultivar label usable as a model input and no cultivar selector or parameter exists. A cultivar effect cannot be learned from one cultivar per study.",
       "layers": {
         "data": {
-          "state": "absent",
-          "evidence": [],
-          "note": "no experiment in-repo carries a cultivar label usable as an input"
+          "state": "retired",
+          "note": "no obtainable dataset supports this claim",
+          "evidence": [
+            "docs/PHASE26_FEATURE_COVERAGE_MATRIX.md"
+          ]
         },
         "method": {
-          "state": "partial",
-          "evidence": [
-            "backend/app/simulation/crops.py"
-          ],
-          "note": "three species profiles, no cultivar field"
+          "state": "retired",
+          "note": "no implementation is served",
+          "evidence": []
         },
         "service": {
-          "state": "present",
-          "evidence": [
-            "backend/app/simulation/crops.py"
-          ]
+          "state": "retired",
+          "note": "no module assembles a result",
+          "evidence": []
         },
         "endpoint": {
-          "state": "present",
-          "evidence": [
-            "backend/app/routes/simulation.py"
-          ],
-          "note": "GET /api/crops lists the profiles"
+          "state": "retired",
+          "note": "no route accepts it",
+          "evidence": []
         },
         "inputCheck": {
-          "state": "present",
-          "evidence": [
-            "backend/app/models/simulation.py"
-          ]
+          "state": "not-applicable",
+          "note": "no request schema accepts these inputs",
+          "evidence": []
         },
         "outputCheck": {
           "state": "not-applicable",
+          "note": "no result is produced",
           "evidence": []
         },
         "uncertainty": {
-          "state": "absent",
+          "state": "not-applicable",
+          "note": "no result is produced",
           "evidence": []
         },
         "provenance": {
           "state": "present",
+          "note": "No experiment in the repository carries a cultivar label usable as a model input and no cultivar selector or parameter exists. A cultivar effect cannot be learned from one cultivar per study.",
           "evidence": [
-            "backend/app/routes/simulation.py"
-          ],
-          "note": "'Phase 1 simulation assumptions, not measured NASA values'"
+            "docs/PHASE26_FEATURE_COVERAGE_MATRIX.md"
+          ]
         },
         "frontend": {
-          "state": "present",
-          "evidence": [
-            "frontend/src/pages/modules/Laboratory.jsx"
-          ]
+          "state": "retired",
+          "note": "no control, page or panel presents it",
+          "evidence": []
         },
         "tests": {
           "state": "present",
+          "note": "the removal is asserted, not assumed",
           "evidence": [
-            "backend/tests/test_crops.py"
+            "backend/tests/test_phase32_removed_features.py"
           ]
         }
       }
@@ -584,66 +621,65 @@
       "id": "mission-energy",
       "order": 8,
       "claim": "Energy and mass cost of a described mission",
-      "readinessTier": "experimental",
-      "phase27Status": "audited only",
+      "readinessTier": "removed",
+      "phase27Status": "removed",
+      "phase32Disposition": "removed",
+      "removal": "No mission energy or mass budget dataset exists in the repository and the platform publishes no such figure; Phase 32 proves by test that no response carries one.",
       "layers": {
         "data": {
-          "state": "present",
+          "state": "retired",
+          "note": "no obtainable dataset supports this claim",
           "evidence": [
-            "backend/app/config/simulation_constants.py"
-          ],
-          "note": "stated energy assumptions, not measurements"
+            "docs/PHASE26_FEATURE_COVERAGE_MATRIX.md"
+          ]
         },
         "method": {
-          "state": "present",
-          "evidence": [
-            "backend/app/simulation/engine.py"
-          ]
+          "state": "retired",
+          "note": "no implementation is served",
+          "evidence": []
         },
         "service": {
-          "state": "present",
-          "evidence": [
-            "backend/app/simulation/engine.py"
-          ]
+          "state": "retired",
+          "note": "no module assembles a result",
+          "evidence": []
         },
         "endpoint": {
-          "state": "present",
-          "evidence": [
-            "backend/app/routes/simulation.py"
-          ]
+          "state": "retired",
+          "note": "no route accepts it",
+          "evidence": []
         },
         "inputCheck": {
-          "state": "present",
-          "evidence": [
-            "backend/app/models/simulation.py"
-          ]
+          "state": "not-applicable",
+          "note": "no request schema accepts these inputs",
+          "evidence": []
         },
         "outputCheck": {
-          "state": "partial",
-          "evidence": [
-            "backend/tests/test_engine.py"
-          ]
+          "state": "not-applicable",
+          "note": "no result is produced",
+          "evidence": []
         },
         "uncertainty": {
-          "state": "absent",
+          "state": "not-applicable",
+          "note": "no result is produced",
           "evidence": []
         },
         "provenance": {
           "state": "present",
+          "note": "No mission energy or mass budget dataset exists in the repository and the platform publishes no such figure; Phase 32 proves by test that no response carries one.",
           "evidence": [
-            "backend/app/simulation/model_description.py"
+            "docs/PHASE26_FEATURE_COVERAGE_MATRIX.md"
           ]
         },
         "frontend": {
-          "state": "present",
-          "evidence": [
-            "frontend/src/pages/modules/Analytics.jsx"
-          ]
+          "state": "retired",
+          "note": "no control, page or panel presents it",
+          "evidence": []
         },
         "tests": {
           "state": "present",
+          "note": "the removal is asserted, not assumed",
           "evidence": [
-            "backend/tests/test_engine.py"
+            "backend/tests/test_phase32_removed_features.py"
           ]
         }
       }
@@ -653,72 +689,66 @@
       "order": 9,
       "claim": "Effect of Mars or lunar gravity on crop growth",
       "readinessTier": "removed",
-      "phase27Status": "audited only",
-      "phase30Status": "removed",
-      "removal": "The fractional-gravity response was removed in Phase 30: the growth-penalty coefficient, the input field, the presets, the impact step and the frontend readout are gone. No open dataset measures crop yield or biomass across fractional gravity - the ISS graded-gravity work measures gene expression and morphology, and a clinostat is not partial gravity - so the placeholder could not be replaced by evidence.",
+      "phase27Status": "removed",
+      "phase32Disposition": "removed",
+      "removal": "Withdrawn in Phase 30: no recovered study measures production as a function of gravity - ground chambers and orbital runs compare a microgravity arm against a 1 g control, not a graded response. No input, card or route accepts a gravity value.",
       "layers": {
         "data": {
           "state": "retired",
-          "evidence": [],
-          "note": "no fractional-gravity growth dataset exists, and none was recoverable"
+          "note": "no obtainable dataset supports this claim",
+          "evidence": [
+            "docs/PHASE30_REMOVED_CAPABILITIES.md"
+          ]
         },
         "method": {
           "state": "retired",
-          "evidence": [
-            "backend/app/simulation/factors.py"
-          ],
-          "note": "gravity_factor() no longer exists; a test asserts its absence"
+          "note": "no implementation is served",
+          "evidence": []
         },
         "service": {
           "state": "retired",
-          "evidence": [
-            "backend/app/simulation/engine.py"
-          ],
-          "note": "the engine has no gravity term"
+          "note": "no module assembles a result",
+          "evidence": []
         },
         "endpoint": {
           "state": "retired",
-          "evidence": [
-            "backend/app/models/simulation.py"
-          ],
-          "note": "/api/simulate rejects a gravity field and names the decision"
+          "note": "no route accepts it",
+          "evidence": []
         },
         "inputCheck": {
-          "state": "present",
-          "evidence": [
-            "backend/app/models/simulation.py"
-          ],
-          "note": "extra='forbid' plus a model validator turn the field into a 422"
+          "state": "not-applicable",
+          "note": "no request schema accepts these inputs",
+          "evidence": []
         },
         "outputCheck": {
           "state": "not-applicable",
+          "note": "no result is produced",
           "evidence": []
         },
         "uncertainty": {
           "state": "not-applicable",
+          "note": "no result is produced",
           "evidence": []
         },
         "provenance": {
           "state": "present",
+          "note": "Withdrawn in Phase 30: no recovered study measures production as a function of gravity - ground chambers and orbital runs compare a microgravity arm against a 1 g control, not a graded response. No input, card or route accepts a gravity value.",
           "evidence": [
-            "backend/app/simulation/serializers.py"
-          ],
-          "note": "the radiation warning states that gravity is not modelled at all"
+            "docs/PHASE30_REMOVED_CAPABILITIES.md"
+          ]
         },
         "frontend": {
           "state": "retired",
-          "evidence": [
-            "frontend/src/pages/MissionPlatform.jsx"
-          ],
-          "note": "the gravity control and its presets were removed; the component that carried them was dead code and was deleted in Phase 31"
+          "note": "no control, page or panel presents it",
+          "evidence": []
         },
         "tests": {
           "state": "present",
+          "note": "the removal is asserted, not assumed",
           "evidence": [
-            "backend/tests/test_phase27_engine_integrity.py",
-            "backend/tests/test_phase30_removed_capabilities.py"
-          ],
-          "note": "the tests assert the input is refused and the factor is absent"
+            "backend/tests/test_phase30_removed_capabilities.py",
+            "backend/tests/test_phase32_removed_features.py"
+          ]
         }
       }
     },
@@ -726,65 +756,65 @@
       "id": "substrate-water",
       "order": 10,
       "claim": "Root-zone water status",
-      "readinessTier": "data-blocked",
-      "phase27Status": "audited only",
+      "readinessTier": "removed",
+      "phase27Status": "removed",
+      "phase32Disposition": "removed",
+      "removal": "No root-zone water-potential time series exists in the repository or in the searched sources. The simulator's single well-mixed store is a documented assumption inside the water-demand calculation, not a root-zone status feature.",
       "layers": {
         "data": {
-          "state": "absent",
-          "evidence": [],
-          "note": "no root-zone water-potential time series exists"
+          "state": "retired",
+          "note": "no obtainable dataset supports this claim",
+          "evidence": [
+            "docs/PHASE27_FEATURE_AUDIT.md"
+          ]
         },
         "method": {
-          "state": "partial",
-          "evidence": [
-            "backend/app/simulation/water.py"
-          ],
-          "note": "a single well-mixed store with a recovery-efficiency assumption"
+          "state": "retired",
+          "note": "no implementation is served",
+          "evidence": []
         },
         "service": {
-          "state": "present",
-          "evidence": [
-            "backend/app/simulation/water.py"
-          ]
+          "state": "retired",
+          "note": "no module assembles a result",
+          "evidence": []
         },
         "endpoint": {
-          "state": "present",
-          "evidence": [
-            "backend/app/routes/simulation.py"
-          ]
+          "state": "retired",
+          "note": "no route accepts it",
+          "evidence": []
         },
         "inputCheck": {
-          "state": "present",
-          "evidence": [
-            "backend/app/models/simulation.py"
-          ]
+          "state": "not-applicable",
+          "note": "no request schema accepts these inputs",
+          "evidence": []
         },
         "outputCheck": {
-          "state": "partial",
-          "evidence": [
-            "backend/tests/test_water.py"
-          ]
+          "state": "not-applicable",
+          "note": "no result is produced",
+          "evidence": []
         },
         "uncertainty": {
-          "state": "absent",
+          "state": "not-applicable",
+          "note": "no result is produced",
           "evidence": []
         },
         "provenance": {
           "state": "present",
+          "note": "No root-zone water-potential time series exists in the repository or in the searched sources. The simulator's single well-mixed store is a documented assumption inside the water-demand calculation, not a root-zone status feature.",
           "evidence": [
-            "backend/app/simulation/serializers.py"
+            "docs/PHASE27_FEATURE_AUDIT.md"
           ]
         },
         "frontend": {
-          "state": "present",
-          "evidence": [
-            "frontend/src/services/twinState.js"
-          ]
+          "state": "retired",
+          "note": "no control, page or panel presents it",
+          "evidence": []
         },
         "tests": {
           "state": "present",
+          "note": "the removal is asserted, not assumed",
           "evidence": [
-            "backend/tests/test_water.py"
+            "backend/tests/test_phase32_removed_features.py"
           ]
         }
       }
@@ -793,49 +823,66 @@
       "id": "imagery",
       "order": 11,
       "claim": "Plant health or growth stage from imagery",
-      "readinessTier": "data-blocked",
-      "phase27Status": "audited only",
+      "readinessTier": "removed",
+      "phase27Status": "removed",
+      "phase32Disposition": "removed",
+      "removal": "No paired imagery and harvest labels exist for a plant-health model, and the catalogue's imagery datasets are licence classes E/F, which cannot back a served model. No upload, camera view or plant-health card exists.",
       "layers": {
         "data": {
-          "state": "absent",
-          "evidence": [],
-          "note": "no paired imagery and harvest labels; the catalogue's imagery datasets are class E/F under their licences"
+          "state": "retired",
+          "note": "no obtainable dataset supports this claim",
+          "evidence": [
+            "data/research/dataset_catalog.json"
+          ]
         },
         "method": {
-          "state": "absent",
+          "state": "retired",
+          "note": "no implementation is served",
           "evidence": []
         },
         "service": {
-          "state": "absent",
+          "state": "retired",
+          "note": "no module assembles a result",
           "evidence": []
         },
         "endpoint": {
-          "state": "absent",
+          "state": "retired",
+          "note": "no route accepts it",
           "evidence": []
         },
         "inputCheck": {
           "state": "not-applicable",
+          "note": "no request schema accepts these inputs",
           "evidence": []
         },
         "outputCheck": {
           "state": "not-applicable",
+          "note": "no result is produced",
           "evidence": []
         },
         "uncertainty": {
           "state": "not-applicable",
+          "note": "no result is produced",
           "evidence": []
         },
         "provenance": {
-          "state": "not-applicable",
-          "evidence": []
+          "state": "present",
+          "note": "No paired imagery and harvest labels exist for a plant-health model, and the catalogue's imagery datasets are licence classes E/F, which cannot back a served model. No upload, camera view or plant-health card exists.",
+          "evidence": [
+            "data/research/dataset_catalog.json"
+          ]
         },
         "frontend": {
-          "state": "absent",
+          "state": "retired",
+          "note": "no control, page or panel presents it",
           "evidence": []
         },
         "tests": {
-          "state": "not-applicable",
-          "evidence": []
+          "state": "present",
+          "note": "the removal is asserted, not assumed",
+          "evidence": [
+            "backend/tests/test_phase32_removed_features.py"
+          ]
         }
       }
     },
@@ -843,115 +890,129 @@
       "id": "long-run-climate",
       "order": 12,
       "claim": "Siting for a future climate",
-      "readinessTier": "data-blocked",
-      "phase27Status": "audited only",
+      "readinessTier": "removed",
+      "phase27Status": "removed",
+      "phase32Disposition": "removed",
+      "removal": "The CMIP6 downscaled product is catalogued at licence class D and could not be acquired; no projection data is in the repository and no climate-siting control or report exists.",
       "layers": {
         "data": {
-          "state": "absent",
-          "evidence": [],
-          "note": "the CMIP6 downscaled product is catalogued at class D and not acquired"
+          "state": "retired",
+          "note": "no obtainable dataset supports this claim",
+          "evidence": [
+            "data/research/dataset_catalog.json"
+          ]
         },
         "method": {
-          "state": "absent",
+          "state": "retired",
+          "note": "no implementation is served",
           "evidence": []
         },
         "service": {
-          "state": "absent",
+          "state": "retired",
+          "note": "no module assembles a result",
           "evidence": []
         },
         "endpoint": {
-          "state": "absent",
+          "state": "retired",
+          "note": "no route accepts it",
           "evidence": []
         },
         "inputCheck": {
           "state": "not-applicable",
+          "note": "no request schema accepts these inputs",
           "evidence": []
         },
         "outputCheck": {
           "state": "not-applicable",
+          "note": "no result is produced",
           "evidence": []
         },
         "uncertainty": {
           "state": "not-applicable",
+          "note": "no result is produced",
           "evidence": []
         },
         "provenance": {
-          "state": "not-applicable",
-          "evidence": []
+          "state": "present",
+          "note": "The CMIP6 downscaled product is catalogued at licence class D and could not be acquired; no projection data is in the repository and no climate-siting control or report exists.",
+          "evidence": [
+            "data/research/dataset_catalog.json"
+          ]
         },
         "frontend": {
-          "state": "absent",
+          "state": "retired",
+          "note": "no control, page or panel presents it",
           "evidence": []
         },
         "tests": {
-          "state": "not-applicable",
-          "evidence": []
+          "state": "present",
+          "note": "the removal is asserted, not assumed",
+          "evidence": [
+            "backend/tests/test_phase32_removed_features.py"
+          ]
         }
       }
     }
   ],
   "crossCuttingGaps": [
     {
-      "id": "et0-parameter-not-in-frontend",
-      "finding": "POST /api/simulate accepts et0MmPerDay and cropCoefficient, and the whole reference-ET0 water path is reachable only by hand-crafting an HTTP request. No frontend control sets either field.",
-      "evidence": [
-        "backend/app/models/simulation.py",
-        "frontend/src/services/defaultConfig.js"
-      ],
-      "severity": "major",
-      "why": "a validated-by-construction capability that no user can reach",
-      "feasibility": "high: two optional request fields and one control group"
-    },
-    {
-      "id": "no-per-prediction-interval",
-      "finding": "The harvest models report leave-one-experiment-out error as a single number. No individual prediction carries a range, so a user cannot tell whether a given scenario is inside or outside the model's envelope.",
-      "evidence": [
-        "ml/evaluation/lettuce_splits.json"
-      ],
-      "severity": "major",
-      "why": "the platform's central claim is prediction, and a point estimate hides its own error",
-      "feasibility": "medium: quantile regression or a fold-based empirical interval"
-    },
-    {
-      "id": "no-out-of-distribution-warning",
-      "finding": "Model endpoints validate types and ranges but not whether an input lies outside the training envelope. A prediction at day 60 with 1000 umol/m2/s returns a number with no warning.",
-      "evidence": [
-        "backend/app/routes/research.py"
-      ],
-      "severity": "major",
-      "why": "an extrapolated prediction is indistinguishable from an interpolated one to a user",
-      "feasibility": "high: the training envelope is in the split artefacts"
-    },
-    {
       "id": "water-paths-unarbitrated",
-      "finding": "Two water demand paths ship - crop-relative and ET0-reference - and the response names which one ran but does not say they cannot both be right.",
+      "finding": "Two water demand paths ship - crop-relative and ET0-reference. The response names which one ran, and the measured comparison states that it cannot decide between them because the trial publishes no pot geometry or spacing.",
       "evidence": [
-        "backend/app/simulation/serializers.py",
-        "ml/evaluation/phase26_measured_et_validation.json"
+        "backend/app/water_evidence.py",
+        "backend/app/simulation/serializers.py"
       ],
-      "severity": "major",
-      "why": "a ~60 % difference between two live calculations with no arbiter",
-      "feasibility": "done for the evidence half in Phase 27; the arbiter needs per-day weather"
+      "severity": "documented-limitation",
+      "disposition": "Not actionable with obtainable evidence. An arbiter needs per-day weather for the trial plus its pot area; neither is published, so choosing one would decide the answer before the comparison was made."
     },
     {
-      "id": "comparison-is-parameter-only",
-      "finding": "The comparison module compares parameter sets. The measured benchmark cannot be included in a comparison because it is not a scenario, and there is no export of the comparison with its provenance.",
+      "id": "no-measured-et0-benchmark",
+      "finding": "The reference-ET0 calculation is validated against the FAO-56 worked examples, not against a measured ET0 station record: none is bundled.",
       "evidence": [
-        "backend/app/routes/workspace.py"
+        "backend/app/et0.py",
+        "backend/tests/test_phase23_reference_et0.py"
       ],
-      "severity": "minor",
-      "why": "users comparing scenarios cannot see how any of them relates to measurement",
-      "feasibility": "high"
+      "severity": "documented-limitation",
+      "disposition": "Stated in the response and on the model card. Acquisition of an independent station network failed reproducibly from this environment (USDA Ag Data Commons DNS, figshare search API, Dryad 401), so the claim is scoped down rather than faked."
+    },
+    {
+      "id": "comparison-excludes-measurement",
+      "finding": "The scenario comparison compares parameter sets; it deliberately does not mix a measured benchmark into a scenario ranking.",
+      "evidence": [
+        "backend/app/routes/workspace.py",
+        "frontend/src/pages/modules/WaterEvidencePanel.jsx"
+      ],
+      "severity": "resolved",
+      "disposition": "By design, and the measured-versus-modelled comparison now has its own panel with its own provenance, so a user does not have to infer it from a scenario table."
+    },
+    {
+      "id": "et0-parameter-not-in-frontend",
+      "finding": "POST /api/simulate accepts et0MmPerDay and cropCoefficient; no frontend control sets either field.",
+      "evidence": [
+        "frontend/src/pages/modules/GuidedWorkflows.jsx",
+        "backend/app/routes/workflows.py"
+      ],
+      "severity": "resolved",
+      "disposition": "Resolved: the water-demand workflow exposes the ET0-reference path with the daily ET0, its primary method and per-scenario deltas. The simulator route keeps the fields for API callers; the served UI path is the workflow."
     },
     {
       "id": "units-not-machine-readable",
-      "finding": "Units appear in field names (`waterUsed` is litres, `co2Removed` grams) and in descriptions, but no response field carries a unit object, so a client must read prose to know what it has.",
+      "finding": "Units live in field names and prose only.",
       "evidence": [
-        "backend/app/models/simulation.py"
+        "backend/app/models/simulation.py",
+        "backend/app/simulation/serializers.py"
       ],
-      "severity": "minor",
-      "why": "the stated goal includes consistent units across the platform",
-      "feasibility": "medium: an additive `units` map without breaking existing clients"
+      "severity": "resolved",
+      "disposition": "Resolved in Phase 32: /api/simulate returns a `units` map for every headline scalar, additively, so existing clients are unaffected."
+    },
+    {
+      "id": "no-out-of-distribution-warning",
+      "finding": "Predictions are returned without an out-of-domain flag.",
+      "evidence": [
+        "backend/app/routes/research.py"
+      ],
+      "severity": "resolved",
+      "disposition": "Resolved: every prediction response carries `outOfDistribution` (or `outOfDomain`) with the violated bounds and the warnings that explain them."
     }
   ]
 }
