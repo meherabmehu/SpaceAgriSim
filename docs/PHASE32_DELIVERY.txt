@@ -1,0 +1,33 @@
+Phase 32 - delivery record
+==========================
+
+Repository       : meherabmehu/SpaceAgriSim
+Start SHA        : 3bb675441535a8d3e1638f94f777105325a750a3   (verified main before branching)
+Branch           : phase32/finalization
+Delivery SHA     : a00b32dbeba4269045ef28a153e2f7e53f618b53   (fast-forward into main, pushed)
+Remote main      : a00b32dbeba4269045ef28a153e2f7e53f618b53   (verified with git ls-remote after push)
+Final SHA        : recorded in the commit that adds this file (see header of PHASE32_FINAL_REPORT.md)
+
+Merge type       : fast-forward only (main had no commits beyond the Phase 31 pin; no merge commit)
+Deployment       : NOT performed. No Render service, environment variable, worker, instance,
+                   migration or paid resource was touched by this phase.
+
+Phase 32 commits
+----------------
+d0e74a5  measured probability calibration, complete model provenance, no forecast claims
+dd35581  close the feature coverage matrix and add the output-check layer
+0d31388  fix the circular chunk and enforce the bundle's load graph
+fb06566  skipped-test accounting, acquisition record, API docs and the final report
+a00b32d  note both SQLite skip counts in the gate table
+
+Gates at the delivery SHA
+-------------------------
+SQLite suite        1212 passed, 24 skipped, 0 failed   (1213 / 23 with the PG client on PATH)
+PostgreSQL 17.11    1236 passed, 0 skipped, 0 failed
+Model audit         161 checks, 0 failed, 5 documented limitations, 0 high severity
+Registry            60/60 checks passed
+Coverage            builder --check: up to date (12 features)
+Provenance          --check: complete for 9 artifacts
+Lint / typecheck    0 problems / 0 errors
+Production build    clean, no circular chunk; bundle check passed (initial request 240 kB)
+Browser suite       120 passed across desktop, tablet and mobile
