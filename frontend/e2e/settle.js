@@ -11,3 +11,36 @@ export async function settleForCapture(page) {
   await page.mouse.move(0, 0);
   await page.waitForTimeout(300);
 }
+
+/**
+ * Screenshot one element at integer page coordinates.
+ *
+ * `locator.screenshot()` rounds a fractional CSS box at capture time using the element's resting
+ * scroll offset, so a panel whose measured height is 626.61 px produced a 627-pixel image on one run
+ * and a 628-pixel image on the next. The visual gate compares canvas sizes exactly - correctly, since
+ * a size change normally means something moved - so a sub-pixel layout must not be allowed to
+ * masquerade as a regression. Rounding the clip here makes the capture a function of the layout and
+ * nothing else; the gate keeps its exact-size rule and its 2 % pixel budget.
+ */
+export async function captureElement(page, locator, path) {
+  await settleForCapture(page);
+  const box = await locator.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return {
+      x: rect.x + window.scrollX,
+      y: rect.y + window.scrollY,
+      width: rect.width,
+      height: rect.height,
+    };
+  });
+  await page.screenshot({
+    path,
+    fullPage: true,
+    clip: {
+      x: Math.round(box.x),
+      y: Math.round(box.y),
+      width: Math.round(box.width),
+      height: Math.round(box.height),
+    },
+  });
+}

@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { settleForCapture } from "./settle.js";
+import { captureElement, settleForCapture } from "./settle.js";
 
 
 
@@ -58,10 +58,13 @@ test("radiation classifier cards answer and disclose their scope", async ({
     // Captured so later phases can prove these cards did not drift. Written to the
     // gitignored output tree; the committed baseline is refreshed deliberately by
     // scripts/visual_regression.py --refresh and reviewed as a design change.
-    await settleForCapture(page);
-    await panel.screenshot({
-      path: `test-results/screenshots/radiation-${testInfo.project.name}-${model}.png`,
-    });
+    // Integer-clipped capture: see captureElement() for why the element's own screenshot jittered
+    // by a pixel between runs.
+    await captureElement(
+      page,
+      panel,
+      `test-results/screenshots/radiation-${testInfo.project.name}-${model}.png`,
+    );
   }
 
   // Rendering the extra cards must not break the responsive layout.

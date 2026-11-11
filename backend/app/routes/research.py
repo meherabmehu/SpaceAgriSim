@@ -342,7 +342,13 @@ def _transcriptomic_prediction(model_id: str, request: TranscriptomicPredictionR
                               "is not a confidence interval. It is reported as a "
                               "relative score between the trained classes only.")},
         "outOfDomain": bool(warnings),
-        "warnings": warnings + [spec["caveat"]] + model.get("limitations", []),
+        # Phase 35: these two classifiers have never been scored by an independent campaign, and the
+        # verdict says so on every response rather than only in a document. `warnings` carries the
+        # same sentence the other prediction routes emit, so no surface has to reconstruct it.
+        "evidenceVerdict": research.evidence_verdict(model["id"], model),
+        "decisionGrade": research.evidence_verdict(model["id"], model)["decisionGrade"],
+        "warnings": (warnings + [spec["caveat"]] + model.get("limitations", [])
+                     + research.verdict_warning(model["id"], model)),
         "inputsUsed": len(values),
     }
 

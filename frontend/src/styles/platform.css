@@ -1925,6 +1925,21 @@
   padding-bottom: 0.3rem;
   font-variant-numeric: tabular-nums;
 }
+/* Phase 35: a grid item's default `min-width: auto` refuses to be narrower than its longest word.
+   On the benchmark rows that word is a full citation (the PeerJ 12:e17085 title runs to 118
+   characters), so the first track forced the page 83 px wider than a tablet viewport and the whole
+   document scrolled sideways. The tracks were already declared minmax(0, ...), which sizes them;
+   this lets their contents actually shrink into them. Measured: document scrollWidth 903 -> 820 at
+   the 820 px viewport. */
+.bench-row > *,
+.bench-legend > * {
+  min-width: 0;
+  /* BOTH properties are needed and that was measured, not assumed: `min-width: 0` lets the track
+     shrink, but a single long token (a DOI such as 10.1002/fes3.83, or a unit string) still refuses
+     to break and overflows anyway. Injected separately in the browser, min-width alone left the
+     document at 903 px; the pair returns it to 820. */
+  overflow-wrap: anywhere;
+}
 .bench-row span {
   font-size: 0.82rem;
 }

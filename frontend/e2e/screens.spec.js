@@ -6,8 +6,11 @@ import { settleForCapture } from "./settle.js";
  *
  * The gate used to cover the mission shell, the two radiation cards and the water panel. The
  * model-registry and benchmark pages are where a reader decides whether to trust a value, so their
- * layout is now compared too. One capture per route per viewport, written to the gitignored output
- * tree; the committed baseline is refreshed deliberately, never by this test.
+ * layout is compared too.
+ *
+ * Capture and assertion are separate tests on purpose: a capture must still be written when an
+ * assertion fails, otherwise a regression would silently remove the evidence of itself, and the
+ * parent commit - which has the bug this phase fixes - would produce no capture to compare against.
  */
 const ROUTES = [
   { hash: "predictions", name: "predictions" },
@@ -20,17 +23,47 @@ for (const route of ROUTES) {
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto(`/#${route.hash}`);
     await expect(page.getByText("API connected", { exact: true })).toBeVisible();
-    // A page that is still loading would be captured as a skeleton, so wait for content.
+    // A page that is still loading would be captured as a skeleton.
     await expect(page.locator(".module-loading")).toHaveCount(0);
-    expect(
-      await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
-    ).toBeTruthy();
+    // The benchmarks page fills in rows from two API calls; wait for the content itself rather
+    // than for a duration, so the capture is of the same state on both trees.
+    if (route.hash === "benchmarks") {
+      await expect(page.locator(".bench-row").first()).toBeVisible();
+    }
     expect(errors).toEqual([]);
     await settleForCapture(page);
+    // Bound the capture: these two routes stack every model and benchmark row, and an unbounded
+    // full-page capture crashes the renderer at that size. The top 6 000 px carry the status panel
+    // and the first rows, which is what a layout regression would move.
+    const height = await page.evaluate(() =>
+      Math.min(document.documentElement.scrollHeight, 6000),
+    );
     await page.screenshot({
       path: `test-results/screenshots/${route.name}-${testInfo.project.name}.png`,
-      fullPage: true,
+      clip: { x: 0, y: 0, width: page.viewportSize().width, height },
     });
+  });
+}
+
+for (const route of ROUTES) {
+  test(`the ${route.name} route does not scroll sideways at any viewport`, async ({ page }, testInfo) => {
+    await page.goto(`/#${route.hash}`);
+    await expect(page.getByText("API connected", { exact: true })).toBeVisible();
+    await expect(page.locator(".module-loading")).toHaveCount(0);
+    if (route.hash === "benchmarks") {
+      await expect(page.locator(".bench-row").first()).toBeVisible();
+    }
+    const overflow = await page.evaluate(() => ({
+      scroll: document.documentElement.scrollWidth,
+      client: document.documentElement.clientWidth,
+    }));
+    // Phase 35 fixed the first case this test ever caught: a benchmark row's citation forced the
+    // document 83 px wider than a tablet viewport (903 against 820) because grid items default to
+    // `min-width: auto`. One pixel of tolerance covers sub-pixel layout, not a moved element.
+    expect(
+      overflow.scroll,
+      `${route.name} overflows horizontally at ${testInfo.project.name}`,
+    ).toBeLessThanOrEqual(overflow.client + 1);
   });
 }
 
@@ -40,10 +73,9 @@ test("the model registry shows an evidence verdict on every card", async ({ page
   await page.goto("/#predictions");
   await expect(page.getByText("API connected", { exact: true })).toBeVisible();
   const cards = page.locator(".module-grid .mission-card");
-  const count = await cards.count();
-  expect(count).toBeGreaterThanOrEqual(7);
+  expect(await cards.count()).toBeGreaterThanOrEqual(7);
   await expect(page.getByText("Independent check failed").first()).toBeVisible();
   await expect(page.getByText("No independent check").first()).toBeVisible();
-  const failed = page.locator('.pill', { hasText: "Independent check failed" });
+  const failed = page.locator(".pill", { hasText: "Independent check failed" });
   expect(await failed.count()).toBeGreaterThanOrEqual(3);
 });
