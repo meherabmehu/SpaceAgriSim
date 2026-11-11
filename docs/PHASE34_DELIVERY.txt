@@ -1,0 +1,124 @@
+PHASE 34 — DELIVERY RECORD
+==========================
+
+Scope
+-----
+Evidence-driven scientific expansion, visual baseline repair and platform readiness. Five open
+model-audit findings were answered by measurement against independent campaigns and out-of-fold
+predictions, two false statements were removed from served model text, and the visual regression
+gate was repaired. No model was trained, promoted, reinstated or retired. No dataset was added.
+No route, schema, API contract or test expectation changed. No Render resource, setting,
+environment variable, plan, worker or deployment was created, changed or read.
+
+Base
+----
+Starting commit, verified with `git ls-remote` before the clone was used and again before the
+branch was pushed:
+
+    e7ee85582bfc4224e9f94a4f0d3e85672dcc95fa
+
+(that is the Phase 33 delivery commit and the remote tip of `main` at the start of this phase).
+
+Branch `phase34/evidence`, cut from that commit in a fresh clone.
+
+Commits on the branch
+---------------------
+    a6c89df  research: measure phase 34 cross-campaign coverage and probability calibration
+    17c6a72  test: pin the phase 34 evidence to the cards that serve it
+    f4f858e  docs(visual): archive the stale baselines and install the regenerated ones
+    7eb3276  fix(visual): repair the visual gate: deterministic captures, live water panel,
+             fresh baselines
+    ceefaa1  docs: record the phase 34 measurement in the dataset gap matrix
+    455f411  docs: correct the architecture page and add the evidence path
+    aaa2e9d  docs: phase 34 baseline, acquisition, validation, visual and delivery reports
+    fa56c20  docs: record the phase 34 reproducibility re-check and the final gate run
+
+Final SHA
+---------
+A commit cannot contain its own hash, so the authoritative final SHA is not written here; read it
+from the remote after this record is merged:
+
+    git ls-remote origin refs/heads/main
+
+The branch was pushed and verified with `git ls-remote` before the merge
+(`refs/heads/phase34/evidence` = fa56c202315b76549b693e86d88c33f42a8ee13e), and the merge into
+`main` was a fast-forward, so no Phase 1–33 history was rebased, amended, reset or force-pushed.
+The last code commit on the branch is fa56c20; the commit that adds this file sits on top of it.
+
+Datasets
+--------
+No new dataset acquired. Verified and used: NASA OSDR OSD-780 (CC0-1.0, both VEG-04A and VEG-04B)
+and Wicharuck 2024 PeerJ 12:e17085 (CC BY 4.0). Verified and rejected with reasons: Zenodo
+17794636 (no temperature, PPFD or photoperiod), Zenodo 20759414 and 8410252 (39.1 GB / 49.8 GB,
+unverifiable here), Dryad records (non-CEA), Agronomy 12:1026, biorxiv 2025.01.16.633207, JXB
+erag222, SCRI-OPTIMIA DLI report (papers and reports, not datasets), OSDR registrations (a
+registration is not a measurement table). Full table in docs/PHASE34_DATA_ACQUISITION.md.
+
+Measurements delivered
+----------------------
+tomato-flight-response-v1, out of fold over 36 samples from 21 plants:
+    accuracy 0.9167 reproduced; log loss 0.2827 [0.1881, 0.3902]; Brier 0.081; ECE 0.1621 (10 bins)
+    7 predictions at or above 0.9, 0 wrong; calibrated false; servedScaling none
+
+Cross-campaign interval coverage (independent campaigns, no fit saw them):
+    lettuce-earth-growth-v1    0 / 6   ratio median 3.655 (1.905-5.493)
+    lettuce-earth-growth-v2    0 / 6   ratio median 3.212 (1.674-5.375)
+    lettuce-earth-growth-v3    6 / 6   ratio median 1.163 (0.606-1.863), coverage not accuracy;
+                                       its Touliatos holdout still fails the 30 percent criterion
+    mizuna-microbial-load-v1       107 / 123 pooled both directions, achieved 0.8699 (nominal 0.90)
+    mizuna-microbial-relative-load-v2  110 / 123 pooled, achieved 0.8943 (nominal 0.90)
+
+Both evaluation files reproduce identically when re-run in a rebuilt environment.
+
+Audit outcome
+-------------
+    before:  161 checks, 0 failed, 5 documented gaps, 3 resolved
+    after:   168 checks, 0 failed, 0 documented gaps, 7 resolved (3 phase 32, 4 phase 34)
+No severity threshold was lowered; the two negative results are recorded as failures.
+
+Visual regression
+-----------------
+Parent commit e7ee855 rebuilt in a worktree, identical Playwright suite and viewports on both
+trees. Pre-existing drift: every committed baseline had a different canvas size from the shipped
+page. Phase 34's own change: 0.000 percent on 12 of 12 captures. Baselines regenerated from the
+parent commit (not from the candidate's own output), originals archived under
+docs/screenshots/historical/phase9, water-use panel brought under the gate. Gate: 12/12 PASS at
+0.000 percent.
+
+Bundle
+------
+    initial request                    240 kB across 3 modules (budget 240 kB, unchanged)
+    vendor-react                       192.91 kB (60.52 kB gzip)  initial
+    index                               34.32 kB (11.94 kB gzip)  initial
+    vendor-icons                        18.31 kB (6.56 kB gzip)   initial
+    vendor-charts                      402.65 kB (115.99 kB gzip) lazy, retained with reasons
+build:check passed: no cycles, no oversized chunk anywhere, initial request within budget. No
+chunkSizeWarningLimit change, no warning suppression, no budget raise.
+
+Gates run on this branch
+------------------------
+    pytest backend/tests (SQLite)                  1225 passed, 23 skipped
+    pytest backend/tests (PostgreSQL 17.11)        1248 passed, 0 skipped
+    npm run lint                                   clean
+    npm run typecheck                              clean
+    npm run build:check                            passed
+    scripts/audit_models.py                        9/9 models, 168 checks, 0 failed
+    scripts/verify_model_registry.py               60/60
+    phase32_provenance.py --check                  9/9 artifacts
+    build_feature_readiness / coverage / gap matrix  up to date (12 / 12 / 14)
+    phase34_record_measurements.py --check          5 cards, no drift
+    scripts/visual_regression.py                   12/12 PASS, 0.000 percent differing
+    npx playwright test                            123 passed x 3 viewports
+                                                   (desktop 1440x1100, tablet 820x1180,
+                                                    mobile Pixel 7)
+
+Every SQLite skip is a PostgreSQL-only test with its reason printed; the PostgreSQL run skips
+none. No test was deleted, skipped, weakened or rewritten.
+
+Open limitations carried forward
+--------------------------------
+lettuce v1/v2 intervals do not transfer to an independent campaign (0/6); v3's independent holdout
+failure stands; two campaigns bound but do not estimate a campaign offset; PeerJ 2024 is a
+cross-campaign measurement, not an untouched holdout; the tomato calibration covers one experiment;
+no measured reference ET, substrate-moisture series, LED-spectrum response surface or
+fractional-gravity data exists, so those gap-matrix entries keep their original severities.
