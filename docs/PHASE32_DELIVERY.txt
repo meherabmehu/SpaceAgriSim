@@ -6,7 +6,7 @@ Start SHA        : 3bb675441535a8d3e1638f94f777105325a750a3   (verified main bef
 Branch           : phase32/finalization
 Delivery SHA     : a00b32dbeba4269045ef28a153e2f7e53f618b53   (fast-forward into main, pushed)
 Remote main      : a00b32dbeba4269045ef28a153e2f7e53f618b53   (verified with git ls-remote after push)
-Final SHA        : recorded in the commit that adds this file (see header of PHASE32_FINAL_REPORT.md)
+Final SHA        : ed4e80552abaa4eb250e59633ccec74cdc152a1d   (the commit that pins this record; final commit of Phase 32)
 
 Merge type       : fast-forward only (main had no commits beyond the Phase 31 pin; no merge commit)
 Deployment       : NOT performed. No Render service, environment variable, worker, instance,

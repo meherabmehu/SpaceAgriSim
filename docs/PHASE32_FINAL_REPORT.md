@@ -8,7 +8,8 @@ production-ready verification.**
 | Repository | `meherabmehu/SpaceAgriSim` |
 | Branch | `phase32/finalization`, based on verified `main` at `3bb675441535a8d3e1638f94f777105325a750a3` |
 | Phase 32 commits | `d0e74a5`, `dd35581`, `0d31388` (working tree contains the documentation set this file belongs to) |
-| Delivery SHA | recorded in `docs/PHASE32_DELIVERY.txt` after the merge |
+| Delivery SHA | `a00b32dbeba4269045ef28a153e2f7e53f618b53` (fast-forward into `main`, pushed and verified with `git ls-remote`) |
+| Final SHA | recorded in `docs/PHASE32_DELIVERY.txt` — the commit that pins the record |
 | Production deploy | **not performed by this phase.** No Render resources, settings, environment variables, migrations, workers or paid plans were touched |
 
 The report separates five things that a single "done" would blur: **code completeness**,
