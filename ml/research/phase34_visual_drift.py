@@ -30,6 +30,9 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from screenshot_store import names_in, resolve  # noqa: E402  (sibling module, not a package)
+
 ROOT = Path(__file__).resolve().parents[2]
 BASELINE = ROOT / "docs" / "screenshots"
 PARENT = BASELINE / "phase34" / "parent"
@@ -62,13 +65,20 @@ def changed_ratio(first: Path, second: Path) -> dict:
 def compare(first_dir: Path, second_dir: Path, names: list[str]) -> dict:
     rows = {}
     for name in names:
-        first = first_dir / f"{name}.png"
-        second = second_dir / f"{name}.png"
-        if not (first.is_file() and second.is_file()):
+        # A capture that was byte-identical to another is not missing: the dedupe pass recorded
+        # where its bytes live, so the comparison still shows 0.000 % rather than a gap.
+        first, first_alias = resolve(first_dir / f"{name}.png")
+        second, second_alias = resolve(second_dir / f"{name}.png")
+        if first is None or second is None:
             rows[name] = {"skipped": True,
                           "reason": "capture missing on one side"}
             continue
-        rows[name] = changed_ratio(first, second)
+        row = changed_ratio(first, second)
+        if first_alias or second_alias:
+            # Say which side came from an identical copy, so 0.000 % is explained rather than
+            # assumed: this is the same bytes, resolved through the dedupe manifest.
+            row["identicalCopyOf"] = {"first": first_alias, "second": second_alias}
+        rows[name] = row
     compared = {name: row for name, row in rows.items() if not row.get("skipped")}
     ratios = [row["changedPixelRatio"] for row in compared.values()
               if row["changedPixelRatio"] is not None]
@@ -87,11 +97,10 @@ def compare(first_dir: Path, second_dir: Path, names: list[str]) -> dict:
 
 
 def main() -> int:
-    if not PARENT.is_dir() or not CANDIDATE.is_dir():
+    names = names_in(PARENT, CANDIDATE)
+    if not names:
         print("captures missing: run the Playwright suite in both worktrees first")
         return 1
-    names = sorted({path.stem for path in CANDIDATE.glob("*.png")}
-                   | {path.stem for path in PARENT.glob("*.png")})
     report = {
         "schema": "spaceagrisim.visual_drift/1",
         "parentCommit": "e7ee85582bfc4224e9f94a4f0d3e85672dcc95fa",

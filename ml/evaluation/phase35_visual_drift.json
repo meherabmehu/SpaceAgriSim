@@ -5,17 +5,25 @@
   "method": "Identical Playwright suite and viewports on both trees; per-capture share of pixels whose largest channel delta exceeds 16, the gate's own metric.",
   "baselineToParent": {
     "captures": {
-      "benchmarks-desktop": {
+      "crop-growth": {
         "skipped": true,
-        "reason": "no baseline yet"
+        "reason": "capture missing on the candidate side"
       },
-      "benchmarks-mobile": {
+      "dashboard-overview": {
         "skipped": true,
-        "reason": "no baseline yet"
+        "reason": "capture missing on the candidate side"
       },
-      "benchmarks-tablet": {
+      "digital-twin": {
         "skipped": true,
-        "reason": "no baseline yet"
+        "reason": "capture missing on the candidate side"
+      },
+      "impact-breakdown": {
+        "skipped": true,
+        "reason": "capture missing on the candidate side"
+      },
+      "life-support": {
+        "skipped": true,
+        "reason": "capture missing on the candidate side"
       },
       "mission-desktop": {
         "sameSize": true,
@@ -29,7 +37,11 @@
         "secondSize": [
           1440,
           1649
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": "/home/user/p35/docs/screenshots/historical/phase34/mission-desktop.png",
+          "second": "/home/user/p35/docs/screenshots/phase35/parent/mission-desktop.png"
+        }
       },
       "mission-mobile": {
         "sameSize": true,
@@ -43,7 +55,11 @@
         "secondSize": [
           1082,
           6641
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": "/home/user/p35/docs/screenshots/historical/phase34/mission-mobile.png",
+          "second": "/home/user/p35/docs/screenshots/phase35/parent/mission-mobile.png"
+        }
       },
       "mission-tablet": {
         "sameSize": true,
@@ -57,19 +73,15 @@
         "secondSize": [
           820,
           2468
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": "/home/user/p35/docs/screenshots/historical/phase34/mission-tablet.png",
+          "second": "/home/user/p35/docs/screenshots/phase35/parent/mission-tablet.png"
+        }
       },
-      "predictions-desktop": {
+      "mobile": {
         "skipped": true,
-        "reason": "no baseline yet"
-      },
-      "predictions-mobile": {
-        "skipped": true,
-        "reason": "no baseline yet"
-      },
-      "predictions-tablet": {
-        "skipped": true,
-        "reason": "no baseline yet"
+        "reason": "capture missing on the candidate side"
       },
       "radiation-desktop-radiation-exposure-osd46-v1": {
         "sameSize": true,
@@ -83,7 +95,11 @@
         "secondSize": [
           1104,
           627
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": null,
+          "second": "/home/user/p35/docs/screenshots/phase35/parent/radiation-desktop-radiation-exposure-osd46-v1.png"
+        }
       },
       "radiation-desktop-radiation-quality-osd46-v1": {
         "sameSize": false,
@@ -110,7 +126,11 @@
         "secondSize": [
           992,
           2378
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": null,
+          "second": "/home/user/p35/docs/screenshots/phase35/parent/radiation-mobile-radiation-exposure-osd46-v1.png"
+        }
       },
       "radiation-mobile-radiation-quality-osd46-v1": {
         "sameSize": false,
@@ -163,7 +183,11 @@
         "secondSize": [
           1440,
           2287
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": "/home/user/p35/docs/screenshots/historical/phase34/water-evidence-desktop.png",
+          "second": "/home/user/p35/docs/screenshots/phase35/parent/water-evidence-desktop.png"
+        }
       },
       "water-evidence-mobile": {
         "sameSize": true,
@@ -177,7 +201,11 @@
         "secondSize": [
           1082,
           10222
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": "/home/user/p35/docs/screenshots/historical/phase34/water-evidence-mobile.png",
+          "second": "/home/user/p35/docs/screenshots/phase35/parent/water-evidence-mobile.png"
+        }
       },
       "water-evidence-tablet": {
         "sameSize": true,
@@ -191,27 +219,31 @@
         "secondSize": [
           820,
           3268
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": "/home/user/p35/docs/screenshots/historical/phase34/water-evidence-tablet.png",
+          "second": "/home/user/p35/docs/screenshots/phase35/parent/water-evidence-tablet.png"
+        }
       }
     },
     "compared": 12,
     "skipped": [
-      "benchmarks-desktop",
-      "benchmarks-mobile",
-      "benchmarks-tablet",
-      "predictions-desktop",
-      "predictions-mobile",
-      "predictions-tablet"
+      "crop-growth",
+      "dashboard-overview",
+      "digital-twin",
+      "impact-breakdown",
+      "life-support",
+      "mobile"
     ],
-    "newWithoutBaseline": [
-      "benchmarks-desktop",
-      "benchmarks-mobile",
-      "benchmarks-tablet",
-      "predictions-desktop",
-      "predictions-mobile",
-      "predictions-tablet"
+    "newWithoutBaseline": [],
+    "missing": [
+      "crop-growth",
+      "dashboard-overview",
+      "digital-twin",
+      "impact-breakdown",
+      "life-support",
+      "mobile"
     ],
-    "missing": [],
     "medianPercentChanged": 0.0,
     "maxPercentChanged": 0.0,
     "sizesChanged": [
@@ -237,7 +269,11 @@
         "secondSize": [
           1440,
           1100
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": null,
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/benchmarks-desktop.png"
+        }
       },
       "benchmarks-mobile": {
         "sameSize": true,
@@ -251,7 +287,11 @@
         "secondSize": [
           1082,
           2202
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": null,
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/benchmarks-mobile.png"
+        }
       },
       "benchmarks-tablet": {
         "sameSize": true,
@@ -265,7 +305,11 @@
         "secondSize": [
           820,
           1180
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": null,
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/benchmarks-tablet.png"
+        }
       },
       "mission-desktop": {
         "sameSize": true,
@@ -279,7 +323,11 @@
         "secondSize": [
           1440,
           1649
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": "/home/user/p35/docs/screenshots/phase35/parent/mission-desktop.png",
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/mission-desktop.png"
+        }
       },
       "mission-mobile": {
         "sameSize": true,
@@ -293,7 +341,11 @@
         "secondSize": [
           1082,
           6641
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": "/home/user/p35/docs/screenshots/phase35/parent/mission-mobile.png",
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/mission-mobile.png"
+        }
       },
       "mission-tablet": {
         "sameSize": true,
@@ -307,7 +359,11 @@
         "secondSize": [
           820,
           2468
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": "/home/user/p35/docs/screenshots/phase35/parent/mission-tablet.png",
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/mission-tablet.png"
+        }
       },
       "predictions-desktop": {
         "sameSize": true,
@@ -321,7 +377,11 @@
         "secondSize": [
           1440,
           1100
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": null,
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/predictions-desktop.png"
+        }
       },
       "predictions-mobile": {
         "sameSize": true,
@@ -335,7 +395,11 @@
         "secondSize": [
           1082,
           2202
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": null,
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/predictions-mobile.png"
+        }
       },
       "predictions-tablet": {
         "sameSize": true,
@@ -349,7 +413,11 @@
         "secondSize": [
           820,
           1180
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": null,
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/predictions-tablet.png"
+        }
       },
       "radiation-desktop-radiation-exposure-osd46-v1": {
         "sameSize": false,
@@ -362,7 +430,11 @@
         "secondSize": [
           1104,
           674
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": "/home/user/p35/docs/screenshots/phase35/parent/radiation-desktop-radiation-exposure-osd46-v1.png",
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/radiation-desktop-radiation-exposure-osd46-v1.png"
+        }
       },
       "radiation-desktop-radiation-quality-osd46-v1": {
         "sameSize": false,
@@ -375,7 +447,11 @@
         "secondSize": [
           1104,
           674
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": null,
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/radiation-desktop-radiation-quality-osd46-v1.png"
+        }
       },
       "radiation-mobile-radiation-exposure-osd46-v1": {
         "sameSize": false,
@@ -388,7 +464,11 @@
         "secondSize": [
           992,
           2596
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": "/home/user/p35/docs/screenshots/phase35/parent/radiation-mobile-radiation-exposure-osd46-v1.png",
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/radiation-mobile-radiation-exposure-osd46-v1.png"
+        }
       },
       "radiation-mobile-radiation-quality-osd46-v1": {
         "sameSize": false,
@@ -401,7 +481,11 @@
         "secondSize": [
           992,
           2628
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": null,
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/radiation-mobile-radiation-quality-osd46-v1.png"
+        }
       },
       "radiation-tablet-radiation-exposure-osd46-v1": {
         "sameSize": false,
@@ -414,7 +498,11 @@
         "secondSize": [
           580,
           777
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": null,
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/radiation-tablet-radiation-exposure-osd46-v1.png"
+        }
       },
       "radiation-tablet-radiation-quality-osd46-v1": {
         "sameSize": false,
@@ -427,7 +515,11 @@
         "secondSize": [
           580,
           809
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": null,
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/radiation-tablet-radiation-quality-osd46-v1.png"
+        }
       },
       "water-evidence-desktop": {
         "sameSize": true,
@@ -441,7 +533,11 @@
         "secondSize": [
           1440,
           2287
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": "/home/user/p35/docs/screenshots/phase35/parent/water-evidence-desktop.png",
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/water-evidence-desktop.png"
+        }
       },
       "water-evidence-mobile": {
         "sameSize": true,
@@ -455,7 +551,11 @@
         "secondSize": [
           1082,
           10222
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": "/home/user/p35/docs/screenshots/phase35/parent/water-evidence-mobile.png",
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/water-evidence-mobile.png"
+        }
       },
       "water-evidence-tablet": {
         "sameSize": true,
@@ -469,7 +569,11 @@
         "secondSize": [
           820,
           3268
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": "/home/user/p35/docs/screenshots/phase35/parent/water-evidence-tablet.png",
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/water-evidence-tablet.png"
+        }
       }
     },
     "compared": 18,
@@ -491,17 +595,25 @@
   },
   "baselineToCandidate": {
     "captures": {
-      "benchmarks-desktop": {
+      "crop-growth": {
         "skipped": true,
-        "reason": "no baseline yet"
+        "reason": "capture missing on the candidate side"
       },
-      "benchmarks-mobile": {
+      "dashboard-overview": {
         "skipped": true,
-        "reason": "no baseline yet"
+        "reason": "capture missing on the candidate side"
       },
-      "benchmarks-tablet": {
+      "digital-twin": {
         "skipped": true,
-        "reason": "no baseline yet"
+        "reason": "capture missing on the candidate side"
+      },
+      "impact-breakdown": {
+        "skipped": true,
+        "reason": "capture missing on the candidate side"
+      },
+      "life-support": {
+        "skipped": true,
+        "reason": "capture missing on the candidate side"
       },
       "mission-desktop": {
         "sameSize": true,
@@ -515,7 +627,11 @@
         "secondSize": [
           1440,
           1649
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": "/home/user/p35/docs/screenshots/historical/phase34/mission-desktop.png",
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/mission-desktop.png"
+        }
       },
       "mission-mobile": {
         "sameSize": true,
@@ -529,7 +645,11 @@
         "secondSize": [
           1082,
           6641
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": "/home/user/p35/docs/screenshots/historical/phase34/mission-mobile.png",
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/mission-mobile.png"
+        }
       },
       "mission-tablet": {
         "sameSize": true,
@@ -543,19 +663,15 @@
         "secondSize": [
           820,
           2468
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": "/home/user/p35/docs/screenshots/historical/phase34/mission-tablet.png",
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/mission-tablet.png"
+        }
       },
-      "predictions-desktop": {
+      "mobile": {
         "skipped": true,
-        "reason": "no baseline yet"
-      },
-      "predictions-mobile": {
-        "skipped": true,
-        "reason": "no baseline yet"
-      },
-      "predictions-tablet": {
-        "skipped": true,
-        "reason": "no baseline yet"
+        "reason": "capture missing on the candidate side"
       },
       "radiation-desktop-radiation-exposure-osd46-v1": {
         "sameSize": false,
@@ -568,7 +684,11 @@
         "secondSize": [
           1104,
           674
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": null,
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/radiation-desktop-radiation-exposure-osd46-v1.png"
+        }
       },
       "radiation-desktop-radiation-quality-osd46-v1": {
         "sameSize": false,
@@ -581,7 +701,11 @@
         "secondSize": [
           1104,
           674
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": null,
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/radiation-desktop-radiation-quality-osd46-v1.png"
+        }
       },
       "radiation-mobile-radiation-exposure-osd46-v1": {
         "sameSize": false,
@@ -594,7 +718,11 @@
         "secondSize": [
           992,
           2596
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": null,
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/radiation-mobile-radiation-exposure-osd46-v1.png"
+        }
       },
       "radiation-mobile-radiation-quality-osd46-v1": {
         "sameSize": false,
@@ -607,7 +735,11 @@
         "secondSize": [
           992,
           2628
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": null,
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/radiation-mobile-radiation-quality-osd46-v1.png"
+        }
       },
       "radiation-tablet-radiation-exposure-osd46-v1": {
         "sameSize": false,
@@ -620,7 +752,11 @@
         "secondSize": [
           580,
           777
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": null,
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/radiation-tablet-radiation-exposure-osd46-v1.png"
+        }
       },
       "radiation-tablet-radiation-quality-osd46-v1": {
         "sameSize": false,
@@ -633,7 +769,11 @@
         "secondSize": [
           580,
           809
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": null,
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/radiation-tablet-radiation-quality-osd46-v1.png"
+        }
       },
       "water-evidence-desktop": {
         "sameSize": true,
@@ -647,7 +787,11 @@
         "secondSize": [
           1440,
           2287
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": "/home/user/p35/docs/screenshots/historical/phase34/water-evidence-desktop.png",
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/water-evidence-desktop.png"
+        }
       },
       "water-evidence-mobile": {
         "sameSize": true,
@@ -661,7 +805,11 @@
         "secondSize": [
           1082,
           10222
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": "/home/user/p35/docs/screenshots/historical/phase34/water-evidence-mobile.png",
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/water-evidence-mobile.png"
+        }
       },
       "water-evidence-tablet": {
         "sameSize": true,
@@ -675,27 +823,31 @@
         "secondSize": [
           820,
           3268
-        ]
+        ],
+        "identicalCopyOf": {
+          "first": "/home/user/p35/docs/screenshots/historical/phase34/water-evidence-tablet.png",
+          "second": "/home/user/p35/docs/screenshots/phase35/candidate/water-evidence-tablet.png"
+        }
       }
     },
     "compared": 12,
     "skipped": [
-      "benchmarks-desktop",
-      "benchmarks-mobile",
-      "benchmarks-tablet",
-      "predictions-desktop",
-      "predictions-mobile",
-      "predictions-tablet"
+      "crop-growth",
+      "dashboard-overview",
+      "digital-twin",
+      "impact-breakdown",
+      "life-support",
+      "mobile"
     ],
-    "newWithoutBaseline": [
-      "benchmarks-desktop",
-      "benchmarks-mobile",
-      "benchmarks-tablet",
-      "predictions-desktop",
-      "predictions-mobile",
-      "predictions-tablet"
+    "newWithoutBaseline": [],
+    "missing": [
+      "crop-growth",
+      "dashboard-overview",
+      "digital-twin",
+      "impact-breakdown",
+      "life-support",
+      "mobile"
     ],
-    "missing": [],
     "medianPercentChanged": 0.0,
     "maxPercentChanged": 0.0,
     "sizesChanged": [
@@ -709,5 +861,6 @@
     "budgetPercent": 2.0,
     "allWithinBudget": false
   },
+  "baselineSet": "docs/screenshots/historical/phase34",
   "note": "Read the three blocks in order. baseline->parent is drift this phase never touched; parent->candidate is the change this phase is responsible for."
 }
