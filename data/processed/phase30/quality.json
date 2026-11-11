@@ -1,6 +1,6 @@
 {
   "schema": "spaceagrisim.phase30_datasets/1",
-  "generatedAt": "2026-11-10T17:28:42.030038+00:00",
+  "generatedAt": "2026-11-11T22:21:03.801581+00:00",
   "datasets": {
     "cea-wheat-apogee": {
       "id": "cea-wheat-apogee",
@@ -117,12 +117,12 @@
           "unit": "count",
           "modelled": true
         },
-        "harvestIndex": {
-          "unit": "fraction",
+        "harvestIndexPct": {
+          "unit": "%",
           "modelled": true
         },
-        "grainFillMgPerDay": {
-          "unit": "mg/day",
+        "grainFillGPerM2Day": {
+          "unit": "g/m2/day",
           "modelled": true
         },
         "grainFillRate": {
@@ -164,12 +164,12 @@
         "lightIntegralDayUnidentified": {
           "unit": null,
           "modelled": false,
-          "why": "plausibly a daily photon integral (mol/m2/day), but the workbook gives no unit tag for it, the neighbouring column carries a value three orders of magnitude larger, and neither matches Light_SUM divided by the cycle length. Unidentifiable, so it is carried for fidelity and never modelled or converted."
+          "why": "the workbook's units row tags this column `[s]`, which is not a unit for a photon integral and does not reconcile with anything around it: the neighbouring column carries a value three orders of magnitude larger, and neither matches Light_SUM divided by the cycle length. Unidentifiable, so it is carried for fidelity and never modelled or converted."
         },
         "lightIntegralNightUnidentified": {
           "unit": null,
           "modelled": false,
-          "why": "same unidentified quantity as the day column, recorded for fidelity only"
+          "why": "same unidentified quantity as the day column, tagged `[s]` by the workbook and recorded for fidelity only"
         },
         "meanPpfdUmolPerM2S": {
           "unit": "umol/m2/s",
@@ -203,6 +203,37 @@
           "unit": "identifier",
           "modelled": true
         }
+      },
+      "sourceUnits": {
+        "experimentId": "[ID]",
+        "system": "[category]",
+        "threshingDate": "[date]",
+        "grainYieldKgPerM2": "[kg m\u207b\u00b2]",
+        "grainMassPerSpikeMg": "[mg]",
+        "spikesPerM2": "[m\u207b\u00b2]",
+        "grainsPerM2": "[m\u207b\u00b2]",
+        "grainsPerSpike": "[number]",
+        "harvestIndexPct": "[%]",
+        "grainFillGPerM2Day": "[g m\u207b\u00b2 d\u207b\u00b9]",
+        "grainFillRate": "[mg d\u207b\u00b9]",
+        "lightUseEfficiencyGPerMol": "[g mol\u207b\u00b9]",
+        "annualisedYieldKgPerM2Yr": "[kg m\u207b\u00b2 yr\u207b\u00b9]",
+        "threshingResidueKgPerM2": "[kg m\u207b\u00b2]",
+        "biomassKgPerM2": "[kg m\u207b\u00b2]",
+        "plantHeightCm": "[cm]",
+        "cycleLengthDays": "[d]",
+        "anthesisLengthDays": "[d]",
+        "lightSumMolPerM2": "[mol m\u207b\u00b2]",
+        "lightIntegralDayUnidentified": "[s]",
+        "lightIntegralNightUnidentified": "[s]",
+        "meanPpfdUmolPerM2S": "[\u00b5mol m\u207b\u00b2 s\u207b\u00b9]",
+        "photoperiodHours": "[h]",
+        "co2Ppm": "[\u00b5mol mol\u207b\u00b9]",
+        "airTemperatureC": "[\u00b0C]",
+        "temperatureSumDegCDay": "[\u00b0C d]",
+        "relativeHumidityPct": "[%]",
+        "borderRows": "[category]",
+        "positionId": "[ID]"
       }
     },
     "lettuce-multistudy-lue": {

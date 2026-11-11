@@ -161,6 +161,57 @@ def test_the_quality_record_carries_units_ranges_and_coverage():
     assert lettuce["unitMap"]["co2Ppm"]["unit"] == "ppm"
 
 
+def test_stored_units_do_not_contradict_the_workbooks_own_units_row():
+    """A published unit that the source contradicts is a data-dictionary defect, not a detail.
+
+    Two columns were exported under a unit the workbook's units row disagreed with:
+    `harvestIndex` was declared `fraction` while the workbook declares `[%]` and the column holds
+    percent (median 42.6, maximum 60.5), and `grainFillMgPerDay` was declared `mg/day` while the
+    workbook declares `[g m⁻² d⁻¹]` (median 19.3 - 0.79 kg/m2 of grain over a ~40-day fill, which
+    is grams per square metre per day, not milligrams per day). No value was converted; the names
+    and units now carry what the source declares, and the workbook's row is published beside them
+    as `sourceUnits`.
+    """
+    wheat = _json(MANIFEST)["datasets"]["cea-wheat-apogee"]
+    unit_map = wheat["unitMap"]
+    source_units = wheat["sourceUnits"]
+    assert sorted(unit_map) == sorted(source_units), (
+        "every stored column must carry the source's own unit declaration"
+    )
+    # The two corrected columns, both directions.
+    assert unit_map["harvestIndexPct"]["unit"] == "%"
+    assert source_units["harvestIndexPct"] == "[%]"
+    assert unit_map["grainFillGPerM2Day"]["unit"] == "g/m2/day"
+    assert source_units["grainFillGPerM2Day"].startswith("[g m")
+    assert "harvestIndex" not in unit_map and "grainFillMgPerDay" not in unit_map
+
+
+def test_no_column_declared_a_fraction_holds_a_percentage():
+    """The generic form of the same defect: a unit and the values it describes must agree.
+
+    This catches the class rather than the instance - any column that claims to be a fraction while
+    carrying percent, or claims percent while carrying a fraction, fails here without anyone having
+    to remember which column it was.
+    """
+    wheat = _json(MANIFEST)["datasets"]["cea-wheat-apogee"]
+    unit_map = wheat["unitMap"]
+    rows = _rows(PROCESSED / "cea_wheat_subplots.csv")
+    offenders = []
+    for column, entry in unit_map.items():
+        unit = entry["unit"]
+        if unit not in {"fraction", "%"}:
+            continue
+        values = [float(row[column]) for row in rows if row.get(column) not in ("", None)]
+        if not values:
+            continue
+        low, high = min(values), max(values)
+        if unit == "fraction" and high > 1.0 + 1e-9:
+            offenders.append(f"{column} declared a fraction but reaches {high:.4g}")
+        if unit == "%" and (high > 100.0 + 1e-9 or low < 0.0):
+            offenders.append(f"{column} declared % but ranges {low:.4g}..{high:.4g}")
+    assert offenders == [], "a declared unit contradicts the values in its column: " + "; ".join(offenders)
+
+
 # ------------------------------------------------------------------- evaluations
 
 

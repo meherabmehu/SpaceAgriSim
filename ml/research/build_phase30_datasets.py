@@ -61,8 +61,14 @@ WHEAT_COLUMNS = {
     "Spike_nb_m2": ("spikesPerM2", "count/m2"),
     "Grain_nb_m2": ("grainsPerM2", "count/m2"),
     "Grain_spike": ("grainsPerSpike", "count"),
-    "Harvest_index": ("harvestIndex", "fraction"),
-    "Grain_fill": ("grainFillMgPerDay", "mg/day"),
+    # The workbook's own units row declares `[%]` for Harvest_index and `[g m⁻² d⁻¹]` for Grain_fill.
+    # Both were stored under a unit that contradicted that row: `harvestIndex` was declared a
+    # "fraction" while the column holds percent (median 42.6, range 0.7-60.5), and
+    # `grainFillMgPerDay` was declared "mg/day" while the column holds grams per square metre per
+    # day (median 19.3, which is 0.79 kg/m2 of grain over a ~40-day fill). The stored names and
+    # units now carry what the source declares, with no conversion applied to the values.
+    "Harvest_index": ("harvestIndexPct", "%"),
+    "Grain_fill": ("grainFillGPerM2Day", "g/m2/day"),
     "Grain_fill_rate": ("grainFillRate", "unstated in source"),
     "LUE": ("lightUseEfficiencyGPerMol", "g/mol"),
     "Prod_yr": ("annualisedYieldKgPerM2Yr", "kg/m2/yr"),
@@ -218,6 +224,17 @@ def build_wheat() -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str,
     if missing:
         raise SystemExit(f"wheat workbook is missing expected columns: {missing}")
 
+    # The units row is the source's own declaration, so it is read and published verbatim next to
+    # the unit this builder declares. It used to be unpacked into a local and dropped, which is how
+    # two stored units ended up contradicting the file they came from without anything noticing.
+    source_units: dict[str, str] = {}
+    for source, (stored, _unit) in WHEAT_COLUMNS.items():
+        cell = units_row[position[source]]
+        declared = "" if cell is None else str(cell).strip()
+        if not declared:
+            raise SystemExit(f"wheat workbook declares no unit for column {source!r}")
+        source_units[stored] = declared
+
     subplots: list[dict[str, Any]] = []
     excluded: dict[str, int] = {}
     for raw in rows[2:]:
@@ -258,7 +275,7 @@ def build_wheat() -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str,
             "grainYieldKgPerM2Min": round(min(yields), 6) if yields else "",
             "grainYieldKgPerM2Max": round(max(yields), 6) if yields else "",
         }
-        for field in ("biomassKgPerM2", "harvestIndex"):
+        for field in ("biomassKgPerM2", "harvestIndexPct"):
             values = [row[field] for row in members if isinstance(row.get(field), float)]
             aggregate[f"{field}Mean"] = round(statistics.fmean(values), 6) if values else ""
         for field in ENV_FIELDS:
@@ -296,14 +313,19 @@ def build_wheat() -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str,
         "yieldRange": _range([row["grainYieldKgPerM2Mean"] for row in aggregates]),
         "unitMap": {stored: {"unit": unit, "modelled": unit is not None}
                     for _source, (stored, unit) in WHEAT_COLUMNS.items()},
+        # The workbook's own units row, verbatim. Published beside `unitMap` so a reader can see
+        # that the stored unit is a translation of a declared one rather than an assertion.
+        "sourceUnits": source_units,
     }
     quality["unitMap"]["lightIntegralDayUnidentified"]["why"] = (
-        "plausibly a daily photon integral (mol/m2/day), but the workbook gives no unit tag for it, "
-        "the neighbouring column carries a value three orders of magnitude larger, and neither "
-        "matches Light_SUM divided by the cycle length. Unidentifiable, so it is carried for "
-        "fidelity and never modelled or converted.")
+        "the workbook's units row tags this column `[s]`, which is not a unit for a photon "
+        "integral and does not reconcile with anything around it: the neighbouring column carries "
+        "a value three orders of magnitude larger, and neither matches Light_SUM divided by the "
+        "cycle length. Unidentifiable, so it is carried for fidelity and never modelled or "
+        "converted.")
     quality["unitMap"]["lightIntegralNightUnidentified"]["why"] = (
-        "same unidentified quantity as the day column, recorded for fidelity only")
+        "same unidentified quantity as the day column, tagged `[s]` by the workbook and recorded "
+        "for fidelity only")
     return subplots, aggregates, quality
 
 
