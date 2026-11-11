@@ -8,7 +8,7 @@
       "id": "measured-eta",
       "capability": "Predicted crop water use in litres per plant per day",
       "needed": "Measured evapotranspiration or sap-flow/lysimeter water use for the modelled crops at plant scale",
-      "available": "Reference ET0 computed from reanalysis (FAO-56 Penman-Monteith, cross-validated against four sources), a learned emulator of that computed quantity, an 18-check ingestion validator, and — new in Phase 26 — one third-party measured dataset: gravimetric per-pot evapotranspiration of greenhouse lettuce (Schröder et al. 2021, 35 published pots, 380 usable pot-days), acquired, hashed and preprocessed in-repo with an out-of-sample comparison against the platform's water path.",
+      "available": "Reference ET0 computed from reanalysis (FAO-56 Penman-Monteith, cross-validated against four sources), a learned emulator of that computed quantity, an 18-check ingestion validator, and \u2014 new in Phase 26 \u2014 one third-party measured dataset: gravimetric per-pot evapotranspiration of greenhouse lettuce (Schr\u00f6der et al. 2021, 35 published pots, 380 usable pot-days), acquired, hashed and preprocessed in-repo with an out-of-sample comparison against the platform's water path.",
       "gapType": "partially-addressed",
       "severity": "blocking",
       "howCouldBeClosed": "A lysimeter or gravimetric water-use trial in the target growth system. No open dataset measures per-plant water use in a controlled-environment facility for lettuce or mizuna; this is a measurement to commission, not a download. New ingestion apparatus does not change the status: a validator can reject a bad measurement, it cannot create one.",
@@ -264,7 +264,7 @@
       "gapType": "insufficient",
       "severity": "major",
       "howCouldBeClosed": "More independent experiments, or an external evaluation set with documented protocol. Neither exists for the crops served here.",
-      "currentStatus": "open; intervals are reported as descriptive and no coverage is advertised. The removed harvest workflow's interval spanned a factor of 29, which is a measured statement about how little the data supports.",
+      "currentStatus": "open; intervals are reported as descriptive and no coverage is advertised. The removed harvest workflow's interval spanned a factor of 29, which is a measured statement about how little the data supports. Phase 34 measured the question instead of leaving it open-ended: every served interval was held against a campaign no fit saw, two of five models covered none of it, and the cards now state their own coverage instead of implying it. The interval is still descriptive and no coverage guarantee is offered.",
       "severityMeaning": "the claim is supportable only with a stated limitation that a user would notice",
       "phase30Decision": {
         "decision": "documented, not closed",
@@ -274,6 +274,19 @@
         ],
         "whyRemoved": "n/a - the interval machinery is retained only where a measured comparison needs a between-experiment interval, never as a forecast guarantee",
         "residualCapability": "Descriptive intervals on measured group means."
+      },
+      "phase34Decision": {
+        "decision": "measured, not closed",
+        "what": "The coverage question was answered by measurement rather than by more data: each served 90 % interval was held against a campaign no fit saw, and the mizuna conformal radius was calibrated on one flight campaign and evaluated on the other in both directions. Evidence: ml/evaluation/phase34_cross_campaign_coverage.json.",
+        "results": {
+          "lettuce-earth-growth-v1": "0 of 6 independent PeerJ 2024 treatment means covered, ratio median 3.655 (1.905-5.493)",
+          "lettuce-earth-growth-v2": "0 of 6 covered, ratio median 3.212 (1.674-5.375)",
+          "lettuce-earth-growth-v3": "6 of 6 covered, ratio median 1.163 (0.606-1.863) - coverage, not accuracy; its Touliatos holdout still fails the 30 % criterion",
+          "mizuna-microbial-load-v1": "107 of 123 samples covered across both directions, pooled 0.8699 (nominal 0.90)",
+          "mizuna-microbial-relative-load-v2": "110 of 123 covered, pooled 0.8943 (nominal 0.90)"
+        },
+        "whyNotClosed": "Coverage of six correlated greenhouse means is not a coverage guarantee, two flight campaigns do not estimate a campaign-offset distribution, and two of the five models fail the check outright. The interval stays descriptive; the cards now state the measurement instead of leaving the scope unstated.",
+        "severity": "unchanged (major)"
       }
     }
   ]

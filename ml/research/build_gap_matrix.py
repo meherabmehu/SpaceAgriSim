@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from datetime import date
 from pathlib import Path
 
@@ -27,6 +28,38 @@ CLOSING = (
     "second says the target it validates against is one provider's reanalysis. Fixing the second is "
     "cheap and mechanical (an ERA5-Land token). Fixing the first requires an experiment.\n"
 )
+
+
+DECISION_KEY = re.compile(r"phase(\d+)Decision")
+
+
+def decision_lines(gap: dict) -> list[str]:
+    """Render any recorded per-phase decision, so a later decision cannot be filed and forgotten.
+
+    The keys are named `phase<N>Decision` in the JSON; each one is a decision that was actually
+    taken about this gap, and the point of the matrix is that the document says what was decided
+    rather than only what is still missing.
+    """
+    lines = []
+    for key in sorted(gap, key=lambda name: int((DECISION_KEY.fullmatch(name) or
+                                                 re.match(r"phase(\d+)", name)).group(1))
+                      if DECISION_KEY.fullmatch(name) else 10**6):
+        match = DECISION_KEY.fullmatch(key)
+        if not match:
+            continue
+        entry = gap[key]
+        phase = match.group(1)
+        detail = entry.get("what") or entry.get("whyRemoved") or ""
+        lines.append(f"- **Phase {phase} decision:** {entry.get('decision', 'recorded')}"
+                     + (f" - {detail}" if detail else ""))
+        results = entry.get("results") or {}
+        for model_id, outcome in results.items():
+            lines.append(f"    - `{model_id}`: {outcome}")
+        if entry.get("whyNotClosed"):
+            lines.append(f"- **Why this is still open:** {entry['whyNotClosed']}")
+        elif entry.get("residualCapability"):
+            lines.append(f"- **Residual capability:** {entry['residualCapability']}")
+    return lines
 
 
 def short_status(gap: dict) -> str:
@@ -89,6 +122,7 @@ def render(matrix: dict) -> str:
             f"- **Severity:** {gap['severity']} - {gap['severityMeaning']}",
             f"- **How it could be closed:** {gap['howCouldBeClosed']}",
             f"- **Current status:** {gap['currentStatus']}",
+            *decision_lines(gap),
             "",
         ]
     return "\n".join(lines) + "\n" + CLOSING

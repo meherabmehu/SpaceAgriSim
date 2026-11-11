@@ -63,6 +63,8 @@ A few are closed by decision rather than by data - the capability was removed in
 - **Severity:** blocking - a claim in the product cannot be supported at all without this
 - **How it could be closed:** None available. Orbital and Mars-surface experiments produce too few replicates and too few cultivars to fit a response function; the honest position is that gravity response is a qualitative modifier with a stated uncertainty, never a trained coefficient.
 - **Current status:** closed by decision, not by data: Phase 30 removed the fractional-gravity input, factor, control, API field and tests. The gap is permanent - no open dataset measures crop yield or biomass across fractional gravity, ISS graded-gravity work measures gene expression and morphology, and a ground clinostat or reorientation is not partial gravity - so the capability was withdrawn rather than left as a placeholder coefficient.
+- **Phase 30 decision:** B - removed completely - the 15 %-at-0 g growth penalty, the gravity input field, the gravity presets, the gravity impact step and every test that asserted them
+- **Residual capability:** None. /api/simulate rejects a request carrying a gravity field and names this decision; the simulator has no gravity term at all.
 
 ### Response to specific LED spectra and photoperiods  `led-spectrum-response`
 
@@ -72,6 +74,8 @@ A few are closed by decision rather than by data - the capability was removed in
 - **Severity:** major - the claim is supportable only with a stated limitation that a user would notice
 - **How it could be closed:** The published CEA literature is large but fragmented: hundreds of small papers, no shared protocol, rarely any raw data. A meta-analysis with study-level random effects is the realistic route, and it needs a person reading papers, not an API.
 - **Current status:** open for the predictive surface, served for two measured comparisons: the light-stress workflow compares four spectral regimes at one PPFD and photoperiod, and Phase 30 added a controlled-environment panel over the wheat series (PPFD, photoperiod, CO2, air temperature bands with measured grain yield). A response surface was fitted to that series and failed its sealed holdout (297.46 % MAPE against the 30 % criterion), so no predictive light, CO2 or temperature control is offered.
+- **Phase 30 decision:** A (evidence found) for the measured comparison, B (removed) for the predictive response surface - added GET/POST /api/workflows/light-stress/controlled-environment; the attempted response surface is recorded in ml/evaluation/phase30_cea_wheat_response.json and is not served
+- **Residual capability:** Measured band summaries with between-experiment intervals, a descriptive DLI association, and no significance test across bands.
 
 ### Root-zone water status in a hydroponic or substrate system  `substrate-water`
 
@@ -117,6 +121,8 @@ A few are closed by decision rather than by data - the capability was removed in
 - **Severity:** blocking - a claim in the product cannot be supported at all without this
 - **How it could be closed:** More measured harvests with recorded light, temperature and duration. Until then the model's MAPE (41.7 %) is the honest number and the acceptance criterion is not met.
 - **Current status:** closed by decision, not by data: Phase 30 removed operational harvest forecasting. A leave-one-study-out evaluation over 40 published lettuce studies returned 310.17 % MAPE against the unchanged 30 % criterion, and the best out-of-fold candidate was the mean baseline, so no model in this repository can forecast harvest mass. The measured-versus-model parity record is retained; no prediction is served.
+- **Phase 30 decision:** B - removed completely - POST /api/workflows/harvest-prediction/run (now 410), the workflow catalogue entry (now status unavailable), the harvest UI tab, and every test that asserted a served prediction
+- **Residual capability:** Measured-versus-predicted parity (GET .../parity) and the decision record (GET .../capability) remain readable.
 
 ### Energy and mass cost of a described mission  `mission-energy`
 
@@ -153,6 +159,8 @@ A few are closed by decision rather than by data - the capability was removed in
 - **Severity:** major - the claim is supportable only with a stated limitation that a user would notice
 - **How it could be closed:** A controlled deficit-irrigation experiment per crop with at least four water levels and a measured harvest. Ky must never be transferred between crops, so one experiment closes one cell of the matrix.
 - **Current status:** open; the FAO-56 water balance and the irrigation schedule remain, and no yield-loss claim is made anywhere in the platform
+- **Phase 30 decision:** B - no yield-loss claim retained - no deficit-yield model was built and no Ky value is exposed; the water workflow continues to report demand, deficit and irrigation scheduling only
+- **Residual capability:** Reference ET0, crop demand, deficit accounting and irrigation scheduling, all labelled as computed rather than measured.
 
 ### Calibrated prediction intervals with measured coverage  `prediction-intervals-independent-coverage`
 
@@ -161,7 +169,16 @@ A few are closed by decision rather than by data - the capability was removed in
 - **Gap type:** insufficient
 - **Severity:** major - the claim is supportable only with a stated limitation that a user would notice
 - **How it could be closed:** More independent experiments, or an external evaluation set with documented protocol. Neither exists for the crops served here.
-- **Current status:** open; intervals are reported as descriptive and no coverage is advertised. The removed harvest workflow's interval spanned a factor of 29, which is a measured statement about how little the data supports.
+- **Current status:** open; intervals are reported as descriptive and no coverage is advertised. The removed harvest workflow's interval spanned a factor of 29, which is a measured statement about how little the data supports. Phase 34 measured the question instead of leaving it open-ended: every served interval was held against a campaign no fit saw, two of five models covered none of it, and the cards now state their own coverage instead of implying it. The interval is still descriptive and no coverage guarantee is offered.
+- **Phase 30 decision:** documented, not closed - train/selection/holdout separation was enforced and recorded in both Phase 30 artifacts; the harvest workflow was removed rather than given a wider interval
+- **Residual capability:** Descriptive intervals on measured group means.
+- **Phase 34 decision:** measured, not closed - The coverage question was answered by measurement rather than by more data: each served 90 % interval was held against a campaign no fit saw, and the mizuna conformal radius was calibrated on one flight campaign and evaluated on the other in both directions. Evidence: ml/evaluation/phase34_cross_campaign_coverage.json.
+    - `lettuce-earth-growth-v1`: 0 of 6 independent PeerJ 2024 treatment means covered, ratio median 3.655 (1.905-5.493)
+    - `lettuce-earth-growth-v2`: 0 of 6 covered, ratio median 3.212 (1.674-5.375)
+    - `lettuce-earth-growth-v3`: 6 of 6 covered, ratio median 1.163 (0.606-1.863) - coverage, not accuracy; its Touliatos holdout still fails the 30 % criterion
+    - `mizuna-microbial-load-v1`: 107 of 123 samples covered across both directions, pooled 0.8699 (nominal 0.90)
+    - `mizuna-microbial-relative-load-v2`: 110 of 123 covered, pooled 0.8943 (nominal 0.90)
+- **Why this is still open:** Coverage of six correlated greenhouse means is not a coverage guarantee, two flight campaigns do not estimate a campaign-offset distribution, and two of the five models fail the check outright. The interval stays descriptive; the cards now state the measurement instead of leaving the scope unstated.
 
 ## The two that matter most
 
