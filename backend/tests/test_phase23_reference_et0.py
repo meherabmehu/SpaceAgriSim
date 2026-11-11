@@ -463,6 +463,24 @@ def test_model_audit_passes_after_the_phase31_withdrawals():
 
 
 def test_registry_verifier_passes_after_the_phase31_withdrawals():
-    result = subprocess.run([sys.executable, "scripts/verify_model_registry.py"],
+    # `--check` verifies without rewriting `docs/phase7/registry_verification.json`. Running the
+    # verifier bare regenerated the report with a new `generatedAt` timestamp, so a passing test
+    # suite left a dirty working tree whose only diff was that timestamp - a change that has twice
+    # been mistaken for a real one. The exit code and the checks are identical either way.
+    result = subprocess.run([sys.executable, "scripts/verify_model_registry.py", "--check"],
                             cwd=ROOT, capture_output=True, text=True)
     assert result.returncode == 0, result.stdout[-2000:]
+
+
+def test_registry_verification_gate_does_not_touch_the_committed_report():
+    """The gate must be read-only: a test run may not rewrite the artefact it verifies."""
+    report = ROOT / "docs" / "phase7" / "registry_verification.json"
+    before = report.read_bytes()
+    result = subprocess.run([sys.executable, "scripts/verify_model_registry.py", "--check"],
+                            cwd=ROOT, capture_output=True, text=True)
+    assert result.returncode == 0, result.stdout[-2000:]
+    assert report.read_bytes() == before, (
+        "scripts/verify_model_registry.py rewrote docs/phase7/registry_verification.json; "
+        "use --check so the gate leaves the tree untouched"
+    )
+    assert "verified without writing" in result.stdout
