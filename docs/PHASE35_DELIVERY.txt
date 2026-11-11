@@ -1,0 +1,94 @@
+PHASE 35 — FINAL COMPLETION, SCIENTIFIC RELIABILITY, PRODUCTION HARDENING
+================================================================================
+
+Scope
+-----
+Every remaining feasible engineering, scientific, front-end, back-end, security, reliability,
+accessibility, performance, documentation and testing task, in one phase, implemented rather than
+audited. The one thing this phase does not do is deploy: no Render resource, setting, environment
+variable, plan, worker count or database was read, changed or created.
+
+Base
+----
+    branch      phase35/final-completion, cut from verified remote main
+    base SHA    0f01f314e7f9d8b54ab862a34f686b2c1f31bc7c
+                (confirmed with `git ls-remote` before the clone was used)
+
+Commits
+-------
+    a4a09b3  feat(science): one measured evidence verdict per model, carried to every surface
+    5242005  test(a11y): measure contrast, reduced motion and keyboard-only navigation
+    667ab4d  fix(visual): integer captures, two more routes under the gate, and the benchmarks
+             overflow
+    688b89f  chore(visual): regenerate the gate report on the 18 verified baselines
+    d85307d  fix: the transcriptomic routes carry their verdict too, and the benchmarks grid stops
+             overflowing
+    (this record and the eight reports are committed on top of d85307d)
+
+Final SHA
+---------
+A commit cannot contain its own hash, so the authoritative final SHA is not written here. Read it
+from the remote after this record is merged:
+
+    git ls-remote origin refs/heads/main
+
+The branch was pushed before the merge, and the merge into main is a fast-forward from 0f01f31, so
+no Phase 1-34 history was rebased, amended, reset or force-pushed.
+
+Gates (all run on this branch after the last code change)
+---------------------------------------------------------
+    pytest backend/tests (SQLite)              1235 passed, 24 skipped
+    pytest backend/tests (PostgreSQL 17.11)    1259 passed, 0 skipped, 0 failed
+    npm run lint                               clean
+    npm run typecheck                          clean
+    npm run build + build:check                passed, initial 240 kB / 3 modules (budget unchanged)
+    scripts/audit_models.py                    9/9 models, 202 checks, 0 failed, 0 gaps
+    scripts/verify_model_registry.py           62/62
+    phase32_provenance.py --check              9/9 artifacts
+    build_feature_readiness.py --check         12 features, up to date
+    build_feature_coverage.py --check          12 features, up to date
+    build_gap_matrix.py --check                14 gaps, up to date
+    phase34_record_measurements.py --check     5 cards, no drift
+    phase35_evidence_verdicts.py --check       consistent with the committed measurements
+    scripts/visual_regression.py               18/18 PASS at 0.000 % differing
+    npx playwright test                        150 passed across desktop, tablet, mobile
+
+No test was deleted, skipped, weakened or rewritten except where this record says so explicitly
+(one assertion in test_research.py that asserted a literal status the evidence now changes).
+
+What changed for a user
+-----------------------
+    - every model card states its evidence verdict, and every prediction carries the same verdict
+      and a plain sentence above the number;
+    - the scientific-status panel computes its claims instead of asserting them;
+    - the benchmark page no longer scrolls sideways on tablet or phone;
+    - two model panels that never showed a verdict now show one;
+    - nothing was removed from the interface in this phase.
+
+Datasets
+--------
+No new dataset was acquired. Searched this phase: Zenodo (evapotranspiration products), Mendeley
+Data (multi-sector precision-irrigation telemetry), Figshare (LED-spectrum supplements), NASA OSDR
+(OSD-480 Plant Gravity Perception, OSD-411, GLDS-251), journal supplements (Plants 12:463,
+Plant Soil Environ 70:305, Agronomy). Every result was rejected with a reason recorded in
+docs/PHASE35_DATA_ACQUISITION.md. The short version: they are either remote-sensing or
+reanalysis products, papers or registrations, open-field systems that cannot validate a controlled-
+environment water balance, or transcriptomic experiments without measured growth outcomes.
+
+Scientific outcome
+------------------
+    decision grade          1 of 7 served models (mizuna-microbial-relative-load-v2), and only
+                            within a campaign that supplies its own baseline samples
+    failed an independent check   3 (lettuce v1, v2, v3)
+    no independent check          3 (radiation-quality, radiation-exposure, tomato)
+    withdrawn, retained          2 (mizuna-harvest-v1, mizuna-microbial-load-v1)
+
+The single promotion is derived, not decided: the card's own recorded promotion rule had four terms,
+three already true, and the fourth - measured conformal coverage across campaigns - was measured in
+Phase 34 at 0.8943 against a nominal 0.90, inside the rule's own ±5-point tolerance. The record says
+which file supplied that number.
+
+Open limitations carried out of this phase are listed in docs/PHASE35_SCIENTIFIC_VALIDATION.md and
+are unchanged in severity: no measured reference ET exists to validate the water balance against,
+no independent campaign supports the lettuce regressions, and no fractional-gravity growth data
+exists at all.

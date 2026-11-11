@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { captureElement, settleForCapture } from "./settle.js";
+import { captureElement } from "./settle.js";
 
 
 

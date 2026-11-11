@@ -75,3 +75,5 @@ NASA study records point to their official OSDR sources; the product is not endo
 - [Phase 12 security review](docs/PHASE12_SECURITY_REVIEW.md) · [performance](docs/PHASE12_PERFORMANCE.md) · [competition demo](docs/PHASE12_COMPETITION_DEMO.md)
 - [Phase 19 accounts, sharing and deployment readiness](docs/PHASE19_ACCOUNT_SHARING_READINESS.md)
 - [Production readiness audit](docs/PRODUCTION_READINESS_AUDIT.md) · [database backup and recovery](docs/DATABASE_BACKUP_AND_RECOVERY.md) · [backup automation setup](docs/DATABASE_BACKUP_AUTOMATION.md) · [why the API runs one worker](docs/MULTI_WORKER_RATE_LIMITING.md)
+- [Phase 35 final report — completion and evidence verdicts](docs/PHASE35_REPORT.md) · [scientific validation](docs/PHASE35_SCIENTIFIC_VALIDATION.md) · [data acquisition](docs/PHASE35_DATA_ACQUISITION.md)
+- [Phase 35 security audit](docs/PHASE35_SECURITY_AUDIT.md) · [performance](docs/PHASE35_PERFORMANCE_REPORT.md) · [accessibility](docs/PHASE35_ACCESSIBILITY_REPORT.md) · [visual regression](docs/PHASE35_VISUAL_REGRESSION.md)

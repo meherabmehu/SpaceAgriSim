@@ -8,6 +8,31 @@
 - Docker/Compose, CI checks, Vercel multi-service configuration and runtime scientific-data packaging.
 - Documentation of architecture, API, provenance, methodology, gaps, evaluation, limitations and verification.
 
+## Phase 35 — final completion, evidence verdicts and one responsive fix
+
+- **One evidence verdict per model, carried to every surface.** `ml/research/phase35_evidence_verdicts.py`
+  derives `passes-independent-check` / `fails-independent-check` / `no-independent-check` per model
+  from committed evaluation files; `decisionGrade` is true only for the first. Every prediction route
+  returns it with the number, the registry cards and the status panel render it, and 34 audit checks
+  plus 11 tests keep the surfaces from disagreeing. Current state: 1 decision-grade model
+  (mizuna-microbial-relative-load-v2), 3 failed independent checks (lettuce v1–v3), 3 never
+  independently checked (radiation ×2, tomato), 2 withdrawn.
+- **The one status change is a derivation.** mizuna v2's card already carried the rule for
+  `validated-exploratory`; three terms were true and the fourth — cross-campaign conformal coverage —
+  was measured in Phase 34 at 0.8943 against a nominal 0.90, inside the rule's own ±5-point tolerance.
+  The artifact records which file supplied the number.
+- **Responsive defect fixed.** `/#benchmarks` overflowed by 83 px at tablet and 114 px at mobile
+  (118-character citation in a `min-width: auto` grid track). Fixed with `min-width: 0` +
+  `overflow-wrap: anywhere`; both properties measured to be necessary.
+- **Visual gate widened** from 12 to 18 captures (predictions and benchmarks routes) and made
+  deterministic: integer-clipped captures, parent rebuilt and captured identically first, 18/18 PASS
+  at 0.000 % differing pixels.
+- **Accessibility measured**: contrast (worst 4.97:1), reduced motion and a keyboard-only journey at
+  three viewports, all passing on the parent as well — the properties were true and unmeasured.
+- **No new dataset, no new model.** Every acquisition candidate was rejected with a reason
+  (`docs/PHASE35_DATA_ACQUISITION.md`); nothing was trained because no candidate cleared the
+  volume/grouping/validation bar.
+
 ## Hosted runtime design
 
 The Vercel API service packages a small checksum-verified read-only copy of the data/model assets at build time. On serverless Vercel deployments, history writes are intentionally marked read-only unless a durable database and enabled write policy are configured. Local and container deployments can enable durable scenario history through `SPACEAGRISIM_DATABASE_URL`.

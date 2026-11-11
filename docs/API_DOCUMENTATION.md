@@ -84,3 +84,26 @@ the ones below.
 | Every prediction response | `operationalForecast: false`, `harvestForecastClaim: null` and `scopeStatement`, copied from the artifact's `servedScope`. A prediction is served under a stated scope and never as an operational forecast |
 | Transcriptomic predictions | `probabilityCalibration`: whether the probabilities are calibrated (`false` for both OSD-46 classifiers), what was measured (log loss, Brier, 10-bin ECE over 22 biological groups), the scope it holds in, and `servedScaling: "none"` |
 | `GET /api/models` rows | `probabilityCalibration` per model, and `servedScope` / `operationalForecast` on every served row |
+
+## Evidence verdict on every model response (Phase 35)
+
+Every `/api/predict/*` response and every row of `/api/models` carries:
+
+```json
+"evidenceVerdict": {
+  "verdict": "passes-independent-check | fails-independent-check | no-independent-check | unrecorded",
+  "decisionGrade": false,
+  "summary": "one sentence for a reader",
+  "reason": "the measurement behind the verdict",
+  "checks": [ { "check": "...", "criterion": "...", "measured": 0.0, "passed": false,
+                "groups": 6, "detail": "...", "evidence": "ml/evaluation/....json" } ],
+  "evidence": "ml/evaluation/phase35_model_evidence.json"
+},
+"decisionGrade": false
+```
+
+`decisionGrade` is `true` only when an independent campaign met every criterion the artifact declared
+for itself. For any model where it is `false`, the same sentence is also appended to `warnings`, so a
+caller cannot read the number without its status. The verdict is derived by
+`ml/research/phase35_evidence_verdicts.py` from committed evaluation files — never written by hand —
+and `scripts/audit_models.py` fails when a response surface disagrees with it.
