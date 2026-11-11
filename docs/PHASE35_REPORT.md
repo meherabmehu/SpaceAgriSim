@@ -128,3 +128,23 @@ support, which the old literal also happened to catch by accident).
 * a sentence above every prediction saying whether it is decision grade, and why not;
 * a status panel whose claims are computed from the data;
 * a benchmark page that fits on a tablet and a phone.
+
+## 8. Repository hygiene after delivery
+
+Two maintenance problems surfaced while verifying the delivered tree, and both are fixed rather than
+noted:
+
+**Duplicated evidence.** 115 committed screenshots held only 53 unique images — a capture that does
+not change gets copied into the next phase's baseline, candidate and parent directories. That was
+46.9 MB of exact duplication. `ml/research/dedupe_screenshots.py` keeps one canonical copy per image,
+records every removed path in `docs/screenshots/MANIFEST.json` with the SHA-256 it shares with the
+canonical file, and `--check` fails if duplicates reappear. The drift scripts resolve a removed path
+through that manifest, so they still compare the same pixels and still report 0.000 % for a capture
+that was merely duplicated, marking the row `identicalCopyOf`. `docs/screenshots` is now 25 MB.
+
+**A checkout that loses `.git`.** Some execution environments snapshot a workspace with a size
+budget; a repository larger than that budget can come back without its `.git` directory. `scripts/restore_git.sh`
+reattaches the tree to the remote without overwriting a file: it clones history into a temporary
+directory, moves `.git` into place, resets the index with `--mixed` so local edits appear as
+modifications rather than disappearing, strips any credential from the remote URL, and prints what
+differs. It was tested against a copy with an injected edit; the edit survived.
