@@ -7,6 +7,8 @@ result, but only an account can accumulate private research records.
 """
 from __future__ import annotations
 
+import csv
+import io
 import json
 from typing import Literal
 
@@ -172,6 +174,40 @@ def delete_analysis(analysis_id: str, user: dict = Depends(current_user)):
     return Response(status_code=204)
 
 
+# Characters that make a spreadsheet treat a cell as a formula rather than as text. A CSV is a
+# file a user opens in Excel, LibreOffice or Sheets, and quoting a value does not stop it being
+# evaluated - the field delimiter is removed before the cell is parsed. The standard mitigation is
+# a leading apostrophe, which the spreadsheet reads as "the rest is literal text".
+_FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
+
+
+def _csv_text(value) -> str:
+    """A free-text cell that cannot become a formula and does not read as a Python `None`.
+
+    Only applied to text fields (titles, quotations). Numbers keep their exact representation:
+    prefixing `-0.5` would turn a measurement into the string `'-0.5`.
+    """
+    if value is None:
+        return ""
+    text = str(value)
+    return "'" + text if text[:1] in _FORMULA_PREFIXES else text
+
+
+def _csv_rows(rows: list[list]) -> str:
+    """Serialise rows with the `csv` module, so quoting and line breaks are RFC 4180.
+
+    The previous export built its lines with f-strings and wrapped the title in bare quotes, so a
+    title containing a quote, a comma or a newline produced a file that no parser can read back:
+    `Harvest "best case", review` split into three columns and the remainder of the title became
+    its own record. The two `#` attribution lines are single-cell rows by design and survive the
+    writer unchanged.
+    """
+    buffer = io.StringIO()
+    writer = csv.writer(buffer, lineterminator="\n")
+    writer.writerows(rows)
+    return buffer.getvalue()
+
+
 @router.get("/analyses/{analysis_id}/export/{fmt}")
 def export_analysis(analysis_id: str, fmt: Literal["json", "csv", "md"],
                     user: dict = Depends(current_user)):
@@ -186,22 +222,24 @@ def export_analysis(analysis_id: str, fmt: Literal["json", "csv", "md"],
         body = json.dumps(analysis, indent=2, sort_keys=True)
         media, name = "application/json", f"{base}.json"
     elif fmt == "csv":
-        lines = ["# SpaceAgriSim saved AI analysis",
-                 "# Model output and model interpretation only - NOT a measurement",
-                 "field,value",
-                 f"analysis_id,{analysis_id}",
-                 f"title,\"{row['title']}\"",
-                 f"model_id,{analysis['modelId']}",
-                 f"created_at,{row['created_at']}",
-                 f"prediction,{analysis['output'].get('prediction')}",
-                 f"output_kind,{analysis['output'].get('kind')}",
-                 f"calibrated,{analysis['output'].get('calibrated')}",
-                 f"category,{analysis['scientificClassification'].get('category')}"]
+        rows: list[list] = [
+            ["# SpaceAgriSim saved AI analysis"],
+            ["# Model output and model interpretation only - NOT a measurement"],
+            ["field", "value"],
+            ["analysis_id", _csv_text(analysis_id)],
+            ["title", _csv_text(row["title"])],
+            ["model_id", _csv_text(analysis["modelId"])],
+            ["created_at", _csv_text(row["created_at"])],
+            ["prediction", _csv_text(analysis["output"].get("prediction"))],
+            ["output_kind", _csv_text(analysis["output"].get("kind"))],
+            ["calibrated", _csv_text(analysis["output"].get("calibrated"))],
+            ["category", _csv_text(analysis["scientificClassification"].get("category"))],
+        ]
         for name_, value in analysis["inputs"].items():
-            lines.append(f"input_{name_},{value}")
+            rows.append([f"input_{name_}", _csv_text(value)])
         for index, claim in enumerate(analysis["evidence"].get("claims", []), start=1):
-            lines.append(f'citation_{index},"{claim["text"].replace(chr(34), chr(39))}"')
-        body = "\n".join(lines) + "\n"
+            rows.append([f"citation_{index}", _csv_text(claim["text"])])
+        body = _csv_rows(rows)
         media, name = "text/csv", f"{base}.csv"
     else:
         evidence = analysis.get("evidence", {})

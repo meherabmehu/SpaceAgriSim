@@ -337,6 +337,47 @@ def test_json_export_round_trips_the_same_numbers_as_the_api(client):
     assert exported["output"]["calibrated"] is False
 
 
+def test_csv_export_survives_a_title_with_quotes_commas_and_newlines(client):
+    """The export used f-strings with a hand-written pair of quotes around the title.
+
+    A title is free text up to 120 characters, so it can contain `"`, `,` or a newline - and any of
+    the three broke the file: `Harvest "best case", review` split into three columns and the rest of
+    the title became a separate record, so a reader (or a spreadsheet) saw a corrupt export of a
+    perfectly valid analysis. The rows are now serialised by the `csv` module, and the title comes
+    back out of the file exactly as it went in.
+    """
+    headers = _headers(client, "csvescape")
+    title = 'Harvest "best case", review\nsecond line'
+    created = _saved(client, headers, title=title)
+    response = client.get(f"/api/analyses/{created['saved']['id']}/export/csv", headers=headers)
+    assert response.status_code == 200
+
+    rows = list(csv.reader(io.StringIO(response.text)))
+    assert {len(row) for row in rows} <= {1, 2}, f"a row split into more cells than the header: {rows}"
+    fields = {row[0]: row[1] for row in rows if len(row) == 2 and not row[0].startswith("#")}
+    assert fields["title"] == title
+    # The numbers are still numbers: escaping must not reach the numeric cells.
+    assert float(fields["prediction"]) == created["output"]["prediction"]
+
+
+@pytest.mark.parametrize("title", ["=cmd|' /C calc'!A0", "+1+1", "-5 trend", "@SUM(A1)"])
+def test_csv_export_neutralises_a_formula_in_the_title(client, title):
+    """A CSV is opened in a spreadsheet, and quoting does not stop a cell being evaluated.
+
+    The title is the one free-text field in the export that a user controls, so a title that starts
+    with a formula character gets the conventional leading apostrophe. The value is not altered
+    beyond that marker, and the numeric cells are untouched - prefixing `-0.5` would turn a
+    measurement into a string.
+    """
+    headers = _headers(client, "csvformula")
+    created = _saved(client, headers, title=title)
+    response = client.get(f"/api/analyses/{created['saved']['id']}/export/csv", headers=headers)
+    rows = list(csv.reader(io.StringIO(response.text)))
+    fields = {row[0]: row[1] for row in rows if len(row) == 2 and not row[0].startswith("#")}
+    assert fields["title"] == "'" + title
+    assert float(fields["prediction"]) == created["output"]["prediction"]
+
+
 def test_csv_export_states_the_prediction_and_its_status(client):
     headers = _headers(client, "exportcsv")
     created = _saved(client, headers)
