@@ -228,6 +228,36 @@ def test_generator_is_deterministic():
     assert len({row["plant_id"] for row in first}) == 6
 
 
+def test_generator_honours_out_dir_and_leaves_the_repository_alone(tmp_path):
+    """`--out-dir` was parsed and then ignored.
+
+    `main()` read the flag into `args` and called `write_fixture(...)` without it, and
+    `write_fixture` wrote to the module-level `FIXTURE_DIR` regardless. So
+    `make_synthetic_fixture.py --out-dir /tmp/anything` rewrote the committed fixtures in the
+    repository - a generator whose only purpose is to be pointed somewhere harmless was unable to
+    be pointed anywhere at all.
+    """
+    before = {path.name: path.read_bytes() for path in FIXTURES.iterdir()}
+    assert fixture_builder.main(["--out-dir", str(tmp_path)]) == 0
+    written = sorted(path.name for path in tmp_path.iterdir())
+    assert written, "the generator wrote nothing to the requested directory"
+    after = {path.name: path.read_bytes() for path in FIXTURES.iterdir()}
+    assert after == before, "--out-dir was ignored: the repository fixtures changed"
+
+
+def test_the_committed_fixtures_are_exactly_what_the_generator_produces(tmp_path):
+    """A committed fixture that the generator no longer produces is a stale test input."""
+    assert fixture_builder.main(["--out-dir", str(tmp_path)]) == 0
+    generated = {path.name: path.read_bytes() for path in tmp_path.iterdir()}
+    committed = {path.name: path.read_bytes() for path in FIXTURES.iterdir()}
+    assert sorted(generated) == sorted(committed), (
+        "scripts/experiment/fixtures is out of date: regenerate with "
+        "`python scripts/experiment/make_synthetic_fixture.py`"
+    )
+    differing = sorted(name for name in generated if generated[name] != committed[name])
+    assert differing == [], f"regenerate these fixtures, they no longer match the generator: {differing}"
+
+
 def test_report_carries_the_honesty_note():
     report = _report(CLEAN)
     assert "cannot establish that a measurement was made" in report["note"]

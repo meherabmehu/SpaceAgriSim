@@ -156,11 +156,12 @@ DEFECTS = {
 }
 
 
-def write_fixture(name: str, rows: list[dict[str, str]], units: dict[str, str]) -> Path:
+def write_fixture(name: str, rows: list[dict[str, str]], units: dict[str, str],
+                  out_dir: Path = FIXTURE_DIR) -> Path:
     suffix = "" if name == "clean" else f"__defect_{name}"
-    csv_path = FIXTURE_DIR / f"SYNTHETIC_FIXTURE_not_a_measurement{suffix}.csv"
-    units_path = FIXTURE_DIR / f"SYNTHETIC_FIXTURE_not_a_measurement{suffix}.units.json"
-    FIXTURE_DIR.mkdir(parents=True, exist_ok=True)
+    csv_path = out_dir / f"SYNTHETIC_FIXTURE_not_a_measurement{suffix}.csv"
+    units_path = out_dir / f"SYNTHETIC_FIXTURE_not_a_measurement{suffix}.units.json"
+    out_dir.mkdir(parents=True, exist_ok=True)
     with csv_path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
         writer.writeheader()
@@ -173,8 +174,12 @@ def write_fixture(name: str, rows: list[dict[str, str]], units: dict[str, str]) 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--out-dir", default=str(FIXTURE_DIR))
+    parser.add_argument("--out-dir", default=str(FIXTURE_DIR),
+                        help="where to write the fixtures (default: beside this script)")
     args = parser.parse_args(argv)
+    # `--out-dir` used to be parsed and then ignored: `write_fixture` wrote to the module-level
+    # FIXTURE_DIR regardless, so asking for a temporary directory silently modified the repository.
+    out_dir = Path(args.out_dir).expanduser().resolve()
 
     schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
     columns = {entry["name"]: entry for entry in
@@ -189,9 +194,9 @@ def main(argv: list[str] | None = None) -> int:
     written = []
     for name, defect in DEFECTS.items():
         rows, units = defect(copy.deepcopy(base_rows), base_units)
-        written.append(write_fixture(name, rows, units))
+        written.append(write_fixture(name, rows, units, out_dir))
 
-    print(f"wrote {len(written)} fixtures to {FIXTURE_DIR}")
+    print(f"wrote {len(written)} fixtures to {out_dir}")
     print(f"every row is labelled: {LABEL}")
     print("defects covered: " + ", ".join(sorted(DEFECTS)))
     return 0
