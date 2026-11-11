@@ -177,6 +177,25 @@ function DatasetDetail({ id }) {
     </Card>
   );
 }
+const VERDICT_BADGE = {
+  "passes-independent-check": { label: "Independent check passed", tone: "green" },
+  "fails-independent-check": { label: "Independent check failed", tone: "amber" },
+  "no-independent-check": { label: "No independent check", tone: "amber" },
+  unrecorded: { label: "Evidence unrecorded", tone: "amber" },
+};
+
+function EvidenceBadge({ verdict }) {
+  // Phase 35: every served model carries a verdict derived from a committed measurement. The
+  // badge is driven by that field, so a model that fails its independent check cannot be
+  // presented here as if it had passed one.
+  const badge = VERDICT_BADGE[verdict?.verdict] || VERDICT_BADGE.unrecorded;
+  return (
+    <span className={`pill ${badge.tone}`} title={verdict?.summary || ""}>
+      {badge.label}
+    </span>
+  );
+}
+
 export function Predictions({ models, registryError }) {
   // Phase 31 removed the mizuna harvest form from this panel: its model was worse than
   // predicting the training mean (held-out R2 -0.333 vs -0.138) and was withdrawn from the
@@ -204,11 +223,23 @@ export function Predictions({ models, registryError }) {
             title={model.name || model.id}
             label={model.task || "EXPERIMENTAL MODEL"}
             action={
-              <span className="pill green">
-                {model.artifactExists ? "Artifact saved" : model.status}
+              <span className="badge-row">
+                <span className="pill">
+                  {model.artifactExists ? "Artifact verified" : model.status}
+                </span>
+                <EvidenceBadge verdict={model.evidenceVerdict} />
               </span>
             }
           >
+            {model.evidenceVerdict?.summary && (
+              <p className="muted fine" role="note">
+                {model.evidenceVerdict.summary}
+                {model.evidenceVerdict.verdict === "fails-independent-check" &&
+                model.evidenceVerdict.reason
+                  ? ` Measured: ${model.evidenceVerdict.reason}.`
+                  : ""}
+              </p>
+            )}
             <div className="stat-pair">
               <span>Version</span>
               <strong>{model.version}</strong>
@@ -230,8 +261,8 @@ export function Predictions({ models, registryError }) {
             </div>
             {model.baselineMetrics && (
               <p className="muted fine">
-                Baseline MAE: {number(model.baselineMetrics.MAE, 3)} ?{" "}
-                {model.samples} samples ? {model.groups} groups
+                Baseline MAE: {number(model.baselineMetrics.MAE, 3)} ·{" "}
+                {model.samples} samples · {model.groups} groups
               </p>
             )}
             <p className="muted fine">{validationText(model)}</p>

@@ -19494,5 +19494,33 @@
     ],
     "reason": "The pre-registered failure is published with the model; withdrawing it would also withdraw the evidence."
   },
-  "note": "No operational forecast. This card describes what the model reproduces inside the measured domain; it is not a prediction of a future or unmeasured crop."
+  "note": "No operational forecast. This card describes what the model reproduces inside the measured domain; it is not a prediction of a future or unmeasured crop.",
+  "evidenceVerdict": {
+    "verdict": "fails-independent-check",
+    "decisionGrade": false,
+    "decisionScope": null,
+    "reason": "Touliatos D, Dodd IC, McAinsh M (2016) Vertical farming increases lettuce yield per unit area compared to conventional horizontal hydroponics. Food and Energy Security 5(3):184-191, doi:10.1002/fes3.83: 41.594 % MAPE against 30.0 %",
+    "checks": [
+      {
+        "check": "independent holdout error",
+        "criterion": "MAPE <= 30.0 % fixed before the measurement",
+        "measured": 41.59420289855073,
+        "unit": "% MAPE",
+        "passed": false,
+        "groups": 1,
+        "detail": "Touliatos D, Dodd IC, McAinsh M (2016) Vertical farming increases lettuce yield per unit area compared to conventional horizontal hydroponics. Food and Energy Security 5(3):184-191, doi:10.1002/fes3.83: 41.594 % MAPE against 30.0 %",
+        "evidence": "ml/artifacts/lettuce-earth-growth-v3.json#validation.independent"
+      },
+      {
+        "check": "cross-campaign interval coverage",
+        "criterion": "no observation may fall outside a nominal 90 % interval that is offered as a 90 % interval; the study's six treatment means are independent of the fit",
+        "measured": 1.0,
+        "unit": "coverage of a nominal 90 % interval",
+        "passed": true,
+        "groups": 6,
+        "detail": "6 of 6 independent treatment means covered, prediction/measurement ratio median 1.163 (0.606-1.863)",
+        "evidence": "ml/evaluation/phase34_cross_campaign_coverage.json"
+      }
+    ]
+  }
 }

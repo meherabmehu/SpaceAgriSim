@@ -77,6 +77,13 @@ function RadiationModelCard({ model }) {
     {error && <div className="error-banner" role="alert">{error}</div>}
     {result && <>
       {profiles?.synthetic && <p className="warning-box">{profiles.label}</p>}
+      {result.evidenceVerdict && (
+        <p className={`verdict-line ${result.decisionGrade ? 'ok' : 'warn'}`} role="note">
+          {result.decisionGrade
+            ? 'Decision grade: an independent campaign met every criterion set for this model.'
+            : `Not decision grade — ${result.evidenceVerdict.summary}`}
+        </p>
+      )}
       <div className="comparison-value">{result.prediction}</div>
       <p className="muted fine">
         Class probabilities: {Object.entries(result.probabilities).map(([k, v]) => `${k} ${v.toFixed(3)}`).join(' · ')}.

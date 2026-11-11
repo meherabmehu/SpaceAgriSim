@@ -29,6 +29,20 @@ export function ScientificStatusPanel() {
   const unrecorded = models.filter(
     (model) => !(model.provenance || {}).category,
   );
+  // Phase 35: these counts are derived from the per-model verdict instead of asserted in prose.
+  // The sentence below used to state, unconditionally, that no served model reports calibrated
+  // probabilities - which stopped being a complete description once one model's calibration was
+  // measured out of fold, and would have stopped being true outright if one were ever calibrated.
+  const decisionGrade = models.filter((model) => model.decisionGrade);
+  const failed = models.filter(
+    (model) => (model.evidenceVerdict || {}).verdict === "fails-independent-check",
+  );
+  const unchecked = models.filter(
+    (model) => (model.evidenceVerdict || {}).verdict === "no-independent-check",
+  );
+  const measuredCalibration = models.filter(
+    (model) => (model.probabilityCalibration || {}).measured,
+  );
   return (
     <Card
       title="Scientific status of every served model"
@@ -42,14 +56,21 @@ export function ScientificStatusPanel() {
             {nasa.length} of {models.length} served models were trained on measurements
             produced by NASA experiments and retrieved from a NASA repository;{" "}
             {external.length} were trained on non-NASA measured data. Each card names the
-            study and the repository. No served model reports calibrated probabilities, so
-            the measured interval coverage below is an evaluation result and not a promise
-            about a future campaign. Models withdrawn in Phase 31 are not listed here: their
-            artifacts and evaluations are kept as documented negative results.
+            study and the repository. {decisionGrade.length} of {models.length} is currently
+            decision grade: {failed.length} failed an independent check, {unchecked.length}
+            have never been scored by one, so the measured interval coverage shown here is an
+            evaluation result and not a promise about a future campaign.
+            {measuredCalibration.length > 0
+              ? ` ${measuredCalibration.length} model${measuredCalibration.length === 1 ? "" : "s"} report a measured probability calibration; none reports its probabilities as calibrated.`
+              : " No served model reports a measured probability calibration."}
+            Models withdrawn in Phase 31 are not listed here: their artifacts and evaluations
+            are kept as documented negative results.
           </p>
           <div className="badge-row">
             <span className="pill green">{nasa.length} NASA-measured</span>
             <span className="pill">{external.length} non-NASA measured</span>
+            <span className="pill green">{decisionGrade.length} decision grade</span>
+            <span className="pill amber">{failed.length} failed an independent check</span>
             {unrecorded.length > 0 && (
               <span className="pill amber">{unrecorded.length} source unrecorded</span>
             )}
@@ -96,6 +117,20 @@ export function ScientificStatusPanel() {
                     Nominal coverage {number(model.calibration.nominalCoverage, 2)} ·
                     measured {number(model.calibration.measuredCoverage, 4)} on{" "}
                     {model.calibration.measuredOn}
+                  </p>
+                )}
+                <div className="stat-pair">
+                  <span>Evidence verdict</span>
+                  <strong>
+                    {(model.evidenceVerdict || {}).verdict || "unrecorded"}
+                  </strong>
+                </div>
+                {(model.evidenceVerdict || {}).reason && (
+                  <p className="muted fine" role="note">
+                    {(model.evidenceVerdict || {}).summary}
+                    {(model.evidenceVerdict || {}).verdict === "fails-independent-check"
+                      ? ` Measured: ${model.evidenceVerdict.reason}.`
+                      : ""}
                   </p>
                 )}
                 <div className="stat-pair">

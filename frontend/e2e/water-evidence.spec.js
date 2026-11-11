@@ -1,17 +1,6 @@
 import { test, expect } from "@playwright/test";
+import { settleForCapture } from "./settle.js";
 
-async function settleForCapture(page) {
-  // A screenshot taken while a control still has focus or a pointer is resting on it records the
-  // hover/focus ring, not the layout: the same page captured twice then differs by a few percent
-  // of the canvas for no design reason. Blur and park the pointer first so the baseline is a
-  // property of the page rather than of where the last click landed.
-  await page.evaluate(() => document.activeElement?.blur?.());
-  await page.mouse.move(0, 0);
-  // The controls animate their hover/focus styling, so a screenshot taken in the same frame as
-  // the blur records a mid-transition tint. Wait for the transition to finish rather than
-  // sampling it.
-  await page.waitForTimeout(300);
-}
 
 
 /**

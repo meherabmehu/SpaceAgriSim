@@ -142,6 +142,11 @@ def model_catalogue() -> dict:
             "sourceStudy": model.get("sourceStudy"),
             "sourceType": (model.get("provenance") or {}).get("label"),
             "provenance": model.get("provenance"),
+            # Phase 35: the same verdict the catalogue and the prediction routes use, so the
+            # scientific-status panel cannot describe a model differently from the response that
+            # serves it.
+            "evidenceVerdict": model.get("evidenceVerdict"),
+            "decisionGrade": bool((model.get("evidenceVerdict") or {}).get("decisionGrade")),
         })
     return {"models": rows,
             "families": FAMILY_DESCRIPTION,

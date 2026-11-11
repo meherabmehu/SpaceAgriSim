@@ -106,7 +106,19 @@ def test_model_registry_requires_actual_verified_artifacts(scientific_client):
     assert all(v > 0 for v in v2["transferSummary"]["v2HeldOutR2"].values())
     # Absolute-scale predictions must not be offered without a campaign reference.
     assert v2["absoluteScaleProtocol"]["required"]
-    assert v2["evidenceStatus"] == "experimental"
+    # Phase 35: this line used to assert the literal "experimental". The card's own recorded rule
+    # (`evidenceBasis.rule`) required four things for validated-exploratory status, and exactly one
+    # of them - conformal coverage within 5 points of nominal - was unmeasured. Phase 34 measured it
+    # across campaigns at 0.8943 against a nominal 0.90, so the rule is now satisfied and the status
+    # follows from it. The assertion is on the derivation rather than on the old literal: the status
+    # and the verdict must agree, and a passing verdict must carry the measurement that earned it.
+    assert v2["evidenceStatus"] == "validated-exploratory"
+    verdict = v2["evidenceVerdict"]
+    assert verdict["verdict"] == "passes-independent-check"
+    assert verdict["decisionGrade"] is True
+    coverage_check = next(c for c in verdict["checks"] if c["check"].startswith("cross-campaign"))
+    assert coverage_check["passed"] is True
+    assert coverage_check["measured"] >= 0.9 - 0.05
     assert v2["interval"]["empiricallyCalibrated"] is True
     assert v2["interval"]["empiricalCoverage"] >= v2["interval"]["nominalCoverage"] - 0.02
     assert v2["uncertainty"]["exchangeabilityUnit"].startswith("biological group")

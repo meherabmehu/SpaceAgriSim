@@ -614,5 +614,12 @@
     "servedScaling": "none",
     "scope": "Measured out of fold over 21 plants in one OSD-767 experiment; the two tissues of a plant stay in one fold.",
     "statement": "Out of fold, 36 samples from 21 plants: log loss 0.2827 (95 % plant-resampled interval 0.1881-0.3902), Brier 0.081, top-label ECE 0.1621 over 10 bins. 0 of 7 predictions at or above 0.9 were wrong. The ground/flight base rate is 0.5. Treat the score as a ranking of recorded flight context, not as the probability the class is correct, and not as a statement about plant health, stress or yield."
+  },
+  "evidenceVerdict": {
+    "verdict": "no-independent-check",
+    "decisionGrade": false,
+    "decisionScope": null,
+    "reason": "Only within-study or within-campaign performance is recorded; no independent campaign has scored this model.",
+    "checks": []
   }
 }

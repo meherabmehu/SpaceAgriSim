@@ -2372,3 +2372,25 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Phase 35: the evidence verdict that travels with a prediction. It is a sentence a user reads
+   before the number, not a tooltip, because "not decision grade" is the part that changes what
+   they should do with the value. */
+.verdict-line {
+  margin: 0 0 0.5rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  border-left: 3px solid;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+.verdict-line.warn {
+  border-left-color: #fbbf24;
+  background: rgba(251, 191, 36, 0.1);
+  color: #f6e2b3;
+}
+.verdict-line.ok {
+  border-left-color: #4ade80;
+  background: rgba(74, 222, 128, 0.1);
+  color: #cdf0da;
+}

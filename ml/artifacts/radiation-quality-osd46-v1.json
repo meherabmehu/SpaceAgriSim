@@ -2740,5 +2740,12 @@
     "servedScaling": "none",
     "scope": "Measured within OSD-46 only. It does not transfer to other radiation qualities, doses, organisms or platforms.",
     "statement": "The class probabilities are uncalibrated scores from a regularised logistic model, measured on 44 arrays from 22 biological groups. Read them as a ranking, not as a probability that the class is correct."
+  },
+  "evidenceVerdict": {
+    "verdict": "no-independent-check",
+    "decisionGrade": false,
+    "decisionScope": null,
+    "reason": "Only within-study or within-campaign performance is recorded; no independent campaign has scored this model.",
+    "checks": []
   }
 }

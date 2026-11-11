@@ -74301,5 +74301,23 @@
     ],
     "reason": "Superseded, not withdrawn: the artifact is still reachable so a report that quoted it can be reproduced, with the supersession stated in every response."
   },
-  "note": "No operational forecast. This card describes what the model reproduces inside the measured domain; it is not a prediction of a future or unmeasured crop."
+  "note": "No operational forecast. This card describes what the model reproduces inside the measured domain; it is not a prediction of a future or unmeasured crop.",
+  "evidenceVerdict": {
+    "verdict": "fails-independent-check",
+    "decisionGrade": false,
+    "decisionScope": null,
+    "reason": "0 of 6 independent treatment means covered, prediction/measurement ratio median 3.655 (1.905-5.493)",
+    "checks": [
+      {
+        "check": "cross-campaign interval coverage",
+        "criterion": "no observation may fall outside a nominal 90 % interval that is offered as a 90 % interval; the study's six treatment means are independent of the fit",
+        "measured": 0.0,
+        "unit": "coverage of a nominal 90 % interval",
+        "passed": false,
+        "groups": 6,
+        "detail": "0 of 6 independent treatment means covered, prediction/measurement ratio median 3.655 (1.905-5.493)",
+        "evidence": "ml/evaluation/phase34_cross_campaign_coverage.json"
+      }
+    ]
+  }
 }

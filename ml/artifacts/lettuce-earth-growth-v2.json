@@ -15660,5 +15660,23 @@
     ],
     "reason": "The failed external check is the result. Removing the card would remove the evidence that the platform checked."
   },
-  "note": "No operational forecast. This card describes what the model reproduces inside the measured domain; it is not a prediction of a future or unmeasured crop."
+  "note": "No operational forecast. This card describes what the model reproduces inside the measured domain; it is not a prediction of a future or unmeasured crop.",
+  "evidenceVerdict": {
+    "verdict": "fails-independent-check",
+    "decisionGrade": false,
+    "decisionScope": null,
+    "reason": "0 of 6 independent treatment means covered, prediction/measurement ratio median 3.212 (1.674-5.375)",
+    "checks": [
+      {
+        "check": "cross-campaign interval coverage",
+        "criterion": "no observation may fall outside a nominal 90 % interval that is offered as a 90 % interval; the study's six treatment means are independent of the fit",
+        "measured": 0.0,
+        "unit": "coverage of a nominal 90 % interval",
+        "passed": false,
+        "groups": 6,
+        "detail": "0 of 6 independent treatment means covered, prediction/measurement ratio median 3.212 (1.674-5.375)",
+        "evidence": "ml/evaluation/phase34_cross_campaign_coverage.json"
+      }
+    ]
+  }
 }

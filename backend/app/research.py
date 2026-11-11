@@ -440,7 +440,61 @@ def _served_row(model_id: str, model: dict, metrics: dict, baseline: dict,
         "sourceType": provenance.get("label"),
         "artifactSourceType": model.get("sourceType"),
         "supersedes": model.get("supersedes") or registered.get("supersedes"),
+        # Phase 35: the per-model evidence verdict, derived by ml/research/phase35_evidence_verdicts.py
+        # from the committed evaluation files rather than written into the card by hand. The
+        # catalogue and the prediction routes read the same block, so the badge a user sees and the
+        # warning attached to a number cannot disagree.
+        "evidenceVerdict": evidence_verdict(model_id, model),
     }
+
+
+VERDICT_SUMMARY = {
+    "passes-independent-check": (
+        "An independent campaign scored this model and every criterion set for it was met."),
+    "fails-independent-check": (
+        "An independent campaign scored this model and it did not meet the criterion. The prediction "
+        "is shown for inspection, not as a validated forecast."),
+    "no-independent-check": (
+        "No independent campaign has scored this model. Its accuracy is measured inside the study it "
+        "was fitted on and nowhere else."),
+}
+
+
+def evidence_verdict(model_id: str, model: dict | None = None) -> dict:
+    """The stored verdict, reduced to what a caller needs, or an explicit absence.
+
+    A missing verdict is reported as `unrecorded` rather than defaulted to something reassuring: a
+    model whose evidence has not been summarised has not thereby passed anything.
+    """
+    card = model if model is not None else load_model(model_id)
+    verdict = card.get("evidenceVerdict") or {}
+    kind = verdict.get("verdict")
+    if kind not in VERDICT_SUMMARY:
+        return {
+            "verdict": "unrecorded",
+            "decisionGrade": False,
+            "summary": "No evidence verdict is recorded for this model; treat it as unvalidated.",
+            "reason": None,
+            "checks": [],
+        }
+    return {
+        "verdict": kind,
+        "decisionGrade": bool(verdict.get("decisionGrade")),
+        "summary": VERDICT_SUMMARY[kind],
+        "reason": verdict.get("reason"),
+        "decisionScope": verdict.get("decisionScope"),
+        "checks": verdict.get("checks") or [],
+        "evidence": "ml/evaluation/phase35_model_evidence.json",
+    }
+
+
+def verdict_warning(model_id: str, model: dict | None = None) -> list[str]:
+    """The sentence a prediction response must carry when the model is not decision grade."""
+    verdict = evidence_verdict(model_id, model)
+    if verdict["verdict"] == "passes-independent-check":
+        return []
+    return [f"Evidence status: {verdict['verdict'].replace('-', ' ')}. {verdict['summary']}"
+            + (f" Measured: {verdict['reason']}." if verdict.get("reason") else "")]
 
 
 def model_registry():

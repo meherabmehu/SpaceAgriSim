@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-11T14:32:33.485278+00:00",
+  "generatedAt": "2026-11-11T18:43:23.363764+00:00",
   "phase": 7,
   "registrySchemaVersion": 1,
   "modelCount": 9,
@@ -15,15 +15,15 @@
     "tomato-flight-response-v1"
   ],
   "artifactDigests": {
-    "lettuce-earth-growth-v1": "ba29bcc710aaf57718ded30ec4f5262d941ca150c4317858c7bd05c22733ee02",
-    "lettuce-earth-growth-v2": "18dd26f95461362f65d0ec8ad6884c35e50ca943faf1a7e47f02e5dcd2b1edb4",
-    "lettuce-earth-growth-v3": "f01a9444bdc5865014ec1ad58048b6f64a6f729bd7eb6ecb69a31bdc5f9dc8b7",
+    "lettuce-earth-growth-v1": "3d5fdaeab4165df6efcb0887c18f5ab2da65b71056aa521400946a4edbf0879c",
+    "lettuce-earth-growth-v2": "a753f4c3a7d3960a4bc09782374252e55bfade10070e568528e9d8f2fd67057b",
+    "lettuce-earth-growth-v3": "9b3277df28587250f92f2dbca85efc0f0cfe58b9eac2594239711f284905b640",
     "mizuna-harvest-v1": "5be2375b7bebca641be3b42e34108daff6609bf913f13e6d2664007b040b3744",
     "mizuna-microbial-load-v1": "5ad5079091a9bc8d663b46b2a077fc67eabeb54239957c9aa612295bb4fb1fe3",
-    "mizuna-microbial-relative-load-v2": "96a66faa99f9b24c6e9f569d70f6ed40701447d211103f8c9df685f3bd8e6a5d",
-    "radiation-exposure-osd46-v1": "9e9f963f529636e5d49dd31f4f264bfd26a2e62342c31c20c1c53a949f9b77f6",
-    "radiation-quality-osd46-v1": "dd5f558045c6de0c45bf56dafb3acd23e3eeeb575134d01a4ebca5dbe375c830",
-    "tomato-flight-response-v1": "b97f24e0988e4dcb1591b2390e7333460a2adeae71fb15329bf6f204626d2a76"
+    "mizuna-microbial-relative-load-v2": "94eeffc2396840f25232afd312ef23d08f0dd0a497a80bc8a1287b14d8888f30",
+    "radiation-exposure-osd46-v1": "b3d2bd1dae4a2ad51d4b5ade89dda41b970ad6901516cf34c57f63cb5b1a5b9b",
+    "radiation-quality-osd46-v1": "711cd7df1b4a050fa70119d9679d58f2a292cf369185c459848be6d454c78897",
+    "tomato-flight-response-v1": "61edbc4850797734a66feb3b6e3d0387b2fd59ad2b46f41c85dc74d024c4dd66"
   },
   "environment": {
     "study": "Touliatos D, Dodd IC, McAinsh M (2016) Vertical farming increases lettuce yield per unit area compared to conventional horizontal hydroponics. Food and Energy Security 5(3):184-191, doi:10.1002/fes3.83",
@@ -89,17 +89,17 @@
     {
       "check": "checksum matches: lettuce-earth-growth-v1",
       "passed": true,
-      "detail": "ba29bcc710aa vs recorded ba29bcc710aa"
+      "detail": "3d5fdaeab416 vs recorded 3d5fdaeab416"
     },
     {
       "check": "checksum matches: lettuce-earth-growth-v2",
       "passed": true,
-      "detail": "18dd26f95461 vs recorded 18dd26f95461"
+      "detail": "a753f4c3a7d3 vs recorded a753f4c3a7d3"
     },
     {
       "check": "checksum matches: lettuce-earth-growth-v3",
       "passed": true,
-      "detail": "f01a9444bdc5 vs recorded f01a9444bdc5"
+      "detail": "9b3277df2858 vs recorded 9b3277df2858"
     },
     {
       "check": "checksum matches: mizuna-harvest-v1",
@@ -114,22 +114,22 @@
     {
       "check": "checksum matches: mizuna-microbial-relative-load-v2",
       "passed": true,
-      "detail": "96a66faa99f9 vs recorded 96a66faa99f9"
+      "detail": "94eeffc23968 vs recorded 94eeffc23968"
     },
     {
       "check": "checksum matches: radiation-exposure-osd46-v1",
       "passed": true,
-      "detail": "9e9f963f5296 vs recorded 9e9f963f5296"
+      "detail": "b3d2bd1dae4a vs recorded b3d2bd1dae4a"
     },
     {
       "check": "checksum matches: radiation-quality-osd46-v1",
       "passed": true,
-      "detail": "dd5f558045c6 vs recorded dd5f558045c6"
+      "detail": "711cd7df1b4a vs recorded 711cd7df1b4a"
     },
     {
       "check": "checksum matches: tomato-flight-response-v1",
       "passed": true,
-      "detail": "b97f24e0988e vs recorded b97f24e0988e"
+      "detail": "61edbc485079 vs recorded 61edbc485079"
     },
     {
       "check": "withdrawn model is not served: et0-emulator-v1",
@@ -189,7 +189,7 @@
     {
       "check": "api can load: mizuna-microbial-relative-load-v2",
       "passed": true,
-      "detail": "experimental"
+      "detail": "validated-exploratory"
     },
     {
       "check": "api can load: radiation-exposure-osd46-v1",
@@ -272,6 +272,11 @@
       "detail": "7 statements"
     },
     {
+      "check": "promotion basis complete: mizuna-microbial-relative-load-v2",
+      "passed": true,
+      "detail": "{\"beatsBaselineWithinPooledData\": true, \"positiveR2OnEveryHeldOutCampaign\": true, \"transferSignificantUnderPermutation\": true, \"intervalsEmpiricallyCalibrated\":"
+    },
+    {
       "check": "artifact reports metrics: mizuna-microbial-relative-load-v2",
       "passed": true,
       "detail": "3 numeric metrics"
@@ -280,6 +285,11 @@
       "check": "artifact reports limitations: mizuna-microbial-relative-load-v2",
       "passed": true,
       "detail": "7 statements"
+    },
+    {
+      "check": "validated model has no negative held-out result: mizuna-microbial-relative-load-v2",
+      "passed": true,
+      "detail": "negative in []"
     },
     {
       "check": "artifact reports metrics: radiation-exposure-osd46-v1",

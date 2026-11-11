@@ -2379,5 +2379,12 @@
     "servedScaling": "none",
     "scope": "Measured within OSD-46 only, and the class balance is confounded with array batch.",
     "statement": "The class probabilities are uncalibrated scores. Controls do not appear on the array batch holding 20 of the 44 arrays, so neither the score nor its calibration can separate irradiation from array handling."
+  },
+  "evidenceVerdict": {
+    "verdict": "no-independent-check",
+    "decisionGrade": false,
+    "decisionScope": null,
+    "reason": "Only within-study or within-campaign performance is recorded; no independent campaign has scored this model.",
+    "checks": []
   }
 }

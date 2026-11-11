@@ -470,6 +470,49 @@ def audit() -> dict:
             check(f"osd320-not-independence:{path.name}", not absent,
                   "OSD-320 is mentioned without a duplicate/independence caveat")
 
+    # ------------------------------------------- 12. per-model evidence verdicts (Phase 35)
+    #
+    # Every served model carries a verdict derived from measurement, and the surface a user meets
+    # must carry the same verdict. Three things are checked: the verdict exists and matches the
+    # committed evidence file, a failed check cannot be decision grade, and a route that serves a
+    # non-decision-grade number must attach the measured reason to its warnings.
+    phase35 = ROOT / "ml" / "evaluation" / "phase35_model_evidence.json"
+    recorded_verdicts = {}
+    if phase35.is_file():
+        recorded_verdicts = (json.loads(phase35.read_text(encoding="utf-8")) or {}).get("models") or {}
+    for row in served:
+        model_id = row["id"]
+        verdict = row.get("evidenceVerdict") or {}
+        recorded = recorded_verdicts.get(model_id) or {}
+        check(f"verdict-recorded:{model_id}", bool(verdict.get("verdict")),
+              "no evidence verdict on the served row")
+        check(f"verdict-matches-evidence:{model_id}",
+              verdict.get("verdict") == recorded.get("verdict"),
+              f"served={verdict.get('verdict')} evidence={recorded.get('verdict')}")
+        check(f"verdict-has-summary:{model_id}", bool(str(verdict.get("summary") or "").strip()),
+              "a verdict with no sentence for the interface to show")
+        if verdict.get("verdict") == "fails-independent-check":
+            check(f"failed-check-not-decision-grade:{model_id}",
+                  verdict.get("decisionGrade") is False,
+                  "a model that failed its independent check is offered as decision grade")
+            check(f"failed-check-states-why:{model_id}", bool(str(verdict.get("reason") or "").strip()),
+                  "a failing verdict without its measured reason")
+            check(f"failed-check-warns-the-caller:{model_id}",
+                  bool(research.verdict_warning(model_id)),
+                  "the prediction path would return the number without its verdict")
+        if verdict.get("verdict") == "no-independent-check":
+            check(f"unvalidated-not-decision-grade:{model_id}",
+                  verdict.get("decisionGrade") is False,
+                  "a model with no independent check is offered as decision grade")
+        card = next((m for m in rows if m["id"] == model_id), {}) or {}
+        if str(card.get("evidenceStatus") or "").startswith("validated"):
+            check(f"validated-status-has-passing-check:{model_id}",
+                  verdict.get("verdict") == "passes-independent-check",
+                  f"status={card.get('evidenceStatus')} verdict={verdict.get('verdict')}")
+    check("verdicts-cover-every-served-model",
+          {row["id"] for row in served} <= set(recorded_verdicts),
+          f"{len(recorded_verdicts)} verdicts recorded for {len(served)} served models")
+
     # ------------------------------------------------ 11. removed capabilities (Phase 30)
     #
     # A removed capability fails the audit in one of two ways: it comes back (a field, a factor, a

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "trainedAt": "2026-11-11T11:59:00.326446+00:00",
+  "trainedAt": "2026-11-11T18:42:52.536513+00:00",
   "environment": {
     "python": "3.13.16",
     "numpy": "2.3.5",
@@ -11,18 +11,18 @@
     {
       "id": "lettuce-earth-growth-v1",
       "artifact": "ml/artifacts/lettuce-earth-growth-v1.json",
-      "sha256": "ba29bcc710aaf57718ded30ec4f5262d941ca150c4317858c7bd05c22733ee02"
+      "sha256": "3d5fdaeab4165df6efcb0887c18f5ab2da65b71056aa521400946a4edbf0879c"
     },
     {
       "id": "lettuce-earth-growth-v2",
       "artifact": "ml/artifacts/lettuce-earth-growth-v2.json",
-      "sha256": "18dd26f95461362f65d0ec8ad6884c35e50ca943faf1a7e47f02e5dcd2b1edb4",
+      "sha256": "a753f4c3a7d3960a4bc09782374252e55bfade10070e568528e9d8f2fd67057b",
       "supersedes": "lettuce-earth-growth-v1"
     },
     {
       "id": "lettuce-earth-growth-v3",
       "artifact": "ml/artifacts/lettuce-earth-growth-v3.json",
-      "sha256": "f01a9444bdc5865014ec1ad58048b6f64a6f729bd7eb6ecb69a31bdc5f9dc8b7",
+      "sha256": "9b3277df28587250f92f2dbca85efc0f0cfe58b9eac2594239711f284905b640",
       "supersedes": "",
       "status": "trained-exploratory",
       "independentValidation": {
@@ -46,23 +46,23 @@
     {
       "id": "mizuna-microbial-relative-load-v2",
       "artifact": "ml/artifacts/mizuna-microbial-relative-load-v2.json",
-      "sha256": "96a66faa99f9b24c6e9f569d70f6ed40701447d211103f8c9df685f3bd8e6a5d",
+      "sha256": "94eeffc2396840f25232afd312ef23d08f0dd0a497a80bc8a1287b14d8888f30",
       "supersedes": "mizuna-microbial-load-v1"
     },
     {
       "id": "radiation-exposure-osd46-v1",
       "artifact": "ml/artifacts/radiation-exposure-osd46-v1.json",
-      "sha256": "9e9f963f529636e5d49dd31f4f264bfd26a2e62342c31c20c1c53a949f9b77f6"
+      "sha256": "b3d2bd1dae4a2ad51d4b5ade89dda41b970ad6901516cf34c57f63cb5b1a5b9b"
     },
     {
       "id": "radiation-quality-osd46-v1",
       "artifact": "ml/artifacts/radiation-quality-osd46-v1.json",
-      "sha256": "dd5f558045c6de0c45bf56dafb3acd23e3eeeb575134d01a4ebca5dbe375c830"
+      "sha256": "711cd7df1b4a050fa70119d9679d58f2a292cf369185c459848be6d454c78897"
     },
     {
       "id": "tomato-flight-response-v1",
       "artifact": "ml/artifacts/tomato-flight-response-v1.json",
-      "sha256": "b97f24e0988e4dcb1591b2390e7333460a2adeae71fb15329bf6f204626d2a76"
+      "sha256": "61edbc4850797734a66feb3b6e3d0387b2fd59ad2b46f41c85dc74d024c4dd66"
     }
   ],
   "dataVersion": "e5a3967ac7c471a2a81ed71e6ac179e8ca01809d199a8739afc9b498b18fdc7c",

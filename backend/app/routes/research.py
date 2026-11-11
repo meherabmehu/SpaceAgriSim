@@ -78,7 +78,7 @@ def predict_lettuce(request: LettucePredictionRequest):
     if request.airTemperature >= 28 and request.rootTemperature <= 24 and request.ppfd >= 400:
         warnings.append('Tip-burn treatment combinations were omitted in the published analysis; this region is unsupported.')
     radius=model['interval']['radius']
-    return {'modelId':model['id'],'prediction':value,'unit':model['unit'],'method':model['method'],'sourceStudy':'WUR-lettuce','sourceUrl':model['sourceUrl'],'interval':{'low':max(0,value-radius),'high':value+radius,'kind':model['interval']['kind']},'outOfDistribution':bool(warnings),'warnings':warnings+model['limitations'],'inputs':request.model_dump(),'operationalForecast':False,'harvestForecastClaim':None,'scopeStatement':model.get('servedScope')}
+    return {'modelId':model['id'],'prediction':value,'unit':model['unit'],'method':model['method'],'sourceStudy':'WUR-lettuce','sourceUrl':model['sourceUrl'],'interval':{'low':max(0,value-radius),'high':value+radius,'kind':model['interval']['kind']},'outOfDistribution':bool(warnings),'warnings':warnings+model['limitations'],'inputs':request.model_dump(),'operationalForecast':False,'harvestForecastClaim':None,'scopeStatement':model.get('servedScope'),'evidenceVerdict':research.evidence_verdict(model['id'],model),'decisionGrade':research.evidence_verdict(model['id'],model)['decisionGrade'],'warnings':warnings+model['limitations']+research.verdict_warning(model['id'],model)}
 
 
 @router.post("/predict/lettuce-earth-growth-v3")
@@ -162,7 +162,7 @@ def predict_lettuce_v3(request: LettuceYieldPredictionRequest):
             },
         },
         "outOfDistribution": bool(warnings),
-        "warnings": warnings + model["limitations"],
+        "warnings": warnings + model["limitations"] + research.verdict_warning(model["id"], model),
         "inputs": request.model_dump(),
         # Phase 32: a prediction is served under a stated scope and never as an
         # operational forecast. These three fields are asserted by
@@ -171,6 +171,12 @@ def predict_lettuce_v3(request: LettuceYieldPredictionRequest):
         "operationalForecast": False,
         "harvestForecastClaim": None,
         "scopeStatement": model.get("servedScope"),
+        # Phase 35: the evidence verdict travels with the number. `decisionGrade` is false for
+        # every model that failed an independent check or was never checked independently, and the
+        # warning list then carries the measured reason, so a caller cannot receive an
+        # experimental estimate without its verdict attached.
+        "evidenceVerdict": research.evidence_verdict(model["id"], model),
+        "decisionGrade": research.evidence_verdict(model["id"], model)["decisionGrade"],
     }
 
 
@@ -217,7 +223,7 @@ def predict_lettuce_v2(request: LettucePredictionRequest):
             "note": selection.get("rule"),
         },
         "outOfDistribution": bool(warnings),
-        "warnings": warnings + model["limitations"],
+        "warnings": warnings + model["limitations"] + research.verdict_warning(model["id"], model),
         "inputs": request.model_dump(),
         # Phase 32: a prediction is served under a stated scope and never as an
         # operational forecast. These three fields are asserted by
@@ -226,6 +232,12 @@ def predict_lettuce_v2(request: LettucePredictionRequest):
         "operationalForecast": False,
         "harvestForecastClaim": None,
         "scopeStatement": model.get("servedScope"),
+        # Phase 35: the evidence verdict travels with the number. `decisionGrade` is false for
+        # every model that failed an independent check or was never checked independently, and the
+        # warning list then carries the measured reason, so a caller cannot receive an
+        # experimental estimate without its verdict attached.
+        "evidenceVerdict": research.evidence_verdict(model["id"], model),
+        "decisionGrade": research.evidence_verdict(model["id"], model)["decisionGrade"],
     }
 
 
@@ -698,7 +710,7 @@ def predict_molecular(request: MolecularPredictionRequest):
         raise HTTPException(422, "Each gene must be finite normalized log1p(CPM) between 0 and 20")
     logit, warnings = research.predict_values(model, values)
     probability = 1 / (1 + math.exp(-max(-700, min(700, logit))))
-    return {"modelId": model["id"], "prediction": "flight" if probability >= .5 else "ground", "probabilityFlight": probability, "calibrated": False, "sourceStudy": model["sourceStudy"], "method": model["method"], "outOfDistribution": bool(warnings), "warnings": warnings + model["limitations"]}
+    return {"modelId": model["id"], "prediction": "flight" if probability >= .5 else "ground", "probabilityFlight": probability, "calibrated": False, "sourceStudy": model["sourceStudy"], "method": model["method"], "outOfDistribution": bool(warnings), "warnings": warnings + model["limitations"] + research.verdict_warning(model["id"], model), "evidenceVerdict": research.evidence_verdict(model["id"], model), "decisionGrade": research.evidence_verdict(model["id"], model)["decisionGrade"]}
 
 
 # ---------------------------------------------------------------------------
@@ -782,7 +794,7 @@ def predict_microbial_relative(request: MicrobialRelativePredictionRequest):
             "refused": model.get("absoluteScaleProtocol", {}).get("refused"),
         },
         "outOfDistribution": bool(warnings),
-        "warnings": warnings + model["limitations"],
+        "warnings": warnings + model["limitations"] + research.verdict_warning(model["id"], model),
         "inputs": request.model_dump(),
         # Phase 32: a prediction is served under a stated scope and never as an
         # operational forecast. These three fields are asserted by
@@ -791,6 +803,12 @@ def predict_microbial_relative(request: MicrobialRelativePredictionRequest):
         "operationalForecast": False,
         "harvestForecastClaim": None,
         "scopeStatement": model.get("servedScope"),
+        # Phase 35: the evidence verdict travels with the number. `decisionGrade` is false for
+        # every model that failed an independent check or was never checked independently, and the
+        # warning list then carries the measured reason, so a caller cannot receive an
+        # experimental estimate without its verdict attached.
+        "evidenceVerdict": research.evidence_verdict(model["id"], model),
+        "decisionGrade": research.evidence_verdict(model["id"], model)["decisionGrade"],
     }
     if request.campaignReference is None:
         payload["absoluteScale"]["note"] = (

@@ -7,7 +7,7 @@
   },
   {
    "check": "checksum:lettuce-earth-growth-v1",
-   "detail": "registry=ba29bcc710aaf577\u2026 disk=ba29bcc710aaf577\u2026",
+   "detail": "registry=3d5fdaeab4165df6\u2026 disk=3d5fdaeab4165df6\u2026",
    "passed": true
   },
   {
@@ -87,7 +87,7 @@
   },
   {
    "check": "checksum:lettuce-earth-growth-v2",
-   "detail": "registry=18dd26f95461362f\u2026 disk=18dd26f95461362f\u2026",
+   "detail": "registry=a753f4c3a7d3960a\u2026 disk=a753f4c3a7d3960a\u2026",
    "passed": true
   },
   {
@@ -167,7 +167,7 @@
   },
   {
    "check": "checksum:lettuce-earth-growth-v3",
-   "detail": "registry=f01a9444bdc58650\u2026 disk=f01a9444bdc58650\u2026",
+   "detail": "registry=9b3277df28587250\u2026 disk=9b3277df28587250\u2026",
    "passed": true
   },
   {
@@ -382,7 +382,7 @@
   },
   {
    "check": "checksum:mizuna-microbial-relative-load-v2",
-   "detail": "registry=96a66faa99f9b24c\u2026 disk=96a66faa99f9b24c\u2026",
+   "detail": "registry=94eeffc2396840f2\u2026 disk=94eeffc2396840f2\u2026",
    "passed": true
   },
   {
@@ -457,7 +457,7 @@
   },
   {
    "check": "checksum:radiation-exposure-osd46-v1",
-   "detail": "registry=9e9f963f529636e5\u2026 disk=9e9f963f529636e5\u2026",
+   "detail": "registry=b3d2bd1dae4a2ad5\u2026 disk=b3d2bd1dae4a2ad5\u2026",
    "passed": true
   },
   {
@@ -542,7 +542,7 @@
   },
   {
    "check": "checksum:radiation-quality-osd46-v1",
-   "detail": "registry=dd5f558045c6de0c\u2026 disk=dd5f558045c6de0c\u2026",
+   "detail": "registry=711cd7df1b4a050f\u2026 disk=711cd7df1b4a050f\u2026",
    "passed": true
   },
   {
@@ -627,7 +627,7 @@
   },
   {
    "check": "checksum:tomato-flight-response-v1",
-   "detail": "registry=b97f24e0988e4dcb\u2026 disk=b97f24e0988e4dcb\u2026",
+   "detail": "registry=61edbc4850797734\u2026 disk=61edbc4850797734\u2026",
    "passed": true
   },
   {
@@ -776,6 +776,176 @@
    "passed": true
   },
   {
+   "check": "verdict-recorded:lettuce-earth-growth-v1",
+   "detail": "no evidence verdict on the served row",
+   "passed": true
+  },
+  {
+   "check": "verdict-matches-evidence:lettuce-earth-growth-v1",
+   "detail": "served=fails-independent-check evidence=fails-independent-check",
+   "passed": true
+  },
+  {
+   "check": "verdict-has-summary:lettuce-earth-growth-v1",
+   "detail": "a verdict with no sentence for the interface to show",
+   "passed": true
+  },
+  {
+   "check": "failed-check-not-decision-grade:lettuce-earth-growth-v1",
+   "detail": "a model that failed its independent check is offered as decision grade",
+   "passed": true
+  },
+  {
+   "check": "failed-check-states-why:lettuce-earth-growth-v1",
+   "detail": "a failing verdict without its measured reason",
+   "passed": true
+  },
+  {
+   "check": "failed-check-warns-the-caller:lettuce-earth-growth-v1",
+   "detail": "the prediction path would return the number without its verdict",
+   "passed": true
+  },
+  {
+   "check": "verdict-recorded:lettuce-earth-growth-v2",
+   "detail": "no evidence verdict on the served row",
+   "passed": true
+  },
+  {
+   "check": "verdict-matches-evidence:lettuce-earth-growth-v2",
+   "detail": "served=fails-independent-check evidence=fails-independent-check",
+   "passed": true
+  },
+  {
+   "check": "verdict-has-summary:lettuce-earth-growth-v2",
+   "detail": "a verdict with no sentence for the interface to show",
+   "passed": true
+  },
+  {
+   "check": "failed-check-not-decision-grade:lettuce-earth-growth-v2",
+   "detail": "a model that failed its independent check is offered as decision grade",
+   "passed": true
+  },
+  {
+   "check": "failed-check-states-why:lettuce-earth-growth-v2",
+   "detail": "a failing verdict without its measured reason",
+   "passed": true
+  },
+  {
+   "check": "failed-check-warns-the-caller:lettuce-earth-growth-v2",
+   "detail": "the prediction path would return the number without its verdict",
+   "passed": true
+  },
+  {
+   "check": "verdict-recorded:lettuce-earth-growth-v3",
+   "detail": "no evidence verdict on the served row",
+   "passed": true
+  },
+  {
+   "check": "verdict-matches-evidence:lettuce-earth-growth-v3",
+   "detail": "served=fails-independent-check evidence=fails-independent-check",
+   "passed": true
+  },
+  {
+   "check": "verdict-has-summary:lettuce-earth-growth-v3",
+   "detail": "a verdict with no sentence for the interface to show",
+   "passed": true
+  },
+  {
+   "check": "failed-check-not-decision-grade:lettuce-earth-growth-v3",
+   "detail": "a model that failed its independent check is offered as decision grade",
+   "passed": true
+  },
+  {
+   "check": "failed-check-states-why:lettuce-earth-growth-v3",
+   "detail": "a failing verdict without its measured reason",
+   "passed": true
+  },
+  {
+   "check": "failed-check-warns-the-caller:lettuce-earth-growth-v3",
+   "detail": "the prediction path would return the number without its verdict",
+   "passed": true
+  },
+  {
+   "check": "verdict-recorded:mizuna-microbial-relative-load-v2",
+   "detail": "no evidence verdict on the served row",
+   "passed": true
+  },
+  {
+   "check": "verdict-matches-evidence:mizuna-microbial-relative-load-v2",
+   "detail": "served=passes-independent-check evidence=passes-independent-check",
+   "passed": true
+  },
+  {
+   "check": "verdict-has-summary:mizuna-microbial-relative-load-v2",
+   "detail": "a verdict with no sentence for the interface to show",
+   "passed": true
+  },
+  {
+   "check": "verdict-recorded:radiation-exposure-osd46-v1",
+   "detail": "no evidence verdict on the served row",
+   "passed": true
+  },
+  {
+   "check": "verdict-matches-evidence:radiation-exposure-osd46-v1",
+   "detail": "served=no-independent-check evidence=no-independent-check",
+   "passed": true
+  },
+  {
+   "check": "verdict-has-summary:radiation-exposure-osd46-v1",
+   "detail": "a verdict with no sentence for the interface to show",
+   "passed": true
+  },
+  {
+   "check": "unvalidated-not-decision-grade:radiation-exposure-osd46-v1",
+   "detail": "a model with no independent check is offered as decision grade",
+   "passed": true
+  },
+  {
+   "check": "verdict-recorded:radiation-quality-osd46-v1",
+   "detail": "no evidence verdict on the served row",
+   "passed": true
+  },
+  {
+   "check": "verdict-matches-evidence:radiation-quality-osd46-v1",
+   "detail": "served=no-independent-check evidence=no-independent-check",
+   "passed": true
+  },
+  {
+   "check": "verdict-has-summary:radiation-quality-osd46-v1",
+   "detail": "a verdict with no sentence for the interface to show",
+   "passed": true
+  },
+  {
+   "check": "unvalidated-not-decision-grade:radiation-quality-osd46-v1",
+   "detail": "a model with no independent check is offered as decision grade",
+   "passed": true
+  },
+  {
+   "check": "verdict-recorded:tomato-flight-response-v1",
+   "detail": "no evidence verdict on the served row",
+   "passed": true
+  },
+  {
+   "check": "verdict-matches-evidence:tomato-flight-response-v1",
+   "detail": "served=no-independent-check evidence=no-independent-check",
+   "passed": true
+  },
+  {
+   "check": "verdict-has-summary:tomato-flight-response-v1",
+   "detail": "a verdict with no sentence for the interface to show",
+   "passed": true
+  },
+  {
+   "check": "unvalidated-not-decision-grade:tomato-flight-response-v1",
+   "detail": "a model with no independent check is offered as decision grade",
+   "passed": true
+  },
+  {
+   "check": "verdicts-cover-every-served-model",
+   "detail": "9 verdicts recorded for 7 served models",
+   "passed": true
+  },
+  {
    "check": "removed:gravity-field-absent",
    "detail": "the simulation request must not accept a gravity input",
    "passed": true
@@ -843,7 +1013,7 @@
  ],
  "failures": [],
  "gaps": [],
- "generatedAt": "2026-11-11T14:32:33.243119+00:00",
+ "generatedAt": "2026-11-11T18:42:53.542820+00:00",
  "models": [
   {
    "baselineMetrics": {
@@ -887,7 +1057,7 @@
    },
    "runStatus": "runnable",
    "samples": 1648,
-   "sha256": "ba29bcc710aaf57718ded30ec4f5262d941ca150c4317858c7bd05c22733ee02",
+   "sha256": "3d5fdaeab4165df6efcb0887c18f5ab2da65b71056aa521400946a4edbf0879c",
    "status": "trained-exploratory",
    "supersedes": null,
    "target": "freshShootMassG",
@@ -938,7 +1108,7 @@
    },
    "runStatus": "runnable",
    "samples": 1648,
-   "sha256": "18dd26f95461362f65d0ec8ad6884c35e50ca943faf1a7e47f02e5dcd2b1edb4",
+   "sha256": "a753f4c3a7d3960a4bc09782374252e55bfade10070e568528e9d8f2fd67057b",
    "status": "trained-exploratory",
    "supersedes": "lettuce-earth-growth-v1 (kept, not overwritten)",
    "target": "freshShootMassG",
@@ -1117,7 +1287,7 @@
    },
    "runStatus": "runnable",
    "samples": 1648,
-   "sha256": "f01a9444bdc5865014ec1ad58048b6f64a6f729bd7eb6ecb69a31bdc5f9dc8b7",
+   "sha256": "9b3277df28587250f92f2dbca85efc0f0cfe58b9eac2594239711f284905b640",
    "status": "trained-exploratory",
    "supersedes": null,
    "target": "log(freshYieldGPerM2)",
@@ -1374,7 +1544,7 @@
    },
    "runStatus": "runnable",
    "samples": 123,
-   "sha256": "96a66faa99f9b24c6e9f569d70f6ed40701447d211103f8c9df685f3bd8e6a5d",
+   "sha256": "94eeffc2396840f25232afd312ef23d08f0dd0a497a80bc8a1287b14d8888f30",
    "status": "trained-exploratory",
    "supersedes": "mizuna-microbial-load-v1 (kept, not overwritten)",
    "target": "z = (log10(1 + CFU/g) - campaign mean) / campaign sd",
@@ -1445,7 +1615,7 @@
    },
    "runStatus": "runnable",
    "samples": 44,
-   "sha256": "9e9f963f529636e5d49dd31f4f264bfd26a2e62342c31c20c1c53a949f9b77f6",
+   "sha256": "b3d2bd1dae4a2ad51d4b5ade89dda41b970ad6901516cf34c57f63cb5b1a5b9b",
    "status": "trained-exploratory",
    "supersedes": null,
    "target": null,
@@ -1525,7 +1695,7 @@
    },
    "runStatus": "runnable",
    "samples": 44,
-   "sha256": "dd5f558045c6de0c45bf56dafb3acd23e3eeeb575134d01a4ebca5dbe375c830",
+   "sha256": "711cd7df1b4a050fa70119d9679d58f2a292cf369185c459848be6d454c78897",
    "status": "trained-exploratory",
    "supersedes": null,
    "target": null,
@@ -1571,7 +1741,7 @@
    },
    "runStatus": "runnable",
    "samples": 36,
-   "sha256": "b97f24e0988e4dcb1591b2390e7333460a2adeae71fb15329bf6f204626d2a76",
+   "sha256": "61edbc4850797734a66feb3b6e3d0387b2fd59ad2b46f41c85dc74d024c4dd66",
    "status": "trained-exploratory",
    "supersedes": null,
    "target": "recorded spaceflight experimental context",
@@ -1592,7 +1762,7 @@
    "sklearn": "1.6.1"
   },
   "schemaVersion": 1,
-  "trainedAt": "2026-11-11T11:59:00.326446+00:00"
+  "trainedAt": "2026-11-11T18:42:52.536513+00:00"
  },
  "resolvedGaps": [
   {
@@ -1648,7 +1818,7 @@
  "summary": {
   "auditedModels": 9,
   "checksFailed": 0,
-  "checksRun": 168,
+  "checksRun": 202,
   "documentedGaps": 0,
   "registeredModels": 9,
   "resolvedByPhase": {
