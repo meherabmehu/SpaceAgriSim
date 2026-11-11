@@ -68,3 +68,19 @@ this table adds what a schema cannot say — the refusal behaviour and what each
 | GET `/api/ready` | Extends the original readiness payload with storage durability, email delivery mode, share-link availability, the rate-limit identity ("socket" behind a gateway means every caller shares one budget), whether the operator console is configured, and — when the database fails — a `reason` code plus the SQLSTATE when the server answered at all It also reports `databaseMigrations` (`applied`/`total`/`pending` from the read-only migration registry) and `databasePool` (size, checked out, overflow, capacity, exhausted; SQLite reports `pooled: false` rather than an invented capacity). A reachable database whose schema is behind returns **503** — `database_schema_incomplete` when no schema exists at all, `database_migration_pending` when an additive step is missing — with `pendingMigrations`, the missing objects, and a remedy. The probe never runs DDL. |
 | GET `/api/admin/summary` | Operator console summary. **404 when `SPACEAGRISIM_ADMIN_TOKEN` is unset, 401 for a missing or wrong token**, compared in constant time. Account identifiers are SHA-256 prefixes, not addresses |
 | GET `/api/admin/audit` | Recent activity by kind, failed logins and live share links, pseudonymised the same way |
+
+## Phase 32: output checks, units and stated scope
+
+These are additive. A client written before Phase 32 receives the same fields it did before, plus
+the ones below.
+
+| Endpoint / field | Behaviour |
+| --- | --- |
+| GET `/api/reference-et0/validate` | Reference ET0 for one day, plus `outputCheck`: `plausible`, the `failures` that made it implausible, the `rule` (`0 <= ET0 <= 30 mm/day` and `tmax >= tmin`) and `physicalCeilingMmPerDay`. The value is **never clamped** — a swapped-temperature day returns the number *and* the verdict that it is not a physical day |
+| POST `/api/reference-et0/validate` | The same check for a whole day supplied as a JSON payload, so a batch read from a file can be validated. Unknown fields are rejected (422) |
+| `POST /api/simulate` → `units` | A map from dotted field path to unit for every headline scalar (`cropYield`, `waterUsed`, `environment.vaporPressureDeficitKpa`, …). A unit in a field name is a convention; this is the contract |
+| `POST /api/simulate` → `environment.vaporPressureDeficit` | `method`, `inputsAreAssumptions`, `propagatedError` (null) and a sentence stating that the value describes the scenario, not a place or a day |
+| `POST /api/simulate` → `environment.dailyLightIntegral` | The same shape, stating that the integral is the scenario's setting rather than a measurement |
+| Every prediction response | `operationalForecast: false`, `harvestForecastClaim: null` and `scopeStatement`, copied from the artifact's `servedScope`. A prediction is served under a stated scope and never as an operational forecast |
+| Transcriptomic predictions | `probabilityCalibration`: whether the probabilities are calibrated (`false` for both OSD-46 classifiers), what was measured (log loss, Brier, 10-bin ECE over 22 biological groups), the scope it holds in, and `servedScaling: "none"` |
+| `GET /api/models` rows | `probabilityCalibration` per model, and `servedScope` / `operationalForecast` on every served row |
