@@ -19,8 +19,8 @@ import {
   Sprout,
 } from "lucide-react";
 /**
- * What the Phase 36 acquisition actually bought, served with the label that says what each number
- * is. The surface exists because the alternative is a report nobody opens: a reader of the running
+ * What the Phase 36 and 37 acquisitions actually bought, served with the label that says what each
+ * number is. The surface exists because the alternative is a report nobody opens: a reader of the running
  * product can see the measured ET result, the projected-climate response and the six gaps that did
  * not close, in the same place as the study registry.
  *
@@ -33,14 +33,14 @@ function AcquisitionEvidence() {
   const data = state.data;
   if (state.error) {
     return (
-      <Card title="Acquisition evidence" label="PHASE 36 · MEASURED, DERIVED, PREDICTED">
+      <Card title="Acquisition evidence" label="PHASE 36–37 · MEASURED, DERIVED, PREDICTED">
         <p className="muted fine">Evidence surface unavailable: {state.error}</p>
       </Card>
     );
   }
   if (!data) {
     return (
-      <Card title="Acquisition evidence" label="PHASE 36 · MEASURED, DERIVED, PREDICTED">
+      <Card title="Acquisition evidence" label="PHASE 36–37 · MEASURED, DERIVED, PREDICTED">
         <p className="muted fine">Loading acquisition evidence…</p>
       </Card>
     );
@@ -49,18 +49,20 @@ function AcquisitionEvidence() {
   const water = data.waterUse || {};
   const climate = data.projectedClimate || {};
   const models = data.models || {};
+  const modelEvidence = data.modelEvidence || {};
+  const spectrum = data.spectrumLight || {};
   return (
     <Card
       title="What the last acquisition changed, and what it did not"
-      label="PHASE 36 · MEASURED, DERIVED, PREDICTED"
+      label="PHASE 36–37 · MEASURED, DERIVED, PREDICTED"
       action={<span className="pill">{gaps.total} documented gaps</span>}
     >
       <p className="prose">
-        Five independent datasets were acquired and every byte checksummed. The
-        point of this panel is the distinction the labels carry: a measured value
-        came off an instrument, a derived value is arithmetic this repository
-        performs on measurements, and a predicted value is a model output that is
-        not an observation of anything.
+        Seven independent datasets were acquired across these two phases and every
+        byte checksummed. The point of this panel is the distinction the labels
+        carry: a measured value came off an instrument, a derived value is
+        arithmetic this repository performs on measurements, and a predicted value
+        is a model output that is not an observation of anything.
       </p>
       <div className="data-table-wrap">
         <table>
@@ -85,6 +87,58 @@ function AcquisitionEvidence() {
         </table>
       </div>
       <p className="muted fine">{gaps.note}</p>
+
+      {spectrum.available && (
+        <>
+          <h3>Green light did not cost yield · {spectrum.design?.crop}</h3>
+          <p className="prose">
+            The simulator has always treated green photons as largely wasted. This is the first
+            trial here that can test that, because every arm targeted the same{" "}
+            {number(spectrum.design?.ppfdTargetUmolPerM2PerS, 0)} µmol m⁻² s⁻¹ and shared the same{" "}
+            {spectrum.design?.photoperiod} photoperiod, so a difference cannot be a difference in
+            photon supply.
+          </p>
+          <div className="data-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ARM</th>
+                  <th>PLANTS</th>
+                  <th>FRESH MASS (g)</th>
+                  <th>SD</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(spectrum.freshWeightByArm || {}).map(([arm, row]) => (
+                  <tr key={arm}>
+                    <td>{arm}</td>
+                    <td>{number(row.plants, 0)}</td>
+                    <td>{number(row.meanGrams, 2)}</td>
+                    <td>{number(row.sdGrams, 2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <ul className="limitation-list">
+            {Object.entries(spectrum.contrasts || {}).map(([name, row]) => (
+              <li key={name}>
+                <strong>derived</strong> · {name.replace(/([A-Z])/g, " $1").toLowerCase()} ·{" "}
+                {number(row.differenceGramsPerPlant, 2)} g per plant (permutation p ={" "}
+                {number(row.permutationP, 4)}, {number(row.permutations, 0)} permutations; 95 %
+                interval {number(row.bootstrap95?.[0], 2)} to {number(row.bootstrap95?.[1], 2)} g).
+              </li>
+            ))}
+            {spectrum.excludedArm && (
+              <li className="muted">
+                <strong>unavailable</strong> · {spectrum.excludedArm.arm} is excluded:{" "}
+                {spectrum.excludedArm.reason}
+              </li>
+            )}
+          </ul>
+          <p className="muted fine">{spectrum.whatThisShows}</p>
+        </>
+      )}
 
       {water.available && (
         <>
@@ -140,19 +194,40 @@ function AcquisitionEvidence() {
         </>
       )}
 
-      {models.available && (
+      {modelEvidence.available ? (
         <>
-          <h3>Models re-evaluated · no retraining, no threshold moved</h3>
+          <h3>Models re-audited against this phase · no retraining, no threshold moved</h3>
           <p className="prose">
-            {number(models.counts?.scored, 0)} of {number(models.counts?.served, 0)} served models
-            could be scored on the new independent campaign:{" "}
-            {number(models.counts?.domainRefused, 0)} fall outside their own declared domain and{" "}
-            {number(models.counts?.noNewEvidence, 0)} have no new evidence bearing on them.
-            Decision-grade models: {number(models.counts?.decisionGradeBefore, 0)} before,{" "}
-            {number(models.counts?.decisionGradeAfter, 0)} after.
+            {number(modelEvidence.counts?.scoredOnNewEvidence, 0)} of{" "}
+            {number(modelEvidence.counts?.served, 0)} served models could be scored on what this
+            phase acquired: all {number(modelEvidence.counts?.notTestedByNewEvidence, 0)} fall
+            outside their own declared input domain, so none could be tested without contradicting
+            its own card. Decision-grade models: {number(modelEvidence.counts?.decisionGradeBefore, 0)}{" "}
+            before, {number(modelEvidence.counts?.decisionGradeAfter, 0)} after.
           </p>
-          <p className="muted fine">{models.note}</p>
+          <ul className="limitation-list">
+            {Object.entries(modelEvidence.classification || {}).map(([id, row]) => (
+              <li key={id}>
+                <strong>{row.verdict}</strong> · {id}
+              </li>
+            ))}
+          </ul>
         </>
+      ) : (
+        models.available && (
+          <>
+            <h3>Models re-evaluated · no retraining, no threshold moved</h3>
+            <p className="prose">
+              {number(models.counts?.scored, 0)} of {number(models.counts?.served, 0)} served models
+              could be scored on the new independent campaign:{" "}
+              {number(models.counts?.domainRefused, 0)} fall outside their own declared domain and{" "}
+              {number(models.counts?.noNewEvidence, 0)} have no new evidence bearing on them.
+              Decision-grade models: {number(models.counts?.decisionGradeBefore, 0)} before,{" "}
+              {number(models.counts?.decisionGradeAfter, 0)} after.
+            </p>
+            <p className="muted fine">{models.note}</p>
+          </>
+        )
       )}
       <JsonDetails title="Every gap, its evidence and its remaining work" data={data} />
     </Card>

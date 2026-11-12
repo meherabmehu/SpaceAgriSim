@@ -41,9 +41,16 @@ from pathlib import Path
 from app.research import DATA, ROOT
 
 PHASE36 = ROOT / "data" / "research" / "phase36"
+PHASE37 = ROOT / "data" / "research" / "phase37"
 GAP_MATRIX = DATA / "research" / "dataset_gap_matrix.json"
 CATALOGUE = DATA / "research" / "dataset_catalog.json"
 REEVALUATION = ROOT / "ml" / "evaluation" / "phase36_model_reevaluation.json"
+MODEL_EVIDENCE_37 = ROOT / "ml" / "evaluation" / "phase37_model_evidence.json"
+
+# Gap decisions are recorded per phase. The surface serves the newest decision that exists for each
+# gap, and says which phase it came from - a reader must be able to tell whether a status is four
+# phases old or today's.
+DECISION_BLOCKS = ("phase37Decision", "phase36Decision")
 
 # The status vocabulary of the gap matrix. Phase 36 counts closures three ways because closing a
 # gap with a measurement and closing it by withdrawing a feature are different results, and adding
@@ -89,7 +96,11 @@ def gaps() -> dict:
     entries = matrix.get("gaps") or []
     rows = []
     for entry in entries:
-        decision = entry.get("phase36Decision") or {}
+        decision, decided_in = {}, None
+        for key in DECISION_BLOCKS:
+            if entry.get(key):
+                decision, decided_in = entry[key], int(key[5:7])
+                break
         token = entry.get("statusToken") or "OPEN"
         rows.append({
             "id": entry.get("id"),
@@ -101,10 +112,18 @@ def gaps() -> dict:
             "whatChanged": decision.get("what"),
             "evidence": decision.get("evidence") or [],
             "remainingWork": decision.get("remainingWork"),
+            "decidedInPhase": decided_in,
         })
     counts = {key: sum(1 for row in rows if row["status"] == key) for key in STATUS_KEYS}
-    stored = (matrix.get("phase36") or {}).get("counts") or {}
-    by_decision = int(stored.get("closedByDecision") or 0)
+    # Which closures were achieved by withdrawing a capability rather than by finding a dataset.
+    # Taken from the entries themselves so a new phase cannot leave the split pointing at an old
+    # summary block.
+    # A gap is closed by decision, not by data, when an earlier phase removed the capability rather
+    # than finding a measurement. Those entries record it as a decision of kind B with no residual
+    # capability, which is a property of the entry rather than of a summary block.
+    by_decision = sum(1 for entry in entries
+                      if entry.get("statusToken") == "CLOSED"
+                      and str((entry.get("phase30Decision") or {}).get("decision", "")).startswith("B"))
     return {
         "total": len(rows),
         "closed": counts["CLOSED"],
@@ -114,7 +133,8 @@ def gaps() -> dict:
         "open": counts["OPEN"],
         "note": (
             "Closed counts include the gaps closed by withdrawing a capability rather than by "
-            "finding a dataset; those are counted separately because they are not the same result."
+            "finding a dataset; those are counted separately because they are not the same result. "
+            "Each row names the phase whose decision it reports."
         ),
         "gaps": rows,
         "source": "data/research/dataset_gap_matrix.json",
@@ -324,6 +344,130 @@ def model_outcomes() -> dict:
     }
 
 
+def spectrum_response() -> dict:
+    """What the constant-PPFD spectrum trial measured, and what was derived from it.
+
+    The platform's radiation-quality surface has always carried the assumption that green photons
+    are largely wasted. This trial is the first evidence in the repository that can test it,
+    because light quantity was held fixed and only composition changed.
+    """
+    payload = _load(PHASE37 / "led_spectrum_response.json")
+    if not payload:
+        return _unavailable("constant-PPFD spectrum response",
+                            "python ml/research/analyze_led_spectrum.py")
+    design = payload.get("design") or {}
+    harvest = (payload.get("harvest") or {}).get("summary") or {}
+    fresh = harvest.get("Fresh weight") or {}
+    contrasts = {}
+    for name, block in ((payload.get("freshWeightContrasts") or {}).get("contrasts") or {}).items():
+        if not block.get("available"):
+            continue
+        contrasts[name] = {
+            "label": "derived",
+            "differenceGramsPerPlant": block.get("differenceOfMeans"),
+            "relativeChange": block.get("relativeChange"),
+            "permutationP": block.get("permutationP"),
+            "permutations": block.get("permutations"),
+            "bootstrap95": block.get("bootstrap95"),
+            "note": ("Derived by permutation and bootstrap from the destructively harvested "
+                     "plants; the comparison is valid only because every arm targeted the same "
+                     "PPFD and shared the same photoperiod."),
+        }
+    confound = payload.get("densityConfound") or {}
+    return {
+        "available": bool(fresh),
+        "sourceStudy": (payload.get("source") or {}).get("title"),
+        "doi": (payload.get("source") or {}).get("doi"),
+        "license": (payload.get("source") or {}).get("license"),
+        "design": {
+            "crop": design.get("crop"),
+            "ppfdTargetUmolPerM2PerS": design.get("ppfdTargetUmolPerM2PerS"),
+            "photoperiod": design.get("photoperiod"),
+            "harvestDayAfterSowing": design.get("harvestDayAfterSowing"),
+            "arms": len(design.get("treatments") or []),
+        },
+        "freshWeightByArm": {
+            arm: {"label": "measured", "plants": block.get("n"),
+                  "meanGrams": block.get("mean"), "sdGrams": block.get("sd")}
+            for arm, block in fresh.items()
+        },
+        "contrasts": contrasts,
+        "excludedArm": {
+            "arm": confound.get("treatment"),
+            "reason": confound.get("whyExcluded"),
+            "label": "unavailable",
+        } if confound else None,
+        "whatThisShows": (
+            "Adding green light to a fixed photon budget did not reduce yield: no arm was worse than "
+            "the red-blue control, and an incremental green regime yielded more. The assumption "
+            "that green photons are wasted is not supported by this trial."),
+        "whatThisDoesNotShow": payload.get("limitations"),
+        "source": "data/research/phase37/led_spectrum_response.json",
+    }
+
+
+def nutrient_solution() -> dict:
+    """Measured ion concentrations and EC - and the uptake rate that is deliberately absent."""
+    payload = _load(PHASE37 / "nutrient_solution.json")
+    if not payload:
+        return _unavailable("hydroponic nutrient-solution chemistry",
+                            "python ml/research/analyze_nutrient_balance.py")
+    measured = payload.get("measuredConcentrations") or {}
+    harvest = payload.get("harvest") or {}
+    not_derivable = payload.get("whatIsNotDerivable") or {}
+    return {
+        "available": True,
+        "sourceStudy": (payload.get("source") or {}).get("title"),
+        "doi": (payload.get("source") or {}).get("doi"),
+        "license": (payload.get("source") or {}).get("license"),
+        "ionsMeasured": (measured.get("ions") or []),
+        "electricalConductivityMeasured": True,
+        "phMeasured": bool((payload.get("source") or {}).get("phMeasured")),
+        "harvest": {
+            "label": "measured",
+            "endpoint": harvest.get("endpoint"),
+            "byTreatment": {
+                name: {"plants": block.get("n"),
+                       "freshWeightGrams": (block.get("freshWeightG") or {}).get("mean")}
+                for name, block in (harvest.get("byTreatment") or {}).items()
+            },
+        },
+        "uptakeRate": {
+            "label": "unavailable",
+            "value": None,
+            "reason": not_derivable.get("reason"),
+            "whatWouldCloseIt": not_derivable.get("whatWouldCloseIt"),
+        },
+        "source": "data/research/phase37/nutrient_solution.json",
+    }
+
+
+def model_evidence_phase37() -> dict:
+    """The five-way classification of every served model, unchanged from before this phase."""
+    payload = _load(MODEL_EVIDENCE_37)
+    if not payload:
+        return _unavailable("model evidence audit",
+                            "python ml/research/audit_models_phase37.py")
+    counts = payload.get("counts") or {}
+    return {
+        "available": True,
+        "counts": {
+            "served": counts.get("served"),
+            "scoredOnNewEvidence": counts.get("scored"),
+            "notTestedByNewEvidence": counts.get("notTestedByNewEvidence"),
+            "decisionGradeBefore": counts.get("decisionGradeBefore"),
+            "decisionGradeAfter": counts.get("decisionGradeAfter"),
+        },
+        "classification": {
+            model_id: {"verdict": block.get("classification"),
+                       "why": block.get("why")}
+            for model_id, block in (payload.get("models") or {}).items()
+        },
+        "policy": payload.get("policy"),
+        "source": "ml/evaluation/phase37_model_evidence.json",
+    }
+
+
 def catalogue_summary() -> dict:
     """The published catalogue, by usability class, for the surface that shows what was acquired."""
     payload = _catalogue()
@@ -362,6 +506,22 @@ def catalogue_summary() -> dict:
     }
 
 
+def _interpretation() -> str:
+    gap_counts = gaps()
+    closed = gap_counts["closed"]
+    open_ = gap_counts["open"]
+    partial = gap_counts["partiallyClosed"]
+    decision_grade = ((_load(MODEL_EVIDENCE_37).get("counts") or {}).get("decisionGradeAfter")
+                      if MODEL_EVIDENCE_37.is_file() else None)
+    return (
+        f"Of fourteen gaps, {closed} are closed, {partial} are partially closed and {open_} remain "
+        f"open. {decision_grade if decision_grade is not None else 'No'} model is decision-grade, "
+        "and none became so in this phase: the two datasets acquired here fall outside every served "
+        "model's declared input domain, so they could test none of them. The acquisition added "
+        "measurement where the record had none; it did not make the platform validated, and nothing "
+        "here should be read as if it had.")
+
+
 def payload() -> dict:
     """Everything above, plus the sentence that stops it being read as a scorecard."""
     return {
@@ -380,10 +540,16 @@ def payload() -> dict:
         "hourly": hourly_information_loss(),
         "models": model_outcomes(),
         "catalogue": catalogue_summary(),
-        "decisionGradeCount": ((_reevaluation().get("counts") or {}).get("decisionGradeAfter")),
-        "interpretation": (
-            "Six of the fourteen gaps remain open and no new model became decision-grade. The "
-            "acquisition added measurement where the record had none; it did not make the platform "
-            "validated, and nothing here should be read as if it had."),
-        "report": "docs/FINAL_SCIENTIFIC_DATA_ACQUISITION_REPORT.md",
+        "spectrumLight": spectrum_response(),
+        "nutrientSolution": nutrient_solution(),
+        "modelEvidence": model_evidence_phase37(),
+        "latestPhase": 37,
+        "decisionGradeCount": (((_load(MODEL_EVIDENCE_37).get("counts") or {}).get(
+            "decisionGradeAfter"))
+            if MODEL_EVIDENCE_37.is_file()
+            else ((_reevaluation().get("counts") or {}).get("decisionGradeAfter"))),
+        # Recomputed rather than written as prose. The sentence said six were open for four phases
+        # after that stopped being true, which is exactly the drift a served number prevents.
+        "interpretation": _interpretation(),
+        "report": "docs/FINAL_PROJECT_COMPLETION_REPORT.md",
     }

@@ -428,15 +428,20 @@ def test_catalogue_counts_match_the_documented_class_counts():
     artefact under data/research/phase36/. The count is still asserted exactly, because the point
     of this test is that the number in the catalogue is not allowed to drift away from the
     number of entries that can be justified one by one.
+
+    Phase 37 added two more class-A entries - the constant-PPFD green-light trial and the nutrient
+    dosing trial - taking A from 10 to 12 and the total from 34 to 36. The duplicate deposit of the
+    dosing trial is deliberately not an entry: it is the same experiment, and a catalogue entry for
+    it would count one trial twice.
     """
     payload = json.loads((ROOT / "data" / "research" / "dataset_catalog.json").read_text())
-    assert len(payload["datasets"]) == 34
+    assert len(payload["datasets"]) == 36
     counts = {}
     for dataset in payload["datasets"]:
         counts[dataset["usabilityClass"]] = counts.get(dataset["usabilityClass"], 0) + 1
-    # Phase 36 added four class-A acquisitions and moved NEX-GDDP-CMIP6 from D to A; no other
-    # class moved, so the shape of the catalogue is unchanged at B, C, E and F.
-    assert counts == {"A": 10, "B": 6, "C": 9, "D": 3, "E": 5, "F": 1}
+    # Phase 36 added four class-A acquisitions and moved NEX-GDDP-CMIP6 from D to A; Phase 37 added
+    # two more class-A entries. No other class moved, so the shape is unchanged at B, C, E and F.
+    assert counts == {"A": 12, "B": 6, "C": 9, "D": 3, "E": 5, "F": 1}
 
 
 def test_only_the_imported_datasets_have_an_open_commercial_licence():

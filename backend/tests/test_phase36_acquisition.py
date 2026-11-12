@@ -187,18 +187,44 @@ def test_ky_is_labelled_conditional_because_no_et_was_measured():
 
 
 # --------------------------------------------------------------------------- gap matrix
+def _current_decision(gap: dict) -> tuple[dict, int]:
+    """The newest adjudication recorded for a gap, and the phase that recorded it.
+
+    A later phase may close or reopen a gap, so the assertions below read the newest decision block
+    rather than pinning Phase 36's. That is a stronger check than the original: the original only
+    held while no later phase touched the matrix, and would have had to be edited or skipped the
+    moment one did.
+    """
+    for phase in (37, 36):
+        block = gap.get(f"phase{phase}Decision")
+        if block:
+            return block, phase
+    return {}, 0
+
+
+def _newest_counts(matrix: dict) -> dict:
+    for phase in (37, 36):
+        block = matrix.get(f"phase{phase}") or {}
+        if block.get("counts"):
+            return block["counts"]
+    return {}
+
+
 def test_every_gap_has_a_status_token_from_the_agreed_vocabulary():
     matrix = json.loads((ROOT / "data" / "research" / "dataset_gap_matrix.json").read_text())
     assert len(matrix["gaps"]) == 14
     for gap in matrix["gaps"]:
         assert gap["statusToken"] in {"CLOSED", "PARTIALLY CLOSED", "OPEN"}, gap["id"]
-        assert gap["phase36Decision"]["decision"] == gap["statusToken"], gap["id"]
+        decision, phase = _current_decision(gap)
+        assert phase, f"{gap['id']}: no adjudication recorded in any phase"
+        assert decision["decision"] == gap["statusToken"], gap["id"]
 
 
 def test_gap_counts_match_the_tokens_they_are_derived_from():
     matrix = json.loads((ROOT / "data" / "research" / "dataset_gap_matrix.json").read_text())
     tokens = [gap["statusToken"] for gap in matrix["gaps"]]
-    counts = matrix["phase36"]["counts"]
+    counts = _newest_counts(matrix)
+    assert counts, "no phase block carries counts"
     assert counts["partiallyClosed"] == tokens.count("PARTIALLY CLOSED")
     assert counts["open"] == tokens.count("OPEN")
     assert counts["total"] == len(tokens)
@@ -211,7 +237,7 @@ def test_closed_gaps_name_the_evidence_that_closed_them():
     for gap in matrix["gaps"]:
         if gap["statusToken"] != "CLOSED":
             continue
-        decision = gap["phase36Decision"]
+        decision, _ = _current_decision(gap)
         if "decision" in gap["id"] or gap["id"] in {"fractional-gravity", "yield-labels"}:
             continue    # closed by removing a capability, so there is no dataset to point at
         assert decision["evidence"], gap["id"]
@@ -323,7 +349,13 @@ def test_no_model_became_decision_grade_and_the_surface_says_so():
     counts = payload["models"]["counts"]
     assert counts["decisionGradeBefore"] == counts["decisionGradeAfter"] == 1
     assert counts["scored"] == 0
-    assert "six of the fourteen gaps remain open" in payload["interpretation"].lower()
+    # The sentence is recomputed from the matrix, so it must agree with the counts served beside it
+    # rather than with whichever number was true when the sentence was written.
+    gaps = payload["gaps"]
+    sentence = payload["interpretation"].lower()
+    assert f"{gaps['open']} remain open" in sentence
+    assert f"{gaps['closed']} are closed" in sentence
+    assert "none became so in this phase" in sentence
 
 
 def test_the_surface_does_not_change_any_existing_response_shape():
