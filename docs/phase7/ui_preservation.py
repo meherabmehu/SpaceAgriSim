@@ -1,6 +1,6 @@
 """Data record. Generated - the generator is named inside the record itself."""
 
-DATA = {'generatedAt': '2026-11-12T21:32:16.692044+00:00',
+DATA = {'generatedAt': '2026-11-12T22:14:20.518767+00:00',
  'phase': 7,
  'assertion': 'Phase 7 did not change the interface. Layout, palette, typography settings, navigation, '
               'cards, buttons, animations, responsive behaviour and the 3D greenhouse are untouched.',
@@ -9,7 +9,7 @@ DATA = {'generatedAt': '2026-11-12T21:32:16.692044+00:00',
             'changedFileCount': 0,
             'diffstat': '(none)',
             'identical': True},
- 'playwright': {'exitCode': 1, 'summary': '  170 passed (5.6m)', 'passed': False},
+ 'playwright': {'exitCode': 0, 'summary': '  171 passed (4.6m)', 'passed': True},
  'screenshotComparison': {},
  'layoutRegressions': [],
  'verdict': 'ui-unchanged',

@@ -28,11 +28,15 @@ export default defineConfig({
         "--font-render-hinting=none",
         "--disable-font-subpixel-positioning",
         "--disable-lcd-text",
-        // /dev/shm is 64 MB on a stock container and 1 GB here; Chromium puts renderer
-        // shared memory there and a long mobile page can exhaust it, which crashes the
-        // renderer rather than failing an assertion. The flag moves that allocation to
-        // /tmp. It changes where memory lives, not what is drawn.
+        // /dev/shm is 64 MB on a stock container; Chromium puts renderer shared memory there
+        // and a long mobile page can exhaust it, which crashes the renderer rather than
+        // failing an assertion. The flag moves that allocation to /tmp. It changes where
+        // memory lives, not what is drawn.
         "--disable-dev-shm-usage",
+        // A single renderer process bounds the memory a full-page capture of a long mobile
+        // page can need. Software rasterisation is what headless already uses, so the pixels
+        // are unchanged; this only stops a second renderer from competing for the budget.
+        "--renderer-process-limit=1",
       ],
     },
   },
