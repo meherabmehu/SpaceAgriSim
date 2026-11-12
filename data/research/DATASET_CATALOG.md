@@ -4,13 +4,13 @@ Generated from `data/research/dataset_catalog.json` on 2026-11-09 by `ml/researc
 
 Every dataset the project has evaluated, with the licence evidence behind its class. The class answers one question: could this support a claim the product makes, under the licence it is actually distributed with?
 
-**34 datasets evaluated.** A: 10, B: 6, C: 9, D: 3, E: 5, F: 1.
+**36 datasets evaluated.** A: 12, B: 6, C: 9, D: 3, E: 5, F: 1.
 
 ## Classes
 
 | Class | Meaning | Datasets |
 |---|---|---|
-| **A** | acquired and used in this repository | 10 |
+| **A** | acquired and used in this repository | 12 |
 | **B** | usable after preprocessing - open licence, relevant variables, usable scale | 6 |
 | **C** | external validation only - wrong task, sensor or size for training | 9 |
 | **D** | scientific reference only - open and correct, but cannot validate this product | 3 |
@@ -21,7 +21,7 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 
 | Grade | Meaning | Datasets |
 |---|---|---|
-| verified | the terms were read for this entry | 20 |
+| verified | the terms were read for this entry | 22 |
 | documented-secondary | a credible registry or dataset card states it | 10 |
 | unverified | believed open, not checked; must be checked before use | 4 |
 
@@ -51,6 +51,8 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 | [FAOSTAT crop production and yield statistics](#faostat) | **D** | CC BY 4.0 | permitted with attribution | no |
 | [Present-day and future Koppen-Geiger climate classification (Beck et al. 2018)](#koppen-geiger-beck) | **D** | CC BY 4.0 | permitted with attribution | no |
 | [NASA NEX-GDDP-CMIP6 statistically downscaled climate projections](#nasa-nex-gddp-cmip6) | **A** | open (NASA NEX); model-specific citation requested | permitted | yes |
+| [Green-light inclusion in hydroponic lettuce at constant PPFD (Red Batavia)](#zenodo-green-light-lettuce) | **A** | CC BY 4.0 | permitted with attribution | yes |
+| [Temporal variation of nutrient ratios in hydroponic solution (Red Batavia)](#zenodo-nutrient-dosing) | **A** | CC BY 4.0 | permitted with attribution | yes |
 | [NASA POWER hourly agroclimatology (community AG)](#nasa-power-hourly) | **A** | NASA open data: no restrictions on use, access or download; citation requested | permitted | yes |
 | [Agroscope weighable-lysimeter water balance, Zurich-Reckenholz](#zenodo-agroscope-lysimeter-2026) | **A** | CC BY 4.0 | permitted with attribution | yes |
 | [TERENO Graswang/Fendt eddy-covariance and lysimeter fluxes](#zenodo-tereno-graswang-fendt) | **A** | CC BY 4.0 | permitted with attribution | yes |
@@ -417,6 +419,38 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 - **Commercial use:** permitted
 - **Imported:** yes - point series in data/processed/nex_gddp via ml/research/acquire_nex_gddp.py
 - **Caveat:** Downscaled model output: uncertainty is the spread across models, not one file.
+
+### Green-light inclusion in hydroponic lettuce at constant PPFD (Red Batavia)  `zenodo-green-light-lettuce`
+
+- **Class:** A - acquired and used in this repository
+- **Why this class:** Acquired, MD5-verified and analysed. It is the first dataset in this repository that varies spectrum while holding light quantity fixed, which is the only design that separates a colour effect from a photon effect; 252 destructively harvested plants, and the density-confounded fourth arm is excluded from every spectrum claim.
+- **Publisher:** Zenodo, accompanying the green-light spectral-composition study
+- **URL:** https://doi.org/10.5281/zenodo.20394352
+- **Format:** XLSX workbook, one file
+- **Coverage:** four spectra at a constant 200 umol m-2 s-1 and 16/8 photoperiod over a 35-day Red Batavia cycle: red-blue control (5.08 % green), fixed 24 % green, incremental 16-24-32 % green, and the incremental regime at 1.25x density
+- **Variables:** destructive harvest fresh and dry mass, leaf number and area, rosette morphology, MultispeQ chlorophyll fluorescence, chlorophyll, carotenoid, flavonoid and polyphenol assays
+- **Units:** g; mm; mm2; count; dimensionless fluorescence ratios; mg g-1 FW
+- **Licence:** CC BY 4.0
+- **Licence evidence:** verified (https://creativecommons.org/licenses/by/4.0/)
+- **Commercial use:** permitted with attribution
+- **Imported:** yes - data/raw/zenodo_20394352 via ml/research/acquire_spectrum_light.py
+- **Caveat:** One cultivar, one facility, one season, and a single destructive harvest at 35 days. The authors report a green percentage, not a spectral power distribution, so the effect cannot be resolved by wavelength band.
+
+### Temporal variation of nutrient ratios in hydroponic solution (Red Batavia)  `zenodo-nutrient-dosing`
+
+- **Class:** A - acquired and used in this repository
+- **Why this class:** Acquired, MD5-verified and analysed. Supplies the ion-concentration and EC half of the nutrient-solution requirement for a real crop cycle. No pH is deposited, and the pre/post-dose labels are not self-consistent, so no mass-balance uptake rate is claimed from it.
+- **Publisher:** Zenodo, accompanying the nutrient-ratio study
+- **URL:** https://doi.org/10.5281/zenodo.17794636
+- **Format:** XLSX workbook, one file
+- **Coverage:** three independent nutrient systems under three management regimes, a 28-day Red Batavia cycle, eight ions sampled repeatedly plus electrical conductivity
+- **Variables:** nitrate, phosphate, potassium, calcium, magnesium, sulphate, iron, manganese, electrical conductivity, destructive harvest fresh and dry mass
+- **Units:** mg L-1; dS m-1; g
+- **Licence:** CC BY 4.0
+- **Licence evidence:** verified (https://creativecommons.org/licenses/by/4.0/)
+- **Commercial use:** permitted with attribution
+- **Imported:** yes - data/raw/zenodo_17794636 via ml/research/acquire_spectrum_light.py
+- **Caveat:** The same study is also deposited as 10.5281/zenodo.18804397; all five shared sheets are cell-for-cell identical, so it is one experiment, not two. It is recorded as a duplicate and not counted as independent evidence.
 
 ### NASA POWER hourly agroclimatology (community AG)  `nasa-power-hourly`
 

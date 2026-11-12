@@ -15,6 +15,8 @@
    "A": [
     "nasa-power-daily",
     "nasa-nex-gddp-cmip6",
+    "zenodo-green-light-lettuce",
+    "zenodo-nutrient-dosing",
     "nasa-power-hourly",
     "zenodo-agroscope-lysimeter-2026",
     "zenodo-tereno-graswang-fendt",
@@ -60,7 +62,7 @@
    ]
   },
   "byLicenseEvidence": {
-   "verified": 20,
+   "verified": 22,
    "documented-secondary": 10,
    "unverified": 4
   }
@@ -590,6 +592,54 @@
    "imported": true,
    "importNote": "point series in data/processed/nex_gddp via ml/research/acquire_nex_gddp.py",
    "caveat": "Downscaled model output: uncertainty is the spread across models, not one file."
+  },
+  {
+   "id": "zenodo-green-light-lettuce",
+   "name": "Green-light inclusion in hydroponic lettuce at constant PPFD (Red Batavia)",
+   "publisher": "Zenodo, accompanying the green-light spectral-composition study",
+   "url": "https://doi.org/10.5281/zenodo.20394352",
+   "format": "XLSX workbook, one file",
+   "coverage": "four spectra at a constant 200 umol m-2 s-1 and 16/8 photoperiod over a 35-day Red Batavia cycle: red-blue control (5.08 % green), fixed 24 % green, incremental 16-24-32 % green, and the incremental regime at 1.25x density",
+   "variables": [
+    "destructive harvest fresh and dry mass",
+    "leaf number and area",
+    "rosette morphology",
+    "MultispeQ chlorophyll fluorescence",
+    "chlorophyll, carotenoid, flavonoid and polyphenol assays"
+   ],
+   "units": "g; mm; mm2; count; dimensionless fluorescence ratios; mg g-1 FW",
+   "license": "CC BY 4.0",
+   "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "licenseEvidence": "verified",
+   "commercialUse": "permitted with attribution",
+   "usabilityClass": "A",
+   "classReason": "Acquired, MD5-verified and analysed. It is the first dataset in this repository that varies spectrum while holding light quantity fixed, which is the only design that separates a colour effect from a photon effect; 252 destructively harvested plants, and the density-confounded fourth arm is excluded from every spectrum claim.",
+   "imported": true,
+   "importNote": "data/raw/zenodo_20394352 via ml/research/acquire_spectrum_light.py",
+   "caveat": "One cultivar, one facility, one season, and a single destructive harvest at 35 days. The authors report a green percentage, not a spectral power distribution, so the effect cannot be resolved by wavelength band."
+  },
+  {
+   "id": "zenodo-nutrient-dosing",
+   "name": "Temporal variation of nutrient ratios in hydroponic solution (Red Batavia)",
+   "publisher": "Zenodo, accompanying the nutrient-ratio study",
+   "url": "https://doi.org/10.5281/zenodo.17794636",
+   "format": "XLSX workbook, one file",
+   "coverage": "three independent nutrient systems under three management regimes, a 28-day Red Batavia cycle, eight ions sampled repeatedly plus electrical conductivity",
+   "variables": [
+    "nitrate, phosphate, potassium, calcium, magnesium, sulphate, iron, manganese",
+    "electrical conductivity",
+    "destructive harvest fresh and dry mass"
+   ],
+   "units": "mg L-1; dS m-1; g",
+   "license": "CC BY 4.0",
+   "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "licenseEvidence": "verified",
+   "commercialUse": "permitted with attribution",
+   "usabilityClass": "A",
+   "classReason": "Acquired, MD5-verified and analysed. Supplies the ion-concentration and EC half of the nutrient-solution requirement for a real crop cycle. No pH is deposited, and the pre/post-dose labels are not self-consistent, so no mass-balance uptake rate is claimed from it.",
+   "imported": true,
+   "importNote": "data/raw/zenodo_17794636 via ml/research/acquire_spectrum_light.py",
+   "caveat": "The same study is also deposited as 10.5281/zenodo.18804397; all five shared sheets are cell-for-cell identical, so it is one experiment, not two. It is recorded as a duplicate and not counted as independent evidence."
   },
   {
    "id": "nasa-power-hourly",

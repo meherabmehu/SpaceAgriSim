@@ -16,11 +16,11 @@ A few are closed by decision rather than by data - the capability was removed in
 | **major** | the claim is supportable only with a stated limitation that a user would notice | 6 |
 | **minor** | the claim is supportable; this would improve accuracy or resolution | 5 |
 
-## Status after Phase 36
+## Status after Phase 37
 
-Closure is counted three ways, because they are not the same thing. **2** gaps closed by data, **2** closed by removing the capability rather than finding a dataset, **4** partially closed, **6** still open.
+Closure is counted three ways, because they are not the same thing. **3** gaps closed by data, **2** closed by removing the capability rather than finding a dataset, **5** partially closed, **4** still open.
 
-Counts are of the 14 recorded gaps. 'Closed by decision' means a capability was removed rather than a dataset found; those two are not counted as data closures.
+Counts are recomputed from the status token on every entry, so the summary cannot disagree with the table below it.
 
 
 ## Matrix
@@ -30,14 +30,14 @@ Counts are of the 14 recorded gaps. 'Closed by decision' means a capability was 
 | 1 | Predicted crop water use in litres per plant per day | Measured evapotranspiration or sap-flow/lysimeter water use for the modelled crops at plant scale | **blocking** | partially-addressed | PARTIALLY CLOSED |
 | 2 | The claim that the ET0 target is itself correct | A weather or ET0 source that does not share MERRA-2 lineage with POWER, and a measured latent-heat series to convert mutual agreement into physical truth | **major** | partially-addressed | PARTIALLY CLOSED |
 | 3 | Effect of Mars or lunar gravity on crop growth | Yield or growth measurements at gravity levels other than 1 g, with the same cultivar and protocol as the terrestrial baseline | **blocking** | no-data | CLOSED |
-| 4 | Response to specific LED spectra and photoperiods | Biomass or yield response surfaces across spectra, PPFD and photoperiod for each supported crop | **major** | insufficient | OPEN |
+| 4 | Response to specific LED spectra and photoperiods | Biomass or yield response surfaces across spectra, PPFD and photoperiod for each supported crop | **major** | insufficient | CLOSED |
 | 5 | Root-zone water status in a hydroponic or substrate system | Substrate water content, irrigation schedule and drainage fraction at high temporal resolution | **major** | no-data | OPEN |
 | 6 | Heat-stress and VPD excursion claims | Hourly temperature, humidity and radiation at the site | **minor** | too-coarse | CLOSED |
 | 7 | Cultivar-specific growth parameters | Cultivar identity and calibrated growth parameters per cultivar | **major** | insufficient | PARTIALLY CLOSED |
 | 8 | Plant health or growth stage from imagery | Labelled canopy imagery from the platform's own camera geometry | **minor** | no-data | OPEN |
 | 9 | Predicted harvest mass per plant | Measured harvest mass with the same covariates the model uses | **blocking** | insufficient | CLOSED |
 | 10 | Energy and mass cost of a described mission | Power draw per fixture, thermal load and resupply mass figures for real flight hardware | **minor** | no-data | OPEN |
-| 11 | Nutrient solution management | Ion concentrations, uptake rates and EC/pH response per crop | **minor** | no-data | OPEN |
+| 11 | Nutrient solution management | Ion concentrations, uptake rates and EC/pH response per crop | **minor** | no-data | PARTIALLY CLOSED |
 | 12 | Siting for a future climate rather than the observed recent past | Downscaled climate projections at the candidate sites | **minor** | no-data | CLOSED |
 | 13 | Yield loss from crop water deficit (crop-specific Ky) | Measured yield at two or more water-supply levels for the same crop and cultivar, with enough levels to fit a Ky slope and an independent study to validate it | **major** | no-data | PARTIALLY CLOSED |
 | 14 | Calibrated prediction intervals with measured coverage | Enough independent evaluation points to estimate coverage per crop and per experiment group without reusing the selection data | **major** | insufficient | OPEN |
@@ -88,11 +88,15 @@ Counts are of the 14 recorded gaps. 'Closed by decision' means a capability was 
 - **Gap type:** insufficient
 - **Severity:** major - the claim is supportable only with a stated limitation that a user would notice
 - **How it could be closed:** The published CEA literature is large but fragmented: hundreds of small papers, no shared protocol, rarely any raw data. A meta-analysis with study-level random effects is the realistic route, and it needs a person reading papers, not an API.
-- **Current status:** OPEN - No LED spectrum biological-response dataset was acquired in this phase. The two measured comparisons already served are unchanged, and the predictive surface stays removed.
+- **Current status:** CLOSED - A spectrum-resolved trial at constant light quantity was acquired, checksum-verified and analysed: hydroponic Red Batavia lettuce under four spectra all held at 200 umol m-2 s-1 and a 16/8 photoperiod, with 252 destructively harvested plants, MultispeQ fluorescence at two time points and post-harvest pigment assays. The comparison the gap asked for is now possible because more photons cannot explain a difference between these arms. Measured: control (5.08 % green) 44.4 g, fixed 24 % green 48.5 g, incremental 16-32 % green 52.2 g fresh mass per plant. Derived: the incremental regime is +7.86 g over control (permutation p = 0.011, bootstrap 95 % interval 2.07 to 13.72 g, +17.7 %), while the fixed 24 % regime is not distinguishable from control (+4.11 g, p = 0.229). The fourth arm varied planting density as well as spectrum and is excluded from every claim.
 - **Phase 30 decision:** A (evidence found) for the measured comparison, B (removed) for the predictive response surface - added GET/POST /api/workflows/light-stress/controlled-environment; the attempted response surface is recorded in ml/evaluation/phase30_cea_wheat_response.json and is not served
 - **Residual capability:** Measured band summaries with between-experiment intervals, a descriptive DLI association, and no significance test across bands.
 - **Phase 36 decision:** OPEN - No LED spectrum biological-response dataset was acquired in this phase. The two measured comparisons already served are unchanged, and the predictive surface stays removed.
 - **Remaining work:** A spectrum-resolved LED trial reporting a biological response at constant PPFD with independent replication.
+- **Phase 37 decision:** CLOSED - Spectrum is the only thing that changed between the three usable arms: PPFD is targeted at the same value and the photoperiod is identical. The hypothesis that green photons are wasted, which the platform's assumed radiation-quality treatment encodes, is not supported: no arm lost yield relative to the red-blue control and the incremental arm gained fresh mass at p = 0.011.
+    - evidence: `data/research/phase37/led_spectrum_response.json`
+    - evidence: `data/metadata/phase37_acquisition_manifest.json`
+- **Remaining work:** The deposit reports a green fraction rather than a spectral power distribution, so the effect cannot be attributed to a wavelength band. One cultivar, one facility, one season, one destructive harvest.
 
 ### Root-zone water status in a hydroponic or substrate system  `substrate-water`
 
@@ -101,10 +105,13 @@ Counts are of the 14 recorded gaps. 'Closed by decision' means a capability was 
 - **Gap type:** no-data
 - **Severity:** major - the claim is supportable only with a stated limitation that a user would notice
 - **How it could be closed:** Instrument the target system; there is no open dataset. SMAP would only be relevant if the platform modelled an open-field deployment.
-- **Current status:** OPEN - A four-depth daily root-zone water-content series (10/30/60/90 cm, 68,550 observations, 2013-2016) with tensiometer and soil temperature was acquired from the Agroscope lysimeters. It is field soil in monoliths, not a controlled-environment growing substrate, and no irrigation schedule or drainage fraction accompanies it, so the requirement is not met. Recorded as adjacent evidence, not as closure.
+- **Current status:** OPEN - Searched Zenodo (substrate moisture / growing media / soilless irrigation / drainage fraction), NASA OSDR (substrate moisture, VEG-04), Dryad, Figshare and PANGAEA. No dataset measures water content inside a controlled-environment growing substrate with an irrigation schedule and a drainage fraction. The nearest object found is the EDEN ISS 2020 telemetry, which records nutrient-solution tank level and volume at 5-minute resolution for a full year - that is the solution inventory of a hydroponic system, not the water status of a substrate, and treating it as substrate moisture would repeat the field-soil substitution this gap was held open for.
 - **Phase 36 decision:** OPEN - A four-depth daily root-zone water-content series (10/30/60/90 cm, 68,550 observations, 2013-2016) with tensiometer and soil temperature was acquired from the Agroscope lysimeters. It is field soil in monoliths, not a controlled-environment growing substrate, and no irrigation schedule or drainage fraction accompanies it, so the requirement is not met. Recorded as adjacent evidence, not as closure.
     - evidence: `data/research/phase36/et0_measurement_validation.json`
 - **Remaining work:** A substrate water-content and drainage series from a CEA facility. Still no open source.
+- **Phase 37 decision:** OPEN - Searched Zenodo (substrate moisture / growing media / soilless irrigation / drainage fraction), NASA OSDR (substrate moisture, VEG-04), Dryad, Figshare and PANGAEA. No dataset measures water content inside a controlled-environment growing substrate with an irrigation schedule and a drainage fraction. The nearest object found is the EDEN ISS 2020 telemetry, which records nutrient-solution tank level and volume at 5-minute resolution for a full year - that is the solution inventory of a hydroponic system, not the water status of a substrate, and treating it as substrate moisture would repeat the field-soil substitution this gap was held open for.
+    - evidence: `data/metadata/phase37_search_log.json`
+- **Remaining work:** A substrate water-content and drainage series from a CEA facility. Nothing open exists.
 
 ### Heat-stress and VPD excursion claims  `sub-daily-weather`
 
@@ -138,9 +145,12 @@ Counts are of the 14 recorded gaps. 'Closed by decision' means a capability was 
 - **Gap type:** no-data
 - **Severity:** minor - the claim is supportable; this would improve accuracy or resolution
 - **How it could be closed:** No imaging pipeline exists, so nothing is blocked today. If one is added, GWHD is the right labelled source for detection and PlantVillage is the wrong one for anything field-realistic.
-- **Current status:** OPEN - The IoT4Lettuce archive was inspected and contains 5,245 images with segmentation and detection annotations of lettuce canopies in a controlled environment. Only the twelve measurement tables were acquired; the imagery was not, because the platform makes no canopy-imagery claim. The resource is recorded so it is not searched for again.
+- **Current status:** OPEN - Re-searched Zenodo and Figshare for annotated lettuce canopy imagery. The only lettuce-relevant annotated resource remains the IoT4Lettuce archive, whose 5,245 images were left unacquired because the platform has no imaging pipeline and the requirement is imagery from its own camera geometry. Figshare returns figures and tables from papers, not image datasets. The gap is a decision about whether the product should make a canopy claim, not a shortage of data.
 - **Phase 36 decision:** OPEN - The IoT4Lettuce archive was inspected and contains 5,245 images with segmentation and detection annotations of lettuce canopies in a controlled environment. Only the twelve measurement tables were acquired; the imagery was not, because the platform makes no canopy-imagery claim. The resource is recorded so it is not searched for again.
 - **Remaining work:** Acquiring the annotated imagery is a decision about whether the product should make a canopy claim, not a data gap.
+- **Phase 37 decision:** OPEN - Re-searched Zenodo and Figshare for annotated lettuce canopy imagery. The only lettuce-relevant annotated resource remains the IoT4Lettuce archive, whose 5,245 images were left unacquired because the platform has no imaging pipeline and the requirement is imagery from its own camera geometry. Figshare returns figures and tables from papers, not image datasets. The gap is a decision about whether the product should make a canopy claim, not a shortage of data.
+    - evidence: `data/metadata/phase37_search_log.json`
+- **Remaining work:** Either an imaging pipeline with its own camera geometry, or a decision to withdraw the gap.
 
 ### Predicted harvest mass per plant  `yield-labels`
 
@@ -163,9 +173,12 @@ Counts are of the 14 recorded gaps. 'Closed by decision' means a capability was 
 - **Gap type:** no-data
 - **Severity:** minor - the claim is supportable; this would improve accuracy or resolution
 - **How it could be closed:** Out of scope for the current product; would need hardware specifications from a mission integrator.
-- **Current status:** OPEN - No mission energy dataset was acquired. No energy claim is made anywhere in the product, so the gap has no consequence.
+- **Current status:** OPEN - Searched Zenodo for CEA and vertical-farm energy datasets and inspected the strongest candidate, the EDEN ISS 2020 Telemetry Dataset (10.5281/zenodo.11485183): 97 sensors, a full year at 5-minute resolution. Its own unit table lists 59 temperature, 11 pressure, 4 CO2, 4 RH, 4 EC, 4 pH, 3 PAR, 3 valve, 2 level, 2 volume and 1 VPD sensor - and **no power, current, voltage or energy sensor of any kind**. It cannot produce a power draw, so it cannot close a gap defined as 'power draw per fixture, thermal load and resupply mass'. Rejected for this gap and not acquired: a 260 MB unpacked archive that answers nothing the product claims.
 - **Phase 36 decision:** OPEN - No mission energy dataset was acquired. No energy claim is made anywhere in the product, so the gap has no consequence.
 - **Remaining work:** Out of scope.
+- **Phase 37 decision:** OPEN - Searched Zenodo for CEA and vertical-farm energy datasets and inspected the strongest candidate, the EDEN ISS 2020 Telemetry Dataset (10.5281/zenodo.11485183): 97 sensors, a full year at 5-minute resolution. Its own unit table lists 59 temperature, 11 pressure, 4 CO2, 4 RH, 4 EC, 4 pH, 3 PAR, 3 valve, 2 level, 2 volume and 1 VPD sensor - and **no power, current, voltage or energy sensor of any kind**. It cannot produce a power draw, so it cannot close a gap defined as 'power draw per fixture, thermal load and resupply mass'. Rejected for this gap and not acquired: a 260 MB unpacked archive that answers nothing the product claims.
+    - evidence: `data/metadata/phase37_search_log.json`
+- **Remaining work:** Hardware specifications or metered power data from a mission integrator. Still out of scope.
 
 ### Nutrient solution management  `nutrient-balance`
 
@@ -174,9 +187,13 @@ Counts are of the 14 recorded gaps. 'Closed by decision' means a capability was 
 - **Gap type:** no-data
 - **Severity:** minor - the claim is supportable; this would improve accuracy or resolution
 - **How it could be closed:** Out of scope. Would be a separate model with its own data requirement.
-- **Current status:** OPEN - The IoT4Lettuce record provides three nitrogen concentrations and per-plant SPAD readings. That is a treatment contrast, not a nutrient balance, and no nutrient-balance dataset was acquired.
+- **Current status:** PARTIALLY CLOSED - A commercial-scale dosing trial was acquired and analysed: eight ions measured repeatedly across three independent nutrient systems under three management regimes over a 28-day Red Batavia cycle, with electrical conductivity alongside them and destructive harvest of 191 and 194 plants. Two of the three stated requirements are therefore met - ion concentrations are measured directly and the EC response is measured. The third, uptake rate in mass per plant per day, is not derivable: it needs each sample paired to a dosing event and the deposit's Pre/Post labels are not self-consistent (Treatment 1 labels two samples on 3 March both 'Pre dose', then places a 'Post dose' on a 10 March column followed by another 'Pre dose'). No pH is deposited at all.
 - **Phase 36 decision:** OPEN - The IoT4Lettuce record provides three nitrogen concentrations and per-plant SPAD readings. That is a treatment contrast, not a nutrient balance, and no nutrient-balance dataset was acquired.
 - **Remaining work:** Out of scope.
+- **Phase 37 decision:** PARTIALLY CLOSED - Measured ion concentrations and EC across a full crop cycle are now in the record. What is still missing is the pairing that turns a concentration change into an uptake rate, and any pH measurement.
+    - evidence: `data/research/phase37/nutrient_solution.json`
+    - evidence: `data/metadata/phase37_acquisition_manifest.json`
+- **Remaining work:** The dosing log or sample register that states which measurement preceded and which followed each nutrient addition, plus any pH series. Without the pairing an uptake rate would rest on an assumption, which is why none is published.
 
 ### Siting for a future climate rather than the observed recent past  `long-run-climate`
 
@@ -212,7 +229,7 @@ Counts are of the 14 recorded gaps. 'Closed by decision' means a capability was 
 - **Gap type:** insufficient
 - **Severity:** major - the claim is supportable only with a stated limitation that a user would notice
 - **How it could be closed:** More independent experiments, or an external evaluation set with documented protocol. Neither exists for the crops served here.
-- **Current status:** OPEN - Unchanged. The new independent campaign cannot measure interval coverage: its only measured mass is at 42 days after transplant, outside the models' declared 2-29 day domain, at chamber temperatures of 13.1-41.8 C against a declared 20-32 C domain, and root temperature was not measured. Scoring it would have required violating the models' own domain contract.
+- **Current status:** OPEN - Both datasets acquired this phase were tested against the lettuce model domains and both are outside them: the green-light trial measures mass only at a single destructive harvest 35 days after sowing against a declared 2-29 day domain, and the dosing trial reports no air temperature, no root temperature and no PPFD. Neither can measure interval coverage without breaking the model's own domain contract.
 - **Phase 30 decision:** documented, not closed - train/selection/holdout separation was enforced and recorded in both Phase 30 artifacts; the harvest workflow was removed rather than given a wider interval
 - **Residual capability:** Descriptive intervals on measured group means.
 - **Phase 34 decision:** measured, not closed - The coverage question was answered by measurement rather than by more data: each served 90 % interval was held against a campaign no fit saw, and the mizuna conformal radius was calibrated on one flight campaign and evaluated on the other in both directions. Evidence: ml/evaluation/phase34_cross_campaign_coverage.json.
@@ -225,6 +242,9 @@ Counts are of the 14 recorded gaps. 'Closed by decision' means a capability was 
 - **Phase 36 decision:** OPEN - Unchanged. The new independent campaign cannot measure interval coverage: its only measured mass is at 42 days after transplant, outside the models' declared 2-29 day domain, at chamber temperatures of 13.1-41.8 C against a declared 20-32 C domain, and root temperature was not measured. Scoring it would have required violating the models' own domain contract.
     - evidence: `ml/evaluation/phase36_model_reevaluation.json`
 - **Remaining work:** More independent experiments inside the declared domain.
+- **Phase 37 decision:** OPEN - Both datasets acquired this phase were tested against the lettuce model domains and both are outside them: the green-light trial measures mass only at a single destructive harvest 35 days after sowing against a declared 2-29 day domain, and the dosing trial reports no air temperature, no root temperature and no PPFD. Neither can measure interval coverage without breaking the model's own domain contract.
+    - evidence: `ml/evaluation/phase37_model_evidence.json`
+- **Remaining work:** Independent experiments inside the declared domain, with repeated mass measurements over time and a measured root temperature.
 
 ## The two that matter most
 

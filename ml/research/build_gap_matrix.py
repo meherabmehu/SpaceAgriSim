@@ -111,20 +111,30 @@ def render(matrix: dict) -> str:
     for severity in SEVERITIES:
         lines.append(f"| **{severity}** | {meaning[severity]} | {counts[severity]} |")
 
-    phase36 = matrix.get("phase36") or {}
-    if phase36:
-        counts36 = phase36["counts"]
+    # The counts are recomputed from the status tokens rather than read from whichever phase block
+    # happens to be newest. A stored summary that disagrees with the entries above it is exactly the
+    # kind of drift this file exists to prevent.
+    tokens = [g.get("statusToken") or "OPEN" for g in matrix.get("gaps", [])]
+    closed_by_decision = {"fractional-gravity", "yield-labels"}
+    closed_by_data = sum(1 for g in matrix.get("gaps", [])
+                         if (g.get("statusToken") == "CLOSED"
+                             and g.get("id") not in closed_by_decision))
+    latest = matrix.get("phase37") or matrix.get("phase36") or {}
+    if latest:
         lines += [
             "",
-            "## Status after Phase 36",
+            f"## Status after Phase {latest.get('phase', '')}".rstrip(),
             "",
             "Closure is counted three ways, because they are not the same thing. "
-            f"**{counts36['closedByData']}** gaps closed by data, "
-            f"**{counts36['closedByDecision']}** closed by removing the capability rather than "
-            f"finding a dataset, **{counts36['partiallyClosed']}** partially closed, "
-            f"**{counts36['open']}** still open.",
+            f"**{closed_by_data}** gaps closed by data, "
+            f"**{sum(1 for g in matrix.get('gaps', []) if g.get('id') in closed_by_decision)}** "
+            "closed by removing the capability rather than finding a dataset, "
+            f"**{tokens.count('PARTIALLY CLOSED')}** partially closed, "
+            f"**{tokens.count('OPEN')}** still open.",
             "",
-            phase36.get("note", ""),
+            (latest.get("note") or
+             "Counts are recomputed from the status token on every entry, so the summary cannot "
+             "disagree with the table below it."),
             "",
         ]
 
