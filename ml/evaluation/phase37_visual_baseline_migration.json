@@ -1,6 +1,6 @@
 {
   "schema": "spaceagrisim.visual_baseline_migration/1",
-  "reason": "The interface has always declared Inter first in its font stack and shipped no font file, so every machine substituted a fallback (DejaVu Sans on a bare container, Liberation Sans or Noto Sans where installed). The four weights are now bundled as a latin subset under SIL OFL, and rasterisation is pinned, which makes the rendered page a property of the repository. The replaced images are archived under historical/phase37.",
+  "reason": "Re-materialising the Inter baselines after the workspace snapshot dropped the committed images; capture pipeline, fonts, rasterisation flags and budgets unchanged.",
   "captures": [
     {
       "capture": "mission-desktop",
