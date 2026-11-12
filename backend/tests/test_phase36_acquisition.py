@@ -262,3 +262,75 @@ def test_every_recorded_checksum_is_a_full_digest():
         assert digests, f"{name} records no SHA-256 digest"
         for digest in digests:
             assert len(digest) == 64
+
+
+# --------------------------------------------------------------------------- served evidence surface
+# Phase 8 required the acquisition to be reflected in the running product without breaking any
+# existing contract. These tests hold the surface to the same rule as the research scripts: a number
+# is served only with the label that says what kind of number it is, and the counts it reports must
+# be recomputed from the entries rather than trusted from a summary.
+
+def _client():
+    from fastapi.testclient import TestClient
+    from app.main import app
+    return TestClient(app)
+
+
+def test_acquisition_evidence_surface_is_served():
+    response = _client().get("/api/acquisition-evidence")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["phase"] == 36
+    for key in ("gaps", "waterUse", "projectedClimate", "cultivarAndWater", "hourly", "models",
+                "catalogue"):
+        assert key in payload, key
+
+
+def test_the_surface_labels_what_each_kind_of_number_is():
+    payload = _client().get("/api/acquisition-evidence").json()
+    assert set(payload["labels"]) == {"measured", "derived", "predicted"}
+    # A projected value must never be offered as a measurement, and a ratio computed from a model
+    # must never be offered as one either.
+    assert payload["projectedClimate"]["label"] == "predicted"
+    assert payload["waterUse"]["formulation"]["label"] == "derived"
+    assert payload["waterUse"]["level"]["label"] == "derived"
+    assert payload["cultivarAndWater"]["cultivar"]["label"] == "measured"
+
+
+def test_the_served_gap_counts_recompute_from_the_entries():
+    payload = _client().get("/api/acquisition-evidence").json()
+    gaps = payload["gaps"]
+    rows = gaps["gaps"]
+    assert len(rows) == gaps["total"] == 14
+    for token in ("CLOSED", "PARTIALLY CLOSED", "OPEN"):
+        assert gaps[{"CLOSED": "closed", "PARTIALLY CLOSED": "partiallyClosed",
+                     "OPEN": "open"}[token]] == sum(1 for r in rows if r["status"] == token)
+    # Closed splits into data and decision closures, and the two must add up to the total closed.
+    assert gaps["closedByData"] + gaps["closedByDecision"] == gaps["closed"]
+
+
+def test_every_open_gap_states_why_it_is_still_open():
+    payload = _client().get("/api/acquisition-evidence").json()
+    for row in payload["gaps"]["gaps"]:
+        if row["status"] != "CLOSED":
+            assert row["whatChanged"], row["id"]
+            assert row["remainingWork"], row["id"]
+
+
+def test_no_model_became_decision_grade_and_the_surface_says_so():
+    payload = _client().get("/api/acquisition-evidence").json()
+    assert payload["decisionGradeCount"] == 1
+    counts = payload["models"]["counts"]
+    assert counts["decisionGradeBefore"] == counts["decisionGradeAfter"] == 1
+    assert counts["scored"] == 0
+    assert "six of the fourteen gaps remain open" in payload["interpretation"].lower()
+
+
+def test_the_surface_does_not_change_any_existing_response_shape():
+    """Additive only: the routes the frontend already consumes must be untouched by Phase 8."""
+    client = _client()
+    for path in ("/api/models", "/api/datasets", "/api/benchmarks", "/api/water-use-evidence",
+                 "/api/science/evidence", "/api/scientific-summary"):
+        response = client.get(path)
+        assert response.status_code == 200, path
+        assert isinstance(response.json(), dict), path

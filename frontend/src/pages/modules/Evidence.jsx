@@ -18,6 +18,147 @@ import {
   Search,
   Sprout,
 } from "lucide-react";
+/**
+ * What the Phase 36 acquisition actually bought, served with the label that says what each number
+ * is. The surface exists because the alternative is a report nobody opens: a reader of the running
+ * product can see the measured ET result, the projected-climate response and the six gaps that did
+ * not close, in the same place as the study registry.
+ *
+ * The panel deliberately leads with the number that did not move - no model became decision-grade -
+ * rather than with the datasets acquired. Progress that is real but does not change a decision is
+ * still worth reporting, but it must not look like a changed decision.
+ */
+function AcquisitionEvidence() {
+  const state = useResource("/acquisition-evidence");
+  const data = state.data;
+  if (state.error) {
+    return (
+      <Card title="Acquisition evidence" label="PHASE 36 · MEASURED, DERIVED, PREDICTED">
+        <p className="muted fine">Evidence surface unavailable: {state.error}</p>
+      </Card>
+    );
+  }
+  if (!data) {
+    return (
+      <Card title="Acquisition evidence" label="PHASE 36 · MEASURED, DERIVED, PREDICTED">
+        <p className="muted fine">Loading acquisition evidence…</p>
+      </Card>
+    );
+  }
+  const gaps = data.gaps || {};
+  const water = data.waterUse || {};
+  const climate = data.projectedClimate || {};
+  const models = data.models || {};
+  return (
+    <Card
+      title="What the last acquisition changed, and what it did not"
+      label="PHASE 36 · MEASURED, DERIVED, PREDICTED"
+      action={<span className="pill">{gaps.total} documented gaps</span>}
+    >
+      <p className="prose">
+        Five independent datasets were acquired and every byte checksummed. The
+        point of this panel is the distinction the labels carry: a measured value
+        came off an instrument, a derived value is arithmetic this repository
+        performs on measurements, and a predicted value is a model output that is
+        not an observation of anything.
+      </p>
+      <div className="data-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>GAP STATUS</th>
+              <th>CLOSED BY DATA</th>
+              <th>CLOSED BY DECISION</th>
+              <th>PARTIALLY CLOSED</th>
+              <th>OPEN</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{gaps.total} recorded</td>
+              <td>{gaps.closedByData}</td>
+              <td>{gaps.closedByDecision}</td>
+              <td>{gaps.partiallyClosed}</td>
+              <td>{gaps.open}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p className="muted fine">{gaps.note}</p>
+
+      {water.available && (
+        <>
+          <h3>Measured evapotranspiration, held against the model</h3>
+          <ul className="limitation-list">
+            <li>
+              <strong>derived</strong> · FAO-56 on measured available energy against
+              eddy-covariance latent heat: r = {number(water.formulation?.correlation, 4)} over{" "}
+              {number(water.formulation?.siteDays, 0)} site-days, bias{" "}
+              {number(water.formulation?.biasMmPerDay, 3)} mm/day.
+            </li>
+            <li>
+              <strong>derived</strong> · measured ET ÷ modelled ET0 from six weighable
+              lysimeters: median {number(water.level?.medianImpliedKcActiveDays, 3)} over{" "}
+              {number(water.level?.activeDays, 0)} active days.
+            </li>
+            <li className="muted">{water.limitation}</li>
+          </ul>
+        </>
+      )}
+
+      {climate.available && (
+        <>
+          <h3>Projected environment · {climate.model}, {climate.scenario}</h3>
+          <p className="muted fine">
+            <strong>predicted</strong> · {climate.baselineWindow} against {climate.futureWindow} at{" "}
+            {climate.gridResolution}. {climate.caveat}
+          </p>
+          <div className="data-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>SITE</th>
+                  <th>ΔT (°C)</th>
+                  <th>ΔVPD (kPa)</th>
+                  <th>ΔDLI (mol/m²/d)</th>
+                  <th>Δ DAYS &gt;30 °C</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(climate.sites || {}).map(([site, delta]) => (
+                  <tr key={site}>
+                    <td>{site.replace(/_/g, " ")}</td>
+                    <td>{number(delta.meanTasC, 2)}</td>
+                    <td>{number(delta.meanVpdKpa, 2)}</td>
+                    <td>{number(delta.meanDliMolM2D, 2)}</td>
+                    <td>{number(delta.daysAbove30C, 0)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+
+      {models.available && (
+        <>
+          <h3>Models re-evaluated · no retraining, no threshold moved</h3>
+          <p className="prose">
+            {number(models.counts?.scored, 0)} of {number(models.counts?.served, 0)} served models
+            could be scored on the new independent campaign:{" "}
+            {number(models.counts?.domainRefused, 0)} fall outside their own declared domain and{" "}
+            {number(models.counts?.noNewEvidence, 0)} have no new evidence bearing on them.
+            Decision-grade models: {number(models.counts?.decisionGradeBefore, 0)} before,{" "}
+            {number(models.counts?.decisionGradeAfter, 0)} after.
+          </p>
+          <p className="muted fine">{models.note}</p>
+        </>
+      )}
+      <JsonDetails title="Every gap, its evidence and its remaining work" data={data} />
+    </Card>
+  );
+}
+
 export function Datasets({ registry, registryError }) {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(null);
@@ -43,6 +184,7 @@ export function Datasets({ registry, registryError }) {
         </div>
       )}
       <IndependencePanel />
+      <AcquisitionEvidence />
       <Card
         title="Study catalog"
         label="VERIFIED SOURCE RECORDS"

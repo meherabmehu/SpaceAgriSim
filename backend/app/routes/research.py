@@ -8,8 +8,8 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field
 
-from app import (benchmarks, closed_loop, et0, external_validation, research,
-                 science_classification, water_evidence)
+from app import (acquisition_evidence, benchmarks, closed_loop, et0, external_validation,
+                 research, science_classification, water_evidence)
 
 router = APIRouter(tags=["scientific data and models"])
 
@@ -901,6 +901,18 @@ def science_classification_of_features():
     checked against the running system, not only against a document.
     """
     return science_classification.classifier_response()
+
+
+@router.get("/acquisition-evidence")
+def acquisition_evidence_surface():
+    """What Phase 36 acquired, what it proved, and what it did not.
+
+    Every value carries the label that says whether it is measured, derived or predicted, because
+    the three are mixed on this surface by necessity and would be indistinguishable without it. The
+    six gaps that remain open are returned with the same prominence as the four that closed, and
+    the payload ends with the count that did not move: no model became decision-grade.
+    """
+    return acquisition_evidence.payload()
 
 
 @router.get("/scientific-summary")
