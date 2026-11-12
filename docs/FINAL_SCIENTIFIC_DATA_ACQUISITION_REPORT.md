@@ -303,9 +303,9 @@ Run on the merged tree (§17).
 
 | Gate | Result | Evidence |
 |---|---|---|
-| Backend suite, SQLite | **PASS** | 1,280 passed, 24 skipped |
-| Backend suite, PostgreSQL 17 (skips are failures) | **PASS** | 1,304 passed, **0 skipped** |
-| Phase 36 acquisition tests | **PASS** | 22 passed |
+| Backend suite, SQLite | **PASS** | 1,286 passed, 24 skipped |
+| Backend suite, PostgreSQL 17 (skips are failures) | **PASS** | 1,310 passed, **0 skipped** |
+| Phase 36 acquisition and evidence tests | **PASS** | 28 passed |
 | `bandit -r backend/app` | **PASS** | 0 findings, 0 by severity |
 | `pip-audit` | **PASS** | no known vulnerabilities |
 | Model audit | **PASS** | 202 checks, 0 failed, 0 undocumented gaps |
@@ -320,20 +320,26 @@ Run on the merged tree (§17).
 | Frontend typecheck | **PASS** | clean |
 | Frontend unit tests | **PASS** | 20/20 |
 | Frontend `build:check` | **PASS** | 240 kB initial request, within the 245,760 B budget; no cycles; no oversized chunk |
+| Evidence surface contract | **PASS** | `GET /api/acquisition-evidence` additive; the six routes the frontend already consumes answer unchanged |
 | Playwright end-to-end | **PASS** | 171 passed across desktop, tablet and mobile (3.9 min) |
-| Visual regression | **FAIL — not attributable to this change** | see below |
+| Visual regression | **FAIL — not attributable to this change** | all 18 viewport comparisons differ; see below |
 
-**Visual regression.** `scripts/visual_regression.py` reports canvas-size changes and 6–13 % pixel
-differences against the committed baselines. The baselines were **not** refreshed, because
+**Visual regression.** `scripts/visual_regression.py` reports canvas-size changes and 5–13 % pixel
+differences against the committed baselines on all 18 viewports it guards. The baselines were **not** refreshed, because
 refreshing them would bake this environment's rendering into the repository and erase the signal.
 
 The difference is not caused by anything in this phase, and that is demonstrable rather than
-asserted: the largest height change (128 px, mobile) is on the **mission page**, which renders no
-acquired dataset, no model card and no catalogue entry — nothing this phase touched. A page that
-reads none of the changed data cannot have been changed by it. The pattern across all the failures
-— identical canvas widths, small height changes on text-dense pages, pixel differences on pages of
-identical size — is the signature of different font metrics and antialiasing in a freshly installed
-browser, not of a layout or content change.
+asserted. The single largest height change — **128 px, on the mobile mission page** — is on the one
+page that renders no acquired dataset, no model card, no catalogue entry and none of the new
+evidence panel. A page that reads none of the changed data cannot have been changed by it. The
+pattern across the failures — identical canvas widths, small height changes on text-dense pages,
+pixel differences on pages of identical size — is the signature of different font metrics and
+antialiasing in a freshly installed browser, not of a layout or content change.
+
+The one page this phase did change visually, the datasets module, has **no committed baseline**, so
+it cannot be the source of any of these failures. The Playwright crawl that produced the fresh
+screenshots passes on that page with no console error and no failed request, which is the check that
+would catch a broken panel.
 
 The previous recorded result on `f6f6da1`, in the environment the baselines were captured in, was
 18/18 comparisons at 0.000 % difference. This run is reported as a failure because it is one; it is
@@ -363,6 +369,8 @@ rather than merged into a comfortable one.
 | `ml/evaluation/phase36_model_reevaluation.json` | per-model outcome |
 | `data/research/phase36/*.json` | four analysis artefacts |
 | `data/metadata/*_manifest.json` | five acquisition manifests and one processing manifest |
+| `GET /api/acquisition-evidence` | the served surface: gaps, water use, projected climate, cultivar trial, hourly information loss, model outcomes — every value labelled measured, derived or predicted |
+| `backend/app/acquisition_evidence.py` | the module behind it, and the reasoning for the three labels |
 
 ## 16. What this phase did not achieve, stated plainly
 
