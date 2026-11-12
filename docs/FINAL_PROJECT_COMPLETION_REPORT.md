@@ -888,7 +888,7 @@ The failure message now distinguishes the two cases, because they need opposite 
 shallow checkout says so and names `fetch-depth: 0`; a commit that is present but lacks the path
 says the reference is wrong. Verified in a clean depth-1 clone.
 
-**Verification is the CI run itself, not a local claim.** Run `43266438602` on the final commit of this
+**Verification is the CI run itself, not a local claim.** Run `43267880740` on the final commit of this
 branch is the one that matters; run `43246367901` on commit `52d9374` was the first green one:
 
 | Job | Result |
@@ -980,7 +980,7 @@ document. Every result below was observed; none is carried over from an earlier 
 | Python dependency audit | `python3 -m pip_audit -r backend/requirements.txt -r backend/requirements-dev.txt` | no known vulnerabilities |
 | Static analysis | `python3 -m bandit -q -r backend/app` | exit 0 (no findings) |
 | Node dependency audit | `npm audit --audit-level=high` | 0 vulnerabilities |
-| **Continuous integration (GitHub Actions)** | workflow run `43266438602` on commit `54398c3`, queried through the GitHub API | **success — all five jobs green** (`backend`, `postgres`, `science`, `frontend`, `browser`) |
+| **Continuous integration (GitHub Actions)** | workflow run `43267880740` on the final commit `f94f3a9`, queried through the GitHub API | **success — all five jobs green** (`backend`, `postgres`, `science`, `frontend`, `browser`) |
 
 The science job was also checked for the property that matters as much as passing: after running
 every one of those scripts, `git status --porcelain` was empty. The gates verify the committed
@@ -1043,7 +1043,7 @@ whole suite.
 | Same command, same commit, `MemAvailable` ~0.67 GB | 55 passed, **2 failed**, both capture errors |
 | One test alone, mobile | **1 passed in 17.0 s** |
 | Each project in its own process, 57 tests each | **57 + 57 + 57 = 171 passed** |
-| `CI=1 npx playwright test` on GitHub's runner (≈7 GB) | **success**, runs `43246367901` and `43266438602`, browser job |
+| `CI=1 npx playwright test` on GitHub's runner (≈7 GB) | **success** in every run since the checkout fix — `43246367901`, `43266438602`, `43267880740` — browser job |
 
 With no swap at all, a 0 MB `MemAvailable` sample means an allocation had nothing to fall back on,
 which is exactly the failure the screenshot call reports. Changing only available memory — the same
