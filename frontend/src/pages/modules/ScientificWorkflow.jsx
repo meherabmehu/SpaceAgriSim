@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card, number } from "../missionUI.jsx";
-import { api } from "../../services/platformApi.ts";
+import { api, isAbortError } from "../../services/platformApi.ts";
 import { authorizationHeader } from "../../services/auth.ts";
 import { useResource, RequestState, Limitations, JsonDetails } from "./moduleSupport.jsx";
 import {
@@ -100,10 +100,22 @@ export function ScientificWorkflow({ session, onRequireSignIn, setNotice }) {
   useEffect(() => {
     if (!session) return undefined;
     const controller = new AbortController();
+    // This effect re-runs every time an analysis is saved, so it is superseded routinely. A
+    // cancelled request is not an empty result: reporting one as `null` removed the "recent
+    // analyses" panel and put it back on every save, and a response that landed late could put an
+    // older list back on screen after a newer one had already been committed.
+    let active = true;
     api("/analyses?limit=5", undefined, controller.signal)
-      .then((data) => setSavedList(data))
-      .catch(() => setSavedList(null));
-    return () => controller.abort();
+      .then((data) => {
+        if (active) setSavedList(data);
+      })
+      .catch((error) => {
+        if (active && !isAbortError(error)) setSavedList(null);
+      });
+    return () => {
+      active = false;
+      controller.abort();
+    };
   }, [session, saved]);
 
   const payload = () => {

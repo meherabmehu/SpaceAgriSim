@@ -1,5 +1,6 @@
 import { act, cleanup, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { createFetchHarness } from "../../testSupport/deferredFetch.js";
 import { RequestState, useResource } from "./moduleSupport.jsx";
 
 /**
@@ -17,55 +18,6 @@ import { RequestState, useResource } from "./moduleSupport.jsx";
  */
 
 const DEBOUNCE_MS = 150;
-
-/** A `fetch` whose every call answers only when the test says so. */
-function createFetchHarness() {
-  const calls = [];
-  const fetch = vi.fn((url, init = {}) => {
-    let settle;
-    let fail;
-    let bodyMode = "json";
-    const pending = new Promise((resolve, reject) => {
-      settle = resolve;
-      fail = reject;
-    });
-    const abortError = () => new DOMException("The operation was aborted.", "AbortError");
-    const call = {
-      url,
-      init,
-      signal: init.signal,
-      /** Deliver a complete response. */
-      respond(status, payload) {
-        settle({
-          ok: status >= 200 && status < 300,
-          status,
-          json: async () => payload,
-        });
-      },
-      /** Deliver a response whose body read is cancelled mid-stream. */
-      respondThenCancelBody(status) {
-        settle({
-          ok: status >= 200 && status < 300,
-          status,
-          json: async () => {
-            bodyMode = "cancelled";
-            throw abortError();
-          },
-        });
-      },
-      get bodyMode() {
-        return bodyMode;
-      },
-    };
-    calls.push(call);
-    if (init.signal) {
-      if (init.signal.aborted) fail(abortError());
-      else init.signal.addEventListener("abort", () => fail(abortError()));
-    }
-    return pending;
-  });
-  return { fetch, calls };
-}
 
 let harness;
 

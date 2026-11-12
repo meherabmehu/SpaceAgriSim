@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Card } from "../missionUI.jsx";
-import { api } from "../../services/platformApi.ts";
+import { api, isAbortError } from "../../services/platformApi.ts";
 import { useResource, RequestState, JsonDetails } from "./moduleSupport.jsx";
 import {
   BookOpenCheck,
@@ -72,10 +72,22 @@ export function ResearchAssistant() {
 
   useEffect(() => {
     const controller = new AbortController();
+    // Same rule as the rest of the platform: a cancellation is not an empty result. No user-visible
+    // symptom was reproduced here (the request is issued once per mount), so this guards the
+    // pattern rather than a known failure - an aborted load must not be able to write an empty list
+    // over a delivered one.
+    let active = true;
     api("/assistant/suggestions", undefined, controller.signal)
-      .then((data) => setSuggestionList(data?.suggestions || []))
-      .catch(() => setSuggestionList([]));
-    return () => controller.abort();
+      .then((data) => {
+        if (active) setSuggestionList(data?.suggestions || []);
+      })
+      .catch((error) => {
+        if (active && !isAbortError(error)) setSuggestionList([]);
+      });
+    return () => {
+      active = false;
+      controller.abort();
+    };
   }, []);
 
   const ask = async (text) => {
