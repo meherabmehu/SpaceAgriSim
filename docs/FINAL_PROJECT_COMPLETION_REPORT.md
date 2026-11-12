@@ -16,18 +16,19 @@ search that failed to find it is recorded.
 | Repository | `github.com/meherabmehu/SpaceAgriSim` |
 | Starting commit | `429097c` — the branch point, equal to `origin/main` at the start of this pass |
 | Branch | `final/project-completion`, created off that commit |
-| Commits on the branch | 7 (six before this report, one carrying it) |
+| Commits on the branch | 9 — eight before this correction, one carrying it |
 | Force-push / history rewrite / protection bypass | none, at any point |
 | Merge strategy | fast-forward only; no merge commit, no conflict resolution |
 | Render | **not touched** — no deploy, no trigger, no service, environment, secret or plan change |
 | Production PostgreSQL | **not touched** — no migration, reset, seed, delete or write |
 | Test databases | isolated local instances only (`sqlite:///tmp/qa37.db` and a local PostgreSQL 17 cluster on port 55437) |
 
-The branch tip before this report's own commit:
+The branch tip before this report's own commit was `a6553aa`. The tip when this correction was
+written:
 
 ```
 $ git rev-parse HEAD
-a6553aaea81525812b4cbac7de0dd99180ae9634
+f42ecfbee156c9827822b4a0cc6a200fe7ab1a06
 $ git log --oneline 429097c..HEAD
 a6553aa Serve this phase's evidence on the surface that already exists
 a465dc9 Audit every served model against the new evidence without promoting any
@@ -37,9 +38,10 @@ a465dc9 Audit every served model against the new evidence without promoting any
 be64e67 Bundle Inter instead of merely asking for it
 ```
 
-This report is the seventh commit; it cannot contain its own SHA, and it does not pretend to. The
-merge and push that follow it are recorded in the delivery message, with `git ls-remote` output, not
-in this file.
+This report cannot contain its own SHA, and it does not pretend to: the correction that follows it
+adds one more commit, and the final SHA of `main` and of the branch after the push is recorded in
+the delivery message with the `git ls-remote` output that proves it, not in a file that would have
+to be committed again to be accurate.
 
 ### 1.1 A note on how this pass started
 
@@ -483,6 +485,8 @@ be64e67  Bundle Inter instead of merely asking for it
 544b117  Adjudicate the gap matrix against the evidence actually acquired
 a465dc9  Audit every served model against the new evidence without promoting any
 a6553aa  Serve this phase's evidence on the surface that already exists
+2a22a33  Write the completion report the brief asks for, and archive the old one
+f42ecfb  Record the sub-threshold pixel the visual gate tolerates
 ```
 
 The branch was pushed and verified with `git ls-remote` before this report was written (the remote
