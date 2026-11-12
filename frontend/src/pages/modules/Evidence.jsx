@@ -280,7 +280,7 @@ export function Datasets({ registry, registryError }) {
           />
         </div>
         <div className="data-table-wrap">
-          <table>
+          <table aria-label="Study catalog">
             <thead>
               <tr>
                 <th>STUDY / TITLE</th>

@@ -1004,33 +1004,56 @@ be rejected. Both were environment corrections — no test was modified, skipped
 past them. The credential test was then run alone to confirm it executes and passes rather than
 being silently skipped.
 
-### 23.2 The one thing that does not reproduce cleanly here, and why
+### 23.2 The two browser-suite flakes, one of which was a real defect
 
-Run as a single process over all three viewports, the browser suite intermittently fails one test on
-this host: `guided-workflows.spec.js › water demand workflow runs from the page and matches the API`
-on mobile, with `page.screenshot: Protocol error (Page.captureScreenshot): Unable to capture
-screenshot` after hanging for the full 45-second test timeout. It failed that way in three
-consecutive single-process runs and passed every time it was given room:
+Two different tests failed at different times, and they turned out to have opposite causes. The
+distinction is the reason this subsection exists at all: one was a race in a test, fixed in code;
+the other is the host running out of memory, measured rather than assumed.
 
-| How it was run | Result |
+**First, the real defect.** CI run `43259662304` (commit `0fd41fb`, a documentation-only change)
+failed the browser job on `mission.spec.js › comparison, evidence search, and processed measurement
+preview`: `expect(locator('tbody tr')).toHaveCount(1)` resolved to **12** elements for twelve
+seconds. The page was not broken. The failing run's own page snapshot shows the search box holding
+`OSD-655` and the catalogue correctly reduced to the single OSD-655 row, while the same page also
+displays three other tables — the shared-sample relation, the gap-closure counts, and the
+acquisition table. `page.locator("tbody tr")` counts rows across all four, so the assertion held
+only as long as those other panels had not yet finished their own fetches. On a fast runner they
+finish first and the test fails; on a slow one it passes. That is a test that measures timing.
+
+The fix does not weaken anything. The catalogue table now carries `aria-label="Study catalog"` —
+which also gives screen-reader users the name the surrounding card already shows — and the
+assertion is scoped to it, so it counts the catalogue's rows and only those. Proved under the
+exact failing condition with a throwaway spec that waits for all four tables to render before typing:
+the page-wide count is **12**, the scoped count is **1**, three repetitions, three passes. `mission.spec.js`
+then ran 36/36 across all three viewports with two repetitions each. The inaccessible-vs-scoped
+difference is the whole bug: the old assertion was not stricter, only luckier.
+
+**Second, the host.** A different test on a different page,
+`guided-workflows.spec.js › water demand workflow runs from the page and matches the API` and once
+`water-evidence.spec.js`, fails with `page.screenshot: Protocol error (Page.captureScreenshot):
+Unable to capture screenshot`. That is Chromium failing to allocate the capture surface — no
+assertion is involved, and every assertion before the screenshot had already passed. The cause was
+measured rather than guessed: a sampler recorded `/proc/meminfo` every few seconds through one
+whole suite.
+
+| Condition on this host | Result |
 |---|---|
-| All three projects in one process, 1.9 GB host | 170 passed, **1 failed** (the capture error above) |
-| That one test alone, mobile | **1 passed in 17.0 s** |
-| Whole mobile project alone | **57 passed** |
-| Whole desktop project alone | **57 passed** |
-| Whole tablet project alone | **57 passed** |
-| `CI=1 npx playwright test` on GitHub's runner, commit `52d9374` | **success** (CI run `43246367901`, browser job) |
+| `MemAvailable` sampled down to **0 MB**, `SwapTotal` **0 kB** | 169 passed, **2 failed**, both capture errors, suite stretched to 12.4 min |
+| Same command, same commit, `MemAvailable` ~1.3 GB | **57/57** on the mobile project in 2.0 min |
+| Same command, same commit, `MemAvailable` ~0.67 GB | 55 passed, **2 failed**, both capture errors |
+| One test alone, mobile | **1 passed in 17.0 s** |
+| Each project in its own process, 57 tests each | **57 + 57 + 57 = 171 passed** |
+| `CI=1 npx playwright test` on GitHub's runner (≈7 GB) | **success**, run `43246367901`, browser job |
 
-The failure is in Chromium's screenshot syscall, not in an assertion: the page rendered, the error
-list was empty, and the panel content had already been asserted. The host reports 1.9 GB of RAM and
-two cores with a load average that reached 14.8 during these runs; the same suite in the same commit
-passed as a single process twice earlier in the day when the machine was quieter, and it passes on
-GitHub's runner. So the honest statement is: **171 of 171 tests pass**, they pass together on
-adequate hardware, and they pass here only when the three projects are not sharing one browser
-process on a starved machine.
+With no swap at all, a 0 MB `MemAvailable` sample means an allocation had nothing to fall back on,
+which is exactly the failure the screenshot call reports. Changing only available memory — the same
+binary, the same tests, the same commit, minutes apart — flipped the result from 2 failures to 57
+passes. That is the proof the earlier draft of this section lacked, and it is why this is now stated
+as a measurement rather than a suspicion.
 
-No test was skipped, retried, relaxed or excluded to reach that number, and no retry setting was
-added to the configuration to paper over it.
+No test was skipped, retried, relaxed or excluded to reach 171, no `retries` value was set to paper
+over it, and nothing about the failure is hidden: the two tests still fail here whenever the machine
+is starved, and they are reported that way.
 
 ## 24. Files and commits added by this pass
 
@@ -1041,12 +1064,15 @@ added to the configuration to paper over it.
 | `880e8ca` | Replace the mizuna provenance claim that pointed at a file nobody created; directory hashing in the card generator; test that no card cites a missing path |
 | `422a8dd` | Part III of this report |
 | `52d9374` | Check out full history where the gates read it; make the shallow-clone failure diagnose itself |
+| `0fd41fb` | Record the browser suite honestly, including where it does not reproduce |
+| this commit | Scope the study-catalogue assertion to its own table; record the memory measurement behind the screenshot flake |
 
 Files changed: `docs/screenshots/MANIFEST.json`, seven deletions under `docs/screenshots/`
 (6 superfluous archive copies + 1 resurrected leftover), `backend/tests/test_phase37_gates.py`
 (new), `backend/tests/test_phase37_model_cards.py`, `ml/research/build_model_cards.py`,
 `ml/artifacts/cards/mizuna-microbial-relative-load-v2.json`, `docs/MODEL_CARDS.md`,
-`.github/workflows/ci.yml`, and this document.
+`.github/workflows/ci.yml`, `frontend/src/pages/modules/Evidence.jsx`,
+`frontend/e2e/mission.spec.js`, and this document.
 
 **No model artifact was modified.** `git diff --name-only` across all three commits under
 `ml/artifacts/*.json` returns nothing; all nine artifacts still hash to their registry entries, and

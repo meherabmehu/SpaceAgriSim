@@ -72,7 +72,13 @@ test("comparison, evidence search, and processed measurement preview", async ({
   await page
     .getByRole("searchbox", { name: "Search NASA datasets" })
     .fill("OSD-655");
-  await expect(page.locator("tbody tr")).toHaveCount(1);
+  // Scoped to the study catalogue itself. This page carries four tables, and an
+  // unscoped `tbody tr` also counts the rows other panels render once their own
+  // fetches land - which made the assertion depend on which request finished
+  // first rather than on the filter. Naming the table keeps the intent (the
+  // catalogue filters to exactly one row) and removes that race.
+  const catalog = page.getByRole("table", { name: "Study catalog" });
+  await expect(catalog.locator("tbody tr")).toHaveCount(1);
   await page.getByRole("button", { name: "Details", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: /mizuna_harvest.csv/ }),
