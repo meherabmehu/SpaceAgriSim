@@ -72,6 +72,8 @@ NASA study records point to their official OSDR sources; the product is not endo
 ## Documentation
 
 - [Final completion report](docs/FINAL_PROJECT_COMPLETION_REPORT.md)
+- [Model cards](docs/MODEL_CARDS.md) — the seven served models, with training-data digests and
+  immutable code references
 - [Dataset catalogue](data/research/DATASET_CATALOG.md) · [gap matrix](docs/DATASET_GAP_MATRIX.md)
 - [Archived reports](docs/archive/README.md)
 - [Architecture](docs/ARCHITECTURE.md)

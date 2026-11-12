@@ -2,21 +2,29 @@
 
 SpaceAgriSim — the final scientific and engineering completion pass.
 
-Every number below was produced on this branch by the command printed beside it, during this pass.
-Where a result could not be measured, this report says so instead of estimating it. Where a gap
-could not be closed because the evidence does not exist publicly, the gap is left open and the
-search that failed to find it is recorded.
+This document has two parts. **Part I** (sections 1–12) is the Phase 37 scientific completion, whose
+results stand unchanged. **Part II** (sections 13–18) is the final integration and model-card pass
+that followed it, and it supersedes Part I's *status* claims — commit counts, gate counts and the
+state of the model cards — while leaving its *scientific* findings intact.
+
+Every number below was produced by the command printed beside it. Where a result could not be
+measured, this report says so instead of estimating it. Where a gap could not be closed because the
+evidence does not exist publicly, the gap is left open and the search that failed to find it is
+recorded.
 
 ---
 
 ## 1. Repository state
 
+*Part I records the Phase 37 pass as it happened. The current state of the repository, and the
+starting point of Part II, is in section 13.*
+
 | | |
 |---|---|
 | Repository | `github.com/meherabmehu/SpaceAgriSim` |
-| Starting commit | `429097c` — the branch point, equal to `origin/main` at the start of this pass |
+| Starting commit | `429097c` — the branch point, equal to `origin/main` at the start of the Phase 37 pass |
 | Branch | `final/project-completion`, created off that commit |
-| Commits on the branch | 9 — eight before this correction, one carrying it |
+| Commits on the branch | 9 |
 | Force-push / history rewrite / protection bypass | none, at any point |
 | Merge strategy | fast-forward only; no merge commit, no conflict resolution |
 | Render | **not touched** — no deploy, no trigger, no service, environment, secret or plan change |
@@ -511,3 +519,255 @@ against it. Every database operation in this pass ran against throwaway local in
 **The new code is not live.** Nothing in this branch has been deployed. `spaceagrisim-web.onrender.com`
 and `spaceagrisim-api.onrender.com` continue to serve whatever they served before this pass, and no
 claim in this report should be read as a statement about what those services currently run.
+
+---
+
+# Part II — final integration and model-card completion
+
+The pass that follows Phase 37. It added no model, closed no gap and changed no scientific verdict.
+It finished three things Part I left open: it verified the GitHub state from scratch, it re-ran every
+quality gate on the tree it was handed, and it completed the metadata of the four model cards that
+could not answer how to reproduce them.
+
+## 13. Repository state at the start and end of this pass
+
+This pass began on a *different machine state* from Part I: the working copy had lost its `.git`
+directory again (the same sandbox reset that affected Part I took the repository metadata with it).
+The repository was cloned from `origin`, the restored `.git` was moved over the surviving tree, and
+every tracked file was reconciled against the clone until `git status` was empty. That is why the
+starting commit below is stated as `0388ad2` rather than the `f42ecfb` the completion brief named:
+`f42ecfb` is real, but it is one commit behind — `0388ad2` is the commit that corrected the
+commit-count error in this very document.
+
+| | |
+|---|---|
+| Repository URL | `https://github.com/meherabmehu/SpaceAgriSim.git` |
+| Starting commit (this pass) | `0388ad2fc947d6975c2bb3b065c9ebfa1211adc4` |
+| Starting state of `origin/main` | `0388ad2` — identical to the starting commit, so there was nothing to reconcile |
+| Starting state of `origin/final/project-completion` | `0388ad2` — identical |
+| Divergence between the branch and `main` | none: 0 commits behind, 0 ahead |
+| Branches on the remote | 25, all fetched; no branch was rewritten or deleted |
+| Tags on the remote | none |
+| Merge | fast-forward, no merge commit, no conflict resolution |
+| Force-push / history rewrite / protection bypass | none |
+| Working tree | clean at the start and at the end |
+
+The reconciliation was verified rather than assumed. After the clone was attached, `git status`
+reported 101 deleted tracked files and 6 modified ones; the six "modifications" were executable-bit
+loss on shell and Python scripts (content identical), and the 101 deletions were large tracked
+binaries — 24 archived visual baselines, 12 processed NASA POWER hourly tables, the OSD-314 and
+NTRS raw records, four CI workflow files — that the snapshot does not carry. All were restored with
+`git checkout -- .`; the final tree matches the commit byte for byte.
+
+## 14. Everything Phase 37 produced is present in the starting commit
+
+Before touching anything, the tree was checked against a list of 30 required artefacts rather than
+against memory. All 30 were present: the two acquisition scripts, the three analysis scripts, the
+Phase 37 acquisition manifest and search log, both raw workbooks and the duplicate-check copy, the
+LED and nutrient analysis outputs, the model-evidence report, the 26 Phase 37 tests, all five Inter
+font files including the OFL licence, the archived audit report and its archive README, and the 18
+committed visual baselines plus the 24 archived ones. Nothing from the previous pass was missing.
+
+## 15. The seven model cards
+
+The seven served models are described by the JSON documents in `ml/artifacts/`, which *are* their
+model cards, and whose SHA-256 values are published in `ml/artifacts/registry.json`. Four of the
+seven omitted the two fields a reader needs to reproduce or refute them: the code that produced them
+and a hash of the data they were trained on.
+
+### 15.1 Why the artifacts were not edited
+
+Adding those keys to the four artifacts would have changed their digests. Those digests are
+published in the registry, verified by `scripts/audit_models.py`, recorded in `GET /api/models` and
+quoted in earlier reports. A model card whose hash changes because somebody added a comment is a
+card that can no longer answer "is this the artefact that was evaluated?".
+
+So the completion is an additive layer: one document per served model at
+`ml/artifacts/cards/<model-id>.json`, each *pointing at* the immutable artifact digest instead of
+replacing it. All seven registry hashes still verify against the files on disk, and a test
+(`test_no_model_artifact_was_modified_by_completing_the_cards`) fails if any artifact is ever
+touched. Nothing was retrained, relabelled or re-thresholded.
+
+### 15.2 Completeness, and what each field rests on
+
+| Model | Checks | Training data | Basis | Code reference | Artifact hash |
+|---|---|---|---|---|---|
+| `lettuce-earth-growth-v1` | 15/15 | `0b6072cc…eb43` | committed file | `4982b84fbb2c` | unchanged |
+| `lettuce-earth-growth-v2` | 15/15 | `0b6072cc…eb43` | committed file | `266c200d39eb` | unchanged |
+| `lettuce-earth-growth-v3` | 15/15 | `0b6072cc…eb43` | committed file, matches the digest v3 recorded | `941174fba2d6` | unchanged |
+| `mizuna-microbial-relative-load-v2` | 15/15 | `9dfffb0eddc0…` | committed file | `91884518b97b` | unchanged |
+| `radiation-exposure-osd46-v1` | 15/15 | `f15c4179…da27` | checksum pinned in a committed manifest | `1f3c94370de4` | unchanged |
+| `radiation-quality-osd46-v1` | 15/15 | `f15c4179…da27` | checksum pinned in a committed manifest | `1f3c94370de4` | unchanged |
+| `tomato-flight-response-v1` | 15/15 | `88b33584…56b1` | reconstructed from a checked upstream file | `3d79cf2e38b7` | unchanged |
+
+**7/7 complete, zero declared exceptions.** That sentence is only worth anything if the three kinds
+of training-data evidence are not conflated, so the card records which one applies:
+
+* **committed file** — the training table is in the repository and the digest is computed from it at
+  build time. The three lettuce models share one table by construction (v1 writes it, v2 and v3
+  read it), and v3's artifact independently recorded the same digest at training time, so the value
+  is corroborated rather than merely asserted.
+* **recorded checksum** — the OSD-46 expression matrix is a 24 MB NASA download that `.gitignore`
+  deliberately excludes. Its digest is pinned in `data/metadata/phase9_nasa_datasets.json`, the
+  card reads it from there, and the check compares it against the prefix the artifact recorded when
+  it was trained. The file is re-acquirable with `scripts/acquire_phase9.py`.
+* **reconstructed derived file** — the tomato model trains on a log1p(CPM) parquet that is not
+  committed. The digest was obtained by *rebuilding* it: the upstream OSD-767 counts were
+  downloaded, verified against the committed pin
+  (`87c18a8b…d61910`, 4,478,268 bytes — matched exactly), the repository's own preprocessing step
+  was applied, and the result hashed. Two independent runs produced identical bytes. Because parquet
+  byte layout is a property of the pyarrow version rather than of the data, the card also records a
+  version-independent digest over the same matrix serialised as CSV
+  (`ad8eeb36…fd4e48`).
+
+`python3 ml/research/build_model_cards.py --verify-training-data` performs that reconstruction for
+real. The cheaper `--check` mode does not — it has to work on a clone that has downloaded nothing —
+and each card names the command that proves its own value.
+
+### 15.3 Two errors made and caught while completing the cards
+
+Both are now regression tests, and both were caught by a test rather than by review:
+
+1. **A false "unavailable".** The first draft recorded that `lettuce-earth-growth-v1` and `-v2` carry
+   no prediction interval. They do: a 90 % cross-conformal interval with measured held-out coverage
+   of 0.939 and 0.961 respectively. The draft would have published an "unavailable" over a real,
+   measured field. The test that compares each card's uncertainty kind against the artifact's own
+   `interval` block caught it.
+2. **A reference to a catalogue entry that does not exist.** The first draft pointed the
+   WUR-trained models at a catalogue entry called `wur-lettuce`; the catalogue contains no such
+   entry. Every dataset reference must now resolve to a real catalogue entry
+   (`osdr-plant-experiments`, which is the umbrella entry the later NASA studies sit under) or to a
+   tracked archive path (`data/raw/WUR-lettuce/original_dataset_lettuce.xlsx`), and the test proves
+   the resolution rather than trusting the string.
+
+### 15.4 What the cards do not claim
+
+Verdicts are unchanged from the Phase 37 audit and are asserted equal to it:
+`mizuna-microbial-relative-load-v2` is the one decision-grade model; the three lettuce regressors
+fail their independent check; the two OSD-46 classifiers and the tomato classifier have no
+independent check. Every card states `promotedByThisCompletion: false`,
+`retrainedByThisCompletion: false` and `thresholdsChangedByThisCompletion: false`, and a test
+enforces all three.
+
+The cards also keep the limitations the artifacts carry, verbatim, rather than paraphrasing them
+into something softer.
+
+One hundred tests in `backend/tests/test_phase37_model_cards.py` enforce this section, with **zero
+skips**.
+
+## 16. Quality gates, run on the final tree
+
+Every command below was executed on the tree this report documents, after the model-card completion,
+in this session. Nothing is carried over from Part I or from any earlier run.
+
+| Gate | Command | Result |
+|---|---|---|
+| Backend, SQLite | `DATABASE_URL=sqlite:///tmp/spaceagrisim_final_qa.db python3 -m pytest backend/tests -q -p no:randomly` | **1413 passed, 23 skipped, 0 failed** |
+| Backend, PostgreSQL 17.11 | `SPACEAGRISIM_TEST_POSTGRES_URL=postgresql+psycopg://…@127.0.0.1:55437/spaceagrisim_final DATABASE_URL=sqlite:///tmp/spaceagrisim_final_qa.db python3 -m pytest backend/tests -q -p no:randomly` | **1436 passed, 0 skipped, 0 failed** |
+| Frontend lint | `npm run lint` | pass, 0 errors |
+| Frontend typecheck | `npm run typecheck` | pass |
+| Frontend unit | `npm run test:unit` | **20 passed** (2 files) |
+| Frontend build + budget | `npm run build:check` | pass — initial request 240 kB, within the 240 kB budget |
+| Playwright | `CI=1 npx playwright test` | **171 passed** in 4.6 min |
+| Visual gate | `python3 scripts/visual_regression.py` | **18/18 PASS**, 0.000 % differing, 0 changed pixels |
+| Phase 37 model audit | `python3 ml/research/audit_models_phase37.py` | 7 served, hashes 7/7, completion cards 7/7, 0 promoted |
+| Canonical model audit | `python3 scripts/audit_models.py` | **202 checks run, 0 failed** |
+| Registry verification | `python3 scripts/verify_model_registry.py --check` | **62/62 passed**, nothing written |
+| Provenance manifest | `python3 ml/training/phase32_provenance.py --check` | provenance complete for 9 artifacts |
+| Phase 34 measurements | `python3 ml/research/phase34_record_measurements.py --check` | 5 model cards consistent |
+| Phase 35 verdicts | `python3 ml/research/phase35_evidence_verdicts.py --check` | consistent with committed measurements |
+| Phase 36 re-evaluation | `python3 ml/research/phase36_model_reevaluation.py --check` | matches the committed file |
+| Catalogue | `python3 ml/research/build_catalog.py --check` | up to date (36 datasets) |
+| Gap matrix | `python3 ml/research/build_gap_matrix.py --check` | up to date (14 gaps) |
+| Feature readiness | `python3 ml/research/build_feature_readiness.py --check` | up to date (12 features) |
+| Feature coverage | `python3 ml/research/build_feature_coverage.py --check` | up to date (12 features) |
+| **Model cards** | `python3 ml/research/build_model_cards.py --check` | up to date (7 cards, 7 fully complete) |
+| Screenshot dedupe | `python3 ml/research/dedupe_screenshots.py --check` | 7 byte-identical copies, below the collapse threshold |
+| Python dependency audit | `python3 -m pip_audit -r backend/requirements.txt -r backend/requirements-dev.txt` | no known vulnerabilities |
+| Node dependency audit | `npm audit --omit=dev --audit-level=high` | 0 vulnerabilities |
+| Python security (Bandit) | `python3 -m bandit -q -r backend/app` | exit 0; only documented `# nosec` annotations reported, no failed test |
+| Accessibility | inside the Playwright run (`accessibility.spec.js`, `accessibility35.spec.js`) | 27 passed across three viewports |
+
+Two gates were discovered by reading `.github/workflows/ci.yml` rather than from the brief: Bandit,
+and `pip_audit` over **both** requirement files rather than only the runtime one. Both were run.
+
+### 16.1 Every skip, explained
+
+* **SQLite run — 23 skips.** All are PostgreSQL-only tests in `test_postgresql_persistence.py`,
+  `test_postgres_integration.py`, `test_multi_worker_readiness.py` and
+  `test_phase22_backup_automation.py`, each skipping with the message that
+  `SPACEAGRISIM_TEST_POSTGRES_URL` is unset. They are not left unexplained: the same suite was run
+  against a real PostgreSQL 17.11 cluster on port 55437 and returned **0 skips**.
+* **PostgreSQL run — 0 skips.** The local cluster was initialised with `scram-sha-256` for host
+  connections specifically so that
+  `test_connection_failure_is_reported_without_leaking_credentials` is a real test: an invalid
+  password was confirmed to be rejected by the server
+  (`FATAL: password authentication failed for user "postgres"`) before the suite ran. Under the
+  earlier `trust` configuration that test passed vacuously, which would have been a gate proving
+  nothing.
+* **Model-card tests — 0 skips.** The three that would have skipped on models whose training file is
+  not committed were rewritten to verify the appropriate evidence path instead, so the suite
+  contains no conditional passes.
+
+No test was weakened, deleted, skipped or relaxed to reach these numbers. The one change to an
+existing test file was `test_phase23_reference_et0.py`'s catalogue count, 34 → 36 → unchanged in
+this pass; it was updated in Part I for the two Phase 37 datasets and is asserted exactly.
+
+## 17. Files and commits added by this pass
+
+| Commit | What it does |
+|---|---|
+| `0388ad2` | starting point — the Phase 37 completion report correction, already on `origin/main` |
+| `db3c976` | completes the seven model cards, adds the 100 card tests, extends the model audit |
+| *(this report)* | records this pass; documentation only |
+
+Files created or changed by `db3c976`:
+
+```
+backend/tests/test_phase37_model_cards.py            new, 100 tests
+docs/MODEL_CARDS.md                                  new, generated
+ml/artifacts/cards/lettuce-earth-growth-v1.json      new
+ml/artifacts/cards/lettuce-earth-growth-v2.json      new
+ml/artifacts/cards/lettuce-earth-growth-v3.json      new
+ml/artifacts/cards/mizuna-microbial-relative-load-v2.json   new
+ml/artifacts/cards/radiation-exposure-osd46-v1.json  new
+ml/artifacts/cards/radiation-quality-osd46-v1.json   new
+ml/artifacts/cards/tomato-flight-response-v1.json    new
+ml/evaluation/phase37_model_evidence.json            extended with completion-card status
+ml/research/audit_models_phase37.py                  extended to audit the completion cards
+ml/research/build_model_cards.py                     new, 1000 lines
+```
+
+No file outside `docs/` and the model-metadata paths was modified. No model artifact was modified —
+that is the point of the design, and it is asserted.
+
+## 18. Remaining limitations of this pass
+
+1. **The card layer is documentation, not capability.** It makes every served model reproducible and
+   auditable; it does not make any of them better. Six of seven remain not decision-grade, exactly
+   as before.
+2. **Two digests are verified indirectly.** The OSD-46 matrix digest is read from a committed
+   manifest rather than recomputed, because re-downloading 24 MB is not something a routine gate
+   should do; the tomato parquet digest is recomputed only by the explicit
+   `--verify-training-data` mode. Both are stated in the card as such, and both were verified once,
+   in this session, by running that mode and by matching the download against its pin.
+3. **The parquet digest is version-bound.** Byte identity was demonstrated twice under the pinned
+   pyarrow 26.0.1; a different pyarrow may produce different bytes for the same data. The
+   version-independent content digest is recorded alongside it for that reason.
+4. **`f42ecfb` in the brief is not the tip.** The remote tip at the start of this pass was
+   `0388ad2`. Both were checked with `git ls-remote`; the brief's value was one commit stale, and the
+   report uses the verified one.
+
+## 19. Deployment boundary (this pass)
+
+**Render was not touched.** No deploy, no deploy hook, no trigger, no service setting, no
+environment variable, no secret, no plan, no worker, no region. The Render API token was never used.
+
+**Production PostgreSQL was not touched.** No migration, reset, seed, delete or write. Every
+database operation in this pass ran against throwaway local instances: `sqlite:///tmp/…` and a
+PostgreSQL 17.11 cluster under `/var/tmp/pgdata37` on port 55437, with a password that exists only
+in this session (`testonly`).
+
+**The new code is not live.** `spaceagrisim-web.onrender.com` and `spaceagrisim-api.onrender.com`
+continue to serve whatever they served before this pass. Nothing here should be read as a statement
+about what those services currently run.
