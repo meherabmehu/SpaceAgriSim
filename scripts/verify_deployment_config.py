@@ -17,7 +17,9 @@ What it actually does (nothing is asserted from documentation):
 
 Exit code is non-zero on any failure, so this is usable in CI.
 
-Requires an isolated PostgreSQL instance. Example:
+Requires an isolated PostgreSQL instance and an explicit auth secret: the settings object refuses
+to construct on Vercel without one, which is one of the invariants checked here. Example:
+    SPACEAGRISIM_AUTH_SECRET=$(python -c "import secrets;print(secrets.token_urlsafe(48))") \\
     SPACEAGRISIM_TEST_POSTGRES_URL=postgresql+psycopg://user:pw@127.0.0.1:55432/db \\
         python scripts/verify_deployment_config.py
 """
@@ -180,8 +182,13 @@ def verify_settings_invariants() -> dict:
     except Exception as exc:  # noqa: BLE001
         check("plaintext non-local CORS origin is rejected", True, type(exc).__name__)
 
-    check("auth secret meets the 32-character floor", len(base.auth_secret) >= 32,
-          f"length={len(base.auth_secret)}")
+    # `auth_secret` is the configured value, not the effective one: when it is unset the application
+    # generates a process-local ephemeral secret, so the attribute is legitimately `None`. Reading a
+    # length off it directly raised TypeError and killed the script before it could report the very
+    # condition it exists to catch - a deployment without a configured secret.
+    secret = base.auth_secret or ""
+    check("auth secret meets the 32-character floor", len(secret) >= 32,
+          "unset (an ephemeral secret is generated at runtime)" if not secret else f"length={len(secret)}")
     check("auth tokens expire within a day",
           5 <= base.auth_token_minutes <= 1440, str(base.auth_token_minutes))
     check("auth rate limiting is enabled",
@@ -207,7 +214,7 @@ def verify_settings_invariants() -> dict:
     importlib.reload(settings_module)
     results.update({
         "corsOrigins": base.cors_origins,
-        "authSecretLength": len(base.auth_secret),
+        "authSecretLength": len(secret),
         "tokenMinutes": base.auth_token_minutes,
         "rateLimitPerMinute": base.auth_rate_limit_per_minute,
         "historyWritesOnVercel": vercel.history_writes_enabled,
@@ -228,6 +235,14 @@ def verify_orm_migration_parity() -> dict:
 
 
 def main() -> int:
+    # Stated up front rather than discovered mid-run: `fresh(VERCEL="1")` below constructs the
+    # settings object under a Vercel environment, where a missing secret is a validation error by
+    # design. Without this guard that intended refusal surfaced as a pydantic traceback from the
+    # middle of the SECURITY checks, which reads like a broken script instead of a precondition.
+    if not os.getenv("SPACEAGRISIM_AUTH_SECRET"):
+        print("SPACEAGRISIM_AUTH_SECRET must be set; run this with the deployment's own secret.")
+        return 2
+
     dsn = os.getenv("SPACEAGRISIM_TEST_POSTGRES_URL")
     payload = {
         "generatedAt": datetime.now(timezone.utc).isoformat(),
