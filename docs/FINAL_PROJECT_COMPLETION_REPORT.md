@@ -888,7 +888,8 @@ The failure message now distinguishes the two cases, because they need opposite 
 shallow checkout says so and names `fetch-depth: 0`; a commit that is present but lacks the path
 says the reference is wrong. Verified in a clean depth-1 clone.
 
-**Verification is the CI run itself, not a local claim.** Run `43246367901` on commit `52d9374`:
+**Verification is the CI run itself, not a local claim.** Run `43266438602` on the final commit of this
+branch is the one that matters; run `43246367901` on commit `52d9374` was the first green one:
 
 | Job | Result |
 |---|---|
@@ -962,7 +963,7 @@ document. Every result below was observed; none is carried over from an earlier 
 | Frontend typecheck | `npm run typecheck` | pass |
 | Frontend unit | `npm run test:unit` | **20 passed** |
 | Frontend build + budget | `npm run build:check` | pass — initial request 240 kB, within budget |
-| Playwright (3 viewports) | `CI=1 npx playwright test` | **171 passed** |
+| Playwright (3 viewports) | `CI=1 npx playwright test --project=desktop`, then `--project=tablet`, then `--project=mobile` | **57 + 57 + 57 = 171 passed**, 0 failed. Run as one process on this 1.9 GB host it reports 169–170 passed and 1–2 screenshot-allocation errors; §23.2 records the measurement behind that, and the same command passes on CI (run `43266438602`, browser job) |
 | Visual regression | `python3 scripts/visual_regression.py` | **18 / 18 PASS**, 0 FAIL |
 | Model audit | `python3 scripts/audit_models.py` | **202 checks, 0 failed** |
 | Registry checksums | `python3 scripts/verify_model_registry.py --check` | 62/62, no write |
@@ -979,8 +980,7 @@ document. Every result below was observed; none is carried over from an earlier 
 | Python dependency audit | `python3 -m pip_audit -r backend/requirements.txt -r backend/requirements-dev.txt` | no known vulnerabilities |
 | Static analysis | `python3 -m bandit -q -r backend/app` | exit 0 (no findings) |
 | Node dependency audit | `npm audit --audit-level=high` | 0 vulnerabilities |
-| Playwright, per project | `CI=1 npx playwright test --project=desktop|tablet|mobile` | **57 + 57 + 57 = 171 passed**, 0 failed |
-| **Continuous integration (GitHub Actions)** | workflow run `43246367901` on commit `52d9374`, queried through the GitHub API | **success — all five jobs green** (`backend`, `postgres`, `science`, `frontend`, `browser`) |
+| **Continuous integration (GitHub Actions)** | workflow run `43266438602` on commit `54398c3`, queried through the GitHub API | **success — all five jobs green** (`backend`, `postgres`, `science`, `frontend`, `browser`) |
 
 The science job was also checked for the property that matters as much as passing: after running
 every one of those scripts, `git status --porcelain` was empty. The gates verify the committed
@@ -1043,7 +1043,7 @@ whole suite.
 | Same command, same commit, `MemAvailable` ~0.67 GB | 55 passed, **2 failed**, both capture errors |
 | One test alone, mobile | **1 passed in 17.0 s** |
 | Each project in its own process, 57 tests each | **57 + 57 + 57 = 171 passed** |
-| `CI=1 npx playwright test` on GitHub's runner (≈7 GB) | **success**, run `43246367901`, browser job |
+| `CI=1 npx playwright test` on GitHub's runner (≈7 GB) | **success**, runs `43246367901` and `43266438602`, browser job |
 
 With no swap at all, a 0 MB `MemAvailable` sample means an allocation had nothing to fall back on,
 which is exactly the failure the screenshot call reports. Changing only available memory — the same
