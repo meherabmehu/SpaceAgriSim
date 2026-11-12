@@ -23,8 +23,21 @@ tree hashed identically to `f6f6da1` afterwards.
 
 ## 2. Final commit
 
-Recorded in §17 and §18, after the merge and the push, from `git rev-parse HEAD` and
-`git ls-remote origin refs/heads/main`.
+**`ffa45c9ff29f7be39d0dfba7b88986644c163ec4`** on `main`, reached by a fast-forward merge of
+`final/scientific-data-completion` and confirmed on the remote with
+`git ls-remote origin refs/heads/main`, which returned the same SHA.
+
+Seven commits, each one thing:
+
+| Commit | Subject |
+|---|---|
+| `05996bb` | acquisition: reproducibly fetch five independent measurement datasets |
+| `2c340d6` | data: the acquired series, their manifests and the derived measurement records |
+| `36d15b8` | research: adjudicate all fourteen gaps and re-evaluate all seven models |
+| `c5717f5` | tests: hold the new evidence to the same standard as the old |
+| `66869f6` | docs: the final scientific data acquisition report |
+| `dedcd61` | api, ui: serve what the acquisition proved, with the label on every number |
+| `ffa45c9` | review: drop two unused imports and correct the visual-gate count in the report |
 
 ---
 
@@ -394,11 +407,23 @@ narrower.
 
 ## 17. Merge and push
 
-Recorded after the fact in §20.
+| Step | Result |
+|---|---|
+| `git fetch origin main` | `origin/main` was still `f6f6da1`; the branch was 7 commits ahead and 0 behind |
+| `git merge --ff-only final/scientific-data-completion` | **fast-forward**, no conflicts, no merge commit, no rewrite |
+| `git push origin main` | `f6f6da1..ffa45c9  main -> main` |
+| `git ls-remote origin refs/heads/main` | `ffa45c9ff29f7be39d0dfba7b88986644c163ec4` — the pushed SHA, read back from the remote |
+
+No force-push, no history rewrite, no branch protection bypass. The token was supplied inline for
+the push and the remote URL was restored immediately afterwards; nothing was written to
+`.git/config` or to disk.
 
 ## 18. Working tree
 
-Recorded after the fact in §20.
+One untracked file remains: `docs/FINAL_LIVE_PRODUCTION_VERIFICATION.md`, carried over from the
+preceding live-verification task. It is deliberately **not** committed here, because it belongs to
+that task rather than this one, and the instruction for this phase was to make no unrelated
+changes. Everything produced by this phase is committed and pushed.
 
 ## 19. Render and production database
 
