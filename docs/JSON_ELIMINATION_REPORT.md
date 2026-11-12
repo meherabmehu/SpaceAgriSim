@@ -15,8 +15,8 @@ follows from here on.
 | Kept, because npm requires that exact format | 2 |
 | **Total** | **190** |
 
-Of the 186 converted or removed records, 127 hold byte-for-byte the same values as the
-JSON they came from. The other 57 changed for one of three reasons, and each one is
+Of the 188 converted or removed records, 127 hold exactly the same values as the
+JSON they came from. The other 61 changed for one of three reasons, and each one is
 visible in the diff:
 
 1. **A path field named the old encoding.** A record that said `ml/evaluation/phase34_cross_campaign_coverage.json` names the same record without a suffix now, because the file
