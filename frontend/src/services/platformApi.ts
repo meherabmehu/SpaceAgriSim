@@ -16,6 +16,19 @@ export interface MissionParameters {
   waterRecyclingEfficiency: number;
 }
 const base = import.meta.env.VITE_API_BASE_URL || "/api";
+
+/**
+ * Was this rejection a cancellation rather than a failure?
+ *
+ * `fetch` rejects with a `DOMException` named `AbortError` when its signal fires, and a body read
+ * throws the same name when the stream is cancelled mid-read. Callers must be able to tell the two
+ * apart from a real failure: a cancelled request is not an error to show the user, and a component
+ * that reports one as an error has invented a fault that did not happen.
+ */
+export function isAbortError(error: unknown): boolean {
+  return (error as { name?: string } | null | undefined)?.name === "AbortError";
+}
+
 export async function api<T = Record<string, unknown>>(
   path: string,
   body?: unknown,
@@ -35,13 +48,22 @@ export async function api<T = Record<string, unknown>>(
     },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
-  const payload = await response.json().catch(() => null);
-  if (!response.ok)
-    throw new Error(
-      typeof payload?.detail === "string"
-        ? payload.detail
-        : payload?.message || `API request failed (${response.status})`,
-    );
+  // A body that is not JSON - an empty 204, a proxy's HTML error page - is not an error by itself:
+  // the status line decides that, and `.catch` exists so a non-JSON failure body still surfaces as
+  // a status message. A *cancelled* read is not that case. Swallowing it here turned `abort()` into
+  // a resolved `null`, so a request the caller had deliberately cancelled came back as
+  // "loaded successfully, no data" and overwrote whatever the caller was showing.
+  const payload: { detail?: unknown; message?: unknown } | null = await response
+    .json()
+    .catch((error) => {
+      if (isAbortError(error)) throw error;
+      return null;
+    });
+  if (!response.ok) {
+    const detail = typeof payload?.detail === "string" ? payload.detail : "";
+    const message = typeof payload?.message === "string" ? payload.message : "";
+    throw new Error(detail || message || `API request failed (${response.status})`);
+  }
   return payload as T;
 }
 export async function downloadReport(

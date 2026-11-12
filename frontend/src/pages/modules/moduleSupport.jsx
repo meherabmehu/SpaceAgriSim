@@ -1,44 +1,93 @@
-import { useEffect, useState } from "react";
-import { api } from "../../services/platformApi.ts";
+import { useEffect, useRef, useState } from "react";
+import { api, isAbortError } from "../../services/platformApi.ts";
 
-// The resolved state a resource reports when it was never asked for. A module-level constant keeps
-// its identity stable, so a skipped resource cannot cause a render loop in a consumer effect.
-const skipped = { data: null, error: "", loading: false };
+// Stable identities, so returning one of them cannot cause a render loop in a consumer effect.
+const PENDING = { data: null, error: "", loading: true };
+const SKIPPED = { data: null, error: "", loading: false };
 
+// A fast slider hands the hook a new parameter set on every keystroke; without this the panel
+// would issue one request per intermediate value. The debounce collapses them into one.
+const DEBOUNCE_MS = 150;
+
+/**
+ * One API resource, as a React state machine that cannot show the wrong answer.
+ *
+ * Three properties are load-bearing, and each of them was broken at some point:
+ *
+ *  1. **A resource that was never asked for makes no request.** `path` of `null` means the caller
+ *     is gating an authenticated resource on a session that does not exist; it used to be passed
+ *     to `api()`, whose URL template produced `GET /apinull`.
+ *
+ *  2. **A superseded response can never be committed.** Every request carries an identity, and
+ *     only the newest identity may write state. `AbortController` alone is not enough: it cancels
+ *     a request that is still in flight, but it cannot un-resolve one whose body has already
+ *     arrived - the bytes are in memory, `fetch` resolved before the abort, and the `.then` that
+ *     follows will run. That window is small in wall-clock terms and trivially reachable in
+ *     practice (a 2 kB JSON reply is buffered in one packet), and the failure it produces is a
+ *     panel showing the previous parameters' numbers underneath the new controls.
+ *
+ *  3. **A cancellation is not a failure.** Aborting a request is something *this hook* did on
+ *     purpose. It must never reach the user as an error banner, and it must never be mistaken for
+ *     a completed load with no data.
+ *
+ * The returned value is also derived from the request key rather than only from committed state,
+ * so the very render in which the parameters change already reports "loading" instead of handing
+ * the caller the previous parameters' data under the new controls.
+ */
 // eslint-disable-next-line react-refresh/only-export-components
 export function useResource(path, body) {
-  const key = JSON.stringify(body);
-  // A `null` path means "there is nothing to ask for yet" - the caller gates an authenticated
-  // resource on a session that does not exist. It used to be handed straight to `api()`, whose
-  // `${base}${path}` template produced the request `GET /apinull` (404 in every console, signed
-  // out, on the account page). A skipped resource is resolved with no data and no error, so the
-  // caller renders its own signed-out branch instead of a red banner.
+  const bodyKey = JSON.stringify(body);
   const enabled = typeof path === "string" && path.length > 0;
-  const [state, setState] = useState({ data: null, error: "", loading: true });
+  // Identity of the requested resource. `\u0000` cannot appear in either half, so two different
+  // (path, body) pairs cannot collide into one key.
+  const requestKey = enabled ? `${path}\u0000${bodyKey ?? ""}` : "";
+  // Identity of the newest request this hook has started. Only a request holding the newest
+  // identity may commit.
+  const newest = useRef(0);
+  // The identity travels *beside* the state, not inside it: consumers must keep receiving exactly
+  // `{ data, error, loading }`, and the state object keeps its identity until it is replaced.
+  const [committed, setCommitted] = useState({ requestKey: "", state: PENDING });
+
   useEffect(() => {
     if (!enabled) return undefined;
     const controller = new AbortController();
+    const requestId = newest.current + 1;
+    newest.current = requestId;
+    // `cancelled` covers unmount, where no newer request exists to advance the identity.
+    let cancelled = false;
+    const isCurrent = () => !cancelled && newest.current === requestId;
+
     const timer = setTimeout(() => {
-      setState({ data: null, error: "", loading: true });
-      api(
-        path,
-        key === undefined ? undefined : JSON.parse(key),
-        controller.signal,
-      )
-        .then((data) => setState({ data, error: "", loading: false }))
-        .catch((err) => {
-          if (err.name !== "AbortError")
-            setState({ data: null, error: err.message, loading: false });
+      api(path, bodyKey === undefined ? undefined : JSON.parse(bodyKey), controller.signal)
+        .then((data) => {
+          if (isCurrent())
+            setCommitted({ requestKey, state: { data, error: "", loading: false } });
+        })
+        .catch((error) => {
+          if (!isCurrent() || isAbortError(error)) return;
+          setCommitted({
+            requestKey,
+            state: {
+              data: null,
+              error: error instanceof Error ? error.message : String(error),
+              loading: false,
+            },
+          });
         });
-    }, 150);
+    }, DEBOUNCE_MS);
+
     return () => {
+      cancelled = true;
       clearTimeout(timer);
       controller.abort();
     };
-  }, [path, key, enabled]);
-  // A skipped resource reports "resolved, nothing to show" without touching state, so the effect
-  // never sets state synchronously (that is a cascading render, and an ESLint error here).
-  return enabled ? state : skipped;
+  }, [path, bodyKey, enabled, requestKey]);
+
+  if (!enabled) return SKIPPED;
+  // Committed state belongs to the request key it was fetched for. If the key has moved on - or
+  // nothing has been committed for it yet - the honest answer is "still loading", never the
+  // previous resource's data.
+  return committed.requestKey === requestKey ? committed.state : PENDING;
 }
 /**
  * The visible state of one request.
