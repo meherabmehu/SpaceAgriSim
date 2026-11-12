@@ -2,10 +2,30 @@
 
 SpaceAgriSim — the final scientific and engineering completion pass.
 
-This document has two parts. **Part I** (sections 1–12) is the Phase 37 scientific completion, whose
-results stand unchanged. **Part II** (sections 13–18) is the final integration and model-card pass
-that followed it, and it supersedes Part I's *status* claims — commit counts, gate counts and the
-state of the model cards — while leaving its *scientific* findings intact.
+This document has three parts. **Part I** (sections 1–12) is the Phase 37 scientific completion, whose
+findings stand unchanged. **Part II** (sections 13–19) is the final integration and model-card pass
+that followed it. **Part III** (sections 20–27) is the last pass: three red gates and the fix for each,
+the checkout depth that made CI fail, a browser test that was measuring request timing, and every gate
+replayed on the tree as delivered. **Part III supersedes Parts I and II for status claims** — commit
+counts, gate counts, the state of the model cards and the state of the gap matrix — and leaves their
+scientific findings intact.
+
+Where the deliverable asked for something, it is authoritative here:
+
+| Asked for | Authoritative section |
+|---|---|
+| Start and final SHA, clean tree, remote verification | §20 (state), §24 (commits), delivery message (tip) |
+| All fourteen gaps, before and after | **§27.1**, with the long form in §2 |
+| Searches run, candidates accepted and rejected | §3 (Part I), §21.3 |
+| New data: identifiers, licences, sizes, checksums | §4 |
+| Findings with n and uncertainty | §5 |
+| The seven model verdicts, old → new | **§27.2**, with the long form in §6 and §22 |
+| All eighteen visual comparisons | §7 (outcomes), §23 and §23.2 (gates, and the two flakes) |
+| Exact gate commands and results | **§23** |
+| Honest limitations | §25 |
+| What was integrated into the product | §10 |
+| Commit and push confirmation | §24, plus `git ls-remote` in the delivery message |
+| Render and production PostgreSQL untouched | §26 |
 
 Every number below was produced by the command printed beside it. Where a result could not be
 measured, this report says so instead of estimating it. Where a gap could not be closed because the
@@ -401,12 +421,12 @@ inferred.
 
 ### 8.1 Every skip, explained
 
-**SQLite run — 23 skips, all one cause.** They are the PostgreSQL-only tests
-(`test_postgresql_persistence.py`, `test_postgres_integration.py`,
-`test_multi_worker_readiness.py` ×3, `test_phase22_backup_automation.py`) which require
-`SPACEAGRISIM_TEST_POSTGRES_URL`; they skip with that exact message rather than failing quietly.
-They are not left unexplained: the same suite was then run **against a real PostgreSQL 17.11
-cluster and returned 0 skips**, listed in the row above.
+**SQLite run — 23 skips, all one cause, in three files.** They are the PostgreSQL-only tests
+(`test_postgresql_persistence.py` ×19, `test_multi_worker_readiness.py` ×3,
+`test_postgres_integration.py` ×1), which require `SPACEAGRISIM_TEST_POSTGRES_URL`. They skip by
+name, with a message that says so, rather than failing quietly. They are not left unexplained: the
+same suite was then run **against a real PostgreSQL 17.11 cluster and returned 0 skips**, listed in
+the row above.
 
 **PostgreSQL run — 0 skips.** The one failure that appeared on the first attempt was in
 `test_connection_failure_is_reported_without_leaking_credentials`, and the cause was the test
@@ -657,9 +677,14 @@ into something softer.
 One hundred tests in `backend/tests/test_phase37_model_cards.py` enforce this section, with **zero
 skips**.
 
-## 16. Quality gates, run on the final tree
+## 16. Quality gates, run on the tree at the end of this pass
 
-Every command below was executed on the tree this report documents, after the model-card completion,
+> **Superseded.** This was the final gate table when it was written; Part III then changed code and
+> re-ran every gate again. **§23 is the authoritative table.** The numbers below are kept because they
+> are what that commit actually produced, and deleting them would erase the record of a state the
+> repository passed through.
+
+Every command below was executed on the tree this section documents, after the model-card completion,
 in this session. Nothing is carried over from Part I or from any earlier run.
 
 | Gate | Command | Result |
@@ -992,10 +1017,19 @@ repository already guards with a test asserting the `--check` form leaves the fi
 
 ### 23.1 Every skip, explained
 
-**23 skips in the SQLite run, one cause.** They are the PostgreSQL-only tests
-(`test_postgresql_persistence.py` ×19, `test_postgres_integration.py` ×1,
-`test_multi_worker_readiness.py` ×3), each skipped with the message naming
-`SPACEAGRISIM_TEST_POSTGRES_URL`. They are not left hanging: the same suite ran against a real
+**23 skips in the SQLite run, one cause, three distinct message texts.** They are the
+PostgreSQL-only tests — `test_postgresql_persistence.py` ×19, `test_multi_worker_readiness.py` ×3,
+`test_postgres_integration.py` ×1 — and `pytest -rs` was run to read the reason from each one rather
+than trusting the count. Every message names the variable, in the file's own wording:
+
+| File | Skips | Message (verbatim, from `-rs`) |
+|---|---|---|
+| `test_postgresql_persistence.py` | 19 | `Set SPACEAGRISIM_TEST_POSTGRES_URL=postgresql+psycopg://user:pass@host:5432/db to run the PostgreSQL persistence tests against an isolated schema` |
+| `test_multi_worker_readiness.py` | 3 | `SPACEAGRISIM_TEST_POSTGRES_URL is not set; PostgreSQL-only assertion` |
+| `test_postgres_integration.py` | 1 | `Set SPACEAGRISIM_TEST_POSTGRES_URL to run against an isolated PostgreSQL test database` |
+
+One cause, but not one string — an earlier revision of §8.1 said "that exact message", which was
+wrong about its own evidence. They are not left hanging: the same suite ran against a real
 PostgreSQL 17.11 cluster with **0 skips**, and the count reconciles exactly (1434 + 23 = 1457).
 
 **0 skips in the PostgreSQL run.** The cluster was initialised with `--encoding=UTF8 --locale=C.UTF-8`
@@ -1067,7 +1101,8 @@ is starved, and they are reported that way.
 | `422a8dd` | Part III of this report |
 | `52d9374` | Check out full history where the gates read it; make the shallow-clone failure diagnose itself |
 | `0fd41fb` | Record the browser suite honestly, including where it does not reproduce |
-| this commit | Scope the study-catalogue assertion to its own table; record the memory measurement behind the screenshot flake |
+| `54398c3` | Scope the study-catalogue assertion to its own table |
+| `f94f3a9`, `5553b67`, `235e5aa`, and the commit carrying this revision | Documentation only: point each gate row at a run that covers the tree, stop pinning the report to a commit it outruns, add §27 with the gap and verdict tables generated from the JSON |
 
 Files changed: `docs/screenshots/MANIFEST.json`, seven deletions under `docs/screenshots/`
 (6 superfluous archive copies + 1 resurrected leftover), `backend/tests/test_phase37_gates.py`
@@ -1110,3 +1145,56 @@ in this session.
 
 **The new code is not live.** `spaceagrisim-web.onrender.com` and `spaceagrisim-api.onrender.com`
 continue to serve whatever they served before this pass.
+
+## 27. The scientific state at the end of the pass
+
+Parts II and III acquired no data, closed no gap and promoted no model, so the scientific status did
+not move after Part I. It is restated here anyway, because the required deliverable is a report about
+the *final* tree, and a reader should not have to infer the end state from a section that also
+describes the start. Every token below was read from `data/research/dataset_gap_matrix.json` and
+`ml/evaluation/phase37_model_evidence.json` at the final tree, not retyped from earlier prose. Where a
+cell ends in `…` it is **truncated, not summarised** — the full sentence is in §2 and in the JSON.
+
+### 27.1 The fourteen gaps
+
+**5 CLOSED, 5 PARTIALLY CLOSED, 4 OPEN.** Unchanged from §2; nothing here was redefined to look closed.
+
+| Gap | Status | What the status rests on |
+|---|---|---|
+| `measured-eta` | PARTIALLY CLOSED | Two independent measured water-use records were acquired, checksum-verified and reduced: six weighable lysimeters at Zurich-Reckenholz measured daily actual ET for 1,096 days (6,576 lysimeter-days,… |
+| `independent-et0` | PARTIALLY CLOSED | The half that was missing - a measured latent-heat series - now exists. |
+| `fractional-gravity` | CLOSED | Unchanged. |
+| `led-spectrum-response` | CLOSED | A spectrum-resolved trial at constant light quantity was acquired, checksum-verified and analysed: hydroponic Red Batavia lettuce under four spectra all held at 200 umol m-2 s-1 and a 16/8 photoperiod, with… |
+| `substrate-water` | OPEN | Searched Zenodo (substrate moisture / growing media / soilless irrigation / drainage fraction), NASA OSDR (substrate moisture, VEG-04), Dryad, Figshare and PANGAEA. |
+| `sub-daily-weather` | CLOSED | POWER hourly acquired for all six sites: 52,560 hourly records, seven parameters, zero missing values. |
+| `cultivar-metadata` | PARTIALLY CLOSED | The first measured cultivar contrast in this repository: Grand Rapid and Lollo Rossa under identical nitrogen and irrigation treatments, n = 15 each, reached 41.9 g and 23.1 g harvest fresh weight - ratio… |
+| `imagery` | OPEN | Re-searched Zenodo and Figshare for annotated lettuce canopy imagery. |
+| `yield-labels` | CLOSED | 45 measured harvest fresh weights for lettuce were acquired in this phase. |
+| `mission-energy` | OPEN | Searched Zenodo for CEA and vertical-farm energy datasets and inspected the strongest candidate, the EDEN ISS 2020 Telemetry Dataset (10.5281/zenodo.11485183): 97 sensors, a full year at 5-minute resolution. |
+| `nutrient-balance` | PARTIALLY CLOSED | A commercial-scale dosing trial was acquired and analysed: eight ions measured repeatedly across three independent nutrient systems under three management regimes over a 28-day Red Batavia cycle, with… |
+| `long-run-climate` | CLOSED | NEX-GDDP-CMIP6 (ACCESS-CM2, r1i1p1f1, SSP2-4.5) acquired at all six sites: 50 daily objects streamed, SHA-256 checksummed and reduced to point series, with units asserted per variable - temperature is… |
+| `crop-water-response-ky` | PARTIALLY CLOSED | A real two-level deficit experiment for lettuce now exists in the record: 50 % and 75 % replacement of the water lost between irrigations, with destructive harvest mass per plant. |
+| `prediction-intervals-independent-coverage` | OPEN | Both datasets acquired this phase were tested against the lettuce model domains and both are outside them: the green-light trial measures mass only at a single destructive harvest 35 days after sowing… |
+
+### 27.2 The seven served models
+
+**One passes, three fail their independent check, three have no independent check.** Zero promoted,
+zero retrained, zero thresholds moved, zero relabelled — the "before" column is the Phase 36 verdict
+and it equals the "after" column in all seven cases.
+
+| Model | Before | After | Why |
+|---|---|---|---|
+| `lettuce-earth-growth-v1` | fails independent check | **fails independent check** | Neither dataset supplies every required feature inside the declared domain, so no prediction can be scored without violating the model's own contract. |
+| `lettuce-earth-growth-v2` | fails independent check | **fails independent check** | Neither dataset supplies every required feature inside the declared domain, so no prediction can be scored without violating the model's own contract. |
+| `lettuce-earth-growth-v3` | fails independent check | **fails independent check** | Neither dataset supplies every required feature inside the declared domain, so no prediction can be scored without violating the model's own contract. |
+| `mizuna-microbial-relative-load-v2` | passes independent check | **passes independent check** | It predicts from flight microclimate and microbiome covariates recorded in VEG-04. |
+| `radiation-exposure-osd46-v1` | no independent check | **no independent check** | Transcriptomic model. |
+| `radiation-quality-osd46-v1` | no independent check | **no independent check** | Transcriptomic model. |
+| `tomato-flight-response-v1` | no independent check | **no independent check** | Transcriptomic model. |
+
+The three `NO-INDEPENDENT-CHECK` models are transcriptomic: they consume a normalised expression
+vector, and neither dataset acquired in this pass deposits expression. They are not excused by that —
+they are simply not scoreable against anything in the record, and the table says so rather than
+awarding them a verdict they have not earned. The three `FAILS-INDEPENDENT-CHECK` lettuce models fail
+because neither new dataset supplies every required feature inside each model's declared domain, so a
+prediction cannot be scored without breaking the model's own contract first.
