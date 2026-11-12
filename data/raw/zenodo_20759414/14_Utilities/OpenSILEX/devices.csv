@@ -1,0 +1,17 @@
+name,brand,uri,rdf_type,constructor_model,serial_number,person_in_charge,start_up,removal,description,Geoloc,vocabulary:measures_1,vocabulary:measures_2
+oak-1,Luxonis,dev:id/device/oak-1,vocabulary:RGBCamera,,,,,,auto-focus,,,
+fx17,SPECIM,dev:id/device/fx17,"vocabulary:HyperspectralCamera",FX17e,4210420,,,,"640 samples",,,
+test,,dev:id/device/test,"vocabulary:TemperatureSensor",,,,,,,25,,
+metbots,Hamamatsu,dev:id/device/metbots,vocabulary:Spectrometer,C12880MA,,,,,"288 pixels",,,
+cropsign,"ams-OSRAM AG",dev:id/device/cropsign,vocabulary:Spectrometer,AS7341,,,,,"11 pixels",,,
+flexx,"pmd technologies",dev:id/device/flexx,vocabulary:3DCamera,"flexx 2",8630-942C-1AC7-2068,,,,,,,
+temp,"TE Connectivity",dev:id/device/temp,"vocabulary:TemperatureSensor",HTU21D,,,,,,,"dev:id/variable/environment_air_temperature_min_directmeasurement_degreecelsius","dev:id/variable/environment_air_temperature_max_directmeasurement_degreecelsius"
+livox,Livox,dev:id/device/livox,vocabulary:LiDAR,MID-70,,,,,,,,
+c11697mb,Hamamatsu,dev:id/device/c11697mb,vocabulary:Spectrometer,C11697MB,C19EF102,"https://orcid.org/0000-0003-4507-2481",,,"2048 pixels",,,
+c11697mb,Hamamatsu,dev:id/device/c11697mb,vocabulary:Spectrometer,C11697MB,C19EF102,"https://orcid.org/0000-0003-4507-2481",,,"2048 pixels",,,
+oak-d,Luxonis,dev:id/device/oak-d,vocabulary:RGBCamera,"OAK-D S2",,,,,,,,
+hum,"TE Connectivity",dev:id/device/hum,"vocabulary:HumiditySensor",HTU21D,,,,,,,,
+spad,"Konica Minolta",dev:id/device/spad,"vocabulary:ChlorophyllMeter",SPAD-502,,,,,,,"dev:id/variable/leaf_chlorophyllcontent_directmeasurement_dimensionless",
+par,"Apogee Instruments",dev:id/device/par,vocabulary:QuantumSensor,SQ-520,4951,,,,,,,
+os30p,Opti-Sciences,dev:id/device/os30p,vocabulary:fluorometer,"OS30p+",,,,,,,"dev:id/variable/leaf_quantum_yield_fvfm_dark_adapted_directmeasurement_dimensionless",
+c15714,Hamamatsu,dev:id/device/c15714,vocabulary:Spectrometer,C15714,3F40003,,,,"400 pixels",,,

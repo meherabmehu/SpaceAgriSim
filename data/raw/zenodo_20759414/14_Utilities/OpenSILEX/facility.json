@@ -1,0 +1,42 @@
+{
+    "uri": "dev:id/organization/facility.greentribe",
+    "publisher": null,
+    "publication_date": "2024-11-04T16:39:28.374934535Z",
+    "last_updated_date": "2024-11-30T13:33:04.164010446Z",
+    "rdf_type": "vocabulary:Greenhouse",
+    "rdf_type_name": "greenhouse",
+    "name": "GREENTRIBE",
+    "organizations": [
+      {
+        "uri": "dev:id/organization/tribe_lab",
+        "name": "TRIBE LAB",
+        "rdf_type": "vocabulary:ResearchUnit",
+        "rdf_type_name": "Research Unit",
+        "publication_date": "2024-11-09T16:36:58.439889585Z",
+        "last_updated_date": null
+      }
+    ],
+    "sites": [
+      {
+        "uri": "dev:id/organization/greentribe_site",
+        "name": "GREENTRIBE site",
+        "rdf_type": "http://www.w3.org/ns/org#Site",
+        "rdf_type_name": "Site",
+        "publication_date": "2024-11-09T16:42:57.74203803Z",
+        "last_updated_date": null
+      }
+    ],
+    "address": null,
+    "variableGroups": [
+      {
+        "uri": "dev:id/variablesGroup/environmental_variables",
+        "name": "Environmental Variables",
+        "rdf_type": "vocabulary:VariablesGroup",
+        "rdf_type_name": "Group of variables",
+        "publication_date": "2024-11-06T10:09:39.686903773Z",
+        "last_updated_date": null
+      }
+    ],
+    "geometry": null,
+    "relations": []
+  }

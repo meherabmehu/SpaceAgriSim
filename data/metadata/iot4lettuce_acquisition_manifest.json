@@ -1,0 +1,120 @@
+{
+  "dataset": {
+    "name": "IoT4Lettuce - multimodal high-throughput phenotyping of hydroponic lettuce",
+    "doi": "10.5281/zenodo.20759414",
+    "record": "20759414",
+    "title": "Multi-Sensor High-Throughput Phenotyping Dataset of Hydroponic Lettuce under Variable Fertigation Conditions",
+    "license": "cc-by-4.0",
+    "licenseUrl": null,
+    "publicationDate": "2026-06-19",
+    "creators": [
+      "Rodrigues, Leandro",
+      "Terra, Francisco",
+      "Rodrigues, Pedro",
+      "Moreira, Germano",
+      "Oliveira, Francisco",
+      "Moura, Pedro",
+      "Pinheiro, Isabel",
+      "Filipe, Santos",
+      "Cunha, M\u00e1rio"
+    ],
+    "archiveKey": "IoT4Lettuce.zip",
+    "archiveBytes": 39149276870,
+    "publishedMd5": "md5:2c7543bceec4a9c54838f6349c21bcdc",
+    "archiveMd5Verified": false,
+    "archiveMd5Note": "the published MD5 covers the whole 39 GB object; it is not verified because the object is not downloaded whole",
+    "acquisitionMethod": "HTTP range requests against the zip central directory; only the listed members are transferred",
+    "membersTotal": 20679,
+    "membersAcquired": 12,
+    "membersNotAcquired": 20667,
+    "bytesFetched": 3186249,
+    "rangeRequests": 40,
+    "collectedAt": "2026-11-12T06:43:47.974508+00:00"
+  },
+  "members": [
+    {
+      "member": "IoT4Lettuce/03_Climate/readme.md",
+      "status": "ok",
+      "path": "data/raw/zenodo_20759414/03_Climate/readme.md",
+      "bytes": 1080,
+      "sha256": "1514a9b0e2eadc393733a53609e9bfa5790edf58487653da6cab95743862dfe4"
+    },
+    {
+      "member": "IoT4Lettuce/03_Climate/inside.csv",
+      "status": "ok",
+      "path": "data/raw/zenodo_20759414/03_Climate/inside.csv",
+      "bytes": 57380,
+      "sha256": "1f301e922a68cf37c41ad7c65db92e6e1ac1bc1bae790c48f687c551b61dbcec"
+    },
+    {
+      "member": "IoT4Lettuce/03_Climate/outside.csv",
+      "status": "ok",
+      "path": "data/raw/zenodo_20759414/03_Climate/outside.csv",
+      "bytes": 30936,
+      "sha256": "c4e5b2d0e943e6ad01c3f02d819ff54bddb151561b1078c0b52b9b1baa87772e"
+    },
+    {
+      "member": "IoT4Lettuce/03_Climate/PAR.csv",
+      "status": "ok",
+      "path": "data/raw/zenodo_20759414/03_Climate/PAR.csv",
+      "bytes": 10579,
+      "sha256": "35c2cdb9cd81a15d5a2563fa179e47885548439e49afa5a5c03ab3af9e9d57b8"
+    },
+    {
+      "member": "IoT4Lettuce/13_Manual_measurements/full_db.csv",
+      "status": "ok",
+      "path": "data/raw/zenodo_20759414/13_Manual_measurements/full_db.csv",
+      "bytes": 12884,
+      "sha256": "f2fbbf1164a9495e6dade2fff9673070d83c0f943dd29536c76862e75701f310"
+    },
+    {
+      "member": "IoT4Lettuce/11_SPAD/full_db.csv",
+      "status": "ok",
+      "path": "data/raw/zenodo_20759414/11_SPAD/full_db.csv",
+      "bytes": 6513,
+      "sha256": "11b6662723723c329e6b05622afbda689e5a352d403614b9f61b0b14a7568468"
+    },
+    {
+      "member": "IoT4Lettuce/14_Utilities/OpenSILEX/data.csv",
+      "status": "ok",
+      "path": "data/raw/zenodo_20759414/14_Utilities/OpenSILEX/data.csv",
+      "bytes": 169158,
+      "sha256": "7f6490f77198f1bb35d4b557e542121c87d2384380943d66b8c0b851f6018b2b"
+    },
+    {
+      "member": "IoT4Lettuce/14_Utilities/OpenSILEX/scientific_objects.csv",
+      "status": "ok",
+      "path": "data/raw/zenodo_20759414/14_Utilities/OpenSILEX/scientific_objects.csv",
+      "bytes": 16063,
+      "sha256": "887fa03c2d4541c9fa835d33e9342d6e74c7821c93b248c65c5f208eca9ab10c"
+    },
+    {
+      "member": "IoT4Lettuce/14_Utilities/OpenSILEX/variables.csv",
+      "status": "ok",
+      "path": "data/raw/zenodo_20759414/14_Utilities/OpenSILEX/variables.csv",
+      "bytes": 6247,
+      "sha256": "79dfdd6ca092f2ed4ec2d605b3c3594e07a96d2bd8ddea0f6044a1fee0d93060"
+    },
+    {
+      "member": "IoT4Lettuce/14_Utilities/OpenSILEX/devices.csv",
+      "status": "ok",
+      "path": "data/raw/zenodo_20759414/14_Utilities/OpenSILEX/devices.csv",
+      "bytes": 1951,
+      "sha256": "f94b0562724c0748c9469d306676a74cbf51091a84d62c997555704faa30d57f"
+    },
+    {
+      "member": "IoT4Lettuce/14_Utilities/OpenSILEX/experiment.json",
+      "status": "ok",
+      "path": "data/raw/zenodo_20759414/14_Utilities/OpenSILEX/experiment.json",
+      "bytes": 2163,
+      "sha256": "a5e14303187cf1d52160cfa740ce9f1ef83b207d35cc002e2709cd0eb58dadd3"
+    },
+    {
+      "member": "IoT4Lettuce/14_Utilities/OpenSILEX/facility.json",
+      "status": "ok",
+      "path": "data/raw/zenodo_20759414/14_Utilities/OpenSILEX/facility.json",
+      "bytes": 1367,
+      "sha256": "765ac021695046735d83dc499718ada5d2bbc1886e84d2e15ddbcf12956b3a2a"
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "generatedAt": "2026-11-12T07:49:08.294413+00:00",
+  "unitConversions": {
+    "agroscope.eta": "none - already mm/day for a 1 m2 weighable lysimeter",
+    "agroscope.fdr": "none - already volumetric % at the stated depth",
+    "tereno.vapour_pressure_hpa_to_kpa": "hPa / 10 = kPa",
+    "tereno.wm2_to_mm_per_hour": "LE [W m-2] * 0.0036 / 2.45 = mm h-1 (latent heat of vaporisation 2.45 MJ kg-1)",
+    "tereno.available_energy": "A is Rn - G as measured by the station; used directly, not re-modelled"
+  },
+  "zurichEta": {
+    "rows": 6576,
+    "lysimeters": [
+      "L1",
+      "L11",
+      "L12",
+      "L5",
+      "L6",
+      "L7"
+    ],
+    "firstDate": "2013-08-01",
+    "lastDate": "2016-07-31",
+    "missingCells": null
+  },
+  "zurichFdr": {
+    "rows": 68550,
+    "depthsCm": [
+      10,
+      30,
+      60,
+      90
+    ],
+    "firstDate": "2013-01-01",
+    "lastDate": "2016-12-31",
+    "vwcRangePct": [
+      5.01,
+      49.79
+    ]
+  },
+  "tereno": {
+    "rows": 6608,
+    "files": [
+      {
+        "file": "FE_2013.xlsx",
+        "sheet": "FE13_crono",
+        "site": "Fendt",
+        "year": 2013,
+        "rows": 2192
+      },
+      {
+        "file": "FE_2014.xlsx",
+        "sheet": "EC_vs_LY",
+        "site": "Fendt",
+        "year": 2014,
+        "rows": 2536
+      },
+      {
+        "file": "GW_2014.xlsx",
+        "sheet": "GW14_crono",
+        "site": "Graswang",
+        "year": 2014,
+        "rows": 1880
+      }
+    ],
+    "excludedSheets": [
+      {
+        "file": "GW2013_.xlsx",
+        "sheet": "all Data",
+        "reason": "no wind speed column (Ta/ea/pa/ra/oA/oH/oLE only); the aerodynamic term of Penman-Monteith cannot be evaluated without u2"
+      },
+      {
+        "file": "FE_2013.xlsx",
+        "sheet": "dE&wLin",
+        "reason": "re-arranged copy of FE13_crono"
+      },
+      {
+        "file": "FE_2014.xlsx",
+        "sheet": "only flags 000 (2)",
+        "reason": "quality-flag filtered subset of EC_vs_LY; the unfiltered sheet is used instead"
+      },
+      {
+        "file": "FE_2014.xlsx",
+        "sheet": "FE 14 full",
+        "reason": "no DoY header block"
+      },
+      {
+        "file": "GW2013_SM.xlsx",
+        "sheet": "*",
+        "reason": "soil-moisture workbook, not a flux table"
+      }
+    ],
+    "sites": [
+      "Fendt",
+      "Graswang"
+    ],
+    "yearRange": [
+      2013,
+      2014
+    ],
+    "hoursMissingWind": 35,
+    "hoursWithNegativeLe": 24
+  }
+}
