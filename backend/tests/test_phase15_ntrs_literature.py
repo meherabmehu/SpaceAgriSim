@@ -7,6 +7,7 @@ both ends: the measurements must be retrievable, and they must not make the assi
 to answer a question the evidence still does not cover.
 """
 
+import sys
 import hashlib
 import json
 from pathlib import Path
@@ -16,13 +17,15 @@ import pytest
 from app import evidence
 
 ROOT = Path(__file__).resolve().parents[2]
-LITERATURE = ROOT / "data" / "literature" / "ntrs_bpc.json"
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
+LITERATURE = ROOT / "data" / "literature" / "ntrs_bpc"
 REPORTS = ["19900016137", "19910010713", "19900007373"]
 
 
 @pytest.fixture(scope="module")
 def literature() -> dict:
-    return json.loads(LITERATURE.read_text())
+    return safedata.load(LITERATURE)
 
 
 @pytest.mark.parametrize("record_id", REPORTS)
@@ -33,8 +36,8 @@ def test_each_report_is_pinned_and_its_pdf_is_present(literature, record_id):
     pin = report["pin"]
     assert pin["url"].startswith("https://ntrs.nasa.gov/api/citations/")
     pdf = ROOT / pin["file"]
-    assert pdf.is_file(), f"{record_id}: pinned PDF is missing from the repository"
-    payload = pdf.read_bytes()
+    assert safedata.exists(pdf), f"{record_id}: pinned PDF is missing from the repository"
+    payload = safedata.bytes(pdf)
     assert hashlib.sha256(payload).hexdigest() == pin["sha256"]
     assert len(payload) == pin["bytes"]
 
@@ -94,8 +97,8 @@ def test_the_literature_file_is_inside_the_runtime_bundle():
     """
     from app import evidence as evidence_module
 
-    assert evidence_module.LITERATURE.is_file()
-    if evidence_module.BUNDLE.exists():
+    assert safedata.exists(evidence_module.LITERATURE)
+    if safedata.exists(evidence_module.BUNDLE):
         assert evidence_module.BUNDLE in evidence_module.LITERATURE.parents, (
             "the literature file must be packaged into backend/scientific_data, "
             f"not read from {evidence_module.LITERATURE}")

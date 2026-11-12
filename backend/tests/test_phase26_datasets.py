@@ -5,6 +5,7 @@ produced a few hundred bytes of JSON was recorded as an acquired dataset, and a 
 offset error turned one rate column into another. Both are now checkable in milliseconds.
 """
 from __future__ import annotations
+import safedata
 
 import hashlib
 import json
@@ -21,8 +22,8 @@ if str(REPO_ROOT) not in sys.path:
 from scripts.datasets import registry  # noqa: E402
 
 PROCESSED = REPO_ROOT / "data" / "processed" / "phase26"
-MANIFEST = REPO_ROOT / "data" / "metadata" / "phase26_acquisition_manifest.json"
-VALIDATION = REPO_ROOT / "ml" / "evaluation" / "phase26_measured_et_validation.json"
+MANIFEST = REPO_ROOT / "data" / "metadata" / "phase26_acquisition_manifest"
+VALIDATION = REPO_ROOT / "ml" / "evaluation" / "phase26_measured_et_validation"
 
 
 # ---------------------------------------------------------------------------------------
@@ -81,9 +82,9 @@ def test_by_id_raises_on_an_unknown_id():
 # ---------------------------------------------------------------------------------------
 @pytest.fixture(scope="module")
 def manifest() -> dict:
-    if not MANIFEST.is_file():
+    if not safedata.exists(MANIFEST):
         pytest.skip("acquisition manifest not present")
-    return json.loads(MANIFEST.read_text(encoding="utf-8"))
+    return safedata.load(MANIFEST)
 
 
 def test_manifest_verified_count_matches_the_records(manifest):
@@ -97,8 +98,8 @@ def test_each_verified_file_exists_and_hashes_to_the_recorded_value(manifest):
             if entry["action"] not in ("written", "unchanged"):
                 continue
             path = REPO_ROOT / entry["path"]
-            assert path.is_file(), f"{dataset_id}: {entry['path']} missing"
-            digest = hashlib.sha256(path.read_bytes()).hexdigest()
+            assert safedata.exists(path), f"{dataset_id}: {entry['path']} missing"
+            digest = hashlib.sha256(safedata.bytes(path)).hexdigest()
             assert digest == entry["sha256"], f"{dataset_id}: bytes changed since acquisition"
             if entry.get("declaredSize") is not None:
                 assert path.stat().st_size == entry["declaredSize"]
@@ -113,7 +114,7 @@ def test_no_verified_file_is_a_metadata_stub(manifest):
             path = REPO_ROOT / entry["path"]
             assert path.stat().st_size > 50_000, f"{dataset_id}: {entry['path']} is too small"
             if path.suffix == ".xlsx":
-                assert path.read_bytes()[:4] == b"PK\x03\x04", dataset_id
+                assert safedata.bytes(path)[:4] == b"PK\x03\x04", dataset_id
 
 
 def test_verification_rejects_a_wrong_size(tmp_path):
@@ -139,16 +140,16 @@ def test_verification_rejects_json_masquerading_as_csv(tmp_path):
 # ---------------------------------------------------------------------------------------
 def _read(name: str) -> pd.DataFrame:
     path = PROCESSED / f"{name}.csv"
-    if not path.is_file():
+    if not safedata.exists(path):
         pytest.skip(f"{name} not generated")
     return pd.read_csv(path)
 
 
 def test_processed_tables_have_matching_quality_files():
     for path in PROCESSED.glob("*.csv"):
-        quality = path.with_name(path.stem + "_quality.json")
-        assert quality.is_file(), f"{path.name} has no quality file"
-        record = json.loads(quality.read_text(encoding="utf-8"))
+        quality = path.with_name(path.stem + "_quality")
+        assert safedata.exists(quality), f"{path.name} has no quality file"
+        record = safedata.load(quality)
         assert record["table"] == path.name
         assert record["rows"] == len(pd.read_csv(path))
 
@@ -186,9 +187,9 @@ def test_every_pot_day_has_a_usable_rate_including_the_first_interval():
 
 
 def test_validation_uses_every_measurement_date():
-    if not VALIDATION.is_file():
+    if not safedata.exists(VALIDATION):
         pytest.skip("ET validation artefact not present")
-    payload = json.loads(VALIDATION.read_text(encoding="utf-8"))
+    payload = safedata.load(VALIDATION)
     assert payload["measuredSide"]["measurementDates"] == 11
     assert payload["shape"]["points"] == 11
     et = _read("schroder2021_lettuce_et")
@@ -222,8 +223,7 @@ def test_greenlight_harvest_keeps_every_published_plant():
 
 
 def test_greenlight_fluorescence_is_not_labelled_as_a_photosynthesis_rate():
-    quality = json.loads(
-        (PROCESSED / "greenlight2024_lettuce_fluorescence_quality.json").read_text())
+    quality = safedata.load(PROCESSED / "greenlight2024_lettuce_fluorescence_quality")
     assert "notAPhotosyntheticRate" in quality
     assert "photosynthesis" in quality["notAPhotosyntheticRate"].lower()
 
@@ -235,8 +235,7 @@ def test_tomato_growth_table_is_per_plant_and_weekly():
 
 
 def test_open_field_tomato_is_not_described_as_controlled_environment():
-    quality = json.loads(
-        (PROCESSED / "ledphotoperiod2025_tomato_growth_quality.json").read_text())
+    quality = safedata.load(PROCESSED / "ledphotoperiod2025_tomato_growth_quality")
     assert quality["study"]["environment"] == "open field"
     assert "not controlled" in quality["note"]
 
@@ -246,9 +245,9 @@ def test_open_field_tomato_is_not_described_as_controlled_environment():
 # ---------------------------------------------------------------------------------------
 @pytest.fixture(scope="module")
 def validation() -> dict:
-    if not VALIDATION.is_file():
+    if not safedata.exists(VALIDATION):
         pytest.skip("ET validation artefact not present")
-    return json.loads(VALIDATION.read_text(encoding="utf-8"))
+    return safedata.load(VALIDATION)
 
 
 def test_validation_reports_uncalibrated_and_calibrated_numbers_side_by_side(validation):
@@ -289,14 +288,14 @@ def test_validation_never_calls_a_pot_measurement_microgravity(validation):
 # ---------------------------------------------------------------------------------------
 # the Phase 26 readiness audit
 # ---------------------------------------------------------------------------------------
-READINESS = REPO_ROOT / "data" / "research" / "phase26" / "feature_readiness.json"
+READINESS = REPO_ROOT / "data" / "research" / "phase26" / "feature_readiness"
 
 
 @pytest.fixture(scope="module")
 def readiness() -> dict:
-    if not READINESS.is_file():
+    if not safedata.exists(READINESS):
         pytest.skip("readiness audit not built")
-    return json.loads(READINESS.read_text(encoding="utf-8"))
+    return safedata.load(READINESS)
 
 
 def test_readiness_audits_all_twelve_named_features(readiness):
@@ -335,12 +334,11 @@ def test_a_moved_tier_actually_moved(readiness):
 def test_every_named_evidence_path_exists(readiness):
     for feature in readiness["features"]:
         for path in feature["evidence"]:
-            assert (REPO_ROOT / path).exists(), f"{feature['id']}: {path}"
+            assert safedata.exists(REPO_ROOT / path), f"{feature['id']}: {path}"
 
 
 def test_data_blocked_features_name_no_acquired_dataset(readiness):
-    catalogue = json.loads(
-        (REPO_ROOT / "data" / "research" / "dataset_catalog.json").read_text())
+    catalogue = safedata.load(REPO_ROOT / "data" / "research" / "dataset_catalog")
     acquired = {d["id"] for d in catalogue["datasets"] if d.get("imported")}
     for feature in readiness["features"]:
         if feature["tier"] == "data-blocked":

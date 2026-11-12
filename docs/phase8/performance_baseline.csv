@@ -1,0 +1,10 @@
+endpoint,medianMs,p95Ms
+GET /api/config,3.22,4.15
+GET /api/crops,2.94,3.13
+GET /api/models,19.73,28.65
+GET /api/datasets,8.88,10.21
+GET /api/science/measurements,4.92,6.08
+POST /api/simulate,5.22,5.59
+POST /api/compare,24.5,26.26
+POST /api/advisor,8.37,9.2
+POST /api/optimize,140.05,140.2

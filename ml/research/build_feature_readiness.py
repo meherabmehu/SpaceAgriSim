@@ -29,7 +29,9 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
-TARGET_JSON = ROOT / "data" / "research" / "phase26" / "feature_readiness.json"
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
+TARGET_JSON = ROOT / "data" / "research" / "phase26" / "feature_readiness"
 TARGET_MD = ROOT / "docs" / "PHASE26_FEATURE_COVERAGE_MATRIX.md"
 GENERATED_ON = "2026-11-10"
 
@@ -55,7 +57,7 @@ FEATURES: list[dict[str, Any]] = [
         "tier": "research-ready",
         "tierChanged": True,
         "evidence": [
-            "ml/evaluation/phase26_measured_et_validation.json",
+            "ml/evaluation/phase26_measured_et_validation",
             "data/processed/phase26/schroder2021_lettuce_et.csv",
             "backend/app/simulation/water.py",
         ],
@@ -83,7 +85,7 @@ FEATURES: list[dict[str, Any]] = [
         "tier": "research-ready",
         "tierChanged": False,
         "evidence": [
-            "ml/evaluation/et0_dataset_quality.json",
+            "ml/evaluation/et0_dataset_quality",
             "docs/ERA5_LAND_INDEPENDENT_VALIDATION.md",
                     ],
         "datasets": ["nasa-power-daily", "era5-land", "era5-hourly-0p25", "noaa-isd-lite"],
@@ -115,7 +117,7 @@ FEATURES: list[dict[str, Any]] = [
             "catalogue entry is 'unavailable'."
         ),
         "evidence": [
-            "ml/evaluation/phase30_harvest_crossstudy.json",
+            "ml/evaluation/phase30_harvest_crossstudy",
             "data/processed/phase30/lettuce_multistudy.csv",
             "backend/tests/test_phase30_removed_capabilities.py",
         ],
@@ -212,7 +214,7 @@ FEATURES: list[dict[str, Any]] = [
         "tier": "research-ready",
         "tierChanged": False,
         "evidence": [
-            "ml/evaluation/phase11_dataset_discovery.json",
+            "ml/evaluation/phase11_dataset_discovery",
             "docs/DATASET_GAP_MATRIX.md",
         ],
         "datasets": ["era5-hourly-0p25", "noaa-isd-lite"],
@@ -337,7 +339,7 @@ TIER_ORDER = ["production-ready", "research-ready", "experimental", "data-blocke
 
 
 def _catalogue_ids() -> set[str]:
-    payload = json.loads((ROOT / "data" / "research" / "dataset_catalog.json").read_text())
+    payload = safedata.load(ROOT / "data" / "research" / "dataset_catalog")
     return {dataset["id"] for dataset in payload["datasets"]}
 
 
@@ -419,8 +421,7 @@ def validate(features: list[dict[str, Any]]) -> list[str]:
     """Refuse to write an audit whose tiers outrun its evidence."""
     problems: list[str] = []
     catalogue = _catalogue_ids()
-    acquired = json.loads(
-        (ROOT / "data" / "research" / "dataset_catalog.json").read_text())["datasets"]
+    acquired = safedata.load(ROOT / "data" / "research" / "dataset_catalog")["datasets"]
     acquired_ids = {d["id"] for d in acquired if d.get("imported")}
 
     for feature in features:
@@ -430,7 +431,7 @@ def validate(features: list[dict[str, Any]]) -> list[str]:
             if not feature["evidence"]:
                 problems.append(f"{feature['id']}: {feature['tier']} with no evidence")
         for path in feature["evidence"]:
-            if not (ROOT / path).exists():
+            if not safedata.exists(ROOT / path):
                 problems.append(f"{feature['id']}: evidence path missing: {path}")
         for dataset_id in feature["datasets"]:
             if dataset_id not in catalogue:
@@ -456,7 +457,7 @@ def render(payload: dict[str, Any]) -> str:
     lines = [
         "# Phase 26 — Feature Readiness and Coverage Matrix",
         "",
-        f"Generated from `data/research/phase26/feature_readiness.json` on "
+        f"Generated from `data/research/phase26/feature_readiness` on "
         f"{payload['generatedOn']} by `ml/research/build_feature_readiness.py`. "
         "Edit the JSON, not this file.",
         "",
@@ -577,10 +578,10 @@ def main() -> int:
 
     payload = build()
     if args.check:
-        if not TARGET_JSON.is_file() or not TARGET_MD.is_file():
+        if not safedata.exists(TARGET_JSON) or not safedata.exists(TARGET_MD):
             print("MISSING readiness files; run without --check")
             return 1
-        committed = json.loads(TARGET_JSON.read_text(encoding="utf-8"))
+        committed = safedata.load(TARGET_JSON)
         if committed["features"] != payload["features"]:
             print("STALE JSON: the builder's feature list differs from the committed one")
             return 1
@@ -591,7 +592,7 @@ def main() -> int:
         return 0
 
     TARGET_JSON.parent.mkdir(parents=True, exist_ok=True)
-    TARGET_JSON.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(payload, TARGET_JSON)
     TARGET_MD.write_text(render(payload), encoding="utf-8")
     print(f"wrote {TARGET_MD.relative_to(ROOT)}: {len(FEATURES)} features, "
           + ", ".join(f"{tier}:{count}" for tier, count in sorted(payload['counts']['byTier'].items())))

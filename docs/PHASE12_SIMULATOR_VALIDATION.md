@@ -47,7 +47,7 @@ Phase 11 tested two novelty scores against three controls:
 | `mahalanobis_pca` | 1 of 3 |
 | `nearest_neighbour_correlation` | 2 of 3 |
 
-`thresholdValidated` is `false` in `ml/evaluation/phase11_ood_uncertainty.json`, and the
+`thresholdValidated` is `false` in `ml/evaluation/phase11_ood_uncertainty`, and the
 verdict is `ood-score-not-validated-by-any-available-control`. Phase 12 therefore ships
 **schema-based domain checks** and a transparent training-domain report. `/workflow/run`
 never returns a novelty score, never calls a distance an out-of-distribution probability, and

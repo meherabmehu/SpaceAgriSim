@@ -2,7 +2,7 @@
 
 The Phase 31 audit closed with 19 documented gaps, and most of them were the same three fields
 missing from the same artifacts: `sourceUrl`, `sourceType` and `license`. Those fields exist in
-`data/metadata/dataset_manifest.json` and `data/research/dataset_catalog.json` already, so the gap
+`data/metadata/dataset_manifest` and `data/research/dataset_catalog` already, so the gap
 was never missing knowledge - it was knowledge that had not been carried to the card a user
 actually reads, and would be lost again the next time an artifact was retrained.
 
@@ -30,8 +30,10 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 ARTIFACTS = ROOT / "ml" / "artifacts"
-CALIBRATION = ROOT / "ml" / "evaluation" / "phase32_radiation_calibration.json"
+CALIBRATION = ROOT / "ml" / "evaluation" / "phase32_radiation_calibration"
 
 RETRIEVED = "2026-11-09"
 
@@ -39,7 +41,7 @@ OSDR_LICENSE = ("Public OSDR access; retain study attribution and comply with OS
                 "assume every contributed file is public domain.")
 OSDR_TERMS = "https://science.nasa.gov/reference/osdr-help-terms-and-conditions/"
 
-WUR_LICENSE = "CC BY 4.0, declared in the dataset's RO-Crate (data/metadata/wur_lettuce_rocrate.json)"
+WUR_LICENSE = "CC BY 4.0, declared in the dataset's RO-Crate (data/metadata/wur_lettuce_rocrate.py)"
 WUR_TERMS = "https://creativecommons.org/licenses/by/4.0/"
 WUR_CITATION = ("Meinen E., Carotti L., Graamans L., Puksic F., Butturini M., Stanghellini C. "
                 "(2025). Data underlying the publication: Plant Factories Are Heating Up: "
@@ -68,7 +70,7 @@ PROVENANCE: dict[str, dict] = {
         "archivalRecord": {
             "retained": True,
             "served": "reproducibility-only",
-            "files": ["ml/artifacts/lettuce-earth-growth-v1.json"],
+            "files": ["ml/artifacts/lettuce-earth-growth-v1"],
             "reason": "Superseded, not withdrawn: the artifact is still reachable so a report "
                       "that quoted it can be reproduced, with the supersession stated in every "
                       "response.",
@@ -94,8 +96,8 @@ PROVENANCE: dict[str, dict] = {
         "archivalRecord": {
             "retained": True,
             "served": "research surface with the failed independent check stated",
-            "files": ["ml/artifacts/lettuce-earth-growth-v2.json",
-                      "ml/evaluation/phase30_harvest_crossstudy.json"],
+            "files": ["ml/artifacts/lettuce-earth-growth-v2",
+                      "ml/evaluation/phase30_harvest_crossstudy"],
             "reason": "The failed external check is the result. Removing the card would remove "
                       "the evidence that the platform checked.",
         },
@@ -119,8 +121,8 @@ PROVENANCE: dict[str, dict] = {
         "archivalRecord": {
             "retained": True,
             "served": "research surface with the missed criterion stated",
-            "files": ["ml/artifacts/lettuce-earth-growth-v3.json",
-                      "ml/evaluation/phase29_harvest_diagnosis.json"],
+            "files": ["ml/artifacts/lettuce-earth-growth-v3",
+                      "ml/evaluation/phase29_harvest_diagnosis"],
             "reason": "The pre-registered failure is published with the model; withdrawing it "
                       "would also withdraw the evidence.",
         },
@@ -144,7 +146,7 @@ PROVENANCE: dict[str, dict] = {
         "archivalRecord": {
             "retained": True,
             "served": "no: withdrawn from every surface",
-            "files": ["ml/artifacts/mizuna-harvest-v1.json"],
+            "files": ["ml/artifacts/mizuna-harvest-v1"],
             "reason": "A withdrawn model keeps its artifact and its evaluation so the withdrawal "
                       "is auditable; backend/tests/test_phase32_no_forecast.py proves it is "
                       "unreachable.",
@@ -245,7 +247,7 @@ CALIBRATION_DECLARATIONS: dict[str, dict] = {
     "radiation-quality-osd46-v1": {
         "calibrated": False,
         "measured": True,
-        "evidence": "ml/evaluation/phase32_radiation_calibration.json",
+        "evidence": "ml/evaluation/phase32_radiation_calibration",
         "method": ("Leave-one-biological-group-out out-of-fold probabilities, the same split as the "
                    "reported accuracy (recomputed and asserted equal). Log loss, Brier score and a "
                    "10-bin ECE were measured; a nested temperature search was run and reported."),
@@ -259,7 +261,7 @@ CALIBRATION_DECLARATIONS: dict[str, dict] = {
     "radiation-exposure-osd46-v1": {
         "calibrated": False,
         "measured": True,
-        "evidence": "ml/evaluation/phase32_radiation_calibration.json",
+        "evidence": "ml/evaluation/phase32_radiation_calibration",
         "method": ("Leave-one-biological-group-out out-of-fold probabilities, the same split as the "
                    "reported accuracy. Log loss, Brier score and a 10-bin ECE were measured; a "
                    "nested temperature search was run and reported."),
@@ -304,15 +306,14 @@ def apply(payload: dict) -> dict:
 
 def patch_all() -> list[str]:
     changed = []
-    for path in sorted(ARTIFACTS.glob("*.json")):
-        payload = json.loads(path.read_text(encoding="utf-8"))
+    for path in safedata.records(ARTIFACTS):
+        payload = safedata.load(path)
         if not isinstance(payload, dict) or payload.get("id") not in PROVENANCE:
             continue
         before = json.dumps(payload, sort_keys=True)
         apply(payload)
         if json.dumps(payload, sort_keys=True) != before:
-            path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
-                            encoding="utf-8")
+            safedata.dump(payload, path)
             changed.append(path.name)
     return changed
 
@@ -334,8 +335,8 @@ def _licence_identity(text: str) -> str:
 
 def check() -> list[str]:
     problems = []
-    for path in sorted(ARTIFACTS.glob("*.json")):
-        payload = json.loads(path.read_text(encoding="utf-8"))
+    for path in safedata.records(ARTIFACTS):
+        payload = safedata.load(path)
         if not isinstance(payload, dict) or payload.get("id") not in PROVENANCE:
             continue
         for key, value in PROVENANCE[payload["id"]].items():
@@ -349,7 +350,7 @@ def check() -> list[str]:
         if payload["id"] in CALIBRATION_DECLARATIONS:
             if not payload.get("probabilityCalibration"):
                 problems.append(f"{path.name}: no probabilityCalibration declaration")
-            elif payload["probabilityCalibration"].get("measured") and not CALIBRATION.is_file():
+            elif payload["probabilityCalibration"].get("measured") and not safedata.exists(CALIBRATION):
                 problems.append(f"{path.name}: cites a calibration record that does not exist")
     return problems
 

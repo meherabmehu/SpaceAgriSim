@@ -26,6 +26,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "backend"))
 
 from fastapi.testclient import TestClient  # noqa: E402
@@ -33,7 +35,7 @@ from fastapi.testclient import TestClient  # noqa: E402
 from app.config.settings import settings  # noqa: E402
 from app.main import app  # noqa: E402
 
-OUT = ROOT / "ml" / "evaluation" / "phase13_performance.json"
+OUT = ROOT / "ml" / "evaluation" / "phase13_performance"
 
 LETTUCE = {"daysAfterTransplant": 20, "airTemperature": 24, "rootTemperature": 22, "ppfd": 400}
 SIM = {"crop": "lettuce", "gravity": 1.0, "radiation": 0.05, "waterAvailability": 100,
@@ -168,7 +170,7 @@ def main() -> int:
 
     if arguments.write:
         OUT.parent.mkdir(parents=True, exist_ok=True)
-        OUT.write_text(json.dumps(artifact, indent=1, sort_keys=True), encoding="utf-8")
+        safedata.dump(artifact, OUT)
         print(f"written: {OUT.relative_to(ROOT)}")
 
     return 0 if not artifact["summary"]["errors"] else 1

@@ -47,8 +47,10 @@ from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import LeaveOneGroupOut
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "ml" / "training"))
-OUT = ROOT / "ml" / "evaluation" / "phase11_ood_uncertainty.json"
+OUT = ROOT / "ml" / "evaluation" / "phase11_ood_uncertainty"
 
 SEED = 12110
 COMPONENTS = 10
@@ -282,7 +284,7 @@ def main() -> int:
                  "not thresholds; supplying one would be the claim this phase refutes."),
     }
     report["uncertaintyCarriedOver"] = {
-        "source": "phase10_uncertainty_decision.json",
+        "source": "phase10_uncertainty_decision",
         "nominalCoverage": 0.90,
         "empiricalCoverage": {
             "mizuna-microbial-relative-load-v2": 0.9919,
@@ -295,7 +297,7 @@ def main() -> int:
                       "coverage reached it"),
     }
     report["registryChange"] = None
-    OUT.write_text(json.dumps(report, indent=2) + "\n")
+    safedata.dump(report, OUT)
     print(f"\nverdict: {report['verdict']}\nwrote {OUT.relative_to(ROOT)}")
     return 0
 

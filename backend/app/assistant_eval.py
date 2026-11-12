@@ -28,13 +28,13 @@ retrieved document does not contain, which is the failure mode this whole subsys
 prevent.
 """
 from __future__ import annotations
+import safedata
 
-import json
 import statistics
 import time
 from pathlib import Path
 
-BENCHMARK = Path(__file__).resolve().parents[1] / "tests" / "data" / "assistant_benchmark.json"
+BENCHMARK = Path(__file__).resolve().parents[1] / "tests" / "data" / "assistant_benchmark"
 
 STATUS_EQUIVALENCE = {
     # "notGrounded" is a deliberate expectation class: the answer may be partial or refused,
@@ -44,7 +44,7 @@ STATUS_EQUIVALENCE = {
 
 
 def load_benchmark() -> dict:
-    return json.loads(BENCHMARK.read_text(encoding="utf-8"))
+    return safedata.load(BENCHMARK)
 
 
 def _status_matches(expected: str, actual: str) -> bool:

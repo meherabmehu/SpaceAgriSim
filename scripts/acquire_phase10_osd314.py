@@ -34,6 +34,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 DEST = ROOT / "data" / "raw" / "OSD-314"
 BASE = "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-314/version-6"
 
@@ -63,13 +65,13 @@ FILES = {
 
 
 def digest(path: Path) -> tuple[int, str]:
-    payload = path.read_bytes()
+    payload = safedata.bytes(path)
     return len(payload), hashlib.sha256(payload).hexdigest()
 
 
 def acquire(name: str, subdir: str, size: int, sha: str) -> dict:
     target = DEST / name
-    if target.exists():
+    if safedata.exists(target):
         actual_size, actual_sha = digest(target)
         if actual_size == size and actual_sha == sha:
             return {"name": name, "sha256": sha, "bytes": size, "status": "verified-cached"}
@@ -147,15 +149,15 @@ def main() -> int:
     for entry in files:
         print(f"  {entry['status']:16s} {entry['bytes']:>9,} B  {entry['name']}")
 
-    manifest_path = ROOT / "data" / "metadata" / "dataset_manifest.json"
-    manifest = json.loads(manifest_path.read_text())
+    manifest_path = ROOT / "data" / "metadata" / "dataset_manifest"
+    manifest = safedata.load(manifest_path)
     existing = {entry["id"] for entry in manifest["datasets"]}
     if "OSD-314" in existing:
         manifest["datasets"] = [entry for entry in manifest["datasets"]
                                 if entry["id"] != "OSD-314"]
     manifest["datasets"].append(catalogue_entry(files))
     manifest["datasets"].sort(key=lambda entry: entry["id"])
-    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
+    safedata.dump(manifest, manifest_path)
     print(f"catalogue now holds {len(manifest['datasets'])} NASA datasets "
           f"(OSD-314 added or refreshed)")
     return 0

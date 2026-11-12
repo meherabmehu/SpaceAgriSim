@@ -2,7 +2,7 @@
 
 What each recovered NASA report actually contains, at the level of detail needed
 to judge a claim made from it. Machine-readable equivalents are in
-`data/processed/` and `data/metadata/phase7_measurement_catalog.json`.
+`data/processed/` and `data/metadata/phase7_measurement_catalog`.
 
 ---
 

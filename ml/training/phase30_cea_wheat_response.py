@@ -29,6 +29,7 @@ Protocol, fixed before any number was read
     python3 ml/training/phase30_cea_wheat_response.py
 """
 from __future__ import annotations
+import sys
 
 import csv
 import hashlib
@@ -46,9 +47,11 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 DATA = ROOT / "data" / "processed" / "phase30" / "cea_wheat_experiments.csv"
-QUALITY = ROOT / "data" / "processed" / "phase30" / "quality.json"
-OUT = ROOT / "ml" / "evaluation" / "phase30_cea_wheat_response.json"
+QUALITY = ROOT / "data" / "processed" / "phase30" / "quality"
+OUT = ROOT / "ml" / "evaluation" / "phase30_cea_wheat_response"
 
 SEED = 20261110
 ACCEPTANCE_CRITERION_PCT = 30.0
@@ -288,7 +291,7 @@ def main() -> int:
               for row, predicted in zip(holdout, holdout_predicted)]
     measured_yields = sorted(row["grainYieldKgPerM2Mean"] for row in rows)
     ratio = measured_yields[-1] / measured_yields[0]
-    quality = json.loads(QUALITY.read_text(encoding="utf-8"))["datasets"]["cea-wheat-apogee"]
+    quality = safedata.load(QUALITY)["datasets"]["cea-wheat-apogee"]
 
     payload = {
         "schema": "spaceagrisim.phase30_cea_wheat_response/1",
@@ -401,7 +404,7 @@ def main() -> int:
                                    "once"),
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(payload, indent=1) + "\n", encoding="utf-8")
+    safedata.dump(payload, OUT)
     print(f"written: {OUT.relative_to(ROOT)}")
     return 0
 

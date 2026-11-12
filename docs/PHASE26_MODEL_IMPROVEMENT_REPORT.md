@@ -54,7 +54,7 @@ still passes.
 Nothing at runtime. The changes are:
 
 - a **validation artefact** that constrains what the water feature may claim
-  (`ml/evaluation/phase26_measured_et_validation.json`);
+  (`ml/evaluation/phase26_measured_et_validation`);
 - a **readiness audit** that records, per feature, what would justify a model change and what would
   not (`docs/PHASE26_FEATURE_COVERAGE_MATRIX.md`);
 - a **gap-matrix update** that keeps `measured-eta` at `blocking` while recording the partial

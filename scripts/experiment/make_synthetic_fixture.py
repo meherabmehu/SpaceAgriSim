@@ -11,6 +11,9 @@ including the comfortable possibility that it silently passes everything.
 Do not cite any value in these files. Do not copy them into a results directory.
 """
 from __future__ import annotations
+import sys as _sys, pathlib as _pathlib   # the repository root holds safedata/
+_sys.path.insert(0, str(_pathlib.Path(__file__).resolve().parents[2]))
+import safedata
 
 import argparse
 import copy
@@ -20,7 +23,7 @@ import json
 from pathlib import Path
 
 FIXTURE_DIR = Path(__file__).resolve().parent / "fixtures"
-SCHEMA_PATH = Path(__file__).resolve().parents[2] / "data" / "experiments" / "water_use_schema.json"
+SCHEMA_PATH = Path(__file__).resolve().parents[2] / "data" / "experiments" / "water_use_schema"
 LABEL = "SYNTHETIC FIXTURE - not a measurement"
 PLANTS = ("A01", "A02", "A03", "A04", "A05", "A06")
 DAYS = 42
@@ -160,15 +163,13 @@ def write_fixture(name: str, rows: list[dict[str, str]], units: dict[str, str],
                   out_dir: Path = FIXTURE_DIR) -> Path:
     suffix = "" if name == "clean" else f"__defect_{name}"
     csv_path = out_dir / f"SYNTHETIC_FIXTURE_not_a_measurement{suffix}.csv"
-    units_path = out_dir / f"SYNTHETIC_FIXTURE_not_a_measurement{suffix}.units.json"
+    units_path = out_dir / f"SYNTHETIC_FIXTURE_not_a_measurement{suffix}.units"
     out_dir.mkdir(parents=True, exist_ok=True)
     with csv_path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
-    units_path.write_text(json.dumps(
-        {"schemaVersion": "1.0.0", "fixtureLabel": LABEL, "units": units}, indent=2) + "\n",
-        encoding="utf-8")
+    safedata.dump({"schemaVersion": "1.0.0", "fixtureLabel": LABEL, "units": units}, units_path)
     return csv_path
 
 
@@ -181,7 +182,7 @@ def main(argv: list[str] | None = None) -> int:
     # FIXTURE_DIR regardless, so asking for a temporary directory silently modified the repository.
     out_dir = Path(args.out_dir).expanduser().resolve()
 
-    schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+    schema = safedata.load(SCHEMA_PATH)
     columns = {entry["name"]: entry for entry in
                schema["requiredColumns"] + schema["optionalColumns"]}
     base_rows = _rows()

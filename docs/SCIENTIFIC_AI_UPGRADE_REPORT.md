@@ -66,7 +66,7 @@ Six sites, chosen for climate spread rather than convenience:
 | Nairobi, KE | −1.29 | 5.17 | tropical highland |
 
 NASA POWER daily, 2018-01-01 to 2025-10-31, **17,021 rows, 0 missing values**. Each raw response is
-checksummed and recorded in `data/metadata/power_acquisition_manifest.json` with the API version
+checksummed and recorded in `data/metadata/power_acquisition_manifest` with the API version
 (`v2.10.3`), the request parameters and the grid elevation. Licence: no restrictions on use or
 download, citation requested (verified at the POWER site and the AWS Open Data registry).
 
@@ -197,7 +197,7 @@ sites. No surface claims measurement.
 
 ## 10. Dataset catalogue
 
-`data/research/DATASET_CATALOG.md` (generated from `dataset_catalog.json`, with `--check` to prevent
+`data/research/DATASET_CATALOG.md` (generated from `dataset_catalog`, with `--check` to prevent
 drift): **21 datasets**, each with publisher, URL, format, coverage, variables, units, licence,
 licence-evidence grade, commercial-use verdict and an A–F usability class.
 
@@ -215,7 +215,7 @@ records, 4 unverified and labelled as unverified.
 
 ## 11. Gap matrix
 
-`docs/DATASET_GAP_MATRIX.md` (generated from `dataset_gap_matrix.json`): **12 gaps** —
+`docs/DATASET_GAP_MATRIX.md` (generated from `dataset_gap_matrix`): **12 gaps** —
 3 blocking, 4 major, 5 minor. The two that matter:
 
 - **`measured-eta`** (blocking): no open dataset measures per-plant water use in a controlled

@@ -19,6 +19,7 @@ Two rules the builder enforces:
   the path. A workflow with a UI and no tests, or tests and no UI, is `partial` and is labelled so.
 """
 from __future__ import annotations
+import sys
 
 import argparse
 import json
@@ -26,7 +27,9 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
-TARGET_JSON = ROOT / "data" / "research" / "phase29" / "workflow_readiness.json"
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
+TARGET_JSON = ROOT / "data" / "research" / "phase29" / "workflow_readiness"
 TARGET_MD = ROOT / "docs" / "PHASE29_WORKFLOW_COVERAGE_MATRIX.md"
 GENERATED_ON = "2026-11-10"
 
@@ -65,7 +68,7 @@ WORKFLOWS: list[dict[str, Any]] = [
         ],
         "layers": {
             "data": ["data/processed/phase26/schroder2021_lettuce_et.csv",
-                     "ml/evaluation/phase26_measured_et_validation.json"],
+                     "ml/evaluation/phase26_measured_et_validation"],
             "method": ["backend/app/simulation/et0_fao56.py",
                        "backend/app/simulation/water.py",
                        "backend/app/simulation/irrigation.py"],
@@ -120,8 +123,8 @@ WORKFLOWS: list[dict[str, Any]] = [
             "inputCheck": [],
             "outputCheck": [],
             "uncertainty": [],
-            "provenance": ["ml/evaluation/phase30_harvest_crossstudy.json",
-                           "ml/evaluation/phase29_harvest_final.json"],
+            "provenance": ["ml/evaluation/phase30_harvest_crossstudy",
+                           "ml/evaluation/phase29_harvest_final"],
             "frontend": ["frontend/src/pages/modules/GuidedWorkflows.jsx"],
             "tests": ["backend/tests/test_phase30_removed_capabilities.py",
                       "backend/tests/test_phase28_workflows.py"],
@@ -149,15 +152,15 @@ WORKFLOWS: list[dict[str, Any]] = [
                      "data/processed/phase29/light_stress_photosynthesis.csv",
                      "data/processed/phase29/light_stress_pigments.csv",
                      "data/processed/phase29/light_spectrum_treatments.csv",
-                     "data/processed/phase29/light_stress_quality.json"],
+                     "data/processed/phase29/light_stress_quality"],
             "method": ["backend/app/workflows/light_stress.py"],
             "service": ["backend/app/workflows/light_stress.py"],
             "endpoint": ["backend/app/routes/workflows.py"],
             "inputCheck": ["backend/app/routes/workflows.py"],
             "outputCheck": ["backend/app/workflows/light_stress.py"],
             "uncertainty": ["backend/app/workflows/light_stress.py"],
-            "provenance": ["data/metadata/phase26_acquisition_manifest.json",
-                           "data/processed/phase29/light_stress_quality.json"],
+            "provenance": ["data/metadata/phase26_acquisition_manifest",
+                           "data/processed/phase29/light_stress_quality"],
             "frontend": ["frontend/src/pages/modules/GuidedWorkflows.jsx"],
             "tests": ["backend/tests/test_phase29_workflows.py",
                       "backend/tests/test_phase29_datasets.py"],
@@ -204,7 +207,7 @@ BLOCKED: list[dict[str, str]] = [
      "capability": "A continuous response surface in spectral composition, PPFD, photoperiod, CO2, "
                    "temperature or humidity",
      "blockedBy": "no open dataset varies any of these over a yield response in lettuce; the search "
-                  "that established this is data/research/phase29/environmental_stress_search.json",
+                  "that established this is data/research/phase29/environmental_stress_search",
      "consequence": "the workflow offers four named measured regimes and marks every other "
                     "environmental factor as unsupported, in the response as well as in the UI"},
     {"id": "fractional-gravity",
@@ -224,7 +227,7 @@ def verify(workflows: list[dict[str, Any]]) -> list[str]:
     for workflow in workflows:
         for layer, paths in workflow["layers"].items():
             for path in paths:
-                if not (ROOT / path).exists():
+                if not safedata.exists(ROOT / path):
                     missing.append(f"{workflow['id']}/{layer}: {path}")
     return missing
 
@@ -254,7 +257,7 @@ def render(payload: dict[str, Any]) -> str:
     rows = payload["workflows"]
     out: list[str] = []
     out.append("# Phase 29 Workflow Coverage Matrix\n")
-    out.append(f"Generated from `data/research/phase29/workflow_readiness.json` on "
+    out.append(f"Generated from `data/research/phase29/workflow_readiness` on "
                f"{payload['generatedOn']} by `ml/research/build_phase29_readiness.py`. Edit the "
                f"builder, not this file.\n")
     out.append(
@@ -362,7 +365,7 @@ def build() -> dict[str, Any]:
         "phase": 29,
         "generatedBy": "ml/research/build_phase29_readiness.py",
         "generatedOn": GENERATED_ON,
-        "supersedes": "data/research/phase27/feature_implementation_coverage.json",
+        "supersedes": "data/research/phase27/feature_implementation_coverage",
         "layerDefinitions": {layer: meaning for layer, meaning in LAYERS},
         "counts": {
             "workflows": len(workflows),
@@ -383,17 +386,17 @@ def main() -> int:
     args = parser.parse_args()
     payload = build()
     if args.check:
-        if not TARGET_JSON.is_file() or not TARGET_MD.is_file():
+        if not safedata.exists(TARGET_JSON) or not safedata.exists(TARGET_MD):
             raise SystemExit("phase29 readiness artefacts are missing; run without --check")
-        committed = json.loads(TARGET_JSON.read_text(encoding="utf-8"))
+        committed = safedata.load(TARGET_JSON)
         if committed != payload:
-            raise SystemExit("workflow_readiness.json is stale")
+            raise SystemExit("workflow_readiness is stale")
         if TARGET_MD.read_text(encoding="utf-8") != render(committed):
             raise SystemExit("PHASE29_WORKFLOW_COVERAGE_MATRIX.md is stale")
         print(f"phase29 readiness up to date ({payload['counts']['complete']} workflows complete)")
         return 0
     TARGET_JSON.parent.mkdir(parents=True, exist_ok=True)
-    TARGET_JSON.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(payload, TARGET_JSON)
     TARGET_MD.write_text(render(payload), encoding="utf-8")
     print(f"wrote {TARGET_JSON.relative_to(ROOT)} and {TARGET_MD.relative_to(ROOT)}: "
           f"{payload['counts']['complete']} complete, {payload['counts']['blockedCapabilities']} blocked")

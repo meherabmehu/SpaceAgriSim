@@ -36,6 +36,7 @@ detecting time, and every fold keeps all three dose levels.
 """
 
 from __future__ import annotations
+import sys
 
 import json
 from pathlib import Path
@@ -48,8 +49,10 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 DATA = ROOT / "data"
-OUT = ROOT / "ml" / "evaluation" / "phase11_dose_generalization.json"
+OUT = ROOT / "ml" / "evaluation" / "phase11_dose_generalization"
 
 SEED = 11450
 PERMUTATIONS = 2000
@@ -320,7 +323,7 @@ def main() -> int:
         "reaches predictive quality, and the exclusion reason is now specific: the "
         "evidence for dose is a weak ordinal tendency that does not survive an unseen "
         "dose level")
-    OUT.write_text(json.dumps(report, indent=2) + "\n")
+    safedata.dump(report, OUT)
     print(f"\nverdict: {verdict}")
     print(f"wrote {OUT.relative_to(ROOT)}")
     return 0

@@ -1,8 +1,8 @@
-"""Rebuild ml/artifacts/registry.json from the artifacts that actually exist.
+"""Rebuild ml/artifacts/registry from the artifacts that actually exist.
 
 Why this exists
 ---------------
-Each training script previously rewrote `registry.json` from only the model it
+Each training script previously rewrote `registry` from only the model it
 had just trained. Running them in the wrong order therefore silently deleted
 other models from the registry, and the API would then report a perfectly good
 artifact as "not registered". That happened during Phase 6 development.
@@ -23,18 +23,21 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "scripts"))
 from nasa_pipeline import save_json, stamp  # noqa: E402
 
 ARTIFACTS = ROOT / "ml" / "artifacts"
-REGISTRY = ARTIFACTS / "registry.json"
+REGISTRY = ARTIFACTS / "registry"
 
 # Files in ml/artifacts that are not model cards.
-NON_MODEL = {"registry.json", "tomato_example.json"}
+NON_MODEL = {"registry", "tomato_example"}
 
 
 def is_model_card(name: str) -> bool:
-    return name.endswith(".json") and name not in NON_MODEL
+    """A model artifact is any record in ml/artifacts that is not the registry itself."""
+    return Path(name).stem not in NON_MODEL
 
 
 def main() -> int:
@@ -43,8 +46,8 @@ def main() -> int:
     import sklearn
 
     previous_rows = {}
-    if REGISTRY.exists():
-        for row in json.loads(REGISTRY.read_text()).get("models", []):
+    if safedata.exists(REGISTRY):
+        for row in safedata.load(REGISTRY).get("models", []):
             if row.get("id"):
                 previous_rows[row["id"]] = row
 
@@ -63,12 +66,12 @@ def main() -> int:
         return row
 
     cards = []
-    for path in sorted(ARTIFACTS.glob("*.json")):
+    for path in safedata.records(ARTIFACTS):
         if not is_model_card(path.name):
             continue
-        body = path.read_bytes()
+        body = safedata.resolve(path).read_bytes()
         try:
-            card = json.loads(body)
+            card = safedata.loads_python_module(body.decode('utf-8'), where=str(path))
         except json.JSONDecodeError:
             print(f"  SKIP (invalid JSON): {path.name}")
             continue
@@ -76,7 +79,7 @@ def main() -> int:
         if not model_id:
             print(f"  SKIP (no id): {path.name}")
             continue
-        if path.name != f"{model_id}.json":
+        if path.stem != model_id:
             print(f"  SKIP (filename/id mismatch): {path.name} vs {model_id}")
             continue
         cards.append({
@@ -88,7 +91,7 @@ def main() -> int:
             "samples": card.get("samples"),
         })
 
-    previous = json.loads(REGISTRY.read_text()) if REGISTRY.exists() else {}
+    previous = safedata.load(REGISTRY) if safedata.exists(REGISTRY) else {}
     registry = {
         "schemaVersion": 1,
         "trainedAt": stamp(),

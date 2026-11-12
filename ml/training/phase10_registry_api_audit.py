@@ -2,7 +2,7 @@
 
 Phase 9 added models, intervals, and explanations across several commits, and a
 registry that drifts from its artifacts is the failure mode that matters most: a
-number in `registry.json` that no artifact backs is a claim with no evidence behind
+number in `registry` that no artifact backs is a claim with no evidence behind
 it, and it survives every test that only checks the API returns 200.
 
 This script does not trust the registry. It reads the artifact each entry points at and
@@ -19,7 +19,7 @@ checks, for every model:
              the excluded candidates
 
 `registryChange` is deliberately absent: this pass fixes nothing silently. Anything it
-finds is written to `ml/evaluation/phase10_registry_api_audit.json` and either repaired
+finds is written to `ml/evaluation/phase10_registry_api_audit` and either repaired
 explicitly or listed as a known gap.
 """
 
@@ -32,16 +32,18 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "backend"))
 
-OUT = ROOT / "ml" / "evaluation" / "phase10_registry_api_audit.json"
+OUT = ROOT / "ml" / "evaluation" / "phase10_registry_api_audit"
 
 EXCLUDED = ("radiation-dose-osd782-v1", "gravity-reorientation-osd411-v1")
 METRIC_KEYS = ("accuracy", "balancedAccuracy", "macroF1", "mae", "r2", "rmse")
 
 
 def sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    return hashlib.sha256(safedata.bytes(path)).hexdigest()
 
 
 def audit() -> dict:
@@ -55,11 +57,11 @@ def audit() -> dict:
 
     for model in models:
         model_id = model["id"]
-        path = artifacts / f"{model_id}.json"
-        if not path.exists():
+        path = artifacts / f"{model_id}"
+        if not safedata.exists(path):
             findings.append({"model": model_id, "kind": "missing-artifact", "severity": "high"})
             continue
-        artifact = json.loads(path.read_text())
+        artifact = safedata.load(path)
 
         # --- identity ---------------------------------------------------------
         if model.get("artifactSha256") and model["artifactSha256"] != sha256(path):
@@ -96,10 +98,10 @@ def audit() -> dict:
                              "severity": "medium"})
 
         # --- explanations -----------------------------------------------------
-        explanation_path = artifacts / f"{model_id}-explanation.json"
+        explanation_path = artifacts / f"{model_id}-explanation"
         phase10 = model.get("phase10") or {}
-        if explanation_path.exists():
-            explanation = json.loads(explanation_path.read_text())
+        if safedata.exists(explanation_path):
+            explanation = safedata.load(explanation_path)
             if explanation.get("identityResidual", 1.0) > 1e-9:
                 findings.append({"model": model_id, "kind": "explanation-not-exact",
                                  "residual": explanation["identityResidual"],
@@ -124,7 +126,7 @@ def audit() -> dict:
     app.include_router(router, prefix="/api")
     client = TestClient(app)
     served = client.get("/api/models")
-    served_ids = {entry["id"] for entry in served.json()["models"]} if served.status_code == 200 else set()
+    served_ids = {entry["id"] for entry in served.py()["models"]} if served.status_code == 200 else set()
     registry_ids = {model["id"] for model in models}
     if served.status_code != 200:
         findings.append({"kind": "api-models-failed", "status": served.status_code,
@@ -144,7 +146,7 @@ def audit() -> dict:
         findings.append({"kind": "surrogate-explanation-served",
                          "status": explanation_404.status_code, "severity": "high"})
     checks["doubles"] = client.get("/api/models/radiation-quality-osd46-v1/reference-profiles").status_code
-    checks["openapiPaths"] = len(client.get("/openapi.json").json().get("paths", {}))
+    checks["openapiPaths"] = len(client.get("/openapi.py").py().get("paths", {}))
 
     high = [finding for finding in findings if finding["severity"] == "high"]
     return {
@@ -165,7 +167,7 @@ def audit() -> dict:
 def main() -> int:
     result = audit()
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(result, indent=2) + "\n")
+    safedata.dump(result, OUT)
     print(f"{result['checks']['models']} models, "
           f"{len(result['findings'])} findings, {result['highSeverity']} high severity")
     for finding in result["findings"]:

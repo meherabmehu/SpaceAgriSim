@@ -9,8 +9,8 @@ Two studies were produced. Both read shipped artifacts through the same code the
 the served model, not a re-fit of it. Neither study trains anything.
 
 ```
-ml/research/phase34_tomato_calibration.py      -> ml/evaluation/phase34_probability_calibration.json
-ml/research/phase34_cross_campaign_coverage.py -> ml/evaluation/phase34_cross_campaign_coverage.json
+ml/research/phase34_tomato_calibration.py      -> ml/evaluation/phase34_probability_calibration
+ml/research/phase34_cross_campaign_coverage.py -> ml/evaluation/phase34_cross_campaign_coverage
 ml/research/phase34_record_measurements.py     -> writes those numbers into the five model cards
 ```
 
@@ -22,7 +22,7 @@ cannot drift away from its own measurement.
 **Question.** The classifier serves `predict_proba`. Is that number a probability, or a ranking?
 
 **Method.** Every scored probability is out of fold under the committed 4-fold stratified-group
-split (`ml/evaluation/tomato_splits.json`): the two tissues of a plant stay in one fold, so no
+split (`ml/evaluation/tomato_splits`): the two tissues of a plant stay in one fold, so no
 plant is in the fold that scored it. Hard-label accuracy is recomputed from those same
 probabilities and asserted equal to the artifact's 0.9167. Intervals come from 2000 bootstrap
 resamples **over plants**, not over rows. No rescaling is fitted: a nested temperature search would

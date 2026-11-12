@@ -2,8 +2,8 @@
 
 Two files were produced this phase:
 
-    ml/evaluation/phase34_probability_calibration.json    (tomato classifier, out of fold)
-    ml/evaluation/phase34_cross_campaign_coverage.json    (5 intervals, independent campaigns)
+    ml/evaluation/phase34_probability_calibration    (tomato classifier, out of fold)
+    ml/evaluation/phase34_cross_campaign_coverage    (5 intervals, independent campaigns)
 
 Every test here reads one of those files and the artifact that serves it. None of them re-fits
 anything, and none of them relaxes an earlier assertion: the point of the phase is that a
@@ -20,32 +20,34 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "backend"))
 
 from app import research  # noqa: E402
 
 ARTIFACTS = ROOT / "ml" / "artifacts"
-CALIBRATION = ROOT / "ml" / "evaluation" / "phase34_probability_calibration.json"
-COVERAGE = ROOT / "ml" / "evaluation" / "phase34_cross_campaign_coverage.json"
+CALIBRATION = ROOT / "ml" / "evaluation" / "phase34_probability_calibration"
+COVERAGE = ROOT / "ml" / "evaluation" / "phase34_cross_campaign_coverage"
 
 
 def card(model_id: str) -> dict:
-    return json.loads((ARTIFACTS / f"{model_id}.json").read_text(encoding="utf-8"))
+    return safedata.load(ARTIFACTS / f"{model_id}")
 
 
 def coverage_record() -> dict:
-    return json.loads(COVERAGE.read_text(encoding="utf-8"))
+    return safedata.load(COVERAGE)
 
 
 def calibration_record() -> dict:
-    return json.loads(CALIBRATION.read_text(encoding="utf-8"))
+    return safedata.load(CALIBRATION)
 
 
 # ---------------------------------------------------------------- the evidence files themselves
 def test_the_evidence_files_exist_and_declare_their_schema():
     for path, schema in ((CALIBRATION, "spaceagrisim.probability_calibration/1"),
                          (COVERAGE, "spaceagrisim.cross_campaign_coverage/1")):
-        record = json.loads(path.read_text(encoding="utf-8"))
+        record = safedata.load(path)
         assert record["schema"] == schema, path.name
         assert record["models"], path.name
 
@@ -90,7 +92,7 @@ def test_lettuce_cards_carry_their_cross_campaign_measurement(model_id):
     assert block["observations"] == measured["observations"]
     assert "PeerJ" in block["campaign"] and "CC BY 4.0" in block["campaign"], \
         "the measurement must name the study and its licence, not just a number"
-    assert block["evidence"] == "ml/evaluation/phase34_cross_campaign_coverage.json"
+    assert block["evidence"] == "ml/evaluation/phase34_cross_campaign_coverage"
     assert "Cross-campaign coverage was measured" in artifact["servedScope"]
 
 
@@ -130,7 +132,7 @@ def test_the_tomato_card_reports_a_measurement_without_claiming_a_calibration():
     assert block["metrics"]["brier"] == record["probability"]["brier"]
     assert block["metrics"]["ece"] == record["probability"]["ece"]
     assert block["metrics"]["groups"] == record["groups"] == 21
-    assert block["evidence"] == "ml/evaluation/phase34_probability_calibration.json"
+    assert block["evidence"] == "ml/evaluation/phase34_probability_calibration"
     # The prediction is measured out of fold over plants, not over rows.
     assert record["groups"] < record["samples"]
     served = next(model for model in research.model_registry()["models"]
@@ -147,11 +149,11 @@ def test_no_served_number_outruns_its_evidence_file():
             # Phase 32 recorded the OSD-46 calibrations under `scope`+`statement` without a
             # numeric block, so the requirement is the cited evidence file and a statement, not a
             # shape only the newer cards use.
-            assert (ROOT / declared["evidence"]).is_file(), model_id
+            assert safedata.exists(ROOT / declared["evidence"]), model_id
             assert declared.get("statement"), model_id
         block = (artifact.get("interval") or {}).get("crossCampaign")
         if block:
-            assert (ROOT / block["evidence"]).is_file(), model_id
+            assert safedata.exists(ROOT / block["evidence"]), model_id
 
 
 # ---------------------------------------------------------------- API surface

@@ -94,7 +94,7 @@ def physics_status() -> dict:
                 "when radiation and wind were missing. A surrogate of an equation that is "
                 "computable from the same inputs adds error and no information."
             ),
-            "retainedFor": "ml/artifacts/et0-emulator-v1.json and ml/evaluation, as a negative result.",
+            "retainedFor": "ml/artifacts/et0-emulator-v1 and ml/evaluation, as a negative result.",
         },
         "limitations": [
             "ET0 is a computed flux for a reference grass surface, not a measurement of a crop's water use.",

@@ -7,6 +7,7 @@ each other and with the served v3 artefact, and nothing in the registry moved.
 """
 
 from __future__ import annotations
+import sys
 
 import csv
 import json
@@ -15,25 +16,27 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 
 
 def _load(relative: str) -> dict:
-    return json.loads((ROOT / relative).read_text())
+    return safedata.load(ROOT / relative)
 
 
 @pytest.fixture(scope="module")
 def diagnosis() -> dict:
-    return _load("ml/evaluation/phase29_harvest_diagnosis.json")
+    return _load("ml/evaluation/phase29_harvest_diagnosis")
 
 
 @pytest.fixture(scope="module")
 def experiments() -> dict:
-    return _load("ml/evaluation/phase29_harvest_experiments.json")
+    return _load("ml/evaluation/phase29_harvest_experiments")
 
 
 @pytest.fixture(scope="module")
 def final() -> dict:
-    return _load("ml/evaluation/phase29_harvest_final.json")
+    return _load("ml/evaluation/phase29_harvest_final")
 
 
 def test_training_set_is_grouped_by_experiment():
@@ -43,7 +46,7 @@ def test_training_set_is_grouped_by_experiment():
     groups = {row["experiment"] for row in rows}
     assert len(groups) == 4
     # Four groups, four folds: each fold withholds exactly one whole experiment.
-    protocol = _load("ml/evaluation/phase29_harvest_experiments.json")["protocol"]
+    protocol = _load("ml/evaluation/phase29_harvest_experiments")["protocol"]
     assert protocol["groupCount"] == len(groups)
     assert "leave-one-experiment-out" in protocol["split"]
 
@@ -88,7 +91,7 @@ def test_selection_did_not_look_at_the_holdout(experiments):
 
 
 def test_the_reported_metric_matches_the_served_artifact(diagnosis, final):
-    artifact = _load("ml/artifacts/lettuce-earth-growth-v3.json")
+    artifact = _load("ml/artifacts/lettuce-earth-growth-v3")
     v3_mape = artifact["validation"]["independent"]["metrics"]["MAPE"]
     assert final["holdout"]["priorResultPhase19_v3"] == pytest.approx(v3_mape, abs=0.01)
     assert final["holdout"]["changeVsV3PercentagePoints"] == pytest.approx(
@@ -111,7 +114,7 @@ def test_the_holdout_is_reported_as_single_observation(final):
 
 
 def test_interval_audit_records_what_it_could_not_establish():
-    audit = _load("ml/evaluation/phase29_interval_audit.json")
+    audit = _load("ml/evaluation/phase29_interval_audit")
     conclusion = audit["conclusion"]
     assert conclusion["canClaimIndependentCoverage"] is False
     assert conclusion["outOfFoldCoverageIsDescriptive"] is True
@@ -123,12 +126,12 @@ def test_interval_audit_records_what_it_could_not_establish():
 
 
 def test_registry_still_lists_only_the_served_models():
-    registry = json.dumps(_load("ml/artifacts/registry.json"))
+    registry = json.dumps(_load("ml/artifacts/registry"))
     assert "lettuce-earth-growth-v4" not in registry
     assert "lettuce-earth-growth-v3" in registry
 
 
 def test_the_holdout_interval_check_is_not_overclaimed():
-    check = _load("ml/evaluation/phase29_interval_audit.json")["holdoutCheck"]
+    check = _load("ml/evaluation/phase29_interval_audit")["holdoutCheck"]
     assert check["nObservations"] == 1
     assert "not evidence of 90 % coverage" in check["reading"]

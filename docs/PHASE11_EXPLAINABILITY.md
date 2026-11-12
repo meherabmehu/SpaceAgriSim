@@ -5,7 +5,7 @@ every fold. That is a claim about a large panel. A user reading an explanation s
 short list*, so Phase 11 measured the two things that decide whether that list may be
 trusted: does it move between folds, and does it depend on which learner produced it.
 
-Evidence: `ml/evaluation/phase11_explainability.json`.
+Evidence: `ml/evaluation/phase11_explainability`.
 
 ```
 python ml/training/phase11_explainability.py    # ~10 min

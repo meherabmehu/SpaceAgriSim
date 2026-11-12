@@ -5,7 +5,7 @@ hard constraints: **do not auto-apply** Phase 6's suggested tomato (3.91 kg/m²)
 and radish (1.58 kg/m²) baselines, **preserve the mass-balance invariant**, and
 **preserve output definitions**.
 
-Evidence: `docs/phase7/scientific_calibration.json`, produced by
+Evidence: `docs/phase7/scientific_calibration`, produced by
 `scripts/calibrate_phase7.py`. Enforced by
 `backend/tests/test_phase7_calibration.py` (7 tests).
 

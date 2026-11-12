@@ -26,14 +26,16 @@ import pathlib
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "backend"))
 
 # The completion documents written by build_model_cards.py. They live beside the checksummed
 # artifacts rather than inside them, so this audit can report on them without the artifact hashes
 # moving - which is the whole reason they exist as a separate layer.
 CARD_DIR = ROOT / "ml" / "artifacts" / "cards"
-REGISTRY = ROOT / "ml" / "artifacts" / "registry.json"
-EVIDENCE = ROOT / "ml" / "evaluation" / "phase37_model_evidence.json"
+REGISTRY = ROOT / "ml" / "artifacts" / "registry"
+EVIDENCE = ROOT / "ml" / "evaluation" / "phase37_model_evidence"
 
 # Card obligations, each with the field names that can satisfy it. The two model families do not
 # carry the same schema: a regressor records a training script and a data hash, while a
@@ -120,7 +122,7 @@ PHASE37_DATASETS = {
 
 def sha256(path: pathlib.Path) -> str:
     h = hashlib.sha256()
-    h.update(path.read_bytes())
+    h.update(safedata.bytes(path))
     return h.hexdigest()
 
 
@@ -180,11 +182,11 @@ def domain_test(model_id: str, artifact: dict) -> dict:
 
 
 def main() -> int:
-    registry = json.loads(REGISTRY.read_text())
+    registry = safedata.load(REGISTRY)
     previous = {}
-    prev_path = ROOT / "ml" / "evaluation" / "phase36_model_reevaluation.json"
-    if prev_path.exists():
-        previous = json.loads(prev_path.read_text()).get("models") or {}
+    prev_path = ROOT / "ml" / "evaluation" / "phase36_model_reevaluation"
+    if safedata.exists(prev_path):
+        previous = safedata.load(prev_path).get("models") or {}
 
     # The served set is read from the application rather than hard-coded here, so a model that is
     # withdrawn tomorrow cannot keep appearing as served in this report.
@@ -198,7 +200,7 @@ def main() -> int:
         if mid not in served_ids:
             continue
         path = ROOT / entry["artifact"]
-        artifact = json.loads(path.read_text())
+        artifact = safedata.load(path)
         on_disk = sha256(path)
 
         # Dotted paths are followed, so "metrics.baselineMacroF1" is a real look-up rather than a
@@ -239,8 +241,8 @@ def main() -> int:
         groups = artifact.get("groups")
         group_note = json.dumps(leakage)
 
-        card_path = CARD_DIR / f"{mid}.json"
-        completion = json.loads(card_path.read_text()) if card_path.is_file() else {}
+        card_path = CARD_DIR / f"{mid}"
+        completion = safedata.load(card_path) if safedata.exists(card_path) else {}
 
         prev = previous.get(mid, {})
         models[mid] = {
@@ -280,7 +282,7 @@ def main() -> int:
             "thresholdsChanged": False,
             "completionCard": {
                 "present": bool(completion),
-                "path": (f"ml/artifacts/cards/{mid}.json" if completion else None),
+                "path": (f"ml/artifacts/cards/{mid}" if completion else None),
                 "complete": (completion.get("completeness") or {}).get("allComplete"),
                 "checks": f"{(completion.get('completeness') or {}).get('complete')}/"
                           f"{(completion.get('completeness') or {}).get('total')}",
@@ -293,7 +295,7 @@ def main() -> int:
             },
             "reproductionScript": REPRODUCTION.get(mid),
             "reproductionScriptExists": bool(REPRODUCTION.get(mid)
-                                            and (ROOT / REPRODUCTION[mid]).is_file()),
+                                            and safedata.exists(ROOT / REPRODUCTION[mid])),
             "embedsTrainingScript": "trainingScript" in artifact,
             "embedsTrainingDataHash": bool(artifact.get("trainingDataSha256")
                                            or artifact.get("sourceChecksum")),
@@ -375,7 +377,7 @@ def main() -> int:
         "models": models,
         "counts": counts,
     }
-    EVIDENCE.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(payload, EVIDENCE)
 
     print(f"models audited      {counts['served']} (served set from app.research)")
     print("classification                       "

@@ -23,11 +23,14 @@ must nevertheless use positions, not key names.
 
 Run: python ml/analysis/audit_osd655_mass.py
 """
+import sys
 import csv
 import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 RAW = ROOT / "data" / "raw" / "OSD-655"
 
 I_SN, I_ESTAB, I_LEAVES = 1, 5, 9
@@ -36,7 +39,7 @@ I_CONSUMPTION, I_HARVESTED, I_BROKEN, I_TOTAL = 14, 15, 16, 17
 
 
 def rows_of(name):
-    text = (RAW / name).read_bytes().decode("cp1252")
+    text = safedata.bytes(RAW / name).decode("cp1252")
     return list(csv.reader(text.splitlines()))
 
 
@@ -155,9 +158,9 @@ def main():
         "the labels from column 13 onward. Total (g) is unaffected; "
         "Consumption Avg. (g) and Return Samples (g) are mis-mapped."
     )
-    out = ROOT / "docs" / "phase6" / "osd655_mass_audit.json"
+    out = ROOT / "docs" / "phase6" / "osd655_mass_audit"
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(report, out)
 
     print()
     print("=" * 84)

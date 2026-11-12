@@ -1,5 +1,6 @@
 """Versioned NASA OSDR acquisition. No API key; bounded public downloads only."""
 from __future__ import annotations
+import sys
 
 import concurrent.futures
 import hashlib
@@ -10,6 +11,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 DATA = ROOT / "data"
 IDS = [267, 268, 269, 745, 766, 767, 773, 7, 120, 436, 625, 375, 655]
 TERMS = "https://science.nasa.gov/reference/osdr-help-terms-and-conditions/"
@@ -35,7 +38,7 @@ def save_json(path, value):
         except ImportError:  # pragma: no cover - the table is in-repo
             pass
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(value, indent=2, ensure_ascii=True, allow_nan=False) + "\n", encoding="utf-8")
+    safedata.dump(value, path)
 
 
 def fetch(url, attempts=3, max_bytes=12_000_000):
@@ -66,13 +69,13 @@ def discover(refresh=False):
         sid = f"OSD-{number}"
         payloads = {}
         for kind in ("meta", "files"):
-            cache = DATA / "metadata" / f"{sid}_{kind}.json"
+            cache = DATA / "metadata" / f"{sid}_{kind}"
             url = f"https://osdr.nasa.gov/osdr/data/osd/{kind}/{number}"
-            if refresh or not cache.exists():
+            if refresh or not safedata.exists(cache):
                 body = fetch(url)
                 cache.parent.mkdir(parents=True, exist_ok=True)
                 cache.write_bytes(body)
-            payloads[kind] = json.loads(cache.read_text(encoding="utf-8"))
+            payloads[kind] = safedata.load(cache)
         investigation = payloads["meta"]["study"][sid]
         study = investigation["studies"][0]
         files = payloads["files"]["studies"][sid]["study_files"]
@@ -85,7 +88,7 @@ def discover(refresh=False):
             "sourceUrl": f"https://osdr.nasa.gov/bio/repo/data/studies/{sid}",
             "metadataUrl": f"https://osdr.nasa.gov/osdr/data/osd/meta/{number}",
             "filesUrl": f"https://osdr.nasa.gov/osdr/data/osd/files/{number}",
-            "metadataSha256": hashlib.sha256((DATA / "metadata" / f"{sid}_meta.json").read_bytes()).hexdigest(),
+            "metadataSha256": hashlib.sha256(safedata.bytes(DATA / "metadata" / f"{sid}_meta")).hexdigest(),
             "version": investigation.get("version"), "verifiedAt": stamp(),
             "organisms": organisms, "assayTypes": assay_types,
             "sampleCount": len({s["name"] for s in samples}),
@@ -102,15 +105,15 @@ def discover(refresh=False):
     with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
         datasets = list(pool.map(one, IDS))
     result = {"schemaVersion": 1, "generatedAt": stamp(), "source": "NASA OSDR official study and file APIs", "datasets": datasets}
-    save_json(DATA / "metadata" / "dataset_manifest.json", result)
+    save_json(DATA / "metadata" / "dataset_manifest", result)
     return result
 
 
 def download():
-    manifest_path = DATA / "metadata" / "dataset_manifest.json"
-    manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else discover()
-    checksum_path = DATA / "metadata" / "download_checksums.json"
-    previous = {r["path"]: r for r in json.loads(checksum_path.read_text())} if checksum_path.exists() else {}
+    manifest_path = DATA / "metadata" / "dataset_manifest"
+    manifest = safedata.load(manifest_path) if safedata.exists(manifest_path) else discover()
+    checksum_path = DATA / "metadata" / "download_checksums"
+    previous = {r["path"]: r for r in safedata.load(checksum_path)} if safedata.exists(checksum_path) else {}
     jobs = [(d, f) for d in manifest["datasets"] for f in d["files"] if not f["restricted"] and ((d["id"] in ("OSD-655", "OSD-745") and f["name"].endswith(".csv")) or (d["id"] == "OSD-767" and "STAR_Unnormalized_Counts" in f["name"]))]
     def one(job):
         study, info = job
@@ -119,8 +122,8 @@ def download():
         path = DATA / "raw" / study["id"] / info["name"]
         relative = path.relative_to(ROOT).as_posix()
         prior = previous.get(relative)
-        if path.exists() and prior and hashlib.sha256(path.read_bytes()).hexdigest() == prior["sha256"]:
-            body = path.read_bytes()
+        if safedata.exists(path) and prior and hashlib.sha256(safedata.bytes(path)).hexdigest() == prior["sha256"]:
+            body = safedata.bytes(path)
             acquired_at = prior.get("downloadedAt", stamp())
         else:
             body = fetch(info["url"])
@@ -140,14 +143,14 @@ def download():
 
 
 def validate():
-    checks = json.loads((DATA / "metadata" / "download_checksums.json").read_text())
+    checks = safedata.load(DATA / "metadata" / "download_checksums")
     issues = []
     for item in checks:
         path = ROOT / item["path"]
-        if not path.exists() or hashlib.sha256(path.read_bytes()).hexdigest() != item["sha256"]:
+        if not safedata.exists(path) or hashlib.sha256(safedata.bytes(path)).hexdigest() != item["sha256"]:
             issues.append(item["path"])
     report = {"checkedAt": stamp(), "filesChecked": len(checks), "integrityFailures": issues, "valid": not issues}
-    save_json(DATA / "metadata" / "integrity_report.json", report)
+    save_json(DATA / "metadata" / "integrity_report", report)
     if issues:
         raise ValueError(f"Integrity check failed: {issues}")
     return report

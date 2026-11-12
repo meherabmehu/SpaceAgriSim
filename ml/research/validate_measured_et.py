@@ -23,6 +23,7 @@ not transpiration, one cultivar in one greenhouse is not a crop coefficient, and
 table is a microgravity observation.
 """
 from __future__ import annotations
+import safedata
 
 import json
 import math
@@ -41,7 +42,7 @@ from app.config import simulation_constants as constants  # noqa: E402
 from app.simulation import crops, growth, water  # noqa: E402
 
 PROCESSED = _REPO_ROOT / "data" / "processed" / "phase26"
-OUTPUT = _REPO_ROOT / "ml" / "evaluation" / "phase26_measured_et_validation.json"
+OUTPUT = _REPO_ROOT / "ml" / "evaluation" / "phase26_measured_et_validation"
 
 POT_AREA_M2 = 0.0112  # the stated assumption; the study does not publish pot diameter
 POT_VOLUME_L = 2.2
@@ -352,7 +353,7 @@ def main() -> int:
     }
 
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(report, OUTPUT)
 
     print(f"records: {len(frame)} pot-days, {frame['potId'].nunique()} pots, "
           f"{len(report['measuredSide']['treatments'])} treatments")

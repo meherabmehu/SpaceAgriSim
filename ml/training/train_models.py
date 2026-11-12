@@ -23,6 +23,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "scripts"))
 from nasa_pipeline import DATA, save_json, stamp, validate
 
@@ -79,11 +81,11 @@ def train_harvest():
         "limitations": ["Only 14 measured harvest outcomes from VEG04A; not validated for another experiment or spacecraft.", "Crop is mizuna, not lettuce, tomato or radish. No cross-crop prediction.", "Full-period irrigation is a retrospective input; this is not an early harvest forecast or causal irrigation recommendation.", "Irrigation supplied is not physiological water demand or transpiration.", "Small-data regression may underperform its baseline; see measured metrics.", "No gravity-dose, radiation, temperature or humidity treatment effects can be learned from these tables."],
         "linear": portable_linear(model),
     }
-    save_json(ARTIFACTS / "mizuna-harvest-v1.json", card)
+    save_json(ARTIFACTS / "mizuna-harvest-v1", card)
     records = frame[["environment", "pillow", "group", "harvestFreshMassG"]].copy()
     records["prediction"] = predicted; records["baseline"] = baseline; records["cohortHoldoutPrediction"] = cohort_predictions
     records.to_csv(EVALUATION / "mizuna_out_of_fold.csv", index=False, lineterminator="\n")
-    save_json(EVALUATION / "mizuna_splits.json", folds)
+    save_json(EVALUATION / "mizuna_splits", folds)
     fig, ax = plt.subplots(figsize=(5, 4)); ax.scatter(y, predicted, label="Outer grouped CV"); ax.plot([0, 90], [0, 90], "--", color="gray"); ax.set(xlabel="Measured mass (g/pillow)", ylabel="Predicted mass (g/pillow)", title="Mizuna: exploratory validation"); ax.legend(); fig.tight_layout(); fig.savefig(EVALUATION / "mizuna_validation.png", dpi=150); plt.close(fig)
     return card
 
@@ -121,12 +123,12 @@ def train_molecular():
         "domain": {gene: {"min": float(frame[gene].min()), "max": float(frame[gene].max())} for gene in genes},
         "limitations": ["One VEG-05 experiment; cannot establish cross-study or causal gravity effects.", "Flight class is not disease, health, stress severity or biomass.", "Possible flight/ground batch confounding remains despite plant-grouped validation.", "Class probability is uncalibrated, not confidence or a medical/operational diagnostic.", "Requires laboratory RNA-seq, exact gene IDs and library normalization; environmental sliders are not compatible inputs."],
     }
-    save_json(ARTIFACTS / "tomato-flight-response-v1.json", card)
+    save_json(ARTIFACTS / "tomato-flight-response-v1", card)
     records = metadata.reset_index().copy(); records["observedFlight"] = y; records["outerCvProbabilityFlight"] = probabilities; records["outerCvClass"] = predicted
     records.to_csv(EVALUATION / "tomato_out_of_fold.csv", index=False, lineterminator="\n")
-    save_json(EVALUATION / "tomato_splits.json", splits)
+    save_json(EVALUATION / "tomato_splits", splits)
     # An explicit measured sample is provided for exercising schema/inference, not new validation.
-    save_json(ARTIFACTS / "tomato_example.json", {"sample": str(frame.index[0]), "sourceStudy": "OSD-767", "isTrainingSample": True, "expression": {gene: float(frame.iloc[0][gene]) for gene in genes}})
+    save_json(ARTIFACTS / "tomato_example", {"sample": str(frame.index[0]), "sourceStudy": "OSD-767", "isTrainingSample": True, "expression": {gene: float(frame.iloc[0][gene]) for gene in genes}})
     fig, ax = plt.subplots(figsize=(5, 4)); image = ax.imshow(metrics["confusionMatrix"], cmap="Blues"); ax.set(xticks=[0,1], yticks=[0,1], xticklabels=["Ground", "Flight"], yticklabels=["Ground", "Flight"], xlabel="Outer CV prediction", ylabel="Recorded condition", title="Tomato molecular context · grouped CV")
     for (i,j), value in np.ndenumerate(np.array(metrics["confusionMatrix"])): ax.text(j,i,str(value),ha="center",va="center")
     fig.colorbar(image,ax=ax); fig.tight_layout(); fig.savefig(EVALUATION / "tomato_confusion.png",dpi=150); plt.close(fig)
@@ -136,9 +138,9 @@ def train_molecular():
 def main():
     validate(); ARTIFACTS.mkdir(exist_ok=True); EVALUATION.mkdir(exist_ok=True)
     cards = [train_harvest(), train_molecular()]
-    checks = json.loads((DATA / "metadata" / "download_checksums.json").read_text())
-    registry = {"schemaVersion": 1, "trainedAt": stamp(), "environment": {"python": platform.python_version(), "numpy": np.__version__, "pandas": pd.__version__, "sklearn": sklearn.__version__}, "dataVersion": hashlib.sha256(json.dumps(checks, sort_keys=True).encode()).hexdigest(), "models": [{"id": c["id"], "artifact": f"ml/artifacts/{c['id']}.json", "sha256": hashlib.sha256((ARTIFACTS / f"{c['id']}.json").read_bytes()).hexdigest()} for c in cards]}
-    save_json(ARTIFACTS / "registry.json", registry)
+    checks = safedata.load(DATA / "metadata" / "download_checksums")
+    registry = {"schemaVersion": 1, "trainedAt": stamp(), "environment": {"python": platform.python_version(), "numpy": np.__version__, "pandas": pd.__version__, "sklearn": sklearn.__version__}, "dataVersion": hashlib.sha256(json.dumps(checks, sort_keys=True).encode()).hexdigest(), "models": [{"id": c["id"], "artifact": f"ml/artifacts/{c['id']}", "sha256": hashlib.sha256(safedata.bytes(ARTIFACTS / f"{c['id']}")).hexdigest()} for c in cards]}
+    save_json(ARTIFACTS / "registry", registry)
     print(json.dumps([{k:c[k] for k in ['id','samples','metrics']} for c in cards],indent=2))
 
 

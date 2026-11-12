@@ -220,7 +220,7 @@ def export_analysis(analysis_id: str, fmt: Literal["json", "csv", "md"],
 
     if fmt == "json":
         body = json.dumps(analysis, indent=2, sort_keys=True)
-        media, name = "application/json", f"{base}.json"
+        media, name = "application/json", f"{base}"
     elif fmt == "csv":
         rows: list[list] = [
             ["# SpaceAgriSim saved AI analysis"],

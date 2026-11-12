@@ -5,7 +5,7 @@ navigation, cards, buttons, animations, responsive design, the 3D greenhouse or
 visual assets. New functionality must arrive through existing generic components.
 
 This document records the measurement, not the intention. Evidence:
-`docs/phase7/ui_preservation.json`, produced by
+`docs/phase7/ui_preservation`, produced by
 `scripts/compare_ui_screenshots.py`.
 
 ---

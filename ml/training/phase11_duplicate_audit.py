@@ -20,11 +20,12 @@ Two identifier conventions must be reconciled, which is the entire trap:
     OSD-46   stores arrays as GSM1506014_1   (one array, one suffix)
     OSD-320  stores the same arrays as GSM1506014
 
-Output: `ml/evaluation/phase11_duplicate_audit.json`
+Output: `ml/evaluation/phase11_duplicate_audit`
 Run:    python ml/training/phase11_duplicate_audit.py
 """
 
 from __future__ import annotations
+import sys
 
 import csv
 import io
@@ -35,8 +36,10 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 RAW = ROOT / "data" / "raw"
-OUT = ROOT / "ml" / "evaluation" / "phase11_duplicate_audit.json"
+OUT = ROOT / "ml" / "evaluation" / "phase11_duplicate_audit"
 BUCKET = "https://nasa-osdr.s3.us-west-2.amazonaws.com"
 
 # Studies worth checking: everything catalogued plus the Phase 11 discovery leads.
@@ -53,7 +56,7 @@ ACCESSION = re.compile(r"^(GSM|SRR|ERR|DRR|SAMN|SAMEA)?\s*0*(\d{5,})", re.I)
 def isa_bytes(osd: str) -> bytes | None:
     """Local ISA archive if present, otherwise the newest one in the bucket."""
     for path in RAW.glob(f"{osd}/*ISA.zip"):
-        return path.read_bytes()
+        return safedata.bytes(path)
     try:
         listing = urllib.request.urlopen(
             f"{BUCKET}/?list-type=2&prefix={osd}/&max-keys=1000", timeout=120).read().decode()
@@ -198,7 +201,7 @@ def main() -> int:
     # differently - OSD-655 holds element and phenolic chemistry, OSD-780 holds plate
     # counts from the same VEG-04 plants. Only an identical value proves duplicate data.
     assays = {}
-    manifest = json.loads((ROOT / "data" / "metadata" / "dataset_manifest.json").read_text())
+    manifest = safedata.load(ROOT / "data" / "metadata" / "dataset_manifest")
     for entry in manifest["datasets"]:
         assays[entry["id"]] = entry.get("assayTypes", [])
     for row in duplicates:
@@ -233,7 +236,7 @@ def main() -> int:
             "as the same accession."),
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(result, indent=2) + "\n")
+    safedata.dump(result, OUT)
 
     print(f"\nchecked {len(identifiers)} studies, {len(unavailable)} unavailable")
     for row in duplicates:

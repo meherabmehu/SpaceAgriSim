@@ -27,6 +27,7 @@ missing layer is a gap; a layer that does not apply (no uncertainty layer for a 
 conversion) is not.
 """
 from __future__ import annotations
+import sys
 
 import argparse
 import json
@@ -34,7 +35,9 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
-TARGET_JSON = ROOT / "data" / "research" / "phase27" / "feature_implementation_coverage.json"
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
+TARGET_JSON = ROOT / "data" / "research" / "phase27" / "feature_implementation_coverage"
 TARGET_MD = ROOT / "docs" / "PHASE27_FEATURE_COVERAGE_MATRIX.md"
 GENERATED_ON = "2026-11-10"
 
@@ -123,7 +126,7 @@ FEATURES: list[dict[str, Any]] = [
             "data": _layer("present",
                            "345 usable pot-days reduced to 11 treatment-mean dates, hash-verified",
                            "data/processed/phase26/schroder2021_lettuce_et.csv",
-                           "data/metadata/phase26_acquisition_manifest.json"),
+                           "data/metadata/phase26_acquisition_manifest"),
             "method": _layer("present", "the shipped crop-relative demand path, called unmodified",
                              "backend/app/simulation/water.py"),
             "service": _layer("present",
@@ -145,10 +148,10 @@ FEATURES: list[dict[str, Any]] = [
             "uncertainty": _layer("present",
                                   "between-pot spread, measured; the three denominators shown side "
                                   "by side and an explicit statement that no confidence interval exists",
-                                  "ml/evaluation/phase26_measured_et_validation.json"),
+                                  "ml/evaluation/phase26_measured_et_validation"),
             "provenance": _layer("present",
                                  "DOI, licence, processed path and per-file SHA-256, hashVerified computed",
-                                 "data/research/dataset_catalog.json"),
+                                 "data/research/dataset_catalog"),
             "frontend": _layer("present",
                                "inside the existing simulation lab; verdict, curve, spread, denominators",
                                "frontend/src/pages/modules/WaterEvidencePanel.jsx",
@@ -220,7 +223,7 @@ FEATURES: list[dict[str, Any]] = [
                               "stay committed; every model passage the assistant can quote carries "
                               "its served scope",
                               "docs/PHASE31_REMOVED_MODELS.md",
-                              "ml/evaluation/phase30_harvest_crossstudy.json"),
+                              "ml/evaluation/phase30_harvest_crossstudy"),
          "tests": _layer("present",
                          "no route, OpenAPI operation, catalogue row, request schema, assistant "
                          "passage or workflow offers a harvest forecast",
@@ -267,7 +270,7 @@ FEATURES: list[dict[str, Any]] = [
                                   "backend/app/workflows/light_stress.py"),
             "provenance": _layer("present",
                                  "each regime names its source study, licence and design caveat",
-                                 "data/processed/phase29/light_stress_quality.json"),
+                                 "data/processed/phase29/light_stress_quality"),
             "frontend": _layer("present",
                                "the guided workflows render the measured groups and their spread",
                                "frontend/src/pages/modules/GuidedWorkflows.jsx",
@@ -358,13 +361,13 @@ FEATURES: list[dict[str, Any]] = [
         "No paired imagery and harvest labels exist for a plant-health model, and the catalogue's "
         "imagery datasets are licence classes E/F, which cannot back a served model. No upload, "
         "camera view or plant-health card exists.",
-        "data/research/dataset_catalog.json",
+        "data/research/dataset_catalog",
         [PHASE32_TESTS]),
     _removed_feature(
         12, "long-run-climate", "Siting for a future climate",
         "The CMIP6 downscaled product is catalogued at licence class D and could not be acquired; "
         "no projection data is in the repository and no climate-siting control or report exists.",
-        "data/research/dataset_catalog.json",
+        "data/research/dataset_catalog",
         [PHASE32_TESTS]),
 ]
 
@@ -440,9 +443,7 @@ CROSS_CUTTING_GAPS: list[dict[str, Any]] = [
 
 
 def _catalogue_ok() -> dict[str, Any]:
-    return json.loads((ROOT / "data" / "research" / "phase26" / "feature_readiness.json")
-                      .read_text(encoding="utf-8")) if (
-        ROOT / "data" / "research" / "phase26" / "feature_readiness.json").is_file() else {}
+    return safedata.load(ROOT / "data" / "research" / "phase26" / "feature_readiness") if safedata.exists(ROOT / "data" / "research" / "phase26" / "feature_readiness") else {}
 
 
 def validate() -> list[str]:
@@ -466,7 +467,7 @@ def validate() -> list[str]:
             if entry["state"] == "present" and not entry["evidence"]:
                 problems.append(f"{feature['id']}.{layer}: present with no evidence path")
             for path in entry["evidence"]:
-                if not (ROOT / path).exists():
+                if not safedata.exists(ROOT / path):
                     problems.append(f"{feature['id']}.{layer}: missing path {path}")
     return problems
 
@@ -494,7 +495,7 @@ def render(payload: dict[str, Any]) -> str:
     lines = [
         "# Phase 27 — Feature Implementation Coverage Matrix",
         "",
-        f"Generated from `data/research/phase27/feature_implementation_coverage.json` on "
+        f"Generated from `data/research/phase27/feature_implementation_coverage` on "
         f"{payload['generatedOn']} by `ml/research/build_feature_coverage.py`. Edit the JSON, not "
         "this file.",
         "",
@@ -609,10 +610,10 @@ def main() -> int:
 
     payload = build()
     if args.check:
-        if not TARGET_JSON.is_file() or not TARGET_MD.is_file():
+        if not safedata.exists(TARGET_JSON) or not safedata.exists(TARGET_MD):
             print("MISSING coverage files; run without --check")
             return 1
-        committed = json.loads(TARGET_JSON.read_text(encoding="utf-8"))
+        committed = safedata.load(TARGET_JSON)
         if committed["features"] != payload["features"]:
             print("STALE JSON: the builder's feature list differs from the committed one")
             return 1
@@ -623,7 +624,7 @@ def main() -> int:
         return 0
 
     TARGET_JSON.parent.mkdir(parents=True, exist_ok=True)
-    TARGET_JSON.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(payload, TARGET_JSON)
     TARGET_MD.write_text(render(payload), encoding="utf-8")
     print(f"wrote {TARGET_MD.relative_to(ROOT)}: {len(FEATURES)} features, "
           f"{len(payload['summary']['completeWorkflows'])} complete workflows, "

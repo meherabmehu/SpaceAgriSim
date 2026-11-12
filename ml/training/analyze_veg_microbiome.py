@@ -208,7 +208,7 @@ def main() -> int:
         ],
     }
     EVAL.mkdir(parents=True, exist_ok=True)
-    save_json(EVAL / "phase9_veg_microbiome_feasibility.json", payload)
+    save_json(EVAL / "phase9_veg_microbiome_feasibility", payload)
 
     for record in records:
         print(f"\n{record['study']} ({record['mission']}): {record['samples']} samples, "
@@ -218,7 +218,7 @@ def main() -> int:
         if test:
             print(f"  CLR centroid distance {test['observedDistance']:.3f}, "
                   f"p={test['pValue']:.4f} over {test['nPermutations']} permutations")
-    print("\nwrote ml/evaluation/phase9_veg_microbiome_feasibility.json")
+    print("\nwrote ml/evaluation/phase9_veg_microbiome_feasibility")
     print("Verdict: descriptive only. No model registered.")
     return 0
 

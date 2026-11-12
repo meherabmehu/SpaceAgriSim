@@ -26,12 +26,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "backend"))
 
 ARTIFACTS = ROOT / "ml" / "artifacts"
-REGISTRY = ARTIFACTS / "registry.json"
+REGISTRY = ARTIFACTS / "registry"
 PINS = ROOT / "ml" / "requirements-training.txt"
-OUT = ROOT / "docs" / "phase7" / "registry_verification.json"
+OUT = ROOT / "docs" / "phase7" / "registry_verification"
 
 FAILURES: list[str] = []
 CHECKS: list[dict] = []
@@ -57,32 +59,32 @@ def pinned_versions() -> dict[str, str]:
 def main(argv: list[str] | None = None) -> int:
     # `--check` verifies without rewriting the report. Two things motivated it: CI should be able to
     # run this gate without dirtying the working tree, and a timestamp-only diff in
-    # docs/phase7/registry_verification.json has twice been mistaken for a real change.
+    # docs/phase7/registry_verification has twice been mistaken for a real change.
     arguments = sys.argv[1:] if argv is None else argv
     write = "--check" not in arguments and "--no-write" not in arguments
-    registry = json.loads(REGISTRY.read_text())
+    registry = safedata.load(REGISTRY)
     models = registry["models"]
 
     # 1. Every registered artifact exists and matches its checksum.
     digests = {}
     for item in models:
         path = ROOT / item["artifact"]
-        if not path.is_file():
+        if not safedata.exists(path):
             check(f"artifact exists: {item['id']}", False, str(path))
             continue
-        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        digest = hashlib.sha256(safedata.bytes(path)).hexdigest()
         digests[item["id"]] = digest
         check(f"checksum matches: {item['id']}", digest == item["sha256"],
               f"{digest[:12]} vs recorded {item['sha256'][:12]}")
 
     # 2. No orphan artifacts: everything on disk is accounted for.
     #
-    # Explanation files live beside their models (ml/artifacts/<id>-explanation.json)
+    # Explanation files live beside their models (ml/artifacts/<id>-explanation)
     # rather than inside them, so a model checksum keeps meaning "the trained model".
     # They are not models and must be excluded here, or every explained model looks
     # like an orphan.
     registered_ids = {item["id"] for item in models}
-    on_disk = {p.stem for p in ARTIFACTS.glob("*.json")} - {"registry", "tomato_example"}
+    on_disk = {p.stem for p in safedata.records(ARTIFACTS)} - {"registry", "tomato_example"}
     on_disk = {stem for stem in on_disk if not stem.endswith("-explanation")}
     # Phase 31: three artifacts are retained as documented negative results but are not served.
     # They leave the orphan set only because `research.RETIRED_MODEL_IDS` declares them, and that
@@ -134,10 +136,10 @@ def main(argv: list[str] | None = None) -> int:
 
     # 6. No artifact claims more than its own evidence supports.
     for item in models:
-        path = ARTIFACTS / f"{item['id']}.json"
-        if not path.is_file():
+        path = ARTIFACTS / f"{item['id']}"
+        if not safedata.exists(path):
             continue
-        card = json.loads(path.read_text())
+        card = safedata.load(path)
         status = card.get("evidenceStatus")
         basis = card.get("evidenceBasis") or {}
         if status == "validated" or status == "validated-exploratory":
@@ -170,11 +172,11 @@ def main(argv: list[str] | None = None) -> int:
         declared = item.get("independentValidation")
         if not declared:
             continue
-        path = ARTIFACTS / f"{item['id']}.json"
-        if not path.is_file():
+        path = ARTIFACTS / f"{item['id']}"
+        if not safedata.exists(path):
             check(f"independent validation has an artifact: {item['id']}", False, str(path))
             continue
-        card = json.loads(path.read_text())
+        card = safedata.load(path)
         recorded = ((card.get("validation") or {}).get("independent") or {})
         if not recorded:
             check(f"independent validation is recorded in the artifact: {item['id']}", False,
@@ -244,7 +246,7 @@ def main(argv: list[str] | None = None) -> int:
     }
     if write:
         OUT.parent.mkdir(parents=True, exist_ok=True)
-        OUT.write_text(json.dumps(payload, indent=2, ensure_ascii=True) + "\n")
+        safedata.dump(payload, OUT)
 
     for entry in CHECKS:
         print(f"  [{'PASS' if entry['passed'] else 'FAIL'}] {entry['check']}"

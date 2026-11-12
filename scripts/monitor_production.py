@@ -17,7 +17,7 @@ anyone's data, and it writes no records.
 
 Usage:
     python3 scripts/monitor_production.py                       # hosted API, human output
-    python3 scripts/monitor_production.py --json                # machine-readable
+    python3 scripts/monitor_production.py --report out.yaml     # machine-readable
     python3 scripts/monitor_production.py --base-url http://127.0.0.1:8011 --allow-degraded
 
 Exit codes:
@@ -31,6 +31,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import pathlib
 import sys
 import time
 import urllib.error
@@ -263,7 +264,8 @@ def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Monitor the deployed SpaceAgriSim API.")
     parser.add_argument("--base-url", default=DEFAULT_BASE_URL)
     parser.add_argument("--timeout", type=float, default=DEFAULT_TIMEOUT)
-    parser.add_argument("--json", action="store_true", help="machine-readable output")
+    parser.add_argument("--report", metavar="PATH",
+                        help="write the machine-readable report to PATH (YAML)")
     parser.add_argument("--allow-degraded", action="store_true",
                         help="report a not-ready service as a warning instead of a failure "
                              "(for a maintenance window, not for CI)")
@@ -278,8 +280,14 @@ def main(argv=None) -> int:
 
     payload = result.as_dict()
     payload["warnings"] = [check.name for check in result.warnings]
-    if args.json:
-        print(json.dumps(payload, indent=2))
+    if args:
+        import yaml
+        rendered = yaml.safe_dump(payload, sort_keys=False, allow_unicode=True, width=100)
+        if args.report:
+            pathlib.Path(args.report).write_text(rendered, encoding="utf-8")
+            print(f"report: {args.report}")
+        else:
+            print(rendered)
     else:
         print(f"SpaceAgriSim production monitor: {base}")
         for check in result.checks:

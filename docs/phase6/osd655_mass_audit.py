@@ -1,0 +1,26 @@
+"""Data record. Generated - the generator is named inside the record itself."""
+
+DATA = {'study': 'OSD-655',
+ 'experiment': 'VEG-04A',
+ 'arms': {'flight': {'rows': 12,
+                     'formula': 'mean(MMD4 subsample weighings) + crew consumption',
+                     'rows_reconstructed': 8,
+                     'rows_exact': 8,
+                     'leaf_counts_available': 0,
+                     'consumption_included_in_total': True},
+          'ground': {'rows': 12,
+                     'formula': 'full harvested leaf mass + broken leaf mass',
+                     'rows_reconstructed': 6,
+                     'rows_exact': 6,
+                     'leaf_counts_available': 6,
+                     'consumption_included_in_total': False}},
+ 'verdict': 'The two arms define Total (g) by different formulas over different underlying measurements: the '
+            'flight value is a weighed subsample mean plus crew consumption, the ground value is a complete '
+            'harvest plus broken-leaf mass. Only the ground arm records leaf counts. Pooling both into one '
+            'target, with `flight` as a predictor, allows the model to fit a measurement-protocol difference '
+            'rather than crop biology. The target is NOT a like-for-like comparison and must be reported as '
+            'such.',
+ 'header_defect': 'The published header declares three blank sub-headers for the MMD block while four '
+                  'replicate columns are populated, so key-based parsing shifts the labels from column 13 '
+                  'onward. Total (g) is unaffected; Consumption Avg. (g) and Return Samples (g) are '
+                  'mis-mapped.'}

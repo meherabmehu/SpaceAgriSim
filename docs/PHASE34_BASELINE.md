@@ -33,7 +33,7 @@ indicator are asserted by the Playwright suite.
 | OpenAPI paths / operations | 83 / 90 | `app.openapi()` at this commit |
 | served model ids | 7 | `app.research.MODEL_IDS` |
 | withdrawn artifacts (retained, unreachable) | 2 | `app.research.RETIRED_MODEL_IDS` |
-| registered artifacts | 9 | `ml/artifacts/*.json` + `registry.json` |
+| registered artifacts | 9 | `ml/artifacts/*.py` + `registry` |
 
 Served models at baseline: `lettuce-earth-growth-v1/-v2/-v3`, `tomato-flight-response-v1`,
 `mizuna-microbial-relative-load-v2`, `radiation-quality-osd46-v1`, `radiation-exposure-osd46-v1`.
@@ -42,15 +42,15 @@ Withdrawn and unreachable: `mizuna-harvest-v1` (held-out R² −0.333), `mizuna-
 
 ## 3. Data
 
-* `data/metadata/dataset_manifest.json` — **24 datasets** with id, title, source URL, metadata URL.
+* `data/metadata/dataset_manifest` — **24 datasets** with id, title, source URL, metadata URL.
 * `data/raw/` — 22 MB across OSD-46, OSD-59, OSD-120, OSD-314, OSD-386, OSD-655, OSD-670, OSD-723,
   OSD-745, OSD-780 and NTRS extracts.
 * `data/processed/` — 5.5 MB, including `mizuna_microbial_load.csv` (356 rows; VEG04A 184,
   VEG04B 172, **both campaigns in one file**) and `lettuce_earth.csv` (1648 rows, DAT 2–29,
   air/root 20–32 °C, PPFD 200–750, FW 0.441–942.1 g).
-* `data/literature/external_lettuce_peerj17085.json` — PeerJ 2024 treatment means with study
+* `data/literature/external_lettuce_peerj17085` — PeerJ 2024 treatment means with study
   conditions, committed in an earlier phase.
-* Checksums, licences and provenance: `data/metadata/*checksums*.json`,
+* Checksums, licences and provenance: `data/metadata/*checksums*.py`,
   `ml/training/phase32_provenance.py` (verified 9/9 at baseline and at delivery).
 
 ## 4. Tests and gates at baseline

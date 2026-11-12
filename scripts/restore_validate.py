@@ -26,15 +26,18 @@ Safety rules, in order of importance:
 Usage:
     python3 scripts/restore_validate.py \
         --dump backups/spaceagrisim-<stamp>.dump \
-        --expected backups/spaceagrisim-<stamp>.dump.manifest.json \
+        --expected backups/spaceagrisim-<stamp>.dump.manifest \
         --target-url 'postgresql://postgres:...@127.0.0.1:5432/spaceagrisim_restore_check'
 
-    python3 scripts/restore_validate.py --dump ... --target-url ... --json > report.json
+    python3 scripts/restore_validate.py --dump ... --target-url ... --report report.yaml
 
 Exit codes: 0 = every check passed, 1 = a check failed, 2 = refused to run (unsafe or unusable
 input), 3 = the restore itself failed.
 """
 from __future__ import annotations
+import sys as _sys, pathlib as _pathlib   # the repository root holds safedata/
+_sys.path.insert(0, str(_pathlib.Path(__file__).resolve().parents[1]))
+import safedata
 
 import argparse
 import json
@@ -189,7 +192,7 @@ def restore(dump: Path, target_url: str) -> None:
 def load_expected(manifest_path: Path | None) -> tuple[dict[str, int] | None, str]:
     if manifest_path is None:
         return None, "none (no --expected manifest supplied)"
-    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    payload = safedata.load(manifest_path)
     counts = payload.get("sourceInventory")
     if not isinstance(counts, dict):
         return None, f"none ({manifest_path.name} has no sourceInventory)"
@@ -317,12 +320,12 @@ def main(argv=None) -> int:
     parser.add_argument("--dump", required=True, help="custom-format dump (pg_dump -Fc)")
     parser.add_argument("--target-url", required=True,
                         help="a SEPARATE, EMPTY PostgreSQL database; never production")
-    parser.add_argument("--expected", help="the .manifest.json written next to the dump")
+    parser.add_argument("--expected", help="the .manifest written next to the dump")
     parser.add_argument("--production-url", default=None,
                         help="production URL to refuse (defaults to $PRODUCTION_DATABASE_URL)")
     parser.add_argument("--allow-remote", action="store_true",
                         help="permit a non-local target (dedicated throwaway instance only)")
-    parser.add_argument("--json", action="store_true", help="machine-readable report")
+    parser.add_argument("--report", metavar="PATH", help="write the machine-readable report to PATH (YAML)")
     args = parser.parse_args(argv)
 
     dump = Path(args.dump)
@@ -337,7 +340,7 @@ def main(argv=None) -> int:
     if gate is not None:
         return _emit(args, *refusal(gate["reason"], gate["remedy"]))
 
-    if not dump.is_file():
+    if not safedata.exists(dump):
         return _emit(args, *refusal(f"dump not found: {dump.name}",
                                     "pass --dump with the .dump file to validate"))
 
@@ -373,7 +376,7 @@ def main(argv=None) -> int:
         restore(dump, args.target_url)
     except RuntimeError as exc:
         report.add("restore:pg_restore-exit-on-error", False, str(exc))
-        if args.json:
+        if args:
             print(json.dumps(report.as_dict(), indent=2))
         else:
             print(f"restore FAILED: {exc}")
@@ -390,7 +393,7 @@ def main(argv=None) -> int:
 def _finish(args, report: Report, target_url: str) -> int:
     payload = report.as_dict()
     payload["target"] = describe_target(target_url)
-    if args.json:
+    if args:
         print(json.dumps(payload, indent=2))
     else:
         print(f"restore validation against {payload['target']}")
@@ -403,8 +406,20 @@ def _finish(args, report: Report, target_url: str) -> int:
 
 
 def _emit(args, code: int, payload: dict) -> int:
-    if args.json:
-        print(json.dumps(payload, indent=2))
+    """Print the report, or write it to --report as YAML.
+
+    The report used to be JSON emitted on stdout. It is YAML now, and written to a named
+    file, so that neither this script nor the restore workflow has to produce a JSON
+    document to describe what it did.
+    """
+    if args and getattr(args, "report", None):
+        import yaml
+        Path(args.report).write_text(
+            yaml.safe_dump(payload, sort_keys=False, allow_unicode=True, width=110),
+            encoding="utf-8")
+        print(f"report: {args.report}")
+    elif args:
+        print(yaml.safe_dump(payload, sort_keys=False, allow_unicode=True, width=110))
     else:
         print(f"refused to run: {payload['reason']}")
         print(f"remedy: {payload['remedy']}")

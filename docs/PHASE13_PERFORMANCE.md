@@ -1,6 +1,6 @@
 # Phase 13 — Performance: Measured, Not Assumed
 
-Artifact: `ml/evaluation/phase13_performance.json`
+Artifact: `ml/evaluation/phase13_performance`
 Runner: `python3 scripts/benchmark_api.py --write`
 Environment: in-process Starlette `TestClient`, single sandbox CPU, 25 iterations per route after
 one warm-up.
@@ -60,7 +60,7 @@ the response itself.
 
 ## 4. Where the assistant's cost is
 
-The assistant's own benchmark (`ml/evaluation/phase13_assistant_eval.json`) times the composer
+The assistant's own benchmark (`ml/evaluation/phase13_assistant_eval`) times the composer
 without HTTP: **median 1.24 ms, p95 3.28 ms** across 32 questions. Through the API the same class
 of question costs 5–12 ms, i.e. framework and serialisation dominate retrieval and composition.
 This is why there is no index, no vector store and no cache in the assistant: at 47 passages,

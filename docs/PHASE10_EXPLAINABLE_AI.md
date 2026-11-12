@@ -104,7 +104,7 @@ reported for ranking genes, not as evidence of performance. The artifact says th
 
 ## Where it lives
 
-Explanations are stored **beside** the models (`ml/artifacts/<id>-explanation.json`),
+Explanations are stored **beside** the models (`ml/artifacts/<id>-explanation.py`),
 not inside them, so a model artifact's checksum keeps meaning "the trained model" and
 the explanation carries its own provenance and its own regeneration script
 (`ml/training/phase10_explain_radiation.py`).

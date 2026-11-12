@@ -23,7 +23,7 @@ REMOVED_FIELDS: dict[str, str] = {
     "gravity": (
         "gravity was removed in Phase 30. No open dataset measures crop yield across fractional "
         "gravity, so the simulator applied an invented penalty; it no longer accepts a gravity input "
-        "and no output depends on one. See data/research/dataset_gap_matrix.json, gap "
+        "and no output depends on one. See data/research/dataset_gap_matrix, gap "
         "'fractional-gravity'."
     ),
 }

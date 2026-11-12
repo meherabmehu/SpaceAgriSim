@@ -36,6 +36,8 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "backend"))
 sys.path.insert(0, str(ROOT / "scripts" / "et0_validation"))
 
@@ -49,7 +51,7 @@ from app.simulation.et0_fao56 import (  # noqa: E402
 
 PROCESSED = ROOT / "data" / "processed" / "lysimeter"
 OUT = ROOT / "data" / "research" / "phase36"
-REPORT = OUT / "et0_measurement_validation.json"
+REPORT = OUT / "et0_measurement_validation"
 
 # Latent heat of vaporisation used to turn a measured flux into a water depth. 2.45 MJ/kg is the
 # FAO-56 value at 20 C; using it at 5 C introduces ~1 % error, which is far below the eddy
@@ -127,7 +129,7 @@ def regression(xs: list[float], ys: list[float]) -> dict:
 
 def tereno_leg() -> dict:
     path = PROCESSED / "tereno_hourly.csv"
-    if not path.exists():
+    if not safedata.exists(path):
         return {"status": "UNAVAILABLE", "reason": f"{path} missing"}
     hourly: dict[tuple[str, int, int], dict] = {}
     skipped = {"missing_wind": 0, "missing_pressure": 0, "non_positive_energy": 0}
@@ -212,7 +214,7 @@ def tereno_leg() -> dict:
 def lysimeter_leg() -> dict:
     eta_path = PROCESSED / "zurich_eta_daily.csv"
     power_path = ROOT / "data" / "processed" / "power_validation" / "zurich_reckenholz_ch.csv"
-    if not eta_path.exists() or not power_path.exists():
+    if not safedata.exists(eta_path) or not safedata.exists(power_path):
         return {"status": "UNAVAILABLE", "reason": "lysimeter or POWER forcing missing"}
 
     by_day: dict[str, list[float]] = {}
@@ -318,7 +320,7 @@ def lysimeter_leg() -> dict:
 
 def substrate_leg() -> dict:
     path = PROCESSED / "zurich_fdr_daily.csv"
-    if not path.exists():
+    if not safedata.exists(path):
         return {"status": "UNAVAILABLE"}
     by_depth: dict[int, list[float]] = {}
     with path.open(newline="") as handle:
@@ -347,7 +349,7 @@ def main() -> int:
         "lysimeterLevelTest": lysimeter_leg(),
         "rootZoneWaterContent": substrate_leg(),
     }
-    REPORT.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(report, REPORT)
     t = report["terenoFormulationTest"]
     l = report["lysimeterLevelTest"]
     print("TERENO (formulation, measured forcing):", t.get("status"),

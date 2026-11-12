@@ -1,6 +1,6 @@
 # Phase 26 — Feature Readiness and Coverage Matrix
 
-Generated from `data/research/phase26/feature_readiness.json` on 2026-11-10 by `ml/research/build_feature_readiness.py`. Edit the JSON, not this file.
+Generated from `data/research/phase26/feature_readiness` on 2026-11-10 by `ml/research/build_feature_readiness.py`. Edit the JSON, not this file.
 
 Twelve named capabilities, audited against the evidence that exists in this repository. A tier describes what a feature may **claim**, not how much code it has, and the builder refuses to write an audit whose tiers outrun their evidence.
 
@@ -70,7 +70,7 @@ What would move it: per-day weather and pot geometry for a gravimetric or lysime
 
 Blocking evidence: none obtainable under an open licence in this phase
 
-Evidence artefacts: `ml/evaluation/phase26_measured_et_validation.json`, `data/processed/phase26/schroder2021_lettuce_et.csv`, `backend/app/simulation/water.py`
+Evidence artefacts: `ml/evaluation/phase26_measured_et_validation`, `data/processed/phase26/schroder2021_lettuce_et.csv`, `backend/app/simulation/water.py`
 
 ### 2. The claim that the ET0 target is itself correct
 
@@ -90,7 +90,7 @@ What would move it: a flux-tower or lysimeter site inside a controlled environme
 
 Blocking evidence: no controlled-environment ET0 measurement exists openly
 
-Evidence artefacts: `ml/evaluation/et0_dataset_quality.json`, `docs/ERA5_LAND_INDEPENDENT_VALIDATION.md`
+Evidence artefacts: `ml/evaluation/et0_dataset_quality`, `docs/ERA5_LAND_INDEPENDENT_VALIDATION.md`
 
 ### 3. Predicted harvest mass per plant
 
@@ -108,7 +108,7 @@ What would move it: nothing: the capability is removed rather than blocked
 
 Blocking evidence: the independent error is more than ten times the criterion
 
-Evidence artefacts: `ml/evaluation/phase30_harvest_crossstudy.json`, `data/processed/phase30/lettuce_multistudy.csv`, `backend/tests/test_phase30_removed_capabilities.py`
+Evidence artefacts: `ml/evaluation/phase30_harvest_crossstudy`, `data/processed/phase30/lettuce_multistudy.csv`, `backend/tests/test_phase30_removed_capabilities.py`
 
 ### 4. Response to specific LED spectra and photoperiods
 
@@ -182,7 +182,7 @@ What would move it: in-facility climate logging at sub-hourly resolution
 
 Blocking evidence: no open controlled-environment climate series with the required resolution was found
 
-Evidence artefacts: `ml/evaluation/phase11_dataset_discovery.json`, `docs/DATASET_GAP_MATRIX.md`
+Evidence artefacts: `ml/evaluation/phase11_dataset_discovery`, `docs/DATASET_GAP_MATRIX.md`
 
 ### 8. Cultivar-specific growth parameters
 

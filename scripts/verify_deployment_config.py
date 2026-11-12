@@ -34,6 +34,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "backend"))
 
 FAILURES: list[str] = []
@@ -265,9 +267,9 @@ def main() -> int:
             payload["checks"] = CHECKS
             payload["passed"] = False
             payload["failures"] = FAILURES
-            out = ROOT / "docs" / "phase7" / "deployment_verification.json"
+            out = ROOT / "docs" / "phase7" / "deployment_verification"
             out.parent.mkdir(parents=True, exist_ok=True)
-            out.write_text(json.dumps(payload, indent=2, ensure_ascii=True) + "\n")
+            safedata.dump(payload, out)
             for entry in CHECKS:
                 print(f"  [{'PASS' if entry['passed'] else 'FAIL'}] "
                       f"{entry['check']}: {entry['detail']}")
@@ -284,9 +286,9 @@ def main() -> int:
     payload["passed"] = not FAILURES
     payload["failures"] = FAILURES
 
-    out = ROOT / "docs" / "phase7" / "deployment_verification.json"
+    out = ROOT / "docs" / "phase7" / "deployment_verification"
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(payload, indent=2, ensure_ascii=True) + "\n")
+    safedata.dump(payload, out)
 
     for entry in CHECKS:
         print(f"  [{'PASS' if entry['passed'] else 'FAIL'}] {entry['check']}: {entry['detail']}")

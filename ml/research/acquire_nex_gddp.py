@@ -3,7 +3,7 @@
 
 Why this exists
 ---------------
-Gap ``long-run-climate`` in ``data/research/dataset_gap_matrix.json`` records that the platform
+Gap ``long-run-climate`` in ``data/research/dataset_gap_matrix`` records that the platform
 can say what the weather was at a site but not what it is projected to become, so any statement
 about whether a location stays viable under mid-century forcing had no evidence behind it.
 
@@ -30,6 +30,7 @@ Grid conventions that bite
     python3 ml/research/acquire_nex_gddp.py [--model ACCESS-CM2] [--write-manifest-only]
 """
 from __future__ import annotations
+import sys
 
 import argparse
 import hashlib
@@ -40,8 +41,10 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 PROCESSED = ROOT / "data" / "processed" / "nex_gddp"
-MANIFEST = ROOT / "data" / "metadata" / "nex_gddp_acquisition_manifest.json"
+MANIFEST = ROOT / "data" / "metadata" / "nex_gddp_acquisition_manifest"
 STAGING = Path("/var/tmp/spaceagrisim_nex")
 
 BUCKET = "https://nex-gddp-cmip6.s3.amazonaws.com"
@@ -287,7 +290,7 @@ def main() -> int:
         "bytesTransferred": sum(f.get("bytes", 0) for f in manifest["files"]),
         "blockedCells": {k: v for k, v in manifest["cells"].items()},
     }
-    MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(manifest, MANIFEST)
     shutil.rmtree(STAGING, ignore_errors=True)
     print(f"\nmanifest -> {MANIFEST.relative_to(ROOT)}")
     print(json.dumps(manifest["summary"], indent=2)[:600])

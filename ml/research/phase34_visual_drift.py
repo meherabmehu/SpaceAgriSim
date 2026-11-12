@@ -18,7 +18,7 @@ Three comparisons per capture:
 Every comparison uses the gate's own metric (`scripts/visual_regression.py`): canvas size equality
 plus the share of pixels whose largest channel delta exceeds 16. No baseline is rewritten here.
 
-Output: ml/evaluation/phase34_visual_drift.json
+Output: ml/evaluation/phase34_visual_drift
 Run:    python ml/research/phase34_visual_drift.py
 """
 from __future__ import annotations
@@ -34,10 +34,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from screenshot_store import names_in, resolve  # noqa: E402  (sibling module, not a package)
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 BASELINE = ROOT / "docs" / "screenshots"
 PARENT = BASELINE / "phase34" / "parent"
 CANDIDATE = BASELINE / "phase34" / "candidate"
-OUTPUT = ROOT / "ml" / "evaluation" / "phase34_visual_drift.json"
+OUTPUT = ROOT / "ml" / "evaluation" / "phase34_visual_drift"
 
 # Identical to the gate, so a number here means the same thing as a number there.
 PIXEL_BUDGET = 0.02
@@ -113,7 +115,7 @@ def main() -> int:
         "note": ("Read the three blocks in order. baseline->parent is drift this phase never "
                  "touched; parent->candidate is the change this phase is responsible for."),
     }
-    OUTPUT.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(report, OUTPUT)
     for key in ("baselineToParent", "parentToCandidate", "baselineToCandidate"):
         block = report[key]
         print(f"{key}: {block['compared']} captures, median "

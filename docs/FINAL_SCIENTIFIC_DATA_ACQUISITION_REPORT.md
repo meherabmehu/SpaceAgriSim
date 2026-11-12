@@ -73,8 +73,8 @@ added a file rather than a fact. It is recorded so that a later phase does not r
 
 | Dataset | Objects / members | Bytes transferred | Checksum |
 |---|---|---|---|
-| POWER hourly | 6 JSON | 6.76 MB | SHA-256 per file in `data/metadata/power_hourly_manifest.json` |
-| POWER daily (lysimeter site) | 1 JSON | small | SHA-256 in `power_validation_manifest.json` |
+| POWER hourly | 6 JSON | 6.76 MB | SHA-256 per file in `data/metadata/power_hourly_manifest` |
+| POWER daily (lysimeter site) | 1 JSON | small | SHA-256 in `power_validation_manifest` |
 | NEX-GDDP-CMIP6 | 50 NetCDF objects | 12.62 GB | SHA-256 per object, computed while streaming |
 | Agroscope lysimeter | 7 files | 6.24 MB | publisher MD5 verified for all 7 |
 | TERENO | 1 TAR (5 workbooks) | 8.49 MB | publisher MD5 verified |
@@ -110,7 +110,7 @@ recorded before any analysis touched it. Five findings changed the code:
    recorded.
 5. **The IoT4Lettuce climate tables are cp1252, not UTF-8**, and several TERENO workbooks duplicate
    the same observations across sheets. Both are handled explicitly; the excluded sheets are listed
-   with the reason in `data/metadata/lysimeter_processing_manifest.json`.
+   with the reason in `data/metadata/lysimeter_processing_manifest`.
 
 ## 6. Datasets rejected
 
@@ -133,15 +133,15 @@ and whose files are one article.
 ## 7. Datasets accepted and integrated
 
 Five datasets were accepted and integrated, and all five are class A in
-`data/research/dataset_catalog.json` — acquired, used, and driving a committed artefact.
+`data/research/dataset_catalog` — acquired, used, and driving a committed artefact.
 
 | Dataset | Licence | Integrated as | Drives |
 |---|---|---|---|
-| POWER hourly | NASA open, no restrictions | `data/processed/power_hourly/` | `data/research/phase36/hourly_environment.json` |
-| NEX-GDDP-CMIP6 | open, CMIP6 terms | `data/processed/nex_gddp/` | `data/research/phase36/projected_climate.json` |
-| Agroscope lysimeter | CC BY 4.0 | `data/processed/lysimeter/zurich_*.csv` | `data/research/phase36/et0_measurement_validation.json` |
+| POWER hourly | NASA open, no restrictions | `data/processed/power_hourly/` | `data/research/phase36/hourly_environment` |
+| NEX-GDDP-CMIP6 | open, CMIP6 terms | `data/processed/nex_gddp/` | `data/research/phase36/projected_climate` |
+| Agroscope lysimeter | CC BY 4.0 | `data/processed/lysimeter/zurich_*.csv` | `data/research/phase36/et0_measurement_validation` |
 | TERENO EC + lysimeter | CC BY 4.0 | `data/processed/lysimeter/tereno_hourly.csv` | the same artefact, formulation leg |
-| IoT4Lettuce (12 members) | CC BY 4.0 | `data/raw/zenodo_20759414/` | `data/research/phase36/iot4lettuce_water_cultivar.json` |
+| IoT4Lettuce (12 members) | CC BY 4.0 | `data/raw/zenodo_20759414/` | `data/research/phase36/iot4lettuce_water_cultivar` |
 
 Integration follows the architecture already in the repository: a raw file written before parsing,
 a SHA-256 and byte size per file, a manifest naming the exact request parameters and provider
@@ -155,7 +155,7 @@ no reader can mistake "the archive was inspected" for "the archive was downloade
 
 ## 8. Status of all 14 gaps
 
-Source of truth: `data/research/dataset_gap_matrix.json`; rendered into
+Source of truth: `data/research/dataset_gap_matrix`; rendered into
 `docs/DATASET_GAP_MATRIX.md` by `ml/research/build_gap_matrix.py`, whose `--check` mode fails on
 drift.
 
@@ -228,7 +228,7 @@ produce a positive slope, and the water-use axis is a design variable, not a mea
 
 ## 9. Model evidence before re-evaluation
 
-From `ml/evaluation/phase35_model_evidence.json`, unchanged throughout Phase 36:
+From `ml/evaluation/phase35_model_evidence`, unchanged throughout Phase 36:
 
 | Model | Verdict before | Decision-grade |
 |---|---|---|
@@ -244,7 +244,7 @@ One of seven.
 
 ## 10. Model evidence after re-evaluation
 
-`ml/research/phase36_model_reevaluation.py` → `ml/evaluation/phase36_model_reevaluation.json`.
+`ml/research/phase36_model_reevaluation.py` → `ml/evaluation/phase36_model_reevaluation`.
 No model was retrained, no threshold moved, no artefact changed: the script hashes every card and
 fails if a hash differs from the registry.
 
@@ -284,7 +284,7 @@ All five analyses are reproducible from the committed scripts and their JSON out
 **Measured ET against modelled ET0** (§8). Formulation: r = 0.971, RMSE 0.831 mm/day over 536
 days. Level: median implied Kc 0.958 over 673 active days, inside the factor-of-two band.
 
-**Hourly environment** (`data/research/phase36/hourly_environment.json`). 2023, six sites:
+**Hourly environment** (`data/research/phase36/hourly_environment`). 2023, six sites:
 
 | Site | DLI (mol m⁻² d⁻¹) | Mean diurnal ΔT (°C) | Hours > 2.5 kPa VPD | DLI within ±2 h of noon |
 |---|---|---|---|---|
@@ -299,7 +299,7 @@ The information-loss test is the point of the table: across 30 daily-mean VPD bi
 hours above 2.5 kPa varies by up to **8 hours** between days that share the same daily mean. A
 controller sized on the daily mean would not see that, and this is what the hourly acquisition buys.
 
-**Projected environment** (`data/research/phase36/projected_climate.json`). ACCESS-CM2, SSP2-4.5,
+**Projected environment** (`data/research/phase36/projected_climate`). ACCESS-CM2, SSP2-4.5,
 2000–2004 against 2045–2049:
 
 | Site | ΔT (°C) | ΔTmax (°C) | ΔVPD (kPa) | ΔDLI (mol m⁻² d⁻¹) | Δ days > 30 °C | Δ precipitation (mm/yr) |
@@ -383,11 +383,11 @@ rather than merged into a comfortable one.
 | `docs/FINAL_SCIENTIFIC_DATA_ACQUISITION_REPORT.md` | this file |
 | `docs/DATASET_GAP_MATRIX.md` | regenerated, 14 gaps, new status section |
 | `data/research/DATASET_CATALOG.md` | regenerated, 34 datasets, 10 class A |
-| `data/research/dataset_gap_matrix.json` | the adjudication itself |
-| `data/research/dataset_catalog.json` | five new entries, NEX promoted D → A |
-| `ml/evaluation/phase36_model_reevaluation.json` | per-model outcome |
-| `data/research/phase36/*.json` | four analysis artefacts |
-| `data/metadata/*_manifest.json` | five acquisition manifests and one processing manifest |
+| `data/research/dataset_gap_matrix` | the adjudication itself |
+| `data/research/dataset_catalog` | five new entries, NEX promoted D → A |
+| `ml/evaluation/phase36_model_reevaluation` | per-model outcome |
+| `data/research/phase36/*.py` | four analysis artefacts |
+| `data/metadata/*_manifest.py` | five acquisition manifests and one processing manifest |
 | `GET /api/acquisition-evidence` | the served surface: gaps, water use, projected climate, cultivar trial, hourly information loss, model outcomes — every value labelled measured, derived or predicted |
 | `backend/app/acquisition_evidence.py` | the module behind it, and the reasoning for the three labels |
 

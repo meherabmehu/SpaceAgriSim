@@ -80,7 +80,7 @@ def summary(_: None = Depends(require_operator)) -> dict:
     except Exception as exc:  # noqa: BLE001 - the operator needs the failure, not a traceback
         health = {"status": f"unavailable: {type(exc).__name__}", "dialect": "unknown"}
     snapshot = storage.activity_summary()
-    resync = storage.read_json_artifact("osdr_live_status.json")
+    resync = storage.read_json_artifact("osdr_live_status")
     return {
         "generatedAt": datetime.now(timezone.utc).isoformat(),
         "database": health,

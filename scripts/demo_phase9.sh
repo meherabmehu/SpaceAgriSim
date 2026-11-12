@@ -49,10 +49,11 @@ fi
 
 step "3/8 Assert the documented metrics still hold"
 python3 - <<'PY'
-import json, sys
-from pathlib import Path
+import sys
+sys.path.insert(0, ".")          # the demo runs from the repository root
+import safedata
 
-report = json.loads(Path("ml/evaluation/phase9_osd46_radiation.json").read_text())
+report = safedata.load("ml/evaluation/phase9_osd46_radiation")
 # These are the SHIPPED learner's numbers, not the best learner's: the artifact
 # serialises the best *linear* family because tree ensembles cannot be exported to
 # the dependency-free evaluator. For exposure that means logistic_l2 (0.910) ships
@@ -86,9 +87,11 @@ python3 scripts/package_runtime_data.py
 
 step "5/8 Show the interval calibration, the corrected transfer reading, and the recovered signals"
 python3 - <<'PY'
-import json
-from pathlib import Path
-r = json.loads(Path("ml/evaluation/phase9_rnaseq_candidates.json").read_text())
+import sys
+sys.path.insert(0, ".")          # the demo runs from the repository root
+import safedata
+
+r = safedata.load("ml/evaluation/phase9_rnaseq_candidates")
 for result in r["results"]:
     if "bestLearner" in result:
         best = result["learners"][result["bestLearner"]]["balancedAccuracy"]
@@ -97,19 +100,19 @@ for result in r["results"]:
     else:
         print(f"  {result['task']:32s} balanced {result['balancedAccuracy']:.3f}  "
               f"-> {result['verdict']} (accuracy {result['accuracy']:.3f} is misleading)")
-excluded = sorted(p.stem for p in Path("ml/evaluation/excluded").glob("*.json"))
+excluded = sorted(p.stem for p in safedata.records("ml/evaluation/excluded"))
 print(f"  excluded from the registry: {', '.join(excluded)}")
 
 # Phase 10: what each served interval actually covers, on held-out groups.
-conformal = json.loads(Path("ml/evaluation/phase10_conformal.json").read_text())
-decision = json.loads(Path("ml/evaluation/phase10_uncertainty_decision.json").read_text())
+conformal = safedata.load("ml/evaluation/phase10_conformal")
+decision = safedata.load("ml/evaluation/phase10_uncertainty_decision")
 print("  interval coverage, nominal 0.90 (split was the Phase 9 method):")
 for model_id, choice in decision["decisions"].items():
     measured = conformal["models"][model_id]["summary"]
     print(f"    {model_id:34s} split {measured['split']['empiricalCoverage']:.3f}"
           f" -> {choice['adopted']} {choice['achievedCoverage']:.3f}")
 
-transfer = json.loads(Path("ml/evaluation/phase10_cross_study.json").read_text())
+transfer = safedata.load("ml/evaluation/phase10_cross_study")
 reference = transfer["withinStudyReference"]
 matched = reference["protocolSensitivity"]["timepointHeldOut"]
 print(f"  cross-study: {transfer['verdict']}; the target's own contrast is "
@@ -119,7 +122,7 @@ print(f"  cross-study: {transfer['verdict']}; the target's own contrast is "
       f"transfer, not about the absence of signal")
 
 # Phase 10: the two Phase 9 exclusions, re-measured with protocols matched to design.
-dose = json.loads(Path("ml/evaluation/phase10_dose_recovery.json").read_text())
+dose = safedata.load("ml/evaluation/phase10_dose_recovery")
 protocols = dose["protocols"]
 print(f"  dose labels: valid ({dose['labelsAvailable']['values']} Gy), and the answer "
       f"depends on the split:")
@@ -127,8 +130,7 @@ print(f"    hold out (dose,timepoint) cell -> balanced {protocols['A_cellHeldOut
       f"   hold out whole timepoint -> {protocols['B_timepointHeldOut']['balancedAccuracy']:.3f}"
       f" (p={protocols['B_timepointHeldOut']['permutation']['pCorrected']})")
 
-replication = json.loads(
-    Path("ml/evaluation/phase10_partial_gravity_replication.json").read_text())
+replication = safedata.load("ml/evaluation/phase10_partial_gravity_replication")
 p1 = replication["P1_binaryReplication"]
 graded = replication["P2_gradedRegression"]
 print(f"  OSD-346 replication: 0 g vs 0.25-0.38 g -> balanced "
@@ -138,7 +140,7 @@ print(f"  OSD-346 replication: 0 g vs 0.25-0.38 g -> balanced "
       f"(p={graded['correlation']['pCorrected']}) -> replicated "
       f"{replication['replicated']}")
 
-gravity = json.loads(Path("ml/evaluation/phase10_partial_gravity.json").read_text())
+gravity = safedata.load("ml/evaluation/phase10_partial_gravity")
 primary = gravity["primaryContrast"]
 print(f"  partial gravity, OSD-314 at {gravity['design']['gravityLevelsG']} g in orbit:")
 print(f"    uG vs 0.34 g inside flight -> balanced {primary['balancedAccuracy']:.3f} "
@@ -149,21 +151,22 @@ PY
 
 step "6/8 Phase 11 evidence, including the results that are negative on purpose"
 python3 - <<'PY'
-import json
-from pathlib import Path
+import sys
+sys.path.insert(0, ".")          # the demo runs from the repository root
+import safedata
 
-root = Path("ml/evaluation")
+root = "ml/evaluation"
 
 
 def load(name):
-    return json.loads((root / name).read_text())
+    return safedata.load(f"{root}/{name}")
 
 
-gravity = load("phase11_gravity_batch.json")
+gravity = load("phase11_gravity_batch")
 print(f"  OSD-346 gravity: {gravity['conclusion']}")
 print(f"    signal survives removing the flight run: {gravity['signalSurvivesRunRemoval']}")
 
-discovery = load("phase11_dataset_discovery.json")
+discovery = load("phase11_dataset_discovery")
 microbial = discovery["questions"]["microbial"]
 harvest = discovery["questions"]["harvest"]
 corpus = discovery["corpus"]
@@ -175,7 +178,7 @@ print(f"    harvest or biomass candidates: {harvest['candidatesNotYetCatalogued'
 print(f"    new microbial candidates: {microbial['candidatesNotYetCatalogued']}, "
       f"none a crop load campaign")
 
-audit = load("phase11_duplicate_audit.json")
+audit = load("phase11_duplicate_audit")
 proof = audit["numericProof"]
 duplicate = next(row for row in audit["duplicates"]
                  if row["classification"] == "duplicate-measurement")
@@ -187,7 +190,7 @@ print(f"    overlaps checked: {audit['studiesChecked']} studies, "
       f"{len(audit['duplicates'])} paired overlaps classified, "
       f"{len(audit['overlaps'])} further overlaps")
 
-radiation = load("phase11_radiation_validation.json")
+radiation = load("phase11_radiation_validation")
 for model_id, model in radiation["models"].items():
     nested = model["nestedSelection"]
     print(f"  {model_id}: shipped {model['fidelity']['phase9CommittedBalancedAccuracy']:.4f} "
@@ -195,21 +198,21 @@ for model_id, model in radiation["models"].items():
           f"{nested['nestedBalancedAccuracy']:.4f} "
           f"(delta {nested['deltaVersusShipped']:+.4f}), promoted {model['anyPromoted']}")
 
-dose = load("phase11_dose_generalization.json")
+dose = load("phase11_dose_generalization")
 print(f"  OSD-782 dose: {dose['verdict']}")
 print(f"    within-timepoint rho "
       f"{dose['P1_withinTimepointRanking']['meanWithinTimepointSpearman']:+.4f} "
       f"(p={dose['P1_withinTimepointRanking']['permutation']['pCorrected']}), "
       f"sign flips at 3 h")
 
-campaigns = load("phase11_microbial_campaigns.json")
+campaigns = load("phase11_microbial_campaigns")
 pooled = campaigns["S4_randomEffects"]
 print(f"  microbial flight effect: pooled {pooled['pooledEffect']:+.3f} "
       f"(95% CI {pooled['ci95'][0]:+.3f} to {pooled['ci95'][1]:+.3f}), "
       f"prediction interval for a NEW campaign {pooled['predictionInterval95'][0]:+.3f} to "
       f"{pooled['predictionInterval95'][1]:+.3f} - it includes zero, on purpose")
 
-ood = load("phase11_ood_uncertainty.json")
+ood = load("phase11_ood_uncertainty")
 print(f"  OOD novelty score: {ood['verdict']}")
 for name, block in ood["scores"].items():
     print(f"    {name:34s} passes {block['controlsPassed']} of 3 controls "

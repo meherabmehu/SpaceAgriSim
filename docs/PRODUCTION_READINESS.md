@@ -72,9 +72,9 @@ writes until the PostgreSQL round-trip has actually been run.
 | Frontend typecheck | ✅ Clean | `tsc --noEmit` |
 | Root `Dockerfile` | ✅ Present | multi-stage API image |
 | `docker-compose.yml` | ✅ Valid | API + nginx web, named volume for scenarios, health-gated `depends_on` |
-| `vercel.json` | ✅ Present | services + `/api/*` rewrite |
+| `vercel.py` | ✅ Present | services + `/api/*` rewrite |
 | `render.yaml` | ✅ Present | API web service, `/api/ready` health check, `autoDeployTrigger` (was `off` here; corrected to `commit` in Phase 22 to match the dashboard) |
-| **Phase 6 evidence in runtime bundle** | ✅ **Fixed** | `package_runtime_data.py` now packages `docs/phase6/*.json` into `scientific_data/phase6/`, so `/api/science/calibration` returns real data on serverless |
+| **Phase 6 evidence in runtime bundle** | ✅ **Fixed** | `package_runtime_data.py` now packages `docs/phase6/*.py` into `scientific_data/phase6/`, so `/api/science/calibration` returns real data on serverless |
 
 ### Deployment gap found and fixed
 
@@ -82,7 +82,7 @@ The new Phase 6 endpoints read evidence from `docs/phase6/`. On a serverless
 deploy only `backend/scientific_data/` ships, so those endpoints would have
 silently degraded to `{"status": "not-run"}`. The packaging script now copies the
 four Phase 6 artifacts into the bundle and fails loudly if they are missing. All
-are < 214 kB (largest: `simulation_calibration.json`, 213 kB), within the
+are < 214 kB (largest: `simulation_calibration`, 213 kB), within the
 existing 2 MB per-asset guard. Verified by loading the app against the bundle only.
 
 ## 5. Test status — actual results from this run

@@ -65,12 +65,14 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "scripts"))
 from nasa_pipeline import save_json, stamp  # noqa: E402
 
 DATA = ROOT / "data" / "processed" / "lettuce_earth.csv"
 ARTIFACTS = ROOT / "ml" / "artifacts"
-REGISTRY = ARTIFACTS / "registry.json"
+REGISTRY = ARTIFACTS / "registry"
 MODEL_ID = "lettuce-earth-growth-v3"
 SEED = 42
 
@@ -370,22 +372,22 @@ def main() -> None:
             "Earth only, within the declared domains, and not validated for harvest forecasting.",
         ],
         "trainingScript": "ml/training/train_lettuce_v3.py",
-        "trainingDataSha256": hashlib.sha256(DATA.read_bytes()).hexdigest(),
+        "trainingDataSha256": hashlib.sha256(safedata.bytes(DATA)).hexdigest(),
     }
     if chosen_name == "gradient_boosting":
         artifact["boostedTrees"] = serialise_boosted(chosen)
     elif chosen_name == "random_forest":
         artifact["forest"] = [serialise_tree(step) for step in chosen.estimators_]
 
-    path = ARTIFACTS / f"{MODEL_ID}.json"
+    path = ARTIFACTS / f"{MODEL_ID}"
     save_json(path, artifact)
 
-    registry = json.loads(REGISTRY.read_text())
+    registry = safedata.load(REGISTRY)
     registry["models"] = [m for m in registry["models"] if m["id"] != MODEL_ID]
     registry["models"].append({
         "id": MODEL_ID,
-        "artifact": f"ml/artifacts/{MODEL_ID}.json",
-        "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        "artifact": f"ml/artifacts/{MODEL_ID}",
+        "sha256": hashlib.sha256(safedata.bytes(path)).hexdigest(),
         "supersedes": "",
         "status": "trained-exploratory",
         "independentValidation": {

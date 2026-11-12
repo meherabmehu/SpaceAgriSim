@@ -5,7 +5,7 @@ microarray) does not transfer to OSD-782 (Illumina RNA-seq): 0.667 accuracy, 0.5
 balanced accuracy, control recall 0.00, identical collapse across 16 settings.
 
 Phase 10 asks the next question: **is that a representation problem that a better
-harmonisation could fix?** Evidence: `ml/evaluation/phase10_cross_study.json`.
+harmonisation could fix?** Evidence: `ml/evaluation/phase10_cross_study`.
 
 ## Four harmonisations, one shared scoring protocol
 
@@ -73,4 +73,4 @@ would settle it is a target study whose cells are not single batches.
 - **No tuning toward a positive result.** The four harmonisations were chosen as
   distinct scientific hypotheses, not searched over a grid.
 - **No promotion.** The registry is unchanged; Phase 9's negative is preserved in
-  `ml/evaluation/phase9_cross_study_transfer.json`.
+  `ml/evaluation/phase9_cross_study_transfer`.

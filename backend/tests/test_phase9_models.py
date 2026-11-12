@@ -5,6 +5,7 @@ that would fail if someone quietly made a result look better than the data
 supports, or shipped a model whose provenance no longer matches its artifact.
 """
 from __future__ import annotations
+import safedata
 
 import json
 
@@ -37,7 +38,7 @@ def profile_request(client, model_id, label):
 # ---------------------------------------------------------------------------
 @pytest.mark.parametrize("model_id", NATIVE_MODELS)
 def test_phase9_models_are_registered_and_checksums_verify(model_id):
-    registry = json.loads((research.ARTIFACTS / "registry.json").read_text())
+    registry = safedata.load(research.ARTIFACTS / "registry")
     entries = {m["id"]: m for m in registry["models"]}
     assert model_id in entries
     artifact = research.load_model(model_id)
@@ -52,9 +53,9 @@ def test_failed_candidates_are_not_served(model_id):
     ids = {m["id"] for m in research.model_registry()["models"]}
     assert model_id not in ids
     assert model_id not in research.MODEL_IDS
-    evidence = research.ROOT / "ml" / "evaluation" / "excluded" / f"{model_id}.json"
-    assert evidence.is_file(), "excluded model must retain its evidence artifact"
-    assert json.loads(evidence.read_text())["evidenceStatus"] == "insufficient-evidence"
+    evidence = research.ROOT / "ml" / "evaluation" / "excluded" / f"{model_id}"
+    assert safedata.exists(evidence), "excluded model must retain its evidence artifact"
+    assert safedata.load(evidence)["evidenceStatus"] == "insufficient-evidence"
 
 
 def test_excluded_models_have_no_route(client):
@@ -63,7 +64,7 @@ def test_excluded_models_have_no_route(client):
 
 
 def test_dataset_manifest_pins_every_file_by_checksum():
-    manifest = json.loads((research.DATA / "metadata" / "phase9_nasa_datasets.json").read_text())
+    manifest = safedata.load(research.DATA / "metadata" / "phase9_nasa_datasets")
     assert len(manifest["files"]) >= 6
     for entry in manifest["files"]:
         assert len(entry["sha256"]) == 64
@@ -318,7 +319,7 @@ def test_every_modelled_study_is_in_the_dataset_explorer():
     catalogue = {entry["id"] for entry in research.manifest()["datasets"]}
     # Non-NASA sources are surfaced by /api/external-datasets instead of the OSDR
     # catalogue, so they are checked against that payload rather than this one.
-    external = {(research.read_json(research.DATA / "metadata" / "external_lettuce.json")
+    external = {(research.read_json(research.DATA / "metadata" / "external_lettuce")
                  or {}).get("id", "WUR-lettuce")}
     for entry in research.model_registry()["models"]:
         # Every served model is a loaded JSON artifact now: the reference-ET0 surface is a
@@ -333,7 +334,7 @@ def test_every_modelled_study_is_in_the_dataset_explorer():
 
 
 def test_phase9_catalogue_entries_carry_verified_provenance():
-    manifest = json.loads((research.DATA / "metadata" / "phase9_nasa_datasets.json").read_text())
+    manifest = safedata.load(research.DATA / "metadata" / "phase9_nasa_datasets")
     pinned = {(spec["study"], spec["name"]): spec["sha256"] for spec in manifest["files"]}
     catalogue = {entry["id"]: entry for entry in research.manifest()["datasets"]}
     for study in ("OSD-46", "OSD-782", "OSD-411"):
@@ -451,7 +452,7 @@ def test_every_acquired_phase9_file_is_marked_downloaded_in_the_catalogue():
     built from a live OSDR listing. A provenance catalogue that under-reports what
     it can prove is as wrong as one that over-reports.
     """
-    manifest = research.read_json(research.DATA / "metadata" / "phase9_nasa_datasets.json")
+    manifest = research.read_json(research.DATA / "metadata" / "phase9_nasa_datasets")
     catalogue = {entry["id"]: entry for entry in research.manifest()["datasets"]}
 
     for spec in manifest["files"]:

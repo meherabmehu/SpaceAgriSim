@@ -18,12 +18,14 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 PROCESSED = ROOT / "data" / "processed" / "phase29"
 RAW = ROOT / "data" / "raw" / "phase26" / "zenodo-greenlight-2024-lettuce"
 
 
 def _quality() -> dict:
-    return json.loads((PROCESSED / "light_stress_quality.json").read_text())
+    return safedata.load(PROCESSED / "light_stress_quality")
 
 
 def _rows(name: str) -> list[dict[str, str]]:
@@ -34,11 +36,10 @@ def _rows(name: str) -> list[dict[str, str]]:
 
 
 def test_raw_file_matches_the_acquisition_manifest():
-    manifest = json.loads((ROOT / "data" / "metadata" / "phase26_acquisition_manifest.json")
-                          .read_text())
+    manifest = safedata.load(ROOT / "data" / "metadata" / "phase26_acquisition_manifest")
     recorded = manifest["datasets"]["zenodo-greenlight-2024-lettuce"]
     raw = RAW / "green_light_lettuce_open_data_(1).xlsx"
-    digest = hashlib.sha256(raw.read_bytes()).hexdigest()
+    digest = hashlib.sha256(safedata.bytes(raw)).hexdigest()
     recorded_digests = {entry["sha256"] for entry in recorded["files"]}
     assert digest in recorded_digests
     assert digest == _quality()["source"]["file"]["sha256"]
@@ -58,31 +59,31 @@ def test_build_is_reproducible_and_writes_nothing_new():
 
     It builds into a temporary directory (`--out-dir`) rather than over the committed files. The
     earlier version overwrote the committed outputs in place and compared only the four CSVs, so
-    (a) every suite run rewrote `generatedAt` in `light_stress_quality.json` and left the tree
+    (a) every suite run rewrote `generatedAt` in `light_stress_quality` and left the tree
     dirty, and (b) the JSON - the file that carries the licence, the source digest and the
     exclusion record - was never actually compared. This compares all five outputs and asserts
     the committed files are byte-identical afterwards.
     """
-    before = {path.name: path.read_bytes() for path in PROCESSED.iterdir()}
+    before = {path.name: safedata.bytes(path) for path in PROCESSED.iterdir()}
     with tempfile.TemporaryDirectory() as tmp:
         result = subprocess.run([sys.executable, "ml/research/build_light_stress_dataset.py",
                                  "--out-dir", tmp],
                                 cwd=ROOT, capture_output=True, text=True)
         assert result.returncode == 0, result.stderr
-        built = {path.name: path.read_bytes() for path in Path(tmp).iterdir()}
+        built = {path.name: safedata.bytes(path) for path in Path(tmp).iterdir()}
 
     assert sorted(built) == sorted(before)
     for name, body in built.items():
-        if name.endswith(".json"):
-            fresh = json.loads(body)
-            committed = json.loads(before[name])
+        if name.endswith(".py"):
+            fresh = safedata.loads_python_module(body.decode("utf-8"), where=name)
+            committed = safedata.loads_python_module(before[name].decode("utf-8"), where=name)
             fresh.pop("generatedAt", None)
             committed.pop("generatedAt", None)
             assert fresh == committed, name
         else:
             assert body == before[name], f"{name} does not reproduce byte-for-byte"
 
-    after = {path.name: path.read_bytes() for path in PROCESSED.iterdir()}
+    after = {path.name: safedata.bytes(path) for path in PROCESSED.iterdir()}
     assert after == before, "the builder must not rewrite the committed outputs"
 
 

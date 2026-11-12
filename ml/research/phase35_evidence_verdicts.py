@@ -40,9 +40,11 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 ARTIFACTS = ROOT / "ml" / "artifacts"
-COVERAGE = ROOT / "ml" / "evaluation" / "phase34_cross_campaign_coverage.json"
-OUTPUT = ROOT / "ml" / "evaluation" / "phase35_model_evidence.json"
+COVERAGE = ROOT / "ml" / "evaluation" / "phase34_cross_campaign_coverage"
+OUTPUT = ROOT / "ml" / "evaluation" / "phase35_model_evidence"
 
 # The interval rule is applied to the pooled cross-campaign coverage Phase 34 measured.
 COVERAGE_TOLERANCE = 0.05
@@ -60,7 +62,7 @@ WITHDRAWN = ("mizuna-harvest-v1", "mizuna-microbial-load-v1")
 
 
 def load(path: Path) -> dict:
-    return json.loads(path.read_text(encoding="utf-8"))
+    return safedata.load(path)
 
 
 def coverage_checks(model_id: str, coverage: dict) -> list[dict]:
@@ -83,7 +85,7 @@ def coverage_checks(model_id: str, coverage: dict) -> list[dict]:
             "groups": campaign["observations"],
             "detail": (f"{campaign['covered']} of {campaign['observations']} samples covered, pooled "
                        f"across both calibration directions"),
-            "evidence": "ml/evaluation/phase34_cross_campaign_coverage.json",
+            "evidence": "ml/evaluation/phase34_cross_campaign_coverage",
         }]
     covered = int(campaign["covered"])
     total = int(campaign["observations"])
@@ -102,7 +104,7 @@ def coverage_checks(model_id: str, coverage: dict) -> list[dict]:
         "detail": (f"{covered} of {total} independent treatment means covered, prediction/measurement "
                    f"ratio median {campaign['ratioMedian']} "
                    f"({campaign['ratioMin']}-{campaign['ratioMax']})"),
-        "evidence": "ml/evaluation/phase34_cross_campaign_coverage.json",
+        "evidence": "ml/evaluation/phase34_cross_campaign_coverage",
     }]
 
 
@@ -151,7 +153,7 @@ def card_checks(card: dict, coverage: list[dict]) -> list[dict]:
             "detail": (f"{independent.get('study', 'independent study')}: "
                        f"{round(value, 3) if isinstance(value, (int, float)) else value} % MAPE against "
                        f"{criterion} %"),
-            "evidence": "ml/artifacts/" + card["id"] + ".json#validation.independent",
+            "evidence": "ml/artifacts/" + card["id"] + "#validation.independent",
         })
     basis = card.get("evidenceBasis") or {}
     rule = {k: v for k, v in basis.items() if isinstance(v, bool)}
@@ -179,7 +181,7 @@ def card_checks(card: dict, coverage: list[dict]) -> list[dict]:
             # A sentence rather than a dump of booleans: this string is what the interface shows a
             # reader, and `beatsBaselineWithinPooledData=True` is not a sentence.
             "detail": readable_rule_detail(card, rule, measured),
-            "evidence": "ml/artifacts/" + card["id"] + ".json#evidenceBasis",
+            "evidence": "ml/artifacts/" + card["id"] + "#evidenceBasis",
             "ruleTerms": rule,
         })
     return checks
@@ -235,13 +237,13 @@ def mizuna_v2_status_change(card: dict, verdict: dict) -> dict | None:
     updated = dict(basis)
     updated["intervalsEmpiricallyCalibrated"] = True
     updated["intervalsEmpiricallyCalibratedEvidence"] = (
-        "ml/evaluation/phase34_cross_campaign_coverage.json: pooled cross-campaign coverage "
+        "ml/evaluation/phase34_cross_campaign_coverage: pooled cross-campaign coverage "
         f"{coverage[0]['measured']} against a nominal 0.90")
     return updated
 
 
 def apply(write: bool) -> int:
-    coverage = load(COVERAGE) if COVERAGE.is_file() else {"models": {}}
+    coverage = load(COVERAGE) if safedata.exists(COVERAGE) else {"models": {}}
     report = {
         "schema": "spaceagrisim.model_evidence/1",
         "purpose": ("One machine-derived evidence verdict per registered model, read from committed "
@@ -255,7 +257,7 @@ def apply(write: bool) -> int:
         "models": {},
     }
     changed = []
-    for path in sorted(ARTIFACTS.glob("*.json")):
+    for path in safedata.records(ARTIFACTS):
         card = load(path)
         if not isinstance(card, dict) or not card.get("id"):
             continue
@@ -275,7 +277,7 @@ def apply(write: bool) -> int:
                         card["evidenceStatus"] = "validated-exploratory"
                         changed.append(f"{model_id}: evidenceStatus -> validated-exploratory")
             if write:
-                path.write_text(json.dumps(card, indent=2) + "\n", encoding="utf-8")
+                safedata.dump(card, path)
         report["models"][model_id] = verdict
 
     report["counts"] = {
@@ -286,7 +288,7 @@ def apply(write: bool) -> int:
     report["counts"]["decisionGrade"] = sum(1 for row in report["models"].values()
                                             if row["decisionGrade"])
     if write:
-        OUTPUT.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+        safedata.dump(report, OUTPUT)
         for entry in changed:
             print(f"updated {entry}")
         print(f"wrote {OUTPUT.relative_to(ROOT)}")
@@ -298,7 +300,7 @@ def apply(write: bool) -> int:
 def check() -> int:
     coverage = load(COVERAGE)
     problems = []
-    for path in sorted(ARTIFACTS.glob("*.json")):
+    for path in safedata.records(ARTIFACTS):
         card = load(path)
         if not isinstance(card, dict) or not card.get("id") or card["id"] in WITHDRAWN:
             continue

@@ -36,6 +36,8 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(ROOT / "ml" / "training"))
 from nasa_pipeline import save_json, stamp  # noqa: E402
@@ -152,7 +154,7 @@ SPECS = {
 def batch_table() -> dict:
     """Array batch per sample, recovered from the raw CEL headers in a prior step."""
     path = PROCESSED / "osd46_array_batch.csv"
-    if not path.is_file():
+    if not safedata.exists(path):
         return {}
     frame = pd.read_csv(path, dtype=str)
     return dict(zip(frame["sample"], frame["arrayBatch"]))
@@ -313,10 +315,10 @@ def write_artifact(key: str, matrix, genes, annotation, groups, labels, report) 
         "recommendedUse": spec["recommendedUse"],
     }
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
-    path = ARTIFACTS / f"{spec['id']}.json"
-    path.write_text(json.dumps(payload, indent=2) + "\n")
+    path = ARTIFACTS / f"{spec['id']}"
+    safedata.dump(payload, path)
     import hashlib
-    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    digest = hashlib.sha256(safedata.bytes(path)).hexdigest()
     print(f"   wrote {path.name} ({path.stat().st_size:,} B), sha256 {digest[:16]}...")
     return {"artifact": str(path.relative_to(ROOT)), "sha256": digest,
             "size": path.stat().st_size}
@@ -391,8 +393,8 @@ def main() -> int:
 
     report["artifacts"] = written
     EVAL.mkdir(parents=True, exist_ok=True)
-    save_json(EVAL / "phase9_osd46_radiation.json", report)
-    print("\nwrote ml/evaluation/phase9_osd46_radiation.json")
+    save_json(EVAL / "phase9_osd46_radiation", report)
+    print("\nwrote ml/evaluation/phase9_osd46_radiation")
     return 0
 
 

@@ -6,6 +6,13 @@ export default defineConfig({
   timeout: 45000,
   expect: { timeout: 12000 },
   reporter: [["list"], ["html", { open: "never" }]],
+  // Test artefacts live outside the repository tree by default.
+  //
+  // Playwright writes `.last-run` and per-test JSON into its output directory; keeping that
+  // inside the checkout meant a test run left JSON files in the project. Pointing the default
+  // at a temp directory means running the suite cannot deposit a JSON document in the repo,
+  // while CI overrides PLAYWRIGHT_OUTPUT_DIR so the evidence it uploads still has a path.
+  outputDir: process.env.PLAYWRIGHT_OUTPUT_DIR || "/tmp/spaceagrisim-playwright",
   use: {
     baseURL: "http://127.0.0.1:5173",
     trace: "retain-on-failure",
@@ -21,6 +28,11 @@ export default defineConfig({
         "--font-render-hinting=none",
         "--disable-font-subpixel-positioning",
         "--disable-lcd-text",
+        // /dev/shm is 64 MB on a stock container and 1 GB here; Chromium puts renderer
+        // shared memory there and a long mobile page can exhaust it, which crashes the
+        // renderer rather than failing an assertion. The flag moves that allocation to
+        // /tmp. It changes where memory lives, not what is drawn.
+        "--disable-dev-shm-usage",
       ],
     },
   },

@@ -2,7 +2,7 @@
 
 **Generated from live official NASA OSDR APIs on 2026-11-07.**
 Reproduce with `python scripts/discover_expanded.py`
-→ `data/metadata/phase6_discovery.json`
+→ `data/metadata/phase6_discovery`
 (SHA-256 of that run: `ec8251a6c1ff7f36716ac99ba4489594a6cf753feec4b25efbeca91a6adee864`)
 
 Official endpoints used, exclusively:

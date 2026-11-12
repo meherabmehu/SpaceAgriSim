@@ -140,7 +140,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/backup"
           python3 scripts/db_backup.py --from-libpq-env --out "$RUNNER_TEMP/backup"
           dump="$(find "$RUNNER_TEMP/backup" -name '*.dump' -type f | head -n 1)"
-          manifest="${dump}.manifest.json"
+          manifest="${dump}.manifest.yaml"
           [ -s "$dump" ] || { echo "no dump produced" >&2; exit 1; }
           [ -s "$manifest" ] || { echo "no manifest produced" >&2; exit 1; }
           # Independent of the script: list the archive again here, so the log itself shows a
@@ -177,7 +177,7 @@ jobs:
                 --cipher-algo AES256 --compress-algo none --output "$2" "$1"
           }
           encrypt "$dump" "${dump}.gpg"
-          encrypt "${dump}.manifest.json" "${dump}.manifest.json.gpg"
+          encrypt "${dump}.manifest.yaml" "${dump}.manifest.yaml.gpg"
 
           plain_sha="$(sha256sum "$dump" | cut -d' ' -f1)"
           # A ciphertext nobody can open is not a backup: decrypt it again, compare digests, and
@@ -200,7 +200,7 @@ jobs:
           echo "a wrong passphrase is rejected"
 
           rm -f "$RUNNER_TEMP/roundtrip.dump" "$RUNNER_TEMP/pass" "$RUNNER_TEMP/wrong" \
-                "$dump" "${dump}.manifest.json"
+                "$dump" "${dump}.manifest.yaml"
           ls -l "$work"
 
       - name: Upload encrypted backup

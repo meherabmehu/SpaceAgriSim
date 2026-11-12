@@ -19,7 +19,7 @@ Docker copies tracked registry/processed/model artifacts. Raw research downloads
 
 ## Vercel frontend and Render API
 
-1. Promote reviewed commits to `main` through normal review. Use a feature-branch Vercel preview for pre-merge verification; the root `vercel.json` deploys the Vite frontend and FastAPI service together.
+1. Promote reviewed commits to `main` through normal review. Use a feature-branch Vercel preview for pre-merge verification; the root `vercel.py` deploys the Vite frontend and FastAPI service together.
 2. Create a Render Blueprint from the repository using `render.yaml`. Its API uses the repository root so `data/` and `ml/` resolve beside `backend/`.
 3. Supply `SPACEAGRISIM_DATABASE_URL` using PostgreSQL with a `postgresql+psycopg://` URL, `SPACEAGRISIM_AUTH_SECRET` as a unique 32+-character secret, and `SPACEAGRISIM_CORS_ORIGINS` as a JSON list of exact frontend origins. Set values through the hosting secret UI, never Git.
 4. Create a Vercel Vite project with root directory `frontend`, install command `npm ci`, build command `npm run build`, output `dist`, and build-time variable `VITE_API_BASE_URL=https://YOUR-API.onrender.com/api`.
@@ -30,7 +30,7 @@ The Blueprint selects a free web-service compute plan for a constrained demonstr
 
 `.python-version` selects the latest supported Python 3.12 patch on Render, consistent with CI and the Docker base minor version. This follows the [documented version-file behavior](https://render.com/docs/python-version); freeze a tested patch/image digest when preparing an immutable release.
 
-The Blueprint can be structurally checked against [Render's public schema](https://render.com/schema/render.yaml.json), and platform-aware validation uses:
+The Blueprint can be structurally checked against [Render's public schema](https://render.com/schema/render.yaml.py), and platform-aware validation uses:
 
 ```sh
 render blueprints validate render.yaml

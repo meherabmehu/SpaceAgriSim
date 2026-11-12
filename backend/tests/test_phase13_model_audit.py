@@ -8,6 +8,7 @@ The last test is the important one: it proves the audit did not rewrite a single
 that can edit the thing it audits reports whatever it just wrote.
 """
 from __future__ import annotations
+import sys
 
 import hashlib
 import importlib.util
@@ -17,6 +18,8 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 ARTIFACTS = ROOT / "ml" / "artifacts"
 
 
@@ -42,7 +45,7 @@ def test_audit_reports_no_failures(report):
 
 
 def test_every_registered_artifact_is_audited(report):
-    registry = json.loads((ARTIFACTS / "registry.json").read_text(encoding="utf-8"))
+    registry = safedata.load(ARTIFACTS / "registry")
     assert report["summary"]["registeredModels"] == len(registry["models"])
     assert report["summary"]["auditedModels"] == len(registry["models"])
     assert {row["id"] for row in report["models"]} == {entry["id"] for entry in registry["models"]}
@@ -50,9 +53,9 @@ def test_every_registered_artifact_is_audited(report):
 
 def test_checksums_are_recomputed_from_disk(report):
     registry = {entry["id"]: entry for entry in
-                json.loads((ARTIFACTS / "registry.json").read_text(encoding="utf-8"))["models"]}
+                safedata.load(ARTIFACTS / "registry")["models"]}
     for row in report["models"]:
-        digest = hashlib.sha256((ROOT / registry[row["id"]]["artifact"]).read_bytes()).hexdigest()
+        digest = hashlib.sha256(safedata.bytes(ROOT / registry[row["id"]]["artifact"])).hexdigest()
         assert row["sha256"] == digest == registry[row["id"]]["sha256"]
 
 
@@ -84,7 +87,7 @@ def test_superseded_predecessors_are_kept_not_overwritten(report):
         # The recorded string is "mizuna-microbial-load-v1 (kept, not overwritten)": the id is the
         # first token, and the parenthetical is the statement of what happened to the old file.
         predecessor = row["supersedes"].split()[0]
-        assert (ARTIFACTS / f"{predecessor}.json").is_file()
+        assert safedata.exists(ARTIFACTS / f"{predecessor}")
 
 
 def test_no_served_model_is_retired_and_every_withdrawal_is_recorded(report):
@@ -135,12 +138,12 @@ def test_no_high_severity_gap_survives_the_phase_32_measurement(report):
         resolution = resolved[(model_id, "calibration")]
         assert "log loss" in resolution["resolution"]
         assert "22 biological groups" in resolution["resolution"]
-        assert (ROOT / resolution["evidence"]).is_file()
+        assert safedata.exists(ROOT / resolution["evidence"])
 
 
 def test_the_calibration_record_proves_it_scored_a_different_fit(report):
     """The measurement is only a calibration if it was not fitted and scored on one set."""
-    record = json.loads((ROOT / "ml/evaluation/phase32_radiation_calibration.json").read_text())
+    record = safedata.load(ROOT / "ml/evaluation/phase32_radiation_calibration")
     for model_id, entry in record["models"].items():
         assert entry["accuracyMatchesArtifact"] is True, model_id
         assert entry["probability"]["logLoss"] > 0
@@ -176,9 +179,9 @@ def test_osd320_is_never_cited_as_independent_evidence():
 
 
 def test_the_audit_does_not_modify_any_artifact(audit_module):
-    before = {path.name: hashlib.sha256(path.read_bytes()).hexdigest()
-              for path in sorted(ARTIFACTS.glob("*.json"))}
+    before = {path.name: hashlib.sha256(safedata.bytes(path)).hexdigest()
+              for path in safedata.records(ARTIFACTS)}
     audit_module.audit()
-    after = {path.name: hashlib.sha256(path.read_bytes()).hexdigest()
-             for path in sorted(ARTIFACTS.glob("*.json"))}
+    after = {path.name: hashlib.sha256(safedata.bytes(path)).hexdigest()
+             for path in safedata.records(ARTIFACTS)}
     assert before == after

@@ -10,6 +10,7 @@ must not have is inventing agreement:
 """
 
 from __future__ import annotations
+import safedata
 
 import json
 
@@ -34,7 +35,7 @@ def client():
 
 def test_benchmarks_endpoint_reports_the_pinned_bpc_numbers(client):
     body = client.get("/api/benchmarks").json()["benchmarks"]
-    artifact = json.loads((research.DATA / "derived" / "bpc_benchmark.json").read_text())
+    artifact = safedata.load(research.DATA / "derived" / "bpc_benchmark")
     assert body["bpc"]["measured"] == artifact["measured"]
     assert body["bpc"]["ratios"] == artifact["ratios"]
     # the published anchor and the lettuce comparison must survive the round trip unchanged
@@ -70,7 +71,7 @@ def test_benchmark_payload_states_what_it_is_not(client):
 
 
 def test_missing_artifact_is_reported_not_faked(monkeypatch, tmp_path):
-    monkeypatch.setattr(benchmarks, "BPC_BENCHMARK", tmp_path / "absent.json")
+    monkeypatch.setattr(benchmarks, "BPC_BENCHMARK", tmp_path / "absent")
     benchmarks._artifact.cache_clear()
     try:
         body = benchmarks.payload()["benchmarks"]
@@ -183,7 +184,7 @@ def test_transcription_matches_the_published_table_verbatim():
     import json
     from app.research import DATA
 
-    study = json.loads((DATA / "literature" / "external_lettuce_peerj17085.json").read_text())
+    study = safedata.load(DATA / "literature" / "external_lettuce_peerj17085")
     assert study["source"]["doi"] == "10.7717/peerj.17085"
     assert study["source"]["license"] == "CC BY 4.0"
     assert len(study["source"]["retrievedSha256"]) == 64
@@ -210,7 +211,7 @@ def test_missing_root_temperature_is_declared_not_invented():
     import json
     from app.research import DATA
 
-    study = json.loads((DATA / "literature" / "external_lettuce_peerj17085.json").read_text())
+    study = safedata.load(DATA / "literature" / "external_lettuce_peerj17085")
     assumption = study["acceptedAssumptions"][0]
     assert assumption["input"] == "rootTemperature"
     assert "not root-zone or growing-media temperature" in assumption["why"]

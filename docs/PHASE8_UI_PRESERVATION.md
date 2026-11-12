@@ -80,7 +80,7 @@ compared image at all.
 
 ## 4. Commit hygiene
 
-Regenerated PNGs and regenerated `docs/phase7/*.json` verification reports were
+Regenerated PNGs and regenerated `docs/phase7/*.py` verification reports were
 **not committed**. Those files change on every verification run (timestamps and
 random row ids) and committing them would present churn as work. They were restored
 to the committed baseline with `git checkout --` after each run.

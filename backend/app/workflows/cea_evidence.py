@@ -20,14 +20,14 @@ returns the daily-light-integral relationship as a measured association rather t
 
 It does **not** predict the yield of a new environment. A response surface was fitted to this same
 dataset in Phase 30 and scored once on sealed experiments; it missed the project's 30 % criterion by
-an order of magnitude. The numbers come from `ml/evaluation/phase30_cea_wheat_response.json`, the model
+an order of magnitude. The numbers come from `ml/evaluation/phase30_cea_wheat_response`, the model
 is not served, and the failure is returned in every response so a user can read the evidence for the
 decision instead of taking it on trust.
 """
 from __future__ import annotations
+import sys
 
 import csv
-import json
 import math
 import statistics
 from functools import lru_cache
@@ -37,9 +37,11 @@ from typing import Any
 from app.workflows import units
 
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 DATA = ROOT / "data" / "processed" / "phase30" / "cea_wheat_experiments.csv"
-QUALITY = ROOT / "data" / "processed" / "phase30" / "quality.json"
-MODEL_EVIDENCE = ROOT / "ml" / "evaluation" / "phase30_cea_wheat_response.json"
+QUALITY = ROOT / "data" / "processed" / "phase30" / "quality"
+MODEL_EVIDENCE = ROOT / "ml" / "evaluation" / "phase30_cea_wheat_response"
 
 SOURCE = {
     "dataset": "cea-wheat-apogee",
@@ -126,12 +128,12 @@ def _experiments() -> tuple[dict[str, Any], ...]:
 
 @lru_cache(maxsize=1)
 def _quality() -> dict[str, Any]:
-    return json.loads(QUALITY.read_text(encoding="utf-8"))
+    return safedata.load(QUALITY)
 
 
 @lru_cache(maxsize=1)
 def _model_evidence() -> dict[str, Any]:
-    return json.loads(MODEL_EVIDENCE.read_text(encoding="utf-8"))
+    return safedata.load(MODEL_EVIDENCE)
 
 
 def _dli(row: dict[str, Any]) -> float:
@@ -191,9 +193,9 @@ def _predictive_model() -> dict[str, Any]:
             f"({evidence['selected']}) missed the {holdout['acceptanceCriterionPct']:g} % criterion "
             f"by an order of magnitude: {holdout['metrics']['MAPE']:.1f} % MAPE, R2 "
             f"{holdout['metrics']['R2']}. It is recorded in "
-            "ml/evaluation/phase30_cea_wheat_response.json and is not served."
+            "ml/evaluation/phase30_cea_wheat_response and is not served."
         ),
-        "evidenceFile": "ml/evaluation/phase30_cea_wheat_response.json",
+        "evidenceFile": "ml/evaluation/phase30_cea_wheat_response",
     }
 
 
@@ -333,7 +335,7 @@ def run(selections: list[dict[str, Any]]) -> dict[str, Any]:
             "Yield is grain, not edible biomass, and the harvest index is not modelled.",
             "No predictive model is served: the response model fitted to this data failed its "
             "holdout by an order of magnitude and is recorded in "
-            "ml/evaluation/phase30_cea_wheat_response.json.",
+            "ml/evaluation/phase30_cea_wheat_response.",
         ],
         "units": capability()["units"],
     }

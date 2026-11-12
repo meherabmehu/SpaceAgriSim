@@ -78,5 +78,5 @@ pre-existing: a build of the parent commit `bcd4ec5…` reproduces the same curr
 direct parent-vs-branch capture at 1440 px gives an identical 1440x1649 canvas with 0.0351 % of
 pixels differing. The baselines were deliberately NOT refreshed, because doing so would have
 recorded unrelated layout drift under this phase; the honest measurement is the parent-build one.
-ml/evaluation/phase9_visual_regression.json was left as committed rather than overwritten with a
+ml/evaluation/phase9_visual_regression.py was left as committed rather than overwritten with a
 failing run that says nothing about Phase 33. Flagged for the next phase to handle deliberately.

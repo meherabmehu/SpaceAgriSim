@@ -3,7 +3,7 @@
     python3 scripts/et0_validation/attribute.py
 
 Reads ``data/validation/et0/harmonised_daily.csv`` (written by ``run_validation.py``) and writes
-``attribution.json``. The comparison is a **substitution game**: both legs are evaluated by the
+``attribution``. The comparison is a **substitution game**: both legs are evaluated by the
 same equation and the same code, so swapping a subset of the five daily drivers from one product
 to the other gives a path between them. Contributions are averaged over **all 120 orderings**,
 which is the Shapley value of that game - it removes the arbitrary choice of order, and because
@@ -16,6 +16,7 @@ separately as ``pressureRemainderMm``. That is what makes the efficiency check e
 version did not, and left a silent 0.003 mm/day unexplained.
 """
 from __future__ import annotations
+import safedata
 
 import argparse
 import csv
@@ -35,7 +36,7 @@ if str(_REPO_ROOT) not in sys.path:  # pragma: no cover - import plumbing
 from scripts.et0_validation import methods, scoring, sources  # noqa: E402
 
 DEFAULT_CSV = _REPO_ROOT / "data" / "validation" / "et0" / "harmonised_daily.csv"
-DEFAULT_OUT = _REPO_ROOT / "data" / "validation" / "et0" / "attribution.json"
+DEFAULT_OUT = _REPO_ROOT / "data" / "validation" / "et0" / "attribution"
 
 DRIVERS = ("tmax", "tmin", "ea", "rs", "u2")
 
@@ -280,7 +281,7 @@ def _mean(values: list[float | None]) -> float | None:
 
 def attribute(csv_path: Path, out_path: Path) -> dict[str, Any]:
     rows = load_rows(csv_path)
-    summary = json.loads((csv_path.parent / "validation_summary.json").read_text())
+    summary = safedata.load(csv_path.parent / "validation_summary")
     sites = {entry["key"]: entry for entry in summary["siteMetadata"]}
 
     per_site: dict[str, Any] = {}
@@ -319,7 +320,7 @@ def attribute(csv_path: Path, out_path: Path) -> dict[str, Any]:
             ),
         },
     }
-    out_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(payload, out_path)
 
     for site_key, block in payload["perSite"].items():
         shapley = block["shapley"]

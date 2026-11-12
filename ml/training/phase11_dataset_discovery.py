@@ -19,11 +19,12 @@ question-specific vocabularies. The scan is deliberately generous: missing a stu
 expensive error, listing extra candidates only costs review time, and every candidate is
 recorded with its factors so the rejection reason is auditable.
 
-Output: `ml/evaluation/phase11_dataset_discovery.json`
+Output: `ml/evaluation/phase11_dataset_discovery`
 Run:    python ml/training/phase11_dataset_discovery.py
 """
 
 from __future__ import annotations
+import sys
 
 import json
 import re
@@ -34,9 +35,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-SWEEP = ROOT / "data" / "metadata" / "phase9_osdr_sweep.json"
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
+SWEEP = ROOT / "data" / "metadata" / "phase9_osdr_sweep"
 CACHE = ROOT / "data" / "metadata" / "osdr_study_metadata_phase11"
-OUT = ROOT / "ml" / "evaluation" / "phase11_dataset_discovery.json"
+OUT = ROOT / "ml" / "evaluation" / "phase11_dataset_discovery"
 
 API = "https://osdr.nasa.gov/osdr/data/osd/meta/{}"
 
@@ -72,10 +75,10 @@ PLANT = re.compile(r"Arabidopsis|Lactuca|lettuce|Brassica|mizuna|tomato|Solanum|
 
 
 def metadata(osd: str) -> dict | None:
-    cached = CACHE / f"{osd.replace('-', '')}.json"
-    if cached.exists():
+    cached = CACHE / f"{osd.replace('-', '')}"
+    if safedata.exists(cached):
         try:
-            return json.loads(cached.read_text())
+            return safedata.load(cached)
         except json.JSONDecodeError:
             pass
     try:
@@ -85,7 +88,7 @@ def metadata(osd: str) -> dict | None:
         return None
     try:
         CACHE.mkdir(parents=True, exist_ok=True)
-        cached.write_text(json.dumps(payload))
+        safedata.dump(payload, cached)
     except OSError:
         pass
     return payload
@@ -117,7 +120,7 @@ def summarise(payload: dict) -> dict:
 
 
 def main() -> int:
-    sweep = json.loads(SWEEP.read_text())
+    sweep = safedata.load(SWEEP)
     usable = sweep["usableProcessedMatrix"]
     already = {"OSD-46", "OSD-782", "OSD-314", "OSD-346", "OSD-411", "OSD-267", "OSD-268",
                "OSD-269", "OSD-745", "OSD-766", "OSD-767", "OSD-773", "OSD-7", "OSD-120",
@@ -192,7 +195,7 @@ def main() -> int:
             "ten-point check in the Phase 11 data discovery document before anything is "
             "downloaded or trained on."),
     }
-    OUT.write_text(json.dumps(result, indent=2) + "\n")
+    safedata.dump(result, OUT)
 
     print(f"\nscanned {scanned}, unavailable {len(unavailable)}")
     for key, value in summary.items():

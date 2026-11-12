@@ -32,8 +32,10 @@ import numpy as np
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 SCREENSHOTS = ROOT / "docs" / "screenshots"
-REPORT = ROOT / "ml" / "evaluation" / "phase9_visual_regression.json"
+REPORT = ROOT / "ml" / "evaluation" / "phase9_visual_regression"
 FRESH = ROOT / "frontend" / "test-results" / "screenshots"
 
 # A single changed card or a palette shift moves several percent of the canvas.
@@ -56,7 +58,7 @@ RADIATION = tuple(f"radiation-{viewport}-{model}"
 WATER = tuple(f"water-evidence-{viewport}" for viewport in ("desktop", "tablet", "mobile"))
 # Phase 35: the two routes where a reader decides whether to trust a number. Their baselines were
 # established from the verified candidate after the parent commit was rebuilt and captured with the
-# same suite; ml/evaluation/phase35_visual_drift.json records what moved and why.
+# same suite; ml/evaluation/phase35_visual_drift records what moved and why.
 SCREENS = tuple(f"{name}-{viewport}" for name in ("predictions", "benchmarks")
                 for viewport in ("desktop", "tablet", "mobile"))
 ALL_CAPTURES = VIEWPORTS + RADIATION + WATER + SCREENS
@@ -132,7 +134,7 @@ def main() -> int:
     # fresh capture, which is how a brand-new component gets its first baseline.
     # A missing *fresh* capture is always an error: it means the suite did not run.
     missing_fresh = [name for name in ALL_CAPTURES
-                     if not (fresh_dir / f"{name}.png").is_file()]
+                     if not safedata.exists(fresh_dir / f"{name}.png")]
     if missing_fresh:
         print(f"no fresh screenshots for {missing_fresh}; run the Playwright suite first",
               file=sys.stderr)
@@ -164,7 +166,7 @@ def main() -> int:
         for name in ALL_CAPTURES:
             old = SCREENSHOTS / f"{name}.png"
             new = fresh_dir / f"{name}.png"
-            before = Image.open(old).convert("RGB") if old.is_file() else None
+            before = Image.open(old).convert("RGB") if safedata.exists(old) else None
             after = Image.open(new).convert("RGB")
             entry = {
                 "capture": name,
@@ -198,13 +200,12 @@ def main() -> int:
                      "kept, not deleted: they are the record of how the interface looked when the "
                      "typography was whatever the host happened to have."),
         }
-        (REPORT.parent / "phase37_visual_baseline_migration.json").write_text(
-            json.dumps(record, indent=2) + "\n")
+        safedata.dump(record, REPORT.parent / "phase37_visual_baseline_migration")
         print(f"migrated {len(records)} baselines; previous images archived to {archive}")
         new_baselines = []
 
     new_baselines = [name for name in ALL_CAPTURES
-                     if not (SCREENSHOTS / f"{name}.png").is_file()]
+                     if not safedata.exists(SCREENSHOTS / f"{name}.png")]
 
     if new_baselines:
         for name in new_baselines:
@@ -237,7 +238,7 @@ def main() -> int:
               f"{entry['reason']}")
 
     REPORT.parent.mkdir(parents=True, exist_ok=True)
-    REPORT.write_text(json.dumps({
+    safedata.dump({
         "phase": 9,
         "purpose": ("Verify that adding the Phase 9 prediction cards did not alter "
                     "the existing visual design."),
@@ -248,7 +249,7 @@ def main() -> int:
         "passed": all(entry["passed"] for entry in results),
         "note": ("A tolerance is required because text rasterisation differs between "
                  "machines. Canvas size must match exactly: that is the layout guard."),
-    }, indent=2) + "\n")
+    }, REPORT)
     print(f"\nwrote {REPORT.relative_to(ROOT)}")
     return 0 if all(entry["passed"] for entry in results) else 1
 

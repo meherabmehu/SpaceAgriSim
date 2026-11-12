@@ -2,7 +2,7 @@
 
 Acquisition date: 2026-11-06. Source: NASA Open Science Data Repository, official public metadata/file APIs documented at <https://api.nasa.gov/> and <https://www.nasa.gov/osdr-api/>.
 
-Every requested study identifier was queried, rather than trusting the descriptions in the project brief. Raw API responses are a local cache excluded from Git; their SHA256 values, source URLs, version fields and verified timestamps are retained in the dataset manifest. Downloaded bytes have individual SHA256 hashes, exact byte lengths and UTC acquisition timestamps in `download_checksums.json`. The downloaded content is not generated from the simulator.
+Every requested study identifier was queried, rather than trusting the descriptions in the project brief. Raw API responses are a local cache excluded from Git; their SHA256 values, source URLs, version fields and verified timestamps are retained in the dataset manifest. Downloaded bytes have individual SHA256 hashes, exact byte lengths and UTC acquisition timestamps in `download_checksums`. The downloaded content is not generated from the simulator.
 
 The source file API may redirect official requests to `genelab-repo-prod.s3.amazonaws.com`; this NASA-selected bucket is explicitly allowed. Downloads are capped at 12 MB/file. Redirect URLs and signed query strings are not written to manifests. The manifest preserves stable NASA download endpoints.
 

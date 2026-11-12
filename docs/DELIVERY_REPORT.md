@@ -45,8 +45,8 @@ this environment it is stated as not done, with the reason.
 | Quality issues after the check fix | **0** on all six sites |
 | Catalogued datasets *not* downloaded | 20, each with the reason recorded |
 
-Sources: `data/research/DATASET_CATALOG.md` / `.json`,
-`data/metadata/power_acquisition_manifest.json`, `ml/evaluation/et0_dataset_quality.json`.
+Sources: `data/research/DATASET_CATALOG.md` / `.py`,
+`data/metadata/power_acquisition_manifest`, `ml/evaluation/et0_dataset_quality`.
 
 ## C. Gap closure
 
@@ -71,7 +71,7 @@ Gaps that remain, with their exact nature:
 
 `et0-emulator-v1`, trained on 14,648 rows (2018-01-01..2023-12-31), conformal-calibrated on
 2,160 of them (2023), tested on 3,994 (2024-01-01..2025-10-31). Every number below is read from
-`ml/artifacts/et0-emulator-v1.json`, which the trainer writes and the audit re-reads.
+`ml/artifacts/et0-emulator-v1`, which the trainer writes and the audit re-reads.
 
 | Model | Temporal holdout MAE (mm/day) | RMSE | R² | Bias | LOSO pooled MAE |
 |---|---|---|---|---|---|
@@ -124,12 +124,12 @@ re-applied on top of `3cfe9a4` after the working tree lost the earlier commits.
 - physics and service: `backend/app/simulation/et0_fao56.py`, `backend/app/et0.py`
 - tests: `backend/tests/test_phase23_reference_et0.py` (58 tests)
 - pipeline: `ml/research/{acquire_power_climate,build_et0_dataset,train_et0_emulator,build_catalog,build_gap_matrix,et0_fao56}.py`
-- artifacts: `ml/artifacts/et0-emulator-v1.{json,joblib}`, `ml/evaluation/{et0_dataset_quality.json,
+- artifacts: `ml/artifacts/et0-emulator-v1.{json,joblib}`, `ml/evaluation/{et0_dataset_quality,
   et0_model_comparison.md, et0_model_comparison.csv}`
 - data: `data/raw/nasa_power/` (6 responses, 2.5 MB), `data/processed/power_daily/` (6 CSVs),
-  `data/processed/et0_dataset.csv` (2.4 MB), `data/processed/et0_dataset.metadata.json`,
-  `data/metadata/power_acquisition_manifest.json`
-- catalogue: `data/research/{DATASET_CATALOG.md,dataset_catalog.json,dataset_gap_matrix.json}`
+  `data/processed/et0_dataset.csv` (2.4 MB), `data/processed/et0_dataset.metadata`,
+  `data/metadata/power_acquisition_manifest`
+- catalogue: `data/research/{DATASET_CATALOG.md,dataset_catalog,dataset_gap_matrix}`
 - documentation: `docs/{SCIENTIFIC_MODEL_AUDIT,DATA_QUALITY_AND_HARMONIZATION,DATASET_GAP_MATRIX,
   SCIENTIFIC_AI_UPGRADE_REPORT,DELIVERY_REPORT}.md`
 
@@ -138,7 +138,7 @@ re-applied on top of `3cfe9a4` after the working tree lost the earlier commits.
 `backend/app/simulation/{water,engine,serializers,model_description}.py`;
 `backend/app/config/simulation_constants.py`; `scripts/{audit_models,verify_model_registry}.py`;
 `backend/tests/{test_research,test_phase9_models,test_phase12_assistant,test_phase12_workflow}.py`;
-`ml/evaluation/phase13_model_audit.json`; `docs/phase7/registry_verification.json`.
+`ml/evaluation/phase13_model_audit`; `docs/phase7/registry_verification`.
 
 **No frontend file changed.** The UI consumes `/api/config` and `/api/simulate`, both of which
 gained additive fields only, and the default simulation path is byte-identical.
@@ -214,7 +214,7 @@ runs were dispatched to prove the pipeline rather than assume it:
 
 The monitor's checks are fixed health assertions; `emailDelivery=unconfigured` is reported as a
 check that passes while naming the missing capability, not hidden. Its payload is committed as
-`docs/production_monitor_run_2026-11-09.json`.
+`docs/production_monitor_run_2026-11-09`.
 
 **The backup job fails on purpose and that is the honest state.** `db-backup.yml` accepts a
 `skip_if_no_secrets` input, but the scheduled trigger passes nothing, so an unconfigured run is red.
@@ -380,8 +380,8 @@ Branch `phase26-dataset-expansion`, based on `main` at `34056cf`. Read
 `scripts/datasets/{registry,acquire,preprocess}.py`,
 `ml/research/validate_measured_et.py`, `ml/research/build_feature_readiness.py`,
 `data/processed/phase26/` (8 tables + 8 quality files),
-`data/metadata/phase26_acquisition_manifest.json`,
-`ml/evaluation/phase26_measured_et_validation.json`,
+`data/metadata/phase26_acquisition_manifest`,
+`ml/evaluation/phase26_measured_et_validation`,
 `docs/PHASE26_FEATURE_COVERAGE_MATRIX.md` and the three Phase 26 reports.
 
 ### K.3 Two corrections made to existing machinery

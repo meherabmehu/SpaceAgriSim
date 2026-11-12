@@ -13,6 +13,7 @@ Two things are protected here, both of them regressions that actually happened:
     full working set and every GET /api/models re-read ~1 MB of artifacts.
 """
 from __future__ import annotations
+import safedata
 
 import pytest
 from fastapi import FastAPI
@@ -136,7 +137,7 @@ def test_each_model_artifact_verifies(model_id):
 # ---------------------------------------------------------------------------
 def test_lettuce_v2_is_registered_beside_v1_not_over_it():
     """v1 must remain byte-identical: Phase 8 improves by addition, not overwrite."""
-    registry = research.read_json(research.ARTIFACTS / "registry.json")
+    registry = research.read_json(research.ARTIFACTS / "registry")
     entries = {item["id"]: item for item in registry["models"]}
     assert "lettuce-earth-growth-v1" in entries
     assert "lettuce-earth-growth-v2" in entries
@@ -219,17 +220,16 @@ def test_boosted_artifact_rejects_corrupt_learning_rate(tmp_path, monkeypatch):
     semantic check rather than trivially on the digest.
     """
     import hashlib
-    import json
 
-    model = json.loads((research.ARTIFACTS / "lettuce-earth-growth-v2.json").read_text())
+    model = safedata.load(research.ARTIFACTS / "lettuce-earth-growth-v2")
     model["boostedTrees"]["learningRate"] = 0.0
-    body = json.dumps(model, separators=(",", ":"))
-    (tmp_path / "lettuce-earth-growth-v2.json").write_text(body)
-    (tmp_path / "registry.json").write_text(json.dumps({"schemaVersion": 1, "models": [{
+    target = safedata.dump(model, tmp_path / "lettuce-earth-growth-v2")
+    body = target.read_bytes()
+    safedata.dump({"schemaVersion": 1, "models": [{
         "id": "lettuce-earth-growth-v2",
-        "artifact": "ml/artifacts/lettuce-earth-growth-v2.json",
-        "sha256": hashlib.sha256(body.encode()).hexdigest(),
-    }]}))
+        "artifact": "ml/artifacts/lettuce-earth-growth-v2",
+        "sha256": hashlib.sha256(body).hexdigest(),
+    }]}, tmp_path / "registry")
     monkeypatch.setattr(research, "ARTIFACTS", tmp_path)
     research.load_model.cache_clear()
     try:
@@ -241,13 +241,13 @@ def test_boosted_artifact_rejects_corrupt_learning_rate(tmp_path, monkeypatch):
     # A tree whose branch index points out of bounds must be rejected too.
     model["boostedTrees"]["learningRate"] = 0.06
     model["boostedTrees"]["trees"][0]["left"][0] = 10 ** 6
-    body = json.dumps(model, separators=(",", ":"))
-    (tmp_path / "lettuce-earth-growth-v2.json").write_text(body)
-    (tmp_path / "registry.json").write_text(json.dumps({"schemaVersion": 1, "models": [{
+    target = safedata.dump(model, tmp_path / "lettuce-earth-growth-v2")
+    body = target.read_bytes()
+    safedata.dump({"schemaVersion": 1, "models": [{
         "id": "lettuce-earth-growth-v2",
-        "artifact": "ml/artifacts/lettuce-earth-growth-v2.json",
-        "sha256": hashlib.sha256(body.encode()).hexdigest(),
-    }]}))
+        "artifact": "ml/artifacts/lettuce-earth-growth-v2",
+        "sha256": hashlib.sha256(body).hexdigest(),
+    }]}, tmp_path / "registry")
     research.load_model.cache_clear()
     try:
         with pytest.raises(ValueError, match="tree branches"):

@@ -15,9 +15,10 @@ re-downloadable); only this reproducible script and its manifest are.
 Run: python scripts/acquire_ntrs_reports.py
 Output:
     data/raw/ntrs/{id}.pdf                (gitignored)
-    data/metadata/phase7_ntrs_checksums.json
+    data/metadata/phase7_ntrs_checksums
 """
 from __future__ import annotations
+import sys
 
 import hashlib
 import json
@@ -27,8 +28,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 RAW = ROOT / "data" / "raw" / "ntrs"
-OUT = ROOT / "data" / "metadata" / "phase7_ntrs_checksums.json"
+OUT = ROOT / "data" / "metadata" / "phase7_ntrs_checksums"
 UA = {"User-Agent": "SpaceAgriSim/1.0 (Phase 7 NASA report recovery)"}
 
 # (NTRS citation id, short label, scientific role)
@@ -86,16 +89,16 @@ def fetch(url: str, attempts: int = 3) -> bytes:
 def main() -> int:
     RAW.mkdir(parents=True, exist_ok=True)
     previous = {}
-    if OUT.exists():
-        previous = {item["id"]: item for item in json.loads(OUT.read_text())}
+    if safedata.exists(OUT):
+        previous = {item["id"]: item for item in safedata.load(OUT)}
 
     records = []
     for citation_id, label, role in REPORTS:
         target = RAW / f"{citation_id}.pdf"
         url = BASE.format(id=citation_id)
         prior = previous.get(citation_id)
-        if target.is_file():
-            body = target.read_bytes()
+        if safedata.exists(target):
+            body = safedata.bytes(target)
             reused = True
         else:
             body = fetch(url)

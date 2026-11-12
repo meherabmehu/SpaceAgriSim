@@ -26,7 +26,7 @@ that was true of what the repository held, not of what NASA published.
 | 19910010713 | N91-20026, CO₂ and water exchange of a soybean stand in the BPC | Soybean | A second crop and canopy geometry for comparison |
 | 19900007373 | N90-16689, Dynamics of CO₂ exchange of a wheat community | Wheat | How the exchange rate moves across the growth cycle, not just the endpoint |
 
-Each PDF is pinned by **byte length and SHA-256** in `data/literature/ntrs_bpc.json`; a download
+Each PDF is pinned by **byte length and SHA-256** in `data/literature/ntrs_bpc`; a download
 that does not match the pin is rejected, and a changed upstream hash stops the script rather
 than being accepted. 14 measurement pages were selected across the three reports.
 

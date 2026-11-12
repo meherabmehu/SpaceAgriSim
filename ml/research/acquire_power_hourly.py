@@ -7,7 +7,7 @@ Every weather input this repository had was a *daily* aggregate (``acquire_power
 That is enough to fit an ET0 model but not enough to say anything about the diurnal cycle, which
 is the part of the environment a controlled-environment system actually has to manage: the hour
 of peak VPD, the daily temperature amplitude, the number of hours a crop spends above a VPD
-threshold. Gap ``sub-daily-weather`` in ``data/research/dataset_gap_matrix.json`` records that
+threshold. Gap ``sub-daily-weather`` in ``data/research/dataset_gap_matrix`` records that
 limitation. This script closes it by acquiring the hourly product directly from the same NASA
 POWER service, so the hourly and daily series share an upstream lineage and cannot disagree
 because of a provider change.
@@ -32,6 +32,7 @@ What the script guarantees
     python3 ml/research/acquire_power_hourly.py [--start 20230101] [--end 20231231]
 """
 from __future__ import annotations
+import sys
 
 import argparse
 import hashlib
@@ -45,9 +46,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 RAW = ROOT / "data" / "raw" / "nasa_power_hourly"
 PROCESSED = ROOT / "data" / "processed" / "power_hourly"
-MANIFEST = ROOT / "data" / "metadata" / "power_hourly_manifest.json"
+MANIFEST = ROOT / "data" / "metadata" / "power_hourly_manifest"
 
 ENDPOINT = "https://power.larc.nasa.gov/api/temporal/hourly/point"
 FILL_VALUE = -999.0
@@ -298,7 +301,7 @@ def main() -> int:
     for site in SITES:
         key = f"{site['siteId']}_{args.start}_{args.end}"
         url = build_url(site, args.start, args.end)
-        target = RAW / f"power_hourly_{site['siteId']}.json"
+        target = RAW / f"power_hourly_{site['siteId']}"
         try:
             body, fetched_at = fetch(url)
             target.write_bytes(body)
@@ -343,7 +346,7 @@ def main() -> int:
         "sitesOk": len(SITES) - failures,
         "sitesFailed": failures,
     }
-    MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(manifest, MANIFEST)
     print(f"\nmanifest -> {MANIFEST.relative_to(ROOT)} ({manifest['summary']})")
     return 1 if failures else 0
 

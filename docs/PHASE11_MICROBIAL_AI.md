@@ -4,8 +4,8 @@ The microbial evidence rests on two VEG-04 campaigns. Phase 11 asked three quest
 does the headline effect survive a harder test, what can a *new* campaign expect, and is a
 third campaign obtainable at all.
 
-Evidence: `ml/evaluation/phase11_microbial_campaigns.json`,
-`ml/evaluation/phase11_dataset_discovery.json`.
+Evidence: `ml/evaluation/phase11_microbial_campaigns`,
+`ml/evaluation/phase11_dataset_discovery`.
 
 ```
 python ml/training/phase11_microbial_campaigns.py    # ~3 s

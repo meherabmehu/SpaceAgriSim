@@ -20,6 +20,7 @@ What the script guarantees
     python3 ml/research/acquire_power_climate.py [--start 20180101] [--end 20251031]
 """
 from __future__ import annotations
+import sys
 
 import argparse
 import hashlib
@@ -32,8 +33,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 RAW = ROOT / "data" / "raw" / "nasa_power"
-MANIFEST = ROOT / "data" / "metadata" / "power_acquisition_manifest.json"
+MANIFEST = ROOT / "data" / "metadata" / "power_acquisition_manifest"
 
 ENDPOINT = "https://power.larc.nasa.gov/api/temporal/daily/point"
 FILL_VALUE = -999.0
@@ -169,7 +172,7 @@ def main() -> int:
     for site in SITES:
         key = f"{site['siteId']}_{args.start}_{args.end}"
         url = build_url(site, args.start, args.end)
-        target = RAW / f"power_{site['siteId']}.json"
+        target = RAW / f"power_{site['siteId']}"
         try:
             body, fetched_at = fetch(url)
             # Write first, parse second: a parse bug must not cost a download.
@@ -198,7 +201,7 @@ def main() -> int:
               f"elev {meta['elevationM']} m, API {meta['apiVersion']}, "
               f"missing {sum(meta['missingPerParameter'].values())}")
 
-    MANIFEST.write_text(json.dumps(manifest, indent=1) + "\n", encoding="utf-8")
+    safedata.dump(manifest, MANIFEST)
     print(f"\nwrote {MANIFEST.relative_to(ROOT)} "
           f"({len(SITES) - failures}/{len(SITES)} sites)")
     return 1 if failures else 0

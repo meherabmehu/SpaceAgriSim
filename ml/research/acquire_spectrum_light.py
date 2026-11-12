@@ -38,6 +38,7 @@ What the script guarantees
     python3 ml/research/acquire_spectrum_light.py
 """
 from __future__ import annotations
+import sys
 
 import hashlib
 import json
@@ -50,8 +51,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 RAW = ROOT / "data" / "raw"
-MANIFEST = ROOT / "data" / "metadata" / "phase37_acquisition_manifest.json"
+MANIFEST = ROOT / "data" / "metadata" / "phase37_acquisition_manifest"
 
 # Records that were downloaded, inspected and deliberately not retained. The checksum is kept so
 # the rejection can be reproduced byte for byte; the payload is not, because a 284 MB archive that
@@ -243,7 +246,7 @@ def main() -> int:
         "rejectedRetained": sum(1 for r in REJECTED if r["retained"]),
     }
     MANIFEST.parent.mkdir(parents=True, exist_ok=True)
-    MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(manifest, MANIFEST)
     print(f"\nmanifest -> {MANIFEST.relative_to(ROOT)}  {manifest['summary']}")
     return 0 if not manifest["failures"] else 1
 

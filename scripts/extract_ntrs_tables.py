@@ -31,7 +31,7 @@ Outputs:
     data/processed/ntrs_wheat_harvest_trays.csv
     data/processed/ntrs_wheat_growth_series.csv
     data/processed/ntrs_wheat_gas_exchange.csv
-    data/metadata/ntrs_extraction_report.json
+    data/metadata/ntrs_extraction_report
 """
 from __future__ import annotations
 
@@ -44,9 +44,11 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 RAW = ROOT / "data" / "raw" / "ntrs"
 PROCESSED = ROOT / "data" / "processed"
-REPORT = ROOT / "data" / "metadata" / "ntrs_extraction_report.json"
+REPORT = ROOT / "data" / "metadata" / "ntrs_extraction_report"
 
 TM102784 = "19900009537"   # Continuous hydroponic wheat production (harvest + growth)
 TM102788 = "19900016137"   # CO2 and water exchange, 86-day wheat study
@@ -278,7 +280,7 @@ def read_pdf_text(report_id: str) -> dict[int, str]:
     except ImportError:  # pragma: no cover
         return {}
     path = RAW / f"{report_id}.pdf"
-    if not path.is_file():
+    if not safedata.exists(path):
         return {}
     document = pymupdf.open(path)
     return {i + 1: document[i].get_text() for i in range(document.page_count)}
@@ -590,7 +592,7 @@ def main() -> int:
         "provenance": provenance,
     }
     REPORT.parent.mkdir(parents=True, exist_ok=True)
-    REPORT.write_text(json.dumps(report, indent=2, ensure_ascii=True, allow_nan=False) + "\n")
+    safedata.dump(report, REPORT)
 
     print("EXTRACTION VALIDATED")
     print(f"  harvest trays          : {len(harvest)}")

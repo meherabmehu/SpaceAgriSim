@@ -14,6 +14,7 @@ Rules this script follows, because the alternative is a dataset catalogue that l
 * nothing is written for a candidate whose licence is not established as redistributable.
 """
 from __future__ import annotations
+import safedata
 
 import argparse
 import datetime as _dt
@@ -32,7 +33,7 @@ if str(_REPO_ROOT) not in sys.path:  # pragma: no cover - import plumbing
 from scripts.datasets import registry  # noqa: E402
 
 RAW_ROOT = _REPO_ROOT / "data" / "raw" / "phase26"
-MANIFEST = _REPO_ROOT / "data" / "metadata" / "phase26_acquisition_manifest.json"
+MANIFEST = _REPO_ROOT / "data" / "metadata" / "phase26_acquisition_manifest"
 USER_AGENT = "SpaceAgriSim-Phase26/1.0 (+https://github.com/meherabmehu/SpaceAgriSim)"
 CHUNK = 1 << 16
 
@@ -48,7 +49,7 @@ def sha256_of(path: Path) -> str:
 MAGIC = {
     ".xlsx": (b"PK\x03\x04", "zip container (xlsx)"),
     ".csv": (None, "text"),
-    ".json": (None, "text"),
+    "": (None, "text"),
 }
 
 
@@ -79,7 +80,7 @@ def verify_payload(path: Path, expected_size: int | None, expected_checksum: str
     prefix, description = MAGIC.get(extension, (None, "unchecked"))
     if prefix is not None and not head.startswith(prefix):
         problems.append(f"magic bytes do not match {description}: {head[:4]!r}")
-    if extension in (".csv", ".json") and (head[:1] in (b"{", b"<") and extension == ".csv"):
+    if extension in (".csv", "") and (head[:1] in (b"{", b"<") and extension == ".csv"):
         problems.append("text payload looks like JSON/HTML rather than CSV")
     md5 = None
     if expected_checksum:
@@ -131,7 +132,7 @@ def download(url: str, target: Path) -> dict[str, Any]:
             sink.write(block)
             written += len(block)
     digest = sha256_of(temporary)
-    previous = sha256_of(target) if target.exists() else None
+    previous = sha256_of(target) if safedata.exists(target) else None
     if previous is not None and previous != digest:
         temporary.unlink()
         return {"action": "refused-overwrite", "existingSha256": previous,
@@ -209,7 +210,7 @@ def acquire(datasets: list[str] | None = None) -> dict[str, Any]:
     manifest["datasetsAcquired"] = sum(
         1 for record in manifest["datasets"].values() if record.get("allFilesVerified"))
     MANIFEST.parent.mkdir(parents=True, exist_ok=True)
-    MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(manifest, MANIFEST)
     print(f"\nverified downloads: {manifest['verifiedDownloadCount']} in "
           f"{manifest['datasetsAcquired']} datasets -> {MANIFEST.relative_to(_REPO_ROOT)}")
     return manifest
@@ -224,14 +225,14 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.probe:
         probes = {c["id"]: probe(c["landingUrl"]) for c in registry.CANDIDATES}
-        out = _REPO_ROOT / "data" / "research" / "phase26" / "discovery_probes.json"
+        out = _REPO_ROOT / "data" / "research" / "phase26" / "discovery_probes"
         out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(json.dumps({
+        safedata.dump({
             "generatedAt": _dt.datetime.now(_dt.timezone.utc).isoformat(),
             "note": ("Reachability only. A 200 response proves an endpoint answered; it does not "
                      "prove that a usable dataset exists behind it."),
             "probes": probes,
-        }, indent=2) + "\n", encoding="utf-8")
+        }, out)
         for key, value in probes.items():
             print(f"{key:42s} {value.get('httpStatus', value.get('error'))}")
         return 0

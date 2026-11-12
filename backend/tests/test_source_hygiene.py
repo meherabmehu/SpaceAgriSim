@@ -18,6 +18,8 @@ from pathlib import Path
 
 import pytest
 
+import safedata
+
 APP = Path(__file__).resolve().parents[1] / "app"
 
 
@@ -80,7 +82,7 @@ def test_the_unit_registry_declares_each_unit_once_with_its_description():
 
 def test_the_file_that_was_fixed_stays_fixed():
     path = APP / "workflows" / "units.py"
-    assert path.exists()
+    assert safedata.exists(path)
     assert _duplicate_literal_keys(path) == []
 
 

@@ -30,8 +30,8 @@ neither source publishes. So the comparison verdict is one of `shape-only`, `lev
 """
 
 from __future__ import annotations
+import sys
 
-import json
 import math
 from functools import lru_cache
 from pathlib import Path
@@ -40,10 +40,12 @@ from typing import Any
 from app.simulation import crops, growth, water
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 PROCESSED = ROOT / "data" / "processed" / "phase26"
-VALIDATION = ROOT / "ml" / "evaluation" / "phase26_measured_et_validation.json"
-CATALOGUE = ROOT / "data" / "research" / "dataset_catalog.json"
-MANIFEST = ROOT / "data" / "metadata" / "phase26_acquisition_manifest.json"
+VALIDATION = ROOT / "ml" / "evaluation" / "phase26_measured_et_validation"
+CATALOGUE = ROOT / "data" / "research" / "dataset_catalog"
+MANIFEST = ROOT / "data" / "metadata" / "phase26_acquisition_manifest"
 
 STUDY_ID = "zenodo-schroder-2021-lettuce-pot"
 POT_AREA_M2 = 0.0112
@@ -90,7 +92,7 @@ def _benchmark_rows() -> tuple[dict[str, Any], ...]:
     state; the returned tuple is never written to.
     """
     per_pot = PROCESSED / "schroder2021_lettuce_et.csv"
-    if not per_pot.is_file():
+    if not safedata.exists(per_pot):
         return ()
     rows = _read_csv(per_pot)
     published = {"VC-C", "VC-P", "TC-F", "TC-G", "TC-G2", "TC-G3", "SC"}
@@ -125,16 +127,16 @@ def _benchmark_rows() -> tuple[dict[str, Any], ...]:
 
 @lru_cache(maxsize=1)
 def _validation() -> dict[str, Any]:
-    if not VALIDATION.is_file():
+    if not safedata.exists(VALIDATION):
         return {}
-    return json.loads(VALIDATION.read_text(encoding="utf-8"))
+    return safedata.load(VALIDATION)
 
 
 @lru_cache(maxsize=1)
 def _catalogue_entry() -> dict[str, Any]:
-    if not CATALOGUE.is_file():
+    if not safedata.exists(CATALOGUE):
         return {}
-    payload = json.loads(CATALOGUE.read_text(encoding="utf-8"))
+    payload = safedata.load(CATALOGUE)
     for dataset in payload.get("datasets", []):
         if dataset.get("id") == STUDY_ID:
             return dataset
@@ -143,9 +145,9 @@ def _catalogue_entry() -> dict[str, Any]:
 
 @lru_cache(maxsize=1)
 def _manifest_entry() -> dict[str, Any]:
-    if not MANIFEST.is_file():
+    if not safedata.exists(MANIFEST):
         return {}
-    payload = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    payload = safedata.load(MANIFEST)
     return payload.get("datasets", {}).get(STUDY_ID, {})
 
 
@@ -171,7 +173,7 @@ def provenance() -> dict[str, Any]:
             "Gravimetric pot evapotranspiration: each pot was weighed and the mass loss between "
             "weighings is the water lost by the plant and substrate together."),
         "processedTable": "data/processed/phase26/schroder2021_lettuce_et.csv",
-        "validationArtefact": "ml/evaluation/phase26_measured_et_validation.json",
+        "validationArtefact": "ml/evaluation/phase26_measured_et_validation",
         "files": files,
         "hashVerified": bool(files) and all(item["verified"] for item in files),
     }

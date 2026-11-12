@@ -62,7 +62,7 @@ documentation and exits non-zero on any failure, so it is CI-usable.
 | Parity | every ORM column appears in the SQL migration | PASS |
 | Security | 7 Phase 4 invariants (see §3) | PASS |
 
-**21/21 passed.** Evidence artifact: `docs/phase7/deployment_verification.json`.
+**21/21 passed.** Evidence artifact: `docs/phase7/deployment_verification`.
 
 The idempotence check matters more than it looks: deployments re-run migrations,
 and `ADD COLUMN IF NOT EXISTS` / `CREATE TABLE IF NOT EXISTS` are what make that

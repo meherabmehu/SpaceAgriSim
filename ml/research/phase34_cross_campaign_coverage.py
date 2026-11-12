@@ -14,7 +14,7 @@ study that no part of training ever saw:
     six treatment means (2 cultivars x 3 vertical levels), 28 days after transplant,
     air 27.5 C, photoperiod 12 h, PPFD 322 / 391 / 697 umol m-2 s-1, 48 plants per m2.
 
-The transcription is already committed at `data/literature/external_lettuce_peerj17085.json`
+The transcription is already committed at `data/literature/external_lettuce_peerj17085`
 (every number copied from the open-access full text; no value read off a figure). Nothing here
 re-transcribes or interpolates it.
 
@@ -35,7 +35,7 @@ The mizuna pair is handled the same way, from the committed out-of-fold predicti
 VEG-04 campaigns in OSD-780: the conformal radius is fitted on one campaign and its coverage is
 measured on the other. That is the measurement the audit says is missing.
 
-Output: ml/evaluation/phase34_cross_campaign_coverage.json
+Output: ml/evaluation/phase34_cross_campaign_coverage
 Run:    python ml/research/phase34_cross_campaign_coverage.py
 """
 from __future__ import annotations
@@ -47,13 +47,15 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "backend"))
 
 from app import research  # noqa: E402
 
 ARTIFACTS = ROOT / "ml" / "artifacts"
-OBSERVATIONS = ROOT / "data" / "literature" / "external_lettuce_peerj17085.json"
-TARGET = ROOT / "ml" / "evaluation" / "phase34_cross_campaign_coverage.json"
+OBSERVATIONS = ROOT / "data" / "literature" / "external_lettuce_peerj17085"
+TARGET = ROOT / "ml" / "evaluation" / "phase34_cross_campaign_coverage"
 
 # v1 is superseded but still shipped for reproducibility, so its interval is measured too: leaving
 # one of the four audit findings unmeasured would make the record incomplete for no reason.
@@ -78,7 +80,7 @@ COVERAGE = 0.9
 
 
 def external_rows() -> tuple[list[dict], dict]:
-    record = json.loads(OBSERVATIONS.read_text(encoding="utf-8"))
+    record = safedata.load(OBSERVATIONS)
     conditions = record["studyConditions"]
     rows = []
     for observation in record["observations"]:
@@ -195,7 +197,7 @@ def evaluate_campaigns(model_id: str, spec: dict) -> dict:
     campaign = frame[spec["campaign"]].astype(str).to_numpy()
     # mizuna-microbial-load-v1 is superseded and has no served route, so its card is read from
     # disk. Only the two served estimators below go through the API's loader.
-    model = json.loads((ARTIFACTS / f"{model_id}.json").read_text(encoding="utf-8"))
+    model = safedata.load(ARTIFACTS / f"{model_id}")
 
     residual = np.abs(truth - predicted)
     directions = {}
@@ -316,7 +318,7 @@ def main() -> int:
         )
         print(f"  {result['statement']}")
 
-    TARGET.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(report, TARGET)
     print(f"wrote {TARGET.relative_to(ROOT)}")
     return 0
 

@@ -2,7 +2,7 @@
 
 Everything here is read from artifacts that were produced by scripts, not typed into this file:
 
-* `data/derived/bpc_benchmark.json` - NASA TM 102788 Biomass Production Chamber measurements
+* `data/derived/bpc_benchmark` - NASA TM 102788 Biomass Production Chamber measurements
   held against the simulator under the chamber's own operating point (Phase 16).
 * the leafy-green planning anchor derived from NTRS 20250001897 (Phase 18), which lives inside
   the same artifact.
@@ -15,23 +15,23 @@ models - and a table that sorted them would imply a comparison that does not exi
 """
 
 from __future__ import annotations
+import safedata
 
-import json
 from functools import lru_cache
 
 from app.research import DATA
 from app.config import simulation_constants as constants
 from app.simulation.factors import co2_factor
 
-BPC_BENCHMARK = DATA / "derived" / "bpc_benchmark.json"
+BPC_BENCHMARK = DATA / "derived" / "bpc_benchmark"
 CO2_POINTS = (420.0, 1000.0, 3000.0)
 
 
 @lru_cache(maxsize=1)
 def _artifact() -> dict | None:
-    if not BPC_BENCHMARK.is_file():
+    if not safedata.exists(BPC_BENCHMARK):
         return None
-    return json.loads(BPC_BENCHMARK.read_text())
+    return safedata.load(BPC_BENCHMARK)
 
 
 def co2_response() -> dict:
@@ -67,7 +67,7 @@ def payload() -> dict:
         benchmarks["leafyAnchor"] = None
         benchmarks["availability"] = {
             "available": False,
-            "reason": "data/derived/bpc_benchmark.json is not present in this deployment",
+            "reason": "data/derived/bpc_benchmark is not present in this deployment",
             "howToRebuild": "python scripts/benchmark_bpc_vs_simulation.py",
         }
     else:

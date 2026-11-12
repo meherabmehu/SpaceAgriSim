@@ -136,7 +136,7 @@ The Schröder bench's known weakness is unchanged and still stated: the study pu
 diameter nor spacing, so converting a per-pot measurement into a per-area flux requires an assumption,
 and the sign of the platform-vs-measurement discrepancy depends on which denominator you pick
 (0.247× on a pot-surface basis, 2.7× on a canopy-area basis, from
-`ml/evaluation/phase26_measured_et_validation.json`).
+`ml/evaluation/phase26_measured_et_validation`).
 
 Phase 29 did **not** resolve that, and it deliberately did not let the new irrigation layer launder it:
 the schedule is labelled `isReferenceCalculation: true`, `isMeasurement: false`, and the measured

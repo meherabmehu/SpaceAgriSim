@@ -29,13 +29,14 @@ traced to a page a reader can open.
 Provenance discipline
 ---------------------
 Same rule as every earlier acquisition: the PDF is pinned by byte length and SHA-256, a
-download that does not match is rejected, and `data/literature/ntrs_bpc.json` records the
+download that does not match is rejected, and `data/literature/ntrs_bpc` records the
 citation record, the page selection and the extraction timestamp.
 
 Run: python scripts/acquire_ntrs_bpc_measurements.py
 """
 
 from __future__ import annotations
+import sys
 
 import hashlib
 import json
@@ -45,8 +46,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 RAW = ROOT / "data" / "raw" / "NTRS"
-OUT = ROOT / "data" / "literature" / "ntrs_bpc.json"
+OUT = ROOT / "data" / "literature" / "ntrs_bpc"
 UA = {"User-Agent": "SpaceAgriSim-research/1.0 (NASA NTRS literature acquisition)"}
 
 REPORTS = {
@@ -91,8 +94,8 @@ def pinned_pdf(record_id: str, pinned: dict) -> tuple[bytes, dict]:
     url = f"https://ntrs.nasa.gov/api/citations/{record_id}/downloads/{record_id}.pdf"
     target = RAW / f"{record_id}.pdf"
     pin = pinned.get(record_id)
-    if pin and target.is_file():
-        payload = target.read_bytes()
+    if pin and safedata.exists(target):
+        payload = safedata.bytes(target)
         if len(payload) == pin["bytes"] and hashlib.sha256(payload).hexdigest() == pin["sha256"]:
             return payload, pin
     payload = fetch(url)
@@ -142,7 +145,7 @@ def citation(record_id: str) -> dict:
 
 def main() -> int:
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    state = json.loads(OUT.read_text()) if OUT.is_file() else {"reports": {}, "pins": {}}
+    state = safedata.load(OUT) if safedata.exists(OUT) else {"reports": {}, "pins": {}}
     pins = state.setdefault("pins", {})
     reports = state.setdefault("reports", {})
 
@@ -204,7 +207,7 @@ def main() -> int:
                           "acquired. Nothing was reconstructed from its abstract."),
         "recordedAt": datetime.now(timezone.utc).isoformat(),
     }
-    OUT.write_text(json.dumps(state, indent=2) + "\n")
+    safedata.dump(state, OUT)
 
     total = sum(len(entry["measurementPages"]) for entry in reports.values())
     print(f"\nwrote {OUT.relative_to(ROOT)} — {len(reports)} reports, {total} measurement pages")

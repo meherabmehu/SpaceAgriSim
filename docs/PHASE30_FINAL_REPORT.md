@@ -45,8 +45,8 @@ Sources searched, by name, with what each yielded:
 | Indoor wheat (Apogee), fully controlled environment | `10.5281/zenodo.17764612` | CC BY 4.0 | 39 experiment rows, 719 sub-plot rows, 34 with yield + environment | `data/raw/phase30/wheat_yields.xlsx` (138 723 B) | `385d4680…c33c5` |
 | Kilowatts to kilograms: lettuce LUE compilation | `10.5281/zenodo.14640245` | CC BY 4.0 | 53 published treatment means from 40 studies | `data/raw/phase30/lue_dataset.xlsx` (34 049 B) | `feb96c6c…ecedd` |
 
-Full detail: `docs/PHASE30_DATASET_ACQUISITION.md`, `data/metadata/phase30_acquisition_manifest.json`,
-`data/processed/phase30/quality.json`.
+Full detail: `docs/PHASE30_DATASET_ACQUISITION.md`, `data/metadata/phase30_acquisition_manifest`,
+`data/processed/phase30/quality`.
 
 ## 4. Rejected, with reasons
 
@@ -220,7 +220,7 @@ Changes that a future deploy would carry:
 | Crop water-deficit yield loss | **B** — no crop-specific Ky found; no yield-loss claim retained |
 | Prediction intervals / coverage | documented — descriptive only, no coverage guarantee advertised |
 | LED spectrum response | unchanged from Phase 29: measured comparison served, surface not claimed |
-| Remaining nine gaps in `dataset_gap_matrix.json` | unchanged, each with its stated consequence |
+| Remaining nine gaps in `dataset_gap_matrix` | unchanged, each with its stated consequence |
 
 There is no "future phase" list: each gap above ends in either an integrated and tested capability or
 a documented multi-source failure with the capability removed.

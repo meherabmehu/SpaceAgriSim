@@ -13,7 +13,7 @@ Removal here means **removal**, not retirement:
 
 What stays, deliberately:
 
-* the artifact under `ml/artifacts/` and its recorded SHA-256 in `ml/artifacts/registry.json`
+* the artifact under `ml/artifacts/` and its recorded SHA-256 in `ml/artifacts/registry`
   (checksum verification still runs over it, and `GET /api/science/checksums` lists it with
   `"served": false`);
 * the evaluation files under `ml/evaluation/`, so every number below can be re-derived;
@@ -49,7 +49,7 @@ standardised load: held-out R² **+0.444 / +0.373**, permutation p = 0.000, posi
 campaign. It returns standard deviations within a campaign and refuses to emit an absolute log10 CFU/g
 figure unless the caller supplies that campaign's own measured mean and sd.
 
-**Records:** `ml/artifacts/mizuna-microbial-load-v1.json`, `ml/evaluation/phase6_*`,
+**Records:** `ml/artifacts/mizuna-microbial-load-v1`, `ml/evaluation/phase6_*`,
 `ml/evaluation/phase7_*`, `docs/PHASE7_FINAL_REPORT.md`.
 
 ---
@@ -64,7 +64,7 @@ experiment**, and its two arms differ in target definition (see `docs/DATA_HARMO
 AI prediction centre — a form that returns a number, with an uncalibrated interval, for a model that
 fails its own evaluation. It was also pinned at `baseline-only` in the registry rather than withdrawn.
 
-**Records:** `ml/artifacts/mizuna-harvest-v1.json`, `ml/evaluation/phase10_*`,
+**Records:** `ml/artifacts/mizuna-harvest-v1`, `ml/evaluation/phase10_*`,
 `docs/PHASE10_WEAK_MODEL_AUDIT.md`.
 
 ---
@@ -90,7 +90,7 @@ inputs and the reason named in every response. The implementation is checked aga
 worked examples on every call (`GET /api/reference-et0/model`); no measured-ET0 station benchmark is
 bundled, and the API says so instead of implying one exists.
 
-**Records:** `ml/artifacts/et0-emulator-v1.json` + `.joblib`, `ml/evaluation/phase23_*`,
+**Records:** `ml/artifacts/et0-emulator-v1` + `.joblib`, `ml/evaluation/phase23_*`,
 `data/processed/et0_dataset.csv`.
 
 ---
@@ -99,8 +99,8 @@ bundled, and the API says so instead of implying one exists.
 
 **Why it is gone.** No harvest model met the project's unchanged 30 % independent-error criterion:
 **41.7 % MAPE** on the Phase 28 holdout, **39.3 %** on the single published holdout in
-`phase29_harvest_final.json`, and a cross-study evaluation over 35 published lettuce studies that was
-worse again (`phase30_harvest_crossstudy.json`).
+`phase29_harvest_final`, and a cross-study evaluation over 35 published lettuce studies that was
+worse again (`phase30_harvest_crossstudy`).
 
 **What was wrong with the previous treatment.** Phase 30 removed the forecast itself but kept a
 *catalogue entry*, *three endpoints* (`capability`, `parity`, and a `410` tombstone at `run`) and a
@@ -108,9 +108,9 @@ dedicated UI tab whose only content was the explanation that the feature no long
 deleted all of it: `backend/app/workflows/harvest.py`, the routes, the catalogue entry, the guided
 workflow tab, and the frontend panel.
 
-**Records (unchanged, still committed):** `ml/evaluation/phase28_harvest_holdout.json`,
-`phase29_harvest_final.json`, `phase29_harvest_diagnosis.json`, `phase29_harvest_experiments.json`,
-`phase30_harvest_crossstudy.json`, `ml/artifacts/lettuce-earth-growth-v3.json`, and the Phase 29/30
+**Records (unchanged, still committed):** `ml/evaluation/phase28_harvest_holdout.py`,
+`phase29_harvest_final`, `phase29_harvest_diagnosis`, `phase29_harvest_experiments`,
+`phase30_harvest_crossstudy`, `ml/artifacts/lettuce-earth-growth-v3`, and the Phase 29/30
 reports under `docs/`.
 
 ---
@@ -147,7 +147,7 @@ imported them: `ControlGroup`, `CropSelector`, `DurationSelector`, `ImpactBreakd
   for that status; three of the four terms were true and the fourth — conformal coverage within five
   points of nominal — was unmeasured until Phase 34 measured it at 0.8943 against a nominal 0.90.
   The promotion is derived from that measurement, recorded in
-  `ml/evaluation/phase35_model_evidence.json`, and it still binds the number to a campaign that
+  `ml/evaluation/phase35_model_evidence`, and it still binds the number to a campaign that
   supplies its own baseline samples. Nothing in this phase's reasoning about the withdrawn models
   changed.
 * **The demand-curve comparison** stays as a *relative* comparison. The trial publishes neither pot

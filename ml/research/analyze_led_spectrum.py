@@ -28,6 +28,7 @@ script performs. Nothing here is `predicted`.
     python3 ml/research/analyze_led_spectrum.py
 """
 from __future__ import annotations
+import sys
 
 import csv
 import json
@@ -39,6 +40,8 @@ from pathlib import Path
 import openpyxl
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 RAW = ROOT / "data" / "raw" / "zenodo_20394352"
 OUT = ROOT / "data" / "research" / "phase37"
 PROCESSED = ROOT / "data" / "processed" / "led_spectrum"
@@ -52,7 +55,7 @@ PERMUTATIONS = 20000
 
 
 def _load() -> openpyxl.Workbook:
-    if not WORKBOOK.is_file():
+    if not safedata.exists(WORKBOOK):
         raise SystemExit(f"missing {WORKBOOK}; run ml/research/acquire_spectrum_light.py")
     return openpyxl.load_workbook(WORKBOOK, data_only=True)
 
@@ -282,8 +285,7 @@ def main() -> int:
         ],
     }
     OUT.mkdir(parents=True, exist_ok=True)
-    (OUT / "led_spectrum_response.json").write_text(json.dumps(report, indent=2) + "\n",
-                                                   encoding="utf-8")
+    safedata.dump(report, OUT / "led_spectrum_response")
 
     wp = report["freshWeightContrasts"]["contrasts"]
     print(f"harvest plants: {sum(v['n'] for v in harvest_summary['Fresh weight'].values())}")
@@ -293,7 +295,7 @@ def main() -> int:
     for name, c in wp.items():
         print(f"  {name:34} diff={c['differenceOfMeans']:7.3f} g  "
               f"p={c['permutationP']:.5f}  CI={c['bootstrap95']}")
-    print(f"\nreport -> {OUT / 'led_spectrum_response.json'}")
+    print(f"\nreport -> {OUT / 'led_spectrum_response'}")
     return 0
 
 

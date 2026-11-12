@@ -6,7 +6,7 @@
 Render operation of any kind was performed** (§9).
 **Companions:** `docs/ERA5_LAND_INDEPENDENT_VALIDATION.md`,
 `docs/EXPERIMENTAL_WATER_USE_VALIDATION_PROTOCOL.md`,
-`data/experiments/water_use_schema.json`.
+`data/experiments/water_use_schema`.
 
 ---
 
@@ -61,7 +61,7 @@ test asserts the set cannot silently change:
   argv, logs or `.git/config`.
 * Absent credential → `MissingCredentialError` naming the missing variables, echoing no value,
   creating no file, and **no fallback to a different product**.
-* Recorded in every run's `validation_summary.json` as
+* Recorded in every run's `validation_summary` as
   `provenance.routesNotRun[copernicus-cds-era5-land]` with `missingEnvironmentVariables`,
   `reason` ("… Data are NOT fabricated and the leg is omitted"), `impact` and `howToRun`.
 * Five tests cover this, including that a *present* variable's value is never echoed in the error.
@@ -110,7 +110,7 @@ results. It is omitted on purpose, and `run_validation.py` will populate the two
 A Shapley decomposition over all 120 orderings of the five swapped daily drivers, with both legs
 evaluated by the same equation, so each contribution is a defensible share of the ET0 difference
 
-(`scripts/et0_validation/attribute.py`, artefact `data/validation/et0/attribution.json`).
+(`scripts/et0_validation/attribute.py`, artefact `data/validation/et0/attribution`).
 
 | Site | diff (mm d⁻¹) | Tmax | Tmin | ea | Rs | u₂ | dominant |
 |---|---|---|---|---|---|---|---|
@@ -171,9 +171,9 @@ What was built is the apparatus that decides whether a future export is usable.
 
 | Deliverable | Location | Content |
 |---|---|---|
-| Machine-checked schema | `data/experiments/water_use_schema.json` | 23 required + 18 optional + 2 derived columns, per-column type/unit/range, 7 cross-field rules, quality rules, pre-registered analysis plan |
+| Machine-checked schema | `data/experiments/water_use_schema` | 23 required + 18 optional + 2 derived columns, per-column type/unit/range, 7 cross-field rules, quality rules, pre-registered analysis plan |
 | Ingestion validator | `scripts/experiment/validate_water_use.py` | 18 checks, non-zero exit on failure, JSON report |
-| Template generator | `--emit-template` | header-only CSV + `units.json`; **no example rows**, because a template with plausible rows gets cited as data |
+| Template generator | `--emit-template` | header-only CSV + `units.py`; **no example rows**, because a template with plausible rows gets cited as data |
 | Synthetic fixture generator | `scripts/experiment/make_synthetic_fixture.py` | one clean fixture + 10 single-defect variants, every row labelled `SYNTHETIC FIXTURE … not a measurement` |
 | Tests | `backend/tests/test_phase25_experimental_ingestion.py` | 31 tests, one per defect class plus the integrity rules |
 
@@ -190,7 +190,7 @@ plausibility; replication; trial duration; Kc availability; QC distribution.
 2. **A failed water balance rejects the day; it does not get averaged in.** Days outside the 10 %
    closure limit are counted and listed so a report can state how many were lost.
 
-Units are compared against a companion `units.json` and **equivalents are rejected**: `L` against a
+Units are compared against a companion `units.py` and **equivalents are rejected**: `L` against a
 column the schema defines in `mL` fails, because both parse as a number and the difference is a
 silent factor of 1 000. A missing units file is a hard failure, not a warning.
 
@@ -270,7 +270,7 @@ Two audit runs: `scripts/audit_models.py` → **141 checks, 0 failed**;
 | ET0 validation run | `python scripts/et0_validation/run_validation.py` | 6 570 site-days, 24 s |
 | Attribution | `python scripts/et0_validation/attribute.py` | 6 sites, 120 orderings each, 17 s |
 | Fresh-clone check | `git clone` of the commit → full suite | **950 passed, 24 skipped** |
-| Pipeline reproducibility | two full runs + one cache replay, compared with `cmp` and a field diff | `harmonised_daily.csv` **byte-identical**; `validation_summary.json` differs only in `generatedAt` |
+| Pipeline reproducibility | two full runs + one cache replay, compared with `cmp` and a field diff | `harmonised_daily.csv` **byte-identical**; `validation_summary` differs only in `generatedAt` |
 
 The 24 skips are all PostgreSQL-related (see §8), unchanged from the previous phase.
 
@@ -340,16 +340,16 @@ measures is unchanged.
 |---|---|
 | `scripts/et0_validation/{__init__,sources,methods,era5_land,scoring,attribute,run_validation}.py` | new — acquisition with credential gate and provenance, hourly + daily FAO-56 + Hargreaves, CDS NetCDF reader, metrics, Shapley attribution, pipeline |
 | `scripts/experiment/{__init__,validate_water_use,make_synthetic_fixture}.py` + `fixtures/` | new — schema validator, template generator, synthetic fixtures |
-| `data/experiments/water_use_schema.json` | new — the trial data contract |
-| `data/validation/et0/{harmonised_daily.csv,validation_summary.json,attribution.json}` | new — derived evidence (3.1 MB total) |
+| `data/experiments/water_use_schema` | new — the trial data contract |
+| `data/validation/et0/{harmonised_daily.csv,validation_summary,attribution}` | new — derived evidence (3.1 MB total) |
 | `backend/tests/test_phase25_et0_validation.py`, `test_phase25_experimental_ingestion.py` | new — 100 tests |
 | `backend/tests/test_phase23_reference_et0.py` | catalogue-count test updated 21 → 23 datasets with B:6→5 and C:5→8, reason in the docstring |
 | `docs/ERA5_LAND_INDEPENDENT_VALIDATION.md` | rewritten against the new code and numbers |
 | `docs/EXPERIMENTAL_WATER_USE_VALIDATION_PROTOCOL.md` | rewritten with equipment, frequency, sample size, calibration, uncertainty budget, schema and acceptance criteria |
 | `docs/PHASE25_DELIVERY_REPORT.md` | new (this file) |
 | `docs/POST_PHASE23_VALIDATION_REPORT.md` | **deleted** — documented Phase 24 files that were never pushed and no longer exist |
-| `data/research/dataset_catalog.json` + `DATASET_CATALOG.md` | regenerated: 23 datasets |
-| `data/research/dataset_gap_matrix.json` + `docs/DATASET_GAP_MATRIX.md` | `independent-et0` and `measured-eta` status text updated with evidence; severities unchanged |
+| `data/research/dataset_catalog` + `DATASET_CATALOG.md` | regenerated: 23 datasets |
+| `data/research/dataset_gap_matrix` + `docs/DATASET_GAP_MATRIX.md` | `independent-et0` and `measured-eta` status text updated with evidence; severities unchanged |
 
 Not changed: production ET0 code and thresholds, any model artefact or classification, the database
 schema, the API contract, the UI, the workflows.

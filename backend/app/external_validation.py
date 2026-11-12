@@ -9,15 +9,15 @@ every request, so a retrained model changes the answer and the page cannot show 
 """
 
 from __future__ import annotations
+import safedata
 
-import json
 import statistics
 from functools import lru_cache
 
 from app.research import DATA, load_model
 
-SCREEN = DATA / "literature" / "external_validation_screen.json"
-EXTERNAL = DATA / "literature" / "external_lettuce_peerj17085.json"
+SCREEN = DATA / "literature" / "external_validation_screen"
+EXTERNAL = DATA / "literature" / "external_lettuce_peerj17085"
 MODEL_ID = "lettuce-earth-growth-v2"
 # The Phase 19 successor. v2 is kept and still scored, because its failure is the record that
 # justified rebuilding it; deleting the failing check once a better model existed would erase the
@@ -32,16 +32,16 @@ ROOT_TEMPERATURE_PROBES = (20.0, 24.0, 27.5, 30.0, 32.0)
 
 @lru_cache(maxsize=1)
 def _screen() -> dict | None:
-    if not SCREEN.is_file():
+    if not safedata.exists(SCREEN):
         return None
-    return json.loads(SCREEN.read_text())
+    return safedata.load(SCREEN)
 
 
 @lru_cache(maxsize=1)
 def _external() -> dict | None:
-    if not EXTERNAL.is_file():
+    if not safedata.exists(EXTERNAL):
         return None
-    return json.loads(EXTERNAL.read_text())
+    return safedata.load(EXTERNAL)
 
 
 def _predict(inputs: list[float]) -> float:
@@ -75,7 +75,7 @@ def _v3_check() -> dict:
     study = _external()
     if study is None:
         return {"available": False,
-                "reason": "data/literature/external_lettuce_peerj17085.json is not in this deployment"}
+                "reason": "data/literature/external_lettuce_peerj17085 is not in this deployment"}
     try:
         model = load_model(MODEL_ID_V3)
     except (KeyError, FileNotFoundError, ValueError) as exc:
@@ -193,7 +193,7 @@ def _external_check() -> dict:
     study = _external()
     if study is None:
         return {"available": False,
-                "reason": "data/literature/external_lettuce_peerj17085.json is not in this deployment"}
+                "reason": "data/literature/external_lettuce_peerj17085 is not in this deployment"}
     conditions = study["studyConditions"]
     air = float(conditions["airTemperatureC"])
     rows = []
@@ -320,7 +320,7 @@ def payload() -> dict:
     }
     if screen is None:
         body.update({"available": False,
-                     "reason": "data/literature/external_validation_screen.json is not in this deployment"})
+                     "reason": "data/literature/external_validation_screen is not in this deployment"})
         return body
     body.update({
         "available": True,

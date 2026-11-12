@@ -1,6 +1,6 @@
 # SpaceAgriSim Dataset Catalogue
 
-Generated from `data/research/dataset_catalog.json` on 2026-11-09 by `ml/research/build_catalog.py`. Edit the JSON, not this file.
+Generated from `data/research/dataset_catalog` on 2026-11-09 by `ml/research/build_catalog.py`. Edit the JSON, not this file.
 
 Every dataset the project has evaluated, with the licence evidence behind its class. The class answers one question: could this support a claim the product makes, under the licence it is actually distributed with?
 
@@ -81,7 +81,7 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 - **Licence:** NASA open data: no restrictions on use, access or download; citation requested
 - **Licence evidence:** verified (https://registry.opendata.aws/nasa-power/)
 - **Commercial use:** permitted
-- **Imported:** yes - data/raw/nasa_power/*.json via ml/research/acquire_power_climate.py
+- **Imported:** yes - data/raw/nasa_power/* via ml/research/acquire_power_climate.py
 - **Caveat:** Reanalysis on a coarse grid: a site label is a grid-cell value, not an instrument reading, and its MERRA-2 lineage means it cannot validate itself.
 
 ### SMAP L4 Global 3-hourly 9 km surface and root-zone soil moisture (SPL4SMGP v8)  `smap-l4-ssm`
@@ -241,7 +241,7 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 - **Licence:** NASA open data policy: no restrictions on use; per-study citation
 - **Licence evidence:** verified (https://osdr.nasa.gov/bio/about/policies.html)
 - **Commercial use:** permitted
-- **Imported:** yes - data/metadata/dataset_manifest.json - provenance only, never a feature
+- **Imported:** yes - data/metadata/dataset_manifest - provenance only, never a feature
 - **Caveat:** Microgravity studies exist here, but none with the replication a response function needs.
 
 ### Published lettuce light-intensity and temperature trial (PeerJ 17085)  `peerj17085-lettuce`
@@ -257,7 +257,7 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 - **Licence:** article CC BY 4.0; the extracted table is a derived dataset
 - **Licence evidence:** unverified (https://peerj.com/articles/17085/)
 - **Commercial use:** permitted with attribution (article licence)
-- **Imported:** yes - data/literature/external_lettuce_peerj17085.json - validation only
+- **Imported:** yes - data/literature/external_lettuce_peerj17085 - validation only
 - **Caveat:** One cultivar, one facility: agreement here is a sanity check, not validation.
 
 ### DeepWeeds: weed image classification in northern Australia  `deepweeds`
@@ -465,7 +465,7 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 - **Licence:** NASA open data: no restrictions on use, access or download; citation requested
 - **Licence evidence:** verified (https://registry.opendata.aws/nasa-power/)
 - **Commercial use:** permitted
-- **Imported:** yes - data/raw/nasa_power_hourly/*.json via ml/research/acquire_power_hourly.py
+- **Imported:** yes - data/raw/nasa_power_hourly/* via ml/research/acquire_power_hourly.py
 - **Caveat:** Local standard time, as the provider states; not relabelled as UTC. MERRA-2 lineage, so it cannot validate a MERRA-2-derived ET0.
 
 ### Agroscope weighable-lysimeter water balance, Zurich-Reckenholz  `zenodo-agroscope-lysimeter-2026`
@@ -535,7 +535,7 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 ### Greenhouse lettuce pot experiment with gravimetric evapotranspiration (Schroeder et al. 2021)  `zenodo-schroder-2021-lettuce-pot`
 
 - **Class:** A - acquired and used in this repository
-- **Why this class:** Acquired, hash-verified and used: it is the measured side of ml/evaluation/phase26_measured_et_validation.json, the first measured crop water-use comparison in the repository.
+- **Why this class:** Acquired, hash-verified and used: it is the measured side of ml/evaluation/phase26_measured_et_validation, the first measured crop water-use comparison in the repository.
 - **Publisher:** Zenodo (Agronomy 11:1175 supplementary data)
 - **URL:** https://doi.org/10.5281/zenodo.5550230
 - **Format:** XLSX, 9 sheets
@@ -577,7 +577,7 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 - **Licence:** CC BY 4.0
 - **Licence evidence:** verified (https://zenodo.org/records/17764612)
 - **Commercial use:** permitted with attribution
-- **Imported:** yes - data/processed/phase30/cea_wheat_experiments.csv, cea_wheat_subplots.csv, and the shared quality record data/processed/phase30/quality.json
+- **Imported:** yes - data/processed/phase30/cea_wheat_experiments.csv, cea_wheat_subplots.csv, and the shared quality record data/processed/phase30/quality
 - **Caveat:** One cultivar (Apogee) in one facility family. The environmental logs are per-run summaries here, and PPFD varied within a run in most experiments, so a band is a group of whole experiments rather than a controlled level. Grain yield is not edible biomass and the harvest index is not modelled.
 
 ### Kilowatts to kilograms: lettuce light-use-efficiency compilation  `zenodo-kilowatts-lettuce-lue`

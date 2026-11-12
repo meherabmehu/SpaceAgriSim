@@ -19,6 +19,7 @@ Layout quirks handled here
     python3 ml/research/process_lysimeter_evidence.py
 """
 from __future__ import annotations
+import sys
 
 import csv
 import json
@@ -26,9 +27,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 RAW = ROOT / "data" / "raw"
 OUT = ROOT / "data" / "processed" / "lysimeter"
-MANIFEST = ROOT / "data" / "metadata" / "lysimeter_processing_manifest.json"
+MANIFEST = ROOT / "data" / "metadata" / "lysimeter_processing_manifest"
 
 UNIT_CONVERSIONS = {
     "agroscope.eta": "none - already mm/day for a 1 m2 weighable lysimeter",
@@ -244,7 +247,7 @@ def main() -> int:
         "hoursWithNegativeLe": sum(1 for r in tereno if r["le_wm2"] < 0),
     }
 
-    MANIFEST.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(report, MANIFEST)
     print(json.dumps(report, indent=2)[:1600])
     print(f"\nmanifest -> {MANIFEST.relative_to(ROOT)}")
     return 0

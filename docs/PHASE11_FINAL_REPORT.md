@@ -28,11 +28,11 @@ a result is negative, it is stated as negative and classified as such.
 
 | # | Objective | Classification | Evidence |
 | --- | --- | --- | --- |
-| 1 | Improve reliability of existing NASA-trained models | **Rejected by scientific evaluation** | `phase11_radiation_validation.json` |
-| 2 | Find new NASA datasets that fix weak models | **Partially completed** (sweep complete; nothing usable found) | `phase11_dataset_discovery.json`, `phase11_duplicate_audit.json` |
+| 1 | Improve reliability of existing NASA-trained models | **Rejected by scientific evaluation** | `phase11_radiation_validation` |
+| 2 | Find new NASA datasets that fix weak models | **Partially completed** (sweep complete; nothing usable found) | `phase11_dataset_discovery`, `phase11_duplicate_audit` |
 | 3 | Narrow Phase 10 scientific uncertainties | **Completed** (four narrowed, one confirmed blocked) | gravity, dose, microbial, OOD artifacts |
-| 4 | Improve explainability, uncertainty, OOD | **Partially completed** — explainability and OOD completed; OOD detector rejected on its own controls | `phase11_explainability.json`, `phase11_ood_uncertainty.json` |
-| 5 | Evidence-grounded decision support | **Completed** | `phase11_microbial_campaigns.json` prediction interval |
+| 4 | Improve explainability, uncertainty, OOD | **Partially completed** — explainability and OOD completed; OOD detector rejected on its own controls | `phase11_explainability`, `phase11_ood_uncertainty` |
+| 5 | Evidence-grounded decision support | **Completed** | `phase11_microbial_campaigns` prediction interval |
 | 6 | Reproducible competition demo | **Completed** | `scripts/demo_phase9.sh`, `docs/PHASE11_COMPETITION_DEMO.md` |
 | 7 | Platform quality and merge to `main` | **Completed** | `docs/PHASE11_PLATFORM_QA.md`, this branch merged with `--no-ff` |
 
@@ -138,7 +138,7 @@ Conclusion `osd346-gravity-signal-is-not-separable-from-flight-run`,
 The Phase 10 number is not overwritten. Its P2 correlation of 0.571 was p 0.0015 under a
 **within-light-treatment** null that spans all six runs and centres on zero, versus p 0.196
 under a within-run null. That is a **null-specification error**, disclosed in
-`phase11_gravity_batch.json` as `C_phase10Correction`; no served claim depended on it.
+`phase11_gravity_batch` as `C_phase10Correction`; no served claim depended on it.
 
 ### 5b. Dose: **completed** — now a mechanism, not a low score
 

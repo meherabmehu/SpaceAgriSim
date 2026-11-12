@@ -10,6 +10,7 @@ routes, request schemas, response fields, the catalogue, the assistant corpus an
 matrix. Anything that could resurrect one of these features quietly fails here.
 """
 from __future__ import annotations
+import safedata
 
 import json
 
@@ -103,8 +104,8 @@ def test_the_assistant_never_offers_a_removed_capability(phrase):
 # ------------------------------------------------------------------ the matrices
 
 def test_the_coverage_matrix_agrees_the_features_are_gone():
-    coverage = json.loads((ROOT / "data" / "research" / "phase27" /
-                           "feature_implementation_coverage.json").read_text(encoding="utf-8"))
+    coverage = safedata.load(ROOT / "data" / "research" / "phase27" /
+                           "feature_implementation_coverage")
     assert {feature["id"] for feature in coverage["features"]} == {
         "measured-eta", "independent-et0", "yield-labels", "led-spectrum-response",
         "nutrient-balance", "cultivar-metadata", "mission-energy", "fractional-gravity",
@@ -124,8 +125,8 @@ def test_the_coverage_matrix_agrees_the_features_are_gone():
 
 
 def test_the_readiness_audit_records_a_reason_and_a_search_for_each_removal():
-    readiness = json.loads((ROOT / "data" / "research" / "phase26" /
-                            "feature_readiness.json").read_text(encoding="utf-8"))
+    readiness = safedata.load(ROOT / "data" / "research" / "phase26" /
+                            "feature_readiness")
     removed = [feature for feature in readiness["features"] if feature["tier"] == "removed"]
     assert len(removed) == 8
     assert {feature["id"] for feature in removed} == set(REMOVED)
@@ -141,8 +142,8 @@ def test_the_readiness_audit_records_a_reason_and_a_search_for_each_removal():
 
 def test_no_feature_is_left_in_a_blocked_state():
     """The point of Phase 32: 'blocked' is a plan, and this phase does not ship plans."""
-    readiness = json.loads((ROOT / "data" / "research" / "phase26" /
-                            "feature_readiness.json").read_text(encoding="utf-8"))
+    readiness = safedata.load(ROOT / "data" / "research" / "phase26" /
+                            "feature_readiness")
     assert readiness["counts"]["byTier"].get("data-blocked", 0) == 0
     assert readiness["counts"]["byTier"].get("unsupported", 0) == 0
     for feature in readiness["features"]:

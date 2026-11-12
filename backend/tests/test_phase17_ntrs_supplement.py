@@ -13,6 +13,7 @@ become citable evidence, and neither becomes a fitted coefficient.
 """
 
 from __future__ import annotations
+import sys
 
 import hashlib
 import json
@@ -21,13 +22,15 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-SUPPLEMENT = ROOT / "data" / "literature" / "ntrs_supplement.json"
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
+SUPPLEMENT = ROOT / "data" / "literature" / "ntrs_supplement"
 POSTER = ROOT / "data" / "raw" / "NTRS" / "20160006559.pdf"
 
 
 @pytest.fixture(scope="module")
 def payload() -> dict:
-    return json.loads(SUPPLEMENT.read_text())
+    return safedata.load(SUPPLEMENT)
 
 
 @pytest.fixture(scope="module")
@@ -42,8 +45,8 @@ def ethylene(payload) -> dict:
 
 # -- provenance -----------------------------------------------------------------
 def test_the_light_quality_poster_is_pinned_to_the_acquired_pdf(light_study):
-    assert POSTER.is_file(), "the poster PDF must be committed with the record"
-    digest = hashlib.sha256(POSTER.read_bytes()).hexdigest()
+    assert safedata.exists(POSTER), "the poster PDF must be committed with the record"
+    digest = hashlib.sha256(safedata.bytes(POSTER)).hexdigest()
     assert light_study["pdf_sha256"] == digest
     assert light_study["pages"] == 1
     assert light_study["url"] == "https://ntrs.nasa.gov/citations/20160006559"

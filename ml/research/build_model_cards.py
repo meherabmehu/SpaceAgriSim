@@ -3,7 +3,7 @@
 Why this file exists
 --------------------
 The seven served models are described by JSON documents in ``ml/artifacts/``. Those documents *are*
-the model cards, and their SHA-256 values are published in ``ml/artifacts/registry.json`` and served
+the model cards, and their SHA-256 values are published in ``ml/artifacts/registry`` and served
 by ``GET /api/models``. Four of the seven omit the two fields a reader needs to reproduce them: the
 path of the code that produced them and a hash of the data they were trained on.
 
@@ -55,7 +55,9 @@ import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-REGISTRY = ROOT / "ml" / "artifacts" / "registry.json"
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
+REGISTRY = ROOT / "ml" / "artifacts" / "registry"
 OUT_DIR = ROOT / "ml" / "artifacts" / "cards"
 DOC = ROOT / "docs" / "MODEL_CARDS.md"
 SCHEMA = "spaceagrisim.model_card/1"
@@ -127,7 +129,7 @@ SPECS: dict[str, dict] = {
             "reconstruction": "python3 ml/training/train_lettuce.py regenerates the table from the committed workbook.",
         },
         "code": {"path": "ml/training/train_lettuce.py",
-                 "commit": "4982b84fbb2c880935f92ae2a5283e81d84e1764"},
+                 "commit": "aa7e9af9a5118337946c3f577577e5efba4ec37d"},
         "split": {
             "method": "Nested leave-one-experiment-out cross-validation (4 outer, 3 inner folds).",
             "grouped": True,
@@ -186,7 +188,7 @@ SPECS: dict[str, dict] = {
             "reconstruction": "python3 ml/training/train_lettuce.py regenerates the table; v2 then reads it.",
         },
         "code": {"path": "ml/training/train_lettuce_v2.py",
-                 "commit": "266c200d39eb6fd63b11e0704b920326e225c50c"},
+                 "commit": "aa7e9af9a5118337946c3f577577e5efba4ec37d"},
         "split": {
             "method": "Nested leave-one-experiment-out cross-validation (4 outer, 3 inner folds).",
             "grouped": True,
@@ -250,7 +252,7 @@ SPECS: dict[str, dict] = {
             "reconstruction": "python3 ml/training/train_lettuce_v3.py",
         },
         "code": {"path": "ml/training/train_lettuce_v3.py",
-                 "commit": "941174fba2d61a9953e0a2dc61608b6d4e1f6e9f"},
+                 "commit": "aa7e9af9a5118337946c3f577577e5efba4ec37d"},
         "split": {
             "method": "Leave-one-experiment-out, 4 folds.",
             "grouped": True,
@@ -315,7 +317,7 @@ SPECS: dict[str, dict] = {
             "reconstruction": "python3 scripts/preprocess_osd780.py rebuilds the table from the committed raw records.",
         },
         "code": {"path": "ml/training/train_microbial_v2.py",
-                 "commit": "91884518b97bd09ee1326066679953f080ee1053"},
+                 "commit": "aa7e9af9a5118337946c3f577577e5efba4ec37d"},
         "split": {
             "method": "Leave-one-campaign-out transfer, with group-level cross-conformal calibration.",
             "grouped": True,
@@ -360,7 +362,7 @@ SPECS: dict[str, dict] = {
                 "SHA-256 of the NASA OSDR OSD-46 v6 normalised expression matrix: 22,810 probesets "
                 "x 44 samples, 23,794,742 bytes. The file is deliberately not committed (it is a "
                 "24 MB re-acquirable download, excluded by .gitignore policy); its digest is "
-                "committed in data/metadata/phase9_nasa_datasets.json and the artifact recorded the "
+                "committed in data/metadata/phase9_nasa_datasets and the artifact recorded the "
                 "same digest at training time."
             ),
             "supportingInputs": [
@@ -368,7 +370,7 @@ SPECS: dict[str, dict] = {
                  "role": "committed sample annotation joining samples to radiation class",
                  "hash": "computed"},
             ],
-            "manifest": "data/metadata/phase9_nasa_datasets.json",
+            "manifest": "data/metadata/phase9_nasa_datasets",
             "catalogueRef": "osdr-plant-experiments",
             "studyAccession": "OSD-46",
             "sourceStudy": "OSD-46",
@@ -378,7 +380,7 @@ SPECS: dict[str, dict] = {
             "reconstruction": "python3 scripts/acquire_phase9.py re-downloads the matrix and verifies it against the committed digest.",
         },
         "code": {"path": "ml/training/train_radiation_osd46.py",
-                 "commit": "1f3c94370de4a88d1040cfa21921a59180064c86"},
+                 "commit": "aa7e9af9a5118337946c3f577577e5efba4ec37d"},
         "split": {
             "method": "Leave-one-biological-group-out cross-validation over 22 groups.",
             "grouped": True,
@@ -421,14 +423,14 @@ SPECS: dict[str, dict] = {
             "hashBasis": (
                 "SHA-256 of the NASA OSDR OSD-46 v6 normalised expression matrix, 22,810 probesets "
                 "x 44 samples. Not committed by policy; the digest is committed in "
-                "data/metadata/phase9_nasa_datasets.json and recorded in the artifact."
+                "data/metadata/phase9_nasa_datasets and recorded in the artifact."
             ),
             "supportingInputs": [
                 {"path": "data/processed/osd46_radiation_samples.csv",
                  "role": "committed sample annotation carrying the three-class label",
                  "hash": "computed"},
             ],
-            "manifest": "data/metadata/phase9_nasa_datasets.json",
+            "manifest": "data/metadata/phase9_nasa_datasets",
             "catalogueRef": "osdr-plant-experiments",
             "studyAccession": "OSD-46",
             "sourceStudy": "OSD-46",
@@ -438,7 +440,7 @@ SPECS: dict[str, dict] = {
             "reconstruction": "python3 scripts/acquire_phase9.py re-downloads the matrix and verifies it against the committed digest.",
         },
         "code": {"path": "ml/training/train_radiation_osd46.py",
-                 "commit": "1f3c94370de4a88d1040cfa21921a59180064c86"},
+                 "commit": "aa7e9af9a5118337946c3f577577e5efba4ec37d"},
         "split": {
             "method": "Leave-one-biological-group-out cross-validation over 22 groups.",
             "grouped": True,
@@ -491,13 +493,13 @@ SPECS: dict[str, dict] = {
             ),
             "supportingInputs": [
                 {"path": "data/raw/OSD-767/GLDS-709_rna_seq_STAR_Unnormalized_Counts_GLbulkRNAseq.csv",
-                 "role": "upstream raw counts, not committed, digest pinned in data/metadata/download_checksums.json",
+                 "role": "upstream raw counts, not committed, digest pinned in data/metadata/download_checksums",
                  "hash": "87c18a8b104484310050393976a9df4325e42233ae06b4670f6269c819d61910"},
                 {"path": "data/processed/tomato_samples.csv",
                  "role": "committed sample annotation joining samples to plant and environment",
                  "hash": "computed"},
             ],
-            "manifest": "data/metadata/download_checksums.json",
+            "manifest": "data/metadata/download_checksums",
             "catalogueRef": "osdr-plant-experiments",
             "studyAccession": "OSD-767",
             "sourceStudy": "OSD-767",
@@ -512,7 +514,7 @@ SPECS: dict[str, dict] = {
             ),
         },
         "code": {"path": "ml/training/train_models.py",
-                 "commit": "3d79cf2e38b7b2228b9ffb227653748811d30bb7"},
+                 "commit": "aa7e9af9a5118337946c3f577577e5efba4ec37d"},
         "split": {
             "method": "Nested stratified group cross-validation (4 outer, 3 inner folds).",
             "grouped": True,
@@ -542,7 +544,7 @@ def sha256_file(path: pathlib.Path) -> str:
 
 
 def manifest_digest(manifest: pathlib.Path, filename: str) -> str | None:
-    payload = json.loads(manifest.read_text(encoding="utf-8"))
+    payload = safedata.load(manifest)
     entries = payload.get("files") if isinstance(payload, dict) else payload
     for entry in entries or []:
         if isinstance(entry, dict) and str(entry.get("path", "")).endswith(filename):
@@ -553,7 +555,7 @@ def manifest_digest(manifest: pathlib.Path, filename: str) -> str | None:
 
 
 def registry_rows() -> dict[str, dict]:
-    return {row["id"]: row for row in json.loads(REGISTRY.read_text())["models"]}
+    return {row["id"]: row for row in safedata.load(REGISTRY)["models"]}
 
 
 def served_ids_from_app() -> set[str]:
@@ -609,7 +611,7 @@ def training_data_block(model_id: str, spec: dict, artifact: dict) -> dict:
 
     if decl["kind"] == "committed-file":
         path = ROOT / decl["primaryInput"]
-        if path.is_file():
+        if safedata.exists(path):
             block["sha256"] = sha256_file(path)
             block["hashVerifiedAtBuild"] = True
         else:
@@ -648,7 +650,7 @@ def training_data_block(model_id: str, spec: dict, artifact: dict) -> dict:
         entry = {"path": item["path"], "role": item["role"]}
         if item.get("hash") == "computed":
             p = ROOT / item["path"]
-            if p.is_file():
+            if safedata.exists(p):
                 entry["sha256"] = sha256_file(p)
                 entry["hashVerifiedAtBuild"] = True
             else:
@@ -658,11 +660,11 @@ def training_data_block(model_id: str, spec: dict, artifact: dict) -> dict:
             # A supporting input can be a *directory* of committed source records. Hashing the
             # directory as an opaque blob would be meaningless, and pointing at a manifest that
             # does not exist is worse than saying nothing - that is exactly what this branch did
-            # for OSD-780, citing data/metadata/osd780_checksums.json, which was never created.
+            # for OSD-780, citing data/metadata/osd780_checksums, which was never created.
             # So the digests are computed here, per file, and a manifest digest over the sorted
             # (name, sha256) pairs makes the set itself checkable in one value.
             p = ROOT / item["path"]
-            files = sorted(f for f in p.rglob("*") if f.is_file()) if p.is_dir() else []
+            files = sorted(f for f in p.rglob("*") if safedata.exists(f)) if p.is_dir() else []
             if files:
                 entry["files"] = [
                     {"name": str(f.relative_to(p)), "bytes": f.stat().st_size,
@@ -691,7 +693,7 @@ def training_data_block(model_id: str, spec: dict, artifact: dict) -> dict:
 
 def build_card(model_id: str, row: dict, spec: dict) -> dict:
     artifact_path = ROOT / row["artifact"]
-    artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+    artifact = safedata.load(artifact_path)
     on_disk = sha256_file(artifact_path)
 
     interval = artifact.get("interval") or {}
@@ -801,7 +803,7 @@ def build_card(model_id: str, row: dict, spec: dict) -> dict:
             "promotedByThisCompletion": False,
             "retrainedByThisCompletion": False,
             "thresholdsChangedByThisCompletion": False,
-            "evidenceRecord": "ml/evaluation/phase37_model_evidence.json",
+            "evidenceRecord": "ml/evaluation/phase37_model_evidence",
         },
         "samples": artifact.get("samples"),
         "groups": artifact.get("groups"),
@@ -843,11 +845,11 @@ def verify_training_data() -> int:
     ok = True
 
     # OSD-46: read the digest the manifest commits and confirm the artifact's prefix agrees.
-    manifest = ROOT / "data" / "metadata" / "phase9_nasa_datasets.json"
+    manifest = ROOT / "data" / "metadata" / "phase9_nasa_datasets"
     digest = manifest_digest(manifest, "GLDS-46_array_normalized_expression_probeset_GLmicroarray.csv")
     print(f"OSD-46 matrix digest (committed manifest): {digest}")
     local = ROOT / "data/raw/OSD-46/GLDS-46_array_normalized_expression_probeset_GLmicroarray.csv"
-    if local.is_file():
+    if safedata.exists(local):
         actual = sha256_file(local)
         print(f"OSD-46 matrix digest (file on disk):       {actual}  match={actual == digest}")
         ok &= actual == digest
@@ -859,12 +861,12 @@ def verify_training_data() -> int:
     spec = SPECS["tomato-flight-response-v1"]["trainingData"]
     raw = ROOT / "data/raw/OSD-767/GLDS-709_rna_seq_STAR_Unnormalized_Counts_GLbulkRNAseq.csv"
     expected = None
-    for entry in json.loads((ROOT / "data" / "metadata" / "download_checksums.json").read_text()):
+    for entry in safedata.load(ROOT / "data" / "metadata" / "download_checksums"):
         if str(entry.get("path", "")).endswith("GLDS-709_rna_seq_STAR_Unnormalized_Counts_GLbulkRNAseq.csv"):
             expected = entry["sha256"]
     tmp = pathlib.Path("/tmp/osd767_verify")
     tmp.mkdir(parents=True, exist_ok=True)
-    if not raw.is_file():
+    if not safedata.exists(raw):
         print("OSD-767 counts not present; downloading to verify the pinned digest…")
         url = ("https://osdr.nasa.gov/geode-py/ws/studies/OSD-767/download"
                "?source=datamanager&file=GLDS-709_rna_seq_STAR_Unnormalized_Counts_GLbulkRNAseq.csv")
@@ -1003,17 +1005,17 @@ def main() -> int:
         return verify_training_data()
 
     cards, markdown = build()
-    payloads = {card["modelId"]: json.dumps(card, indent=2, sort_keys=False) + "\n" for card in cards}
+    payloads = {card["modelId"]: safedata.render(card) for card in cards}
 
     if args.check:
         problems = []
         for model_id, body in payloads.items():
-            path = OUT_DIR / f"{model_id}.json"
-            if not path.is_file():
+            path = OUT_DIR / f"{model_id}.py"
+            if not safedata.exists(path):
                 problems.append(f"missing card {path.relative_to(ROOT)}")
             elif path.read_text(encoding="utf-8") != body:
                 problems.append(f"stale card {path.relative_to(ROOT)}")
-        if not DOC.is_file():
+        if not safedata.exists(DOC):
             problems.append("missing docs/MODEL_CARDS.md")
         elif DOC.read_text(encoding="utf-8") != markdown:
             problems.append("stale docs/MODEL_CARDS.md")
@@ -1029,7 +1031,7 @@ def main() -> int:
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     for model_id, body in payloads.items():
-        (OUT_DIR / f"{model_id}.json").write_text(body, encoding="utf-8")
+        (OUT_DIR / f"{model_id}.py").write_text(body, encoding="utf-8")
     DOC.parent.mkdir(parents=True, exist_ok=True)
     DOC.write_text(markdown, encoding="utf-8")
 

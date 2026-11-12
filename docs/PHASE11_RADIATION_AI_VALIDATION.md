@@ -4,7 +4,7 @@ Objective 1 was to make the existing NASA-trained models more reliable. For the 
 radiation classifiers from OSD-46 that means answering one question honestly: **is there a
 better learner, or only a better-looking number?**
 
-Evidence: `ml/evaluation/phase11_radiation_validation.json`,
+Evidence: `ml/evaluation/phase11_radiation_validation`,
 produced by `ml/training/phase11_radiation_validation.py`.
 
 ```

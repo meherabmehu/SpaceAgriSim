@@ -78,7 +78,7 @@ present feature importance as a ranking of biological importance.
 
 Nothing on the panel is computed in the browser. The category, the calibration block, the
 explanation flag and the source string all come from the API, which reads
-`ml/artifacts/registry.json` and `ml/evaluation/*.json`. The UI restates no threshold and
+`ml/artifacts/registry` and `ml/evaluation/*.py`. The UI restates no threshold and
 derives no metric; it also does not paraphrase the category names, so it cannot drift from
 `app/science_classification.py`.
 

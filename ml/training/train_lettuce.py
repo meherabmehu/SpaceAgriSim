@@ -1,4 +1,5 @@
 """Earth-only lettuce random forest; nested whole-experiment validation."""
+import safedata
 import hashlib
 import json
 import sys
@@ -45,17 +46,17 @@ def main():
         forest.append({'left':tree.children_left.tolist(),'right':tree.children_right.tolist(),'feature':tree.feature.tolist(),'threshold':tree.threshold.tolist(),'value':tree.value[:,0,0].tolist()})
     residual=np.abs(y-prediction)
     card={'id':'lettuce-earth-growth-v1','name':'Lettuce Earth growth · WUR random forest','version':'1.0.0','status':'trained-exploratory','trainedAt':stamp(),'task':'Earth-only fresh shoot mass regression','sourceStudy':'WUR-lettuce','sourceUrl':source['sourceUrl'],'sourceType':'external scientific data (not NASA)','license':source['license'],'crop':'lettuce','method':'External-scientific-data-trained exploratory regression','samples':len(y),'groups':len(set(groups)),'features':features,'target':'freshShootMassG','unit':'g fresh shoot mass/plant','metrics':metrics(y,prediction),'baselineMetrics':metrics(y,baseline),'validation':'Nested leave-one-experiment-out CV (4 outer folds, 3 inner folds); all plants/treatments from each experiment remain together. Independent-study validation unavailable.','seed':42,'hyperparameters':final.best_params_,'domain':{name:{'min':float(x[:,i].min()),'max':float(x[:,i].max())} for i,name in enumerate(features)},'interval':{'radius':float(np.quantile(residual,.9,method='higher')),'kind':'90th percentile absolute outer-CV residual; uncalibrated descriptive range','nominalCoverage':None},'limitations':source['limitations']+['Only Batavia Othilie lettuce on Earth; not calibrated for partial gravity or radiation.','No inference for water stress, nutrient stress, CO2 response, other cultivars, or different photoperiods.','Measured domain is 2–29 days after transplant, air/root 20–32 C, PPFD 200–750 µmol/m²/s; treatment grid is sparse.','Environmental combinations omitted for tip burn are unsupported even inside marginal ranges.','Fresh shoot mass per plant is not edible harvest per square meter; no planting-density conversion is assumed.'],'forest':forest}
-    path=ROOT/'ml/artifacts/lettuce-earth-growth-v1.json'
+    path=ROOT/'ml/artifacts/lettuce-earth-growth-v1'
     # Compact tree arrays keep this inspectable artifact below 1 MB.
-    path.write_text(json.dumps(card,separators=(',',':'),allow_nan=False)+'\n',encoding='utf-8')
-    register=ROOT/'ml/artifacts/registry.json'; registry=json.loads(register.read_text())
-    registry['models']=[m for m in registry['models'] if m['id']!=card['id']]+[{'id':card['id'],'artifact':'ml/artifacts/'+path.name,'sha256':hashlib.sha256(path.read_bytes()).hexdigest()}]
+    safedata.dump(card, path)
+    register=ROOT/'ml/artifacts/registry'; registry=safedata.load(register)
+    registry['models']=[m for m in registry['models'] if m['id']!=card['id']]+[{'id':card['id'],'artifact':'ml/artifacts/'+path.name,'sha256':hashlib.sha256(safedata.bytes(path)).hexdigest()}]
     registry['externalDataVersion']=hashlib.sha256(json.dumps(source['files'],sort_keys=True).encode()).hexdigest()
     registry['externalTrainingEnvironment']={'numpy':np.__version__,'pandas':pd.__version__,'sklearn':sklearn.__version__}
     save_json(register,registry)
     out=frame.copy();out['outerCvPrediction']=prediction;out['baselinePrediction']=baseline
     out.to_csv(ROOT/'ml/evaluation/lettuce_out_of_fold.csv',index=False,lineterminator='\n')
-    save_json(ROOT/'ml/evaluation/lettuce_splits.json',splits)
+    save_json(ROOT/'ml/evaluation/lettuce_splits',splits)
     print(json.dumps({k:card[k] for k in ['id','samples','groups','metrics','baselineMetrics','hyperparameters']},indent=2))
 
 if __name__=='__main__':main()

@@ -8,6 +8,7 @@ protocols and the protocols to their limits.
 """
 
 from __future__ import annotations
+import sys
 
 import json
 
@@ -16,16 +17,18 @@ from pathlib import Path
 from app import research
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 EVALUATION = ROOT / "ml" / "evaluation"
 
 
 def artifact(name: str) -> dict:
-    return json.loads((EVALUATION / name).read_text())
+    return safedata.load(EVALUATION / name)
 
 
 def test_the_dose_labels_were_valid_all_along():
     """Phase 9 called the dose label unusable; the label was fine, the split was not."""
-    dose = artifact("phase10_dose_recovery.json")
+    dose = artifact("phase10_dose_recovery")
     assert dose["labelsAvailable"]["absorbedDoseGy"] is True
     assert dose["labelsAvailable"]["values"] == [0.0, 10.0, 100.0]
     audit = dose["confoundAudit"]
@@ -37,7 +40,7 @@ def test_the_dose_labels_were_valid_all_along():
 
 def test_the_dose_protocol_decides_the_answer():
     """Two protocols on the same 36 libraries give opposite readings, and both are kept."""
-    dose = artifact("phase10_dose_recovery.json")
+    dose = artifact("phase10_dose_recovery")
     protocols = dose["protocols"]
     cell = protocols["A_cellHeldOut"]["balancedAccuracy"]
     time = protocols["B_timepointHeldOut"]["balancedAccuracy"]
@@ -51,14 +54,14 @@ def test_the_dose_protocol_decides_the_answer():
 
 def test_a_zero_balanced_accuracy_is_labelled_as_worse_than_chance():
     """A degenerate split must not be reported as 'no better than chance'."""
-    dose = artifact("phase10_dose_recovery.json")
+    dose = artifact("phase10_dose_recovery")
     assert "whyItCannotAnswerTheQuestion" in dose["protocols"]["A_cellHeldOut"]
     assert dose["registryChange"] is None
 
 
 def test_dose_is_not_served_even_though_the_signal_was_detected():
     """Recovering a signal on 36 libraries does not create a model."""
-    dose = artifact("phase10_dose_recovery.json")
+    dose = artifact("phase10_dose_recovery")
     assert dose["outcome"] != "dose-signal-not-recovered"
     assert dose["registryChange"] is None
     assert "does not create a servable model" in dose["disclosure"]
@@ -79,7 +82,7 @@ def test_the_partial_gravity_study_is_real_and_catalogued():
 
 
 def test_partial_gravity_is_reported_with_its_confound():
-    gravity = artifact("phase10_partial_gravity.json")
+    gravity = artifact("phase10_partial_gravity")
     design = gravity["design"]
     assert design["gravityLevelsG"] == [0.0, 0.34, 1.0]
     # The three-level analysis is flight-confounded and must say so in the artifact.
@@ -92,7 +95,7 @@ def test_partial_gravity_is_reported_with_its_confound():
 
 def test_the_perfect_separation_is_corroborated_and_batch_limited():
     """1.0 balanced accuracy on 11 libraries needs both a corroboration and a caveat."""
-    gravity = artifact("phase10_partial_gravity.json")
+    gravity = artifact("phase10_partial_gravity")
     corroboration = gravity["corroboration"]
     assert corroboration["available"] is True
     counts = corroboration["withinFlightContrasts"]
@@ -115,7 +118,7 @@ def test_no_model_claims_partial_gravity_or_dose_anywhere_in_the_registry():
 
 def test_the_registry_says_only_what_the_artifacts_support():
     """The registry/API audit must be clean, and its own output must prove it ran."""
-    audit = artifact("phase10_registry_api_audit.json")
+    audit = artifact("phase10_registry_api_audit")
     assert audit["checks"]["models"] == 8
     assert audit["highSeverity"] == 0, audit["findings"]
     assert audit["findings"] == [], (
@@ -145,7 +148,7 @@ def test_the_osd346_replication_is_catalogued_with_its_limit():
 
 def test_the_partial_gravity_result_did_not_replicate_and_says_so():
     """The headline number must carry its failed replication wherever it travels."""
-    replication = artifact("phase10_partial_gravity_replication.json")
+    replication = artifact("phase10_partial_gravity_replication")
     assert replication["replicated"] is False
     assert replication["gradedGravityDetected"] is True
     # A graded signal exists, but only at higher gravity: this is not a rescue.
@@ -161,6 +164,6 @@ def test_the_partial_gravity_result_did_not_replicate_and_says_so():
 
 
 def test_the_osd314_artifact_points_at_its_own_failed_replication():
-    gravity = artifact("phase10_partial_gravity.json")
+    gravity = artifact("phase10_partial_gravity")
     assert "does not reproduce this contrast" in gravity["nextAction"]
     assert "one experiment" in gravity["nextAction"]

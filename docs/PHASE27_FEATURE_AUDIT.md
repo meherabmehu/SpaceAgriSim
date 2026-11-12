@@ -3,7 +3,7 @@
 Two audits in one document: **what exists behind each named feature** (ten workflow layers, machine
 verified) and **what the platform is missing** (ranked, with evidence). The generated matrices are
 `docs/PHASE27_FEATURE_COVERAGE_MATRIX.md` and
-`data/research/phase27/feature_implementation_coverage.json`.
+`data/research/phase27/feature_implementation_coverage`.
 
 Every named path in the matrix is checked by `ml/research/build_feature_coverage.py`, which refuses
 to write if a layer is marked present without an artefact that exists.
@@ -70,10 +70,10 @@ comes from the gap matrix and the audit; feasibility is an engineering estimate,
 
 | Rank | Gap | Severity | Scientific value | User value | Feasibility | Evidence |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | **No per-prediction interval** — harvest models report one error number for all predictions | major | high: a point estimate hides its own error | high: users cannot tell if their scenario is inside the envelope | medium: quantile regression or fold-based empirical intervals | `ml/evaluation/lettuce_splits.json` |
+| 1 | **No per-prediction interval** — harvest models report one error number for all predictions | major | high: a point estimate hides its own error | high: users cannot tell if their scenario is inside the envelope | medium: quantile regression or fold-based empirical intervals | `ml/evaluation/lettuce_splits` |
 | 2 | **No out-of-distribution warning** — endpoints validate types and ranges, not the training envelope | major | high: extrapolation is indistinguishable from interpolation | high | high: the envelope is already in the split artefacts | `backend/app/routes/research.py` |
 | 3 | **Reference-ET0 water path unreachable from the UI** — `et0MmPerDay` and `cropCoefficient` exist on the API and no control sets them | major | medium: the path is implemented and untested by users | high | high: two optional fields and one control group | `backend/app/models/simulation.py`, `frontend/src/services/defaultConfig.js` |
-| 4 | **Two water paths, no arbiter** — crop-relative and ET0-reference differ by ~60 % and the response names which ran without saying they disagree | major | high: this is the platform's largest unexplained internal difference | medium | done for the evidence half this phase; the arbiter needs per-day trial weather | `ml/evaluation/phase26_measured_et_validation.json` |
+| 4 | **Two water paths, no arbiter** — crop-relative and ET0-reference differ by ~60 % and the response names which ran without saying they disagree | major | high: this is the platform's largest unexplained internal difference | medium | done for the evidence half this phase; the arbiter needs per-day trial weather | `ml/evaluation/phase26_measured_et_validation` |
 | 5 | **Comparison cannot include measurement** — compares parameter sets only, no provenance-bearing export | minor | medium | medium | high | `backend/app/routes/workspace.py` |
 | 6 | **Units live only in prose** — no response field carries a unit object | minor | medium | medium | medium: additive `units` map | `backend/app/models/simulation.py` |
 

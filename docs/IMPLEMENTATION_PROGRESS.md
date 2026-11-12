@@ -140,7 +140,7 @@ The Vercel API service packages a small checksum-verified read-only copy of the 
   passages are excluded from that premise unless they themselves state the absence. This surfaced
   because v3's name contains "fresh yield" and started winning the lexical match, turning a correct
   refusal into a partial answer.
-- **Registry.** `ml/artifacts/registry.json` gains an `independentValidation` block per model;
+- **Registry.** `ml/artifacts/registry` gains an `independentValidation` block per model;
   `scripts/verify_model_registry.py` now cross-checks it against the artifact, verifies the pass flag
   against its own criterion, and fails if a failed evaluation carries a validated-style status.
   `docs/DATASET_REGISTRY.md` is generated from the data files by `scripts/generate_dataset_registry.py`.
@@ -173,7 +173,7 @@ The Vercel API service packages a small checksum-verified read-only copy of the 
   capped at the measured ISS 98 %.
 - Closed-loop measurements added: `GET /api/closed-loop` serves NASA's measured ethylene
   production and lettuce dose response (Wheeler et al. 1996) and the ISS 98 % water recovery figure;
-  transcribed in `data/literature/nasa_air_and_water.json`. Ethylene stays out of the growth
+  transcribed in `data/literature/nasa_air_and_water`. Ethylene stays out of the growth
   equations by design and a test enforces that.
 - Obtain sufficiently large, compatible mission and ground yield datasets before recalibrating the simulator.
   For the lettuce model specifically, `docs/DATASET_GAP_ANALYSIS.md` now states the acquisition
@@ -185,7 +185,7 @@ The Vercel API service packages a small checksum-verified read-only copy of the 
   observations. A replacement would need both features before it could be scored again.
 - External validation of the lettuce model: **attempted, improved, still failed.** Wicharuck et al.
   2024 (PeerJ 12:e17085, CC BY 4.0) was transcribed verbatim into
-  `data/literature/external_lettuce_peerj17085.json` (six observations: two cultivars x three
+  `data/literature/external_lettuce_peerj17085` (six observations: two cultivars x three
   canopy levels, fresh weight at 28 DAT, source SHA-256 recorded) and served at
   `GET /api/external-validation` with predictions computed live rather than stored. The first
   scoring, on `lettuce-earth-growth-v2`, overpredicted every observation by x1.67 to x5.38 (median

@@ -14,7 +14,7 @@ worked examples below is an illustrative calculation, not a result.
 
 | Artefact | Purpose |
 |---|---|
-| `data/experiments/water_use_schema.json` | machine-readable schema: 23 required columns, 18 optional, per-column units and ranges, cross-field rules, quality rules, pre-registered analysis plan |
+| `data/experiments/water_use_schema` | machine-readable schema: 23 required columns, 18 optional, per-column units and ranges, cross-field rules, quality rules, pre-registered analysis plan |
 | `scripts/experiment/validate_water_use.py` | ingestion validator: 18 checks (schema, units, timestamps, ranges, cross-field, missingness, water-balance closure, replication, Kc provenance), non-zero exit on failure |
 | `scripts/experiment/make_synthetic_fixture.py` | generates the clearly-labelled synthetic fixtures the validator's tests run against |
 | `backend/tests/test_phase25_experimental_ingestion.py` | 31 tests, including one per defect class the validator must catch |
@@ -225,7 +225,7 @@ predicts, the budget is wrong and the larger number is the honest one.
 
 ## 10. Data schema, template and ingestion
 
-* Schema: `data/experiments/water_use_schema.json` (23 required columns, 18 optional, 2 derived;
+* Schema: `data/experiments/water_use_schema` (23 required columns, 18 optional, 2 derived;
   units and physical ranges per column; cross-field rules; quality rules; pre-registered analysis
   plan).
 * Template: generated, never hand-written, and **header-only**:
@@ -233,13 +233,13 @@ predicts, the budget is wrong and the larger number is the honest one.
   ```bash
   python scripts/experiment/validate_water_use.py --emit-template trial_2027.csv
   # -> trial_2027.csv            (header + no rows, deliberately)
-  # -> trial_2027.units.json
+  # -> trial_2027.units.py
   ```
 
 * Ingest and validate:
 
   ```bash
-  python scripts/experiment/validate_water_use.py my_trial.csv --report my_trial_report.json
+  python scripts/experiment/validate_water_use.py my_trial.csv --report my_trial_report.py
   ```
 
   Exit code is non-zero if any hard check fails. The **18 checks** are, in the order the validator
@@ -250,7 +250,7 @@ predicts, the budget is wrong and the larger number is the honest one.
   optional-column missingness; water-balance closure; per-plant plausibility; replication and trial
   duration; and Kc provenance.
 
-* Units file: a `units.json` beside the CSV, declaring each volume's unit. The validator compares
+* Units file: a `units.py` beside the CSV, declaring each volume's unit. The validator compares
   the declaration to the schema and **rejects equivalents**: `L` against a column the schema
   defines in `mL` fails the run. This is deliberate — both parse as a number, and the
   difference is a silent factor of 1000.

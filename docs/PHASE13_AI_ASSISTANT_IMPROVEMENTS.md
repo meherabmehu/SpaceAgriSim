@@ -2,8 +2,8 @@
 
 This document describes the changes to the in-app research assistant in Phase 13. Every claim
 about quality here is backed by a number produced by `scripts/evaluate_assistant.py` against
-the fixed benchmark in `backend/tests/data/assistant_benchmark.json`; the full metrics are in
-`docs/PHASE13_ASSISTANT_EVALUATION.md` and `ml/evaluation/phase13_assistant_eval.json`.
+the fixed benchmark in `backend/tests/data/assistant_benchmark`; the full metrics are in
+`docs/PHASE13_ASSISTANT_EVALUATION.md` and `ml/evaluation/phase13_assistant_eval`.
 
 The assistant is a **retrieval-grounded** system. It answers from a corpus of 47 curated
 passages built from the project's own NASA OSDR manifests, dataset records, model cards, the

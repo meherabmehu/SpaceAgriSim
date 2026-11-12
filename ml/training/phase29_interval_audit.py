@@ -18,7 +18,7 @@ repeats it. This script asks the questions that number cannot answer on its own:
 
 Nothing here refits a production model or changes a served interval. It measures the served one.
 
-Output: `ml/evaluation/phase29_interval_audit.json`
+Output: `ml/evaluation/phase29_interval_audit`
 
 Run: python ml/training/phase29_interval_audit.py
 """
@@ -34,12 +34,14 @@ from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.model_selection import GroupKFold
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "scripts"))
 from nasa_pipeline import save_json, stamp  # noqa: E402
 
 DATA = ROOT / "data" / "processed" / "lettuce_earth.csv"
-V3 = ROOT / "ml" / "artifacts" / "lettuce-earth-growth-v3.json"
-OUT = ROOT / "ml" / "evaluation" / "phase29_interval_audit.json"
+V3 = ROOT / "ml" / "artifacts" / "lettuce-earth-growth-v3"
+OUT = ROOT / "ml" / "evaluation" / "phase29_interval_audit"
 DENSITY, PHOTOPERIOD, SEED = 25.0, 16.0, 42
 
 
@@ -139,10 +141,10 @@ def main() -> None:
     }
 
     # ---- the holdout, once -------------------------------------------------------------
-    final = json.loads((ROOT / "ml" / "evaluation" / "phase29_harvest_final.json").read_text())
+    final = safedata.load(ROOT / "ml" / "evaluation" / "phase29_harvest_final")
     holdout = final["holdout"]["observations"][0]
 
-    served = json.loads(V3.read_text())["interval"]
+    served = safedata.load(V3)["interval"]
     payload = {
         "schema": "spaceagrisim.phase29_interval_audit/1",
         "generatedAt": stamp(),

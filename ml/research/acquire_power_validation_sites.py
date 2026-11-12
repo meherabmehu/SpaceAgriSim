@@ -18,6 +18,7 @@ the lysimeter's own grid cell.
     python3 ml/research/acquire_power_validation_sites.py
 """
 from __future__ import annotations
+import sys
 
 import hashlib
 import json
@@ -29,9 +30,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 RAW = ROOT / "data" / "raw" / "nasa_power_validation"
 PROCESSED = ROOT / "data" / "processed" / "power_validation"
-MANIFEST = ROOT / "data" / "metadata" / "power_validation_manifest.json"
+MANIFEST = ROOT / "data" / "metadata" / "power_validation_manifest"
 
 ENDPOINT = "https://power.larc.nasa.gov/api/temporal/daily/point"
 FILL_VALUE = -999.0
@@ -97,7 +100,7 @@ def main() -> int:
     failures = 0
     for site in SITES:
         url = build_url(site)
-        target = RAW / f"power_{site['siteId']}.json"
+        target = RAW / f"power_{site['siteId']}"
         try:
             body, fetched_at = fetch(url)
             target.write_bytes(body)
@@ -155,7 +158,7 @@ def main() -> int:
               f"{sum(missing.values())}, elev {elevation[2] if len(elevation) > 2 else '?'} m")
 
     manifest["summary"] = {"sitesRequested": len(SITES), "sitesFailed": failures}
-    MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(manifest, MANIFEST)
     print(f"manifest -> {MANIFEST.relative_to(ROOT)}")
     return 1 if failures else 0
 

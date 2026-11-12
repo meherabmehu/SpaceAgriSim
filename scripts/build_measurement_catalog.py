@@ -30,9 +30,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 PROCESSED = ROOT / "data" / "processed"
 METADATA = ROOT / "data" / "metadata"
-OUT = METADATA / "phase7_measurement_catalog.json"
+OUT = METADATA / "phase7_measurement_catalog"
 
 SOURCES = {
     "TM-102784": {"ntrsId": "19900009537",
@@ -430,10 +432,10 @@ TARGETS = [
 
 
 def checksums() -> dict:
-    manifest = METADATA / "phase7_ntrs_checksums.json"
-    if not manifest.is_file():
+    manifest = METADATA / "phase7_ntrs_checksums"
+    if not safedata.exists(manifest):
         return {"available": False}
-    payload = json.loads(manifest.read_text())
+    payload = safedata.load(manifest)
     entries = payload.get("documents", payload) if isinstance(payload, dict) else payload
     documents = {}
     for entry in entries:
@@ -446,14 +448,14 @@ def checksums() -> dict:
         }
     return {
         "available": True,
-        "manifest": "data/metadata/phase7_ntrs_checksums.json",
+        "manifest": "data/metadata/phase7_ntrs_checksums",
         "algorithm": "SHA-256 over the downloaded PDF bytes",
         "documents": documents,
     }
 
 
 def file_digest(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    return hashlib.sha256(safedata.bytes(path)).hexdigest()
 
 
 def main() -> int:
@@ -509,7 +511,7 @@ def main() -> int:
         return 1
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(catalog, indent=2, ensure_ascii=True, allow_nan=False) + "\n")
+    safedata.dump(catalog, OUT)
     print("CATALOG BUILT")
     print(f"  targets       : {len(TARGETS)}")
     for status, count in sorted(counts.items()):

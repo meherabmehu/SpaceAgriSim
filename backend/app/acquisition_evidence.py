@@ -33,6 +33,7 @@ What this module refuses to do
 """
 
 from __future__ import annotations
+import safedata
 
 import json
 from functools import lru_cache
@@ -42,10 +43,17 @@ from app.research import DATA, ROOT
 
 PHASE36 = ROOT / "data" / "research" / "phase36"
 PHASE37 = ROOT / "data" / "research" / "phase37"
-GAP_MATRIX = DATA / "research" / "dataset_gap_matrix.json"
-CATALOGUE = DATA / "research" / "dataset_catalog.json"
-REEVALUATION = ROOT / "ml" / "evaluation" / "phase36_model_reevaluation.json"
-MODEL_EVIDENCE_37 = ROOT / "ml" / "evaluation" / "phase37_model_evidence.json"
+# The runtime bundle carries the inference assets, and it does not carry data/research. Resolving
+# these two records through the bundle first and the checkout second means a bundle that omits
+# them cannot silently empty the endpoint - which is what a bare `DATA / ...` path did.
+GAP_MATRIX = ((DATA / "research" / "dataset_gap_matrix")
+              if safedata.exists(DATA / "research" / "dataset_gap_matrix")
+              else (ROOT / "data" / "research" / "dataset_gap_matrix"))
+CATALOGUE = ((DATA / "research" / "dataset_catalog")
+             if safedata.exists(DATA / "research" / "dataset_catalog")
+             else (ROOT / "data" / "research" / "dataset_catalog"))
+REEVALUATION = ROOT / "ml" / "evaluation" / "phase36_model_reevaluation"
+MODEL_EVIDENCE_37 = ROOT / "ml" / "evaluation" / "phase37_model_evidence"
 
 # Gap decisions are recorded per phase. The surface serves the newest decision that exists for each
 # gap, and says which phase it came from - a reader must be able to tell whether a status is four
@@ -59,10 +67,10 @@ STATUS_KEYS = ("CLOSED", "PARTIALLY CLOSED", "OPEN")
 
 
 def _load(path: Path) -> dict:
-    if not path.is_file():
+    if not safedata.exists(path):
         return {}
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        return safedata.load(path)
     except (OSError, json.JSONDecodeError):
         return {}
 
@@ -137,13 +145,13 @@ def gaps() -> dict:
             "Each row names the phase whose decision it reports."
         ),
         "gaps": rows,
-        "source": "data/research/dataset_gap_matrix.json",
+        "source": "data/research/dataset_gap_matrix",
     }
 
 
 def measured_water_use() -> dict:
     """The two measured-evapotranspiration results, with the label on every number."""
-    payload = _load(PHASE36 / "et0_measurement_validation.json")
+    payload = _load(PHASE36 / "et0_measurement_validation")
     if not payload:
         return _unavailable("measured ET against modelled ET0",
                             "python ml/research/validate_et0_against_measurement.py")
@@ -184,13 +192,13 @@ def measured_water_use() -> dict:
         },
         "limitation": payload.get("limitation") or (
             "The measurement sites are not the six siting sites, and the crop is not lettuce."),
-        "source": "data/research/phase36/et0_measurement_validation.json",
+        "source": "data/research/phase36/et0_measurement_validation",
     }
 
 
 def projected_climate() -> dict:
     """The single-model warming and light response at each reference site."""
-    payload = _load(PHASE36 / "projected_climate.json")
+    payload = _load(PHASE36 / "projected_climate")
     if not payload:
         return _unavailable("projected environment",
                             "python ml/research/analyze_projected_climate.py")
@@ -221,13 +229,13 @@ def projected_climate() -> dict:
         "caveat": ("One climate model, one scenario. The spread across models is the uncertainty "
                    "and it is not characterised here, so these are a response to a scenario, not a "
                    "forecast of a season."),
-        "source": "data/research/phase36/projected_climate.json",
+        "source": "data/research/phase36/projected_climate",
     }
 
 
 def cultivar_and_water() -> dict:
     """The lettuce trial: a measured cultivar contrast and a measured irrigation null."""
-    payload = _load(PHASE36 / "iot4lettuce_water_cultivar.json")
+    payload = _load(PHASE36 / "iot4lettuce_water_cultivar")
     if not payload:
         return _unavailable("lettuce cultivar and irrigation trial",
                             "python ml/research/analyze_iot4lettuce.py")
@@ -270,13 +278,13 @@ def cultivar_and_water() -> dict:
             "whyConditional": ("No per-treatment evapotranspiration was measured, so the water-use "
                                "axis is a design assumption and not a measurement."),
         },
-        "source": "data/research/phase36/iot4lettuce_water_cultivar.json",
+        "source": "data/research/phase36/iot4lettuce_water_cultivar",
     }
 
 
 def hourly_information_loss() -> dict:
     """What a daily mean hides, measured rather than argued."""
-    payload = _load(PHASE36 / "hourly_environment.json")
+    payload = _load(PHASE36 / "hourly_environment")
     if not payload:
         return _unavailable("hourly environment",
                             "python ml/research/analyze_hourly_environment.py")
@@ -304,7 +312,7 @@ def hourly_information_loss() -> dict:
                         "above-threshold exposure. A controller sized on the daily mean cannot "
                         "see that difference, which is what the hourly acquisition buys."),
         },
-        "source": "data/research/phase36/hourly_environment.json",
+        "source": "data/research/phase36/hourly_environment",
     }
 
 
@@ -340,7 +348,7 @@ def model_outcomes() -> dict:
             "A DOMAIN-REFUSED outcome means the independent campaign falls outside the model's own "
             "declared input domain, so it cannot score the model without contradicting the card. "
             "That is a refusal to answer, not evidence that the model is right."),
-        "source": "ml/evaluation/phase36_model_reevaluation.json",
+        "source": "ml/evaluation/phase36_model_reevaluation",
     }
 
 
@@ -351,7 +359,7 @@ def spectrum_response() -> dict:
     are largely wasted. This trial is the first evidence in the repository that can test it,
     because light quantity was held fixed and only composition changed.
     """
-    payload = _load(PHASE37 / "led_spectrum_response.json")
+    payload = _load(PHASE37 / "led_spectrum_response")
     if not payload:
         return _unavailable("constant-PPFD spectrum response",
                             "python ml/research/analyze_led_spectrum.py")
@@ -402,13 +410,13 @@ def spectrum_response() -> dict:
             "the red-blue control, and an incremental green regime yielded more. The assumption "
             "that green photons are wasted is not supported by this trial."),
         "whatThisDoesNotShow": payload.get("limitations"),
-        "source": "data/research/phase37/led_spectrum_response.json",
+        "source": "data/research/phase37/led_spectrum_response",
     }
 
 
 def nutrient_solution() -> dict:
     """Measured ion concentrations and EC - and the uptake rate that is deliberately absent."""
-    payload = _load(PHASE37 / "nutrient_solution.json")
+    payload = _load(PHASE37 / "nutrient_solution")
     if not payload:
         return _unavailable("hydroponic nutrient-solution chemistry",
                             "python ml/research/analyze_nutrient_balance.py")
@@ -438,7 +446,7 @@ def nutrient_solution() -> dict:
             "reason": not_derivable.get("reason"),
             "whatWouldCloseIt": not_derivable.get("whatWouldCloseIt"),
         },
-        "source": "data/research/phase37/nutrient_solution.json",
+        "source": "data/research/phase37/nutrient_solution",
     }
 
 
@@ -464,7 +472,7 @@ def model_evidence_phase37() -> dict:
             for model_id, block in (payload.get("models") or {}).items()
         },
         "policy": payload.get("policy"),
-        "source": "ml/evaluation/phase37_model_evidence.json",
+        "source": "ml/evaluation/phase37_model_evidence",
     }
 
 
@@ -502,7 +510,7 @@ def catalogue_summary() -> dict:
             for item in datasets
             if item.get("id") == "nasa-nex-gddp-cmip6"
         ],
-        "source": "data/research/dataset_catalog.json",
+        "source": "data/research/dataset_catalog",
     }
 
 
@@ -512,7 +520,7 @@ def _interpretation() -> str:
     open_ = gap_counts["open"]
     partial = gap_counts["partiallyClosed"]
     decision_grade = ((_load(MODEL_EVIDENCE_37).get("counts") or {}).get("decisionGradeAfter")
-                      if MODEL_EVIDENCE_37.is_file() else None)
+                      if safedata.exists(MODEL_EVIDENCE_37) else None)
     return (
         f"Of fourteen gaps, {closed} are closed, {partial} are partially closed and {open_} remain "
         f"open. {decision_grade if decision_grade is not None else 'No'} model is decision-grade, "
@@ -546,7 +554,7 @@ def payload() -> dict:
         "latestPhase": 37,
         "decisionGradeCount": (((_load(MODEL_EVIDENCE_37).get("counts") or {}).get(
             "decisionGradeAfter"))
-            if MODEL_EVIDENCE_37.is_file()
+            if safedata.exists(MODEL_EVIDENCE_37)
             else ((_reevaluation().get("counts") or {}).get("decisionGradeAfter"))),
         # Recomputed rather than written as prose. The sentence said six were open for four phases
         # after that stopped being true, which is exactly the drift a served number prevents.

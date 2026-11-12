@@ -40,7 +40,7 @@ writes its report only when given `--write` — and all nine now also run in CI'
 | Phase 35 verdicts | `python ml/research/phase35_evidence_verdicts.py --check` | consistent with the committed measurements |
 | Screenshot dedupe | `python ml/research/dedupe_screenshots.py --check` | 53 unique images, 46.9 MB of duplicates recorded |
 
-`docs/phase7/registry_verification.json` is byte-identical to the committed file after the run — which
+`docs/phase7/registry_verification` is byte-identical to the committed file after the run — which
 is the point of `--check`, and the reason the gate can run in CI at all.
 
 ## 3. Static analysis and dependency audits

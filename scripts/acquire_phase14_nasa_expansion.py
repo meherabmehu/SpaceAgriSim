@@ -26,7 +26,7 @@ stay in orbit rather than a short one.
 Provenance discipline
 ---------------------
 Identical to `acquire_phase10_osd314.py` and `acquire_phase9.py`: every file is pinned by byte
-length and SHA-256 recorded in `data/metadata/phase14_manifest_checksums.json`, and a download
+length and SHA-256 recorded in `data/metadata/phase14_manifest_checksums`, and a download
 that does not match the pin is rejected rather than used. Re-running the script re-verifies the
 pinned bytes and does not re-download matching files.
 
@@ -39,6 +39,7 @@ Run: python scripts/acquire_phase14_nasa_expansion.py
 """
 
 from __future__ import annotations
+import sys
 
 import hashlib
 import io
@@ -51,9 +52,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 RAW = ROOT / "data" / "raw"
-MANIFEST = ROOT / "data" / "metadata" / "dataset_manifest.json"
-CHECKSUMS = ROOT / "data" / "metadata" / "phase14_manifest_checksums.json"
+MANIFEST = ROOT / "data" / "metadata" / "dataset_manifest"
+CHECKSUMS = ROOT / "data" / "metadata" / "phase14_manifest_checksums"
 S3 = "https://nasa-osdr.s3.us-west-2.amazonaws.com"
 UA = {"User-Agent": "SpaceAgriSim-research/1.0 (NASA OSDR metadata acquisition)"}
 
@@ -96,8 +99,8 @@ def pinned(number: int, resolved: dict, checksums: dict) -> bytes:
     sid = f"OSD-{number}"
     record = checksums.get(sid)
     target = RAW / sid / Path(resolved["key"]).name
-    if record and record["sha256"] and target.is_file():
-        payload = target.read_bytes()
+    if record and record["sha256"] and safedata.exists(target):
+        payload = safedata.bytes(target)
         if (len(payload) == record["bytes"]
                 and hashlib.sha256(payload).hexdigest() == record["sha256"]):
             return payload
@@ -258,11 +261,11 @@ LIMITATIONS = {
 
 def main() -> int:
     MANIFEST.parent.mkdir(parents=True, exist_ok=True)
-    checksums = (json.loads(CHECKSUMS.read_text())
-                 if CHECKSUMS.is_file() else {"studies": {}})
+    checksums = (safedata.load(CHECKSUMS)
+                 if safedata.exists(CHECKSUMS) else {"studies": {}})
     pins = checksums.setdefault("studies", {})
 
-    manifest = json.loads(MANIFEST.read_text())
+    manifest = safedata.load(MANIFEST)
     existing = {row["id"]: row for row in manifest["datasets"]}
     added, refreshed = [], []
 
@@ -317,7 +320,7 @@ def main() -> int:
 
     manifest["datasets"].sort(key=lambda row: int(row["id"].split("-")[1]))
     manifest["generatedAt"] = datetime.now(timezone.utc).isoformat()
-    MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n")
+    safedata.dump(manifest, MANIFEST)
 
     checksums["discovery"] = {
         "endpoint": "https://osdr.nasa.gov/osdr/data/search?term={term}",
@@ -329,7 +332,7 @@ def main() -> int:
         "selected": [f"OSD-{n}" for n in CANDIDATES],
         "recordedAt": datetime.now(timezone.utc).isoformat(),
     }
-    CHECKSUMS.write_text(json.dumps(checksums, indent=2) + "\n")
+    safedata.dump(checksums, CHECKSUMS)
 
     print(f"\ncatalogue: {len(manifest['datasets'])} studies "
           f"(added {len(added)}, refreshed {len(refreshed)})")

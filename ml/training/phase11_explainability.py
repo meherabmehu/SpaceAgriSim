@@ -35,8 +35,10 @@ from sklearn.metrics import balanced_accuracy_score
 from sklearn.model_selection import LeaveOneGroupOut
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "ml" / "training"))
-OUT = ROOT / "ml" / "evaluation" / "phase11_explainability.json"
+OUT = ROOT / "ml" / "evaluation" / "phase11_explainability"
 
 SEED = 11900
 TOP_GENES = 150
@@ -229,7 +231,7 @@ def main() -> int:
                       "the served model and no biological claim is attached to a gene "
                       "rank"),
     }
-    OUT.write_text(json.dumps(report, indent=2) + "\n")
+    safedata.dump(report, OUT)
     print(f"\nwrote {OUT.relative_to(ROOT)}")
     return 0
 

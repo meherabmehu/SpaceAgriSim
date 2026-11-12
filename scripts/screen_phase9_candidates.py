@@ -9,7 +9,7 @@ taxonomic abundance table** (OTU/ASV/taxonomy matrix). A raw amplicon FASTQ
 deposit does not qualify: this project does not run a QIIME/DADA2 pipeline, and
 inventing one mid-phase would put an unvalidated pipeline under a scientific claim.
 
-Output: data/metadata/phase9_candidate_screen.json
+Output: data/metadata/phase9_candidate_screen
 """
 from __future__ import annotations
 
@@ -19,6 +19,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "scripts"))
 from sweep_phase9_osdr import BUCKET, list_objects  # noqa: E402
 
@@ -82,7 +84,7 @@ def screen(study: str, objects: list[dict]) -> dict | None:
 
 
 def main() -> int:
-    sweep = json.loads((METADATA / "phase9_osdr_sweep.json").read_text())
+    sweep = safedata.load(METADATA / "phase9_osdr_sweep")
     usable = sweep["usableProcessedMatrix"]
     results = []
     for index, study in enumerate(usable, 1):
@@ -102,7 +104,7 @@ def main() -> int:
     crop_microbiome = [r for r in candidates if r.get("quadrant") == "crop-microbiome"]
     payload = {
         "generatedAt": datetime.now(timezone.utc).isoformat(),
-        "source": "data/metadata/phase9_osdr_sweep.json",
+        "source": "data/metadata/phase9_osdr_sweep",
         "studiesScreened": len(usable),
         "studiesMatchingAnySignal": len([r for r in results if "verdict" in r]),
         "candidatesWithTaxonomyTable": len(candidates),
@@ -112,14 +114,14 @@ def main() -> int:
                         "would need an unvalidated pipeline inside this phase."),
         "results": results,
     }
-    (METADATA / "phase9_candidate_screen.json").write_text(json.dumps(payload, indent=2) + "\n")
+    safedata.dump(payload, METADATA / "phase9_candidate_screen")
     print(f"\nscreened {len(usable)} studies with processed matrices")
     print(f"  candidates with a processed taxonomy table: {len(candidates)}")
     print(f"  crop + microbiome quadrant: {len(crop_microbiome)}")
     for record in crop_microbiome[:15]:
         print(f"    {record['study']:10s} {', '.join(record['cropSignals'])[:40]:42s} "
               f"{record['taxonomyTables'][0] if record['taxonomyTables'] else '-'}")
-    print("wrote data/metadata/phase9_candidate_screen.json")
+    print("wrote data/metadata/phase9_candidate_screen")
     return 0
 
 

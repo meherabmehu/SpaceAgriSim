@@ -4,6 +4,7 @@ These exercise the operator scripts against a real SQLite database so the
 backup/restore path is tested rather than merely documented.
 """
 from __future__ import annotations
+import safedata
 
 import importlib.util
 import json
@@ -49,7 +50,7 @@ def test_backup_creates_verified_snapshot(seeded_db, tmp_path):
 
     created = list(out.glob("*.sqlite3"))
     assert len(created) == 1
-    manifest = json.loads(Path(str(created[0]) + ".manifest.json").read_text())
+    manifest = safedata.load(Path(str(created[0]) + ".manifest"))
 
     assert manifest["backend"] == "sqlite"
     assert manifest["integrityCheck"] == "ok"
@@ -88,8 +89,8 @@ def test_restore_verification_detects_row_loss(seeded_db, tmp_path):
     out = tmp_path / "backups"
     assert backup_mod.main(["--database-url", f"sqlite:///{seeded_db}", "--out", str(out)]) == 0
     backup = next(out.glob("*.sqlite3"))
-    manifest_path = Path(str(backup) + ".manifest.json")
-    manifest = json.loads(manifest_path.read_text())
+    manifest_path = Path(str(backup) + ".manifest")
+    manifest = safedata.load(manifest_path)
 
     # Delete every scenario row from the snapshot, then re-stamp the manifest so
     # the checksum matches again - isolation must still catch the loss.
@@ -98,10 +99,10 @@ def test_restore_verification_detects_row_loss(seeded_db, tmp_path):
     connection.commit()
     connection.close()
     import hashlib
-    body = backup.read_bytes()
+    body = safedata.bytes(backup)
     manifest["sha256"] = hashlib.sha256(body).hexdigest()
     manifest["bytes"] = len(body)
-    manifest_path.write_text(json.dumps(manifest))
+    safedata.dump(manifest, manifest_path)
 
     assert verify_mod.main([str(backup)]) == 1
 

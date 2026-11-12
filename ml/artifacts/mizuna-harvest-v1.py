@@ -1,0 +1,67 @@
+"""Data record. Generated - the generator is named inside the record itself."""
+
+DATA = {'id': 'mizuna-harvest-v1',
+ 'name': 'Mizuna harvest · exploratory ridge',
+ 'version': '1.0.0',
+ 'status': 'trained-exploratory',
+ 'trainedAt': '2026-11-07T14:32:42.218887+00:00',
+ 'task': 'Crop-specific fresh harvest mass regression',
+ 'sourceStudy': 'OSD-655',
+ 'crop': 'mizuna',
+ 'method': 'NASA-data-trained exploratory regression',
+ 'samples': 14,
+ 'groups': 10,
+ 'features': ['waterSuppliedL', 'establishedPlants', 'flight', 'blue'],
+ 'target': 'harvestFreshMassG',
+ 'unit': 'g fresh mass/pillow',
+ 'metrics': {'MAE': 15.503016407381864, 'RMSE': 18.853155340928144, 'R2': -0.33340311313596915},
+ 'baselineMetrics': {'MAE': 14.409584415584415, 'RMSE': 17.419824540924623, 'R2': -0.13836340373596334},
+ 'cohortHoldoutMetrics': {'MAE': 13.958276737592117, 'RMSE': 16.937577727790547, 'R2': -0.07620740358711608},
+ 'validation': 'Nested 4-fold GroupKFold, paired pillow numbers kept together; inner 3-fold alpha search. '
+               'One experiment only; folds do not establish cross-study generalization.',
+ 'hyperparameters': {'linear__alpha': 100.0},
+ 'seed': 42,
+ 'domain': {'waterSuppliedL': {'min': 1.245, 'max': 2.01},
+            'establishedPlants': {'min': 1.0, 'max': 2.0},
+            'flight': {'min': 0.0, 'max': 1.0},
+            'blue': {'min': 0.0, 'max': 1.0}},
+ 'interval': {'radius': 28.23824562603823,
+              'kind': '90th percentile absolute outer-CV residual, uncalibrated descriptive range',
+              'nominalCoverage': None},
+ 'limitations': ['Only 14 measured harvest outcomes from VEG04A; not validated for another experiment or '
+                 'spacecraft.',
+                 'Crop is mizuna, not lettuce, tomato or radish. No cross-crop prediction.',
+                 'Full-period irrigation is a retrospective input; this is not an early harvest forecast or '
+                 'causal irrigation recommendation.',
+                 'Irrigation supplied is not physiological water demand or transpiration.',
+                 'Small-data regression may underperform its baseline; see measured metrics.',
+                 'No gravity-dose, radiation, temperature or humidity treatment effects can be learned from '
+                 'these tables.'],
+ 'linear': {'mean': [1.6231428571428574, 1.7857142857142858, 0.5714285714285714, 0.42857142857142855],
+            'scale': [0.23410554919366028, 0.4103259033241448, 0.4948716593053935, 0.49487165930539345],
+            'coefficients': [0.17632944837171066, 0.3527515852400572, 0.1233313409762194,
+                             -0.45369601582403646],
+            'intercept': 44.62714285714286},
+ 'sourceUrl': 'https://osdr.nasa.gov/bio/repo/data/studies/OSD-655',
+ 'sourceType': 'NASA OSDR (OSD-655) VEG-01/02 pick-and-eat harvest records',
+ 'license': 'Public OSDR access; retain study attribution and comply with OSDR terms; do not assume every '
+            'contributed file is public domain.',
+ 'sourceLicense': 'Public OSDR access; retain study attribution and comply with OSDR terms; do not assume '
+                  'every contributed file is public domain.',
+ 'sourceLicenseUrl': 'https://science.nasa.gov/reference/osdr-help-terms-and-conditions/',
+ 'sourceCitation': 'NASA Open Science Data Repository, OSD-655: Pick-and-eat space crop production flight '
+                   'testing on the International Space Station.',
+ 'sourceRetrieved': '2026-11-09',
+ 'servedScope': 'Withdrawn in Phase 31. Held-out R2 was -0.333, i.e. worse than predicting the mean, so no '
+                'forecast of mizuna harvest is offered by any route, workflow, catalogue entry or assistant '
+                'passage. The card is retained as a non-serving record of that evaluation.',
+ 'operationalForecast': False,
+ 'harvestForecastClaim': 'none',
+ 'archivalRecord': {'retained': True,
+                    'served': 'no: withdrawn from every surface',
+                    'files': ['ml/artifacts/mizuna-harvest-v1.py'],
+                    'reason': 'A withdrawn model keeps its artifact and its evaluation so the withdrawal is '
+                              'auditable; backend/tests/test_phase32_no_forecast.py proves it is '
+                              'unreachable.'},
+ 'note': 'No operational forecast. This card describes what the model reproduces inside the measured domain; '
+         'it is not a prediction of a future or unmeasured crop.'}

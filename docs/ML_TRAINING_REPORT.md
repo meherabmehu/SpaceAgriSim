@@ -50,7 +50,7 @@ Interpretation, stated carefully:
 ## 3. `mizuna-harvest-v1` — re-evaluated, retained as baseline-only
 
 Reproduce: `python ml/analysis/reevaluate_harvest.py` →
-`docs/phase6/mizuna_reevaluation.json`
+`docs/phase6/mizuna_reevaluation`
 
 | | MAE (g) | RMSE (g) | R² |
 |---|---|---|---|
@@ -160,6 +160,6 @@ case, per the brief's own instruction.
 ## 6. Artifact integrity
 
 Artifacts are portable JSON (never pickle), each registered with a SHA-256 in
-`ml/artifacts/registry.json` and verified at load time by
+`ml/artifacts/registry` and verified at load time by
 `backend/app/research.py::load_model`. A checksum mismatch raises rather than
 silently serving a different model.

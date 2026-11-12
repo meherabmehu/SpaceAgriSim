@@ -28,6 +28,7 @@ question it answers is whether the gradient exists in the transcriptome at all.
 """
 
 from __future__ import annotations
+import sys
 
 import json
 from pathlib import Path
@@ -42,8 +43,10 @@ from sklearn.preprocessing import StandardScaler
 from scipy import stats
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 RAW = ROOT / "data" / "raw" / "OSD-314"
-OUT = ROOT / "ml" / "evaluation" / "phase10_partial_gravity.json"
+OUT = ROOT / "ml" / "evaluation" / "phase10_partial_gravity"
 
 SEED = 314
 PERMUTATIONS = 2000
@@ -340,11 +343,11 @@ def main() -> int:
         "nextAction": (
             "Done in Phase 10: OSD-346 was analysed as the replication. It does not "
             "reproduce this contrast (see ml/evaluation/"
-            "phase10_partial_gravity_replication.json), so the 1.000 reported here must "
+            "phase10_partial_gravity_replication.py), so the 1.000 reported here must "
             "be read as one experiment rather than as a stable property of plant "
             "transcriptomes. A servable gravity predictor would need a third mission."),
     }
-    OUT.write_text(json.dumps(result, indent=2) + "\n")
+    safedata.dump(result, OUT)
     print(f"\nprimary balanced accuracy {primary['balancedAccuracy']} "
           f"(p={primary['permutation']['pCorrected']}), "
           f"uG recall {primary['recallMicrogravity']}, "

@@ -204,7 +204,7 @@ def test_corpus_is_built_from_the_verified_artifacts(client):
     # three artifacts Phase 31 withdrew, and those are not models in the product any more.
     assert stats["byKind"]["models"] >= len(research.MODEL_IDS)
     assert stats["byKind"]["models"] <= len(evidence._read_json(
-        evidence.ARTIFACTS / "registry.json")["models"])
+        evidence.ARTIFACTS / "registry")["models"])
     from app import research
     # `research.manifest()` is the application's single source of dataset truth: it merges
     # the pinned manifest with the Phase 2 candidate list. The corpus must match that, not

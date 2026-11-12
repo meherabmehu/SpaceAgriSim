@@ -11,7 +11,7 @@ none qualifies for predictive training, and of everything in the project only on
 task was retrained.** Phase 6 counted measurements and inferred trainability;
 Phase 7 separates them.
 
-Machine-readable matrix: `data/metadata/phase7_training_eligibility.json`.
+Machine-readable matrix: `data/metadata/phase7_training_eligibility`.
 
 ---
 

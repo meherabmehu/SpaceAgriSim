@@ -68,7 +68,7 @@ response surface. No PPFD, photoperiod, CO₂ or temperature control is offered 
 | Tests | `test_phase28_workflows.py` (CEA block), `test_phase30_datasets.py` | |
 
 **Where it stops.** No prediction. The attempted surface is recorded in
-`ml/evaluation/phase30_cea_wheat_response.json` and reported as `predictiveModel.served: false`.
+`ml/evaluation/phase30_cea_wheat_response` and reported as `predictiveModel.served: false`.
 
 ---
 

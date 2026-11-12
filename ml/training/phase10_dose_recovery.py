@@ -27,6 +27,7 @@ credit the model for detecting the timepoint.
 """
 
 from __future__ import annotations
+import sys
 
 import json
 from pathlib import Path
@@ -41,8 +42,10 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 DATA = ROOT / "data"
-OUT = ROOT / "ml" / "evaluation" / "phase10_dose_recovery.json"
+OUT = ROOT / "ml" / "evaluation" / "phase10_dose_recovery"
 
 SEED = 20240
 PERMUTATIONS = 2000
@@ -373,7 +376,7 @@ def main():
             "one genotype and one laboratory, where each (dose, timepoint) cell is a "
             "single sequencing batch."),
     }
-    OUT.write_text(json.dumps(result, indent=2) + "\n")
+    safedata.dump(result, OUT)
     print(f"protocol A (cells held out) balanced accuracy "
           f"{protocol_a['balancedAccuracy']}")
     print(f"protocol B (timepoints held out) balanced accuracy "

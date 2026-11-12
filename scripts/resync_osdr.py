@@ -12,7 +12,7 @@ bucket, for every study in the manifest:
 It writes what it saw. It never edits the manifest and never "fixes" a pin: a study whose bytes
 changed is reported as changed so a human can decide whether to re-pin it.
 
-Output: data/metadata/osdr_live_status.json
+Output: data/metadata/osdr_live_status
 
 Run:
     python scripts/resync_osdr.py                # all studies
@@ -20,6 +20,7 @@ Run:
     python scripts/resync_osdr.py --verify-local # also re-hash committed raw copies
 """
 from __future__ import annotations
+import sys
 
 import argparse
 import hashlib
@@ -32,8 +33,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-MANIFEST = ROOT / "data" / "metadata" / "dataset_manifest.json"
-OUTPUT = ROOT / "data" / "metadata" / "osdr_live_status.json"
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
+MANIFEST = ROOT / "data" / "metadata" / "dataset_manifest"
+OUTPUT = ROOT / "data" / "metadata" / "osdr_live_status"
 BUCKET = "https://nasa-osdr.s3.us-west-2.amazonaws.com"
 NS = "{http://s3.amazonaws.com/doc/2006-03-01/}"
 USER_AGENT = "SpaceAgriSim/4.0 dataset provenance re-sync"
@@ -139,7 +142,7 @@ def available_versions(study_id: str) -> list[int]:
 
 
 def local_sha256(path: Path) -> str | None:
-    if not path.is_file():
+    if not safedata.exists(path):
         return None
     digest = hashlib.sha256()
     with path.open("rb") as stream:
@@ -224,7 +227,7 @@ def main() -> int:
                         help="cap on files checked per study (hashed files first)")
     arguments = parser.parse_args()
 
-    manifest = json.loads(MANIFEST.read_text())
+    manifest = safedata.load(MANIFEST)
     studies = manifest["datasets"]
     if arguments.study:
         wanted = {value.strip().upper() for value in arguments.study}
@@ -257,7 +260,7 @@ def main() -> int:
         "studies": results,
     }
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text(json.dumps(payload, indent=2) + "\n")
+    safedata.dump(payload, OUTPUT)
 
     print(f"checked {len(results)} studies at {payload['checkedAt']}")
     for verdict, count in payload["verdictCounts"].items():

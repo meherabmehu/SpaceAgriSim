@@ -23,6 +23,7 @@ What is enforced:
 """
 
 from __future__ import annotations
+import sys
 
 import json
 import pathlib
@@ -31,10 +32,12 @@ import subprocess
 import pytest
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 CARDS = ROOT / "ml" / "artifacts" / "cards"
-REGISTRY = ROOT / "ml" / "artifacts" / "registry.json"
-CATALOGUE = ROOT / "data" / "research" / "dataset_catalog.json"
-EVIDENCE = ROOT / "ml" / "evaluation" / "phase37_model_evidence.json"
+REGISTRY = ROOT / "ml" / "artifacts" / "registry"
+CATALOGUE = ROOT / "data" / "research" / "dataset_catalog"
+EVIDENCE = ROOT / "ml" / "evaluation" / "phase37_model_evidence"
 
 SERVED = [
     "lettuce-earth-growth-v1",
@@ -48,22 +51,22 @@ SERVED = [
 
 
 def card(model_id: str) -> dict:
-    path = CARDS / f"{model_id}.json"
-    assert path.is_file(), f"missing model card {path.relative_to(ROOT)}"
-    return json.loads(path.read_text(encoding="utf-8"))
+    path = CARDS / f"{model_id}"
+    assert safedata.exists(path), f"missing model card {path.relative_to(ROOT)}"
+    return safedata.load(path)
 
 
 def artifact(model_id: str) -> dict:
-    return json.loads((ROOT / "ml" / "artifacts" / f"{model_id}.json").read_text(encoding="utf-8"))
+    return safedata.load(ROOT / "ml" / "artifacts" / f"{model_id}")
 
 
 def registry() -> dict[str, dict]:
-    return {row["id"]: row for row in json.loads(REGISTRY.read_text())["models"]}
+    return {row["id"]: row for row in safedata.load(REGISTRY)["models"]}
 
 
 # --------------------------------------------------------------------------- presence
 def test_there_is_one_card_per_served_model_and_no_orphans():
-    on_disk = {p.stem for p in CARDS.glob("*.json")}
+    on_disk = {p.stem for p in safedata.records(CARDS)}
     assert on_disk == set(SERVED), f"card set {sorted(on_disk)} != served set {sorted(SERVED)}"
 
 
@@ -147,7 +150,7 @@ def test_the_artifact_hash_is_preserved_and_matches_the_registry(model_id):
     # And the file on disk still hashes to it, so the card cannot outlive a silent edit.
     import hashlib
 
-    on_disk = hashlib.sha256((ROOT / row["artifact"]).read_bytes()).hexdigest()
+    on_disk = hashlib.sha256(safedata.bytes(ROOT / row["artifact"])).hexdigest()
     assert on_disk == row["sha256"], f"{model_id}: artifact edited after the registry was written"
 
 
@@ -156,7 +159,7 @@ def test_no_model_artifact_was_modified_by_completing_the_cards():
     import hashlib
 
     for model_id, row in registry().items():
-        on_disk = hashlib.sha256((ROOT / row["artifact"]).read_bytes()).hexdigest()
+        on_disk = hashlib.sha256(safedata.bytes(ROOT / row["artifact"])).hexdigest()
         assert on_disk == row["sha256"], model_id
 
 
@@ -224,10 +227,10 @@ def test_every_recorded_digest_is_checked_against_its_declared_source(model_id):
     status = data["status"]
     if status == "committed-file":
         path = ROOT / data["primaryInput"]
-        assert path.is_file(), data["primaryInput"]
-        assert hashlib.sha256(path.read_bytes()).hexdigest() == data["sha256"], model_id
+        assert safedata.exists(path), data["primaryInput"]
+        assert hashlib.sha256(safedata.bytes(path)).hexdigest() == data["sha256"], model_id
     elif status == "recorded-checksum":
-        manifest = json.loads((ROOT / data["manifest"]).read_text())
+        manifest = safedata.load(ROOT / data["manifest"])
         entries = manifest.get("files") if isinstance(manifest, dict) else manifest
         name = pathlib.Path(data["primaryInput"]).name
         pinned = [e["sha256"] for e in entries
@@ -253,7 +256,7 @@ def test_the_lettuce_hash_agrees_with_the_value_the_v3_run_recorded():
 
 
 def test_the_radiation_digest_matches_the_committed_nasa_manifest():
-    manifest = json.loads((ROOT / "data" / "metadata" / "phase9_nasa_datasets.json").read_text())
+    manifest = safedata.load(ROOT / "data" / "metadata" / "phase9_nasa_datasets")
     pinned = None
     for entry in manifest.get("files") or []:
         if str(entry.get("name", "")).startswith("GLDS-46_array_normalized_expression_probeset"):
@@ -269,7 +272,7 @@ def test_the_tomato_digest_is_tied_to_a_checked_upstream_file():
     data = card("tomato-flight-response-v1")["trainingData"]
     upstream = next(item for item in data["supportingInputs"]
                     if "GLDS-709" in item["path"])
-    pinned = json.loads((ROOT / "data" / "metadata" / "download_checksums.json").read_text())
+    pinned = safedata.load(ROOT / "data" / "metadata" / "download_checksums")
     expected = next(e["sha256"] for e in pinned if str(e.get("path", "")).endswith("GLDS-709_rna_seq_STAR_Unnormalized_Counts_GLbulkRNAseq.csv"))
     assert upstream["sha256"] == expected
     # The card must state that the parquet digest was obtained by reconstruction, not by reading a
@@ -283,7 +286,7 @@ def test_the_tomato_digest_is_tied_to_a_checked_upstream_file():
 @pytest.mark.parametrize("model_id", SERVED)
 def test_every_dataset_reference_resolves(model_id):
     data = card(model_id)["trainingData"]
-    catalogue = {d["id"] for d in json.loads(CATALOGUE.read_text())["datasets"]}
+    catalogue = {d["id"] for d in safedata.load(CATALOGUE)["datasets"]}
     resolved = False
     if data.get("catalogueRef"):
         assert data["catalogueRef"] in catalogue, (
@@ -315,8 +318,8 @@ def test_every_supporting_input_that_claims_a_computed_hash_has_one(model_id):
                 lines = []
                 for row in item["files"]:
                     file = base / row["name"]
-                    assert file.is_file(), f"{item['path']}: {row['name']} is missing"
-                    actual = hashlib.sha256(file.read_bytes()).hexdigest()
+                    assert safedata.exists(file), f"{item['path']}: {row['name']} is missing"
+                    actual = hashlib.sha256(safedata.bytes(file)).hexdigest()
                     assert actual == row["sha256"], f"{item['path']}: {row['name']} changed"
                     assert row["bytes"] == file.stat().st_size, f"{item['path']}: {row['name']} size"
                     lines.append(f"{row['name']} {row['sha256']}")
@@ -332,7 +335,7 @@ def test_every_supporting_input_that_claims_a_computed_hash_has_one(model_id):
 @pytest.mark.parametrize("model_id", SERVED)
 def test_no_card_cites_a_manifest_that_does_not_exist(model_id):
     """The defect this test exists for: the mizuna card pointed at
-    data/metadata/osd780_checksums.json, which was never created, so a provenance claim resolved to
+    data/metadata/osd780_checksums, which was never created, so a provenance claim resolved to
     nothing while reading like provenance. Any repo path a card names must exist."""
     import re
 
@@ -349,7 +352,7 @@ def test_no_card_cites_a_manifest_that_does_not_exist(model_id):
     declared_uncommitted |= {item["path"] for item in data.get("supportingInputs") or []
                              if item.get("hashVerifiedAtBuild") is False}
     missing = [path for path in cited
-               if not (ROOT / path).exists() and path not in declared_uncommitted]
+               if not safedata.exists(ROOT / path) and path not in declared_uncommitted]
     assert not missing, f"{model_id} cites paths that do not exist: {missing}"
 
 
@@ -369,7 +372,7 @@ def test_completing_metadata_promoted_retrained_and_relabelled_nothing(model_id)
     assert evidence["retrainedByThisCompletion"] is False, model_id
     assert evidence["thresholdsChangedByThisCompletion"] is False, model_id
     # And the verdict must still be the one the evidence audit recorded.
-    audit = json.loads(EVIDENCE.read_text())["models"][model_id]
+    audit = safedata.load(EVIDENCE)["models"][model_id]
     assert evidence["classification"] == audit["classification"], model_id
     assert evidence["verdict"] == audit["verdictBefore"], model_id
     assert evidence["decisionGrade"] == audit["decisionGradeAfter"], model_id

@@ -2,8 +2,8 @@
 
 Two measured studies were produced:
 
-    ml/research/phase34_tomato_calibration.py       -> phase34_probability_calibration.json
-    ml/research/phase34_cross_campaign_coverage.py  -> phase34_cross_campaign_coverage.json
+    ml/research/phase34_tomato_calibration.py       -> phase34_probability_calibration
+    ml/research/phase34_cross_campaign_coverage.py  -> phase34_cross_campaign_coverage
 
 This script is the only writer. It copies those numbers into the cards that serve the numbers, and
 rewrites the served-scope sentences that the measurements make false. It never computes a metric
@@ -23,7 +23,7 @@ lettuce-earth-growth-v2 / -v3
 mizuna-microbial-load-v1 / -relative-load-v2
     These cards said coverage was within the VEG-04A campaigns "only" and that "there is no second
     campaign in the repository". Both statements are wrong: OSD-780 contains VEG-04B, the transfer
-    study in `ml/evaluation/microbial_v2_transfer.json` already holds one campaign out, and
+    study in `ml/evaluation/microbial_v2_transfer` already holds one campaign out, and
     `interval` gains the measured cross-campaign coverage that the audit said was missing.
 
 Run: python ml/research/phase34_record_measurements.py  [--check]
@@ -36,17 +36,20 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 ARTIFACTS = ROOT / "ml" / "artifacts"
-CALIBRATION = ROOT / "ml" / "evaluation" / "phase34_probability_calibration.json"
-COVERAGE = ROOT / "ml" / "evaluation" / "phase34_cross_campaign_coverage.json"
+CALIBRATION = ROOT / "ml" / "evaluation" / "phase34_probability_calibration"
+COVERAGE = ROOT / "ml" / "evaluation" / "phase34_cross_campaign_coverage"
 
 
 def load(path: Path) -> dict:
-    return json.loads(path.read_text(encoding="utf-8"))
+    return safedata.load(path)
 
 
-def dumps(card: dict) -> str:
-    return json.dumps(card, indent=2) + "\n"
+def save(card: dict, path: Path) -> None:
+    """Write the card through the data layer, which owns the storage shape."""
+    safedata.dump(card, path)
 
 
 def tomato_block(evidence: dict) -> dict:
@@ -125,16 +128,16 @@ def update() -> int:
     changed = []
 
     # ---------------------------------------------------------------- tomato calibration
-    card = load(ARTIFACTS / "tomato-flight-response-v1.json")
+    card = load(ARTIFACTS / "tomato-flight-response-v1")
     before = json.dumps(card.get("probabilityCalibration"), sort_keys=True)
     card["probabilityCalibration"] = tomato_block(calibration)
     if json.dumps(card["probabilityCalibration"], sort_keys=True) != before:
         changed.append("tomato-flight-response-v1: probabilityCalibration")
-    (ARTIFACTS / "tomato-flight-response-v1.json").write_text(dumps(card), encoding="utf-8")
+    save(card, ARTIFACTS / "tomato-flight-response-v1")
 
     # ---------------------------------------------------------------- lettuce intervals
     for model_id in ("lettuce-earth-growth-v1", "lettuce-earth-growth-v2", "lettuce-earth-growth-v3"):
-        card = load(ARTIFACTS / f"{model_id}.json")
+        card = load(ARTIFACTS / f"{model_id}")
         result = coverage["models"][model_id]
         block = lettuce_interval_block(result)
         card["interval"]["crossCampaign"] = block
@@ -147,16 +150,16 @@ def update() -> int:
                 f"{block['observations']} treatment means (ratio median {block['ratioMedian']}, "
                 f"range {block['ratioRange'][0]}-{block['ratioRange'][1]}).")
         changed.append(f"{model_id}: interval.crossCampaign + servedScope")
-        (ARTIFACTS / f"{model_id}.json").write_text(dumps(card), encoding="utf-8")
+        save(card, ARTIFACTS / f"{model_id}")
 
     # ---------------------------------------------------------------- mizuna coverage + scope
     for model_id in MIZUNA_SCOPE:
-        card = load(ARTIFACTS / f"{model_id}.json")
+        card = load(ARTIFACTS / f"{model_id}")
         result = coverage["models"][model_id]
         card["interval"]["crossCampaign"] = mizuna_interval_block(result)
         card["servedScope"] = MIZUNA_SCOPE[model_id]
         changed.append(f"{model_id}: interval.crossCampaign + corrected servedScope")
-        (ARTIFACTS / f"{model_id}.json").write_text(dumps(card), encoding="utf-8")
+        save(card, ARTIFACTS / f"{model_id}")
 
     for entry in changed:
         print(f"updated {entry}")
@@ -171,7 +174,7 @@ def check() -> int:
     coverage = load(COVERAGE)
     problems = []
 
-    card = load(ARTIFACTS / "tomato-flight-response-v1.json")
+    card = load(ARTIFACTS / "tomato-flight-response-v1")
     declared = card.get("probabilityCalibration") or {}
     measured = coverage.get("models")  # presence check only, unused
     _ = measured
@@ -183,7 +186,7 @@ def check() -> int:
         problems.append("tomato-flight-response-v1: a calibration is claimed but none was fitted")
 
     for model_id in ("lettuce-earth-growth-v1", "lettuce-earth-growth-v2", "lettuce-earth-growth-v3"):
-        card = load(ARTIFACTS / f"{model_id}.json")
+        card = load(ARTIFACTS / f"{model_id}")
         block = lettuce_interval_block(coverage["models"][model_id])
         if (card.get("interval") or {}).get("crossCampaign") != block:
             problems.append(f"{model_id}: interval.crossCampaign is missing or stale")
@@ -191,7 +194,7 @@ def check() -> int:
             problems.append(f"{model_id}: servedScope does not state the cross-campaign measurement")
 
     for model_id in MIZUNA_SCOPE:
-        card = load(ARTIFACTS / f"{model_id}.json")
+        card = load(ARTIFACTS / f"{model_id}")
         block = mizuna_interval_block(coverage["models"][model_id])
         if (card.get("interval") or {}).get("crossCampaign") != block:
             problems.append(f"{model_id}: interval.crossCampaign is missing or stale")

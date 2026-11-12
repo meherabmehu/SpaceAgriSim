@@ -14,6 +14,7 @@ study supplies a limitation that now reaches the user as a warning.
 """
 
 from __future__ import annotations
+import sys
 
 import hashlib
 import json
@@ -22,13 +23,15 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-SUPPLEMENT = ROOT / "data" / "literature" / "ntrs_supplement.json"
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
+SUPPLEMENT = ROOT / "data" / "literature" / "ntrs_supplement"
 CROP_TM = ROOT / "data" / "raw" / "NTRS" / "20250001897.pdf"
 
 
 @pytest.fixture(scope="module")
 def payload() -> dict:
-    return json.loads(SUPPLEMENT.read_text())
+    return safedata.load(SUPPLEMENT)
 
 
 @pytest.fixture(scope="module")
@@ -50,8 +53,8 @@ def tm_text() -> dict[int, str]:
 
 # -- provenance ------------------------------------------------------------------
 def test_the_reference_document_is_pinned(crop_tm):
-    assert CROP_TM.is_file()
-    assert crop_tm["pdf_sha256"] == hashlib.sha256(CROP_TM.read_bytes()).hexdigest()
+    assert safedata.exists(CROP_TM)
+    assert crop_tm["pdf_sha256"] == hashlib.sha256(safedata.bytes(CROP_TM)).hexdigest()
     assert crop_tm["pages"] == 82
 
 

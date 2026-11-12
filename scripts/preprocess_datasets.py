@@ -1,5 +1,8 @@
 """Build measured NASA tables; preserve missing outcomes instead of inventing them."""
 from __future__ import annotations
+import sys as _sys, pathlib as _pathlib   # the repository root holds safedata/
+_sys.path.insert(0, str(_pathlib.Path(__file__).resolve().parents[1]))
+import safedata
 
 import csv
 import json
@@ -10,7 +13,7 @@ from nasa_pipeline import DATA, ROOT, save_json, stamp, validate
 
 def read_csv(path):
     # NASA supplements include legacy Windows-1252 degree symbols.
-    body = path.read_bytes()
+    body = safedata.bytes(path)
     try:
         text = body.decode("utf-8-sig")
     except UnicodeDecodeError:
@@ -70,7 +73,7 @@ def preprocess():
     counts = pd.read_csv(counts_file, index_col=0)
     if counts.isna().any().any() or (counts.to_numpy() < 0).any():
         raise ValueError("Invalid RNA-seq count matrix")
-    metadata = json.loads((DATA / "metadata" / "OSD-767_meta.json").read_text())
+    metadata = safedata.load(DATA / "metadata" / "OSD-767_meta")
     samples = {s["name"]: s for s in metadata["study"]["OSD-767"]["studies"][0]["materials"]["samples"]}
     if set(counts.columns) != set(samples):
         raise ValueError("RNA count headers must match official sample metadata exactly")
@@ -89,7 +92,7 @@ def preprocess():
         "mizunaIrrigation": {"rows": len(irrigation), "missingPolicy": "--- and blank excluded; numeric zero retained; irregular event dates are not daily demand", "unit": "mL supplied/event"},
         "tomatoRna": {"samples": len(rows), "genes": len(counts), "plants": len({r['group'] for r in rows}), "normalization": "log1p(count / sample library sum * 1e6)", "label": "recorded flight vs ground experimental context, not stress severity", "geneMissingValues": 0},
     }
-    save_json(DATA / "metadata" / "quality_report.json", quality)
+    save_json(DATA / "metadata" / "quality_report", quality)
     print(json.dumps(quality, indent=2))
 
 

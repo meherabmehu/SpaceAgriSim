@@ -27,18 +27,20 @@ from app.simulation import et0_fao56, water
 from app.simulation.engine import SimulationInput, run_simulation
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 DATASET = ROOT / "data" / "processed" / "et0_dataset.csv"
-DATASET_META = ROOT / "data" / "processed" / "et0_dataset.metadata.json"
-QUALITY = ROOT / "ml" / "evaluation" / "et0_dataset_quality.json"
-EMULATOR_CARD = ROOT / "ml" / "artifacts" / "et0-emulator-v1.json"
+DATASET_META = ROOT / "data" / "processed" / "et0_dataset.metadata"
+QUALITY = ROOT / "ml" / "evaluation" / "et0_dataset_quality"
+EMULATOR_CARD = ROOT / "ml" / "artifacts" / "et0-emulator-v1"
 
 
 def _card() -> dict:
-    return json.loads(EMULATOR_CARD.read_text(encoding="utf-8"))
+    return safedata.load(EMULATOR_CARD)
 
 
 def _dataset_meta() -> dict:
-    return json.loads(DATASET_META.read_text(encoding="utf-8"))
+    return safedata.load(DATASET_META)
 
 
 def _simulate(**overrides) -> SimulationInput:
@@ -244,7 +246,7 @@ def test_non_positive_crop_coefficient_is_rejected():
 
 # --------------------------------------------------------------------------- dataset
 def test_dataset_is_the_one_its_metadata_describes():
-    digest = hashlib.sha256(DATASET.read_bytes()).hexdigest()
+    digest = hashlib.sha256(safedata.bytes(DATASET)).hexdigest()
     assert digest == _dataset_meta()["sha256"]
 
 
@@ -263,7 +265,7 @@ def test_dataset_has_no_missing_values_in_its_model_columns():
 
 
 def test_quality_report_records_no_issues_and_states_the_drops():
-    report = json.loads(QUALITY.read_text(encoding="utf-8"))
+    report = safedata.load(QUALITY)
     assert report["sitesWithIssues"] == []
     assert report["removed"]["nonPositiveEt0Rows"] == 145
     assert report["removed"]["total"] == 145
@@ -303,7 +305,7 @@ def test_runtime_pins_match_the_environment_that_wrote_the_artifacts():
     The served models are still serialised trees, so the runtime pins are still compared with the
     artifacts' own recorded environment - the check outlived the emulator it was written for.
     """
-    registry = json.loads((ROOT / "ml" / "artifacts" / "registry.json").read_text())
+    registry = safedata.load(ROOT / "ml" / "artifacts" / "registry")
     # The registry records the library the artifacts were trained with under its import name.
     trained = {"scikit-learn": registry["environment"]["sklearn"],
                "numpy": registry["environment"]["numpy"]}
@@ -434,7 +436,7 @@ def test_catalogue_counts_match_the_documented_class_counts():
     dosing trial is deliberately not an entry: it is the same experiment, and a catalogue entry for
     it would count one trial twice.
     """
-    payload = json.loads((ROOT / "data" / "research" / "dataset_catalog.json").read_text())
+    payload = safedata.load(ROOT / "data" / "research" / "dataset_catalog")
     assert len(payload["datasets"]) == 36
     counts = {}
     for dataset in payload["datasets"]:
@@ -445,7 +447,7 @@ def test_catalogue_counts_match_the_documented_class_counts():
 
 
 def test_only_the_imported_datasets_have_an_open_commercial_licence():
-    payload = json.loads((ROOT / "data" / "research" / "dataset_catalog.json").read_text())
+    payload = safedata.load(ROOT / "data" / "research" / "dataset_catalog")
     for dataset in payload["datasets"]:
         if dataset["imported"]:
             assert dataset["usabilityClass"] in {"A", "B", "C"}
@@ -477,7 +479,7 @@ def test_model_audit_passes_after_the_phase31_withdrawals():
 
 
 def test_registry_verifier_passes_after_the_phase31_withdrawals():
-    # `--check` verifies without rewriting `docs/phase7/registry_verification.json`. Running the
+    # `--check` verifies without rewriting `docs/phase7/registry_verification`. Running the
     # verifier bare regenerated the report with a new `generatedAt` timestamp, so a passing test
     # suite left a dirty working tree whose only diff was that timestamp - a change that has twice
     # been mistaken for a real one. The exit code and the checks are identical either way.
@@ -488,13 +490,13 @@ def test_registry_verifier_passes_after_the_phase31_withdrawals():
 
 def test_registry_verification_gate_does_not_touch_the_committed_report():
     """The gate must be read-only: a test run may not rewrite the artefact it verifies."""
-    report = ROOT / "docs" / "phase7" / "registry_verification.json"
-    before = report.read_bytes()
+    report = ROOT / "docs" / "phase7" / "registry_verification"
+    before = safedata.bytes(report)
     result = subprocess.run([sys.executable, "scripts/verify_model_registry.py", "--check"],
                             cwd=ROOT, capture_output=True, text=True)
     assert result.returncode == 0, result.stdout[-2000:]
-    assert report.read_bytes() == before, (
-        "scripts/verify_model_registry.py rewrote docs/phase7/registry_verification.json; "
+    assert safedata.bytes(report) == before, (
+        "scripts/verify_model_registry.py rewrote docs/phase7/registry_verification; "
         "use --check so the gate leaves the tree untouched"
     )
     assert "verified without writing" in result.stdout

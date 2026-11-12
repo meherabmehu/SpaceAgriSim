@@ -54,7 +54,7 @@ after python3 scripts/package_runtime_data.py
 pytest -q  ->  291 passed
 ```
 
-Root cause: the bundle's `registry.json` predated Phase 9/10, so `supersedes` was missing on
+Root cause: the bundle's `registry` predated Phase 9/10, so `supersedes` was missing on
 `lettuce-earth-growth-v2`. Not a code defect, and not silently "fixed" by editing the test —
 the packager regenerates the bundle from the committed artifacts, which is the intended path.
 
@@ -65,10 +65,10 @@ the packager regenerates the bundle from the committed artifacts, which is the i
 | Gate | Command | Result |
 | --- | --- | --- |
 | Backend suite | `SPACEAGRISIM_TEST_POSTGRES_URL=… pytest -q` | **291 passed** |
-| Registered models | `ml/artifacts/registry.json` | **8** |
-| Dataset catalogue | `data/metadata/dataset_manifest.json` | **19** |
+| Registered models | `ml/artifacts/registry` | **8** |
+| Dataset catalogue | `data/metadata/dataset_manifest` | **19** |
 | Scientific classification entries | `app.science_classification.FEATURES` | **16** (8 model surfaces + 2 excluded + 6 simulator/estimator surfaces) |
-| Pinned dataset versions | `dataset_manifest.json` | 19 studies, each with `metadataSha256` + `verifiedAt` |
+| Pinned dataset versions | `dataset_manifest` | 19 studies, each with `metadataSha256` + `verifiedAt` |
 
 Model inventory, exactly as the registry serves it:
 
@@ -128,12 +128,12 @@ Stated precisely, because "missing" is a claim that needs a search:
    the UI do not include it. Consequently the UI cannot distinguish a NASA-trained molecular
    classifier from an Earth-only regression without hardcoding.
 3. **No calibration or explanation availability on model rows.** Those facts exist in
-   `phase10_uncertainty_patch.json` and the `*-explanation.json` artifacts but are not
+   `phase10_uncertainty_patch` and the `*-explanation.py` artifacts but are not
    merged into the registry payload.
 4. **No saved analyses.** Only `scenarios` are persisted. A model inference with its
    explanation and citations cannot be saved, re-listed, or exported as a research record.
 5. **No duplicate safeguards in the dataset API.** Phase 11 proved OSD-320 duplicates the 44
-   arrays in OSD-46 and wrote `phase11_duplicate_audit.json`, but `/api/datasets` does not
+   arrays in OSD-46 and wrote `phase11_duplicate_audit`, but `/api/datasets` does not
    surface it, so the risk it documents is currently only in a document.
 6. **No AI analysis export.** `/api/reports/{format}` covers simulation output only.
 

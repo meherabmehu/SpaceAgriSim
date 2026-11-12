@@ -86,7 +86,7 @@ download in the restore workflow.
 ## 3. What a run produces, and where it lives
 
 * One artifact per run: `spaceagrisim-db-backup-<run_id>`, containing
-  `spaceagrisim-<stamp>.dump.gpg` and `spaceagrisim-<stamp>.dump.manifest.json.gpg`.
+  `spaceagrisim-<stamp>.dump.gpg` and `spaceagrisim-<stamp>.dump.manifest.py.gpg`.
 * Encryption: GPG symmetric, **AES-256**, passphrase-derived key, no compression (a custom-format
   dump is already compressed). The plaintext dump exists only inside the runner's temp directory
   and is deleted before upload.
@@ -209,7 +209,7 @@ production exercise is `db-restore-verify.yml` after the first real backup.
 gpg --decrypt spaceagrisim-<stamp>.dump.gpg > spaceagrisim-<stamp>.dump
 
 # 2. Confirm it is intact before touching anything.
-sha256sum spaceagrisim-<stamp>.dump          # must equal .manifest.json's "sha256"
+sha256sum spaceagrisim-<stamp>.dump          # must equal .manifest.py's "sha256"
 pg_restore --list spaceagrisim-<stamp>.dump | head
 
 # 3. Restore into a NEW database (a fresh Render Postgres, or a local one for rehearsal).

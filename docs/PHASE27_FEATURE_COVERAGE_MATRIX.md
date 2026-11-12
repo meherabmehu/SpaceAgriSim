@@ -1,6 +1,6 @@
 # Phase 27 — Feature Implementation Coverage Matrix
 
-Generated from `data/research/phase27/feature_implementation_coverage.json` on 2026-11-10 by `ml/research/build_feature_coverage.py`. Edit the JSON, not this file.
+Generated from `data/research/phase27/feature_implementation_coverage` on 2026-11-10 by `ml/research/build_feature_coverage.py`. Edit the JSON, not this file.
 
 Phase 32 status: the list is closed. Every feature is either complete at the level it claims or removed from the product, so this document records what ships rather than a plan for what might.
 

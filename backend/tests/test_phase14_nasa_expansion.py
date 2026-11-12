@@ -11,6 +11,7 @@ assistant's screen publishes a passage count. Both have already drifted once —
 "46" against a corpus of 47. These tests fail if either can drift again.
 """
 
+import sys
 import hashlib
 import json
 import re
@@ -21,6 +22,8 @@ import pytest
 from app import evidence, research
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 PHASE14 = ["OSD-59", "OSD-386", "OSD-670", "OSD-723", "OSD-856"]
 
 
@@ -38,14 +41,14 @@ def test_phase14_study_is_pinned_and_its_bytes_are_present(study_id):
     path = ROOT / entry["file"] if "file" in entry else None
     archive = next((ROOT / "data" / "raw" / study_id).glob("*ISA.zip"), None)
     assert archive is not None, f"{study_id}: pinned ISA archive is missing from the repository"
-    payload = archive.read_bytes()
+    payload = safedata.bytes(archive)
     assert hashlib.sha256(payload).hexdigest() == row["metadataSha256"]
     assert len(payload) == entry["bytes"]
 
 
 def test_phase14_checksums_file_matches_the_catalogue():
-    checksums = json.loads((ROOT / "data" / "metadata" /
-                           "phase14_manifest_checksums.json").read_text())["studies"]
+    checksums = safedata.load(ROOT / "data" / "metadata" /
+                           "phase14_manifest_checksums")["studies"]
     catalogue = _catalogue()
     for study_id in PHASE14:
         assert checksums[study_id]["sha256"] == catalogue[study_id]["metadataSha256"]

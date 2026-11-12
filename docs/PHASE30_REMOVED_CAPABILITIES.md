@@ -162,7 +162,7 @@ factor band, with a 95 % interval on the mean of the experiments in the band, th
 identifiers making up each band, and an explicit statement that no significance test is reported
 because the experiments differ in several factors at once.
 
-The artifact (`ml/evaluation/phase30_cea_wheat_response.json`) is retained and reachable from
+The artifact (`ml/evaluation/phase30_cea_wheat_response`) is retained and reachable from
 `GET /api/workflows/light-stress/controlled-environment/capability`, because an attempt that failed
 is part of the record.
 

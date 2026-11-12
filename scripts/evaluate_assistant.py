@@ -2,7 +2,7 @@
 """Run the Phase 13 assistant benchmark and write the metrics artifact.
 
     python3 scripts/evaluate_assistant.py                 # score the current build
-    python3 scripts/evaluate_assistant.py --write         # also write ml/evaluation/phase13_assistant_eval.json
+    python3 scripts/evaluate_assistant.py --write         # also write ml/evaluation/phase13_assistant_eval
     python3 scripts/evaluate_assistant.py --compare 4a09de3  # score the Phase 12 build too
     python3 scripts/evaluate_assistant.py --explain echo --write  # + narration-layer guards
 
@@ -22,12 +22,14 @@ import sys
 import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 BACKEND = ROOT / "backend"
 sys.path.insert(0, str(BACKEND))
 
 from app import assistant, assistant_eval, llm  # noqa: E402
 
-ARTIFACT = ROOT / "ml" / "evaluation" / "phase13_assistant_eval.json"
+ARTIFACT = ROOT / "ml" / "evaluation" / "phase13_assistant_eval"
 
 
 def score_current() -> dict:
@@ -156,10 +158,10 @@ def main() -> int:
 
     if arguments.write:
         ARTIFACT.parent.mkdir(parents=True, exist_ok=True)
-        ARTIFACT.write_text(json.dumps(payload, indent=1, sort_keys=True), encoding="utf-8")
+        safedata.dump(payload, ARTIFACT)
         print(f"\nwritten: {ARTIFACT.relative_to(ROOT)}")
 
-    if arguments.json:
+    if arguments:
         print(json.dumps(payload, indent=1, sort_keys=True))
 
     return 0 if not current["failures"] else 1

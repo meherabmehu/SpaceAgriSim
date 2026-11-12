@@ -24,14 +24,14 @@ The research pipeline is independent: official NASA metadata → selected verifi
 
 Since Phase 35 that evidence path ends in a **verdict** rather than in prose.
 `ml/research/phase35_evidence_verdicts.py` reads the committed evaluation files and each card's own
-pre-declared criteria and writes one verdict per model into `ml/evaluation/phase35_model_evidence.json`
+pre-declared criteria and writes one verdict per model into `ml/evaluation/phase35_model_evidence`
 and into the card (`evidenceVerdict`). `backend/app/research.py` exposes
 `evidence_verdict()` / `verdict_warning()`; every prediction route attaches them to its response,
 the catalogue carries them on every row, and `scripts/audit_models.py` fails when a surface disagrees
 with the file. A model is `decisionGrade` only when an independent campaign met every criterion set
 for it — so a number, its scope and its verdict cannot travel separately.
 
-Validation evidence has its own path since Phase 34, and it runs the other way: `ml/research/*.py` loads the **shipped** artifact through the same code the API uses, measures it against an independent campaign or an out-of-fold split, writes `ml/evaluation/*.json`, and `ml/research/phase34_record_measurements.py` is the only writer that copies those numbers into a model card. `scripts/audit_models.py` then checks the card against the evidence file and `scripts/build_registry.py` re-seals the artifact hash. A served claim therefore has a script that produced it, a file that holds it, and an audit that fails when the two disagree.
+Validation evidence has its own path since Phase 34, and it runs the other way: `ml/research/*.py` loads the **shipped** artifact through the same code the API uses, measures it against an independent campaign or an out-of-fold split, writes `ml/evaluation/*.py`, and `ml/research/phase34_record_measurements.py` is the only writer that copies those numbers into a model card. `scripts/audit_models.py` then checks the card against the evidence file and `scripts/build_registry.py` re-seals the artifact hash. A served claim therefore has a script that produced it, a file that holds it, and an audit that fails when the two disagree.
 
 ## State and storage
 

@@ -27,8 +27,10 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 DATA = ROOT / "data"
-OUT = ROOT / "docs" / "phase6" / "mizuna_reevaluation.json"
+OUT = ROOT / "docs" / "phase6" / "mizuna_reevaluation"
 SEED = 42
 FEATURES = ["waterSuppliedL", "establishedPlants", "flight", "blue"]
 
@@ -89,7 +91,7 @@ def main():
             "The flight target embeds crew consumption and a subsample mean; the "
             "ground target is a complete harvest plus broken leaves. A mean "
             "difference between arms therefore cannot be attributed to the space "
-            "environment. See docs/phase6/osd655_mass_audit.json."
+            "environment. See docs/phase6/osd655_mass_audit."
         ),
     }
 
@@ -148,7 +150,7 @@ def main():
     )
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(report, indent=2, ensure_ascii=True, allow_nan=False) + "\n")
+    safedata.dump(report, OUT)
     print(json.dumps(report, indent=2))
     print(f"\nwritten: {OUT.relative_to(ROOT)}")
     return 0

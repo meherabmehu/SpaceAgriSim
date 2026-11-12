@@ -69,7 +69,7 @@ tree at `f6f6da1` and fetched from production:
 | | |
 |---|---|
 | Locally generated from `f6f6da1` | 91,545 bytes |
-| Fetched from `https://spaceagrisim-api.onrender.com/api/openapi.json` | 91,545 bytes |
+| Fetched from `https://spaceagrisim-api.onrender.com/api/openapi.py` | 91,545 bytes |
 | Canonicalised (sorted keys) comparison | **IDENTICAL** |
 
 83 paths, 90 operations, `SpaceAgriSim API` v0.1.0 on both sides.
@@ -120,11 +120,11 @@ the served artifacts already equal the commit exactly (§7 for the limitation).
 | `/` | 200 | 0.24 s | application/json | `{"message":"SpaceAgriSim API is running","docs":"/api/docs"}` |
 | `/api/health` | 200 | 0.27 s | application/json | `{"status":"ok","service":"SpaceAgriSim API","version":"0.1.0"}` |
 | `/api/ready` | 200 | 1.59 s | application/json | 681 B; see §2.5 |
-| `/openapi.json` | **404** | 0.24 s | application/json | `{"detail":"Not Found"}` |
-| `/api/openapi.json` | 200 | 1.54 s | application/json | 85,916 B schema |
+| `/openapi.py` | **404** | 0.24 s | application/json | `{"detail":"Not Found"}` |
+| `/api/openapi.py` | 200 | 1.54 s | application/json | 85,916 B schema |
 
-`/openapi.json` 404 is **correct**: the application mounts everything under `/api`, and the schema is
-served at `/api/openapi.json`. This was confirmed from the running service rather than assumed, and
+`/openapi.py` 404 is **correct**: the application mounts everything under `/api`, and the schema is
+served at `/api/openapi.py`. This was confirmed from the running service rather than assumed, and
 it is why the schema (§1.2) was read before any other endpoint was probed.
 
 ### 2.2 Read endpoints — all passed
@@ -172,7 +172,7 @@ as JSON.** Median latency 0.24 s, slowest 0.88 s.
 ### 2.3 Computational endpoints — all passed
 
 These POST endpoints compute a response and persist nothing. Each was called with inputs taken from
-the live schema (bounds and enums read from `/api/openapi.json`, not invented).
+the live schema (bounds and enums read from `/api/openapi.py`, not invented).
 
 | Endpoint | Status | Result summary |
 |---|---|---|
@@ -252,7 +252,7 @@ overflow, broken images, `console` errors, `pageerror` exceptions, responses ≥
 requests. Each route was then **reloaded** and re-measured, so a route that only works via in-app
 navigation would fail here.
 
-Evidence: `browser_results.json` and 48 screenshots in `screenshots/`.
+Evidence: `browser_results.py` and 48 screenshots in `screenshots/`.
 
 ### 3.2 Results — 48 of 48 clean
 
@@ -579,15 +579,15 @@ are relative to that directory.
 
 | Artifact | Contents |
 |---|---|
-| `live_evidence/browser_results.json` | 48 route × viewport records: status, text length, overflow, console/page errors, failed requests, screenshot paths |
-| `live_evidence/get_sweep.json` | 33 read endpoints: status, latency, content type, byte counts, body heads |
-| `live_evidence/post_sweep.json` | 19 computational calls with bodies |
-| `live_evidence/auth_probe.json` | 22 authorization probes |
-| `live_evidence/cors.json` | 8 CORS probes |
-| `live_evidence/errors_cors.json` | 7 error-handling probes |
-| `live_evidence/live_openapi.json` | the production schema as served (85,916 B) |
-| `live_evidence/scientific_findings.json` | 44 scientific-content assertions |
-| `live_evidence/ux_findings.json` | 21 interaction and accessibility assertions |
+| `live_evidence/browser_results.py` | 48 route × viewport records: status, text length, overflow, console/page errors, failed requests, screenshot paths |
+| `live_evidence/get_sweep.py` | 33 read endpoints: status, latency, content type, byte counts, body heads |
+| `live_evidence/post_sweep.py` | 19 computational calls with bodies |
+| `live_evidence/auth_probe.py` | 22 authorization probes |
+| `live_evidence/cors.py` | 8 CORS probes |
+| `live_evidence/errors_cors.py` | 7 error-handling probes |
+| `live_evidence/live_openapi.py` | the production schema as served (85,916 B) |
+| `live_evidence/scientific_findings.py` | 44 scientific-content assertions |
+| `live_evidence/ux_findings.py` | 21 interaction and accessibility assertions |
 | `live_evidence/screenshots/` | 51 PNGs: 48 route/viewport captures plus OSD-46 detail, and the blocked-API error state |
 | `live_evidence/deployed_index.js` | the production entry bundle as downloaded, used for the base-URL and SHA-256 comparison |
 

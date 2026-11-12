@@ -1,6 +1,6 @@
 # NASA dataset inventory
 
-Verified 2026-11-06 against the official OSDR metadata and file APIs. All counts below were computed from retrieved metadata, not inferred from study titles. Full file lists, URLs, sizes, restrictions and acquisition status are in `data/metadata/dataset_manifest.json`.
+Verified 2026-11-06 against the official OSDR metadata and file APIs. All counts below were computed from retrieved metadata, not inferred from study titles. Full file lists, URLs, sizes, restrictions and acquisition status are in `data/metadata/dataset_manifest`.
 
 | Study | Organism | Study sample names | Files | Assay types |
 |---|---|---:|---:|---|

@@ -23,6 +23,8 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 if str(ROOT / "backend") not in sys.path:
     sys.path.insert(0, str(ROOT / "backend"))
 
@@ -166,7 +168,7 @@ def test_the_removed_harvest_module_is_not_importable():
 
 def test_the_harvest_evidence_that_survives_is_measured_data_only():
     """The failure record stays committed as data, outside the served API."""
-    evaluations = list((ROOT / "ml" / "evaluation").glob("*harvest*.json"))
+    evaluations = list([p for p in safedata.records(ROOT / "ml" / "evaluation") if "harvest" in p.stem])
     assert evaluations, "the harvest evaluation records must be retained"
     registry = research.model_registry()
     for model in registry["models"]:
@@ -187,7 +189,7 @@ def test_the_units_registry_does_not_advertise_a_withdrawn_output():
 
 
 def test_the_gap_matrix_records_both_removals_as_decisions():
-    matrix = json.loads((ROOT / "data" / "research" / "dataset_gap_matrix.json").read_text())
+    matrix = safedata.load(ROOT / "data" / "research" / "dataset_gap_matrix")
     gaps = {gap["id"]: gap for gap in matrix["gaps"]}
     assert gaps["fractional-gravity"]["phase30Decision"]["decision"].startswith("B")
     assert gaps["yield-labels"]["phase30Decision"]["decision"].startswith("B")
@@ -196,7 +198,7 @@ def test_the_gap_matrix_records_both_removals_as_decisions():
 
 
 def test_the_catalogue_lists_the_two_phase30_datasets():
-    catalogue = json.loads((ROOT / "data" / "research" / "dataset_catalog.json").read_text())
+    catalogue = safedata.load(ROOT / "data" / "research" / "dataset_catalog")
     ids = {item["id"] for item in catalogue["datasets"]}
     assert {"zenodo-cea-wheat-apogee", "zenodo-kilowatts-lettuce-lue"} <= ids
     for item in catalogue["datasets"]:

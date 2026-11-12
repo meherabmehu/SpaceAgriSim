@@ -49,6 +49,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 RAW = ROOT / "data" / "raw"
 PROCESSED = ROOT / "data" / "processed"
 METADATA = ROOT / "data" / "metadata"
@@ -163,8 +165,8 @@ def fetch(spec: dict) -> Path:
     folder = RAW / spec["study"]
     folder.mkdir(parents=True, exist_ok=True)
     path = folder / spec["name"]
-    if path.is_file():
-        if path.stat().st_size == spec["bytes"] and hashlib.sha256(path.read_bytes()).hexdigest() == spec["sha256"]:
+    if safedata.exists(path):
+        if path.stat().st_size == spec["bytes"] and hashlib.sha256(safedata.bytes(path)).hexdigest() == spec["sha256"]:
             print(f"  cached+verified  {spec['study']}/{spec['name']}")
             return path
         print(f"  stale local copy, refetching {spec['name']}")
@@ -333,13 +335,12 @@ def main() -> None:
             "OSD-413": "25 objects raw amplicon FASTQ; no processed abundance table",
             "OSD-414": "21 objects raw amplicon FASTQ; no processed abundance table",
             # OSD-267/OSD-269 are acquired, but no classifier is built from them:
-            # see ml/evaluation/phase9_veg_microbiome_feasibility.json for the
+            # see ml/evaluation/phase9_veg_microbiome_feasibility for the
             # design numbers that make a predictor indefensible here.
         },
     }
     METADATA.mkdir(parents=True, exist_ok=True)
-    (METADATA / "phase9_nasa_datasets.json").write_text(
-        json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(manifest, METADATA / "phase9_nasa_datasets")
 
     print(json.dumps({
         "osd46Samples": osd46["samples"],

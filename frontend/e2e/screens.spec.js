@@ -73,6 +73,9 @@ test("the model registry shows an evidence verdict on every card", async ({ page
   await page.goto("/#predictions");
   await expect(page.getByText("API connected", { exact: true })).toBeVisible();
   const cards = page.locator(".module-grid .mission-card");
+  // The registry is assembled per request, so wait for the first card before counting;
+  // the assertion itself is unchanged.
+  await expect(cards.first()).toBeVisible();
   expect(await cards.count()).toBeGreaterThanOrEqual(7);
   await expect(page.getByText("Independent check failed").first()).toBeVisible();
   await expect(page.getByText("No independent check").first()).toBeVisible();

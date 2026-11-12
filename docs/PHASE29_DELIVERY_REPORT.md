@@ -33,9 +33,9 @@ five different answers, and only one of them is "yes" in full.
 | `ml/training/phase29_interval_audit.py` | interval calibration and coverage audit |
 | `ml/research/build_light_stress_dataset.py` | reproducible rebuild of the Greenlight 2024 tables |
 | `ml/research/build_phase29_readiness.py` | workflow coverage matrix and readiness table, with `--check` |
-| `data/research/phase29/{workflow_readiness,environmental_stress_search}.json` | machine-readable readiness and search record |
-| `data/research/dataset_catalog.json`, `DATASET_CATALOG.md` | green-light trial promoted B → A now that a workflow serves it |
-| `data/research/dataset_gap_matrix.json`, `docs/DATASET_GAP_MATRIX.md` | gap 4 updated with Phase 29 evidence, severity unchanged |
+| `data/research/phase29/{workflow_readiness,environmental_stress_search}.py` | machine-readable readiness and search record |
+| `data/research/dataset_catalog`, `DATASET_CATALOG.md` | green-light trial promoted B → A now that a workflow serves it |
+| `data/research/dataset_gap_matrix`, `docs/DATASET_GAP_MATRIX.md` | gap 4 updated with Phase 29 evidence, severity unchanged |
 
 ### Verification
 
@@ -139,7 +139,7 @@ matters:
 | W3 light-stress | n/a | no model | n/a — a measured comparison is not a model |
 | W1 irrigation balance | n/a | reference calculation | not a model; labelled `isReferenceCalculation: true` |
 
-A test asserts that `ml/artifacts/lettuce-earth-growth-v4.json` is absent and that the registry still
+A test asserts that `ml/artifacts/lettuce-earth-growth-v4.py` is absent and that the registry still
 lists only v1–v3, so a future change that quietly registers a candidate fails the suite.
 
 ---
@@ -153,7 +153,7 @@ lists only v1–v3, so a future change that quietly registers a candidate fails 
 | W3 Light quality & stress | **complete** | measured observation | `research-ready` (comparison only) | no model, by design |
 
 Generated matrix: `docs/PHASE29_WORKFLOW_COVERAGE_MATRIX.md`, from
-`data/research/phase29/workflow_readiness.json`, with every evidence path verified by the builder.
+`data/research/phase29/workflow_readiness`, with every evidence path verified by the builder.
 
 "Complete" here means all ten layers — data, method, service, endpoint, input check, output check,
 uncertainty, provenance, frontend, tests — not "API exists" and not "screen exists".
@@ -164,7 +164,7 @@ uncertainty, provenance, frontend, tests — not "API exists" and not "screen ex
 
 | Blocker | Why it cannot be closed now | What the product does |
 |---|---|---|
-| **Environmental-stress response surface** (PPFD, photoperiod, CO₂, temperature) | No openly licensed dataset varies these over a lettuce yield response at ≥ 3 levels. Three candidates were examined in this phase and rejected with reasons (`data/research/phase29/environmental_stress_search.json`). | Offers four named measured regimes; every other factor appears as unsupported with a stated reason, in the API and on screen. |
+| **Environmental-stress response surface** (PPFD, photoperiod, CO₂, temperature) | No openly licensed dataset varies these over a lettuce yield response at ≥ 3 levels. Three candidates were examined in this phase and rejected with reasons (`data/research/phase29/environmental_stress_search`). | Offers four named measured regimes; every other factor appears as unsupported with a stated reason, in the API and on screen. |
 | **Fractional-gravity crop response** | No dataset exists in any open repository. | The simulator refuses the claim. |
 | **Water deficit → yield loss** | No crop yield-response factor (`Ky`) exists in this repository. | Reports the deficit as a deficit. |
 | **Harvest model generalisation** | Four experiments, one protocol family, one density, one photoperiod. No modelling choice fixes this. | Model stays `trained-exploratory`; the failed holdout is shown above the prediction. |

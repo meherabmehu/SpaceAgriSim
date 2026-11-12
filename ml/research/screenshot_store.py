@@ -9,21 +9,24 @@ Nothing here re-renders or approximates an image: `resolve()` either finds a fil
 that were recorded or returns None.
 """
 from __future__ import annotations
+import sys
 
 import json
 from functools import lru_cache
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 SHOTS = ROOT / "docs" / "screenshots"
-MANIFEST = SHOTS / "MANIFEST.json"
+MANIFEST = SHOTS / "MANIFEST"
 
 
 @lru_cache(maxsize=1)
 def _manifest() -> dict:
-    if not MANIFEST.is_file():
+    if not safedata.exists(MANIFEST):
         return {"removed": {}}
-    return json.loads(MANIFEST.read_text(encoding="utf-8"))
+    return safedata.load(MANIFEST)
 
 
 def resolve(path: Path) -> tuple[Path | None, str | None]:
@@ -32,13 +35,13 @@ def resolve(path: Path) -> tuple[Path | None, str | None]:
     Returns `(path, None)` when the file itself exists, `(canonical, original)` when the file was
     collapsed into an identical copy, and `(None, None)` when neither exists.
     """
-    if path.is_file():
+    if safedata.exists(path):
         return path, None
     row = (_manifest().get("removed") or {}).get(str(path.relative_to(ROOT)))
     if not row:
         return None, None
     canonical = ROOT / row["identicalTo"]
-    return (canonical if canonical.is_file() else None), str(path)
+    return (canonical if safedata.exists(canonical) else None), str(path)
 
 
 def names_in(*directories: Path) -> list[str]:

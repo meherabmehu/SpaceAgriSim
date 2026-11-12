@@ -121,7 +121,7 @@ possible without fractional-gravity yield data, which does not exist publicly.
 
 ## 2. Registered machine-learning models
 
-All nine artifacts carry a SHA-256 in `ml/artifacts/registry.json`; `scripts/verify_model_registry.py`
+All nine artifacts carry a SHA-256 in `ml/artifacts/registry`; `scripts/verify_model_registry.py`
 re-derives every hash on demand and cross-checks each registry claim against the artifact it
 describes. Splits are grouped at the biological or experimental unit everywhere — pillows, plants,
 biological groups, whole experiments — so no individual is split across folds.

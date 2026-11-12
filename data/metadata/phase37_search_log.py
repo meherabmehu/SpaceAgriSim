@@ -1,0 +1,189 @@
+"""Data record. Generated - the generator is named inside the record itself."""
+
+DATA = {'schema': 'spaceagrisim.phase37.search_log/1',
+ 'searchedOn': '2026-11-12',
+ 'purpose': 'Record every repository and query used to look for evidence behind the six open gaps and the '
+            'four partial ones, and why each candidate was accepted, rejected or left alone. An open gap is '
+            'only defensible if the search for it is written down.',
+ 'repositories': [{'name': 'Zenodo', 'endpoint': 'https://zenodo.org/api/records', 'type': 'dataset'},
+                  {'name': 'NASA OSDR',
+                   'endpoint': 'https://osdr.nasa.gov/osdr/data/search',
+                   'type': 'study'},
+                  {'name': 'Dryad', 'endpoint': 'https://datadryad.org/api/v2/search', 'type': 'dataset'},
+                  {'name': 'Figshare',
+                   'endpoint': 'https://api.figshare.com/v2/articles/search',
+                   'type': 'article'},
+                  {'name': 'PANGAEA',
+                   'endpoint': 'https://www.pangaea.de/advanced/search.php',
+                   'type': 'dataset'}],
+ 'queries': [{'repository': 'Zenodo',
+              'query': 'led spectrum lettuce growth light quality',
+              'hits': 57783,
+              'candidates': ['20394352']},
+             {'repository': 'Zenodo',
+              'query': 'light quality red blue ratio controlled environment plant',
+              'hits': 98209,
+              'candidates': []},
+             {'repository': 'Zenodo',
+              'query': 'substrate moisture content growing media rockwool soilless',
+              'hits': 38237,
+              'candidates': []},
+             {'repository': 'Zenodo',
+              'query': 'irrigation drainage fraction lysimeter greenhouse substrate',
+              'hits': 12758,
+              'candidates': []},
+             {'repository': 'Zenodo',
+              'query': 'nutrient solution balance hydroponic uptake lettuce',
+              'hits': 15893,
+              'candidates': ['17794636', '18804397']},
+             {'repository': 'Zenodo',
+              'query': 'annotated lettuce canopy images segmentation',
+              'hits': 38632,
+              'candidates': []},
+             {'repository': 'Zenodo',
+              'query': 'energy consumption controlled environment agriculture',
+              'hits': 68646,
+              'candidates': ['11485183']},
+             {'repository': 'Zenodo',
+              'query': 'vertical farm energy consumption LED lighting power',
+              'hits': 50748,
+              'candidates': []},
+             {'repository': 'Zenodo',
+              'query': 'plant water use hydroponic nutrient solution volume',
+              'hits': 114628,
+              'candidates': ['17794636']},
+             {'repository': 'NASA OSDR', 'query': 'lettuce', 'hits': 34, 'candidates': []},
+             {'repository': 'NASA OSDR', 'query': 'substrate moisture', 'hits': 3, 'candidates': []},
+             {'repository': 'NASA OSDR', 'query': 'VEG-04', 'hits': 2, 'candidates': ['OSD-655', 'OSD-780']},
+             {'repository': 'Dryad',
+              'query': 'substrate water content hydroponic',
+              'hits': 0,
+              'candidates': []},
+             {'repository': 'Dryad',
+              'query': 'soilless substrate moisture irrigation',
+              'hits': 0,
+              'candidates': []},
+             {'repository': 'Figshare',
+              'query': 'substrate moisture soilless cultivation',
+              'hits': 0,
+              'candidates': []},
+             {'repository': 'Figshare',
+              'query': 'rockwool water content greenhouse',
+              'hits': 1,
+              'candidates': ['34671594']},
+             {'repository': 'Figshare',
+              'query': 'LED spectrum lettuce growth controlled environment',
+              'hits': 3,
+              'candidates': ['25976644', '14051459', '14051462']},
+             {'repository': 'PANGAEA', 'query': 'hydroponic nutrient solution', 'hits': 5, 'candidates': []},
+             {'repository': 'PANGAEA', 'query': 'soilless substrate water', 'hits': 5, 'candidates': []}],
+ 'candidateAdjudication': [{'id': '20394352',
+                            'repository': 'Zenodo',
+                            'title': 'Optimising Spectral Composition in Hydroponic Lettuce Cultivation',
+                            'licence': 'CC-BY-4.0',
+                            'decision': 'ACCEPTED',
+                            'gap': 'led-spectrum-response',
+                            'why': 'Four spectra at a constant 200 umol m-2 s-1 and identical photoperiod, '
+                                   'with destructive harvest of 252 plants. Exactly the design the gap asked '
+                                   'for.',
+                            'integrity': "MD5 verified against the publisher's checksum; 94,162 bytes."},
+                           {'id': '17794636',
+                            'repository': 'Zenodo',
+                            'title': 'Temporal variation of nutrient ratios within hydroponic nutrient '
+                                     'solutions',
+                            'licence': 'CC-BY-4.0',
+                            'decision': 'PARTIALLY ACCEPTED',
+                            'gap': 'nutrient-balance',
+                            'why': 'Eight ions and EC measured repeatedly over a real crop cycle. Accepted '
+                                   'for the concentration and EC requirements; the pre/post-dose labelling '
+                                   'is not self-consistent and no pH is present, so no uptake rate in mass '
+                                   'terms is derived.',
+                            'integrity': 'MD5 verified; 52,889 bytes.'},
+                           {'id': '18804397',
+                            'repository': 'Zenodo',
+                            'title': 'Raw data: Temporal variation of nutrient ratios (Food and Energy '
+                                     'Security)',
+                            'licence': 'CC-BY-4.0',
+                            'decision': 'REJECTED',
+                            'gap': 'nutrient-balance',
+                            'why': 'A second deposit of the same experiment. All five shared sheets are '
+                                   'cell-for-cell identical to 17794636, so counting it would turn one trial '
+                                   'into two pieces of evidence. Downloaded and compared precisely so the '
+                                   'duplicate could be demonstrated rather than assumed.',
+                            'integrity': 'MD5 verified; 55,099 bytes; duplicate evidence in the acquisition '
+                                         'manifest.'},
+                           {'id': '11485183',
+                            'repository': 'Zenodo',
+                            'title': 'EDEN ISS 2020 Telemetry Dataset',
+                            'licence': 'CC-BY-4.0',
+                            'decision': 'REJECTED',
+                            'gap': 'mission-energy',
+                            'why': '97 sensors over a full year of a real space-analogue greenhouse, and not '
+                                   'one power, current, voltage or energy channel. Its unit table lists '
+                                   'temperature, pressure, CO2, RH, EC, pH, PAR, valve, level, volume and '
+                                   'VPD only. A power figure cannot be derived from it, so it cannot answer '
+                                   'a gap defined as power draw per fixture.',
+                            'integrity': 'Published MD5 a16658d87da5f3d99cbd1c8e60f743e3 verified before the '
+                                         'archive was unpacked; the 260 MB expansion was examined and then '
+                                         'removed rather than kept.'},
+                           {'id': '34671594',
+                            'repository': 'Figshare',
+                            'title': 'Fertigation of Bell Pepper in a soil-less greenhouse system',
+                            'licence': 'unknown',
+                            'decision': 'REJECTED',
+                            'gap': 'substrate-water',
+                            'why': 'Bell pepper, and the record is a publication rather than a measurement '
+                                   'table.'},
+                           {'id': '25976644',
+                            'repository': 'Figshare',
+                            'title': 'Data_Sheet_1_Light manipulation … antioxidant properties',
+                            'licence': 'unknown',
+                            'decision': 'REJECTED',
+                            'gap': 'led-spectrum-response',
+                            'why': 'A supplementary data sheet attached to a paper, not an independent '
+                                   'measurement table.'},
+                           {'id': '14051459',
+                            'repository': 'Figshare',
+                            'title': 'Image_1_The Effect of Red & Blue Rich LEDs vs Fluorescent Light on '
+                                     'Lollo Rosso Lettuce',
+                            'licence': 'unknown',
+                            'decision': 'REJECTED',
+                            'gap': 'imagery',
+                            'why': 'A figure image from a paper. A published figure is not a dataset.'},
+                           {'id': '14051462',
+                            'repository': 'Figshare',
+                            'title': 'Table_1_The Effect of Red & Blue Rich LEDs … (table)',
+                            'licence': 'unknown',
+                            'decision': 'REJECTED',
+                            'gap': 'led-spectrum-response',
+                            'why': 'A rendered table image from a paper, not machine-readable measurements.'},
+                           {'id': 'OSD-655',
+                            'repository': 'NASA OSDR',
+                            'title': 'VEG-04A/04B',
+                            'decision': 'ALREADY INTEGRATED',
+                            'gap': 'yield-labels',
+                            'why': 'Already acquired in an earlier phase and used as a model anchor; it adds '
+                                   'nothing new here.'},
+                           {'id': 'OSD-780',
+                            'repository': 'NASA OSDR',
+                            'title': 'VEG-04A/04B microbial plate counts',
+                            'decision': 'ALREADY INTEGRATED',
+                            'gap': None,
+                            'why': 'Already the evidence behind the decision-grade mizuna microbial model.'}],
+ 'whySomeGapsStayOpen': {'substrate-water': 'No open dataset measures water content inside a CEA substrate '
+                                            'together with an irrigation schedule and a drainage fraction. '
+                                            'Field-soil series exist and are already recorded as adjacent '
+                                            'evidence; substituting them would repeat the exact error the '
+                                            'gap is held open to avoid.',
+                         'imagery': 'The platform has no imaging pipeline, and the stated requirement is '
+                                    'imagery from its own camera geometry. No external dataset can satisfy a '
+                                    'self-referential requirement.',
+                         'mission-energy': 'No accessible dataset measures power draw for '
+                                           'flight-representative CEA hardware. The one real candidate has '
+                                           'no power sensor at all.',
+                         'prediction-intervals-independent-coverage': 'Interval coverage needs independent '
+                                                                      "observations inside the model's "
+                                                                      'declared domain. Both datasets '
+                                                                      'acquired this phase fall outside it '
+                                                                      'on days-after-sowing, root '
+                                                                      'temperature or missing PPFD.'}}

@@ -1,5 +1,6 @@
 """Read-only scientific registry and safe, dependency-free JSON model inference."""
 from __future__ import annotations
+import sys
 
 import csv
 import hashlib
@@ -10,9 +11,11 @@ from functools import lru_cache
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 BUNDLE = Path(__file__).resolve().parents[1] / 'scientific_data'
-DATA = (BUNDLE if BUNDLE.exists() else ROOT) / "data"
-ARTIFACTS = (BUNDLE if BUNDLE.exists() else ROOT) / "ml" / "artifacts"
+DATA = (BUNDLE if safedata.exists(BUNDLE) else ROOT) / "data"
+ARTIFACTS = (BUNDLE if safedata.exists(BUNDLE) else ROOT) / "ml" / "artifacts"
 # Evaluation artifacts are not part of the packaged runtime bundle (they are analysis
 # output, not inference assets), so they are resolved separately and their absence is
 # handled rather than assumed.
@@ -138,7 +141,7 @@ def provenance_for(model_id: str) -> dict:
 
 
 def read_json(path):
-    return json.loads(path.read_text(encoding="utf-8"))
+    return safedata.load(path)
 
 
 def osdr_live_status() -> dict:
@@ -149,12 +152,12 @@ def osdr_live_status() -> dict:
     a stronger claim than "this is when we last checked". The file is written by
     scripts/resync_osdr.py; the age of the snapshot is part of the payload.
     """
-    path = DATA / "metadata" / "osdr_live_status.json"
-    if not path.is_file():
+    path = DATA / "metadata" / "osdr_live_status"
+    if not safedata.exists(path):
         return {"available": False,
                 "reason": "No provenance re-sync has been recorded for this deployment.",
                 "howToRefresh": "python scripts/resync_osdr.py"}
-    payload = json.loads(path.read_text())
+    payload = safedata.load(path)
     checked = payload.get("checkedAt")
     age_days = None
     if checked:
@@ -169,10 +172,10 @@ def osdr_live_status() -> dict:
 
 
 def manifest():
-    path = DATA / "metadata" / "dataset_manifest.json"
-    base = read_json(path) if path.is_file() else {"datasets": [], "status": "not-acquired"}
-    candidates = DATA / "metadata" / "phase2_nasa_candidates.json"
-    if candidates.is_file():
+    path = DATA / "metadata" / "dataset_manifest"
+    base = read_json(path) if safedata.exists(path) else {"datasets": [], "status": "not-acquired"}
+    candidates = DATA / "metadata" / "phase2_nasa_candidates"
+    if safedata.exists(candidates):
         base = dict(base)
         base["datasets"] = [*base["datasets"], *read_json(candidates).get("datasets", [])]
     return base
@@ -235,15 +238,16 @@ def _validate_trees(trees, width):
 def load_model(model_id):
     if model_id not in MODEL_IDS:
         raise KeyError(model_id)
-    registry = read_json(ARTIFACTS / "registry.json")
+    registry = read_json(ARTIFACTS / "registry")
     item = next((m for m in registry["models"] if m["id"] == model_id), None)
     if item is None:
         raise FileNotFoundError("Model not registered")
-    path = ARTIFACTS / f"{model_id}.json"
-    body = path.read_bytes()
+    path = ARTIFACTS / f"{model_id}"
+    path = safedata.resolve(path)
+    body = safedata.bytes(path)
     if hashlib.sha256(body).hexdigest() != item["sha256"]:
         raise ValueError("Model artifact failed SHA256 verification")
-    model = json.loads(body)
+    model = safedata.loads_python_module(body.decode("utf-8"), where=str(path))
     if model["id"] != model_id:
         raise ValueError("Model identifier mismatch")
     width = len(model["features"])
@@ -336,12 +340,12 @@ def _calibration_status():
     false, because empirical coverage on held-out groups does not validate a future
     campaign.
     """
-    path = EVALUATION / "phase10_uncertainty_decision.json"
-    if not path.is_file():
+    path = EVALUATION / "phase10_uncertainty_decision"
+    if not safedata.exists(path):
         return {}
     decision = read_json(path)
-    conformal_path = EVALUATION / "phase10_conformal.json"
-    conformal = read_json(conformal_path) if conformal_path.is_file() else {"models": {}}
+    conformal_path = EVALUATION / "phase10_conformal"
+    conformal = read_json(conformal_path) if safedata.exists(conformal_path) else {"models": {}}
     status = {}
     for model_id, choice in (decision.get("decisions") or {}).items():
         measured = (conformal.get("models", {}).get(model_id, {})
@@ -361,8 +365,8 @@ def _calibration_status():
 
 
 def _explanation_available(model_id):
-    path = ARTIFACTS / f"{model_id}-explanation.json"
-    return path.is_file()
+    path = ARTIFACTS / f"{model_id}-explanation"
+    return safedata.exists(path)
 
 
 def _classification_record(model_id):
@@ -484,7 +488,7 @@ def evidence_verdict(model_id: str, model: dict | None = None) -> dict:
         "reason": verdict.get("reason"),
         "decisionScope": verdict.get("decisionScope"),
         "checks": verdict.get("checks") or [],
-        "evidence": "ml/evaluation/phase35_model_evidence.json",
+        "evidence": "ml/evaluation/phase35_model_evidence",
     }
 
 
@@ -510,7 +514,7 @@ def verdict_warning(model_id: str, model: dict | None = None) -> list[str]:
 
 def model_registry():
     """Every served model, with its provenance and the evidence behind its label."""
-    registry = read_json(ARTIFACTS / "registry.json")
+    registry = read_json(ARTIFACTS / "registry")
     registered = {item["id"]: item for item in registry.get("models", [])}
     models = []
     for model_id in sorted(CATALOGUE_MODEL_IDS):
@@ -657,11 +661,12 @@ def explanation(model_id):
     """
     if model_id not in MODEL_IDS:
         raise KeyError(model_id)
-    path = ARTIFACTS / f"{model_id}-explanation.json"
-    if not path.is_file():
+    path = ARTIFACTS / f"{model_id}-explanation"
+    if not safedata.exists(path):
         return None
-    body = path.read_bytes()
-    report = json.loads(body)
+    path = safedata.resolve(path)
+    body = safedata.bytes(path)
+    report = safedata.loads_python_module(body.decode("utf-8"), where=str(path))
     if report.get("modelId") != model_id:
         raise ValueError("Explanation belongs to a different model")
     # The identity check is repeated at read time: an explanation whose residual is
@@ -710,7 +715,7 @@ def preview(study_id):
         targets = []
     for name, note, units in targets:
         path = name if isinstance(name, Path) else DATA / "processed" / name
-        if not path.is_file():
+        if not safedata.exists(path):
             continue
         with path.open(encoding="utf-8-sig", newline="") as handle:
             reader = csv.DictReader(handle); rows = list(reader)
@@ -729,7 +734,7 @@ def phase6_report(name):
         BUNDLE / "phase6" / name,
     ]
     for path in candidates:
-        if path.is_file():
+        if safedata.exists(path):
             return read_json(path)
     return None
 
@@ -745,7 +750,7 @@ def phase7_report(name):
         BUNDLE / "phase7" / name,
     ]
     for path in candidates:
-        if path.is_file():
+        if safedata.exists(path):
             return read_json(path)
     return None
 
@@ -756,12 +761,13 @@ def measurement_catalog():
     Served with a checksum so a consumer can tell whether the catalog it read
     matches the extraction outputs it was built from.
     """
-    path = ROOT / "data" / "metadata" / "phase7_measurement_catalog.json"
-    eligibility_path = ROOT / "data" / "metadata" / "phase7_training_eligibility.json"
-    if not path.is_file():
+    path = ROOT / "data" / "metadata" / "phase7_measurement_catalog"
+    eligibility_path = ROOT / "data" / "metadata" / "phase7_training_eligibility"
+    if not safedata.exists(path):
         return {"status": "not-run", "note": "Run scripts/build_measurement_catalog.py."}
     payload = read_json(path)
-    body = path.read_bytes()
+    path = safedata.resolve(path)
+    body = safedata.bytes(path)
     result = {
         "status": "available",
         "schemaVersion": 1,
@@ -774,10 +780,10 @@ def measurement_catalog():
         "outputChecksums": payload.get("outputs"),
         "trayAreaDiscrepancy": payload.get("trayAreaDiscrepancy"),
     }
-    if eligibility_path.is_file():
+    if safedata.exists(eligibility_path):
         eligibility = read_json(eligibility_path)
         result["trainingEligibility"] = {
-            "sha256": hashlib.sha256(eligibility_path.read_bytes()).hexdigest(),
+            "sha256": hashlib.sha256(safedata.resolve(eligibility_path).read_bytes()).hexdigest(),
             "summary": eligibility.get("summary"),
             "policy": eligibility.get("policy"),
             "refusedTasks": eligibility.get("refusedTasks"),
@@ -787,29 +793,29 @@ def measurement_catalog():
 
 def source_checksums():
     """Checksums for every Phase 7 evidence input and model artifact."""
-    manifest_path = ROOT / "data" / "metadata" / "phase7_ntrs_checksums.json"
+    manifest_path = ROOT / "data" / "metadata" / "phase7_ntrs_checksums"
     documents = []
-    if manifest_path.is_file():
+    if safedata.exists(manifest_path):
         for entry in read_json(manifest_path):
             documents.append({
                 "ntrsId": entry.get("id"), "label": entry.get("label"),
                 "sha256": entry.get("sha256"), "bytes": entry.get("bytes"),
                 "pages": entry.get("pages"), "url": entry.get("url"),
             })
-    registry = read_json(ARTIFACTS / "registry.json")
+    registry = read_json(ARTIFACTS / "registry")
     models = []
     for item in registry.get("models", []):
-        path = ARTIFACTS / f"{item['id']}.json"
+        path = ARTIFACTS / f"{item['id']}"
         verified = False
-        if path.is_file():
-            verified = hashlib.sha256(path.read_bytes()).hexdigest() == item["sha256"]
+        if safedata.exists(path):
+            verified = hashlib.sha256(safedata.resolve(path).read_bytes()).hexdigest() == item["sha256"]
         models.append({"id": item["id"], "sha256": item["sha256"],
                        "supersedes": item.get("supersedes"), "verified": verified,
                        # Phase 31: an artifact can be retained without being served. The digest is
                        # what makes a withdrawn result reproducible, so it stays listed - but a
                        # caller must be able to tell which rows the API will actually run.
                        "served": item["id"] in MODEL_IDS})
-    report_path = ROOT / "data" / "metadata" / "ntrs_extraction_report.json"
+    report_path = ROOT / "data" / "metadata" / "ntrs_extraction_report"
     return {
         "schemaVersion": 1,
         "algorithm": "SHA-256",
@@ -819,8 +825,8 @@ def source_checksums():
             "digests are what make the extraction auditable against the original "
             "documents."
         ),
-        "extractionReport": (hashlib.sha256(report_path.read_bytes()).hexdigest()
-                             if report_path.is_file() else None),
+        "extractionReport": (hashlib.sha256(safedata.resolve(report_path).read_bytes()).hexdigest()
+                             if safedata.exists(report_path) else None),
         "modelArtifacts": models,
         "registryEnvironment": registry.get("environment"),
     }
@@ -828,7 +834,7 @@ def source_checksums():
 
 def calibration():
     """Crop-baseline calibration evidence and simulation invariant results."""
-    payload = phase6_report("simulation_calibration.json")
+    payload = phase6_report("simulation_calibration")
     if payload is None:
         return {
             "status": "not-run",
@@ -849,7 +855,7 @@ def calibration():
     }
     # Phase 7 calibration is additive: the Phase 6 block above keeps its exact
     # shape so no existing consumer sees a moved field.
-    phase7 = phase7_report("scientific_calibration.json")
+    phase7 = phase7_report("scientific_calibration")
     if phase7 is not None:
         result["phase7"] = {
             "checks": phase7.get("checks", []),

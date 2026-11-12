@@ -12,9 +12,9 @@ run, the artefact holding its output is named. Where a check was not run, it is 
 
 | Dataset | Rows | Where it lives | Enters a model? |
 |---|---|---|---|
-| NASA POWER daily agroclimatology, 6 sites | 17,021 | `data/raw/nasa_power/*.json`, `data/processed/power_daily/*.csv`, `data/processed/et0_dataset.csv` | yes - ET0 target and emulator features |
-| NASA OSDR / GeneLab study corpus | small, per-study | `data/metadata/dataset_manifest.json` | yes - provenance only, not as a feature |
-| Published lettuce light/temperature trial (PeerJ 17085) | 6 observations | `data/literature/external_lettuce_peerj17085.json` | validation only, never training |
+| NASA POWER daily agroclimatology, 6 sites | 17,021 | `data/raw/nasa_power/*.py`, `data/processed/power_daily/*.csv`, `data/processed/et0_dataset.csv` | yes - ET0 target and emulator features |
+| NASA OSDR / GeneLab study corpus | small, per-study | `data/metadata/dataset_manifest` | yes - provenance only, not as a feature |
+| Published lettuce light/temperature trial (PeerJ 17085) | 6 observations | `data/literature/external_lettuce_peerj17085` | validation only, never training |
 
 Nothing else in `data/` feeds a computation. The catalogue at `data/research/DATASET_CATALOG.md`
 lists the 21 datasets that were evaluated and why the other 18 were not imported.
@@ -28,7 +28,7 @@ The POWER acquirer (`ml/research/acquire_power_climate.py`) enforces four rules:
 2. **The raw response is written before it is parsed.** A parse bug can be fixed and the file
    re-read; it cannot be fixed if the response was discarded.
 3. **Each raw file is checksummed (SHA-256) and its byte size recorded** in
-   `data/metadata/power_acquisition_manifest.json`, along with the API version (`v2.10.3`), the
+   `data/metadata/power_acquisition_manifest`, along with the API version (`v2.10.3`), the
    request parameters, the grid elevation and the retrieval timestamp.
 4. **Fill values are converted to missing, not to numbers.** POWER uses `-999.0`.
 
@@ -94,7 +94,7 @@ must not be "fixed".
 | values outside physical range (Rs < 0 or > 50 MJ/m^2/day, RH outside [0,100], wind < 0, pressure outside [50,110] kPa, temperature outside [-90,60] C) | a sensor or encoding failure | 0 |
 | `T2MDEW > T2M + 0.5` with `RH2M < 90` | supersaturation with a clearly non-saturated humidity reading is a contradiction | 0 |
 
-Every one of the six sites reports `qualityIssues: {}` in `ml/evaluation/et0_dataset_quality.json`.
+Every one of the six sites reports `qualityIssues: {}` in `ml/evaluation/et0_dataset_quality`.
 
 ### Informational (recorded, never removed)
 
@@ -157,12 +157,12 @@ ET0 <= 0 is not physically meaningful for a daily step (it would imply condensat
 reference surface as a net daily flux). Rows with non-positive ET0 are **removed and counted**, never
 clipped to zero and never imputed:
 
-- `removed.nonPositiveEt0Rows` in `ml/evaluation/et0_dataset_quality.json`
+- `removed.nonPositiveEt0Rows` in `ml/evaluation/et0_dataset_quality`
 - the count is reported in the training run and stored in the artifact
 
 On the delivered dataset this count is **145**: 13 rows at Wageningen and 132 at Reykjavik, where a
 winter day's net radiation is a net loss and ET0 goes negative. Those rows are absent from the
-17,021 that remain, and `ml/evaluation/et0_dataset_quality.json` records the count per site under
+17,021 that remain, and `ml/evaluation/et0_dataset_quality` records the count per site under
 `removed.nonPositiveEt0Rows` with the policy string "removed and counted, never clipped to zero and
 never imputed". An earlier draft of this section said the count was 0; that was wrong, and it is
 corrected here rather than deleted.
@@ -172,7 +172,7 @@ corrected here rather than deleted.
 A dataset is only allowed into `data/processed/` if all of the following are true. This is the
 checklist the catalogue's class A/B assignments imply.
 
-1. **Publisher, URL, version and access date are recorded** in `data/research/dataset_catalog.json`.
+1. **Publisher, URL, version and access date are recorded** in `data/research/dataset_catalog`.
 2. **The licence is checked against the distribution the project actually makes.** "Open for
    research" is not enough if the product is offered commercially. Non-commercial and
    no-derivatives licences are disqualifying (see `plantwild` and `waPOR` in the catalogue).

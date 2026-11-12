@@ -32,8 +32,8 @@ features and 8 models, a vector database would be ceremony: the corpus is a few
 hundred passages and the whole thing builds in milliseconds.
 """
 from __future__ import annotations
+import sys
 
-import json
 import math
 import re
 from dataclasses import dataclass, field
@@ -41,10 +41,15 @@ from functools import lru_cache
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 BUNDLE = Path(__file__).resolve().parents[1] / "scientific_data"
-DATA = (BUNDLE if BUNDLE.exists() else ROOT) / "data"
-ARTIFACTS = (BUNDLE if BUNDLE.exists() else ROOT) / "ml" / "artifacts"
-EVALUATION = (BUNDLE if BUNDLE.exists() else ROOT) / "ml" / "evaluation"
+DATA = (BUNDLE if safedata.exists(BUNDLE) else ROOT) / "data"
+ARTIFACTS = (BUNDLE if safedata.exists(BUNDLE) else ROOT) / "ml" / "artifacts"
+# Resolved per directory, as research.py does: a bundle that carries artifacts but not the
+# evaluation records must not send an evaluation lookup into an empty directory.
+EVALUATION = ((BUNDLE / "ml" / "evaluation") if (BUNDLE / "ml" / "evaluation").is_dir()
+              else (ROOT / "ml" / "evaluation"))
 
 MAX_QUESTION_CHARS = 400
 MAX_PASSAGE_CHARS = 900
@@ -241,7 +246,7 @@ def screen(text: str) -> dict:
 
 def _read_json(path: Path):
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        return safedata.load(path)
     except (OSError, ValueError):
         return None
 
@@ -280,13 +285,13 @@ def _dataset_passages(quarantine: list) -> list[Passage]:
             id=f"dataset::{accession}", source_id=accession, kind="dataset",
             title=f"{accession} — {title}", text=text, accession=accession,
             url=dataset.get("sourceUrl") or dataset.get("metadataUrl"),
-            local_ref=f"data/metadata/dataset_manifest.json#{accession}",
+            local_ref=f"data/metadata/dataset_manifest#{accession}",
             limitations=limitations, measured=True))
     return passages
 
 
 def _duplicate_note(accession: str) -> dict | None:
-    audit = _read_json(EVALUATION / "phase11_duplicate_audit.json")
+    audit = _read_json(EVALUATION / "phase11_duplicate_audit")
     if not audit:
         return None
     for pair in audit.get("duplicates", []):
@@ -341,7 +346,7 @@ def _model_passages(quarantine: list) -> list[Passage]:
             id=f"model::{model_id}", source_id=model_id, kind="model",
             title=f"Model {model_id} — {_clean(model.get('name'))}",
             text=text, url=model.get("sourceUrl"),
-            local_ref=f"ml/artifacts/registry.json#{model_id}",
+            local_ref=f"ml/artifacts/registry#{model_id}",
             limitations=limitations or ["No model-specific limitations are recorded."],
             measured=False))
     # Excluded candidates are evidence too: users ask why they are not served.
@@ -373,7 +378,7 @@ def _evaluation_passages(quarantine: list) -> list[Passage]:
           "44 arrays and 22,810 probesets were compared: minimum Pearson correlation "
           "1.000000 and maximum absolute difference 0.0. OSD-320 must therefore never be "
           "used as independent validation of a radiation model trained on OSD-46."),
-         "phase11_duplicate_audit.json", None,
+         "phase11_duplicate_audit", None,
          ["The finding is a numeric identity check on the processed matrices, not a "
           "metadata comparison."]),
         ("phase11-harvest-zero", "eval", "No harvest or biomass dataset exists in the corpus (Phase 11 sweep)",
@@ -381,7 +386,7 @@ def _evaluation_passages(quarantine: list) -> list[Passage]:
           "question vocabularies returned zero candidates carrying harvest or biomass "
           "measurements paired with an environmental gradient for a leafy crop. The mizuna "
           "harvest gap cannot be closed by adding rows from this corpus."),
-         "phase11_dataset_discovery.json", None,
+         "phase11_dataset_discovery", None,
          ["Zero candidates is a statement about the 231 studies scanned, not about all "
           "biology that has ever been measured."]),
         ("phase11-gravity-osd346", "eval", "OSD-346 gravity signal is not separable from flight run (Phase 11)",
@@ -390,7 +395,7 @@ def _evaluation_passages(quarantine: list) -> list[Passage]:
           "or 18 percent of the 1.05 g span, flight run is identifiable from expression at "
           "balanced accuracy 0.6944, and the run-centred correlation reverses sign "
           "(rho -0.7981)."),
-         "phase11_gravity_batch.json", None,
+         "phase11_gravity_batch", None,
          ["Nine gravity levels across six runs cannot be separated from run-level "
           "variation at this sample size."]),
         ("phase11-radiation-nested", "eval", "No radiation learner beats the served model under nested selection (Phase 11)",
@@ -400,7 +405,7 @@ def _evaluation_passages(quarantine: list) -> list[Passage]:
           "configuration was chosen by inner cross-validation inside every outer fold, the "
           "result was 0.037 below the shipped model on radiation quality and exactly level "
           "on exposure. No model was promoted."),
-         "phase11_radiation_validation.json", None,
+         "phase11_radiation_validation", None,
          ["Clinical or agronomic significance cannot be inferred from balanced accuracy on "
           "44 arrays."]),
         ("phase11-explainability", "eval", "Radiation explanations agree at the top and nowhere else (Phase 11)",
@@ -409,7 +414,7 @@ def _evaluation_passages(quarantine: list) -> list[Passage]:
           "40-gene panel is 0.016. Between 90 and 100 percent of panel genes show zero "
           "permutation drop, so no single gene is individually necessary. Top-ranked "
           "features are attributions of the fitted model, not causes."),
-         "phase11_explainability.json", None,
+         "phase11_explainability", None,
          ["Permutation importance is an attribution, not an intervention."]),
         ("phase11-ood-rejected", "eval", "The novelty detector fails its own controls (Phase 11)",
          ("Two out-of-distribution scores were tested against three controls: a verified "
@@ -418,7 +423,7 @@ def _evaluation_passages(quarantine: list) -> list[Passage]:
           "of three controls and the nearest-neighbour score two of three, with the "
           "platform-shifted study scoring lower than the training data itself. No threshold "
           "is validated and none is served."),
-         "phase11_ood_uncertainty.json", None,
+         "phase11_ood_uncertainty", None,
          ["No validated out-of-distribution threshold exists for this platform."]),
         ("phase10-dose", "eval", "The dose classifier stays excluded (Phase 10 and Phase 11)",
          ("OSD-782 has valid absorbed-dose labels at 0, 10 and 100 Gy, but dose is not "
@@ -426,7 +431,7 @@ def _evaluation_passages(quarantine: list) -> list[Passage]:
           "0.224 at p 0.158 with the sign reversing at 3 hours, and a boundary fitted "
           "through the 0 and 100 Gy anchors places 10 Gy samples at a median predicted "
           "84.8 Gy. The labels are valid; the expression response does not form a dose axis."),
-         "phase11_dose_generalization.json", None,
+         "phase11_dose_generalization", None,
          ["36 libraries over three dose levels cannot support a dose-response model."]),
         ("phase10-coverage", "eval", "Interval coverage is measured, not guaranteed (Phase 10 and Phase 11)",
          ("Every served interval reports measured held-out coverage separately from its "
@@ -434,7 +439,7 @@ def _evaluation_passages(quarantine: list) -> list[Passage]:
           "models, 0.9606 for lettuce v2 and 0.9393 for lettuce v1, against a nominal 0.90. "
           "These are measurements on held-out groups, not guarantees, because multiple "
           "tissues from one pillow and two campaigns are not a sample of future campaigns."),
-         "phase10_uncertainty_decision.json", None,
+         "phase10_uncertainty_decision", None,
          ["Conformal coverage is marginal under exchangeability, which future campaigns "
           "need not satisfy."]),
         ("phase10-cross-study", "eval", "Cross-study radiation transfer failed (Phase 10)",
@@ -443,7 +448,7 @@ def _evaluation_passages(quarantine: list) -> list[Passage]:
           "target's own contrast is learnable within the study (0.812 with timepoints held "
           "out) but does not survive an unseen dose and timepoint cell (0.438), which is the "
           "condition a cross-study transfer actually faces."),
-         "phase10_cross_study.json", None,
+         "phase10_cross_study", None,
          ["The negative is about transfer, not about the absence of signal in the target."]),
         ("phase11-microbial", "eval", "The flight microbial effect replicates, but a new campaign is not promised (Phase 11)",
          ("The flight-versus-ground contrast in culturable aerobic leaf load is +3.06 log10 "
@@ -452,7 +457,7 @@ def _evaluation_passages(quarantine: list) -> list[Passage]:
           "of 2.327 to 3.314, but a 95 percent prediction interval for a new campaign of "
           "-0.377 to 6.018, which includes zero. The effect is tissue-specific: soil and "
           "root strata span zero."),
-         "phase11_microbial_campaigns.json", None,
+         "phase11_microbial_campaigns", None,
          ["Two campaigns cannot estimate between-campaign heterogeneity reliably, so the "
           "prediction interval is wide and provisional."]),
     ]
@@ -534,7 +539,7 @@ def _methodology_passages(quarantine: list) -> list[Passage]:
           "groups and 2 campaigns. Nine targets were refused outright, including wheat "
           "biomass time series with n = 1 per age, and wheat harvest yield with 16 trays from "
           "a single study."),
-         "data/metadata/phase7_training_eligibility.json"),
+         "data/metadata/phase7_training_eligibility"),
         ("method-provenance", "Methodology: dataset provenance and checksums",
          ("Each registered study records a version, a metadata SHA-256 and a verification "
           "timestamp. Downloaded training tables are separate from the registry, so a study "
@@ -561,13 +566,13 @@ def _methodology_passages(quarantine: list) -> list[Passage]:
 # Resolved like every other runtime asset: the serverless bundle carries data/ under
 # backend/scientific_data, so a repo-root-only path silently produced an empty corpus in
 # production while passing locally.
-LITERATURE = DATA / "literature" / "ntrs_bpc.json"
+LITERATURE = DATA / "literature" / "ntrs_bpc"
 
 # NASA records evaluated outside the biomass-production-chamber set: a ground light-quality study with
 # measured endpoints for the two crops the simulator models, and an ethylene-sensitivity reprint that
 # defines a closed-chamber risk the simulator does not carry. Kept in their own file so the BPC
 # bundle and its page-level quotes stay exactly as they were.
-SUPPLEMENT = DATA / "literature" / "ntrs_supplement.json"
+SUPPLEMENT = DATA / "literature" / "ntrs_supplement"
 
 # A NASA technical report page is quoted as evidence with its page number. It is measured data
 # in the everyday sense — somebody measured a canopy — but it is a *literature* measurement:
@@ -591,7 +596,7 @@ SUPPLEMENT_LIMITS = [
 
 def _supplement_passages(quarantine: list) -> list[Passage]:
     """NASA records that are citable but deliberately not modelled."""
-    if not SUPPLEMENT.is_file():
+    if not safedata.exists(SUPPLEMENT):
         return []
     payload = _read_json(SUPPLEMENT)
     passages: list[Passage] = []
@@ -614,7 +619,7 @@ def _supplement_passages(quarantine: list) -> list[Passage]:
                     id=f"supplement::{record_id}::abstract",
                     source_id=f"NTRS-{record_id}", kind="literature",
                     title=f"{label} — {title}", text=text, url=report.get("url"), measured=True,
-                    local_ref=f"data/literature/ntrs_supplement.json#{record_id}",
+                    local_ref=f"data/literature/ntrs_supplement#{record_id}",
                     limitations=SUPPLEMENT_LIMITS + ([report.get("limits", [""])[0]] if report.get("limits") else [])))
         for page in report.get("measurementPages") or []:
             excerpt = (page.get("excerpt") or "").strip()
@@ -633,13 +638,13 @@ def _supplement_passages(quarantine: list) -> list[Passage]:
                 source_id=f"NTRS-{record_id}", kind="literature",
                 title=f"{label} p.{page['page']} — {title}", text=text,
                 url=f"{report.get('url')}", measured=True,
-                local_ref=f"data/literature/ntrs_supplement.json#{record_id}:p{page['page']}",
+                local_ref=f"data/literature/ntrs_supplement#{record_id}:p{page['page']}",
                 limitations=SUPPLEMENT_LIMITS))
     return passages
 
 
 def _literature_passages(quarantine: list) -> list[Passage]:
-    if not LITERATURE.is_file():
+    if not safedata.exists(LITERATURE):
         return []
     payload = _read_json(LITERATURE)
     passages: list[Passage] = []
@@ -660,7 +665,7 @@ def _literature_passages(quarantine: list) -> list[Passage]:
                     source_id=f"NTRS-{record_id}", kind="literature",
                     title=f"{label} abstract — {title}",
                     text=text, url=report.get("url"), measured=True,
-                    local_ref=f"data/literature/ntrs_bpc.json#{record_id}",
+                    local_ref=f"data/literature/ntrs_bpc#{record_id}",
                     limitations=LITERATURE_LIMITS + [report.get("whyItMatters") or ""]))
             else:
                 quarantine.append({"sourceId": f"NTRS-{record_id}", "kind": "literature",
@@ -685,7 +690,7 @@ def _literature_passages(quarantine: list) -> list[Passage]:
                 source_id=f"NTRS-{record_id}", kind="literature",
                 title=f"{label} p.{page['page']} — {title}",
                 text=text, url=f"{report.get('url')}#page={page['page']}", measured=True,
-                local_ref=f"data/literature/ntrs_bpc.json#{record_id}:p{page['page']}",
+                local_ref=f"data/literature/ntrs_bpc#{record_id}:p{page['page']}",
                 limitations=LITERATURE_LIMITS))
     return passages
 

@@ -14,7 +14,7 @@ three things:
   1. hashes every PNG under docs/screenshots;
   2. picks one canonical file per unique image - the committed baseline when the image is a
      baseline, otherwise the existing path;
-  3. deletes the redundant copies and writes docs/screenshots/MANIFEST.json, which maps every
+  3. deletes the redundant copies and writes docs/screenshots/MANIFEST, which maps every
      removed path to the canonical file that holds the same bytes plus the SHA-256 both share.
 
 `ml/research/phase34_visual_drift.py` and `ml/research/phase35_visual_drift.py` resolve a capture
@@ -34,12 +34,14 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 SHOTS = ROOT / "docs" / "screenshots"
-MANIFEST = SHOTS / "MANIFEST.json"
+MANIFEST = SHOTS / "MANIFEST"
 
 
 def sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    return hashlib.sha256(safedata.bytes(path)).hexdigest()
 
 
 def _preference(path: Path) -> tuple:
@@ -93,7 +95,7 @@ def apply(write: bool) -> int:
             "removed": removed,
             "savedBytes": saved,
         }
-        MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+        safedata.dump(manifest, MANIFEST)
 
     print(f"unique images        {len(canonical)}")
     print(f"redundant copies     {sum(len(v) for v in duplicates.values())}")
@@ -113,12 +115,12 @@ def check() -> int:
         print(f"{sum(len(v) for v in duplicates.values())} byte-identical copies remain "
               f"({total / 1e6:.1f} MB); run without --check to collapse them")
         return 1
-    if not MANIFEST.is_file():
+    if not safedata.exists(MANIFEST):
         print("no duplicates, but the manifest is missing")
         return 1
-    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
-    missing = [path for path in manifest["removed"] if (ROOT / path).is_file()]
-    absent = [path for path in manifest["canonical"] if not (ROOT / path).is_file()]
+    manifest = safedata.load(MANIFEST)
+    missing = [path for path in manifest["removed"] if safedata.exists(ROOT / path)]
+    absent = [path for path in manifest["canonical"] if not safedata.exists(ROOT / path)]
     problems = []
     if missing:
         problems.append(f"{len(missing)} file(s) listed as removed are present again")
@@ -126,7 +128,7 @@ def check() -> int:
         problems.append(f"{len(absent)} canonical file(s) are missing")
     for path, row in manifest["removed"].items():
         target = ROOT / row["identicalTo"]
-        if target.is_file() and sha256(target) != row["sha256"]:
+        if safedata.exists(target) and sha256(target) != row["sha256"]:
             problems.append(f"{row['identicalTo']} no longer matches its recorded hash")
     if problems:
         print("screenshot manifest is inconsistent:")

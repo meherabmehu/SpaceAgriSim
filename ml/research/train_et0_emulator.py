@@ -36,6 +36,8 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "backend"))
 
 from app.simulation import et0_fao56  # noqa: E402
@@ -54,10 +56,10 @@ TARGET = "et0MmPerDay"
 
 def load() -> pd.DataFrame:
     """Load the dataset and refuse to train if it is not the one the metadata describes."""
-    meta_path = DATA.with_suffix(".metadata.json")
-    dataset_sha = hashlib.sha256(DATA.read_bytes()).hexdigest()
-    if meta_path.is_file():
-        committed = json.loads(meta_path.read_text(encoding="utf-8"))["sha256"]
+    meta_path = DATA.with_suffix(".metadata")
+    dataset_sha = hashlib.sha256(safedata.bytes(DATA)).hexdigest()
+    if safedata.exists(meta_path):
+        committed = safedata.load(meta_path)["sha256"]
         if committed != dataset_sha:
             raise SystemExit(
                 f"dataset on disk ({dataset_sha[:12]}) is not the one the metadata records "
@@ -137,7 +139,7 @@ def main() -> int:
     frame = load()
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     EVAL.mkdir(parents=True, exist_ok=True)
-    dataset_sha = hashlib.sha256(DATA.read_bytes()).hexdigest()
+    dataset_sha = hashlib.sha256(safedata.bytes(DATA)).hexdigest()
 
     train = frame[frame["date"] < HOLDOUT_START].copy()
     test = frame[frame["date"] >= HOLDOUT_START].copy()
@@ -331,7 +333,7 @@ def main() -> int:
         "environmentPins": "ml/requirements-training.txt",
         "reproduce": "python3 ml/research/train_et0_emulator.py",
     }
-    (ARTIFACTS / f"{MODEL_ID}.json").write_text(json.dumps(card, indent=1) + "\n", encoding="utf-8")
+    safedata.dump(card, ARTIFACTS / f"{MODEL_ID}")
 
     # --- human-readable evaluation table ------------------------------------------------------
     lines = [

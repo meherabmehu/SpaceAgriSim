@@ -41,8 +41,8 @@ its own comparison, and the response explains what each one means physiologicall
 """
 
 from __future__ import annotations
+import sys
 
-import json
 import math
 import random
 import statistics
@@ -53,12 +53,14 @@ from typing import Any
 from app.workflows import units
 
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 DATA = ROOT / "data" / "processed" / "phase29"
 DESIGN = DATA / "light_spectrum_treatments.csv"
 HARVEST = DATA / "light_stress_harvest.csv"
 PHOTOSYNTHESIS = DATA / "light_stress_photosynthesis.csv"
 PIGMENTS = DATA / "light_stress_pigments.csv"
-QUALITY = DATA / "light_stress_quality.json"
+QUALITY = DATA / "light_stress_quality"
 
 SOURCE = {
     "dataset": "zenodo-greenlight-2024-lettuce",
@@ -212,7 +214,7 @@ def _tables() -> dict[str, list[dict[str, str]]]:
     loaded = {}
     for name, path in (("harvest", HARVEST), ("photosynthesis", PHOTOSYNTHESIS),
                        ("pigments", PIGMENTS)):
-        if not path.is_file():
+        if not safedata.exists(path):
             loaded[name] = []
             continue
         with path.open(newline="", encoding="utf-8") as handle:
@@ -222,7 +224,7 @@ def _tables() -> dict[str, list[dict[str, str]]]:
 
 @lru_cache(maxsize=1)
 def _quality() -> dict[str, Any]:
-    return json.loads(QUALITY.read_text()) if QUALITY.is_file() else {}
+    return safedata.load(QUALITY) if safedata.exists(QUALITY) else {}
 
 
 def _values(trait: str, regime: str, day: int | None = None,

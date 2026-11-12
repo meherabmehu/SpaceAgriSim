@@ -37,7 +37,7 @@ requires a sweep "not limited to the previously inspected 25 studies", so
 `scripts/sweep_phase9_osdr.py` walks **every identifier from OSD-1 to OSD-900** and
 classifies what each one publishes.
 
-Result (`data/metadata/phase9_osdr_sweep.json`):
+Result (`data/metadata/phase9_osdr_sweep`):
 
 | Verdict | Studies |
 | --- | --- |
@@ -58,7 +58,7 @@ Raw amplicon FASTQ does not count, because quantifying it would require a
 QIIME/DADA2 pipeline this project does not run, and inventing one mid-phase would
 put an unvalidated pipeline underneath a scientific claim.
 
-Result (`data/metadata/phase9_candidate_screen.json`): of 231 usable studies,
+Result (`data/metadata/phase9_candidate_screen`): of 231 usable studies,
 **6 publish a processed taxonomy table**:
 
 | Study | Tables | Content |
@@ -108,7 +108,7 @@ that 64 libraries came from 16 seedlings so no reader can mistake the libraries 
 ## What this changed
 
 The refined statement, supported by
-`ml/evaluation/phase9_veg_microbiome_feasibility.json`, is:
+`ml/evaluation/phase9_veg_microbiome_feasibility`, is:
 
 > Crop-microbiome data with processed taxonomy tables does exist (OSD-267,
 > OSD-269), but its design cannot support a predictively validated model: VEG-01A
@@ -122,7 +122,7 @@ grounds.
 ## Verification of every acquired file
 
 `scripts/acquire_phase9.py` downloads each file and refuses it unless byte length
-**and** SHA-256 match the pinned value. `data/metadata/phase9_nasa_datasets.json`
+**and** SHA-256 match the pinned value. `data/metadata/phase9_nasa_datasets`
 records 13 files: 10 small enough to commit, 3 fetched on demand.
 
 | Study | File | Bytes | SHA-256 (prefix) |

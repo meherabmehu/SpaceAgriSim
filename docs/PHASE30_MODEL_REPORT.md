@@ -6,8 +6,8 @@ both are retained as evidence rather than deleted.
 
 Artifacts:
 
-- `ml/evaluation/phase30_harvest_crossstudy.json` — cross-study lettuce harvest model
-- `ml/evaluation/phase30_cea_wheat_response.json` — controlled-environment wheat response surface
+- `ml/evaluation/phase30_harvest_crossstudy` — cross-study lettuce harvest model
+- `ml/evaluation/phase30_cea_wheat_response` — controlled-environment wheat response surface
 
 Scripts:
 

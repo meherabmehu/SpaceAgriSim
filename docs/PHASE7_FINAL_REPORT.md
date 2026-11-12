@@ -25,7 +25,7 @@ They were measured. They were published in **NASA Technical Memoranda**, which O
 | Measured-approximate | 1 | water recovery (0.924, one balance, leaking chamber) |
 | **Not measured** | **3** | **O₂ evolution, gravity-dependent growth, radiation dose-response** |
 
-**Status: Completed.** The three absences are recorded with the searches that failed to find them, so a negative finding is distinguishable from a search never run (`data/metadata/phase7_measurement_catalog.json`).
+**Status: Completed.** The three absences are recorded with the searches that failed to find them, so a negative finding is distinguishable from a search never run (`data/metadata/phase7_measurement_catalog`).
 
 ## 3. Every extracted number is defensible three ways
 

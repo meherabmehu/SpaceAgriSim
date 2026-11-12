@@ -9,9 +9,9 @@ readiness audit listed as data-blocked or experimental.
 
 | Dataset | Study | Licence | Verification |
 | --- | --- | --- | --- |
-| OSD-46 Arabidopsis radiation microarray (GeneLab GLDS-46) | "Gamma radiation and HZE treatment of seedlings in Arabidopsis" (UC Davis / Brookhaven) | Public OSDR access; retain attribution, comply with OSDR terms | Re-downloaded during Phase 32 from `nasa-osdr.s3.us-west-2.amazonaws.com/OSD-46/version-6/array/GLDS-46_array_normalized_expression_probeset_GLmicroarray.csv`: **23 794 742 bytes**, sha256 `f15c4179dbbebdfd39c53ffb906f6251ed1fc3fa3c926efc3c71c4736eefda27`, matching the checksum pinned in `data/metadata/dataset_manifest.json` |
+| OSD-46 Arabidopsis radiation microarray (GeneLab GLDS-46) | "Gamma radiation and HZE treatment of seedlings in Arabidopsis" (UC Davis / Brookhaven) | Public OSDR access; retain attribution, comply with OSDR terms | Re-downloaded during Phase 32 from `nasa-osdr.s3.us-west-2.amazonaws.com/OSD-46/version-6/array/GLDS-46_array_normalized_expression_probeset_GLmicroarray.csv`: **23 794 742 bytes**, sha256 `f15c4179dbbebdfd39c53ffb906f6251ed1fc3fa3c926efc3c71c4736eefda27`, matching the checksum pinned in `data/metadata/dataset_manifest` |
 
-That checksum match is what makes the calibration in `ml/evaluation/phase32_radiation_calibration.json`
+That checksum match is what makes the calibration in `ml/evaluation/phase32_radiation_calibration`
 reproducible: the 44 arrays scored there are the same bytes the shipped classifiers were trained on.
 
 Already acquired in earlier phases and used unchanged in this one: the WUR lettuce experiment

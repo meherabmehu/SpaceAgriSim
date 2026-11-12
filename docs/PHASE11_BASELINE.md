@@ -25,19 +25,19 @@ baseline.
 
 ## Phase 10 findings, verified from artifacts
 
-Each value below was re-read from `ml/evaluation/*.json` in this environment.
+Each value below was re-read from `ml/evaluation/*.py` in this environment.
 
 | Claim in the Phase 11 brief | Artifact | Verified value |
 | --- | --- | --- |
-| OSD-314 microgravity vs 0.34 g, balanced accuracy 1.000 | `phase10_partial_gravity.json` | **1.000**, permutation p 0.0055 |
-| OSD-346 replication did not reproduce the contrast | `phase10_partial_gravity_replication.json` | `replicated: false` |
+| OSD-314 microgravity vs 0.34 g, balanced accuracy 1.000 | `phase10_partial_gravity` | **1.000**, permutation p 0.0055 |
+| OSD-346 replication did not reproduce the contrast | `phase10_partial_gravity_replication` | `replicated: false` |
 | OSD-346 graded signal, Spearman ≈ 0.571, not monotonic | same | **ρ 0.571**, p 0.0015, `monotoneInLevelOrder: false` |
-| OSD-782 dose, poor generalization to unseen cells | `phase10_dose_recovery.json` | cell-held-out **0.111**; timepoint-held-out 0.611 |
-| Mizuna harvest, 14 rows, no useful model | `phase10_weak_model_audit.json` | `keep baseline-only status` |
-| Mizuna microbial coverage ≈ 0.992 after group conformal | `phase10_uncertainty_decision.json` | **0.9919** both microbial models |
-| Lettuce v2 R² ≈ 0.870 | `phase10_weak_model_audit.json` | v2 shipped **0.870 / 34.92 MAE** |
-| Cross-study transfer failed | `phase10_cross_study.json` | `transfer-failed-under-every-harmonisation` |
-| Registry clean | `phase10_registry_api_audit.json` | 8 models, **0** high-severity findings |
+| OSD-782 dose, poor generalization to unseen cells | `phase10_dose_recovery` | cell-held-out **0.111**; timepoint-held-out 0.611 |
+| Mizuna harvest, 14 rows, no useful model | `phase10_weak_model_audit` | `keep baseline-only status` |
+| Mizuna microbial coverage ≈ 0.992 after group conformal | `phase10_uncertainty_decision` | **0.9919** both microbial models |
+| Lettuce v2 R² ≈ 0.870 | `phase10_weak_model_audit` | v2 shipped **0.870 / 34.92 MAE** |
+| Cross-study transfer failed | `phase10_cross_study` | `transfer-failed-under-every-harmonisation` |
+| Registry clean | `phase10_registry_api_audit` | 8 models, **0** high-severity findings |
 
 Nothing here was overwritten. Phase 11 adds new artifacts alongside these.
 

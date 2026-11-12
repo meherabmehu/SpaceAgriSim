@@ -51,6 +51,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "scripts"))
 from nasa_pipeline import save_json, stamp  # noqa: E402
 
@@ -218,25 +220,25 @@ def main() -> None:
         "boostedTrees": boosted,
     }
 
-    path = ROOT / "ml" / "artifacts" / f"{MODEL_ID}.json"
+    path = ROOT / "ml" / "artifacts" / f"{MODEL_ID}"
     body = json.dumps(card, separators=(",", ":"), allow_nan=False) + "\n"
     path.write_text(body, encoding="utf-8")
     digest = hashlib.sha256(body.encode()).hexdigest()
     print(f"wrote {path.name} ({len(body)} bytes) sha256 {digest}")
 
-    registry_path = ROOT / "ml" / "artifacts" / "registry.json"
-    registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    registry_path = ROOT / "ml" / "artifacts" / "registry"
+    registry = safedata.load(registry_path)
     registry["models"] = [m for m in registry["models"] if m["id"] != MODEL_ID]
     registry["models"].append({
         "id": MODEL_ID,
-        "artifact": f"ml/artifacts/{MODEL_ID}.json",
+        "artifact": f"ml/artifacts/{MODEL_ID}",
         "sha256": digest,
         "supersedes": "lettuce-earth-growth-v1",
     })
     registry["trainedAt"] = stamp()
-    registry_path.write_text(json.dumps(registry, indent=1) + "\n", encoding="utf-8")
+    safedata.dump(registry, registry_path)
 
-    save_json(ROOT / "ml" / "evaluation" / "phase8_lettuce_benchmark.json", {
+    save_json(ROOT / "ml" / "evaluation" / "phase8_lettuce_benchmark", {
         "phase": 8,
         "task": "lettuce fresh shoot mass",
         "samples": int(len(y)),

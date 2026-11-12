@@ -61,7 +61,7 @@ The script therefore scores that term from the measurement and records what chan
 
 ```
 "intervalsEmpiricallyCalibratedEvidence":
-  "ml/evaluation/phase34_cross_campaign_coverage.json: pooled cross-campaign coverage 0.8943
+  "ml/evaluation/phase34_cross_campaign_coverage: pooled cross-campaign coverage 0.8943
    against a nominal 0.90"
 ```
 

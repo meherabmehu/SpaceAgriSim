@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render docs/DATASET_GAP_MATRIX.md from data/research/dataset_gap_matrix.json.
+"""Render docs/DATASET_GAP_MATRIX.md from data/research/dataset_gap_matrix.
 
 The JSON is the source of truth. This script exists so the matrix cannot drift from the document
 that quotes it: `--check` re-renders and fails when the committed markdown differs from what the
@@ -8,6 +8,7 @@ JSON says.
     python3 ml/research/build_gap_matrix.py [--check]
 """
 from __future__ import annotations
+import sys
 
 import argparse
 import json
@@ -16,7 +17,9 @@ from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-SOURCE = ROOT / "data" / "research" / "dataset_gap_matrix.json"
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
+SOURCE = ROOT / "data" / "research" / "dataset_gap_matrix"
 TARGET = ROOT / "docs" / "DATASET_GAP_MATRIX.md"
 
 SEVERITIES = ["blocking", "major", "minor"]
@@ -89,7 +92,7 @@ def render(matrix: dict) -> str:
     lines = [
         "# SpaceAgriSim Dataset Gap Matrix",
         "",
-        f"Generated from `data/research/dataset_gap_matrix.json` on {matrix['generatedOn']} "
+        f"Generated from `data/research/dataset_gap_matrix` on {matrix['generatedOn']} "
         "by `ml/research/build_gap_matrix.py`. Edit the JSON, not this file.",
         "",
         matrix["scope"],
@@ -171,11 +174,11 @@ def main() -> int:
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
 
-    matrix = json.loads(SOURCE.read_text(encoding="utf-8"))
+    matrix = safedata.load(SOURCE)
     rendered = render(matrix)
 
     if args.check:
-        if not TARGET.is_file():
+        if not safedata.exists(TARGET):
             print(f"MISSING {TARGET.relative_to(ROOT)}")
             return 1
         if TARGET.read_text(encoding="utf-8") != rendered:

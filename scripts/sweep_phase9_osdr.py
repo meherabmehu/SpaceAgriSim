@@ -9,7 +9,7 @@ The distinction matters because a raw FASTQ deposit cannot be turned into a
 supervised dataset without an alignment/quantification pipeline that this project
 does not run. Describing such a study as "available" would be a fiction.
 
-Output: data/metadata/phase9_osdr_sweep.json
+Output: data/metadata/phase9_osdr_sweep
 
 Run: python scripts/sweep_phase9_osdr.py [--start 1] [--end 900]
 """
@@ -26,6 +26,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 METADATA = ROOT / "data" / "metadata"
 BUCKET = "https://nasa-osdr.s3.us-west-2.amazonaws.com"
 NS = "{http://s3.amazonaws.com/doc/2006-03-01/}"
@@ -145,12 +147,12 @@ def main() -> int:
         "studies": studies,
     }
     METADATA.mkdir(parents=True, exist_ok=True)
-    (METADATA / "phase9_osdr_sweep.json").write_text(json.dumps(payload, indent=2) + "\n")
+    safedata.dump(payload, METADATA / "phase9_osdr_sweep")
     print(f"\n{len(studies)} studies found")
     for verdict, count in counts.most_common():
         print(f"  {verdict:32s} {count}")
     print(f"\nusable processed matrices: {', '.join(usable)}")
-    print("wrote data/metadata/phase9_osdr_sweep.json")
+    print("wrote data/metadata/phase9_osdr_sweep")
     return 0
 
 

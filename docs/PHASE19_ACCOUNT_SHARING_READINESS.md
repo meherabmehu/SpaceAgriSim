@@ -202,7 +202,7 @@ See `backend/.env.example`: `SPACEAGRISIM_SMTP_*`, `SPACEAGRISIM_PUBLIC_APP_URL`
 
 ## External validation — status: attempted against an independent study, failed
 
-`GET /api/external-validation` serves `data/literature/external_validation_screen.json`. It reports
+`GET /api/external-validation` serves `data/literature/external_validation_screen`. It reports
 `externalValidationAvailable: false` and says so on the benchmarks page rather than presenting the
 leave-one-experiment-out figures as if they were independent: four experiments from one research
 group are still one source.
@@ -251,7 +251,7 @@ answers `302` (deployment protection), and no Vercel credentials are available i
 
 The PeerJ 17085 per-level table was obtained from the publisher's open-access full text (EuropePMC
 JATS XML, SHA-256 `69f08243…d27bb`, CC BY 4.0) and copied by hand into
-`data/literature/external_lettuce_peerj17085.json`: fresh weight per plant at 28 DAT for 'Baby Cos'
+`data/literature/external_lettuce_peerj17085`: fresh weight per plant at 28 DAT for 'Baby Cos'
 and 'Green Oak' at three canopy levels (PPFD 697 / 391 / 322 µmol m⁻² s⁻¹), with the publication's
 own standard deviations and significance groups. No value was read off a figure, and the reported
 study averages (100.4 g and 163.9 g) were deliberately not used in place of the per-level rows.

@@ -23,7 +23,7 @@ Promotion rule, fixed here
 --------------------------
 A new artifact is written only if it beats the served v3 on the protected holdout AND passes the
 30 % criterion. Otherwise nothing is registered: the experiment is recorded in
-`ml/evaluation/phase29_harvest_final.json` and the served model does not change. Either way the
+`ml/evaluation/phase29_harvest_final` and the served model does not change. Either way the
 result is written down.
 
 Run: python ml/training/phase29_harvest_final.py
@@ -41,13 +41,15 @@ from sklearn.ensemble import GradientBoostingRegressor, HistGradientBoostingRegr
 from sklearn.model_selection import GroupKFold
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "scripts"))
 from nasa_pipeline import save_json, stamp  # noqa: E402
 
 DATA = ROOT / "data" / "processed" / "lettuce_earth.csv"
-EXPERIMENTS = ROOT / "ml" / "evaluation" / "phase29_harvest_experiments.json"
+EXPERIMENTS = ROOT / "ml" / "evaluation" / "phase29_harvest_experiments"
 ARTIFACTS = ROOT / "ml" / "artifacts"
-OUT = ROOT / "ml" / "evaluation" / "phase29_harvest_final.json"
+OUT = ROOT / "ml" / "evaluation" / "phase29_harvest_final"
 NEW_MODEL_ID = "lettuce-earth-growth-v4"
 
 DENSITY, PHOTOPERIOD, SEED = 25.0, 16.0, 42
@@ -112,7 +114,7 @@ def violations(domain: dict, obs: dict) -> list[str]:
 def main() -> None:
     frame = pd.read_csv(DATA).sort_values(
         ["experiment", "daysAfterTransplant", "ppfd"]).reset_index(drop=True)
-    experiments = json.loads(EXPERIMENTS.read_text())
+    experiments = safedata.load(EXPERIMENTS)
     selected = experiments["selected"]
     X = feature_matrix(frame)
     y = np.log(frame.freshShootMassG.to_numpy(float) * DENSITY)
@@ -152,7 +154,7 @@ def main() -> None:
                           for row in scored)
 
     baseline_mape = experiments["candidates"]["gbm-log"].get("holdoutMAPE")  # not stored; recomputed below
-    v3 = json.loads((ARTIFACTS / "lettuce-earth-growth-v3.json").read_text())
+    v3 = safedata.load(ARTIFACTS / "lettuce-earth-growth-v3")
     v3_holdout = v3["validation"]["independent"]["metrics"]["MAPE"]
 
     payload = {

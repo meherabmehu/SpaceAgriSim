@@ -13,7 +13,7 @@ four named regimes and an explicit "unsupported" list, and the response-surface 
 
 Artefacts: `ml/research/build_light_stress_dataset.py`,
 `ml/research/build_phase29_readiness.py`, `data/processed/phase29/*`,
-`data/research/phase29/environmental_stress_search.json`.
+`data/research/phase29/environmental_stress_search`.
 
 ---
 
@@ -47,12 +47,12 @@ imputed** at any point.
 | Licence | CC BY 4.0 (verified on the record) |
 | File | `green_light_lettuce_open_data_(1).xlsx`, 94 162 bytes |
 | SHA-256 | `cb79481841d520cdf741dff2a0857127817284a068fcc6f809cee8039f3b6f4c` |
-| Hash verified against | `data/metadata/phase26_acquisition_manifest.json` |
+| Hash verified against | `data/metadata/phase26_acquisition_manifest` |
 | Sheets | `Treatment_metadata`, `Destructive_harvest`, `MultispeQ`, `Postharvest_assays` |
 
 The hash was recomputed in Phase 29 and matched the acquisition manifest. A test asserts the raw
 file still hashes to the manifest value and to the value recorded in
-`data/processed/phase29/light_stress_quality.json`, so a silently swapped source would fail the suite.
+`data/processed/phase29/light_stress_quality`, so a silently swapped source would fail the suite.
 
 ### The design, as published
 
@@ -81,7 +81,7 @@ treatments file, because the deposit describes it qualitatively rather than as a
 | `light_stress_harvest.csv` | 1552 rows; 252 per destructive trait; **40 for leaf area** |
 | `light_stress_photosynthesis.csv` | 1476 rows; 9 traits × 164 observations at 28 / 35 DAS |
 | `light_stress_pigments.csv` | 168 rows; 7 traits × 24 (upper / lower leaf) |
-| `light_stress_quality.json` | source, licence, counts, exclusions, transformations, limits |
+| `light_stress_quality` | source, licence, counts, exclusions, transformations, limits |
 
 **Exclusions: none.** `exclusions.harvest`, `exclusions.photosynthesisMissingCells` and
 `exclusions.pigments` are all empty. Nothing was imputed, nothing was unit-converted, and no outlier
@@ -107,7 +107,7 @@ test asserts.
 ## 4. The search for a response surface, and why it failed
 
 To claim the surface is blocked rather than merely unbuilt, the search has to be recorded. It is, in
-`data/research/phase29/environmental_stress_search.json`: endpoints, queries, result counts, the
+`data/research/phase29/environmental_stress_search`: endpoints, queries, result counts, the
 candidates returned, and the reason each was not acquired.
 
 **Endpoints reached without credentials:** Zenodo (`/api/records`), Dryad (`/api/v2/search`),

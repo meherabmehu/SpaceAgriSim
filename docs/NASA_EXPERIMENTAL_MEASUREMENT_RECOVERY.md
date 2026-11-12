@@ -17,7 +17,7 @@ Phase 7 therefore re-ran the search against the NASA Technical Reports Server.
 
 Zero-hit queries were recorded rather than discarded, so a negative finding can
 be distinguished from a search that was never actually run. The record is in
-`data/metadata/phase7_ntrs_search.json`.
+`data/metadata/phase7_ntrs_search`.
 
 ---
 
@@ -25,7 +25,7 @@ be distinguished from a search that was never actually run. The record is in
 
 Six documents were downloaded, hashed and stored under `data/raw/ntrs/`
 (gitignored: they are large and publicly re-downloadable). Every byte count and
-SHA-256 is in `data/metadata/phase7_ntrs_checksums.json`.
+SHA-256 is in `data/metadata/phase7_ntrs_checksums`.
 
 | NTRS ID | Report | Pages | Bytes | Role in Phase 7 |
 |---|---|---|---|---|
@@ -69,7 +69,7 @@ independently published derived quantities recompute.**
 ## 3. Defects found in the sources, and what was done about them
 
 The point of the safeguards is that these are *recorded*, not silently smoothed.
-Each is written into `data/metadata/ntrs_extraction_report.json`.
+Each is written into `data/metadata/ntrs_extraction_report`.
 
 | Defect | Evidence | Handling |
 |---|---|---|

@@ -52,7 +52,7 @@ memorised.
       [1] Phase 11 compared all 44 arrays across 22,810 probesets ...
       [2] Title: Gamma radiation and HZE treatment of seedlings in Arabidopsis.
       cite phase11-duplicate-osd320  model or estimate, not a measurement
-      cite OSD-46                    measured data   data/metadata/dataset_manifest.json#OSD-46
+      cite OSD-46                    measured data   data/metadata/dataset_manifest#OSD-46
       measured data: ['OSD-46']
       model/estimate: ['phase11-duplicate-osd320']
 

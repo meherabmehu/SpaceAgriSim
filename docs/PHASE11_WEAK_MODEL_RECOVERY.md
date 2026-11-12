@@ -5,8 +5,8 @@ Two models were weak enough to be worth attacking: the excluded dose classifier
 be recoverable in principle but empty in practice; the other is blocked by data and now
 provably so.
 
-Evidence: `ml/evaluation/phase11_dose_generalization.json`,
-`ml/evaluation/phase11_dataset_discovery.json`.
+Evidence: `ml/evaluation/phase11_dose_generalization`,
+`ml/evaluation/phase11_dataset_discovery`.
 
 ```
 python ml/training/phase11_dose_generalization.py    # ~75 s

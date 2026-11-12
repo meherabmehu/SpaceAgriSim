@@ -3,7 +3,7 @@
 
 Why these two
 -------------
-``independent-et0`` and ``measured-eta`` in ``data/research/dataset_gap_matrix.json`` both come
+``independent-et0`` and ``measured-eta`` in ``data/research/dataset_gap_matrix`` both come
 down to the same missing object: an evapotranspiration measurement that is not derived from the
 same reanalysis that forces the model. Two records supply it, and they supply different halves:
 
@@ -28,6 +28,7 @@ What the script guarantees
     python3 ml/research/acquire_zenodo_lysimeter.py
 """
 from __future__ import annotations
+import sys
 
 import hashlib
 import io
@@ -41,9 +42,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 RAW = ROOT / "data" / "raw"
 PROCESSED = ROOT / "data" / "processed" / "lysimeter"
-MANIFEST = ROOT / "data" / "metadata" / "lysimeter_acquisition_manifest.json"
+MANIFEST = ROOT / "data" / "metadata" / "lysimeter_acquisition_manifest"
 
 RECORDS = [
     {
@@ -88,7 +91,7 @@ def verify(blob: bytes, published: str) -> bool:
 def unwrap(raw_dir: Path) -> None:
     """Extract any zip or tar member in place so the parse step sees plain files."""
     for archive in sorted(raw_dir.glob("*.zip")):
-        with zipfile.ZipFile(io.BytesIO(archive.read_bytes())) as bundle:
+        with zipfile.ZipFile(io.BytesIO(safedata.bytes(archive))) as bundle:
             bundle.extractall(raw_dir / archive.stem)
             print(f"  unzipped {archive.name} -> {archive.stem}/ "
                   f"({len(bundle.namelist())} members)")
@@ -179,7 +182,7 @@ def main() -> int:
         "files": sum(len(r["files"]) for r in manifest["records"].values()),
         "failures": failures,
     }
-    MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(manifest, MANIFEST)
     print(f"\nmanifest -> {MANIFEST.relative_to(ROOT)} ({manifest['summary']})")
     return 1 if failures else 0
 

@@ -1,4 +1,5 @@
 """Scientific dataset/model endpoints; training is deliberately offline."""
+import safedata
 import math
 from functools import lru_cache
 from typing import Literal
@@ -696,7 +697,7 @@ def dataset_detail(study_id: str):
 
 @router.get("/provenance")
 def provenance():
-    return {"coverage": research.coverage(), "checksums": research.read_json(research.DATA / "metadata" / "download_checksums.json") if (research.DATA / "metadata" / "download_checksums.json").exists() else [], "quality": research.read_json(research.DATA / "metadata" / "quality_report.json") if (research.DATA / "metadata" / "quality_report.json").exists() else {}, "termsUrl": "https://science.nasa.gov/reference/osdr-help-terms-and-conditions/"}
+    return {"coverage": research.coverage(), "checksums": research.read_json(research.DATA / "metadata" / "download_checksums") if safedata.exists(research.DATA / "metadata" / "download_checksums") else [], "quality": research.read_json(research.DATA / "metadata" / "quality_report") if safedata.exists(research.DATA / "metadata" / "quality_report") else {}, "termsUrl": "https://science.nasa.gov/reference/osdr-help-terms-and-conditions/"}
 
 
 @router.get("/models")
@@ -706,8 +707,8 @@ def models():
 
 @router.get('/external-datasets')
 def external_datasets():
-    path=research.DATA/'metadata/external_lettuce.json'
-    return {'datasets':[research.read_json(path)] if path.exists() else [],'note':'External scientific sources; separate from NASA study registry.'}
+    path=research.DATA/'metadata/external_lettuce'
+    return {'datasets':[research.read_json(path)] if safedata.exists(path) else [],'note':'External scientific sources; separate from NASA study registry.'}
 
 
 # Phase 31 removed POST /api/predict/mizuna-harvest-v1. Held-out R2 was -0.333 against a
@@ -720,7 +721,7 @@ def external_datasets():
 @router.get("/models/tomato-flight-response-v1/example")
 def molecular_example():
     artifact("tomato-flight-response-v1")
-    return research.read_json(research.ARTIFACTS / "tomato_example.json")
+    return research.read_json(research.ARTIFACTS / "tomato_example")
 
 
 @router.post("/predict/tomato-flight-response-v1")

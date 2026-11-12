@@ -32,7 +32,7 @@ The diagnosis (`phase29_harvest_diagnosis.py`) found three things worth attackin
 So the candidates differ in *structure*, not in seed-hunting: saturating light response, monotone
 constraints, parametric temperature terms, and one deliberately simple rate model as a control.
 
-Output: `ml/evaluation/phase29_harvest_experiments.json`
+Output: `ml/evaluation/phase29_harvest_experiments`
 
 Run: python ml/training/phase29_harvest_experiments.py
 """
@@ -56,7 +56,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from nasa_pipeline import save_json, stamp  # noqa: E402
 
 DATA = ROOT / "data" / "processed" / "lettuce_earth.csv"
-OUT = ROOT / "ml" / "evaluation" / "phase29_harvest_experiments.json"
+OUT = ROOT / "ml" / "evaluation" / "phase29_harvest_experiments"
 
 DENSITY, PHOTOPERIOD, SEED = 25.0, 16.0, 42
 

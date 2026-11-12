@@ -59,6 +59,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "scripts"))
 from nasa_pipeline import save_json, stamp  # noqa: E402
 
@@ -392,7 +394,7 @@ def main() -> int:
         ],
         "forest": portable_forest(forest),
     }
-    save_json(ARTIFACTS / f"{MODEL_ID}.json", card)
+    save_json(ARTIFACTS / f"{MODEL_ID}", card)
 
     out_of_fold = leaf[["sample", "experiment", "environment", "unit", "spectrum",
                         "treatment", "freshWeightG", "log10CfuPerG", "campaignMean",
@@ -401,8 +403,8 @@ def main() -> int:
     out_of_fold["forestFit"] = forest.predict(x)
     out_of_fold.to_csv(EVALUATION / "microbial_v2_out_of_fold.csv",
                        index=False, lineterminator="\n")
-    save_json(EVALUATION / "microbial_v2_splits.json", folds)
-    save_json(EVALUATION / "microbial_v2_transfer.json",
+    save_json(EVALUATION / "microbial_v2_splits", folds)
+    save_json(EVALUATION / "microbial_v2_transfer",
               {"leaveOneExperimentOut": loeo, "permutationTest": permutation,
                "measuredEffect": effect})
 
@@ -416,12 +418,12 @@ def main() -> int:
         "evidenceStatus": evidence_status,
     }, indent=2))
 
-    registry_path = ARTIFACTS / "registry.json"
-    registry = json.loads(registry_path.read_text())
-    digest = hashlib.sha256((ARTIFACTS / f"{MODEL_ID}.json").read_bytes()).hexdigest()
+    registry_path = ARTIFACTS / "registry"
+    registry = safedata.load(registry_path)
+    digest = hashlib.sha256(safedata.bytes(ARTIFACTS / f"{MODEL_ID}")).hexdigest()
     registry["models"] = [m for m in registry["models"] if m["id"] != MODEL_ID]
     registry["models"].append({
-        "id": MODEL_ID, "artifact": f"ml/artifacts/{MODEL_ID}.json", "sha256": digest,
+        "id": MODEL_ID, "artifact": f"ml/artifacts/{MODEL_ID}", "sha256": digest,
         "supersedes": "mizuna-microbial-load-v1",
     })
     registry["trainedAt"] = stamp()
@@ -430,7 +432,7 @@ def main() -> int:
         "pandas": pd.__version__, "sklearn": sklearn.__version__,
     }
     save_json(registry_path, registry)
-    print(f"\nartifact: ml/artifacts/{MODEL_ID}.json  sha256={digest}")
+    print(f"\nartifact: ml/artifacts/{MODEL_ID}  sha256={digest}")
     return 0
 
 

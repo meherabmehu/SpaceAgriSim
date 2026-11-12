@@ -24,6 +24,8 @@ from __future__ import annotations
 import json
 
 import pytest
+
+import safedata
 from fastapi.testclient import TestClient
 
 from app import evidence, research, workflow
@@ -74,7 +76,7 @@ def test_the_withdrawn_model_is_retained_but_not_served():
         assert model_id not in served
         assert research.RETIRED_MODEL_IDS[model_id].strip()
         # the artifact and its evaluation still exist, so the withdrawal is auditable
-        assert (research.ARTIFACTS / f"{model_id}.json").is_file()
+        assert safedata.exists(research.ARTIFACTS / f"{model_id}")
 
 
 def test_every_served_prediction_says_it_is_not_a_forecast():
@@ -126,7 +128,7 @@ def test_the_corpus_states_the_scope_of_every_model_it_describes():
 
 def test_the_removal_is_documented_rather_than_implied():
     register = (research.ROOT / "docs" / "PHASE31_REMOVED_MODELS.md")
-    assert register.is_file()
+    assert safedata.exists(register)
     text = register.read_text(encoding="utf-8").lower()
     assert "harvest" in text
     # the document must quote the number that failed, not just describe a withdrawal

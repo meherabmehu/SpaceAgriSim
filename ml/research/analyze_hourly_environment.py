@@ -19,6 +19,7 @@ greenhouse controller sized on the daily mean would miss that entirely.
     python3 ml/research/analyze_hourly_environment.py
 """
 from __future__ import annotations
+import sys
 
 import csv
 import json
@@ -28,9 +29,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 PROCESSED = ROOT / "data" / "processed" / "power_hourly"
 OUT = ROOT / "data" / "research" / "phase36"
-REPORT = OUT / "hourly_environment.json"
+REPORT = OUT / "hourly_environment"
 
 SITES = ["wageningen_nl", "tucson_us", "singapore_sg", "dhaka_bd", "reykjavik_is", "nairobi_ke"]
 THRESHOLDS = (1.5, 2.5, 3.5)
@@ -138,7 +141,7 @@ def main() -> int:
         "claim": ("the daily product carries the level of the environment but not the exposure: "
                   "hours above a VPD threshold are not a function of the daily mean"),
     }
-    REPORT.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(report, REPORT)
 
     print(f"{'site':<14}{'DLI':>7}{'dTc':>7}{'VPDmean':>9}{'h>1.5':>7}{'h>2.5':>7}{'h>3.5':>7}"
           f"{'noon%':>8}")

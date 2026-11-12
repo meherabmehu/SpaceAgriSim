@@ -76,7 +76,7 @@ mapped to `shoot`/`root`, and a test asserts the organ set is exactly those two.
 
 ## 5. What the catalogue now claims, and what it still cannot
 
-`data/research/dataset_catalog.json` and `docs/DATASET_CATALOG.md` are generated from the builder's
+`data/research/dataset_catalog` and `docs/DATASET_CATALOG.md` are generated from the builder's
 dataset list, and `--check` fails on drift. A test pins the totals exactly:
 
 ```
@@ -96,9 +96,9 @@ read. The four unverified entries are carry-overs from earlier phases and are un
 ## 6. Reproducibility
 
 ```
-python3 scripts/datasets/acquire.py           # download + verify, writes data/metadata/phase26_acquisition_manifest.json
-python3 scripts/datasets/preprocess.py        # writes data/processed/phase26/*.csv + *_quality.json
-python3 ml/research/validate_measured_et.py   # writes ml/evaluation/phase26_measured_et_validation.json
+python3 scripts/datasets/acquire.py           # download + verify, writes data/metadata/phase26_acquisition_manifest
+python3 scripts/datasets/preprocess.py        # writes data/processed/phase26/*.csv + *_quality.py
+python3 ml/research/validate_measured_et.py   # writes ml/evaluation/phase26_measured_et_validation
 python3 ml/research/build_catalog.py          # catalogue JSON + markdown
 python3 ml/research/build_gap_matrix.py       # gap matrix JSON + markdown
 python3 ml/research/build_feature_readiness.py # readiness JSON + coverage matrix

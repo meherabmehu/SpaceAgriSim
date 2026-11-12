@@ -25,8 +25,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CATALOG = ROOT / "data" / "metadata" / "phase7_measurement_catalog.json"
-OUT = ROOT / "data" / "metadata" / "phase7_training_eligibility.json"
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
+CATALOG = ROOT / "data" / "metadata" / "phase7_measurement_catalog"
+OUT = ROOT / "data" / "metadata" / "phase7_training_eligibility"
 
 # Tasks that predate Phase 7. Their verdicts restate what the shipped artifacts
 # already measured; they are re-derived here (not copied) so that the whole
@@ -186,11 +188,11 @@ POLICY = {
 
 
 def main() -> int:
-    if not CATALOG.is_file():
+    if not safedata.exists(CATALOG):
         print(f"missing {CATALOG}; run scripts/build_measurement_catalog.py first",
               file=sys.stderr)
         return 1
-    catalog = json.loads(CATALOG.read_text())
+    catalog = safedata.load(CATALOG)
 
     ntrs = []
     for target in catalog["targets"]:
@@ -244,7 +246,7 @@ def main() -> int:
             print("  -", problem, file=sys.stderr)
         return 1
 
-    OUT.write_text(json.dumps(matrix, indent=2, ensure_ascii=True) + "\n")
+    safedata.dump(matrix, OUT)
     print("ELIGIBILITY MATRIX BUILT")
     print(f"  existing tasks   : {len(EXISTING)}")
     print(f"  NTRS targets     : {len(ntrs)}")

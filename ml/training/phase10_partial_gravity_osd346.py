@@ -25,6 +25,7 @@ code path, one feature-selection rule and one in-sample self-check for both stud
 """
 
 from __future__ import annotations
+import sys
 
 import json
 from pathlib import Path
@@ -41,9 +42,11 @@ from sklearn.preprocessing import StandardScaler
 from phase10_partial_gravity_osd314 import fit_fold, select
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 PROCESSED = ROOT / "data" / "processed"
 DERIVED = ROOT / "data" / "derived"
-OUT = ROOT / "ml" / "evaluation" / "phase10_partial_gravity_replication.json"
+OUT = ROOT / "ml" / "evaluation" / "phase10_partial_gravity_replication"
 
 SEED = 346
 PERMUTATIONS = 2000
@@ -281,7 +284,7 @@ def main() -> int:
         "task": "replicate the OSD-314 partial-gravity result in an independent study",
         "provenance": {
             "acquisition": "scripts/acquire_phase10_osd346.py",
-            "checksums": "data/metadata/osd346_checksums.json",
+            "checksums": "data/metadata/osd346_checksums",
             "rawCommitted": False,
             "rawNote": ("73 MB of per-sample RSEM quantifications are not committed; "
                         "their SHA-256 digests are, so the committed matrices rebuild "
@@ -328,7 +331,7 @@ def main() -> int:
             "treatments inside one",
         ],
     }
-    OUT.write_text(json.dumps(result, indent=2) + "\n")
+    safedata.dump(result, OUT)
 
     print(f"\nP1 0 g vs 0.25-0.38 g, held-out light treatment: balanced "
           f"{p1['balancedAccuracy']} (p={p1['permutation']['pCorrected']}), "

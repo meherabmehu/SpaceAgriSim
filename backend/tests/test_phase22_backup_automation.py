@@ -9,6 +9,7 @@ No PostgreSQL server is required: the SQL-level checks are covered by the restor
 against the real thing.
 """
 from __future__ import annotations
+import safedata
 
 import importlib.util
 import json
@@ -98,12 +99,12 @@ def test_refusal_payload_is_machine_readable():
 
 def test_expected_counts_come_from_the_manifest(tmp_path):
     module = load("restore_validate")
-    manifest = tmp_path / "x.dump.manifest.json"
-    manifest.write_text(json.dumps({"createdAt": "2026-11-09T00:00:00Z",
-                                    "sourceInventory": {"users": 2, "scenarios": -1}}))
+    manifest = tmp_path / "x.dump.manifest"
+    safedata.dump({"createdAt": "2026-11-09T00:00:00Z",
+                                    "sourceInventory": {"users": 2, "scenarios": -1}}, manifest)
     counts, source = module.load_expected(manifest)
     assert counts == {"users": 2}          # -1 means "table absent", so it is dropped
-    assert "x.dump.manifest.json" in source
+    assert "x.dump.manifest" in source
     assert module.load_expected(None) == (None, "none (no --expected manifest supplied)")
 
 
@@ -155,9 +156,9 @@ def test_manifest_never_records_the_connection_string(tmp_path):
     source = next(_seeded_sqlite(tmp_path))
     assert module.main(["--database-url", f"sqlite:///{source}", "--out", str(out)]) == 0
 
-    manifest_path = next(out.glob("*.manifest.json"))
+    manifest_path = next(out.glob("*.manifest.yaml"))
     text = manifest_path.read_text()
-    manifest = json.loads(text)
+    manifest = safedata.load(manifest_path)
     # The old manifest stored everything after '@' - host and database - in a file that CI uploads.
     assert "databaseUrl" not in manifest
     # The database file name only: no host, no absolute path, no user.
@@ -262,7 +263,7 @@ class FakeAPI:
 def test_monitor_passes_on_a_healthy_service():
     module = load("monitor_production")
     with FakeAPI(READY) as api:
-        assert module.main(["--base-url", api.url, "--json"]) == 0
+        assert module.main(["--base-url", api.url]) == 0
 
 
 def test_monitor_reports_a_remedy_when_readiness_fails():
@@ -298,7 +299,7 @@ def test_monitor_treats_warnings_as_non_fatal():
     module = load("monitor_production")
     warn = dict(READY, emailDelivery="unconfigured", rateLimitIdentity="socket")
     with FakeAPI(warn) as api:
-        assert module.main(["--base-url", api.url, "--json"]) == 3
+        assert module.main(["--base-url", api.url]) == 3
 
 
 def test_monitor_reports_server_errors_as_a_warning_with_a_class_hint():
@@ -309,7 +310,7 @@ def test_monitor_reports_server_errors_as_a_warning_with_a_class_hint():
                                         "failures": {"pool-timeout": 3}},
                            "uptimeSeconds": 30}}
     with FakeAPI(READY, metrics=metrics) as api:
-        assert module.main(["--base-url", api.url, "--json"]) == 3
+        assert module.main(["--base-url", api.url]) == 3
         result = module.Result(base_url=api.url)
         module.check_metrics(result, api.url, 5.0)
         hints = {check.name: check.remedy for check in result.checks if check.remedy}

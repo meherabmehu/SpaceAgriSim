@@ -26,6 +26,7 @@ import math
 
 import pytest
 
+import safedata
 from app import research
 from app.workflows import units
 
@@ -326,9 +327,9 @@ def test_the_harvest_failure_record_is_retained_as_data(client):
     from pathlib import Path
 
     root = Path(__file__).resolve().parents[2]
-    records = list((root / "ml" / "evaluation").glob("*harvest*.json"))
+    records = list([p for p in safedata.records(root / "ml" / "evaluation") if "harvest" in p.stem])
     assert records, "harvest evaluation records must remain committed"
-    assert (root / "docs" / "PHASE31_REMOVED_MODELS.md").is_file()
+    assert safedata.exists(root / "docs" / "PHASE31_REMOVED_MODELS.md")
 
 
 def test_the_old_harvest_controls_cannot_reach_anything(client):
@@ -353,7 +354,7 @@ def test_cea_capability_is_measured_and_advertises_no_model(client):
     assert model["criterion"] == 30.0
     assert model["holdoutMapePct"] > model["criterion"]
     # An attempted-and-failed response surface must remain inspectable, not be deleted.
-    assert model["evidenceFile"].endswith(".json")
+    assert safedata.exists(research.ROOT / model["evidenceFile"])
     for factor in body["factors"]:
         assert factor["publicName"] and factor["unit"] in units.UNITS
         assert sum(band["experiments"] for band in factor["bands"]) == body["dataset"]["experiments"]

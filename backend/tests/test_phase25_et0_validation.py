@@ -10,6 +10,7 @@ Three groups of assertions:
   has actually produced in the past.
 """
 from __future__ import annotations
+import safedata
 
 import csv
 import json
@@ -28,9 +29,9 @@ for extra in (REPO_ROOT, REPO_ROOT / "backend"):
 from scripts.et0_validation import era5_land, methods, scoring, sources  # noqa: E402
 
 ARTEFACTS = REPO_ROOT / "data" / "validation" / "et0"
-SUMMARY = ARTEFACTS / "validation_summary.json"
+SUMMARY = ARTEFACTS / "validation_summary"
 HARMONISED = ARTEFACTS / "harmonised_daily.csv"
-ATTRIBUTION = ARTEFACTS / "attribution.json"
+ATTRIBUTION = ARTEFACTS / "attribution"
 
 
 def _write_netcdf(path, *, hours=24, temperature_k=290.0, dewpoint_k=283.0,
@@ -496,7 +497,7 @@ def test_power_fill_values_become_missing_not_negative_numbers():
 
 
 def test_artefacts_exist():
-    assert HARMONISED.is_file() and SUMMARY.is_file() and ATTRIBUTION.is_file()
+    assert safedata.exists(HARMONISED) and safedata.exists(SUMMARY) and safedata.exists(ATTRIBUTION)
 
 
 def test_harmonised_table_has_one_row_per_site_day():
@@ -515,7 +516,7 @@ def test_era5_land_cds_column_is_empty_everywhere():
 
 
 def test_summary_records_the_cds_route_as_not_run():
-    summary = json.loads(SUMMARY.read_text(encoding="utf-8"))
+    summary = safedata.load(SUMMARY)
     routes = summary["provenance"]["routesNotRun"]
     assert "copernicus-cds-era5-land" in routes
     entry = routes["copernicus-cds-era5-land"]
@@ -525,7 +526,7 @@ def test_summary_records_the_cds_route_as_not_run():
 
 
 def test_cds_comparisons_report_no_leg_rather_than_a_number():
-    summary = json.loads(SUMMARY.read_text(encoding="utf-8"))
+    summary = safedata.load(SUMMARY)
     for comparison_id in ("era5_land_cds_pm_vs_om_et0_era5",
                           "era5_land_cds_pm_vs_power_daily_pm"):
         block = summary["comparisons"][comparison_id]
@@ -534,7 +535,7 @@ def test_cds_comparisons_report_no_leg_rather_than_a_number():
 
 
 def test_every_comparison_is_recorded_with_its_purpose():
-    summary = json.loads(SUMMARY.read_text(encoding="utf-8"))
+    summary = safedata.load(SUMMARY)
     assert len(summary["comparisons"]) == 14
     for block in summary["comparisons"].values():
         assert block["description"]
@@ -543,7 +544,7 @@ def test_every_comparison_is_recorded_with_its_purpose():
 
 def test_implementation_control_agrees_and_forcing_does_not():
     """The headline result: the code agrees, the weather differs."""
-    summary = json.loads(SUMMARY.read_text(encoding="utf-8"))
+    summary = safedata.load(SUMMARY)
     implementation = summary["comparisons"]["era5_daily_pm_vs_om_et0_era5"]["pooled"]
     forcing = summary["comparisons"]["era5_daily_pm_vs_power_daily_pm"]["pooled"]
     assert abs(implementation["bias"]) < 0.02
@@ -552,28 +553,28 @@ def test_implementation_control_agrees_and_forcing_does_not():
 
 
 def test_missingness_shows_the_station_leg_and_the_unrun_leg():
-    summary = json.loads(SUMMARY.read_text(encoding="utf-8"))
+    summary = safedata.load(SUMMARY)
     missingness = summary["missingness"]
     assert missingness["era5_land_cds_pm_mm"]["missing"] == 6570
     assert 0 < missingness["isd_hargreaves_mm"]["missing"] < 200
 
 
 def test_summary_states_what_it_does_not_support():
-    summary = json.loads(SUMMARY.read_text(encoding="utf-8"))
+    summary = safedata.load(SUMMARY)
     limits = " ".join(summary["claims"]["doesNotSupport"]).lower()
     assert "crop water use" in limits
     assert "era5-land fao-56 skill" in limits
 
 
 def test_attribution_closes_exactly():
-    payload = json.loads(ATTRIBUTION.read_text(encoding="utf-8"))
+    payload = safedata.load(ATTRIBUTION)
     for site, block in payload["perSite"].items():
         efficiency = block["shapley"]["efficiency"]
         assert abs(efficiency["residual"]) < 5e-3, site
 
 
 def test_attribution_ranks_a_driver_for_every_site():
-    payload = json.loads(ATTRIBUTION.read_text(encoding="utf-8"))
+    payload = safedata.load(ATTRIBUTION)
     for site, block in payload["perSite"].items():
         shapley = block["shapley"]
         assert shapley["daysUsed"] > 900, site
@@ -588,11 +589,11 @@ def methods_drivers():
 
 def test_elevation_is_excluded_as_an_explanation_everywhere():
     """The measured claim: elevation changes ET0 far less than the site differences."""
-    payload = json.loads(ATTRIBUTION.read_text(encoding="utf-8"))
+    payload = safedata.load(ATTRIBUTION)
     for site, block in payload["perSite"].items():
         assert block["elevation"]["maxAbsDeltaMm"] < 0.05, site
 
 
 def test_attribution_admits_it_cannot_crown_a_winner():
-    payload = json.loads(ATTRIBUTION.read_text(encoding="utf-8"))
+    payload = safedata.load(ATTRIBUTION)
     assert "not which one is closer" in payload["claims"]["doesNotSupport"]

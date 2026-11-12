@@ -106,11 +106,11 @@ raises on ambiguity or absence.
 
 | Script | Runtime | Output |
 | --- | --- | --- |
-| `train_radiation_osd46.py` | 2 m 48 s | A1 + A2 artifacts, `phase9_osd46_radiation.json` |
+| `train_radiation_osd46.py` | 2 m 48 s | A1 + A2 artifacts, `phase9_osd46_radiation` |
 | `train_rnaseq_models.py` | 3 m 55 s | B + C evaluations, excluded artifacts |
-| `train_cross_study_transfer.py` | 1.6 s | `phase9_cross_study_transfer.json` |
-| `phase9_sensitivity.py` | 15 s | `phase9_osd46_sensitivity.json` |
-| `analyze_veg_microbiome.py` | 0.7 s | `phase9_veg_microbiome_feasibility.json` |
+| `train_cross_study_transfer.py` | 1.6 s | `phase9_cross_study_transfer` |
+| `phase9_sensitivity.py` | 15 s | `phase9_osd46_sensitivity` |
+| `analyze_veg_microbiome.py` | 0.7 s | `phase9_veg_microbiome_feasibility` |
 
 Deep learning was not used anywhere. The largest task has 44 samples over 22
 groups; a network would have more parameters than independent observations and
@@ -124,6 +124,6 @@ metrics, every learner's result, permutation test, batch confound, seeds,
 environment, the JSON evaluator, the domain ranges, per-class reference profiles,
 limitations and recommended use.
 
-`ml/artifacts/registry.json` pins a SHA-256 per artifact, and the test suite
+`ml/artifacts/registry` pins a SHA-256 per artifact, and the test suite
 re-verifies every one. Excluded candidates keep their evaluation under
 `ml/evaluation/excluded/` and are **absent** from the registry.

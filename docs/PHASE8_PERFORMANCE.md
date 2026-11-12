@@ -91,10 +91,10 @@ measures the process as much as the endpoint.
 ```bash
 # baseline
 git worktree add /tmp/base fe6bbe2
-cd /tmp/base && python -c "..."   # or see docs/phase8/performance_ab.json
+cd /tmp/base && python -c "..."   # or see docs/phase8/performance_ab
 # current
 cd backend && python -m pytest tests/test_phase8_scientific_integrity.py -q
 ```
 
-Raw numbers: `docs/phase8/performance_baseline.json`,
-`docs/phase8/performance_after.json`, `docs/phase8/performance_ab.json`.
+Raw numbers: `docs/phase8/performance_baseline`,
+`docs/phase8/performance_after`, `docs/phase8/performance_ab`.

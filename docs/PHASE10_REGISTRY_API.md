@@ -1,7 +1,7 @@
 # Phase 10 — registry and API pass
 
 A registry that drifts from its artifacts is the most dangerous failure mode in this
-repository: a number in `registry.json` that no artifact backs survives every test that
+repository: a number in `registry` that no artifact backs survives every test that
 only checks the endpoint returns 200.
 
 `ml/training/phase10_registry_api_audit.py` therefore does not trust the registry. It
@@ -19,7 +19,7 @@ reads the artifact each entry points at and checks eight things per model:
 | API | `/api/models` disagreeing with the registry; an excluded model reachable; a surrogate explanation served for a tree ensemble |
 
 Result: **8 models, 0 findings, 0 high severity.**
-`ml/evaluation/phase10_registry_api_audit.json`.
+`ml/evaluation/phase10_registry_api_audit`.
 
 ## What the pass actually found
 
@@ -27,10 +27,10 @@ Two real gaps, both now fixed, both in the direction the audit was built to catc
 registry understating what exists:
 
 - **`phase10.explanationAvailable` was missing** from both radiation artifacts even
-  though `ml/artifacts/<id>-explanation.json` has existed since `68833ac`. The registry
+  though `ml/artifacts/<id>-explanation.py` has existed since `68833ac`. The registry
   therefore advertised no explanation capability for the only models that have one.
   Both artifacts now carry the field with `explanationIsSurrogate: false` and their
-  recorded SHA-256 was updated in `ml/artifacts/registry.json`.
+  recorded SHA-256 was updated in `ml/artifacts/registry`.
 - **`verify_model_registry.py` counted explanation files as orphan models**, failing one
   of its 40 checks since the XAI commit. Explanation files live beside their models so
   a model checksum keeps meaning "the trained model"; the check now excludes them.

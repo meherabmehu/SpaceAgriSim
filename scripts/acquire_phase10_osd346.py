@@ -20,7 +20,7 @@ removes nothing from the gravity range.
 Provenance discipline
 ---------------------
 The deposit publishes one `.genes.results` file per library rather than a matrix. All
-36 are downloaded, pinned by SHA-256 in `data/metadata/osd346_checksums.json`, and
+36 are downloaded, pinned by SHA-256 in `data/metadata/osd346_checksums`, and
 combined here. The 73 MB of raw per-sample files are **not committed**; the checksums
 are, so the matrix can be rebuilt byte-identically without storing them.
 
@@ -28,6 +28,7 @@ Run: python scripts/acquire_phase10_osd346.py
 """
 
 from __future__ import annotations
+import sys
 
 import csv
 import hashlib
@@ -43,13 +44,15 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 RAW = ROOT / "data" / "raw" / "OSD-346"
 PROCESSED = ROOT / "data" / "processed"
 # The combined matrix is 6 MB. data/processed is bundled into the API image, whose
 # packager refuses assets over 2 MB, and this matrix backs an analysis rather than an
 # inference endpoint, so it lives in data/derived.
 DERIVED = ROOT / "data" / "derived"
-CHECKSUMS = ROOT / "data" / "metadata" / "osd346_checksums.json"
+CHECKSUMS = ROOT / "data" / "metadata" / "osd346_checksums"
 
 BUCKET = "https://nasa-osdr.s3.us-west-2.amazonaws.com"
 VERSION = "OSD-346/version-5"
@@ -66,8 +69,8 @@ def listing() -> list[str]:
 
 def download(key: str) -> bytes:
     target = RAW / key.split("/")[-1]
-    if target.exists():
-        return target.read_bytes()
+    if safedata.exists(target):
+        return safedata.bytes(target)
     payload = urllib.request.urlopen(f"{BUCKET}/{key}", timeout=300).read()
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_bytes(payload)
@@ -170,7 +173,7 @@ def catalogue_entry(checksums: dict, design: pd.DataFrame) -> dict:
         "acquisition": "scripts/acquire_phase10_osd346.py",
         "rawCommitted": False,
         "rawNote": ("Per-sample RSEM files are 73 MB and are not committed; their "
-                    "SHA-256 digests are in data/metadata/osd346_checksums.json."),
+                    "SHA-256 digests are in data/metadata/osd346_checksums."),
     }
 
 
@@ -210,7 +213,7 @@ def main() -> int:
     DERIVED.mkdir(parents=True, exist_ok=True)
     expression.to_csv(DERIVED / "osd346_partial_gravity.csv", index=False)
     design.to_csv(PROCESSED / "osd346_samples.csv", index=False)
-    CHECKSUMS.write_text(json.dumps(checksums, indent=2) + "\n")
+    safedata.dump(checksums, CHECKSUMS)
 
     print(f"{len(design)} libraries, {int(detected.sum())} of {len(tpm)} genes pass the "
           f"detection filter")
@@ -221,13 +224,13 @@ def main() -> int:
           f"({(DERIVED / 'osd346_partial_gravity.csv').stat().st_size/1e6:.1f} MB)")
     print(f"wrote {PROCESSED / 'osd346_samples.csv'}")
 
-    manifest_path = ROOT / "data" / "metadata" / "dataset_manifest.json"
-    manifest = json.loads(manifest_path.read_text())
+    manifest_path = ROOT / "data" / "metadata" / "dataset_manifest"
+    manifest = safedata.load(manifest_path)
     manifest["datasets"] = [entry for entry in manifest["datasets"]
                             if entry["id"] != "OSD-346"]
     manifest["datasets"].append(catalogue_entry(checksums, design))
     manifest["datasets"].sort(key=lambda entry: entry["id"])
-    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
+    safedata.dump(manifest, manifest_path)
     print(f"catalogue now holds {len(manifest['datasets'])} NASA datasets "
           f"(OSD-346 added or refreshed)")
     return 0

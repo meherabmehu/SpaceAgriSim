@@ -86,7 +86,7 @@ Five checks, applied in this order, all reported in `validation.checksApplied`:
 **No out-of-distribution threshold is claimed.** Phase 11 tested two novelty scores against
 three controls (a verified duplicate that must look ordinary, a platform shift that must
 look different, and a held-out study) and neither passed; `thresholdValidated` is `false` in
-`ml/evaluation/phase11_ood_uncertainty.json`. Phase 12 therefore does schema and physical
+`ml/evaluation/phase11_ood_uncertainty`. Phase 12 therefore does schema and physical
 plausibility checks and reports the training-domain position, and says in the response that
 this is not a novelty detector.
 

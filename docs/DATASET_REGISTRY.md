@@ -15,7 +15,7 @@ data or the check fails.
 
 ## NASA OSDR studies (metadata only, plus downloaded measurement tables where a model exists)
 
-Source: NASA OSDR official study and file APIs (`data/metadata/dataset_manifest.json`, generated
+Source: NASA OSDR official study and file APIs (`data/metadata/dataset_manifest`, generated
 2026-11-08). 24 studies.
 
 | Accession | Title | Samples | Version | Metadata SHA-256 | Use |
@@ -86,12 +86,12 @@ recorded and the mid-point used for scoring is stated explicitly in the model ar
 
 | File | Identifier | DOI | Licence | Retrieved |
 | --- | --- | --- | --- | --- |
-| `external_lettuce_peerj17085.json` | peerj-17085 | 10.7717/peerj.17085 | CC BY 4.0 | 2026-11-09 |
-| `external_validation_screen.json` | — | — | — | — |
-| `nasa_air_and_water.json` | — | — | — | — |
-| `ntrs_bpc.json` | — | — | — | — |
-| `ntrs_bpc_measurements.json` | — | — | — | — |
-| `ntrs_supplement.json` | — | — | — | — |
+| `external_lettuce_peerj17085` | peerj-17085 | 10.7717/peerj.17085 | CC BY 4.0 | 2026-11-09 |
+| `external_validation_screen` | — | — | — | — |
+| `nasa_air_and_water` | — | — | — | — |
+| `ntrs_bpc` | — | — | — | — |
+| `ntrs_bpc_measurements` | — | — | — | — |
+| `ntrs_supplement` | — | — | — | — |
 
 ## Models and their training data
 

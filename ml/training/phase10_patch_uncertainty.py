@@ -10,7 +10,7 @@ curated fields (supersedes, status, samples, dataVersion) and Phase 9 already lo
 and had to restore them once.
 
 Nothing here tunes a radius to hit a coverage number. The method is fixed by
-`phase10_uncertainty_decision.json`; this only fits it on the data that ships.
+`phase10_uncertainty_decision`; this only fits it on the data that ships.
 """
 from __future__ import annotations
 
@@ -23,6 +23,8 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "ml" / "training"))
 sys.path.insert(0, str(ROOT / "scripts"))
 from conformal import _quantile, group_level_conformal, out_of_fold_residuals  # noqa: E402
@@ -38,8 +40,8 @@ SEED_INNER = 5
 
 
 def main() -> int:
-    decision = json.loads((EVALUATION / "phase10_uncertainty_decision.json").read_text())
-    measured = json.loads((EVALUATION / "phase10_conformal.json").read_text())["models"]
+    decision = safedata.load(EVALUATION / "phase10_uncertainty_decision")
+    measured = safedata.load(EVALUATION / "phase10_conformal")["models"]
 
     loaders = {
         "mizuna-microbial-relative-load-v2": (microbial_relative, microbial_fit),
@@ -74,12 +76,12 @@ def main() -> int:
             "rowLevelRadiusForComparison": round(float(row_radius), 6),
             "groupLevelRadiusForComparison": round(float(group_radius), 6),
             "empiricallyCalibrated": True,
-            "evidence": "ml/evaluation/phase10_conformal.json",
+            "evidence": "ml/evaluation/phase10_conformal",
             "caveat": decision["decisions"][model_id]["honestCaveat"],
         }
 
-        path = ARTIFACTS / f"{model_id}.json"
-        artifact = json.loads(path.read_text())
+        path = ARTIFACTS / f"{model_id}"
+        artifact = safedata.load(path)
         artifact["uncertainty"] = block
         artifact["interval"] = {
             "radius": block["radius"],
@@ -97,7 +99,7 @@ def main() -> int:
         }
         artifact["phase10"] = {"uncertaintyRecalibratedAt": datetime.now(timezone.utc).isoformat(),
                                "method": block["method"]}
-        path.write_text(json.dumps(artifact, indent=1, allow_nan=False) + "\n")
+        safedata.dump(artifact, path)
         patched[model_id] = {"path": str(path.relative_to(ROOT)),
                              "radius": block["radius"],
                              "method": block["method"],
@@ -105,22 +107,20 @@ def main() -> int:
         print(f"{model_id:36s} {block['method']:32s} radius {radius:9.4f}  "
               f"measured coverage {achieved:.3f}")
 
-    registry_path = ARTIFACTS / "registry.json"
-    registry = json.loads(registry_path.read_text())
+    registry_path = ARTIFACTS / "registry"
+    registry = safedata.load(registry_path)
     registry["trainedAt"] = datetime.now(timezone.utc).isoformat()
     for model in registry["models"]:
         if model["id"] in patched:
             model["sha256"] = hashlib.sha256(
-                (ARTIFACTS / f"{model['id']}.json").read_bytes()).hexdigest()
-    registry_path.write_text(json.dumps(registry, indent=1) + "\n")
+                safedata.bytes(ARTIFACTS / f"{model['id']}")).hexdigest()
+    safedata.dump(registry, registry_path)
 
-    (EVALUATION / "phase10_uncertainty_patch.json").write_text(
-        json.dumps({"alpha": ALPHA, "seed": SEED, "models": patched,
+    safedata.dump({"alpha": ALPHA, "seed": SEED, "models": patched,
                     "note": ("Radii calibrated on every available biological group by "
                              "cross-conformal. Achieved coverage is the measured held-out "
-                             "value from phase10_conformal.json, not a re-measurement on "
-                             "the same data the radius was fit to.")},
-                   indent=2) + "\n")
+                             "value from phase10_conformal, not a re-measurement on "
+                             "the same data the radius was fit to.")}, EVALUATION / "phase10_uncertainty_patch")
     print("\npatched artifacts and registry checksums")
     return 0
 

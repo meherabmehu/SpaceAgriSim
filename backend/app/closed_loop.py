@@ -10,20 +10,20 @@ the simulation, and the water figures bound a control the simulator already expo
 """
 
 from __future__ import annotations
+import safedata
 
-import json
 from functools import lru_cache
 
 from app.research import DATA
 
-PATH = DATA / "literature" / "nasa_air_and_water.json"
+PATH = DATA / "literature" / "nasa_air_and_water"
 
 
 @lru_cache(maxsize=1)
 def _source() -> dict | None:
-    if not PATH.is_file():
+    if not safedata.exists(PATH):
         return None
-    return json.loads(PATH.read_text())
+    return safedata.load(PATH)
 
 
 def ethylene_accumulation(area_m2: float, days: float, volume_m3: float,
@@ -62,7 +62,7 @@ def payload() -> dict:
     source = _source()
     if source is None:
         return {"available": False,
-                "reason": "data/literature/nasa_air_and_water.json is not in this deployment"}
+                "reason": "data/literature/nasa_air_and_water is not in this deployment"}
     ethylene = source["ethylene"]
     water = source["water"]
     peak = ethylene["production"]["peakProduction"]

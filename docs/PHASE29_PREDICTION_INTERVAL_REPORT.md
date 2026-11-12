@@ -9,7 +9,7 @@ Short answer: no. The served coverage figure is a *descriptive* statistic about 
 from experiments the calibration already contained. It is not a guarantee of coverage on a new site,
 and this phase found direct evidence that the guarantee would fail.
 
-Artefacts: `ml/training/phase29_interval_audit.py`, `ml/evaluation/phase29_interval_audit.json`.
+Artefacts: `ml/training/phase29_interval_audit.py`, `ml/evaluation/phase29_interval_audit`.
 Nothing in the served model was changed by this audit.
 
 ---

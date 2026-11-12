@@ -2,12 +2,12 @@
 
 Runs the conformal comparison in `ml/training/conformal.py` against the three
 regression models that ship an interval, under one shared leave-group-out
-protocol, and writes `ml/evaluation/phase10_conformal.json`.
+protocol, and writes `ml/evaluation/phase10_conformal`.
 
 The question is deliberately narrow: *does the interval the API reports contain
 the held-out value as often as it claims?* Nothing here changes a shipped model.
 It measures first; promotion is a separate decision recorded in
-`ml/evaluation/phase10_uncertainty_decision.json`.
+`ml/evaluation/phase10_uncertainty_decision`.
 """
 from __future__ import annotations
 
@@ -158,7 +158,7 @@ def main() -> int:
                    "campaigns. These are measured held-out coverages, not guarantees."),
         "models": results,
     }
-    save_json(EVALUATION / "phase10_conformal.json", report)
+    save_json(EVALUATION / "phase10_conformal", report)
 
     print("\ncoverage summary (nominal 0.90):")
     for name, values in results.items():

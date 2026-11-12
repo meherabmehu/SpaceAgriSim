@@ -6,6 +6,7 @@ export is rejected for the right reason, and that the two deliberate refusals (a
 without an in-situ ET0, a failed water balance) cannot be softened.
 """
 from __future__ import annotations
+import safedata
 
 import csv
 import json
@@ -151,7 +152,7 @@ def test_thin_replication_warns_but_does_not_fail_the_trial():
 def test_a_missing_units_file_is_a_failure_not_a_warning(tmp_path):
     """Without units, 'L' and 'mL' are the same number and differ by a factor of 1000."""
     copied = tmp_path / CLEAN.name
-    copied.write_bytes(CLEAN.read_bytes())
+    copied.write_bytes(safedata.bytes(CLEAN))
     report = validator.validate(copied, schema_path=validator.SCHEMA_PATH)
     assert _status(report, "units_file_present") == "fail"
     assert report["verdict"] == "FAIL"
@@ -159,10 +160,10 @@ def test_a_missing_units_file_is_a_failure_not_a_warning(tmp_path):
 
 def test_units_in_the_same_quantity_but_a_different_scale_are_rejected(tmp_path):
     copied = tmp_path / CLEAN.name
-    copied.write_bytes(CLEAN.read_bytes())
-    units = json.loads((FIXTURES / "SYNTHETIC_FIXTURE_not_a_measurement.units.json").read_text())
+    copied.write_bytes(safedata.bytes(CLEAN))
+    units = safedata.load(FIXTURES / "SYNTHETIC_FIXTURE_not_a_measurement.units")
     units["units"]["water_input_ml"] = "L"
-    (tmp_path / f"{CLEAN.stem}.units.json").write_text(json.dumps(units))
+    safedata.dump(units, tmp_path / f"{CLEAN.stem}.units")
     report = validator.validate(copied, schema_path=validator.SCHEMA_PATH)
     assert _status(report, "unit_matches_schema") == "fail"
 
@@ -195,7 +196,7 @@ def test_template_has_a_header_and_no_rows(tmp_path):
     units_path = validator.emit_template(target)
     lines = target.read_text(encoding="utf-8").strip().splitlines()
     assert len(lines) == 1
-    declared = json.loads(units_path.read_text(encoding="utf-8"))["units"]
+    declared = safedata.load(units_path)["units"]
     assert len(declared) == 41  # 23 required + 18 optional
     assert all(value for value in declared.values())
 
@@ -237,19 +238,19 @@ def test_generator_honours_out_dir_and_leaves_the_repository_alone(tmp_path):
     repository - a generator whose only purpose is to be pointed somewhere harmless was unable to
     be pointed anywhere at all.
     """
-    before = {path.name: path.read_bytes() for path in FIXTURES.iterdir()}
+    before = {path.name: safedata.bytes(path) for path in FIXTURES.iterdir() if path.is_file()}
     assert fixture_builder.main(["--out-dir", str(tmp_path)]) == 0
     written = sorted(path.name for path in tmp_path.iterdir())
     assert written, "the generator wrote nothing to the requested directory"
-    after = {path.name: path.read_bytes() for path in FIXTURES.iterdir()}
+    after = {path.name: safedata.bytes(path) for path in FIXTURES.iterdir() if path.is_file()}
     assert after == before, "--out-dir was ignored: the repository fixtures changed"
 
 
 def test_the_committed_fixtures_are_exactly_what_the_generator_produces(tmp_path):
     """A committed fixture that the generator no longer produces is a stale test input."""
     assert fixture_builder.main(["--out-dir", str(tmp_path)]) == 0
-    generated = {path.name: path.read_bytes() for path in tmp_path.iterdir()}
-    committed = {path.name: path.read_bytes() for path in FIXTURES.iterdir()}
+    generated = {path.name: safedata.bytes(path) for path in tmp_path.iterdir()}
+    committed = {path.name: safedata.bytes(path) for path in FIXTURES.iterdir() if path.is_file()}
     assert sorted(generated) == sorted(committed), (
         "scripts/experiment/fixtures is out of date: regenerate with "
         "`python scripts/experiment/make_synthetic_fixture.py`"

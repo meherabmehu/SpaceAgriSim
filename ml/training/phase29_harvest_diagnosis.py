@@ -21,7 +21,7 @@ The questions it answers, each with a number attached:
 5. **Would the model pass if the holdout were in-domain?** PeerJ is inside the declared domain. It is
    also already spent as a development set, so its score is reported as development, not validation.
 
-Output: `ml/evaluation/phase29_harvest_diagnosis.json`, consumed by
+Output: `ml/evaluation/phase29_harvest_diagnosis`, consumed by
 `docs/PHASE29_HARVEST_GENERALIZATION_REPORT.md`.
 
 Run: python ml/training/phase29_harvest_diagnosis.py
@@ -38,19 +38,21 @@ from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.model_selection import GroupKFold
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "scripts"))
 from nasa_pipeline import save_json, stamp  # noqa: E402
 
 DATA = ROOT / "data" / "processed" / "lettuce_earth.csv"
-OUT = ROOT / "ml" / "evaluation" / "phase29_harvest_diagnosis.json"
-ARTIFACT = ROOT / "ml" / "artifacts" / "lettuce-earth-growth-v3.json"
+OUT = ROOT / "ml" / "evaluation" / "phase29_harvest_diagnosis"
+ARTIFACT = ROOT / "ml" / "artifacts" / "lettuce-earth-growth-v3"
 
 DENSITY = 25.0        # Carotti et al.: 15 trays x 4 plants -> 25 plants/m2
 PHOTOPERIOD = 16.0    # Carotti et al.
 SEED = 42
 
 # PeerJ (development, spent) and Touliatos (the declared independent holdout). Transcribed in
-# data/literature/external_lettuce_peerj17085.json and in the v3 training script respectively.
+# data/literature/external_lettuce_peerj17085 and in the v3 training script respectively.
 PEERJ = [("baby-cos-upper", 697, 84.5), ("baby-cos-middle", 391, 123.8),
          ("baby-cos-lower", 322, 92.9), ("green-oak-upper", 697, 97.3),
          ("green-oak-middle", 391, 190.7), ("green-oak-lower", 322, 203.7)]
@@ -172,7 +174,7 @@ def main() -> None:
         })
 
     # ---- 4. domain check on every external observation ------------------------------------
-    domain = json.loads(ARTIFACT.read_text())["domain"]
+    domain = safedata.load(ARTIFACT)["domain"]
     def violations(air: float, root: float, dat: float, dli: float) -> list[str]:
         found = []
         for name, value in (("daysAfterTransplant", dat), ("airTemperature", air),
@@ -239,7 +241,7 @@ def main() -> None:
                 float(np.median(np.abs(rel)) * 100), 2),
             "outOfFoldMeanAbsolutePercentageError": round(float(np.mean(np.abs(rel)) * 100), 2),
             "matchesArtifactMAE": round(overall_mae, 1) == round(
-                float(json.loads(ARTIFACT.read_text())["metrics"]["MAE"]), 1),
+                float(safedata.load(ARTIFACT)["metrics"]["MAE"]), 1),
         },
         "errorDecomposition": {
             "byExperiment": decomposition,

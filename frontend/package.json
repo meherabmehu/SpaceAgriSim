@@ -9,7 +9,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit --target ES2022 --lib ES2022,DOM --module ESNext --moduleResolution Bundler --strict --skipLibCheck --types vite/client src/services/platformApi.ts src/vite-env.d.ts",
     "test:e2e": "playwright test",
     "test:unit": "vitest run",
     "build:check": "vite build && node scripts/check-bundle.mjs"

@@ -30,6 +30,7 @@ so the prediction interval is the honest form of the claim.
 """
 
 from __future__ import annotations
+import sys
 
 import json
 from pathlib import Path
@@ -38,8 +39,10 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 DATA = ROOT / "data" / "processed"
-OUT = ROOT / "ml" / "evaluation" / "phase11_microbial_campaigns.json"
+OUT = ROOT / "ml" / "evaluation" / "phase11_microbial_campaigns"
 
 SEED = 11570
 BOOTSTRAP = 4000
@@ -168,7 +171,7 @@ def main() -> int:
 
     # S1: reproduce the Phase 7 headline -----------------------------------
     leaf = table[(table.assay == "aerobic") & (table.tissue == "leaf")]
-    committed = json.loads((ROOT / "ml" / "evaluation" / "microbial_contrast.json").read_text())
+    committed = safedata.load(ROOT / "ml" / "evaluation" / "microbial_contrast")
     s1 = {"protocol": "aerobic plate counts on leaf tissue, the Phase 7 subset",
           "campaigns": {}}
     for campaign in ("VEG04A", "VEG04B"):
@@ -264,8 +267,8 @@ def main() -> int:
           f"{pooled['predictionInterval95'][1]:+.3f}]")
 
     # The third-campaign question, answered from the sweep rather than invented.
-    discovery = json.loads((ROOT / "ml" / "evaluation"
-                            / "phase11_dataset_discovery.json").read_text())
+    discovery = safedata.load(ROOT / "ml" / "evaluation"
+                            / "phase11_dataset_discovery")
     report["S5_thirdCampaign"] = {
         "available": False,
         "evidence": ("the 231-study discovery sweep found nine uncatalogued microbial "
@@ -300,7 +303,7 @@ def main() -> int:
         if (s3["VEG04B_at_VEG04A_mix"] > 0 and s3["VEG04A_at_VEG04B_mix"] > 0
             and pooled["ci95"][0] > 0)
         else "flight-effect-does-not-survive-composition-standardisation")
-    OUT.write_text(json.dumps(report, indent=2) + "\n")
+    safedata.dump(report, OUT)
     print(f"\nverdict: {report['verdict']}\nwrote {OUT.relative_to(ROOT)}")
     return 0
 

@@ -28,7 +28,7 @@ is safe, and what a long stay in orbit does to a leafy green.**
 
 Selection was made for **coverage of the reasoning gaps**, not by search score. The discovery
 query, its terms and the recorded timestamp are stored in
-`data/metadata/phase14_manifest_checksums.json` so the selection is reproducible and reviewable.
+`data/metadata/phase14_manifest_checksums` so the selection is reproducible and reviewable.
 
 ## 2. Provenance discipline
 
@@ -36,7 +36,7 @@ query, its terms and the recorded timestamp are stored in
 acquisition scripts:
 
 - each ISA metadata archive is pinned by **byte length and SHA-256** in
-  `data/metadata/phase14_manifest_checksums.json`;
+  `data/metadata/phase14_manifest_checksums`;
 - a download whose bytes do not match the pin is **rejected**, never used;
 - if the upstream archive size changes for the same version, the script **stops** rather than
   silently accepting new bytes;

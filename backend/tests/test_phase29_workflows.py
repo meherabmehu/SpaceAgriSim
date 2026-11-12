@@ -15,6 +15,7 @@ take on trust:
 """
 
 from __future__ import annotations
+import sys
 
 import json
 from pathlib import Path
@@ -24,6 +25,8 @@ import pytest
 from app.workflows import units
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 
 LIGHT = "/api/workflows/light-stress"
 WATER = "/api/workflows/water-demand"
@@ -254,19 +257,19 @@ def test_irrigation_schedule_rejects_impossible_soil_inputs(client):
 
 
 def _load(relative: str) -> dict:
-    return json.loads((ROOT / relative).read_text())
+    return safedata.load(ROOT / relative)
 
 
 def test_diagnosis_reproduces_the_served_model():
-    diagnosis = _load("ml/evaluation/phase29_harvest_diagnosis.json")
-    artifact = _load("ml/artifacts/lettuce-earth-growth-v3.json")
+    diagnosis = _load("ml/evaluation/phase29_harvest_diagnosis")
+    artifact = _load("ml/artifacts/lettuce-earth-growth-v3")
     assert diagnosis["reproduction"]["matchesArtifactMAE"] is True
     assert diagnosis["reproduction"]["outOfFoldMAEgPerM2"] == pytest.approx(
         round(artifact["metrics"]["MAE"], 1), abs=0.1)
 
 
 def test_diagnosis_records_the_domain_mismatch_it_found():
-    audit = _load("ml/evaluation/phase29_harvest_diagnosis.json")["declaredDomainAudit"]
+    audit = _load("ml/evaluation/phase29_harvest_diagnosis")["declaredDomainAudit"]
     assert audit["dailyLightIntegral"]["declaredMatchesObserved"] is False
     assert audit["dailyLightIntegral"]["observed"][1] > audit["dailyLightIntegral"]["declared"][1]
     assert "hardcoded" in audit["finding"]
@@ -276,7 +279,7 @@ def test_diagnosis_records_the_domain_mismatch_it_found():
 
 
 def test_holdout_was_not_read_during_model_selection():
-    experiments = _load("ml/evaluation/phase29_harvest_experiments.json")
+    experiments = _load("ml/evaluation/phase29_harvest_experiments")
     assert experiments["holdoutReadHere"] is False
     assert experiments["selectionRule"]["writtenBeforeScoring"] is True
     assert experiments["selected"] in experiments["candidates"]
@@ -285,7 +288,7 @@ def test_holdout_was_not_read_during_model_selection():
 
 
 def test_final_evaluation_reports_a_failure_with_the_criterion_unchanged():
-    final = _load("ml/evaluation/phase29_harvest_final.json")
+    final = _load("ml/evaluation/phase29_harvest_final")
     assert final["holdout"]["acceptanceCriterionPct"] == 30.0
     assert final["holdout"]["passed"] is False
     assert final["holdout"]["MAPE"] > 30.0
@@ -296,14 +299,14 @@ def test_final_evaluation_reports_a_failure_with_the_criterion_unchanged():
 
 
 def test_final_evaluation_disclaims_a_pristine_holdout():
-    provenance = _load("ml/evaluation/phase29_harvest_final.json")["holdoutProvenance"]
+    provenance = _load("ml/evaluation/phase29_harvest_final")["holdoutProvenance"]
     assert provenance["usedInFitting"] is False
     assert provenance["usedInModelSelection"] is False
     assert "NOT an untouched final test set" in provenance["pristineClaim"]
 
 
 def test_interval_audit_exposes_non_uniform_coverage():
-    audit = _load("ml/evaluation/phase29_interval_audit.json")
+    audit = _load("ml/evaluation/phase29_interval_audit")
     coverages = [entry["coverage"] for entry in audit["coverageByExperiment"].values()]
     # The pooled number hides at least one group well below nominal coverage.
     assert min(coverages) < 0.8
@@ -313,10 +316,10 @@ def test_interval_audit_exposes_non_uniform_coverage():
 
 
 def test_served_model_was_not_silently_replaced():
-    artifact = _load("ml/artifacts/lettuce-earth-growth-v3.json")
+    artifact = _load("ml/artifacts/lettuce-earth-growth-v3")
     assert artifact["status"] == "trained-exploratory"
     assert artifact["validation"]["independent"]["passed"] is False
-    assert not (ROOT / "ml" / "artifacts" / "lettuce-earth-growth-v4.json").exists()
+    assert not safedata.exists(ROOT / "ml" / "artifacts" / "lettuce-earth-growth-v4")
 
 
 def test_water_contract_survives_phase29_and_harvest_is_gone(client):

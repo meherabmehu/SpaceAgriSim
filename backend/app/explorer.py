@@ -11,13 +11,14 @@ that no audit has examined is reported as `unverified-overlap`, never as `indepe
 because absence of a detected overlap is not evidence of independence.
 """
 from __future__ import annotations
+import safedata
 
 import json
 from functools import lru_cache
 
 from app import research
 
-AUDIT = research.EVALUATION / "phase11_duplicate_audit.json"
+AUDIT = research.EVALUATION / "phase11_duplicate_audit"
 
 INDEPENDENT = "independent"
 DUPLICATE = "duplicate-measurement"
@@ -45,7 +46,7 @@ REDUNDANT_DEPOSITS = {
         "reason": ("Phase 11 compared all 44 arrays across 22,810 probesets: minimum "
                    "correlation 1.000000 and maximum absolute difference 0.0. OSD-320 is a "
                    "second deposit of OSD-46, not an independent radiation study."),
-        "localReference": "ml/evaluation/phase11_duplicate_audit.json#numericProof",
+        "localReference": "ml/evaluation/phase11_duplicate_audit#numericProof",
     },
 }
 
@@ -66,9 +67,9 @@ _ASSAY_HINTS = (
 
 @lru_cache(maxsize=1)
 def _audit() -> dict:
-    if not AUDIT.is_file():
+    if not safedata.exists(AUDIT):
         return {}
-    return json.loads(AUDIT.read_text(encoding="utf-8"))
+    return safedata.load(AUDIT)
 
 
 def _identifiers() -> dict[str, dict]:
@@ -183,14 +184,14 @@ def relation_between(left: str, right: str) -> dict:
                 "assays": row.get("assays"),
                 "countsAsIndependent": False,
                 "conflicts": bool(shared) or relation == DUPLICATE,
-                "localReference": "ml/evaluation/phase11_duplicate_audit.json#overlaps",
+                "localReference": "ml/evaluation/phase11_duplicate_audit#overlaps",
             }
 
     audited = _audited_ids()
     if left in audited and right in audited:
         return {"pair": [left, right], "relation": INDEPENDENT, "sharedSamples": 0,
                 "countsAsIndependent": True, "conflicts": False,
-                "localReference": "ml/evaluation/phase11_duplicate_audit.json#identifierProvenance"}
+                "localReference": "ml/evaluation/phase11_duplicate_audit#identifierProvenance"}
     return {"pair": [left, right], "relation": UNVERIFIED, "sharedSamples": None,
             "countsAsIndependent": False,
             # Unknown is not the same as contradictory: an unaudited accession cannot be

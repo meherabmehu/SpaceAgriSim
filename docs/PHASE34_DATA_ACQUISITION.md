@@ -48,7 +48,7 @@ model's own inputs. It does not need volume; it needs independence.
   322 / 391 / 697 µmol m⁻² s⁻¹ (DLI 13.9 / 16.9 / 30.1), planting density 600 plants m⁻².
 * This is a **measured independent campaign**, not a model paper: the six fresh-weight treatment
   means are reported values, transcribed by hand into
-  `data/literature/external_lettuce_peerj17085.json` (committed in an earlier phase) with the
+  `data/literature/external_lettuce_peerj17085` (committed in an earlier phase) with the
   study conditions the models need as inputs.
 * **Effect on the work:** the independent campaign for all three lettuce models. No value was read
   off a figure and nothing was interpolated.
@@ -93,7 +93,7 @@ instead of a new model over data that does not.
 
 ## 4. Integrity of what is committed
 
-* Every number in `ml/evaluation/phase34_*.json` is produced by a committed script
+* Every number in `ml/evaluation/phase34_*.py` is produced by a committed script
   (`ml/research/phase34_*.py`) from committed inputs; no value is typed in by hand.
 * Transcription files under `data/literature/` carry their publisher, URL, licence and n of the
   source, and the models' own input conversions (DLI, per-area density) are applied in the script,

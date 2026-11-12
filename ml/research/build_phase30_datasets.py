@@ -2,7 +2,7 @@
 """Phase 30: build the processed tables for the two acquired datasets.
 
 Inputs are immutable raw files under data/raw/phase30/, each hash-recorded in
-data/metadata/phase30_acquisition_manifest.json. Nothing here downloads, edits a raw file, converts a
+data/metadata/phase30_acquisition_manifest. Nothing here downloads, edits a raw file, converts a
 unit silently or fills a blank.
 
 Dataset 1 — controlled-environment wheat (Zenodo 10.5281/zenodo.17764612, CC BY 4.0)
@@ -29,6 +29,7 @@ Units
     python3 ml/research/build_phase30_datasets.py --check    # verify raw hashes and tables
 """
 from __future__ import annotations
+import sys
 
 import argparse
 import csv
@@ -43,9 +44,11 @@ from typing import Any
 import openpyxl
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 RAW = ROOT / "data" / "raw" / "phase30"
 OUT = ROOT / "data" / "processed" / "phase30"
-MANIFEST = ROOT / "data" / "metadata" / "phase30_acquisition_manifest.json"
+MANIFEST = ROOT / "data" / "metadata" / "phase30_acquisition_manifest"
 
 WHEAT_XLSX = "wheat_yields.xlsx"
 LETTUCE_XLSX = "lue_dataset.xlsx"
@@ -460,8 +463,8 @@ def build() -> dict[str, Any]:
         "transformations": TRANSFORMATIONS,
     }
     MANIFEST.parent.mkdir(parents=True, exist_ok=True)
-    MANIFEST.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    (OUT / "quality.json").write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(payload, MANIFEST)
+    safedata.dump(payload, OUT / "quality")
     return payload
 
 
@@ -470,14 +473,14 @@ def main() -> int:
     parser.add_argument("--check", action="store_true")
     arguments = parser.parse_args()
     if arguments.check:
-        manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))["datasets"]
+        manifest = safedata.load(MANIFEST)["datasets"]
         for name, path in (("cea-wheat-apogee", WHEAT_XLSX),
                            ("lettuce-multistudy-lue", LETTUCE_XLSX)):
             if sha256(RAW / path) != manifest[name]["rawSha256"]:
                 raise SystemExit(f"raw file changed for {name}")
         for entry in manifest.values():
             for processed in entry["processedFiles"]:
-                if not (ROOT / processed).is_file():
+                if not safedata.exists(ROOT / processed):
                     raise SystemExit(f"processed table missing: {processed}")
         print("phase30 raw files and processed tables match the committed manifest")
         return 0

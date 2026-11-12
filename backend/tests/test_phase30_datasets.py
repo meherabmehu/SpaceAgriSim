@@ -22,9 +22,11 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 RAW = ROOT / "data" / "raw" / "phase30"
 PROCESSED = ROOT / "data" / "processed" / "phase30"
-MANIFEST = ROOT / "data" / "metadata" / "phase30_acquisition_manifest.json"
+MANIFEST = ROOT / "data" / "metadata" / "phase30_acquisition_manifest"
 
 WHEAT_XLSX = RAW / "wheat_yields.xlsx"
 LETTUCE_XLSX = RAW / "lue_dataset.xlsx"
@@ -32,8 +34,8 @@ LETTUCE_XLSX = RAW / "lue_dataset.xlsx"
 WHEAT_SHA256 = "385d4680067832026296ec6bec1ce8757fa4bc42bd42d6f37b62899b52dc33c5"
 LETTUCE_SHA256 = "feb96c6c79c3997fde182dedbd252a76aa41ddd6d980db34c8ce2beaf434cedd"
 
-HARVEST_EVAL = ROOT / "ml" / "evaluation" / "phase30_harvest_crossstudy.json"
-CEA_EVAL = ROOT / "ml" / "evaluation" / "phase30_cea_wheat_response.json"
+HARVEST_EVAL = ROOT / "ml" / "evaluation" / "phase30_harvest_crossstudy"
+CEA_EVAL = ROOT / "ml" / "evaluation" / "phase30_cea_wheat_response"
 
 
 def _sha256(path: Path) -> str:
@@ -50,7 +52,7 @@ def _rows(path: Path) -> list[dict[str, str]]:
 
 
 def _json(path: Path) -> dict:
-    return json.loads(path.read_text(encoding="utf-8"))
+    return safedata.load(path)
 
 
 # --------------------------------------------------------------- raw acquisition
@@ -60,7 +62,7 @@ def _json(path: Path) -> dict:
                                             (LETTUCE_XLSX, LETTUCE_SHA256)])
 def test_the_raw_files_are_the_bytes_that_were_recorded(path, expected):
     """Raw data is immutable: the hash is the acquisition, and a re-download must match it."""
-    assert path.is_file(), f"{path.name} is missing from the workspace"
+    assert safedata.exists(path), f"{path.name} is missing from the workspace"
     assert _sha256(path) == expected
 
 
@@ -150,7 +152,7 @@ def test_the_builder_reproduces_the_committed_tables():
 
 
 def test_the_quality_record_carries_units_ranges_and_coverage():
-    quality = _json(PROCESSED / "quality.json")
+    quality = _json(PROCESSED / "quality")
     wheat = quality["datasets"]["cea-wheat-apogee"]
     assert wheat["unitMap"]["grainYieldKgPerM2"]["unit"] == "kg/m2"
     assert wheat["unitMap"]["photoperiodHours"]["unit"] == "h/day"
@@ -288,12 +290,12 @@ def test_the_cea_artifact_is_wired_to_a_served_surface_and_the_harvest_one_is_re
     assert capability.returncode == 0, capability.stderr
     payload = json.loads(capability.stdout)
     assert payload["predictiveModel"]["evidenceFile"] == \
-        "ml/evaluation/phase30_cea_wheat_response.json"
+        "ml/evaluation/phase30_cea_wheat_response"
     assert cea["served"] is False
     # The harvest evaluation is retained and still says it failed; it is reachable through the
     # repository and docs/PHASE31_REMOVED_MODELS.md rather than through an API route.
     assert harvest["promoted"] is False
-    assert HARVEST_EVAL.is_file()
+    assert safedata.exists(HARVEST_EVAL)
     assert "harvest" in (ROOT / "docs" / "PHASE31_REMOVED_MODELS.md").read_text().lower()
 
 

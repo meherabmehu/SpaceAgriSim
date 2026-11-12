@@ -9,9 +9,10 @@ Output:
     data/raw/OSD-780/...           (VEG-04A microbial plate counts)
     data/raw/OSD-670/...           (asteroid-regolith substrate chemistry)
     data/raw/OSD-120/...           (image<->sample correlation index)
-    data/metadata/phase6_checksums.json
+    data/metadata/phase6_checksums
 """
 from __future__ import annotations
+import sys
 
 import hashlib
 import json
@@ -21,8 +22,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 DATA = ROOT / "data"
-OUT = DATA / "metadata" / "phase6_checksums.json"
+OUT = DATA / "metadata" / "phase6_checksums"
 UA = {"User-Agent": "SpaceAgriSim/1.0 (Phase 6 reproducible acquisition)"}
 
 BASE = "https://osdr.nasa.gov"
@@ -90,8 +93,8 @@ def resolve_targets() -> list[tuple[str, str, int, str]]:
 
 def main() -> int:
     previous = {}
-    if OUT.exists():
-        previous = {item["path"]: item for item in json.loads(OUT.read_text())}
+    if safedata.exists(OUT):
+        previous = {item["path"]: item for item in safedata.load(OUT)}
     records = []
     targets = resolve_targets()
     for study, path, expected, role in targets:
@@ -103,8 +106,8 @@ def main() -> int:
         relative = destination.relative_to(ROOT).as_posix()
         url = BASE + path
         prior = previous.get(relative)
-        if destination.exists() and prior:
-            body = destination.read_bytes()
+        if safedata.exists(destination) and prior:
+            body = safedata.bytes(destination)
             digest = hashlib.sha256(body).hexdigest()
             downloaded_at = prior.get("downloadedAt", "")
             reused = digest == prior["sha256"]

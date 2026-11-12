@@ -33,7 +33,7 @@ Every SHA is verified against the remote ref; the exact `git ls-remote` output i
 | 1 | Integration report | `docs/PHASE27_INTEGRATION_REPORT.md` |
 | 2 | Feature audit | `docs/PHASE27_FEATURE_AUDIT.md` |
 | 3 | Delivery report | `docs/PHASE27_DELIVERY_REPORT.md` |
-| 4 | Feature implementation coverage matrix | `docs/PHASE27_FEATURE_COVERAGE_MATRIX.md` + `data/research/phase27/feature_implementation_coverage.json` |
+| 4 | Feature implementation coverage matrix | `docs/PHASE27_FEATURE_COVERAGE_MATRIX.md` + `data/research/phase27/feature_implementation_coverage` |
 | 5 | PostgreSQL CI configuration | `.github/workflows/ci.yml` (`postgres` job) |
 | 6 | PostgreSQL test results | §4 of this report, and `docs/PHASE27_POSTGRESQL_RELIABILITY.md` |
 | 7 | Complete research-ready feature | measured water use — service, route, UI, tests, docs |

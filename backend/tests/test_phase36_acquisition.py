@@ -13,6 +13,7 @@ and that was, at some point during Phase 36, actually wrong:
 A test that only checked "the file parses" would have passed in every one of those cases.
 """
 from __future__ import annotations
+import sys
 
 import csv
 import json
@@ -22,13 +23,15 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 PHASE36 = ROOT / "data" / "research" / "phase36"
 SITES = ["wageningen_nl", "tucson_us", "singapore_sg", "dhaka_bd", "reykjavik_is", "nairobi_ke"]
 
 
 def _json(path: Path) -> dict:
-    assert path.is_file(), f"missing artefact {path.relative_to(ROOT)}"
-    return json.loads(path.read_text(encoding="utf-8"))
+    assert safedata.exists(path), f"missing artefact {path.relative_to(ROOT)}"
+    return safedata.load(path)
 
 
 # --------------------------------------------------------------------------- hourly weather
@@ -73,7 +76,7 @@ def test_daily_light_integral_is_physically_possible():
 
 
 def test_hourly_timestamps_are_labelled_as_the_provider_states_them():
-    manifest = _json(ROOT / "data" / "metadata" / "power_hourly_manifest.json")
+    manifest = _json(ROOT / "data" / "metadata" / "power_hourly_manifest")
     assert manifest["dataset"]["fillValue"] == -999.0
     for key, entry in manifest["sites"].items():
         assert entry["status"] == "ok", key
@@ -103,7 +106,7 @@ def test_nex_precipitation_is_not_a_column_of_zeros():
 
 
 def test_nex_latitude_longitude_conversion_found_land_for_every_site():
-    manifest = _json(ROOT / "data" / "metadata" / "nex_gddp_acquisition_manifest.json")
+    manifest = _json(ROOT / "data" / "metadata" / "nex_gddp_acquisition_manifest")
     for site in SITES:
         cell = manifest["cells"][site]
         assert abs(cell["cellLat"] - cell["requestedLat"]) <= 0.25
@@ -127,7 +130,7 @@ def test_both_windows_are_present_and_complete():
 
 # --------------------------------------------------------------------------- measured ET
 def test_measured_et_validation_has_both_legs_computed():
-    report = _json(PHASE36 / "et0_measurement_validation.json")
+    report = _json(PHASE36 / "et0_measurement_validation")
     tereno = report["terenoFormulationTest"]
     assert tereno["status"] == "COMPUTED"
     assert tereno["dayCount"] >= 400
@@ -140,7 +143,7 @@ def test_measured_et_validation_has_both_legs_computed():
 
 def test_the_agroscope_series_is_not_a_copy_of_the_model():
     """A measured ET series that tracked ET0 exactly would be a red flag, not a triumph."""
-    report = _json(PHASE36 / "et0_measurement_validation.json")
+    report = _json(PHASE36 / "et0_measurement_validation")
     annual = report["lysimeterLevelTest"]["annual"]
     ratios = [v["impliedAnnualKc"] for v in annual.values() if v["completeWaterYear"]]
     assert ratios, "no complete water year"
@@ -149,7 +152,7 @@ def test_the_agroscope_series_is_not_a_copy_of_the_model():
 
 # --------------------------------------------------------------------------- IoT4Lettuce
 def test_iot4lettuce_manifest_does_not_claim_the_whole_archive():
-    manifest = _json(ROOT / "data" / "metadata" / "iot4lettuce_acquisition_manifest.json")
+    manifest = _json(ROOT / "data" / "metadata" / "iot4lettuce_acquisition_manifest")
     dataset = manifest["dataset"]
     assert dataset["archiveMd5Verified"] is False
     assert dataset["membersNotAcquired"] > 20_000
@@ -160,14 +163,14 @@ def test_iot4lettuce_manifest_does_not_claim_the_whole_archive():
 
 
 def test_iot4lettuce_join_was_verified_rather_than_assumed():
-    report = _json(PHASE36 / "iot4lettuce_water_cultivar.json")
+    report = _json(PHASE36 / "iot4lettuce_water_cultivar")
     join = report["joinVerification"]
     assert join["pairsMatched"] == 45
     assert join["prefixRuleCheck"]["violations"] == 0
 
 
 def test_cultivar_contrast_is_reported_with_its_uncertainty():
-    report = _json(PHASE36 / "iot4lettuce_water_cultivar.json")
+    report = _json(PHASE36 / "iot4lettuce_water_cultivar")
     contrast = report["cultivarContrast"]
     assert contrast["permutationP"] < 0.001
     low, high = contrast["bootstrap95"]
@@ -179,7 +182,7 @@ def test_cultivar_contrast_is_reported_with_its_uncertainty():
 
 
 def test_ky_is_labelled_conditional_because_no_et_was_measured():
-    report = _json(PHASE36 / "iot4lettuce_water_cultivar.json")
+    report = _json(PHASE36 / "iot4lettuce_water_cultivar")
     ky = report["kyAccounting"]
     assert ky["status"].startswith("CONDITIONAL")
     assert "not" in ky["whyConditional"]
@@ -211,7 +214,7 @@ def _newest_counts(matrix: dict) -> dict:
 
 
 def test_every_gap_has_a_status_token_from_the_agreed_vocabulary():
-    matrix = json.loads((ROOT / "data" / "research" / "dataset_gap_matrix.json").read_text())
+    matrix = safedata.load(ROOT / "data" / "research" / "dataset_gap_matrix")
     assert len(matrix["gaps"]) == 14
     for gap in matrix["gaps"]:
         assert gap["statusToken"] in {"CLOSED", "PARTIALLY CLOSED", "OPEN"}, gap["id"]
@@ -221,7 +224,7 @@ def test_every_gap_has_a_status_token_from_the_agreed_vocabulary():
 
 
 def test_gap_counts_match_the_tokens_they_are_derived_from():
-    matrix = json.loads((ROOT / "data" / "research" / "dataset_gap_matrix.json").read_text())
+    matrix = safedata.load(ROOT / "data" / "research" / "dataset_gap_matrix")
     tokens = [gap["statusToken"] for gap in matrix["gaps"]]
     counts = _newest_counts(matrix)
     assert counts, "no phase block carries counts"
@@ -233,7 +236,7 @@ def test_gap_counts_match_the_tokens_they_are_derived_from():
 
 
 def test_closed_gaps_name_the_evidence_that_closed_them():
-    matrix = json.loads((ROOT / "data" / "research" / "dataset_gap_matrix.json").read_text())
+    matrix = safedata.load(ROOT / "data" / "research" / "dataset_gap_matrix")
     for gap in matrix["gaps"]:
         if gap["statusToken"] != "CLOSED":
             continue
@@ -242,12 +245,12 @@ def test_closed_gaps_name_the_evidence_that_closed_them():
             continue    # closed by removing a capability, so there is no dataset to point at
         assert decision["evidence"], gap["id"]
         for path in decision["evidence"]:
-            assert (ROOT / path).exists(), f"{gap['id']}: missing {path}"
+            assert safedata.exists(ROOT / path), f"{gap['id']}: missing {path}"
 
 
 # --------------------------------------------------------------------------- model re-evaluation
 def test_no_model_was_retrained_or_promoted():
-    report = _json(ROOT / "ml" / "evaluation" / "phase36_model_reevaluation.json")
+    report = _json(ROOT / "ml" / "evaluation" / "phase36_model_reevaluation")
     assert report["counts"]["served"] == 7
     for model_id, record in report["models"].items():
         assert record["retrained"] is False, model_id
@@ -257,7 +260,7 @@ def test_no_model_was_retrained_or_promoted():
 
 
 def test_a_domain_refusal_is_recorded_as_a_refusal_not_as_a_failure():
-    report = _json(ROOT / "ml" / "evaluation" / "phase36_model_reevaluation.json")
+    report = _json(ROOT / "ml" / "evaluation" / "phase36_model_reevaluation")
     refused = [m for m in report["models"].values() if m["outcome"] == "DOMAIN-REFUSED"]
     assert len(refused) == 3
     for record in refused:
@@ -280,8 +283,8 @@ def test_catalogue_document_is_not_stale():
 
 
 def test_every_recorded_checksum_is_a_full_digest():
-    for name in ("lysimeter_acquisition_manifest.json", "iot4lettuce_acquisition_manifest.json",
-                 "power_hourly_manifest.json", "nex_gddp_acquisition_manifest.json"):
+    for name in ("lysimeter_acquisition_manifest", "iot4lettuce_acquisition_manifest",
+                 "power_hourly_manifest", "nex_gddp_acquisition_manifest"):
         payload = _json(ROOT / "data" / "metadata" / name)
         blob = json.dumps(payload)
         digests = re.findall(r"\b[0-9a-f]{64}\b", blob)

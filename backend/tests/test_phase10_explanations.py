@@ -7,6 +7,7 @@ the attribution must reconstruct its logits exactly, and anything that does not 
 an error rather than a table.
 """
 from __future__ import annotations
+import sys
 
 import json
 from pathlib import Path
@@ -20,6 +21,8 @@ from app import research
 from app.routes.research import router
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 EXPLAINED = ("radiation-quality-osd46-v1", "radiation-exposure-osd46-v1")
 
 
@@ -38,7 +41,7 @@ def test_attribution_reconstructs_the_served_logits(model_id):
     sys.path.insert(0, str(ROOT / "ml" / "training"))
     from explain import linear_contributions
 
-    artifact = json.loads((ROOT / "ml" / "artifacts" / f"{model_id}.json").read_text())
+    artifact = safedata.load(ROOT / "ml" / "artifacts" / f"{model_id}")
     evaluator = artifact["evaluator"]
     expression = dict(zip(evaluator["features"], artifact["referenceProfiles"]["control"]))
 
@@ -95,8 +98,7 @@ def test_binary_model_is_explained_as_a_decision_function(scientific_client):
     assert body["perClass"]["classZeroRowIsAllZero"] is True
     assert "decisionFunction" in body["perClass"]
 
-    artifact = json.loads(
-        (ROOT / "ml" / "artifacts" / "radiation-exposure-osd46-v1.json").read_text())
+    artifact = safedata.load(ROOT / "ml" / "artifacts" / "radiation-exposure-osd46-v1")
     zero_row = artifact["evaluator"]["coefficients"]["control"]
     assert all(value == 0.0 for value in zero_row), "the zero-row premise no longer holds"
 
@@ -113,11 +115,9 @@ def test_models_without_a_valid_method_return_404_not_a_stub(scientific_client):
 
 def test_explanation_cannot_be_served_for_a_different_model(tmp_path, monkeypatch):
     """A mislabelled explanation is worse than none, so the id is cross-checked."""
-    original = json.loads(
-        (ROOT / "ml" / "artifacts" / "radiation-quality-osd46-v1-explanation.json").read_text())
+    original = safedata.load(ROOT / "ml" / "artifacts" / "radiation-quality-osd46-v1-explanation")
     mislabelled = dict(original, modelId="radiation-exposure-osd46-v1")
-    (tmp_path / "radiation-quality-osd46-v1-explanation.json").write_text(
-        json.dumps(mislabelled))
+    safedata.dump(mislabelled, tmp_path / "radiation-quality-osd46-v1-explanation")
     monkeypatch.setattr(research, "ARTIFACTS", tmp_path)
 
     with pytest.raises(ValueError, match="different model"):
@@ -126,10 +126,9 @@ def test_explanation_cannot_be_served_for_a_different_model(tmp_path, monkeypatc
 
 def test_explanation_with_a_broken_identity_is_refused(tmp_path, monkeypatch):
     """Read-time check: an explanation that does not reconstruct the logits is not one."""
-    original = json.loads(
-        (ROOT / "ml" / "artifacts" / "radiation-quality-osd46-v1-explanation.json").read_text())
+    original = safedata.load(ROOT / "ml" / "artifacts" / "radiation-quality-osd46-v1-explanation")
     broken = dict(original, identityResidual=0.5)
-    (tmp_path / "radiation-quality-osd46-v1-explanation.json").write_text(json.dumps(broken))
+    safedata.dump(broken, tmp_path / "radiation-quality-osd46-v1-explanation")
     monkeypatch.setattr(research, "ARTIFACTS", tmp_path)
 
     with pytest.raises(ValueError, match="reconstruction identity"):
@@ -139,8 +138,7 @@ def test_explanation_with_a_broken_identity_is_refused(tmp_path, monkeypatch):
 def test_stability_counts_are_consistent_with_the_artifact_metrics():
     """Selection stability must agree with the figure the model card already shows."""
     for model_id in EXPLAINED:
-        artifact = json.loads((ROOT / "ml" / "artifacts" / f"{model_id}.json").read_text())
-        explanation = json.loads(
-            (ROOT / "ml" / "artifacts" / f"{model_id}-explanation.json").read_text())
+        artifact = safedata.load(ROOT / "ml" / "artifacts" / f"{model_id}")
+        explanation = safedata.load(ROOT / "ml" / "artifacts" / f"{model_id}-explanation")
         assert (explanation["selectionStability"]["genesSelectedInEveryFold"]
                 == artifact["metrics"]["genesSharedAcrossFolds"]), model_id

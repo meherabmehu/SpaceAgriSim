@@ -6,7 +6,7 @@ the things that must remain true, then writes an audit artifact. It never rewrit
 metric or a classification: an audit that can edit the thing it audits is not an audit.
 
     python3 scripts/audit_models.py            # audit and report
-    python3 scripts/audit_models.py --write    # also write ml/evaluation/phase13_model_audit.json
+    python3 scripts/audit_models.py --write    # also write ml/evaluation/phase13_model_audit
 
 Exit code is non-zero if any check fails.
 
@@ -39,23 +39,25 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "backend"))
 
 from app import evidence, research, science_classification, workflow  # noqa: E402
 
 ARTIFACTS = ROOT / "ml" / "artifacts"
-REGISTRY = ARTIFACTS / "registry.json"
-OUT = ROOT / "ml" / "evaluation" / "phase13_model_audit.json"
+REGISTRY = ARTIFACTS / "registry"
+OUT = ROOT / "ml" / "evaluation" / "phase13_model_audit"
 # Phase 32: the measured probability calibration for the OSD-46 classifiers. An artifact that
 # cites it is checked against it rather than believed: the record has to name the model, prove the
 # scored predictions came from the same split as the reported accuracy, and state whether any
 # scaling is served.
-CALIBRATION_EVIDENCE = ROOT / "ml" / "evaluation" / "phase32_radiation_calibration.json"
+CALIBRATION_EVIDENCE = ROOT / "ml" / "evaluation" / "phase32_radiation_calibration"
 # Phase 34: two measured studies. The first is the probability calibration of the tomato
 # classifier; the second measures whether each served 90 % interval still covers an *independent
 # campaign*, which is the question the Phase 31-33 `calibration-scope` findings left open.
-PHASE34_CALIBRATION = ROOT / "ml" / "evaluation" / "phase34_probability_calibration.json"
-PHASE34_COVERAGE = ROOT / "ml" / "evaluation" / "phase34_cross_campaign_coverage.json"
+PHASE34_CALIBRATION = ROOT / "ml" / "evaluation" / "phase34_probability_calibration"
+PHASE34_COVERAGE = ROOT / "ml" / "evaluation" / "phase34_cross_campaign_coverage"
 
 CHECKS: list[dict] = []
 FAILURES: list[str] = []
@@ -64,7 +66,7 @@ FAILURES: list[str] = []
 # are reported and counted, never hidden, and they are never "fixed" by editing an artifact.
 GAPS: list[dict] = []
 # Files under ml/artifacts that are deliberately not models (see scripts/build_registry.py).
-NON_MODEL_ARTIFACTS = {"tomato_example.json"}
+NON_MODEL_ARTIFACTS = {"tomato_example"}
 # Fields every artifact must record. `license` and `sourceUrl` are tracked separately: they are
 # genuinely absent on several artifacts, and inventing them would be worse than reporting them.
 REQUIRED_PROVENANCE = ("sourceStudy", "method", "trainedAt", "seed")
@@ -96,26 +98,26 @@ def resolve_gap(model_id: str, field: str, detail: str, evidence: str,
 
 def record_temperature(model_id: str) -> dict:
     """The nested temperature record for a model, so the audit can quote its scheme."""
-    if not CALIBRATION_EVIDENCE.is_file():
+    if not safedata.exists(CALIBRATION_EVIDENCE):
         return {}
-    record = json.loads(CALIBRATION_EVIDENCE.read_text(encoding="utf-8"))
+    record = safedata.load(CALIBRATION_EVIDENCE)
     entry = (record.get("models") or {}).get(model_id) or {}
     return entry.get("temperatureScaling") or {}
 
 
 def phase34_calibration(model_id: str) -> dict | None:
     """The Phase 34 out-of-fold probability record for a model, if one was measured."""
-    if not PHASE34_CALIBRATION.is_file():
+    if not safedata.exists(PHASE34_CALIBRATION):
         return None
-    record = json.loads(PHASE34_CALIBRATION.read_text(encoding="utf-8"))
+    record = safedata.load(PHASE34_CALIBRATION)
     return (record.get("models") or {}).get(model_id) or None
 
 
 def phase34_campaign_coverage(model_id: str) -> dict | None:
     """The Phase 34 cross-campaign coverage record for a model, if one was measured."""
-    if not PHASE34_COVERAGE.is_file():
+    if not safedata.exists(PHASE34_COVERAGE):
         return None
-    record = json.loads(PHASE34_COVERAGE.read_text(encoding="utf-8"))
+    record = safedata.load(PHASE34_COVERAGE)
     return (record.get("models") or {}).get(model_id) or None
 
 
@@ -125,9 +127,9 @@ def measured_calibration(model_id: str) -> dict | None:
     Read from disk on every call and cross-checked against the model's own decision: a record that
     exists but disagrees with the artifact's accuracy is not a calibration of that model.
     """
-    if not CALIBRATION_EVIDENCE.is_file():
+    if not safedata.exists(CALIBRATION_EVIDENCE):
         return None
-    record = json.loads(CALIBRATION_EVIDENCE.read_text(encoding="utf-8"))
+    record = safedata.load(CALIBRATION_EVIDENCE)
     entry = (record.get("models") or {}).get(model_id)
     if not entry:
         return None
@@ -152,7 +154,7 @@ def sha256_of(path: Path) -> str:
 
 
 def audit() -> dict:
-    registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+    registry = safedata.load(REGISTRY)
     catalogue = {row["modelId"]: row for row in workflow.model_catalogue()["models"]}
     served = research.model_registry()["models"]
     corpus = evidence.corpus()["passages"]
@@ -163,14 +165,14 @@ def audit() -> dict:
     # Artifacts that are deliberately retained but not served. Declared in `research` so an
     # undeclared leftover card is still an orphan, and checked below so a "retained" artifact can
     # never quietly keep a catalogue row.
-    retained_cards = {f"{model_id}.json" for model_id in research.RETIRED_MODEL_IDS}
+    retained_cards = {f"{model_id}" for model_id in research.RETIRED_MODEL_IDS}
 
     # ---------------------------------------------------------------- 1. checksums
     for entry in registry["models"]:
         model_id = entry["id"]
         path = ROOT / entry["artifact"]
-        registered_names.add(path.name)
-        exists = path.is_file()
+        registered_names.add(path.stem)
+        exists = safedata.exists(path)
         check(f"artifact-exists:{model_id}", exists, entry["artifact"])
         if not exists:
             continue
@@ -179,8 +181,8 @@ def audit() -> dict:
               f"registry={entry['sha256'][:16]}… disk={actual[:16]}…")
         superseded = entry.get("supersedes")
         if superseded:
-            superseded_names.add(f"{superseded}.json")
-        artifact = json.loads(path.read_text(encoding="utf-8"))
+            superseded_names.add(f"{superseded}")
+        artifact = safedata.load(path)
 
         # ------------------------------------------------------------ 3. provenance
         provenance = {field: artifact.get(field) for field in
@@ -353,9 +355,9 @@ def audit() -> dict:
                 check(f"served-model-not-category-6:{model_id}", category != 6,
                       "a served model is classified as an unsupported prediction")
         explanation_flag = catalogue.get(model_id, {}).get("explanationAvailable")
-        explanation_file = ARTIFACTS / f"{model_id}-explanation.json"
-        check(f"explanation-flag:{model_id}", bool(explanation_flag) == explanation_file.is_file(),
-              f"flag={explanation_flag} file={explanation_file.name} exists={explanation_file.is_file()}")
+        explanation_file = ARTIFACTS / f"{model_id}-explanation"
+        check(f"explanation-flag:{model_id}", bool(explanation_flag) == safedata.exists(explanation_file),
+              f"flag={explanation_flag} file={explanation_file.name} exists={safedata.exists(explanation_file)}")
 
         rows.append({
             "id": model_id,
@@ -385,14 +387,15 @@ def audit() -> dict:
         })
 
     # ------------------------------------------------------- 2. no unregistered artifacts
-    for path in sorted(ARTIFACTS.glob("*.json")):
-        if path.name in {"registry.json", *NON_MODEL_ARTIFACTS} or path.name.endswith("-explanation.json"):
+    for path in safedata.records(ARTIFACTS):
+        name = path.stem
+        if name in {"registry", *NON_MODEL_ARTIFACTS} or name.endswith("-explanation"):
             continue
-        if path.name in registered_names or path.name in superseded_names:
+        if name in registered_names or name in superseded_names:
             continue
-        if path.name in retained_cards:
+        if name in retained_cards:
             continue
-        check(f"artifact-registered:{path.name}", False, "artifact on disk is neither registered nor superseded")
+        check(f"artifact-registered:{name}", False, "artifact on disk is neither registered nor superseded")
     check("no-orphan-artifacts", not any(c["check"].startswith("artifact-registered:") for c in CHECKS),
           "every artifact is registered or explicitly superseded")
 
@@ -424,12 +427,12 @@ def audit() -> dict:
         predecessor = entry.get("supersedes")
         if not predecessor:
             continue
-        predecessor_path = ARTIFACTS / f"{predecessor}.json"
-        check(f"predecessor-kept:{entry['id']}", predecessor_path.is_file(),
-              f"{predecessor}.json was removed instead of kept")
-        if predecessor_path.is_file():
-            old = json.loads(predecessor_path.read_text(encoding="utf-8"))
-            new = json.loads((ROOT / entry["artifact"]).read_text(encoding="utf-8"))
+        predecessor_path = ARTIFACTS / f"{predecessor}"
+        check(f"predecessor-kept:{entry['id']}", safedata.exists(predecessor_path),
+              f"{predecessor} was removed instead of kept")
+        if safedata.exists(predecessor_path):
+            old = safedata.load(predecessor_path)
+            new = safedata.load(ROOT / entry["artifact"])
             check(f"predecessor-not-overwritten:{entry['id']}",
                   old.get("id") == predecessor and old.get("trainedAt") != new.get("trainedAt"),
                   "predecessor artifact looks like it was regenerated by the successor run")
@@ -459,8 +462,8 @@ def audit() -> dict:
               "the OSD-320 finding must state that the shared arrays are not independent evidence")
 
     # No artifact may present OSD-320 as independent evidence for a trained model.
-    for path in sorted(ARTIFACTS.glob("*.json")):
-        if path.name == "registry.json":
+    for path in safedata.records(ARTIFACTS):
+        if path.name == "registry":
             continue
         blob = path.read_text(encoding="utf-8")
         for match in re.finditer(r"OSD-320", blob):
@@ -476,10 +479,10 @@ def audit() -> dict:
     # must carry the same verdict. Three things are checked: the verdict exists and matches the
     # committed evidence file, a failed check cannot be decision grade, and a route that serves a
     # non-decision-grade number must attach the measured reason to its warnings.
-    phase35 = ROOT / "ml" / "evaluation" / "phase35_model_evidence.json"
+    phase35 = ROOT / "ml" / "evaluation" / "phase35_model_evidence"
     recorded_verdicts = {}
-    if phase35.is_file():
-        recorded_verdicts = (json.loads(phase35.read_text(encoding="utf-8")) or {}).get("models") or {}
+    if safedata.exists(phase35):
+        recorded_verdicts = (safedata.load(phase35) or {}).get("models") or {}
     for row in served:
         model_id = row["id"]
         verdict = row.get("evidenceVerdict") or {}
@@ -546,9 +549,9 @@ def audit() -> dict:
         check(f"removed:not-mounted:{route}", route not in mounted_paths(),
               "a removed workflow route is still mounted")
     check("removed:harvest-module-deleted",
-          not (ROOT / "backend" / "app" / "workflows" / "harvest.py").exists(),
+          not safedata.exists(ROOT / "backend" / "app" / "workflows" / "harvest.py"),
           "backend/app/workflows/harvest.py still exists")
-    retained = sorted((ROOT / "ml" / "evaluation").glob("*harvest*.json"))
+    retained = sorted([p for p in safedata.records(ROOT / "ml" / "evaluation") if "harvest" in p.stem])
     check("removed:harvest-evaluations-retained", bool(retained),
           f"{len(retained)} evaluation file(s) retained")
 
@@ -625,7 +628,7 @@ def main() -> int:
         print("\nevery check passed")
     if arguments.write:
         OUT.parent.mkdir(parents=True, exist_ok=True)
-        OUT.write_text(json.dumps(report, indent=1, sort_keys=True), encoding="utf-8")
+        safedata.dump(report, OUT)
         print(f"\nwritten: {OUT.relative_to(ROOT)}")
     return 0 if not report["failures"] else 1
 

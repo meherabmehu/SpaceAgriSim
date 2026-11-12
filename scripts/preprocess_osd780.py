@@ -1,7 +1,7 @@
 """Build the OSD-780 VEG-04A/B microbial-load table from measured plate counts.
 
 Source files (acquired by scripts/acquire_phase6.py, checksums in
-data/metadata/phase6_checksums.json):
+data/metadata/phase6_checksums):
     LSDS-128_Plate Count_Aerobic_Plate_Count_TRANSFORMED.csv
     LSDS-128_Plate Count_Yeast_Mold_Plate_Count_Transformed.csv
     OSD-780_dictionary_DataDictionary_OSD-780.csv
@@ -37,10 +37,12 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 DATA = ROOT / "data"
 RAW = DATA / "raw" / "OSD-780"
 OUT = DATA / "processed" / "mizuna_microbial_load.csv"
-REPORT = DATA / "metadata" / "osd780_quality_report.json"
+REPORT = DATA / "metadata" / "osd780_quality_report"
 
 AEROBIC = "LSDS-128_Plate Count_Aerobic_Plate_Count_TRANSFORMED.csv"
 YEAST = "LSDS-128_Plate Count_Yeast_Mold_Plate_Count_Transformed.csv"
@@ -147,7 +149,7 @@ def main() -> int:
         ],
     }
     REPORT.parent.mkdir(parents=True, exist_ok=True)
-    REPORT.write_text(json.dumps(report, indent=2, ensure_ascii=True, allow_nan=False) + "\n")
+    safedata.dump(report, REPORT)
 
     print(json.dumps({k: report[k] for k in
                       ("rowsWritten", "byAssay", "unparsedSampleNames",

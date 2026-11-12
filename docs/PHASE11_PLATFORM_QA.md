@@ -91,8 +91,8 @@ order the diff between committed and regenerated artifacts is only:
 
 | Artifact | Fields that differ after a full retrain |
 | --- | --- |
-| `ml/evaluation/phase9_osd46_radiation.json` | 2 — the two artifact SHA-256s |
-| `ml/evaluation/phase10_explanations.json` | 1 — `generatedAt` |
+| `ml/evaluation/phase9_osd46_radiation` | 2 — the two artifact SHA-256s |
+| `ml/evaluation/phase10_explanations` | 1 — `generatedAt` |
 | both radiation artifacts | `trainedAt` |
 
 **Every measured number is bit-identical.** This is the difference between a demo that works

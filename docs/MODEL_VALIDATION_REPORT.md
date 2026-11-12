@@ -11,8 +11,8 @@ Reproduce: `python ml/training/train_lettuce_v3.py`, `python scripts/verify_mode
 
 ## 1. Lettuce fresh yield — v3 (the audit's central model)
 
-**Artifact** `ml/artifacts/lettuce-earth-growth-v3.json`, SHA-256
-`885bc54c5e61…` (full value in `ml/artifacts/registry.json`), status **`trained-exploratory`**.
+**Artifact** `ml/artifacts/lettuce-earth-growth-v3`, SHA-256
+`885bc54c5e61…` (full value in `ml/artifacts/registry`), status **`trained-exploratory`**.
 
 ### 1.1 Specification
 

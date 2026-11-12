@@ -36,7 +36,7 @@ Why it fails:
 **Verdict: `experimental` — materially strengthened by Phase 6 validation.**
 
 Reproduce: `python ml/analysis/validate_tomato.py` →
-`docs/phase6/tomato_validation.json`
+`docs/phase6/tomato_validation`
 
 ### Q1 — Batch confounding: **not present**
 

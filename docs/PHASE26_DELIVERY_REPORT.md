@@ -30,17 +30,17 @@ Every SHA above was verified against the remote ref with `git ls-remote` immedia
 | 1 | Dataset expansion report | `docs/PHASE26_DATASET_EXPANSION_REPORT.md` |
 | 2 | Feature restoration report | `docs/PHASE26_FEATURE_RESTORATION_REPORT.md` |
 | 3 | Model improvement report | `docs/PHASE26_MODEL_IMPROVEMENT_REPORT.md` |
-| 4 | Feature-to-dataset coverage matrix | `docs/PHASE26_FEATURE_COVERAGE_MATRIX.md` + `data/research/phase26/feature_readiness.json` |
+| 4 | Feature-to-dataset coverage matrix | `docs/PHASE26_FEATURE_COVERAGE_MATRIX.md` + `data/research/phase26/feature_readiness` |
 | 5 | Acquisition scripts | `scripts/datasets/acquire.py` |
 | 6 | Preprocessing scripts | `scripts/datasets/preprocess.py` |
 | 7 | Discovery registry | `scripts/datasets/registry.py` (17 candidates, A–F) |
-| 8 | Acquisition manifest with hashes | `data/metadata/phase26_acquisition_manifest.json` |
+| 8 | Acquisition manifest with hashes | `data/metadata/phase26_acquisition_manifest` |
 | 9 | Processed tables with quality files | `data/processed/phase26/` (8 tables, 8 quality files) |
-| 10 | Measured-ET validation artefact | `ml/evaluation/phase26_measured_et_validation.json` |
+| 10 | Measured-ET validation artefact | `ml/evaluation/phase26_measured_et_validation` |
 | 11 | This delivery report | `docs/PHASE26_DELIVERY_REPORT.md` |
 
-Supporting regeneration: `data/research/dataset_catalog.json` + `DATASET_CATALOG.md` (28 datasets),
-`data/research/dataset_gap_matrix.json` + `docs/DATASET_GAP_MATRIX.md` (12 gaps, none closed).
+Supporting regeneration: `data/research/dataset_catalog` + `DATASET_CATALOG.md` (28 datasets),
+`data/research/dataset_gap_matrix` + `docs/DATASET_GAP_MATRIX.md` (12 gaps, none closed).
 
 ## 3. Headline results
 
@@ -95,7 +95,7 @@ to survive its own first attempt at exactly that failure mode.
 4. **Commission the water-use trial** with published geometry — still the only route to closing the
    blocking gap, and the new validation artefact now says exactly which two numbers it would need.
 5. **Do not** promote the weather-driven water path to default, and **do not** treat
-   `phase26_measured_et_validation.json` as a validation score for any model.
+   `phase26_measured_et_validation` as a validation score for any model.
 
 ## 6a. Merge record
 

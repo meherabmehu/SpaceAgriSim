@@ -27,6 +27,7 @@ What this does NOT establish
     python3 ml/research/acquire_iot4lettuce.py
 """
 from __future__ import annotations
+import sys
 
 import hashlib
 import io
@@ -37,8 +38,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 RAW = ROOT / "data" / "raw" / "zenodo_20759414"
-MANIFEST = ROOT / "data" / "metadata" / "iot4lettuce_acquisition_manifest.json"
+MANIFEST = ROOT / "data" / "metadata" / "iot4lettuce_acquisition_manifest"
 
 RECORD = "20759414"
 API = f"https://zenodo.org/api/records/{RECORD}"
@@ -55,8 +58,8 @@ MEMBERS = [
     "IoT4Lettuce/14_Utilities/OpenSILEX/scientific_objects.csv",
     "IoT4Lettuce/14_Utilities/OpenSILEX/variables.csv",
     "IoT4Lettuce/14_Utilities/OpenSILEX/devices.csv",
-    "IoT4Lettuce/14_Utilities/OpenSILEX/experiment.json",
-    "IoT4Lettuce/14_Utilities/OpenSILEX/facility.json",
+    "IoT4Lettuce/14_Utilities/OpenSILEX/experiment",
+    "IoT4Lettuce/14_Utilities/OpenSILEX/facility",
 ]
 
 
@@ -177,7 +180,7 @@ def main() -> int:
         },
         "members": extracted,
     }
-    MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(manifest, MANIFEST)
     print(f"\nfetched {handle.bytes_fetched/1024:.0f} KB in {handle.requests} range requests "
           f"of a {ARCHIVE_BYTES/1e9:.1f} GB archive")
     print(f"manifest -> {MANIFEST.relative_to(ROOT)}")

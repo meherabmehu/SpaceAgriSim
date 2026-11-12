@@ -15,6 +15,7 @@ is the expensive error here, not listing one too many.
 """
 
 from __future__ import annotations
+import sys
 
 import json
 import re
@@ -24,9 +25,11 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-SWEEP = ROOT / "data" / "metadata" / "phase9_osdr_sweep.json"
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
+SWEEP = ROOT / "data" / "metadata" / "phase9_osdr_sweep"
 CACHE = ROOT / "data" / "metadata" / "osdr_study_metadata"
-OUT = ROOT / "ml" / "evaluation" / "phase10_gravity_recovery.json"
+OUT = ROOT / "ml" / "evaluation" / "phase10_gravity_recovery"
 
 API = "https://osdr.nasa.gov/osdr/data/osd/meta/{}"
 
@@ -46,10 +49,10 @@ PATTERNS = {
 
 def study_metadata(osd: str) -> dict | None:
     """Fetch and cache one study's ISA metadata. Returns None when unavailable."""
-    cached = CACHE / f"{osd.replace('-', '')}.json"
-    if cached.exists():
+    cached = CACHE / f"{osd.replace('-', '')}"
+    if safedata.exists(cached):
         try:
-            return json.loads(cached.read_text())
+            return safedata.load(cached)
         except json.JSONDecodeError:
             return None
     try:
@@ -59,7 +62,7 @@ def study_metadata(osd: str) -> dict | None:
         return None
     try:
         CACHE.mkdir(parents=True, exist_ok=True)
-        cached.write_text(json.dumps(payload))
+        safedata.dump(payload, cached)
     except OSError:
         pass
     return payload
@@ -99,7 +102,7 @@ def summarise(payload: dict) -> dict:
 
 
 def main() -> int:
-    sweep = json.loads(SWEEP.read_text())
+    sweep = safedata.load(SWEEP)
     usable = sweep["usableProcessedMatrix"]
     print(f"scanning metadata for {len(usable)} studies with a usable processed matrix")
 
@@ -176,7 +179,7 @@ def main() -> int:
             "must come from the study's own factor table, not from the hardware "
             "description."),
     }
-    OUT.write_text(json.dumps(report, indent=2) + "\n")
+    safedata.dump(report, OUT)
     print(f"\nscanned {scanned}, unavailable {len(unavailable)}, candidates {len(hits)}")
     for hit in hits[:12]:
         print(f"  {hit['study']}: {hit['title'][:110]}")

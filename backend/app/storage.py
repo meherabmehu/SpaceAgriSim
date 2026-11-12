@@ -1,4 +1,5 @@
 """Bounded shared scenario history. PostgreSQL in production, SQLite for local demos."""
+import safedata
 import hashlib
 import logging
 import os
@@ -932,10 +933,9 @@ def read_json_artifact(name: str):
     """Read one metadata artifact out of the active data directory, or None when absent."""
     from app.research import DATA
     path = DATA / "metadata" / name
-    if not path.is_file():
+    if not safedata.exists(path):
         return None
-    import json
-    return json.loads(path.read_text())
+    return safedata.load(path)
 
 
 # Older call sites (tests, backup tooling) drop the memoised engine with `database.cache_clear()`.

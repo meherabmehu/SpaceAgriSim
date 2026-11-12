@@ -24,6 +24,7 @@ rather than silently filled.
     python3 ml/research/analyze_projected_climate.py
 """
 from __future__ import annotations
+import sys
 
 import csv
 import json
@@ -32,10 +33,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 PROCESSED = ROOT / "data" / "processed" / "nex_gddp"
-MANIFEST = ROOT / "data" / "metadata" / "nex_gddp_acquisition_manifest.json"
+MANIFEST = ROOT / "data" / "metadata" / "nex_gddp_acquisition_manifest"
 OUT = ROOT / "data" / "research" / "phase36"
-REPORT = OUT / "projected_climate.json"
+REPORT = OUT / "projected_climate"
 
 SITES = ["wageningen_nl", "tucson_us", "singapore_sg", "dhaka_bd", "reykjavik_is", "nairobi_ke"]
 BASELINE = "2000-2004"
@@ -91,7 +94,7 @@ def delta(baseline: dict, future: dict) -> dict:
 
 def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
-    manifest = json.loads(MANIFEST.read_text()) if MANIFEST.exists() else {"files": []}
+    manifest = safedata.load(MANIFEST) if safedata.exists(MANIFEST) else {"files": []}
     blocked: dict[str, int] = {}
     for entry in manifest.get("files", []):
         for site, count in (entry.get("fillCells") or {}).items():
@@ -100,7 +103,7 @@ def main() -> int:
     per_site: dict[str, dict] = {}
     for site in SITES:
         path = PROCESSED / f"{site}.csv"
-        if not path.exists():
+        if not safedata.exists(path):
             per_site[site] = {"status": "UNAVAILABLE", "reason": "processed series missing"}
             continue
         rows = load(site)
@@ -143,7 +146,7 @@ def main() -> int:
         ],
         "sites": per_site,
     }
-    REPORT.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(report, REPORT)
 
     print(f"{'site':<14}{'dT':>7}{'dTmax':>7}{'dVPD':>7}{'dDLI':>7}{'d>30C':>7}{'dPrec':>8}")
     for site, values in per_site.items():

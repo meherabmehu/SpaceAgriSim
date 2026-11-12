@@ -1,3 +1,4 @@
+import safedata
 import hashlib
 import json
 
@@ -144,18 +145,18 @@ def test_withdrawn_artifacts_are_still_on_disk_and_still_checksummed():
     """A withdrawal must not become a deletion: the negative result has to stay reproducible."""
     import hashlib
 
-    registry = json.loads((research.ROOT / "ml" / "artifacts" / "registry.json").read_text())
+    registry = safedata.load(research.ROOT / "ml" / "artifacts" / "registry")
     by_id = {row["id"]: row for row in registry["models"]}
     for model_id in research.RETIRED_MODEL_IDS:
-        path = research.ROOT / "ml" / "artifacts" / f"{model_id}.json"
-        assert path.is_file(), model_id
+        path = research.ROOT / "ml" / "artifacts" / f"{model_id}"
+        assert safedata.exists(path), model_id
         # Two of the three are registered artifacts with a recorded digest; the ET0 emulator
         # shipped a card only (its bundle is a joblib), so it has no registry row to compare with.
         if model_id in by_id:
-            assert hashlib.sha256(path.read_bytes()).hexdigest() == by_id[model_id]["sha256"], model_id
+            assert hashlib.sha256(safedata.bytes(path)).hexdigest() == by_id[model_id]["sha256"], model_id
         else:
             assert model_id == "et0-emulator-v1"
-            assert (research.ROOT / "ml" / "artifacts" / f"{model_id}.joblib").is_file()
+            assert safedata.exists(research.ROOT / "ml" / "artifacts" / f"{model_id}.joblib")
         assert research.RETIRED_MODEL_IDS[model_id].strip()
 
 
@@ -175,8 +176,8 @@ def test_molecular_prediction_schema_is_not_environmental_sliders(scientific_cli
 def test_model_checksum_corruption_rejected(tmp_path, monkeypatch):
     model_id = "lettuce-earth-growth-v2"
     original = research.ARTIFACTS
-    (tmp_path / "registry.json").write_bytes((original / "registry.json").read_bytes())
-    (tmp_path / f"{model_id}.json").write_text('{"tampered": true}')
+    (tmp_path / "registry.py").write_bytes(safedata.bytes(original / "registry"))
+    (tmp_path / f"{model_id}.py").write_text('DATA = {"tampered": True}\n')
     research.load_model.cache_clear()
     monkeypatch.setattr(research, "ARTIFACTS", tmp_path)
     with pytest.raises(ValueError, match="SHA256"):
@@ -185,18 +186,18 @@ def test_model_checksum_corruption_rejected(tmp_path, monkeypatch):
 
 
 def test_all_outer_validation_splits_keep_groups_disjoint():
-    for filename, train_key, test_key in [("mizuna_splits.json", "trainGroups", "testGroups"), ("tomato_splits.json", "trainPlants", "testPlants")]:
-        splits = json.loads((research.ROOT / "ml" / "evaluation" / filename).read_text())
+    for filename, train_key, test_key in [("mizuna_splits", "trainGroups", "testGroups"), ("tomato_splits", "trainPlants", "testPlants")]:
+        splits = safedata.load(research.ROOT / "ml" / "evaluation" / filename)
         assert len(splits) == 4
         assert all(not set(f[train_key]) & set(f[test_key]) for f in splits)
 
 
 def test_tracked_physiological_source_files_have_valid_hashes():
-    checks = research.read_json(research.DATA / "metadata" / "download_checksums.json")
+    checks = research.read_json(research.DATA / "metadata" / "download_checksums")
     assert len(checks) == 28
     for item in checks:
         if item["studyId"] != "OSD-767":
-            assert hashlib.sha256((research.ROOT / item["path"]).read_bytes()).hexdigest() == item["sha256"]
+            assert hashlib.sha256(safedata.bytes(research.ROOT / item["path"])).hexdigest() == item["sha256"]
 
 
 def test_lettuce_external_model_scope_and_experiment_splits(scientific_client):
@@ -212,7 +213,7 @@ def test_lettuce_external_model_scope_and_experiment_splits(scientific_client):
     tipburn=scientific_client.post('/api/predict/lettuce-earth-growth-v1',json=inputs|{'airTemperature':32,'rootTemperature':20})
     assert tipburn.json()['outOfDistribution'] is True
     assert scientific_client.post('/api/predict/lettuce-earth-growth-v1',json=inputs|{'gravity':.38}).status_code==422
-    splits=json.loads((research.ROOT/'ml/evaluation/lettuce_splits.json').read_text())
+    splits=safedata.load(research.ROOT/'ml/evaluation/lettuce_splits')
     assert len(splits)==4 and all(not set(s['trainExperiments'])&set(s['testExperiments']) for s in splits)
 
 
@@ -239,8 +240,8 @@ def test_absolute_microbial_load_model_is_not_served_at_all(scientific_client):
     assert "mizuna-microbial-load-v1" not in models
 
     # The artifact that produced the negative result is retained and unchanged.
-    artifact = json.loads((research.ROOT / "ml" / "artifacts" /
-                           "mizuna-microbial-load-v1.json").read_text())
+    artifact = safedata.load(research.ROOT / "ml" / "artifacts" /
+                           "mizuna-microbial-load-v1")
     for held_out in ("VEG04A", "VEG04B"):
         assert artifact["leaveOneExperimentOut"][held_out]["R2"] < 0
     assert artifact["evidenceBasis"]["transfersToHeldOutExperiment"] is False
@@ -252,8 +253,8 @@ def test_the_relative_model_still_carries_the_reason_its_predecessor_was_withdra
     reason = research.RETIRED_MODEL_IDS["mizuna-microbial-load-v1"]
     assert "VEG-04A" in reason or "VEG04A" in reason
     assert "-0.55" in reason and "-0.58" in reason
-    artifact = json.loads((research.ROOT / "ml" / "artifacts" /
-                           "mizuna-microbial-relative-load-v2.json").read_text())
+    artifact = safedata.load(research.ROOT / "ml" / "artifacts" /
+                           "mizuna-microbial-relative-load-v2")
     assert artifact["supersedes"].startswith("mizuna-microbial-load-v1")
 
 

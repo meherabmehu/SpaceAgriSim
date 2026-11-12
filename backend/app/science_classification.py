@@ -367,7 +367,7 @@ FEATURES: list[Feature] = [
             "longer offers gravity presets."
         ),
         notes=[
-            "The dataset gap is recorded as 'fractional-gravity' in data/research/dataset_gap_matrix.json.",
+            "The dataset gap is recorded as 'fractional-gravity' in data/research/dataset_gap_matrix.",
             "Nothing in the simulator now changes with gravity, so an Earth/Moon/Mars comparison "
             "isolates radiation and resources only.",
         ],

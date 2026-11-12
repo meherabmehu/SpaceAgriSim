@@ -5,8 +5,8 @@ own shortfall: 0.811 and 0.849 coverage against a nominal 0.90. That honesty was
 correct and the defect was real. A stated 90 % interval covering 85 % of held-out
 points is a bug wearing a caveat, and this phase treats it as a bug.
 
-Evidence: `ml/evaluation/phase10_conformal.json`, decision:
-`ml/evaluation/phase10_uncertainty_decision.json`.
+Evidence: `ml/evaluation/phase10_conformal`, decision:
+`ml/evaluation/phase10_uncertainty_decision`.
 
 ## What was measured
 

@@ -11,6 +11,8 @@ import json
 from pathlib import Path
 
 import pytest
+
+import safedata
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
@@ -106,7 +108,7 @@ def test_measurements_endpoint_exposes_absence_as_clearly_as_presence(client_sci
 def test_measurement_catalog_checksum_matches_the_file_on_disk(client_scientific):
     served = client_scientific.get("/api/science/measurements").json()["catalogSha256"]
     on_disk = hashlib.sha256(
-        (ROOT / "data/metadata/phase7_measurement_catalog.json").read_bytes()).hexdigest()
+        safedata.bytes(ROOT / "data/metadata/phase7_measurement_catalog")).hexdigest()
     assert served == on_disk
 
 

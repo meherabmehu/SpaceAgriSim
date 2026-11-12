@@ -12,7 +12,7 @@ Every query is recorded with its hit count so that negative findings are
 reproducible and nobody has to repeat a fruitless search.
 
 Run: python scripts/ntrs_search.py
-Output: data/metadata/phase7_ntrs_search.json
+Output: data/metadata/phase7_ntrs_search
 """
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "data" / "metadata" / "phase7_ntrs_search.json"
+OUT = ROOT / "data" / "metadata" / "phase7_ntrs_search"
 UA = {"User-Agent": "SpaceAgriSim/1.0 (Phase 7 NASA literature recovery)",
       "Accept": "application/json"}
 

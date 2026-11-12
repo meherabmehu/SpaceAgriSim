@@ -7,7 +7,7 @@ mean anything at all?**
 Until now the honest answer was "unvalidated". This document turns that into a tested
 negative, which is a different and stronger position.
 
-Evidence: `ml/evaluation/phase11_ood_uncertainty.json`.
+Evidence: `ml/evaluation/phase11_ood_uncertainty`.
 
 ```
 python ml/training/phase11_ood_uncertainty.py    # ~30 s

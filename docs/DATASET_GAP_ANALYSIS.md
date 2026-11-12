@@ -42,7 +42,7 @@ in-domain cross-validation is not the gate — that is what failed to transfer.
 
 A deep search of NASA sources on 2026-11-09 changed the status of two of the five rows above.
 Both are now backed by measured numbers served at `GET /api/closed-loop`, transcribed into
-`data/literature/nasa_air_and_water.json`.
+`data/literature/nasa_air_and_water`.
 
 | Gap | What was found | Status |
 | --- | --- | --- |

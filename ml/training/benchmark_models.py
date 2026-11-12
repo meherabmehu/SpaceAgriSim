@@ -3,7 +3,7 @@
 Part B asks for a like-for-like comparison of the model families on every task
 that has measured data, evaluated with the same grouping discipline. This script
 is deliberately a *harness*, not a model trainer: it produces no artifacts and
-registers nothing. Its only output is `ml/evaluation/phase7_benchmark.json`.
+registers nothing. Its only output is `ml/evaluation/phase7_benchmark`.
 
 Two rules are enforced rather than documented:
   * every split is grouped by the biological replicate;
@@ -31,8 +31,10 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 DATA = ROOT / "data" / "processed"
-OUT = ROOT / "ml" / "evaluation" / "phase7_benchmark.json"
+OUT = ROOT / "ml" / "evaluation" / "phase7_benchmark"
 SEED = 42
 
 
@@ -272,7 +274,7 @@ def main() -> int:
             ),
         },
     }
-    OUT.write_text(json.dumps(payload, indent=2, ensure_ascii=True, allow_nan=False) + "\n")
+    safedata.dump(payload, OUT)
     print("BENCHMARK COMPLETE")
     for task in tasks:
         verdict_block = task["verdict"]

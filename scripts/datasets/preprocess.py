@@ -13,9 +13,10 @@ Three conventions apply everywhere:
 * an excluded row is counted and its reason recorded, never dropped quietly;
 * a derived quantity is labelled as derived.
 
-Outputs land in ``data/processed/phase26/`` with a matching ``*_quality.json`` per table.
+Outputs land in ``data/processed/phase26/`` with a matching ``*_quality`` per table.
 """
 from __future__ import annotations
+import safedata
 
 import argparse
 import datetime as _dt
@@ -34,7 +35,7 @@ if str(_REPO_ROOT) not in sys.path:  # pragma: no cover - import plumbing
 
 RAW = _REPO_ROOT / "data" / "raw" / "phase26"
 OUT = _REPO_ROOT / "data" / "processed" / "phase26"
-MANIFEST = _REPO_ROOT / "data" / "metadata" / "phase26_acquisition_manifest.json"
+MANIFEST = _REPO_ROOT / "data" / "metadata" / "phase26_acquisition_manifest"
 
 SCHRODER = RAW / "zenodo-schroder-2021-lettuce-pot" / "Data_lettuce_pot_experiment_Schröder_et_al._2021.xlsx"
 GREENLIGHT = RAW / "zenodo-greenlight-2024-lettuce" / "green_light_lettuce_open_data_(1).xlsx"
@@ -83,9 +84,9 @@ def sha256_of(path: Path) -> str:
 
 def _manifest_hash(dataset_id: str) -> str | None:
     """The hash recorded at acquisition, so a preprocessing run is tied to exact bytes."""
-    if not MANIFEST.is_file():
+    if not safedata.exists(MANIFEST):
         return None
-    payload = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    payload = safedata.load(MANIFEST)
     record = payload["datasets"].get(dataset_id) or {}
     for entry in record.get("files", []):
         if entry.get("sha256"):
@@ -109,8 +110,7 @@ def _write(table: pd.DataFrame, name: str, study: str, quality: dict[str, Any]) 
         },
         **quality,
     }
-    (OUT / f"{name}_quality.json").write_text(json.dumps(record, indent=2) + "\n",
-                                              encoding="utf-8")
+    safedata.dump(record, OUT / f"{name}_quality")
     print(f"  wrote {path.name}: {len(table)} rows, {len(table.columns)} columns")
     return path
 

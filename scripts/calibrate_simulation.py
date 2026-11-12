@@ -21,7 +21,7 @@ Normalisation rules (these are the crux; state them or the comparison is junk):
     normalisation is flagged as an assumption, not a measurement.
 
 Run: python scripts/calibrate_simulation.py
-Output: docs/phase6/simulation_calibration.json
+Output: docs/phase6/simulation_calibration
 """
 from __future__ import annotations
 
@@ -33,13 +33,15 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "backend"))
 
 from app.config import simulation_constants as constants  # noqa: E402
 from app.simulation.crops import get_crop, list_crops  # noqa: E402
 from app.simulation import engine, factors, gas_exchange, growth, water  # noqa: E402
 
-OUT = ROOT / "docs" / "phase6" / "simulation_calibration.json"
+OUT = ROOT / "docs" / "phase6" / "simulation_calibration"
 EDEN = ROOT / "data" / "processed" / "eden_iss_2018_biomass_summary.csv"
 
 
@@ -253,7 +255,7 @@ def main() -> int:
         "invariants": invariant_report,
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(payload, indent=2, ensure_ascii=True, allow_nan=False) + "\n")
+    safedata.dump(payload, OUT)
 
     print("=" * 78)
     print("CROP CALIBRATION vs EDEN ISS MEASURED EDIBLE FRESH MASS")

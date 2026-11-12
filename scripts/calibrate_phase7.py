@@ -37,6 +37,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "backend"))
 sys.path.insert(0, str(ROOT / "scripts"))
 
@@ -47,8 +49,8 @@ from app.simulation import engine  # noqa: E402
 
 PROCESSED = ROOT / "data" / "processed"
 OUT_DIR = ROOT / "docs" / "phase7"
-OUT = OUT_DIR / "scientific_calibration.json"
-PHASE6 = ROOT / "docs" / "phase6" / "simulation_calibration.json"
+OUT = OUT_DIR / "scientific_calibration"
+PHASE6 = ROOT / "docs" / "phase6" / "simulation_calibration"
 
 
 def load(name: str) -> list[dict]:
@@ -286,9 +288,9 @@ def check_growth_curve_shape() -> dict:
 
 
 def phase6_suggestions() -> dict:
-    if not PHASE6.is_file():
+    if not safedata.exists(PHASE6):
         return {"available": False}
-    payload = json.loads(PHASE6.read_text())
+    payload = safedata.load(PHASE6)
     calibration = payload.get("calibration", {})
     reviewed = {}
     for crop in ("tomato", "radish"):
@@ -312,7 +314,7 @@ def phase6_suggestions() -> dict:
         }
     return {
         "available": True,
-        "source": "docs/phase6/simulation_calibration.json",
+        "source": "docs/phase6/simulation_calibration",
         "crops": reviewed,
         "verdict": "explicitly-declined",
     }
@@ -351,7 +353,7 @@ def main() -> int:
         "checks": checks,
         "appliedChanges": applied,
         "declinedChanges": [
-            {"source": "Phase 6 simulation_calibration.json", "crops": ["tomato", "radish"],
+            {"source": "Phase 6 simulation_calibration", "crops": ["tomato", "radish"],
              "status": "declined", "detail": phase6_suggestions()},
         ],
         "massBalance": balance,
@@ -403,7 +405,7 @@ def main() -> int:
             print("  -", failure, file=sys.stderr)
         return 1
 
-    OUT.write_text(json.dumps(payload, indent=2, ensure_ascii=True, allow_nan=False) + "\n")
+    safedata.dump(payload, OUT)
     print("CALIBRATION EVIDENCE WRITTEN")
     for check in checks:
         print(f"  {check['parameter'][:52]:<52} {check['verdict']}")

@@ -1,0 +1,25 @@
+"""Data record. Generated - the generator is named inside the record itself."""
+
+DATA = {'id': 'WUR-lettuce',
+ 'sourceType': 'external scientific data (not NASA)',
+ 'sourceUrl': 'https://doi.org/10.4121/5a7472f0-8a67-4ec0-84c9-9d032990d654.v1',
+ 'title': 'Plant Factories Are Heating Up: lettuce growth dataset',
+ 'license': 'CC-BY-4.0',
+ 'creators': 'Esther Meinen, Laura Carotti, Luuk Graamans, Federico Puksic, Michele Butturini, Cecilia '
+             'Stanghellini',
+ 'retrievedAt': '2026-11-06T13:57:33.955648+00:00',
+ 'files': [{'name': 'original_dataset_lettuce.xlsx',
+            'url': 'https://data.4tu.nl/file/5a7472f0-8a67-4ec0-84c9-9d032990d654/6df07236-42b1-4ac4-8fc4-841ff338ec6d',
+            'path': 'data/raw/WUR-lettuce/original_dataset_lettuce.xlsx',
+            'sha256': 'dd947d6a0859a2ec1e2457da8130416e3b7cf950468ae78339fa2849b00fafe6',
+            'bytes': 238769},
+           {'name': 'readme.txt',
+            'url': 'https://data.4tu.nl/file/5a7472f0-8a67-4ec0-84c9-9d032990d654/656d358e-0593-4a58-85fd-fb679d72963b',
+            'path': 'data/raw/WUR-lettuce/readme.txt',
+            'sha256': '668e63afa5f263c08f9c86d1b1adb80ac3051867b7bac9652fc0819f544e8728',
+            'bytes': 3079}],
+ 'conditions': 'Lactuca sativa cv. Batavia Othilie; Earth chambers; 16 h photoperiod; non-limiting water, '
+               'nutrients and CO2. Four experiments, 2018–2019.',
+ 'limitations': ['Not NASA or spaceflight data.',
+                 'Tip-burn-related treatment omissions create selection bias.',
+                 'Plant identifiers are reused across experiments; split by whole experiment.']}

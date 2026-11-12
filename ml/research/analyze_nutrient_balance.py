@@ -29,6 +29,7 @@ stays partially closed rather than being talked into a closure.
     python3 ml/research/analyze_nutrient_balance.py
 """
 from __future__ import annotations
+import sys
 
 import csv
 import datetime as dt
@@ -40,6 +41,8 @@ from pathlib import Path
 import openpyxl
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 RAW = ROOT / "data" / "raw" / "zenodo_17794636"
 OUT = ROOT / "data" / "research" / "phase37"
 PROCESSED = ROOT / "data" / "processed" / "nutrient_dosing"
@@ -157,7 +160,7 @@ def _write_csv(path: Path, rows: list[dict], fieldnames: list[str]) -> None:
 
 
 def main() -> int:
-    if not WORKBOOK.is_file():
+    if not safedata.exists(WORKBOOK):
         raise SystemExit(f"missing {WORKBOOK}; run ml/research/acquire_spectrum_light.py")
     book = openpyxl.load_workbook(WORKBOOK, data_only=True)
 
@@ -279,7 +282,7 @@ def main() -> int:
             "duplicateDeposit": {
                 "doi": "10.5281/zenodo.18804397",
                 "status": "same study, not a second campaign",
-                "evidence": "data/metadata/phase37_acquisition_manifest.json#duplicateCheck",
+                "evidence": "data/metadata/phase37_acquisition_manifest#duplicateCheck",
             },
         },
         "design": {
@@ -342,8 +345,7 @@ def main() -> int:
         ],
     }
     OUT.mkdir(parents=True, exist_ok=True)
-    (OUT / "nutrient_solution.json").write_text(json.dumps(report, indent=2) + "\n",
-                                                encoding="utf-8")
+    safedata.dump(report, OUT / "nutrient_solution")
 
     print(f"regimes parsed: {list(parsed)}")
     for name, h in harvest.items():
@@ -353,7 +355,7 @@ def main() -> int:
     for regime, block in nitrate.items():
         print(f"  NO3-N {regime:11} median {block['medianChangeMgPerLPerDay']:+.4f} mg/L/day over "
               f"{block['intervalCount']} intervals")
-    print(f"\nreport -> {OUT / 'nutrient_solution.json'}")
+    print(f"\nreport -> {OUT / 'nutrient_solution'}")
     return 0
 
 

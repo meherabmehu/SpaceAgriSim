@@ -26,7 +26,7 @@ repository rather than the report:
 
 * `git ls-remote` confirmed `main` at `3bb6754…` before the branch was cut;
 * the audit was re-run from source (`scripts/audit_models.py`), not read from its JSON;
-* `ml/artifacts/registry.json` checksums were recomputed from the artifacts on disk;
+* `ml/artifacts/registry` checksums were recomputed from the artifacts on disk;
 * every evidence path named in the feature matrices was re-checked for existence;
 * the OSD-46 raw file was re-downloaded and its SHA-256 compared with the pinned value;
 * the PostgreSQL suite and the browser suite were both re-run from scratch.
@@ -136,7 +136,7 @@ limitations, 0 high severity.**
 
 `ml/training/phase32_provenance.py` declares, for all nine artifacts, the source URL, source type,
 licence, licence/terms URL, citation, retrieval date, checksum where one exists, served scope and
-archival status. The values are copied from `data/metadata/dataset_manifest.json` and the dataset
+archival status. The values are copied from `data/metadata/dataset_manifest` and the dataset
 catalogue — the records that already held them — rather than inferred from a model name. Every one
 of the 19 audit gaps that concerned a missing `sourceUrl` / `sourceType` / `license` is closed, and
 `scripts/nasa_pipeline.save_json()` applies the table on write, so a retrain cannot drop it again.
@@ -183,7 +183,7 @@ response`, `root-zone water status`, `plant health from imagery`, `future-climat
 
 The record of *why* each was removed — including the searches that were run — is in
 `docs/PHASE31_REMOVED_MODELS.md`, `docs/PHASE30_REMOVED_CAPABILITIES.md`,
-`data/research/phase26/feature_readiness.json` (`phase32.reason`, `phase32.searched`) and
+`data/research/phase26/feature_readiness` (`phase32.reason`, `phase32.searched`) and
 `docs/PHASE32_DATASET_ACQUISITION.md`.
 
 ## 8. Unresolved, non-actionable limitations

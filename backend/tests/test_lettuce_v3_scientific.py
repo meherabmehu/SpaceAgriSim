@@ -17,6 +17,7 @@ model that passes by editing the criterion, the holdout, or the status label is 
 file exists to catch.
 """
 from __future__ import annotations
+import sys
 
 import hashlib
 import json
@@ -32,8 +33,10 @@ from app.routes.research import router
 
 MODEL_ID = "lettuce-earth-growth-v3"
 ROOT = Path(__file__).resolve().parents[2]
-ARTIFACT = ROOT / "ml" / "artifacts" / f"{MODEL_ID}.json"
-REGISTRY = ROOT / "ml" / "artifacts" / "registry.json"
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
+ARTIFACT = ROOT / "ml" / "artifacts" / f"{MODEL_ID}"
+REGISTRY = ROOT / "ml" / "artifacts" / "registry"
 
 # The PeerJ greenhouse conditions, used as a realistic call throughout.
 PEERJ = {"daysAfterTransplant": 28.0, "airTemperature": 27.5, "rootTemperature": 27.5,
@@ -66,9 +69,9 @@ def predict(client: TestClient, **overrides) -> dict:
 # ---------------------------------------------------------------------------
 def test_artifact_checksum_matches_registry():
     """A hand-edited artifact must not serve. This is the check that catches it."""
-    registry = json.loads(REGISTRY.read_text())
+    registry = safedata.load(REGISTRY)
     entry = next(m for m in registry["models"] if m["id"] == MODEL_ID)
-    assert hashlib.sha256(ARTIFACT.read_bytes()).hexdigest() == entry["sha256"]
+    assert hashlib.sha256(safedata.bytes(ARTIFACT)).hexdigest() == entry["sha256"]
 
 
 def test_artifact_is_loadable_through_the_serving_path():
@@ -78,7 +81,7 @@ def test_artifact_is_loadable_through_the_serving_path():
 
 
 def test_artifact_declares_provenance():
-    model = json.loads(ARTIFACT.read_text())
+    model = safedata.load(ARTIFACT)
     assert model["sourceStudy"] and model["sourceUrl"]
     # The training rows are pinned, so "same script, different data" cannot pass as the same model.
     assert len(model["trainingDataSha256"]) == 64
@@ -87,14 +90,14 @@ def test_artifact_declares_provenance():
 
 def test_feature_order_matches_the_domain_block():
     """predict_values feeds features positionally; a reordered list would be silently accepted."""
-    model = json.loads(ARTIFACT.read_text())
+    model = safedata.load(ARTIFACT)
     assert model["features"] == ["daysAfterTransplant", "airTemperature", "rootTemperature",
                                 "dailyLightIntegral"]
     assert set(model["domain"]) == set(model["features"])
 
 
 def test_target_transform_is_declared_and_invertible():
-    model = json.loads(ARTIFACT.read_text())
+    model = safedata.load(ARTIFACT)
     assert model["targetTransform"]["name"] == "log"
     assert research.inverse_target_transform(model, 0.0) == pytest.approx(1.0)
     assert research.inverse_target_transform(model, math.log(250.0)) == pytest.approx(250.0)
@@ -128,7 +131,7 @@ def test_photoperiod_changes_the_prediction_at_fixed_ppfd(client):
 
 
 def test_feature_values_are_inside_the_declared_domain_when_not_flagged(client):
-    model = json.loads(ARTIFACT.read_text())
+    model = safedata.load(ARTIFACT)
     body = predict(client)
     values = {"daysAfterTransplant": body["inputs"]["daysAfterTransplant"],
               "airTemperature": body["inputs"]["airTemperature"],
@@ -172,7 +175,7 @@ def test_density_outside_the_supported_band_is_flagged(client):
 
 
 def test_the_supported_density_band_is_wide_enough_for_the_source_studies(client):
-    model = json.loads(ARTIFACT.read_text())
+    model = safedata.load(ARTIFACT)
     band = model["densityDomain"]["plantsPerM2"]
     assert band["min"] <= 25.0 <= band["max"]      # WUR plant factory
     assert band["min"] <= 48.0 <= band["max"]      # PeerJ greenhouse
@@ -200,7 +203,7 @@ def test_interval_scales_with_density_like_the_point_estimate(client):
 
 
 def test_uncertainty_is_declared_as_out_of_fold_conformal():
-    model = json.loads(ARTIFACT.read_text())
+    model = safedata.load(ARTIFACT)
     assert "conformal" in model["interval"]["kind"].lower()
     assert 0.85 <= model["interval"]["outOfFoldCoverage"] <= 0.95
     # The artifact must say the coverage is descriptive, not independent evidence.
@@ -243,7 +246,7 @@ def test_independent_holdout_failure_is_served_not_hidden(client):
 
 def test_acceptance_criterion_was_not_relaxed():
     """The criterion is a pre-registered constant of the audit, not a tunable."""
-    model = json.loads(ARTIFACT.read_text())
+    model = safedata.load(ARTIFACT)
     assert model["validation"]["independent"]["acceptanceCriterionPct"] == 30.0
 
 
@@ -263,9 +266,9 @@ def test_improvement_over_v2_is_reported_on_the_same_rows(client):
 
 
 def test_registry_and_artifact_agree_on_the_verdict():
-    registry = json.loads(REGISTRY.read_text())
+    registry = safedata.load(REGISTRY)
     entry = next(m for m in registry["models"] if m["id"] == MODEL_ID)
-    model = json.loads(ARTIFACT.read_text())
+    model = safedata.load(ARTIFACT)
     independent = model["validation"]["independent"]
     declared = entry["independentValidation"]
     assert declared["passed"] is independent["passed"]

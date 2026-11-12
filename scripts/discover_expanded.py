@@ -9,7 +9,7 @@ Official endpoints only:
     https://osdr.nasa.gov/osdr/data/osd/files/{n}
 
 Run: python scripts/discover_expanded.py
-Output: data/metadata/phase6_discovery.json
+Output: data/metadata/phase6_discovery
 """
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
-OUT = DATA / "metadata" / "phase6_discovery.json"
+OUT = DATA / "metadata" / "phase6_discovery"
 UA = {"User-Agent": "SpaceAgriSim/1.0 (Phase 6 reproducible discovery)"}
 
 # Verified baseline inventory (13 in the versioned acquisition path + OSD-895).

@@ -5,7 +5,7 @@ The source
 "Optimising Spectral Composition in Hydroponic Lettuce Cultivation: The Role of Green Light, Open
 Data", Zenodo record 20394352, DOI 10.5281/zenodo.20394352, CC BY 4.0. Acquired in Phase 26; this
 script does not re-download it, it re-verifies the file already in the repository against the
-SHA-256 recorded in `data/metadata/phase26_acquisition_manifest.json` and refuses to build if the
+SHA-256 recorded in `data/metadata/phase26_acquisition_manifest` and refuses to build if the
 bytes differ.
 
 The design, transcribed from the workbook's own `Treatment_metadata` sheet
@@ -32,7 +32,7 @@ What is built
 * `light_stress_photosynthesis.csv`- per-plant MultispeQ traits at 28 and 35 days after sowing.
 * `light_stress_pigments.csv`      - per-sample leaf pigment and antioxidant assays, by leaf
                                      position.
-* `light_stress_quality.json`      - what was read, what was dropped and why, with counts.
+* `light_stress_quality`      - what was read, what was dropped and why, with counts.
 
 What is never done
 ------------------
@@ -52,12 +52,14 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "scripts"))
 from nasa_pipeline import save_json, stamp  # noqa: E402
 
 RAW = ROOT / "data" / "raw" / "phase26" / "zenodo-greenlight-2024-lettuce" / \
     "green_light_lettuce_open_data_(1).xlsx"
-MANIFEST = ROOT / "data" / "metadata" / "phase26_acquisition_manifest.json"
+MANIFEST = ROOT / "data" / "metadata" / "phase26_acquisition_manifest"
 OUT_DIR = ROOT / "data" / "processed" / "phase29"
 
 
@@ -149,10 +151,10 @@ PIGMENT_TRAITS = {
 
 
 def verify_raw() -> dict:
-    manifest = json.loads(MANIFEST.read_text())
+    manifest = safedata.load(MANIFEST)
     entry = manifest["datasets"][DATASET_ID]
     recorded = entry["files"][0]["sha256"]
-    body = RAW.read_bytes()
+    body = safedata.bytes(RAW)
     actual = hashlib.sha256(body).hexdigest()
     if actual != recorded:
         raise SystemExit(
@@ -293,7 +295,7 @@ def main() -> None:
             "approximation.",
         ],
     }
-    save_json(out_dir / "light_stress_quality.json", quality)
+    save_json(out_dir / "light_stress_quality", quality)
     print(json.dumps({"raw": raw, "rows": quality["records"], "exclusions": quality["exclusions"]},
                      indent=1)[:1800])
 

@@ -260,9 +260,9 @@ def main() -> int:
         "results": results,
     }
     EVAL.mkdir(parents=True, exist_ok=True)
-    save_json(EVAL / "phase9_rnaseq_candidates.json", payload)
+    save_json(EVAL / "phase9_rnaseq_candidates", payload)
     shippable = [r for r in results if r.get("verdict") == "candidate"]
-    print(f"\nwrote ml/evaluation/phase9_rnaseq_candidates.json")
+    print(f"\nwrote ml/evaluation/phase9_rnaseq_candidates")
     print(f"shippable candidates: {[r['modelId'] for r in shippable] or 'none'}")
     return 0
 

@@ -26,7 +26,7 @@ Two consequences worth stating plainly:
   `npm run build:check` by hand.
 
 `scripts/verify_model_registry.py` gained `--check` for exactly this reason: the CI gate must be able
-to verify without rewriting `docs/phase7/registry_verification.json`. A timestamp-only diff in that
+to verify without rewriting `docs/phase7/registry_verification`. A timestamp-only diff in that
 file had twice been mistaken for a real change, which is the cost of a gate that cannot run read-only.
 
 ## 2. Screenshot store
@@ -35,7 +35,7 @@ file had twice been mistaken for a real change, which is the cost of a gate that
 each phase's baseline, candidate and parent directories, 46.9 MB of exact duplication.
 
 `ml/research/dedupe_screenshots.py` keeps one canonical copy per image, records every removed path in
-`docs/screenshots/MANIFEST.json` with the SHA-256 it shares with the canonical file, and `--check`
+`docs/screenshots/MANIFEST` with the SHA-256 it shares with the canonical file, and `--check`
 fails if a duplicate reappears. The drift scripts resolve a removed path through the manifest, so they
 still compare the same pixels and still report 0.000 % for a capture that was merely duplicated, marking
 the row `identicalCopyOf`.

@@ -49,10 +49,10 @@ Every measured number is bit-identical:
 
 | Artifact | Fields that differ after a full retrain |
 | --- | --- |
-| `ml/evaluation/phase9_osd46_radiation.json` | 2 — the two artifact SHA-256s |
-| `ml/evaluation/phase10_explanations.json` | 1 — `generatedAt` |
-| `ml/artifacts/radiation-quality-osd46-v1.json` | `trainedAt` only |
-| `ml/artifacts/radiation-exposure-osd46-v1.json` | `trainedAt` only |
+| `ml/evaluation/phase9_osd46_radiation` | 2 — the two artifact SHA-256s |
+| `ml/evaluation/phase10_explanations` | 1 — `generatedAt` |
+| `ml/artifacts/radiation-quality-osd46-v1` | `trainedAt` only |
+| `ml/artifacts/radiation-exposure-osd46-v1` | `trainedAt` only |
 
 This is the difference between "the demo works on my machine" and "the demo works from a
 clean checkout": a competition judge who runs the full path now gets a passing gate instead

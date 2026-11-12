@@ -53,7 +53,7 @@ app = FastAPI(
         "NASA and external-data learning experiments. Not validated for spacecraft operations."
     ),
     # Docs live under the API prefix so they stay reachable when only /api/*
-    # is routed to this app (e.g. behind the Vercel rewrite in vercel.json).
+    # is routed to this app (e.g. behind the Vercel rewrite in vercel).
     docs_url=f"{settings.api_prefix}/docs",
     redoc_url=f"{settings.api_prefix}/redoc",
     openapi_url=f"{settings.api_prefix}/openapi.json",

@@ -20,7 +20,7 @@ response. This poster compares two light treatments **at equal PPF** for **lettu
 two of the three crops the simulator models — with n = 20 plants per treatment and printed standard
 deviations.
 
-**What was extracted** (`data/literature/ntrs_supplement.json`):
+**What was extracted** (`data/literature/ntrs_supplement`):
 
 | Crop | Parameter | RB (red+blue LED) | FL (white fluorescent) | Sig. |
 |---|---|---|---|---|

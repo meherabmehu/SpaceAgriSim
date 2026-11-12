@@ -10,6 +10,7 @@ Writes: docs/DATASET_REGISTRY.md
 Exit code is non-zero if a declared dataset file is missing.
 """
 from __future__ import annotations
+import sys
 
 import hashlib
 import json
@@ -17,6 +18,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 DATA = ROOT / "data"
 OUT = ROOT / "docs" / "DATASET_REGISTRY.md"
 
@@ -59,7 +62,7 @@ def code(text: str) -> str:
 
 
 def nasa_studies() -> str:
-    manifest = json.loads((DATA / "metadata" / "dataset_manifest.json").read_text())
+    manifest = safedata.load(DATA / "metadata" / "dataset_manifest")
     rows = []
     for study in manifest["datasets"]:
         used = "served model" if study["id"] in {"OSD-46", "OSD-655", "OSD-767", "OSD-780"} else "corpus / not modelled"
@@ -76,15 +79,15 @@ def nasa_studies() -> str:
 
 def external_sources() -> str:
     rows = []
-    for name in ("external_lettuce.json", "wur_lettuce_rocrate.json"):
+    for name in ("external_lettuce", "wur_lettuce_rocrate"):
         path = DATA / "metadata" / name
-        if not path.is_file():
+        if not safedata.exists(path):
             MISSING.append(str(path))
             continue
-        meta = json.loads(path.read_text())
+        meta = safedata.load(path)
         for item in meta.get("files") or []:
             target = ROOT / item["path"]
-            if target.is_file():
+            if safedata.exists(target):
                 recorded = item.get("sha256")
                 actual = sha256(target)
                 state = "verified" if recorded == actual else "MISMATCH"
@@ -112,8 +115,8 @@ def processed() -> str:
 
 def literature() -> str:
     rows = []
-    for path in sorted(DATA.glob("literature/*.json")):
-        body = json.loads(path.read_text())
+    for path in sorted(DATA.glob("literature/*")):
+        body = safedata.load(path)
         if not isinstance(body, dict):
             continue
         source = body.get("source") or {}
@@ -129,13 +132,13 @@ def literature() -> str:
 
 
 def main() -> int:
-    registry = json.loads((ROOT / "ml" / "artifacts" / "registry.json").read_text())
-    manifest = json.loads((DATA / "metadata" / "dataset_manifest.json").read_text())
+    registry = safedata.load(ROOT / "ml" / "artifacts" / "registry")
+    manifest = safedata.load(DATA / "metadata" / "dataset_manifest")
     _manifest_generated = (manifest.get("generatedAt") or "unknown")[:10]
     _manifest_count = len(manifest["datasets"])
     model_rows = []
     for item in registry["models"]:
-        card = json.loads((ROOT / item["artifact"]).read_text())
+        card = safedata.load(ROOT / item["artifact"])
         model_rows.append([
             code(item["id"]),
             str(card.get("samples")),
@@ -162,7 +165,7 @@ data or the check fails.
 
 ## NASA OSDR studies (metadata only, plus downloaded measurement tables where a model exists)
 
-Source: NASA OSDR official study and file APIs (`data/metadata/dataset_manifest.json`, generated
+Source: NASA OSDR official study and file APIs (`data/metadata/dataset_manifest`, generated
 {_manifest_generated}). {_manifest_count} studies.
 
 {nasa_studies()}

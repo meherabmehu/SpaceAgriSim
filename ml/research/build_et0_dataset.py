@@ -18,9 +18,9 @@ is imputed with a neighbouring day's value, because that leaks the label backwar
 Outputs
 -------
     data/processed/et0_dataset.csv              the modelling table, one row per site-day
-    data/processed/et0_dataset.metadata.json    columns, row counts, checksum, provenance
+    data/processed/et0_dataset.metadata    columns, row counts, checksum, provenance
     data/processed/power_daily/<site>.csv       the harmonized weather, before ET0 is applied
-    ml/evaluation/et0_dataset_quality.json      the quality report, issues and informational
+    ml/evaluation/et0_dataset_quality      the quality report, issues and informational
 
     python3 ml/research/build_et0_dataset.py [--check]
 """
@@ -36,16 +36,18 @@ from datetime import date, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "backend"))
 
 from app.simulation import et0_fao56  # noqa: E402
 
 RAW = ROOT / "data" / "raw" / "nasa_power"
-MANIFEST = ROOT / "data" / "metadata" / "power_acquisition_manifest.json"
+MANIFEST = ROOT / "data" / "metadata" / "power_acquisition_manifest"
 OUT_CSV = ROOT / "data" / "processed" / "et0_dataset.csv"
-OUT_META = ROOT / "data" / "processed" / "et0_dataset.metadata.json"
+OUT_META = ROOT / "data" / "processed" / "et0_dataset.metadata"
 OUT_DAILY = ROOT / "data" / "processed" / "power_daily"
-OUT_QUALITY = ROOT / "ml" / "evaluation" / "et0_dataset_quality.json"
+OUT_QUALITY = ROOT / "ml" / "evaluation" / "et0_dataset_quality"
 
 COLUMNS = [
     "siteId", "date", "dayOfYear", "latitude", "elevationM",
@@ -89,10 +91,10 @@ def canonical_unit(text: str) -> str:
 
 
 def load_manifest() -> dict:
-    if not MANIFEST.is_file():
+    if not safedata.exists(MANIFEST):
         raise SystemExit("run ml/research/acquire_power_climate.py first "
                          f"(missing {MANIFEST.relative_to(ROOT)})")
-    return json.loads(MANIFEST.read_text(encoding="utf-8"))
+    return safedata.load(MANIFEST)
 
 
 def quality_checks(site_id: str, payload: dict, rows: list[dict],
@@ -199,7 +201,7 @@ def quality_checks(site_id: str, payload: dict, rows: list[dict],
 
 def build_site(site_meta: dict) -> tuple[list[dict], dict, dict]:
     raw = ROOT / site_meta["rawFile"]
-    payload = json.loads(raw.read_bytes())
+    payload = safedata.load(raw)
     series = payload["properties"]["parameter"]
     fill = float(payload["header"].get("fill_value", -999.0))
     days = sorted({day for values in series.values() for day in values})
@@ -366,7 +368,7 @@ def main() -> int:
         "bytes": len(body),
         "generatedBy": "ml/research/build_et0_dataset.py",
         "provenance": {
-            "weather": "data/metadata/power_acquisition_manifest.json",
+            "weather": "data/metadata/power_acquisition_manifest",
             "weatherLicense": "NASA POWER, no restrictions, citation requested",
             "physics": "backend/app/simulation/et0_fao56.py (FAO-56, Ex. 17/18/20 asserted)",
         },
@@ -392,11 +394,11 @@ def main() -> int:
     }
 
     if args.check:
-        if not OUT_CSV.is_file() or not OUT_META.is_file():
+        if not safedata.exists(OUT_CSV) or not safedata.exists(OUT_META):
             print(f"MISSING {OUT_CSV.relative_to(ROOT)}; run without --check")
             return 1
-        current = hashlib.sha256(OUT_CSV.read_bytes()).hexdigest()
-        committed = json.loads(OUT_META.read_text(encoding="utf-8"))["sha256"]
+        current = hashlib.sha256(safedata.bytes(OUT_CSV)).hexdigest()
+        committed = safedata.load(OUT_META)["sha256"]
         if current != digest:
             print(f"STALE dataset: on disk {current[:12]} != rebuilt {digest[:12]}")
             return 1
@@ -409,8 +411,8 @@ def main() -> int:
     OUT_CSV.parent.mkdir(parents=True, exist_ok=True)
     OUT_QUALITY.parent.mkdir(parents=True, exist_ok=True)
     OUT_CSV.write_bytes(body)
-    OUT_META.write_text(json.dumps(metadata, indent=1) + "\n", encoding="utf-8")
-    OUT_QUALITY.write_text(json.dumps(quality_report, indent=1) + "\n", encoding="utf-8")
+    safedata.dump(metadata, OUT_META)
+    safedata.dump(quality_report, OUT_QUALITY)
     write_daily(rows_by_site)
 
     print(f"{len(all_rows)} rows from {len(per_site)} sites; {removed_total} removed; "

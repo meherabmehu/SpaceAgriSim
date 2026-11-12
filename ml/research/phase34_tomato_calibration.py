@@ -31,7 +31,7 @@ in this repository. Fitting a temperature on the very rows that are then scored 
 in-sample number presented as a calibration, so no scaling is fitted, and the served surface
 continues to apply none.
 
-Output: ml/evaluation/phase34_probability_calibration.json
+Output: ml/evaluation/phase34_probability_calibration
 Run:    python ml/research/phase34_tomato_calibration.py
 """
 from __future__ import annotations
@@ -45,9 +45,11 @@ import pandas as pd
 from sklearn.metrics import accuracy_score, log_loss
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 OUT_OF_FOLD = ROOT / "ml" / "evaluation" / "tomato_out_of_fold.csv"
-ARTIFACT = ROOT / "ml" / "artifacts" / "tomato-flight-response-v1.json"
-TARGET = ROOT / "ml" / "evaluation" / "phase34_probability_calibration.json"
+ARTIFACT = ROOT / "ml" / "artifacts" / "tomato-flight-response-v1"
+TARGET = ROOT / "ml" / "evaluation" / "phase34_probability_calibration"
 
 MODEL_ID = "tomato-flight-response-v1"
 SEED = 20261107
@@ -112,7 +114,7 @@ def group_bootstrap(metric, groups: np.ndarray, n: int = BOOTSTRAP, seed: int = 
 
 
 def main() -> int:
-    if not OUT_OF_FOLD.is_file():
+    if not safedata.exists(OUT_OF_FOLD):
         raise SystemExit(f"missing {OUT_OF_FOLD.relative_to(ROOT)}; it is produced by "
                          "ml/training/train_models.py and committed with the artifact")
     frame = pd.read_csv(OUT_OF_FOLD)
@@ -123,7 +125,7 @@ def main() -> int:
     if not ((probability >= 0) & (probability <= 1)).all():
         raise SystemExit("out-of-fold probabilities are outside [0, 1]")
 
-    artifact = json.loads(ARTIFACT.read_text(encoding="utf-8"))
+    artifact = safedata.load(ARTIFACT)
     published = float(artifact["metrics"]["accuracy"])
     recomputed = float(accuracy_score(labels, (probability >= 0.5).astype(int)))
     if abs(recomputed - published) > 1e-9:
@@ -224,7 +226,7 @@ def main() -> int:
         "statement about plant health, stress or yield."
     )
 
-    TARGET.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(record, TARGET)
     print(f"{MODEL_ID}: {model['samples']} samples / {model['groups']} plants")
     print(f"  accuracy reproduced {recomputed:.4f} (artifact {published:.4f})")
     print(f"  log loss {model['probability']['logLoss']} "

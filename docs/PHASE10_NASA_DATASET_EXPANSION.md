@@ -24,7 +24,7 @@ clinostat, random positioning, explicit g values, lunar/Mars.
 Patterns were deliberately loose. Missing a study was the expensive error; listing
 extra candidates only costs review time. All 22 candidates, their titles, matched
 patterns and factor tables are recorded in
-`ml/evaluation/phase10_gravity_recovery.json`.
+`ml/evaluation/phase10_gravity_recovery`.
 
 ## What was added
 
@@ -58,7 +58,7 @@ only from 0.6 g upward, and the microgravity-versus-0.34 g distinction is absent
 every framing tried.
 
 The per-sample files are the reason the acquisition took a script rather than a
-download: 36 files are pinned by SHA-256 in `data/metadata/osd346_checksums.json` and
+download: 36 files are pinned by SHA-256 in `data/metadata/osd346_checksums` and
 combined into `data/processed/osd346_partial_gravity.csv`. The 73 MB of raw files are
 not committed; the digests are, so the matrix rebuilds byte-identically.
 

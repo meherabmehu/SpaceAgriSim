@@ -30,6 +30,7 @@ outliers, no fitting on the holdout, and no claim that a random split would have
     python3 ml/training/phase30_harvest_crossstudy.py
 """
 from __future__ import annotations
+import sys
 
 import csv
 import hashlib
@@ -47,8 +48,10 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 DATA = ROOT / "data" / "processed" / "phase30" / "lettuce_multistudy.csv"
-OUT = ROOT / "ml" / "evaluation" / "phase30_harvest_crossstudy.json"
+OUT = ROOT / "ml" / "evaluation" / "phase30_harvest_crossstudy"
 
 SEED = 20261110
 ACCEPTANCE_CRITERION_PCT = 30.0
@@ -339,7 +342,7 @@ def main() -> int:
                                    "was chosen; the split was fixed by SHA-256 and scored once."),
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(payload, indent=1) + "\n", encoding="utf-8")
+    safedata.dump(payload, OUT)
     print(f"written: {OUT.relative_to(ROOT)}")
     return 0
 

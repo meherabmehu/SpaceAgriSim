@@ -17,6 +17,7 @@ actually were before being caught:
 A test that only checked "the JSON parses" would have passed in every one of those cases.
 """
 from __future__ import annotations
+import sys
 
 import json
 import pathlib
@@ -24,18 +25,20 @@ import pathlib
 import pytest
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-LED = ROOT / "data" / "research" / "phase37" / "led_spectrum_response.json"
-NUT = ROOT / "data" / "research" / "phase37" / "nutrient_solution.json"
-MODELS = ROOT / "ml" / "evaluation" / "phase37_model_evidence.json"
-MANIFEST = ROOT / "data" / "metadata" / "phase37_acquisition_manifest.json"
-SEARCH = ROOT / "data" / "metadata" / "phase37_search_log.json"
-CATALOG = ROOT / "data" / "research" / "dataset_catalog.json"
-MATRIX = ROOT / "data" / "research" / "dataset_gap_matrix.json"
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
+LED = ROOT / "data" / "research" / "phase37" / "led_spectrum_response"
+NUT = ROOT / "data" / "research" / "phase37" / "nutrient_solution"
+MODELS = ROOT / "ml" / "evaluation" / "phase37_model_evidence"
+MANIFEST = ROOT / "data" / "metadata" / "phase37_acquisition_manifest"
+SEARCH = ROOT / "data" / "metadata" / "phase37_search_log"
+CATALOG = ROOT / "data" / "research" / "dataset_catalog"
+MATRIX = ROOT / "data" / "research" / "dataset_gap_matrix"
 
 
 def _json(path: pathlib.Path) -> dict:
-    assert path.is_file(), f"missing artefact {path.relative_to(ROOT)}"
-    return json.loads(path.read_text(encoding="utf-8"))
+    assert safedata.exists(path), f"missing artefact {path.relative_to(ROOT)}"
+    return safedata.load(path)
 
 
 # ------------------------------------------------------------------- LED spectrum trial
@@ -136,7 +139,7 @@ def test_every_retained_file_matches_the_publishers_checksum():
     for record in manifest["records"].values():
         for file in record["files"]:
             assert file["checksumVerified"] is True, file["name"]
-            assert (ROOT / file["storedAs"]).is_file(), file["storedAs"]
+            assert safedata.exists(ROOT / file["storedAs"]), file["storedAs"]
 
 
 def test_the_rejected_payload_is_not_retained_but_its_checksum_is():
@@ -149,7 +152,7 @@ def test_the_rejected_payload_is_not_retained_but_its_checksum_is():
     assert eden["retained"] is False
     census = eden["sensorCensus"]
     assert census["power"] == census["current"] == census["voltage"] == census["energy"] == 0
-    assert not (ROOT / "data" / "raw" / "_phase37_inspect").exists()
+    assert not safedata.exists(ROOT / "data" / "raw" / "_phase37_inspect")
 
 
 # ------------------------------------------------------------------- gap adjudication
@@ -178,7 +181,7 @@ def test_a_closed_gap_points_at_the_evidence_that_closed_it():
         if decision and decision["decision"] == "CLOSED":
             assert decision["evidence"], f"{gap['id']} closed with no evidence path"
             for path in decision["evidence"]:
-                assert (ROOT / path).is_file(), f"{gap['id']} cites missing {path}"
+                assert safedata.exists(ROOT / path), f"{gap['id']} cites missing {path}"
 
 
 def test_every_still_open_gap_states_why_it_stays_open():

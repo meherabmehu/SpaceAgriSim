@@ -6,7 +6,7 @@ tell whether a baseline moved because the design changed or because the baseline
 
 ## phase9/
 
-The nine captures that `ml/evaluation/phase9_visual_regression.json` compared against from
+The nine captures that `ml/evaluation/phase9_visual_regression` compared against from
 Phase 9 until Phase 33. They were archived in Phase 34, not deleted, when the baselines were
 regenerated, because every one of them had the wrong canvas size:
 
@@ -25,7 +25,7 @@ regenerated, because every one of them had the wrong canvas size:
 A canvas-size change is the gate's own definition of a moved layout, so from the moment the
 dashboard grew (long before Phase 33) this gate could not pass. That is why it was not run: the
 drift was inherited, not introduced by Phase 34, and
-`ml/evaluation/phase34_visual_drift.json` measures it at three points rather than asserting it.
+`ml/evaluation/phase34_visual_drift` measures it at three points rather than asserting it.
 
 The replacements were captured from the Phase 33 parent commit `e7ee855`, built in a separate
 worktree and photographed with the identical Playwright suite and viewports. Phase 34 itself

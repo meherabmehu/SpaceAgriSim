@@ -1,6 +1,6 @@
 # Phase 13 — Model Reliability Audit
 
-Artifact: `ml/evaluation/phase13_model_audit.json`
+Artifact: `ml/evaluation/phase13_model_audit`
 Script: `python3 scripts/audit_models.py --write` (read-only; exits non-zero on failure)
 Tests: `backend/tests/test_phase13_model_audit.py` (11 tests)
 
@@ -38,8 +38,8 @@ classification change cannot leave a category-6 model answering requests.
 recomputes it rather than trusting the record, so a hand-edited or truncated artifact fails
 `--write`. A test additionally recomputes every digest independently of the audit.
 
-**No orphan artifacts.** Every `ml/artifacts/*.json` is either registered, an explanation file, a
-documented non-model (`tomato_example.json`, a single sample saved by the trainer) or explicitly
+**No orphan artifacts.** Every `ml/artifacts/*.py` is either registered, an explanation file, a
+documented non-model (`tomato_example`, a single sample saved by the trainer) or explicitly
 superseded. An artifact that appears from nowhere is how an untracked model gets served.
 
 **Provenance.** Every artifact must record its source study, method, training time and seed.
@@ -118,7 +118,7 @@ caveat; the audit restates it so it cannot quietly disappear.
 
 ```bash
 python3 scripts/audit_models.py            # report
-python3 scripts/audit_models.py --write    # write ml/evaluation/phase13_model_audit.json
+python3 scripts/audit_models.py --write    # write ml/evaluation/phase13_model_audit
 python3 -m pytest -q backend/tests/test_phase13_model_audit.py
 python3 scripts/verify_model_registry.py   # the Phase 7 checksum gate, 40/40
 ```

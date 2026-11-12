@@ -4,8 +4,8 @@ A targeted search of all **231** OSDR studies that hold a usable processed matri
 against the four questions Phase 11 actually needs answered rather than against "is there
 another dataset".
 
-Evidence: `ml/evaluation/phase11_dataset_discovery.json`,
-`ml/evaluation/phase11_duplicate_audit.json`.
+Evidence: `ml/evaluation/phase11_dataset_discovery`,
+`ml/evaluation/phase11_duplicate_audit`.
 
 ## What was searched, and for what
 

@@ -372,7 +372,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     ok, report = summarise(results)
-    if args.json:
+    if args:
         print(json.dumps({
             "baseUrl": args.base_url,
             "runId": smoke.run_id,

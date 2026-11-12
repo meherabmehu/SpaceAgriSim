@@ -31,8 +31,10 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 DATA = ROOT / "data"
-OUT = ROOT / "docs" / "phase6" / "tomato_validation.json"
+OUT = ROOT / "docs" / "phase6" / "tomato_validation"
 SEED = 42
 
 
@@ -161,7 +163,7 @@ def main():
     report["Q4_tissueScope"]["tissueAlonePredictsLabel"] = False
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(report, indent=2, ensure_ascii=True, allow_nan=False) + "\n")
+    safedata.dump(report, OUT)
     print(json.dumps(report, indent=2))
     print(f"\nwritten: {OUT.relative_to(ROOT)}")
     return 0

@@ -2,11 +2,12 @@
 
     python3 scripts/et0_validation/run_validation.py --start 2021-01-01 --end 2023-12-31
 
-Writes ``data/validation/et0/harmonised_daily.csv`` and ``validation_summary.json``. Every leg
+Writes ``data/validation/et0/harmonised_daily.csv`` and ``validation_summary``. Every leg
 is either computed from data that was actually retrieved, or recorded as not run with the reason.
 Nothing is fabricated and nothing is silently substituted.
 """
 from __future__ import annotations
+import safedata
 
 import argparse
 import csv
@@ -473,10 +474,9 @@ def run(start: str, end: str, out_dir: Path, site_list: list[Site] | None = None
             ],
         },
     }
-    (out_dir / "validation_summary.json").write_text(
-        json.dumps(summary, indent=2, sort_keys=False) + "\n", encoding="utf-8")
+    safedata.dump(summary, out_dir / "validation_summary")
 
-    _log(f"Wrote {csv_path} ({len(all_rows)} rows) and validation_summary.json")
+    _log(f"Wrote {csv_path} ({len(all_rows)} rows) and validation_summary")
     for comparison_id, block in summary["comparisons"].items():
         pooled = block.get("pooled")
         if pooled is None:

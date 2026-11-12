@@ -1,0 +1,88 @@
+"""Data record. Generated - the generator is named inside the record itself."""
+
+DATA = {'schema': 'spaceagrisim.nasa_closed_loop_measurements/1',
+ 'purpose': 'Measured numbers for the two closed-loop questions the simulator used to leave as a disclosed '
+            'gap: how much ethylene a crop stand produces, how sensitive lettuce is to it, and how much '
+            'water a real life-support loop actually recovers. Every value is transcribed from a NASA '
+            'source; none is estimated.',
+ 'transcribedAt': '2026-11-09',
+ 'ethylene': {'whyItMatters': 'In a tightly closed chamber ethylene accumulates from the plants themselves. '
+                              "At 120 ppb it caused epinastic leaf rolling in wheat in NASA's Biomass "
+                              'Production Chamber, and independent chamber work shows lettuce dry weight '
+                              'falling at the same concentrations. A crop model that ignores it can '
+                              'overstate what a sealed habitat will produce.',
+              'production': {'source': 'Wheeler, Mackowiak, Stutte, Sager, Yorio, Ruffe, Fortier, Sharifi, '
+                                       "Knott (1996), 'Ethylene production by plants in a closed "
+                                       "environment', Advances in Space Research 18(4-5):163-166, "
+                                       'doi:10.1016/0273-1177(95)00877-H, PMID 11538797. NASA Kennedy Space '
+                                       'Center, CELSS Biomass Production Chamber (20 m2 stand, 113 m3).',
+                             'chamberConcentrationPpb': {'wheat': 120,
+                                                         'soybean': 60,
+                                                         'lettuce': '40-50',
+                                                         'potato': '40-50'},
+                             'peakProduction': {'value': '0.04-0.06',
+                                                'unit': 'mL m-2 day-1',
+                                                'equivalent': '0.8-1.1 nL g-1 fresh weight h-1',
+                                                'appliesTo': 'rapid growth of lettuce and wheat stands',
+                                                'caveat': 'unadjusted for chamber leakage'},
+                             'secondSource': {'citation': "Wheeler et al. (2004), 'Ethylene production "
+                                                          "throughout growth and development of plants'",
+                                              'peakProduction': '1.6-2.5 nmol m-2 d-1 during rapid growth of '
+                                                                'lettuce and wheat stands, about 0.3-0.5 '
+                                                                'nmol g-1 fresh weight per hour',
+                                              'note': 'Tomato is the exception: a climacteric rise during '
+                                                      'ripening exceeded 500 ppb in the chamber.'}},
+              'lettuceDoseResponse': {'source': "'Effect of ethylene on growth of greenhouse lettuce at "
+                                                "different light and temperature levels', Scientia "
+                                                'Horticulturae, doi:10.1016/0304-4238(89)90082-4',
+                                      'conditions': 'growth chambers, PPFD 50 / 100 / 150 umol m-2 s-1, '
+                                                    '16-24 C',
+                                      'findings': [{'ethyleneNlPerL': 120,
+                                                    'dryWeightReductionPct': '25-50',
+                                                    'note': 'effect generally largest in absolute terms at '
+                                                            'the two highest light levels'},
+                                                   {'ethyleneNlPerL': 55, 'dryWeightReductionPct': '1-25'}],
+                                      'notes': ['The percentage effect was largest at the intermediate light '
+                                                'level.',
+                                                'The effect was unaffected by temperature.',
+                                                'Reduced weight was related to reduced leaf size; ethylene '
+                                                'generally increased leaf number.'],
+                                      'scopeNote': 'These are controlled-chamber dose-response measurements '
+                                                   'on lettuce, not a spaceflight measurement, and they are '
+                                                   'the only quantified lettuce ethylene dose-response '
+                                                   'recovered in this search.'},
+              'relatedNasaReport': {'ntrsId': 19960000867,
+                                    'title': 'Monitoring ethylene emissions from plants cultured for a '
+                                             'controlled ecological life support system',
+                                    'finding': 'Ethylene accumulated to about 60 ppb in BPC wheat growouts; '
+                                               'leaf flecking and rolling were virtually eliminated when '
+                                               'potassium permanganate scrubbing was used.'},
+              'notClaimed': ["No ethylene effect is applied inside the simulator's growth equations. The "
+                             'numbers above are served as a hazard screen next to the simulation, not folded '
+                             'into it.',
+                             'No model of ethylene oxidation, leakage or scrubbing kinetics is offered: none '
+                             'was measured in a form that would support one.']},
+ 'water': {'source': "NASA, 'NASA Achieves Water Recovery Milestone on International Space Station', 20 June "
+                     '2023; ISS Environmental Control and Life Support System (ECLSS).',
+           'issRecovery': {'currentPct': 98,
+                           'previousPct': '93-94',
+                           'achievedBy': 'Brine Processor Assembly added to the Urine Processor Assembly in '
+                                         '2023',
+                           'quote': "Let's say you collect 100 pounds of water on the station. You lose two "
+                                    'pounds of that and the other 98 percent just keeps going around and '
+                                    'around.',
+                           'attribution': 'Christopher Brown, ISS life support systems team'},
+           'implication': {'exampleCrew': 4,
+                           'exampleDays': 900,
+                           'waterWithoutRecyclingKg': 12000,
+                           'waterMakeupAt98PctKg': 250,
+                           'note': "NASA's figure for a four-person, 900-day Mars mission: about 12 tonnes "
+                                   'of water without recycling, about 250 kg of make-up at 98 % closure.'},
+           'useInSimulator': "The simulator's water-recycling control is bounded by this measured range: "
+                             '93-94 % is what the ISS recovered before the brine processor, 98 % is what it '
+                             'reaches now. Anything above 98 % is not a demonstrated capability.'},
+ 'sourcesAudited': ['ntrs.nasa.gov citation 19960000867 (ethylene monitoring, BPC)',
+                    'Advances in Space Research 18(4-5):163-166 (Wheeler et al. 1996), PMID 11538797',
+                    "NASA TM-2020-5008832, 'NASA's Contributions to Vertical Farming' (BPC ethylene "
+                    'accumulation figure, crop yield vs PAR)',
+                    'NASA news release, 20 June 2023 (98 % water recovery, ECLSS)']}

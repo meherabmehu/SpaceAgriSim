@@ -16,9 +16,9 @@ cannot be traced to a file is indistinguishable from an invented one.
 
 | Kind | Passages | Source |
 | --- | --- | --- |
-| `dataset` | 20 | `data/metadata/dataset_manifest.json` + candidates |
-| `model` | 8 | `ml/artifacts/registry.json` |
-| `evaluation` | 10 | `ml/evaluation/phase10_*.json`, `phase11_*.json` |
+| `dataset` | 20 | `data/metadata/dataset_manifest` + candidates |
+| `model` | 8 | `ml/artifacts/registry` |
+| `evaluation` | 10 | `ml/evaluation/phase10_*.py`, `phase11_*.py` |
 | `methodology` | 6 | simulator, split, eligibility and coverage records |
 | `classification` | 3 | `app/science_classification.py` |
 

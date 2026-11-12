@@ -4,9 +4,9 @@ Phase 9 excluded two models: absorbed dose (OSD-782) and gravity (OSD-411). Both
 exclusions were right. Both were also accompanied by explanations that turned out to be
 **partly wrong**, and this document corrects them with measurements.
 
-Evidence: `ml/evaluation/phase10_dose_recovery.json`,
-`ml/evaluation/phase10_partial_gravity.json`,
-`ml/evaluation/phase10_gravity_recovery.json`.
+Evidence: `ml/evaluation/phase10_dose_recovery`,
+`ml/evaluation/phase10_partial_gravity`,
+`ml/evaluation/phase10_gravity_recovery`.
 
 ---
 

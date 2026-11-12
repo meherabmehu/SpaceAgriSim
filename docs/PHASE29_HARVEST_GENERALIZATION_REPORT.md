@@ -14,10 +14,10 @@ Everything in this report is reproducible from four committed artefacts:
 
 | artefact | what it holds |
 |---|---|
-| `ml/training/phase29_harvest_diagnosis.py` → `ml/evaluation/phase29_harvest_diagnosis.json` | pipeline audit, error decomposition, design and domain findings |
-| `ml/training/phase29_harvest_experiments.py` → `ml/evaluation/phase29_harvest_experiments.json` | six candidates, identical grouped folds, selection rule |
-| `ml/training/phase29_harvest_final.py` → `ml/evaluation/phase29_harvest_final.json` | the single holdout scoring of the selected candidate |
-| `ml/training/phase29_interval_audit.py` → `ml/evaluation/phase29_interval_audit.json` | the interval audit, reported separately in `PHASE29_PREDICTION_INTERVAL_REPORT.md` |
+| `ml/training/phase29_harvest_diagnosis.py` → `ml/evaluation/phase29_harvest_diagnosis` | pipeline audit, error decomposition, design and domain findings |
+| `ml/training/phase29_harvest_experiments.py` → `ml/evaluation/phase29_harvest_experiments` | six candidates, identical grouped folds, selection rule |
+| `ml/training/phase29_harvest_final.py` → `ml/evaluation/phase29_harvest_final` | the single holdout scoring of the selected candidate |
+| `ml/training/phase29_interval_audit.py` → `ml/evaluation/phase29_interval_audit` | the interval audit, reported separately in `PHASE29_PREDICTION_INTERVAL_REPORT.md` |
 
 ---
 
@@ -57,14 +57,14 @@ experiments" framing it superficially resembles.
 
 ### A domain declaration that is wrong
 
-`ml/artifacts/lettuce-earth-growth-v3.json` declares `dailyLightIntegral.max = 34.5`. The observed
+`ml/artifacts/lettuce-earth-growth-v3` declares `dailyLightIntegral.max = 34.5`. The observed
 maximum in the training data is **43.2** (750 µmol/m²/s × 16 h). The other three features'
 declarations match observation exactly. So the artifact issues domain warnings on inputs it was in
 fact trained on — 43.2 is inside its data and outside its declared range.
 
 This was **not** repaired. Changing a served artifact's metadata to widen its own domain is a
 scientific decision with a promotion review attached, and it would not change any prediction. It is
-recorded as a defect: `phase29_harvest_diagnosis.json → declaredDomainAudit.dailyLightIntegral`.
+recorded as a defect: `phase29_harvest_diagnosis → declaredDomainAudit.dailyLightIntegral`.
 
 ---
 
@@ -185,8 +185,8 @@ single photoperiod. Nothing in the modelling space fixes that.
 
 ## 6. Consequences carried forward
 
-1. **No v4 artifact was registered.** `ml/artifacts/registry.json` still lists v1–v3 and
-   `lettuce-earth-growth-v4.json` does not exist. A test asserts both.
+1. **No v4 artifact was registered.** `ml/artifacts/registry` still lists v1–v3 and
+   `lettuce-earth-growth-v4.py` does not exist. A test asserts both.
 2. **v3 remains `trained-exploratory`.** The harvest workflow continues to report
    `modelValidatedForForecasting: false` and shows "holdout failed · not a forecast" above the
    prediction.

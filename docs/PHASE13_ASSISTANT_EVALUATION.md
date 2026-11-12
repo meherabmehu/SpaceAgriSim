@@ -1,8 +1,8 @@
 # Phase 13 — Assistant Evaluation: Methods and Measured Results
 
-Artifact: `ml/evaluation/phase13_assistant_eval.json`
+Artifact: `ml/evaluation/phase13_assistant_eval`
 Runner: `python3 scripts/evaluate_assistant.py --compare <rev> --write`
-Benchmark: `backend/tests/data/assistant_benchmark.json` (32 items, 9 categories)
+Benchmark: `backend/tests/data/assistant_benchmark` (32 items, 9 categories)
 Scorer: `backend/app/assistant_eval.py`
 Gate: `backend/tests/test_phase13_assistant.py::test_benchmark_meets_every_expectation`
 

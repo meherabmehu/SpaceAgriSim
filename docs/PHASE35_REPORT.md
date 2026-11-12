@@ -137,7 +137,7 @@ noted:
 **Duplicated evidence.** 115 committed screenshots held only 53 unique images — a capture that does
 not change gets copied into the next phase's baseline, candidate and parent directories. That was
 46.9 MB of exact duplication. `ml/research/dedupe_screenshots.py` keeps one canonical copy per image,
-records every removed path in `docs/screenshots/MANIFEST.json` with the SHA-256 it shares with the
+records every removed path in `docs/screenshots/MANIFEST` with the SHA-256 it shares with the
 canonical file, and `--check` fails if duplicates reappear. The drift scripts resolve a removed path
 through that manifest, so they still compare the same pixels and still report 0.000 % for a capture
 that was merely duplicated, marking the row `identicalCopyOf`. `docs/screenshots` is now 25 MB.

@@ -51,7 +51,7 @@ against documentation.
 
 ## Baseline API latency
 
-`docs/phase8/performance_baseline.json`, measured with `TestClient` on this
+`docs/phase8/performance_baseline`, measured with `TestClient` on this
 machine. Absolute values are machine-specific; the **relative** change is what
 Phase 8 reports.
 

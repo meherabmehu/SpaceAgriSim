@@ -30,7 +30,7 @@ The rule for the whole phase is *never calibrate and evaluate on the same observ
    comparison means anything.
 4. If a metric cannot be measured honestly it is written as null with the reason, never as zero.
 
-Output: ml/evaluation/phase32_radiation_calibration.json
+Output: ml/evaluation/phase32_radiation_calibration
 Run:    python ml/research/phase32_radiation_calibration.py
 """
 from __future__ import annotations
@@ -45,6 +45,8 @@ from sklearn.metrics import accuracy_score, log_loss
 from sklearn.model_selection import LeaveOneGroupOut
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "ml" / "training"))
 
 import phase9_harness as H  # noqa: E402
@@ -52,7 +54,7 @@ import phase9_harness as H  # noqa: E402
 RAW = ROOT / "data" / "raw" / "OSD-46" / "GLDS-46_array_normalized_expression_probeset_GLmicroarray.csv"
 SAMPLES = ROOT / "data" / "processed" / "osd46_radiation_samples.csv"
 ARTIFACTS = ROOT / "ml" / "artifacts"
-TARGET = ROOT / "ml" / "evaluation" / "phase32_radiation_calibration.json"
+TARGET = ROOT / "ml" / "evaluation" / "phase32_radiation_calibration"
 
 CONDITION = {"non-irradiated": "control", "gamma radiation": "gamma", "Fe-56 ion radiation": "hze"}
 SEED = 20261107
@@ -63,7 +65,7 @@ ECE_BINS = 10
 # --------------------------------------------------------------------------- data
 
 def load():
-    if not RAW.is_file():
+    if not safedata.exists(RAW):
         raise SystemExit(
             f"missing {RAW.relative_to(ROOT)}; re-download from "
             "https://nasa-osdr.s3.us-west-2.amazonaws.com/OSD-46/version-6/array/"
@@ -283,7 +285,7 @@ def main() -> int:
     for key, spec in SPECS.items():
         labels = labels_for(key, annotation)
         probability, prediction, classes = out_of_fold(matrix, labels, groups)
-        artifact = json.loads((ARTIFACTS / f"{spec['artifact']}.json").read_text())
+        artifact = safedata.load(ARTIFACTS / f"{spec['artifact']}")
         recomputed = float(accuracy_score(labels, prediction))
         published = float(artifact["metrics"]["accuracy"])
         if abs(recomputed - published) > 1e-9:
@@ -362,7 +364,7 @@ def main() -> int:
         "radiation qualities, doses, organisms or platforms, and the served response says so.",
     ]
     TARGET.parent.mkdir(parents=True, exist_ok=True)
-    TARGET.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(report, TARGET)
     print(f"wrote {TARGET.relative_to(ROOT)}")
     return 0
 

@@ -188,4 +188,4 @@ thing the data cannot support.
 
 `readinessTier: research-ready` for the comparison. The response surface stays **blocked** in the gap
 matrix, at unchanged severity, with the search that established the block recorded in
-`data/research/phase29/environmental_stress_search.json`.
+`data/research/phase29/environmental_stress_search`.

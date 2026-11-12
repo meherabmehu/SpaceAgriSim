@@ -10,6 +10,7 @@ here, plus the ways the feature could quietly start lying:
 * presenting the between-pot spread as a confidence interval.
 """
 from __future__ import annotations
+import safedata
 
 import json
 import sys
@@ -25,7 +26,7 @@ if str(REPO_ROOT / "backend") not in sys.path:
 from app import water_evidence  # noqa: E402
 from app.main import app  # noqa: E402
 
-VALIDATION = REPO_ROOT / "ml" / "evaluation" / "phase26_measured_et_validation.json"
+VALIDATION = REPO_ROOT / "ml" / "evaluation" / "phase26_measured_et_validation"
 BENCHMARK = REPO_ROOT / "data" / "processed" / "phase26" / "schroder2021_lettuce_et.csv"
 
 
@@ -36,7 +37,7 @@ def client() -> TestClient:
 
 @pytest.fixture(scope="module")
 def benchmark_payload() -> dict:
-    if not BENCHMARK.is_file():
+    if not safedata.exists(BENCHMARK):
         pytest.skip("benchmark table not present")
     return water_evidence.benchmark()
 
@@ -101,7 +102,7 @@ def test_benchmark_records_the_measurement_pattern_instead_of_smoothing_it(bench
 
 
 def test_benchmark_endpoint_returns_the_same_payload(client, benchmark_payload):
-    if not BENCHMARK.is_file():
+    if not safedata.exists(BENCHMARK):
         pytest.skip("benchmark table not present")
     response = client.get("/api/water-use-evidence")
     assert response.status_code == 200
@@ -115,9 +116,9 @@ def test_benchmark_endpoint_returns_the_same_payload(client, benchmark_payload):
 # ---------------------------------------------------------------------------------------
 def test_comparison_reproduces_the_independent_validation_artefact(client):
     """The service must agree with the pandas-based artefact, not just with itself."""
-    if not VALIDATION.is_file():
+    if not safedata.exists(VALIDATION):
         pytest.skip("validation artefact not present")
-    artefact = json.loads(VALIDATION.read_text(encoding="utf-8"))
+    artefact = safedata.load(VALIDATION)
     body = client.post("/api/water-use-evidence/compare", json={"crop": "lettuce"}).json()
     assert body["shape"]["spearman"] == artefact["shape"]["spearmanAcrossDays"]
     assert body["shape"]["pairs"] == artefact["shape"]["points"]
@@ -229,26 +230,23 @@ def test_missing_table_reports_unavailable_instead_of_an_estimate(monkeypatch):
 # ---------------------------------------------------------------------------------------
 # the implementation coverage matrix (Phase 27 deliverable)
 # ---------------------------------------------------------------------------------------
-COVERAGE = REPO_ROOT / "data" / "research" / "phase27" / "feature_implementation_coverage.json"
+COVERAGE = REPO_ROOT / "data" / "research" / "phase27" / "feature_implementation_coverage"
 
 
 @pytest.fixture(scope="module")
 def coverage() -> dict:
-    if not COVERAGE.is_file():
+    if not safedata.exists(COVERAGE):
         pytest.skip("coverage matrix not built")
-    return json.loads(COVERAGE.read_text(encoding="utf-8"))
+    return safedata.load(COVERAGE)
 
 
 def test_coverage_covers_every_audited_feature(coverage):
-    readiness = json.loads(
-        (REPO_ROOT / "data" / "research" / "phase26" / "feature_readiness.json").read_text())
+    readiness = safedata.load(REPO_ROOT / "data" / "research" / "phase26" / "feature_readiness")
     assert {f["id"] for f in coverage["features"]} == {f["id"] for f in readiness["features"]}
 
 
 def test_coverage_tiers_agree_with_the_readiness_audit(coverage):
-    readiness = {f["id"]: f["tier"] for f in json.loads(
-        (REPO_ROOT / "data" / "research" / "phase26" / "feature_readiness.json").read_text()
-    )["features"]}
+    readiness = {f["id"]: f["tier"] for f in safedata.load(REPO_ROOT / "data" / "research" / "phase26" / "feature_readiness")["features"]}
     for feature in coverage["features"]:
         assert feature["readinessTier"] == readiness[feature["id"]], feature["id"]
 
@@ -266,7 +264,7 @@ def test_no_layer_is_present_without_evidence(coverage):
             if entry["state"] == "present":
                 assert entry["evidence"], f"{feature['id']}.{name}"
             for path in entry["evidence"]:
-                assert (REPO_ROOT / path).exists(), f"{feature['id']}.{name}: {path}"
+                assert safedata.exists(REPO_ROOT / path), f"{feature['id']}.{name}: {path}"
 
 
 def test_the_complete_workflows_are_the_ones_phase_32_closed(coverage):
@@ -317,7 +315,7 @@ def test_cross_cutting_gaps_carry_evidence_and_a_disposition(coverage):
         assert gap["severity"] in {"resolved", "documented-limitation"}
         assert gap["disposition"].strip()
         for path in gap["evidence"]:
-            assert (REPO_ROOT / path).exists(), (gap["id"], path)
+            assert safedata.exists(REPO_ROOT / path), (gap["id"], path)
 
 
 def test_coverage_markdown_is_not_stale():

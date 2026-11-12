@@ -80,7 +80,7 @@ $ cd backend && python -m pytest -q
 PostgreSQL DSN, as documented in Phase 4.
 
 > Caveat: this run used the sandbox's Python 3.13 / FastAPI 0.162. The
-> repository pins `python 3.12.10` in `ml/artifacts/registry.json` and
+> repository pins `python 3.12.10` in `ml/artifacts/registry` and
 > `.python-version`. Version drift is noted in `docs/PHASE6_PROGRESS.md` but did
 > not affect the assertions.
 
@@ -111,7 +111,7 @@ API during this audit (see `docs/NASA_DATASET_EXPANSION.md`).
 | `tomato-flight-response-v1` | OSD-767 | 36 | 21 | macro-F1 0.805, ROC-AUC 0.941 | `experimental` |
 | `lettuce-earth-growth-v1` | WUR/4TU (not NASA) | 1,648 | 4 | R² 0.812, MAE 38.95 g | `experimental` |
 
-Artifacts are portable JSON with SHA-256 entries in `ml/artifacts/registry.json`;
+Artifacts are portable JSON with SHA-256 entries in `ml/artifacts/registry`;
 the backend verifies checksums at load time (`backend/app/research.py::load_model`).
 No pickle is used. This is a sound design and was preserved.
 
@@ -155,7 +155,7 @@ These are recorded here because they drive Phase 6 work:
    `Total = mean(4 MMD replicate weighings) + crew consumption`, while 6/6
    ground rows satisfy `Total = harvested leaf mass + broken-leaf mass`. Only
    the ground arm records leaf counts. Full detail in
-   `ml/analysis/audit_osd655_mass.py` and `docs/phase6/osd655_mass_audit.json`.
+   `ml/analysis/audit_osd655_mass.py` and `docs/phase6/osd655_mass_audit`.
 2. **OSD-655 CSV header under-labels the MMD block.** The header declares two
    blank sub-headers for three extra populated replicate columns, so
    `Consumption Avg. (g)` lands on a replicate value and `Return Samples (g)`

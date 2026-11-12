@@ -85,8 +85,8 @@ Read this the way the evidence files do:
 * The mizuna intervals degrade mildly across campaigns (0.87–0.89 against nominal 0.90). Both
   directions were evaluated; calibration and evaluation never shared a campaign.
 
-Artefacts: `ml/evaluation/phase34_probability_calibration.json`,
-`ml/evaluation/phase34_cross_campaign_coverage.json`, reproducible with
+Artefacts: `ml/evaluation/phase34_probability_calibration`,
+`ml/evaluation/phase34_cross_campaign_coverage`, reproducible with
 `ml/research/phase34_tomato_calibration.py` and
 `ml/research/phase34_cross_campaign_coverage.py`.
 
@@ -131,7 +131,7 @@ emulator's withdrawal, `mizuna-harvest-v1`'s negative R²) all stay exactly as t
 ## 5. Visual regression
 
 Detail in `PHASE34_VISUAL_REGRESSION.md`, measurement in
-`ml/evaluation/phase34_visual_drift.json`.
+`ml/evaluation/phase34_visual_drift`.
 
 * Rebuilt the **Phase 33 parent commit `e7ee855`** in a worktree and ran the identical Playwright
   suite and viewports on both trees; all three image sets are committed.
@@ -146,7 +146,7 @@ Detail in `PHASE34_VISUAL_REGRESSION.md`, measurement in
   sizes, and add the three `water-evidence-*` captures the suite had been producing but nothing
   was gating. No tolerance changed, no baseline written from failing output.
 * Gate result: **12/12 PASS at 0.000 % differing**, recorded in
-  `ml/evaluation/phase9_visual_regression.json`.
+  `ml/evaluation/phase9_visual_regression`.
 
 ## 6. Bundle and performance
 

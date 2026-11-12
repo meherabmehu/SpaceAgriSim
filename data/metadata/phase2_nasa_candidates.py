@@ -1,0 +1,26 @@
+"""Data record. Generated - the generator is named inside the record itself."""
+
+DATA = {'datasets': [{'id': 'OSD-895',
+               'title': 'Biomass Production of the EDEN ISS Space Greenhouse in Antarctica During the 2018 '
+                        'Experiment Phase',
+               'sourceUrl': 'https://osdr.nasa.gov/bio/repo/data/studies/OSD-895',
+               'sourceType': 'NASA OSDR terrestrial analogue',
+               'downloadUrl': 'https://osdr.nasa.gov/geode-py/ws/studies/OSD-895/download?source=datamanager&file=OSD-895_metadata_OSD-895-ISA.zip',
+               'license': 'Public OSDR access; retain attribution and comply with OSDR terms',
+               'licenseUrl': 'https://science.nasa.gov/reference/osdr-help-terms-and-conditions/',
+               'file': {'path': 'data/raw/OSD-895/OSD-895_metadata_OSD-895-ISA.zip',
+                        'bytes': 72795,
+                        'sha256': '6e30ec49a946f55b944f63100a8b88f17ac6195f9d3617c7ce818a00d2cacf88'},
+               'processedTable': 'data/processed/eden_iss_2018_biomass_summary.csv',
+               'rowCount': 19,
+               'targets': ['mean edible freshweight (kg/m2)', 'aboveground/belowground dry biomass (g/m2)',
+                           'harvest age (days)'],
+               'classification': 'useful for scientific calibration',
+               'trainingEligibility': 'not trainable as a general model without cycle-level observations and '
+                                      'protocol harmonization',
+               'limitations': ['Terrestrial Antarctica analogue, not spaceflight.',
+                               'Rows mix species/cultivars and batch/spread harvest conventions.',
+                               'Freshweight range field must not be expanded into pseudo-replicates.',
+                               'Metadata table reports summaries rather than independent plant-level time '
+                               'series.'],
+               'acquiredAt': '2026-11-06T16:17:32.710999+00:00'}]}

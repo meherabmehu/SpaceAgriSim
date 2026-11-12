@@ -26,7 +26,7 @@ No deployment was performed. Nothing in this report claims production verificati
 | `radiation-dose-osd782-v1` | balanced 0.361 vs 0.333 chance, p = 0.2475; dose confounded with processing order | `ml/evaluation/excluded/` |
 | `gravity-reorientation-osd411-v1` | balanced 0.500, p = 0.6931; failed every transfer direction | `ml/evaluation/excluded/` |
 
-`ml/artifacts/registry.json` holds 8 entries and every SHA-256 is re-verified by the
+`ml/artifacts/registry` holds 8 entries and every SHA-256 is re-verified by the
 test suite. A test asserts the two excluded models are absent from the registry and
 return 404 from the API.
 

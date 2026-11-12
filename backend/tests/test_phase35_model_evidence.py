@@ -6,7 +6,7 @@ claim holds at the boundary a user actually meets - the catalogue row and the HT
 than only in the artifact.
 
 Nothing here re-fits or re-scores a model. Every number asserted below is read from
-`ml/evaluation/phase35_model_evidence.json` or from a card that a script wrote.
+`ml/evaluation/phase35_model_evidence` or from a card that a script wrote.
 """
 from __future__ import annotations
 
@@ -17,27 +17,29 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "backend"))
 
 from app import research  # noqa: E402
 
-EVIDENCE = ROOT / "ml" / "evaluation" / "phase35_model_evidence.json"
+EVIDENCE = ROOT / "ml" / "evaluation" / "phase35_model_evidence"
 ARTIFACTS = ROOT / "ml" / "artifacts"
 
 
 def evidence() -> dict:
-    return json.loads(EVIDENCE.read_text(encoding="utf-8"))
+    return safedata.load(EVIDENCE)
 
 
 def card(model_id: str) -> dict:
-    return json.loads((ARTIFACTS / f"{model_id}.json").read_text(encoding="utf-8"))
+    return safedata.load(ARTIFACTS / f"{model_id}")
 
 
 def test_the_evidence_file_covers_every_registered_model():
     record = evidence()
     assert record["schema"] == "spaceagrisim.model_evidence/1"
-    registered = {path.stem for path in ARTIFACTS.glob("*.json")
-                  if json.loads(path.read_text(encoding="utf-8")).get("id")}
+    registered = {path.stem for path in safedata.records(ARTIFACTS)
+                  if safedata.load(path).get("id")}
     assert registered <= set(record["models"]), sorted(registered - set(record["models"]))
 
 
@@ -103,7 +105,7 @@ def test_the_promoted_model_earned_it_from_its_own_recorded_rule():
         if isinstance(value, bool):
             assert value is True, f"promotion term {name} is not satisfied"
     basis = record["evidenceBasis"]
-    assert "phase34_cross_campaign_coverage.json" in basis["intervalsEmpiricallyCalibratedEvidence"]
+    assert "phase34_cross_campaign_coverage" in basis["intervalsEmpiricallyCalibratedEvidence"]
     verdict = record["evidenceVerdict"]
     assert verdict["decisionGrade"] is True
     coverage = next(c for c in verdict["checks"] if c["check"].startswith("cross-campaign"))

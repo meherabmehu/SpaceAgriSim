@@ -96,8 +96,10 @@ test("water demand workflow runs from the page and matches the API", async ({ pa
   await expect(page.getByRole("rowheader", { name: "reference-calculation" })).toBeVisible();
   await expect(page.getByRole("rowheader", { name: "measured-observation" }).first()).toBeVisible();
 
+  // Same capture ceiling as the stress panel below: the water-demand journey is taller than a
+  // phone viewport's full-page capture limit, so the phone evidence is the visible viewport.
   await testInfo.attach("water-demand-results", {
-    body: await page.screenshot({ fullPage: true }),
+    body: await page.screenshot({ fullPage: testInfo.project.name !== "mobile" }),
     contentType: "image/png",
   });
   expect(errors).toEqual([]);

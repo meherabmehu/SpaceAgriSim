@@ -204,7 +204,7 @@ def audit_lettuce() -> dict:
 def audit_tomato() -> dict:
     import json as _json
 
-    artifact = _json.loads((ROOT / "ml" / "artifacts" / "tomato-flight-response-v1.json").read_text())
+    artifact = _json.loads((ROOT / "ml" / "artifacts" / "tomato-flight-response-v1").read_text())
     metrics = artifact["metrics"]
     print(f"\ntomato-flight-response: {artifact['samples']} samples, "
           f"{artifact['groups']} plant groups, acc {metrics['accuracy']:.3f}")
@@ -244,7 +244,7 @@ def main() -> int:
                      "against predicting the mean rather than against nothing."),
         "models": [audit_mizuna_harvest(), audit_lettuce(), audit_tomato()],
     }
-    save_json(EVALUATION / "phase10_weak_model_audit.json", report)
+    save_json(EVALUATION / "phase10_weak_model_audit", report)
 
     print("\n--- decisions")
     for entry in report["models"]:

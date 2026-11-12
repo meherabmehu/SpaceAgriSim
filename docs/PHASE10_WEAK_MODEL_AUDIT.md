@@ -6,7 +6,7 @@ can be improved, and a model limited by its evidence cannot. Retuning the second
 kind is how a project talks itself into believing a 14-row dataset supports a
 predictor.
 
-Measurements are in `ml/evaluation/phase10_weak_model_audit.json`.
+Measurements are in `ml/evaluation/phase10_weak_model_audit`.
 
 ## Summary
 

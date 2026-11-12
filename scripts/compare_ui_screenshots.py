@@ -32,6 +32,8 @@ import numpy as np
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 # BASELINE holds the committed reference images and must never be written to by a
 # capture run. FRESH holds what the Playwright suite just rendered.
 #
@@ -41,7 +43,7 @@ ROOT = Path(__file__).resolve().parents[1]
 BASELINE = ROOT / "docs" / "screenshots"
 FRESH = ROOT / "frontend" / "test-results" / "screenshots"
 SHOTS = BASELINE  # kept for the baseline lookups below
-OUT = ROOT / "docs" / "phase7" / "ui_preservation.json"
+OUT = ROOT / "docs" / "phase7" / "ui_preservation"
 PIXEL_THRESHOLD = 16  # summed RGB difference treated as a changed pixel
 
 
@@ -200,7 +202,7 @@ def main() -> int:
     baselines = {}
     for name in ("mission-desktop", "mission-tablet", "mission-mobile"):
         path = SHOTS / f"{name}.png"
-        if path.is_file():
+        if safedata.exists(path):
             stored = run_bytes(
                 ["git", "show", f"{args.baseline}:docs/screenshots/{name}.png"], ROOT)
             if stored.returncode == 0 and stored.stdout[:4] == b"\x89PNG":
@@ -213,7 +215,7 @@ def main() -> int:
     missing = []
     for name, baseline_path in baselines.items():
         current = FRESH / f"{name}.png"
-        if current.is_file():
+        if safedata.exists(current):
             comparisons[name] = diff_image(baseline_path, current)
         else:
             missing.append(name)
@@ -245,7 +247,7 @@ def main() -> int:
             "boundaries and change the document height - it does not."
         ),
     }
-    OUT.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n")
+    safedata.dump(payload, OUT)
 
     if missing:
         print(f"no fresh capture for {missing} - run the Playwright suite, or drop "

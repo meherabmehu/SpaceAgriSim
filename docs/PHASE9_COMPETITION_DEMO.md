@@ -136,10 +136,10 @@ python3 scripts/package_runtime_data.py
 cd backend && python3 -m pytest -q      # 261 passed
 
 # 5. see the models answer
-curl -s localhost:8000/api/models/radiation-quality-osd46-v1/reference-profiles > /tmp/p.json
+curl -s localhost:8000/api/models/radiation-quality-osd46-v1/reference-profiles > /tmp/p.py
 python3 - <<'EOF'
 import json, urllib.request
-p = json.load(open('/tmp/p.json'))
+p = json.load(open('/tmp/p.py'))
 body = {"expression": dict(zip(p["features"], p["profiles"]["hze"]))}
 request = urllib.request.Request(
     "http://localhost:8000/api/predict/radiation-quality-osd46-v1",

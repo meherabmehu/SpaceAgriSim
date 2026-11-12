@@ -13,6 +13,9 @@ Usage:
     python scripts/db_restore_verify.py backups/spaceagrisim-....dump --database-url postgresql+psycopg://...
 """
 from __future__ import annotations
+import sys as _sys, pathlib as _pathlib   # the repository root holds safedata/
+_sys.path.insert(0, str(_pathlib.Path(__file__).resolve().parents[1]))
+import safedata
 
 import argparse
 import hashlib
@@ -26,7 +29,7 @@ from pathlib import Path
 
 
 def sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    return hashlib.sha256(safedata.bytes(path)).hexdigest()
 
 
 def inventory(connection: sqlite3.Connection) -> dict:
@@ -74,20 +77,20 @@ def verify_postgres(backup: Path, database_url: str) -> list[str]:
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Verify a SpaceAgriSim database backup.")
     parser.add_argument("backup", help="path to the backup file")
-    parser.add_argument("--manifest", help="path to the manifest (default: <backup>.manifest.json)")
+    parser.add_argument("--manifest", help="path to the manifest (default: <backup>.manifest, a YAML record)")
     parser.add_argument("--database-url", help="target PostgreSQL URL for restore drills")
     args = parser.parse_args(argv)
 
     backup = Path(args.backup)
-    if not backup.is_file():
+    if not safedata.exists(backup):
         print(f"backup not found: {backup}", file=sys.stderr)
         return 1
     manifest_path = Path(args.manifest) if args.manifest else \
-        backup.with_suffix(backup.suffix + ".manifest.json")
-    if not manifest_path.is_file():
+        backup.with_suffix(backup.suffix + ".manifest")
+    if not safedata.exists(manifest_path):
         print(f"manifest not found: {manifest_path}", file=sys.stderr)
         return 1
-    manifest = json.loads(manifest_path.read_text())
+    manifest = safedata.load(manifest_path)
 
     problems = []
     digest = sha256(backup)

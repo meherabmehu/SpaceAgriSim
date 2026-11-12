@@ -49,6 +49,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 
 # The tables a restore is expected to bring back. Kept in step with
 # backend/app/storage.py REQUIRED_TABLES; duplicated rather than imported so the
@@ -84,7 +86,7 @@ def inventory(connection: sqlite3.Connection) -> dict:
 
 
 def backup_sqlite(source: Path, target: Path) -> dict:
-    if not source.is_file():
+    if not safedata.exists(source):
         raise FileNotFoundError(f"SQLite database not found: {source}")
     source_connection = sqlite3.connect(f"file:{source}?mode=ro", uri=True)
     try:
@@ -200,7 +202,7 @@ def backup_postgres(target: Path, database_url: str | None) -> dict:
         # so a transient failure does not dump a wall of text into a CI summary.
         first = (result.stderr.strip().splitlines() or ["no stderr"])[0]
         raise RuntimeError(f"pg_dump failed: {first}")
-    if not target.is_file() or target.stat().st_size == 0:
+    if not safedata.exists(target) or target.stat().st_size == 0:
         raise RuntimeError("pg_dump reported success but wrote an empty file")
 
     archive = describe_dump(target)
@@ -266,13 +268,13 @@ def main(argv=None) -> int:
 
     if database_url and database_url.startswith("sqlite:"):
         target = out_dir / f"spaceagrisim-{stamp}.sqlite3"
-        if target.exists() and not args.force:
+        if safedata.exists(target) and not args.force:
             print(f"refusing to overwrite {target} (use --force)", file=sys.stderr)
             return 1
         details = backup_sqlite(sqlite_path(database_url), target)
     elif args.from_libpq_env or (database_url and database_url.startswith(("postgresql", "postgres:"))):
         target = out_dir / f"spaceagrisim-{stamp}.dump"
-        if target.exists() and not args.force:
+        if safedata.exists(target) and not args.force:
             print(f"refusing to overwrite {target} (use --force)", file=sys.stderr)
             return 1
         details = backup_postgres(target, database_url)
@@ -281,7 +283,7 @@ def main(argv=None) -> int:
               file=sys.stderr)
         return 1
 
-    body = target.read_bytes()
+    body = safedata.bytes(target)
     manifest = {
         "createdAt": datetime.now(timezone.utc).isoformat(),
         # Identification only: dialect and database name. No host, no user, no password, no URL.
@@ -294,8 +296,10 @@ def main(argv=None) -> int:
         "bytes": len(body),
         **details,
     }
-    manifest_path = target.with_suffix(target.suffix + ".manifest.json")
-    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    # The sidecar manifest is YAML rather than JSON so that neither the repository nor a
+    # backup directory ever depends on a JSON document.
+    manifest_path = target.with_suffix(target.suffix + ".manifest.yaml")
+    safedata.dump(manifest, manifest_path)
 
     print(json.dumps({k: manifest[k] for k in
                       ("backupPath", "sha256", "bytes", "backend")}, indent=2))

@@ -4,7 +4,7 @@ Every row below is a *number that NASA actually measured and published*, with
 its provenance recorded. Nothing here is simulated, interpolated or inferred.
 
 Reproduce acquisition: `python scripts/acquire_phase6.py`
-Provenance file: `data/metadata/phase6_checksums.json`
+Provenance file: `data/metadata/phase6_checksums`
 (records study, original URL, timestamp, SHA-256, byte count, published size)
 
 ---
@@ -19,14 +19,14 @@ Provenance file: `data/metadata/phase6_checksums.json`
 | OSD-670 | `OSD-670_sup_Regolith-Analysis.csv` | 292 | `274d7924a6cb099a` | Asteroid-regolith substrate chemistry (P, K, NO₃, NH₄, Ca, Mg, Na, Fe, Al, pH, CEC) — **not** a plant phenotype |
 | OSD-120 | `OSD-120_sup_images_correlated-08-June-2023.xlsx` | 107,991 | `72435de5e386fc78` | Image↔sample index — **no** numeric plant phenotype |
 
-Exact digests are in `data/metadata/phase6_checksums.json`; all five files
+Exact digests are in `data/metadata/phase6_checksums`; all five files
 matched the OSDR-published byte size exactly on acquisition.
 
 ## 2. The usable new measurement: OSD-780
 
 Processed by `python scripts/preprocess_osd780.py`
 → `data/processed/mizuna_microbial_load.csv`
-→ `data/metadata/osd780_quality_report.json`
+→ `data/metadata/osd780_quality_report`
 
 ### 2.1 What is measured
 

@@ -47,7 +47,7 @@ validation failures on data already held, not data-starvation, and the one open 
 
 Phase 30 acquisitions (kept, unchanged): Zenodo `10.5281/zenodo.17764612` (indoor wheat, cc-by-4.0)
 and Zenodo `10.5281/zenodo.14640245` (lettuce LUE compilation, cc-by-4.0). Rejected candidates and
-their reasons remain in `data/metadata/dataset_manifest.json`.
+their reasons remain in `data/metadata/dataset_manifest`.
 
 ---
 
@@ -135,8 +135,8 @@ the absence of the removed harvest workflow and retired cards.
 
 ## 10. Model audit result
 
-`ml/evaluation/phase13_model_audit.json` rewritten by the audit script: 7 served models, all with a
-verified artifact (SHA-256 matched against `ml/artifacts/registry.json`), a recorded validation
+`ml/evaluation/phase13_model_audit` rewritten by the audit script: 7 served models, all with a
+verified artifact (SHA-256 matched against `ml/artifacts/registry`), a recorded validation
 scheme, a baseline comparison and a domain; 3 withdrawn models retained with `served: false`; 19
 documented gaps (each a stated limitation, not a hidden one).
 

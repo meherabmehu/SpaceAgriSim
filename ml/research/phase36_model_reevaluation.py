@@ -26,6 +26,7 @@ evidence about that model, and the model's verdict stays exactly where Phase 35 
     python3 ml/research/phase36_model_reevaluation.py [--check]
 """
 from __future__ import annotations
+import sys
 
 import argparse
 import re
@@ -37,12 +38,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 ARTIFACTS = ROOT / "ml" / "artifacts"
-REGISTRY = ARTIFACTS / "registry.json"
-PHASE35 = ROOT / "ml" / "evaluation" / "phase35_model_evidence.json"
-IOT4 = ROOT / "data" / "research" / "phase36" / "iot4lettuce_water_cultivar.json"
+REGISTRY = ARTIFACTS / "registry"
+PHASE35 = ROOT / "ml" / "evaluation" / "phase35_model_evidence"
+IOT4 = ROOT / "data" / "research" / "phase36" / "iot4lettuce_water_cultivar"
 RAW_IOT4 = ROOT / "data" / "raw" / "zenodo_20759414"
-OUTPUT = ROOT / "ml" / "evaluation" / "phase36_model_reevaluation.json"
+OUTPUT = ROOT / "ml" / "evaluation" / "phase36_model_reevaluation"
 
 SERVED = (
     "lettuce-earth-growth-v1",
@@ -58,27 +61,27 @@ LETTUCE_MODELS = ("lettuce-earth-growth-v1", "lettuce-earth-growth-v2",
 
 
 def sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    return hashlib.sha256(safedata.bytes(path)).hexdigest()
 
 
 def campaign_domain() -> dict:
     """Measure the independent campaign on the axes the lettuce models declare."""
     inside = RAW_IOT4 / "03_Climate" / "inside.csv"
     temperature: list[float] = []
-    if inside.exists():
-        raw = inside.read_bytes().decode("cp1252")
+    if safedata.exists(inside):
+        raw = safedata.bytes(inside).decode("cp1252")
         for row in csv.DictReader(raw.splitlines()):
             column = next((c for c in row if c.startswith("temperature")), None)
             if column and row[column]:
                 temperature.append(float(row[column]))
 
     # The campaign's own dates come from the experiment record rather than from arithmetic on
-    # file names. experiment.json is a concatenation of several OpenSILEX objects, so the first
+    # file names. experiment is a concatenation of several OpenSILEX objects, so the first
     # object is read and the two date fields are taken from it.
-    experiment = (RAW_IOT4 / "14_Utilities" / "OpenSILEX" / "experiment.json").read_bytes()
-    text = experiment.decode("utf-8-sig")
-    start = re.search(r'"start_date"\s*:\s*"(\d{4}-\d{2}-\d{2})"', text).group(1)
-    end = re.search(r'"end_date"\s*:\s*"(\d{4}-\d{2}-\d{2})"', text).group(1)
+    experiment = safedata.load(RAW_IOT4 / "14_Utilities" / "OpenSILEX" / "experiment")
+    record = next(o for o in experiment
+                  if isinstance(o, dict) and "start_date" in o and "end_date" in o)
+    start, end = record["start_date"], record["end_date"]
     campaign_days = (date.fromisoformat(end) - date.fromisoformat(start)).days
 
     # The destructive harvest is the only measured fresh weight. The export also carries a
@@ -125,20 +128,25 @@ def main() -> int:
                         help="fail when the committed file disagrees with a recomputation")
     args = parser.parse_args()
 
-    registry = json.loads(REGISTRY.read_text())
-    phase35 = json.loads(PHASE35.read_text())
+    registry = safedata.load(REGISTRY)
+    phase35 = safedata.load(PHASE35)
     hashes = {entry["id"]: entry["sha256"] for entry in registry["models"]}
     domain = campaign_domain()
 
     models: dict[str, dict] = {}
     for model_id in SERVED:
-        artifact_path = ARTIFACTS / f"{model_id}.json"
-        artifact = json.loads(artifact_path.read_text())
+        artifact_path = ARTIFACTS / f"{model_id}"
+        artifact = safedata.load(artifact_path)
         observed_sha = sha256(artifact_path)
         prior = phase35["models"].get(model_id, {})
 
         record = {
             "artifactSha256": observed_sha,
+            # The digest is over the artifact file as stored. Since the storage migration that
+            # file is the Python data module holding the same payload this audit scored, not a
+            # JSON document, so the basis is stated rather than implied.
+            "hashBasis": (f"SHA-256 of {artifact_path.relative_to(ROOT).as_posix()}, the stored "
+                          "artifact file. The payload is unchanged by the storage format."),
             "artifactUnchanged": observed_sha == hashes.get(model_id),
             "verdictBefore": prior.get("verdict"),
             "decisionGradeBefore": prior.get("decisionGrade"),
@@ -196,8 +204,8 @@ def main() -> int:
             "splitUnit": "whole campaign, never individual rows",
         },
         "newEvidence": {
-            "iot4lettuce": str(IOT4.relative_to(ROOT)) if IOT4.exists() else None,
-            "et0MeasurementValidation": "data/research/phase36/et0_measurement_validation.json",
+            "iot4lettuce": str(IOT4.relative_to(ROOT)) if safedata.exists(IOT4) else None,
+            "et0MeasurementValidation": "data/research/phase36/et0_measurement_validation",
         },
         "models": models,
         "counts": {
@@ -213,7 +221,7 @@ def main() -> int:
     }
 
     if args.check:
-        existing = json.loads(OUTPUT.read_text())
+        existing = safedata.load(OUTPUT)
         if existing.get("models", {}).keys() != payload["models"].keys():
             print("FAIL: model set differs from the committed evaluation")
             return 1
@@ -224,7 +232,7 @@ def main() -> int:
         print("OK: reevaluation matches the committed file")
         return 0
 
-    OUTPUT.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(payload, OUTPUT)
     for model_id, record in models.items():
         print(f"{model_id:<34} {record['outcome']:<16} decision-grade "
               f"{record['decisionGradeBefore']} -> {record['decisionGradeAfter']}")

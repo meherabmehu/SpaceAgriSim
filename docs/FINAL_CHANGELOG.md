@@ -53,7 +53,7 @@ instead of reading a file.
 **Files** `ml/research/build_light_stress_dataset.py`, `backend/tests/test_phase29_datasets.py`
 
 The builder gained `--out-dir` (default unchanged). The test builds into a temporary directory,
-compares four CSVs byte-for-byte and `light_stress_quality.json` field-by-field with `generatedAt`
+compares four CSVs byte-for-byte and `light_stress_quality` field-by-field with `generatedAt`
 removed, then asserts the committed files are untouched. Previously the test ran over the committed
 outputs, rewrote `generatedAt` on every run, left the tree dirty, and never compared the quality record
 — the file carrying the licence, source digest and exclusions.

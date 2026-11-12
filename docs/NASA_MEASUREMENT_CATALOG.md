@@ -2,7 +2,7 @@
 
 The twelve targets requested in Phase 7, each with the status of the evidence and
 what that evidence can actually carry. This document is generated from
-`data/metadata/phase7_measurement_catalog.json`, which is itself built from the
+`data/metadata/phase7_measurement_catalog`, which is itself built from the
 extraction CSVs by `scripts/build_measurement_catalog.py` — a target cannot cite a
 value that was never extracted.
 

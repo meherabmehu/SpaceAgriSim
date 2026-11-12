@@ -9,7 +9,7 @@ Phase 10 also stated that neither deposit carries a sequencing-run identifier.
 
 **That statement was wrong for OSD-346**, and correcting it resolves the contradiction.
 
-Evidence: `ml/evaluation/phase11_gravity_batch.json`,
+Evidence: `ml/evaluation/phase11_gravity_batch`,
 `ml/training/phase11_gravity_batch.py`.
 
 ---

@@ -85,7 +85,7 @@ DEFAULT_CROP = "lettuce"
 # Phase 30 removed the fractional-gravity response entirely: there is no gravity multiplier, no
 # gravity input and no gravity control anywhere in the simulator. No open dataset measures crop yield
 # across gravity levels, so any coefficient would have been invented. The gap is recorded in
-# data/research/dataset_gap_matrix.json and docs/PHASE30_REMOVED_CAPABILITIES.md.
+# data/research/dataset_gap_matrix and docs/PHASE30_REMOVED_CAPABILITIES.md.
 EARTH_BACKGROUND_RADIATION_MGY_PER_DAY = 0.01
 EARTH_AMBIENT_CO2_PPM = 420.0  # also the reference point of the CO2 response curve
 EARTH_REFERENCE_WATER_AVAILABILITY = 100.0

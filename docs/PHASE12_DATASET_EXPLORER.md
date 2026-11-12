@@ -51,7 +51,7 @@ OSD-320 is a **second deposit**, not an independent radiation study. It stays li
 data is real and usable — but `countsAsIndependentStudy: false`, and it is excluded from
 every independent count. The explorer's warning box quotes the numeric proof rather than
 asserting equality by name, and cites
-`ml/evaluation/phase11_duplicate_audit.json#numericProof`.
+`ml/evaluation/phase11_duplicate_audit#numericProof`.
 
 The consequence is stated too: OSD-320 must not be used as a validation study for OSD-46 or
 for any radiation model trained on it. Cross-study validation needs a deposit of *different*

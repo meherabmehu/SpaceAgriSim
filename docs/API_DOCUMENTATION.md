@@ -1,6 +1,6 @@
 # API documentation
 
-Run from `backend`: `python -m uvicorn app.main:app --reload --port 8000`. Interactive OpenAPI: `/api/docs`; machine schema `/api/openapi.json`.
+Run from `backend`: `python -m uvicorn app.main:app --reload --port 8000`. Interactive OpenAPI: `/api/docs`; machine schema `/api/openapi.py`.
 
 ## Scientific inputs
 
@@ -42,7 +42,7 @@ History is a shared demonstration workspace with bounded retention, not a privat
 
 ## Phase 19: accounts, sharing, benchmarks and operator routes
 
-These are the routes added for the competitive build. All of them are also in `/api/openapi.json`;
+These are the routes added for the competitive build. All of them are also in `/api/openapi.py`;
 this table adds what a schema cannot say — the refusal behaviour and what each number means.
 
 | Endpoint | Behaviour |
@@ -96,8 +96,8 @@ Every `/api/predict/*` response and every row of `/api/models` carries:
   "summary": "one sentence for a reader",
   "reason": "the measurement behind the verdict",
   "checks": [ { "check": "...", "criterion": "...", "measured": 0.0, "passed": false,
-                "groups": 6, "detail": "...", "evidence": "ml/evaluation/....json" } ],
-  "evidence": "ml/evaluation/phase35_model_evidence.json"
+                "groups": 6, "detail": "...", "evidence": "ml/evaluation/phase36_model_reevaluation.py" } ],
+  "evidence": "ml/evaluation/phase35_model_evidence"
 },
 "decisionGrade": false
 ```

@@ -23,7 +23,7 @@ exactly (≤0.05 g, allowing 2-dp rounding).
 
 > Enforcement: `ml/analysis/audit_osd655_mass.py` asserts both reconstructions
 > and fails the build if the arithmetic stops holding.
-> Output: `docs/phase6/osd655_mass_audit.json`.
+> Output: `docs/phase6/osd655_mass_audit`.
 
 **Consequence:** the 14-row pooled mizuna table mixes two definitions. The
 `flight` feature therefore partly encodes a protocol difference. The model is
@@ -97,7 +97,7 @@ covariate in the microbial model, where it legitimately conditions the CFU/g
 denominator.
 
 **Enforcement:** stated in `docs/NASA_MEASUREMENT_INVENTORY.md` §2.1,
-`data/metadata/osd780_quality_report.json` (`unitsNote`), and the model artifact's
+`data/metadata/osd780_quality_report` (`unitsNote`), and the model artifact's
 `limitations[2]`.
 
 ## H8 — Molecular expression is not a plant phenotype
@@ -159,7 +159,7 @@ OSD-895 ships only a PDF. `eden_iss_2018_biomass_summary.csv` is a **manual
 transcription** of a table from that paper, and every artifact that touches it
 says so. It is never described as a machine-readable NASA dataset.
 
-**Enforcement:** `data/metadata/dataset_manifest.json` and
+**Enforcement:** `data/metadata/dataset_manifest` and
 `scripts/calibrate_simulation.py` (`sourceCaveat`).
 
 ## H15 — Calibration ≠ independent validation

@@ -1,6 +1,6 @@
 # Phase 29 Workflow Coverage Matrix
 
-Generated from `data/research/phase29/workflow_readiness.json` on 2026-11-10 by `ml/research/build_phase29_readiness.py`. Edit the builder, not this file.
+Generated from `data/research/phase29/workflow_readiness` on 2026-11-10 by `ml/research/build_phase29_readiness.py`. Edit the builder, not this file.
 
 This is the third question the project asks about its own features. Phase 26 asked *what may a claim say*, Phase 27 asked *which layers of a feature exist*, and this asks *can a user actually walk the question from a source to a rendered result, and where does the walk stop*. It supersedes `PHASE27_FEATURE_COVERAGE_MATRIX.md` without overwriting it: that file is the record of what was true then.
 
@@ -82,7 +82,7 @@ These are not to-do items. Each is blocked by the absence of data, and the produ
 
 | Capability | Blocked by | What the user sees instead |
 |---|---|---|
-| **A continuous response surface in spectral composition, PPFD, photoperiod, CO2, temperature or humidity** `environmental-stress-response-surface` | no open dataset varies any of these over a yield response in lettuce; the search that established this is data/research/phase29/environmental_stress_search.json | the workflow offers four named measured regimes and marks every other environmental factor as unsupported, in the response as well as in the UI |
+| **A continuous response surface in spectral composition, PPFD, photoperiod, CO2, temperature or humidity** `environmental-stress-response-surface` | no open dataset varies any of these over a yield response in lettuce; the search that established this is data/research/phase29/environmental_stress_search | the workflow offers four named measured regimes and marks every other environmental factor as unsupported, in the response as well as in the UI |
 | **Growth or yield under lunar or Martian gravity** `fractional-gravity` | no fractional-gravity crop dataset exists in any open repository | the simulator refuses the claim and the factor remains data-blocked |
 | **Converting an irrigation deficit into a yield loss** `yield-from-water-deficit` | no crop yield-response factor (Ky) exists in this repository | the irrigation schedule reports stress days and a relative transpiration deficit, and explicitly declines the conversion |
 

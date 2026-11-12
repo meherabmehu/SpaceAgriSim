@@ -110,8 +110,8 @@ def main() -> int:
         ),
     }
     EVAL.mkdir(parents=True, exist_ok=True)
-    save_json(EVAL / "phase9_osd46_sensitivity.json", payload)
-    print("\nwrote ml/evaluation/phase9_osd46_sensitivity.json")
+    save_json(EVAL / "phase9_osd46_sensitivity", payload)
+    print("\nwrote ml/evaluation/phase9_osd46_sensitivity")
     return 0
 
 

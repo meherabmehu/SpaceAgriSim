@@ -47,10 +47,10 @@ in the phase's own headline number**, which is corrected in `ce3fff0`.
 | Acquisition scripts | `scripts/datasets/{registry,acquire,preprocess}.py` | verified: hashes, sizes, magic bytes, and the manifest's counts follow from files on disk |
 | Raw downloads | 5 files, 2.5 MB | verified: SHA-256 recomputed, matches the manifest, sizes 94 KB–1.5 MB |
 | Processed tables | 8 CSVs + 8 quality JSONs | **one defect found** — see §4 |
-| Validation artefact | `ml/evaluation/phase26_measured_et_validation.json` | regenerated with corrected inputs |
-| Catalogue | `dataset_catalog.json` + `DATASET_CATALOG.md` (28 datasets) | verified: counts match, `--check` clean, every class justified |
-| Gap matrix | `dataset_gap_matrix.json` + `DATASET_GAP_MATRIX.md` (12 gaps) | verified: `--check` clean after regeneration |
-| Readiness audit | `feature_readiness.json`, `build_feature_readiness.py`, coverage matrix | verified: validator rejects every fabricated tier it is given |
+| Validation artefact | `ml/evaluation/phase26_measured_et_validation` | regenerated with corrected inputs |
+| Catalogue | `dataset_catalog` + `DATASET_CATALOG.md` (28 datasets) | verified: counts match, `--check` clean, every class justified |
+| Gap matrix | `dataset_gap_matrix` + `DATASET_GAP_MATRIX.md` (12 gaps) | verified: `--check` clean after regeneration |
+| Readiness audit | `feature_readiness`, `build_feature_readiness.py`, coverage matrix | verified: validator rejects every fabricated tier it is given |
 | Reports | 4 Phase 26 documents | corrected where they quoted the wrong numbers |
 | Tests | `test_phase26_datasets.py`, `test_phase23_reference_et0.py` | verified: 40 tests, all passing |
 

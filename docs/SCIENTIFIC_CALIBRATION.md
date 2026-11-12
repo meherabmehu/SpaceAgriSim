@@ -1,7 +1,7 @@
 # Scientific Simulation Calibration & Invariant Audit — Phase 6
 
 Reproduce: `python scripts/calibrate_simulation.py`
-Output: `docs/phase6/simulation_calibration.json`
+Output: `docs/phase6/simulation_calibration`
 
 ---
 

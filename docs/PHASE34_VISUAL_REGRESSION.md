@@ -34,7 +34,7 @@ docs/screenshots/historical/phase9/*.png  the pre-repair baselines, archived
 
 ## 2. The three-point measurement
 
-`ml/research/phase34_visual_drift.py` → `ml/evaluation/phase34_visual_drift.json`. It uses the
+`ml/research/phase34_visual_drift.py` → `ml/evaluation/phase34_visual_drift`. It uses the
 gate's own metric: identical canvas size, plus the share of pixels whose largest channel delta
 exceeds 16.
 
@@ -103,7 +103,7 @@ PASS water-evidence-tablet.png               0.000% differing
 PASS water-evidence-mobile.png               0.000% differing
 ```
 
-`ml/evaluation/phase9_visual_regression.json` therefore records twelve genuine passes against
+`ml/evaluation/phase9_visual_regression` therefore records twelve genuine passes against
 twelve committed baselines, all captured from the tree this phase started on.
 
 ## 4. A flaky capture, repaired rather than tolerated

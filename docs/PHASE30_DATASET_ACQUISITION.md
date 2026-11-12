@@ -6,9 +6,9 @@ rejected with the reason it was rejected.
 
 Machine-readable copies:
 
-- `data/metadata/phase30_acquisition_manifest.json` — datasets, rejections, transformations
-- `data/processed/phase30/quality.json` — per-dataset unit map, environment ranges, missingness
-- `data/research/dataset_catalog.json` — both acquisitions entered as class A
+- `data/metadata/phase30_acquisition_manifest` — datasets, rejections, transformations
+- `data/processed/phase30/quality` — per-dataset unit map, environment ranges, missingness
+- `data/research/dataset_catalog` — both acquisitions entered as class A
 
 Raw files are committed under `data/raw/phase30/` with the hashes below. They are immutable: the
 builder reads them, never writes to them.
@@ -125,7 +125,7 @@ OSDR records were used from their committed extracts rather than re-queried.
 Recorded verbatim in the manifest because a silent transformation is how unit mixing starts:
 
 1. Column names mapped to unit-carrying names; the map is in the builder, and every mapping is
-   written into `quality.json` as `unitMap[field] = {unit, modelled}`.
+   written into `quality` as `unitMap[field] = {unit, modelled}`.
 2. **No imputation.** Blanks stay blank; coverage is reported per field.
 3. **No unit conversion.** Published units are carried in the column name.
 4. Experiment-level aggregation computes the mean of sub-plot yields and **refuses to average an

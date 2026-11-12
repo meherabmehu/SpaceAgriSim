@@ -6,6 +6,7 @@ the defect was real. Phase 10 recalibrated them, and these tests exist so the fi
 cannot quietly rot back into a disclaimed number.
 """
 from __future__ import annotations
+import sys
 
 import json
 from pathlib import Path
@@ -17,6 +18,8 @@ from fastapi.testclient import TestClient
 from app.routes.research import router
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 EVALUATION = ROOT / "ml" / "evaluation"
 
 @pytest.fixture
@@ -59,8 +62,8 @@ def test_recalibration_did_not_promote_any_model():
     built to avoid.
     """
     # Status lives in the artifact, not the registry entry.
-    registry = json.loads((ROOT / "ml" / "artifacts" / "registry.json").read_text())
-    statuses = {m["id"]: json.loads((ROOT / m["artifact"]).read_text()).get("status")
+    registry = safedata.load(ROOT / "ml" / "artifacts" / "registry")
+    statuses = {m["id"]: safedata.load(ROOT / m["artifact"]).get("status")
                 for m in registry["models"]}
     # A withdrawn artifact keeps its exploratory status: removal is not a promotion either.
     assert statuses["mizuna-microbial-load-v1"] == "trained-exploratory"
@@ -99,8 +102,8 @@ def test_uncertainty_study_is_reproducible():
 
 def test_scientific_claims_about_coverage_match_the_evidence_file():
     """The artifact's numbers must be the ones the study measured, not retyped."""
-    study = json.loads((EVALUATION / "phase10_conformal.json").read_text())
-    decision = json.loads((EVALUATION / "phase10_uncertainty_decision.json").read_text())
+    study = safedata.load(EVALUATION / "phase10_conformal")
+    decision = safedata.load(EVALUATION / "phase10_uncertainty_decision")
 
     for model_id, choice in decision["decisions"].items():
         adopted = choice["adopted"]
@@ -116,14 +119,14 @@ def test_scientific_claims_about_coverage_match_the_evidence_file():
 
 def test_intervals_are_calibrated_on_groups_not_rows():
     """The unit matters. Rows are tissues inside a pillow; a prediction is about a pillow."""
-    decision = json.loads((EVALUATION / "phase10_uncertainty_decision.json").read_text())
+    decision = safedata.load(EVALUATION / "phase10_uncertainty_decision")
     for model_id in ("mizuna-microbial-load-v1", "mizuna-microbial-relative-load-v2"):
         assert decision["decisions"][model_id]["adopted"] == "group_level"
 
-    registry = json.loads((ROOT / "ml" / "artifacts" / "registry.json").read_text())
+    registry = safedata.load(ROOT / "ml" / "artifacts" / "registry")
     for model in registry["models"]:
         if model["id"] in ("mizuna-microbial-load-v1", "mizuna-microbial-relative-load-v2"):
-            artifact = json.loads((ROOT / model["artifact"]).read_text())
+            artifact = safedata.load(ROOT / model["artifact"])
             assert "group" in artifact["uncertainty"]["exchangeabilityUnit"]
             # The row-level radius must still be visible, so the cost of the group
             # interval is auditable rather than hidden.

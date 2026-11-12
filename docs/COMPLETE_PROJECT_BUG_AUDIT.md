@@ -139,7 +139,7 @@ existing history.
 |---|---|
 | **Symptom** | In `data/processed/phase30/cea_wheat_subplots.csv`, `harvestIndex` was declared a `fraction` while holding percent (0.68 – 60.45, median 42.56), and `grainFillMgPerDay` was declared `mg/day` while holding grams per square metre per day (0.22 – 91.77, median 19.27 — 0.79 kg/m² of grain over a ~40-day fill is ~19 g m⁻² d⁻¹, whereas 19 mg per spike per day would fill a 28 mg spike in a day and a half). |
 | **Root cause** | `ml/research/build_phase30_datasets.py` reads the workbook's units row into `units_row` — the comment above the column map says "the raw header is in row 1 (units) and row 2 (names)", so the row was meant to be authoritative — and then never used it. Two hand-written entries in `WHEAT_COLUMNS` disagreed with the file and nothing compared them. |
-| **Affected files** | `ml/research/build_phase30_datasets.py`, `data/metadata/phase30_acquisition_manifest.json`, `data/processed/phase30/{cea_wheat_subplots.csv,cea_wheat_experiments.csv,quality.json}`. |
+| **Affected files** | `ml/research/build_phase30_datasets.py`, `data/metadata/phase30_acquisition_manifest`, `data/processed/phase30/{cea_wheat_subplots.csv,cea_wheat_experiments.csv,quality}`. |
 | **Fix** | The units row is now read: a mapped column with no declared unit fails the build, and the row is published verbatim as `sourceUnits` beside the stored `unitMap`. The two columns are exported as `harvestIndexPct` (`%`) and `grainFillGPerM2Day` (`g/m2/day`). **No value was converted** — the project's rule is that published units are carried, not rewritten. The `lightIntegral*Unidentified` notes were also corrected: they claimed the workbook "gives no unit tag" when its row tags both columns `[s]`, which is not a unit for a photon integral and is exactly why the column stays unmodelled. |
 | **Regression test** | `test_phase30_datasets.py::test_stored_units_do_not_contradict_the_workbooks_own_units_row` pins both corrections and requires `unitMap` and `sourceUnits` to describe the same columns. `::test_no_column_declared_a_fraction_holds_a_percentage` is the generic form: no column declared a fraction may exceed 1, and none declared `%` may leave 0..100 — the class, not the instance. |
 | **Verification** | `python ml/research/build_phase30_datasets.py` regenerates the tables; the **only** change in either CSV is the header cell — every data row is byte-identical. `--check` passes; 20 dataset tests pass. |
@@ -161,7 +161,7 @@ existing history.
 
 | | |
 |---|---|
-| **Symptom** | A green `pytest` run left `docs/phase7/registry_verification.json` modified, with a diff of exactly one line: the `generatedAt` timestamp. |
+| **Symptom** | A green `pytest` run left `docs/phase7/registry_verification` modified, with a diff of exactly one line: the `generatedAt` timestamp. |
 | **Root cause** | `test_phase23_reference_et0.py` ran `scripts/verify_model_registry.py` without `--check`. The script supports `--check` precisely so a gate can verify without rewriting — the flag exists because "a timestamp-only diff has twice been mistaken for a real change". The test call site never used it. |
 | **Affected files** | `backend/tests/test_phase23_reference_et0.py`. |
 | **Fix** | The test passes `--check`: identical checks, identical exit code, no write. |
@@ -336,7 +336,7 @@ rather than assumed:
    "do not refactor without cause" constraint. Recorded, not hidden.
 5. **The crawl is a hunting tool, not a gate.** The three properties it found are now pinned by
    `e2e/layout.spec.js` and `e2e/signed-out.spec.js`; the crawl itself stays outside the suite.
-6. **`docs/phase7/registry_verification.json` regenerates a `maxChannelDelta`-style timestamp only
+6. **`docs/phase7/registry_verification` regenerates a `maxChannelDelta`-style timestamp only
    when a human runs the verifier without `--check`.** The report is byte-identical after the gate
    now (asserted); the file was restored, not re-committed, so the committed timestamp stays the
    original.

@@ -16,7 +16,7 @@ Two rules governed the whole phase:
 
 ## 1. What was extracted
 
-`data/literature/ntrs_bpc_measurements.json` — schema `spaceagrisim.bpc_measurements/1`.
+`data/literature/ntrs_bpc_measurements` — schema `spaceagrisim.bpc_measurements/1`.
 
 | Group | Count | Examples |
 |---|---|---|
@@ -27,7 +27,7 @@ Two rules governed the whole phase:
 Each row carries: `quantity`, `value`, `unit`, `kind`, `page`, **`quote`** (verbatim from the PDF
 text layer), and `reading` (same value in conventional notation).
 
-The source `pdf_sha256` is the same digest pinned in `data/literature/ntrs_bpc.json`, so the
+The source `pdf_sha256` is the same digest pinned in `data/literature/ntrs_bpc`, so the
 table can only ever describe the exact file the literature bundle cites.
 
 ## 2. How it is verified
@@ -70,7 +70,7 @@ daily series remain available to a human reader at the cited pages.
 
 `scripts/benchmark_bpc_vs_simulation.py` runs the unchanged engine at the BPC's own operating
 point (1 g, 1000 ppm CO₂, 20 h photoperiod, 534 µmol m⁻² s⁻¹, 20 °C, 80 % RH, 1 m²) and prints
-the measured/modelled ratio. Output also written to `data/derived/bpc_benchmark.json`.
+the measured/modelled ratio. Output also written to `data/derived/bpc_benchmark`.
 
 Measured anchors (20 m² wheat stand, days 0–86):
 
@@ -121,10 +121,10 @@ Modelled, per crop, one cycle:
 
 | Path | Role |
 |---|---|
-| `data/literature/ntrs_bpc_measurements.json` | the structured, quote-verified table |
+| `data/literature/ntrs_bpc_measurements` | the structured, quote-verified table |
 | `backend/tests/test_phase16_bpc_measurements.py` | 36 verification tests |
 | `scripts/benchmark_bpc_vs_simulation.py` | comparison run (no fitting) |
-| `data/derived/bpc_benchmark.json` | committed output of that run |
+| `data/derived/bpc_benchmark` | committed output of that run |
 | `data/raw/NTRS/19900016137.pdf` | the pinned source report (Phase 15) |
 
 ## 7. Next, in order

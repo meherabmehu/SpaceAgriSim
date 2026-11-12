@@ -168,7 +168,7 @@ presents as established.
 
 ## L1. `et0-emulator-v1` - reduced-input ET0 emulator (**new in this phase**)
 
-`ml/research/train_et0_emulator.py`, artifact `ml/artifacts/et0-emulator-v1.json`
+`ml/research/train_et0_emulator.py`, artifact `ml/artifacts/et0-emulator-v1`
 
 | Question | Answer |
 |---|---|
@@ -187,7 +187,7 @@ presents as established.
 
 ## L2. `lettuce-earth-growth-v3` (and the v1/v2 lineage)
 
-Artifacts `ml/artifacts/lettuce-earth-growth-v{1,2,3}.json`
+Artifacts `ml/artifacts/lettuce-earth-growth-v{1,2,3}.py`
 
 | Question | Answer |
 |---|---|

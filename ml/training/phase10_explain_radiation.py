@@ -1,6 +1,6 @@
 """Phase 10: explanations and selection stability for the radiation models.
 
-Writes `ml/artifacts/radiation-*-explanation.json` beside the models rather than
+Writes `ml/artifacts/radiation-*-explanation` beside the models rather than
 inside them, so a model artifact's checksum keeps meaning "the trained model" and
 the explanation carries its own provenance.
 
@@ -34,6 +34,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "ml" / "training"))
 sys.path.insert(0, str(ROOT / "scripts"))
 from explain import linear_contributions, selection_stability  # noqa: E402
@@ -112,7 +114,7 @@ def main() -> int:
 
     written, summaries = [], {}
     for model_id in ("radiation-quality-osd46-v1", "radiation-exposure-osd46-v1"):
-        artifact = json.loads((ARTIFACTS / f"{model_id}.json").read_text())
+        artifact = safedata.load(ARTIFACTS / f"{model_id}")
         evaluator = artifact["evaluator"]
         features = evaluator["features"]
         labels = labels_for(model_id, samples)
@@ -223,7 +225,7 @@ def main() -> int:
                 "classZeroRowIsAllZero": True,
             }
 
-        path = ARTIFACTS / f"{model_id}-explanation.json"
+        path = ARTIFACTS / f"{model_id}-explanation"
         save_json(path, report)
         written.append(str(path.relative_to(ROOT)))
         summaries[model_id] = {
@@ -236,7 +238,7 @@ def main() -> int:
         }
         print(f"  wrote {path.name} ({path.stat().st_size:,} B)")
 
-    save_json(EVALUATION / "phase10_explanations.json", {
+    save_json(EVALUATION / "phase10_explanations", {
         "phase": 10, "generatedAt": stamp(), "seed": SEED,
         "artifacts": written, "summary": summaries,
         "note": ("Explanations are exact for the served linear evaluators and are stored "

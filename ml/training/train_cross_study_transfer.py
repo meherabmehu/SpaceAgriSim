@@ -190,7 +190,7 @@ def main() -> None:
               f"0.500, so the model predicted a single class for every library. The "
               f"apparently respectable accuracy is meaningless.")
 
-    save_json(EVAL / "phase9_cross_study_transfer.json", {
+    save_json(EVAL / "phase9_cross_study_transfer", {
         "phase": 9,
         "task": "irradiated versus non-irradiated",
         "generatedAt": stamp(),
@@ -227,7 +227,7 @@ def main() -> None:
             "not adjusted until it becomes positive."),
         "deepLearningUsed": False,
     })
-    print("\nwrote ml/evaluation/phase9_cross_study_transfer.json")
+    print("\nwrote ml/evaluation/phase9_cross_study_transfer")
 
 
 if __name__ == "__main__":

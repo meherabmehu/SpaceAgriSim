@@ -23,6 +23,7 @@ Licence evidence is graded, never assumed:
     python3 ml/research/build_catalog.py [--check]
 """
 from __future__ import annotations
+import sys
 
 import argparse
 import json
@@ -30,7 +31,9 @@ from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-TARGET_JSON = ROOT / "data" / "research" / "dataset_catalog.json"
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
+TARGET_JSON = ROOT / "data" / "research" / "dataset_catalog"
 TARGET_MD = ROOT / "data" / "research" / "DATASET_CATALOG.md"
 
 CHECKS = "2026-11-10"
@@ -63,7 +66,7 @@ DATASETS = [
         "classReason": ("Acquired and used: the ET0 target and the emulator features are derived "
                         "from it. The licence permits redistribution and commercial use."),
         "imported": True,
-        "importNote": "data/raw/nasa_power/*.json via ml/research/acquire_power_climate.py",
+        "importNote": "data/raw/nasa_power/* via ml/research/acquire_power_climate.py",
         "caveat": ("Reanalysis on a coarse grid: a site label is a grid-cell value, not an "
                    "instrument reading, and its MERRA-2 lineage means it cannot validate itself."),
     },
@@ -283,7 +286,7 @@ DATASETS = [
                         "few, too heterogeneous and mostly the wrong species to train or validate "
                         "a yield model."),
         "imported": True,
-        "importNote": "data/metadata/dataset_manifest.json - provenance only, never a feature",
+        "importNote": "data/metadata/dataset_manifest - provenance only, never a feature",
         "caveat": "Microgravity studies exist here, but none with the replication a response function needs.",
     },
     {
@@ -304,7 +307,7 @@ DATASETS = [
                         "check, nowhere near enough to fit or tune anything, and it is never used "
                         "as training data."),
         "imported": True,
-        "importNote": "data/literature/external_lettuce_peerj17085.json - validation only",
+        "importNote": "data/literature/external_lettuce_peerj17085 - validation only",
         "caveat": "One cultivar, one facility: agreement here is a sanity check, not validation.",
     },
     {
@@ -598,7 +601,7 @@ DATASETS = [
                         "are asserted in the ingestion, because the hourly irradiance arrives in "
                         "MJ/hr and not W/m2."),
         "imported": True,
-        "importNote": "data/raw/nasa_power_hourly/*.json via ml/research/acquire_power_hourly.py",
+        "importNote": "data/raw/nasa_power_hourly/* via ml/research/acquire_power_hourly.py",
         "caveat": ("Local standard time, as the provider states; not relabelled as UTC. MERRA-2 "
                    "lineage, so it cannot validate a MERRA-2-derived ET0."),
     },
@@ -713,7 +716,7 @@ DATASETS = [
         "commercialUse": "permitted with attribution",
         "usabilityClass": "A",
         "classReason": "Acquired, hash-verified and used: it is the measured side of "
-                       "ml/evaluation/phase26_measured_et_validation.json, the first measured crop "
+                       "ml/evaluation/phase26_measured_et_validation, the first measured crop "
                        "water-use comparison in the repository.",
         "imported": True,
         "importNote": "data/raw/phase26/ via scripts/datasets/acquire.py; "
@@ -779,7 +782,7 @@ DATASETS = [
         "imported": True,
         "importNote": "data/processed/phase30/cea_wheat_experiments.csv, "
                       "cea_wheat_subplots.csv, and the shared quality record "
-                      "data/processed/phase30/quality.json",
+                      "data/processed/phase30/quality",
         "caveat": "One cultivar (Apogee) in one facility family. The environmental logs are per-run "
                   "summaries here, and PPFD varied within a run in most experiments, so a band is a "
                   "group of whole experiments rather than a controlled level. Grain yield is not "
@@ -901,7 +904,7 @@ def render(payload: dict) -> str:
     lines = [
         "# SpaceAgriSim Dataset Catalogue",
         "",
-        f"Generated from `data/research/dataset_catalog.json` on {payload['generatedOn']} by "
+        f"Generated from `data/research/dataset_catalog` on {payload['generatedOn']} by "
         "`ml/research/build_catalog.py`. Edit the JSON, not this file.",
         "",
         "Every dataset the project has evaluated, with the licence evidence behind its class. The "
@@ -992,8 +995,8 @@ def main() -> int:
     payload = {
         "catalogue": "SpaceAgriSim evaluated datasets",
         "generatedBy": "ml/research/build_catalog.py",
-        "generatedOn": CHECKS if not TARGET_JSON.is_file() else
-        json.loads(TARGET_JSON.read_text(encoding="utf-8")).get("generatedOn", CHECKS),
+        "generatedOn": CHECKS if not safedata.exists(TARGET_JSON) else
+        safedata.load(TARGET_JSON).get("generatedOn", CHECKS),
         "classDefinitions": CLASSES,
         "counts": summary(DATASETS),
         "datasets": DATASETS,
@@ -1001,12 +1004,12 @@ def main() -> int:
     rendered = render(payload)
 
     if args.check:
-        if not TARGET_JSON.is_file() or not TARGET_MD.is_file():
+        if not safedata.exists(TARGET_JSON) or not safedata.exists(TARGET_MD):
             print("MISSING catalogue files; run without --check")
             return 1
-        committed = json.loads(TARGET_JSON.read_text(encoding="utf-8"))
+        committed = safedata.load(TARGET_JSON)
         if committed["datasets"] != DATASETS:
-            print("STALE JSON: the script's dataset list differs from data/research/dataset_catalog.json")
+            print("STALE JSON: the script's dataset list differs from data/research/dataset_catalog")
             return 1
         if TARGET_MD.read_text(encoding="utf-8") != render(committed):
             print("STALE markdown: re-render from the JSON")
@@ -1015,7 +1018,7 @@ def main() -> int:
         return 0
 
     TARGET_JSON.parent.mkdir(parents=True, exist_ok=True)
-    TARGET_JSON.write_text(json.dumps(payload, indent=1) + "\n", encoding="utf-8")
+    safedata.dump(payload, TARGET_JSON)
     TARGET_MD.write_text(rendered, encoding="utf-8")
     counts = summary(DATASETS)
     print(f"wrote {TARGET_MD.relative_to(ROOT)}: {len(DATASETS)} datasets "

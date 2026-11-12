@@ -16,11 +16,17 @@ import hashlib
 import json
 import math
 import os
+import sys
 import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
+
+_ROOT = Path(__file__).resolve().parents[2]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+import safedata  # noqa: E402 - repository data layer
 from typing import Any
 
 USER_AGENT = "SpaceAgriSim-ET0Validation/2.0 (+https://github.com/meherabmehu/SpaceAgriSim)"
@@ -194,8 +200,8 @@ def _fetch_bytes(url: str, *, headers: dict[str, str] | None = None) -> bytes:
     cache = _cache_dir()
     if cache is not None:
         cached = cache / (sha256_bytes(url.encode("utf-8")) + ".payload")
-        if cached.is_file():
-            return cached.read_bytes()
+        if safedata.exists(cached):
+            return safedata.bytes(cached)
 
     last: Exception | None = None
     for attempt in range(RETRIES):

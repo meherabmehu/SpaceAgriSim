@@ -8,7 +8,7 @@ documented:
   3. Phase 6's declined calibration suggestions were not quietly applied later.
 
 If a future phase legitimately changes a baseline, it must update
-docs/phase7/scientific_calibration.json deliberately - which is exactly the
+docs/phase7/scientific_calibration deliberately - which is exactly the
 point: the change becomes a reviewed act with a diff, not a side effect.
 """
 from __future__ import annotations
@@ -20,20 +20,22 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "backend"))
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from app.config import simulation_constants as constants  # noqa: E402
 from app.simulation import engine  # noqa: E402
 
-EVIDENCE_PATH = ROOT / "docs" / "phase7" / "scientific_calibration.json"
+EVIDENCE_PATH = ROOT / "docs" / "phase7" / "scientific_calibration"
 
 
 @pytest.fixture(scope="module")
 def evidence():
-    if not EVIDENCE_PATH.is_file():
+    if not safedata.exists(EVIDENCE_PATH):
         pytest.skip("Phase 7 calibration evidence not generated")
-    return json.loads(EVIDENCE_PATH.read_text())
+    return safedata.load(EVIDENCE_PATH)
 
 
 @pytest.fixture(scope="module")
@@ -49,7 +51,7 @@ def test_output_fingerprint_is_unchanged(evidence, calibrate):
     combined = __import__("hashlib").sha256("".join(fingerprints).encode()).hexdigest()
     assert combined == evidence["outputFingerprint"]["sha256"], (
         "A simulator output value, unit or field changed. If this was intentional, "
-        "regenerate docs/phase7/scientific_calibration.json and justify the diff."
+        "regenerate docs/phase7/scientific_calibration and justify the diff."
     )
 
 

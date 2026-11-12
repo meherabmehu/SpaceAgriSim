@@ -44,8 +44,10 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import LinearSVC
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "ml" / "training"))
-OUT = ROOT / "ml" / "evaluation" / "phase11_radiation_validation.json"
+OUT = ROOT / "ml" / "evaluation" / "phase11_radiation_validation"
 
 SEED = 1187
 PERMUTATIONS = 2000
@@ -365,8 +367,7 @@ def main() -> int:
                 "rejected: below the 0.02 balanced-accuracy margin" if delta < PROMOTION_MARGIN
                 else "rejected: did not win on more than half of the groups")
 
-        phase9 = json.loads((ROOT / "ml" / "evaluation" / "phase9_osd46_radiation.json")
-                            .read_text())["tasks"]
+        phase9 = safedata.load(ROOT / "ml" / "evaluation" / "phase9_osd46_radiation")["tasks"]
         key = "quality" if model_id == "radiation-quality-osd46-v1" else "exposure"
         committed = round(phase9[key]["learners"]["logistic_l2"]["balancedAccuracy"], 4)
         reproduced = baseline["balancedAccuracy"]
@@ -444,7 +445,7 @@ def main() -> int:
         "no-candidate-meets-the-promotion-bar"
         if not any(model["anyPromoted"] for model in report["models"].values())
         else "candidate-meets-the-promotion-bar")
-    OUT.write_text(json.dumps(report, indent=2) + "\n")
+    safedata.dump(report, OUT)
     print(f"\nverdict: {report['verdict']} -> wrote {OUT.relative_to(ROOT)}")
     return 0
 

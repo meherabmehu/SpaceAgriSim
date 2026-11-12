@@ -344,7 +344,7 @@ def main() -> int:
             "the failure is not a transform artefact but a difference in what the two "
             "experiments measured."),
     }
-    save_json(EVALUATION / "phase10_cross_study.json", report)
+    save_json(EVALUATION / "phase10_cross_study", report)
 
     print(f"\nverdict: {report['verdict']}")
     print(f"within-study reference balanced accuracy {reference['balancedAccuracy']:.3f}")

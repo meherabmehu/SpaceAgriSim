@@ -17,6 +17,7 @@ processed assay table disagree.
 Run: python scripts/catalog_phase9_studies.py
 """
 from __future__ import annotations
+import sys
 
 import csv
 import io
@@ -26,10 +27,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 RAW = ROOT / "data" / "raw"
 PROCESSED = ROOT / "data" / "processed"
 METADATA = ROOT / "data" / "metadata"
-MANIFEST = METADATA / "dataset_manifest.json"
+MANIFEST = METADATA / "dataset_manifest"
 
 LICENSE = ("Public OSDR access; retain study attribution and comply with OSDR "
            "terms; do not assume every contributed file is public domain.")
@@ -161,7 +164,7 @@ def build(study: str, manifest: dict) -> dict:
             "limitations": [
                 "All samples are one ecotype (Col-0) and one tissue (rosette).",
                 "Dose classification failed to generalise to held-out conditions; see "
-                "ml/evaluation/phase9_rnaseq_candidates.json.",
+                "ml/evaluation/phase9_rnaseq_candidates.",
             ],
             "files": files_from_manifest(study, manifest),
         }
@@ -212,7 +215,7 @@ def build(study: str, manifest: dict) -> dict:
         # cites it and the explorer did not list it, so the model's source study
         # was unreachable from the UI. Provenance comes from the Phase 6 checksum
         # record, which verified these exact bytes.
-        phase6 = json.loads((METADATA / "phase6_checksums.json").read_text())
+        phase6 = safedata.load(METADATA / "phase6_checksums")
         files = [{
             "name": Path(item["path"]).name,
             "bytes": item["bytes"],
@@ -356,8 +359,8 @@ def reconcile_files(catalogue: dict, manifest: dict) -> list[str]:
 
 
 def main() -> int:
-    manifest = json.loads((METADATA / "phase9_nasa_datasets.json").read_text())
-    catalogue = json.loads(MANIFEST.read_text())
+    manifest = safedata.load(METADATA / "phase9_nasa_datasets")
+    catalogue = safedata.load(MANIFEST)
     existing = {entry["id"]: index for index, entry in enumerate(catalogue["datasets"])}
 
     for study in ("OSD-46", "OSD-782", "OSD-411", "OSD-780"):
@@ -383,7 +386,7 @@ def main() -> int:
     for note in superseded:
         print(f"  ! {note}")
 
-    MANIFEST.write_text(json.dumps(catalogue, indent=2) + "\n")
+    safedata.dump(catalogue, MANIFEST)
     print(f"\nwrote {MANIFEST.relative_to(ROOT)} ({len(catalogue['datasets'])} datasets)")
     return 0
 

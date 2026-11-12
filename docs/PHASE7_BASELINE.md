@@ -27,9 +27,9 @@ and only corrects a stale git-hash reference inside
 |---|---|---|
 | 169 backend tests passed | ✅ | `169 passed, 1 skipped` |
 | 1 skipped | ✅ | `test_postgres_integration.py`, gated on a DSN |
-| 25 OSDR studies resolved | ✅ | `data/metadata/phase6_discovery.json` present, 25 studies |
-| 5 NASA files downloaded | ✅ | `data/metadata/phase6_checksums.json`, all size-verified |
-| 1 new microbial model | ✅ | `ml/artifacts/mizuna-microbial-load-v1.json`, 123 samples / 35 groups |
+| 25 OSDR studies resolved | ✅ | `data/metadata/phase6_discovery` present, 25 studies |
+| 5 NASA files downloaded | ✅ | `data/metadata/phase6_checksums`, all size-verified |
+| 1 new microbial model | ✅ | `ml/artifacts/mizuna-microbial-load-v1`, 123 samples / 35 groups |
 | Mass-balance defect fixed | ✅ | `growth.py` exposes `mass_balance_residual_g` |
 | 4 scientific API endpoints | ✅ | `/predict/mizuna-microbial-load-v1`, `/science/calibration`, `/science/evidence`, `/scientific-summary` |
 | No UI changes | ✅ | `git diff cf1d6c3 -- frontend/src` is empty |

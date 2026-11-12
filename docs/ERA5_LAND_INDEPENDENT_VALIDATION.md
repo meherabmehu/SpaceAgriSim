@@ -4,8 +4,8 @@
 is NOT executed** — no Copernicus CDS token exists in this environment (see §2). **Not** field
 validation.
 **Run:** 2021-01-01 → 2023-12-31, six sites, 6 570 site-days.
-**Artefacts:** `data/validation/et0/harmonised_daily.csv`, `validation_summary.json`,
-`attribution.json`.
+**Artefacts:** `data/validation/et0/harmonised_daily.csv`, `validation_summary`,
+`attribution`.
 **Code:** `scripts/et0_validation/` — `sources.py`, `methods.py`, `era5_land.py`, `scoring.py`,
 `attribute.py`, `run_validation.py`.
 **Tests:** `backend/tests/test_phase25_et0_validation.py` (60 tests).
@@ -103,7 +103,7 @@ python scripts/et0_validation/run_validation.py --start 2021-01-01 --end 2023-12
 
 ## 3. Sources and provenance
 
-Every leg writes a provenance block into `validation_summary.json` under
+Every leg writes a provenance block into `validation_summary` under
 `provenance.legs.<leg>.<site>`: product, route, temporal and spatial resolution, fields with
 units, licence, the request URL (no credentials), and the payload SHA-256 that was parsed.
 
@@ -390,7 +390,7 @@ cd backend && python -m pytest tests/test_phase25_et0_validation.py -q   # 60 te
 ### 6.1 Reproducibility, measured rather than asserted
 
 Two consecutive full runs, and a replay from the response cache, produce a **byte-identical**
-`harmonised_daily.csv` and a `validation_summary.json` whose only differing field is
+`harmonised_daily.csv` and a `validation_summary` whose only differing field is
 `generatedAt`. That was checked with `cmp` and a field-by-field diff, not assumed.
 
 One caveat had to be measured too. Each response's raw bytes are digested as `payloadSha256`, and
@@ -409,9 +409,9 @@ keyed by request URL — the same query always returns the same bytes, so a cach
 mix two different responses.
 
 Outputs in `data/validation/et0/`: `harmonised_daily.csv` (6 570 rows, one per site-day, every
-leg's ET0 plus the inputs each leg used), `validation_summary.json` (metrics, per-site/month/
+leg's ET0 plus the inputs each leg used), `validation_summary` (metrics, per-site/month/
 season/year breakdowns, holdout, missingness, provenance with payload and series SHA-256, and
-`routesNotRun`), `attribution.json` (Shapley contributions, elevation and wind-height checks,
+`routesNotRun`), `attribution` (Shapley contributions, elevation and wind-height checks,
 representativeness diagnostics). Only derived tables are committed — bulk reanalysis data does not
 belong in git.
 

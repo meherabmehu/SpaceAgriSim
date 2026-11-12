@@ -101,11 +101,11 @@ first test fails on `expect(banner).toBeVisible()`. The test is load-bearing, no
 **What** The test ran the Phase 29 builder over the committed output directory and compared the four
 CSVs before and after. Two consequences:
 
-1. the builder rewrites `light_stress_quality.json` with a fresh `generatedAt` on every run, so
+1. the builder rewrites `light_stress_quality` with a fresh `generatedAt` on every run, so
    running the suite left a modified tracked file behind — noise that has to be reverted by hand
    before any commit, and noise in which a real change can hide;
 2. the file that was **never compared** is the one that carries the licence, the source SHA-256, the
-   exclusion record and the transformation log: `light_stress_quality.json`.
+   exclusion record and the transformation log: `light_stress_quality`.
 
 **Fix**
 * the builder accepts `--out-dir DIR` (default unchanged, so the documented invocation and the Phase 29
@@ -143,7 +143,7 @@ document and the artifact agree" cannot leave the agreement check to memory.
 **Fix**
 * new `science` job, nine `--check` steps, stdlib-only, on Python 3.12;
 * `verify_model_registry.py` gained `--check` so the job does not rewrite
-  `docs/phase7/registry_verification.json` (the timestamp-only diff had twice been mistaken for a real
+  `docs/phase7/registry_verification` (the timestamp-only diff had twice been mistaken for a real
   change);
 * frontend job runs `build:check` instead of `build`;
 * `pip-audit` now audits `requirements-dev.txt` as well as `requirements.txt`;

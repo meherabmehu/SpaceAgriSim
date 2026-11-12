@@ -39,6 +39,7 @@ no effect, and not that the Phase 10 signal was real.
 """
 
 from __future__ import annotations
+import sys
 
 import csv
 import io
@@ -56,10 +57,12 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 PROCESSED = ROOT / "data" / "processed"
 DERIVED = ROOT / "data" / "derived"
 RAW = ROOT / "data" / "raw"
-OUT = ROOT / "ml" / "evaluation" / "phase11_gravity_batch.json"
+OUT = ROOT / "ml" / "evaluation" / "phase11_gravity_batch"
 
 SEED = 1113
 PERMUTATIONS = 2000
@@ -342,8 +345,8 @@ def main() -> int:
     # six runs, so that null mixes gravity across runs and is centred on zero; it cannot
     # see the nesting. The same observed correlation under a within-run null sits inside
     # the null distribution.
-    prior = json.loads((ROOT / "ml" / "evaluation"
-                        / "phase10_partial_gravity_replication.json").read_text())
+    prior = safedata.load(ROOT / "ml" / "evaluation"
+                        / "phase10_partial_gravity_replication")
     prior_p2 = prior["P2_gradedRegression"]["correlation"]
     correction = {
         "phase10Claim": {
@@ -403,7 +406,7 @@ def main() -> int:
             "sent and no reply is claimed."),
         "registryChange": None,
     }
-    OUT.write_text(json.dumps(result, indent=2) + "\n")
+    safedata.dump(result, OUT)
 
     print(f"\nB1 mean within-run gravity range {b1['meanWithinRunGravityRangeG']} g = "
           f"{within_run_coverage:.0%} of the {full_range} g range; "

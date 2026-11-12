@@ -18,6 +18,9 @@ This script has never seen a real trial. It validates shape, units, internal con
 plausibility; it cannot make a measurement exist.
 """
 from __future__ import annotations
+import sys as _sys, pathlib as _pathlib   # the repository root holds safedata/
+_sys.path.insert(0, str(_pathlib.Path(__file__).resolve().parents[2]))
+import safedata
 
 import argparse
 import csv
@@ -29,7 +32,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-SCHEMA_PATH = Path(__file__).resolve().parents[2] / "data" / "experiments" / "water_use_schema.json"
+SCHEMA_PATH = Path(__file__).resolve().parents[2] / "data" / "experiments" / "water_use_schema"
 ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 ML_TO_MM_PER_M2 = 0.001  # 1 mL spread over 1 m2 is 0.001 mm of water depth
 
@@ -68,7 +71,7 @@ class CheckResult:
 
 
 def load_schema(path: Path = SCHEMA_PATH) -> dict[str, Any]:
-    return json.loads(path.read_text(encoding="utf-8"))
+    return safedata.load(path)
 
 
 def _columns(schema: dict[str, Any]) -> dict[str, dict[str, Any]]:
@@ -102,11 +105,9 @@ def emit_template(csv_path: Path) -> Path:
     csv_path.parent.mkdir(parents=True, exist_ok=True)
     with csv_path.open("w", newline="", encoding="utf-8") as handle:
         csv.writer(handle).writerow(names)
-    units_path = csv_path.with_suffix(".units.json")
-    units_path.write_text(json.dumps(
-        {"schemaVersion": schema["schemaVersion"],
-         "units": {name: columns[name]["unit"] for name in names}}, indent=2) + "\n",
-        encoding="utf-8")
+    units_path = csv_path.with_suffix(".units")
+    safedata.dump({"schemaVersion": schema["schemaVersion"],
+         "units": {name: columns[name]["unit"] for name in names}}, units_path)
     return units_path
 
 
@@ -120,10 +121,10 @@ def validate(csv_path: Path, units_path: Path | None = None,
     rules = schema["qualityRules"]
     results: list[CheckResult] = []
 
-    units_path = units_path or csv_path.with_suffix(".units.json")
+    units_path = units_path or csv_path.with_suffix(".units")
     units: dict[str, str] = {}
-    if units_path.is_file():
-        payload = json.loads(units_path.read_text(encoding="utf-8"))
+    if safedata.exists(units_path):
+        payload = safedata.load(units_path)
         units = payload.get("units") or {}
         results.append(CheckResult("units_file_present", "pass",
                                   f"read {units_path.name} with {len(units)} declarations"))
@@ -439,7 +440,7 @@ def validate(csv_path: Path, units_path: Path | None = None,
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("csv", nargs="?", help="measurement CSV to validate")
-    parser.add_argument("--units", help="companion units JSON (default: same stem .units.json)")
+    parser.add_argument("--units", help="companion units record (default: same stem, .units suffix)")
     parser.add_argument("--schema", default=str(SCHEMA_PATH))
     parser.add_argument("--emit-template", metavar="PATH",
                         help="write a header-only template and its units file, then exit")
@@ -462,7 +463,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"[{marker}] {check['check']:24s} {check['message']}")
     print(f"\nverdict: {report['verdict']}  ({report['rowCount']} rows)")
     if args.report:
-        Path(args.report).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+        safedata.dump(report, Path(args.report))
         print(f"report written to {args.report}")
     return 1 if report["verdict"] == "FAIL" else 0
 

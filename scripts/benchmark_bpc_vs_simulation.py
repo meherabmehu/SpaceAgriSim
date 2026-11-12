@@ -34,14 +34,16 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 sys.path.insert(0, str(ROOT / "backend"))
 
 from app.simulation.crops import get_crop, list_crop_keys  # noqa: E402
 from app.simulation.engine import SimulationInput, run_simulation  # noqa: E402
 
-MEASUREMENTS = ROOT / "data" / "literature" / "ntrs_bpc_measurements.json"
-SUPPLEMENT = ROOT / "data" / "literature" / "ntrs_supplement.json"
-OUT = ROOT / "data" / "derived" / "bpc_benchmark.json"
+MEASUREMENTS = ROOT / "data" / "literature" / "ntrs_bpc_measurements"
+SUPPLEMENT = ROOT / "data" / "literature" / "ntrs_supplement"
+OUT = ROOT / "data" / "derived" / "bpc_benchmark"
 
 # The BPC's own operating point, taken from the measurement table.
 BPC_CONDITIONS = {
@@ -60,7 +62,7 @@ AREA_M2 = 1.0
 
 
 def anchors() -> dict[str, dict]:
-    payload = json.loads(MEASUREMENTS.read_text())
+    payload = safedata.load(MEASUREMENTS)
     rows = {row["id"]: row for row in payload["measurements"]}
     derived = {row["id"]: row for row in payload["derived"]}
     return {**rows, **derived}
@@ -124,7 +126,7 @@ def leafy_anchor() -> dict:
     Taken from NTRS 20250001897: a 25 g microgreen serving grows in a 0.030 m2 tray on a 14-day
     cycle, and 50 g per crew member per day fits in 0.84 m2. Both routes give the same number.
     """
-    row = json.loads(SUPPLEMENT.read_text())["reports"]["20250001897"]["structured"]["areal_productivity_anchor"]
+    row = safedata.load(SUPPLEMENT)["reports"]["20250001897"]["structured"]["areal_productivity_anchor"]
     per_area = row["serving_fresh_mass_g"] / row["tray_area_m2"] / row["cycle_days"]
     per_crew = row["crew_member_daily_serving_g"] / row["area_per_crew_member_m2"]
     return {
@@ -188,7 +190,7 @@ def main() -> None:
         "measured": measured,
         "measured_source": {
             "ntrs_id": "19900016137",
-            "file": "data/literature/ntrs_bpc_measurements.json",
+            "file": "data/literature/ntrs_bpc_measurements",
             "note": "every anchor is quote-verified against the report text - see "
                     "backend/tests/test_phase16_bpc_measurements.py",
         },
@@ -208,9 +210,9 @@ def main() -> None:
     }
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(payload, indent=2) + "\n")
+    safedata.dump(payload, OUT)
 
-    if not args.json:
+    if not args:
         print(f"NASA BPC anchors (TM 102788, 20 m2 wheat stand, {measured['campaign']})")
         print(f"  CO2  net {measured['co2_g_per_m2_day_net']:6.1f}   light-period "
               f"{measured['co2_g_per_m2_day_light_period']:6.1f}   peak {measured['co2_g_per_m2_day_peak']:6.1f}"

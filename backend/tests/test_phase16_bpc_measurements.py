@@ -8,6 +8,7 @@ does not make.
 """
 
 from __future__ import annotations
+import sys
 
 import hashlib
 import json
@@ -16,8 +17,10 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-MEASUREMENTS = ROOT / "data" / "literature" / "ntrs_bpc_measurements.json"
-LITERATURE = ROOT / "data" / "literature" / "ntrs_bpc.json"
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
+MEASUREMENTS = ROOT / "data" / "literature" / "ntrs_bpc_measurements"
+LITERATURE = ROOT / "data" / "literature" / "ntrs_bpc"
 PDF = ROOT / "data" / "raw" / "NTRS" / "19900016137.pdf"
 
 STUDY_AREA_M2 = 20.0
@@ -26,7 +29,7 @@ CARBON_SPECIFIC_UMOL_TO_G = 44.01e-6  # g CO2 per umol
 
 @pytest.fixture(scope="module")
 def table() -> dict:
-    return json.loads(MEASUREMENTS.read_text())
+    return safedata.load(MEASUREMENTS)
 
 
 @pytest.fixture(scope="module")
@@ -48,16 +51,16 @@ def pdf_text() -> dict[int, str]:
 
 # -- provenance ---------------------------------------------------------------
 def test_measurement_file_is_pinned_to_the_same_pdf_as_the_literature_bundle(table):
-    pinned = json.loads(LITERATURE.read_text())["reports"]["19900016137"]
+    pinned = safedata.load(LITERATURE)["reports"]["19900016137"]
     assert table["source"]["ntrs_id"] == "19900016137"
-    digest = hashlib.sha256(PDF.read_bytes()).hexdigest()
+    digest = hashlib.sha256(safedata.bytes(PDF)).hexdigest()
     assert table["source"]["pdf_sha256"] == digest
     assert pinned["pages"] == 32
     assert table["source"]["url"] == f"https://ntrs.nasa.gov/citations/{table['source']['ntrs_id']}"
 
 
 # -- the core promise: every number points at a sentence ------------------------
-@pytest.mark.parametrize("row_id", [row["id"] for row in json.loads(MEASUREMENTS.read_text())["measurements"]])
+@pytest.mark.parametrize("row_id", [row["id"] for row in safedata.load(MEASUREMENTS)["measurements"]])
 def test_every_measurement_quote_appears_on_its_cited_page(row_id, rows, pdf_text):
     row = rows[row_id]
     page = row["page"]

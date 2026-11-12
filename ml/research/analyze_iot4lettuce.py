@@ -3,7 +3,7 @@
 
 What this adds
 --------------
-Two gaps in ``data/research/dataset_gap_matrix.json`` are about evidence that did not exist in
+Two gaps in ``data/research/dataset_gap_matrix`` are about evidence that did not exist in
 this repository at all: ``cultivar-metadata`` (one parameter set per crop, no cultivar dimension)
 and ``crop-water-response-ky`` (no deficit-irrigation experiment per crop). The IoT4Lettuce
 record contains both, in a form that has to be joined carefully before it can be used:
@@ -33,6 +33,7 @@ What is NOT claimed
     python3 ml/research/analyze_iot4lettuce.py
 """
 from __future__ import annotations
+import sys
 
 import csv
 import io
@@ -43,9 +44,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT)) if str(ROOT) not in sys.path else None  # noqa: E501
+import safedata  # noqa: E402 - the repository data layer lives at the root
 RAW = ROOT / "data" / "raw" / "zenodo_20759414"
 OUT = ROOT / "data" / "research" / "phase36"
-REPORT = OUT / "iot4lettuce_water_cultivar.json"
+REPORT = OUT / "iot4lettuce_water_cultivar"
 
 FRESH_WEIGHT_MEASURED = "plant_fresh_weight_directmeasurement_gram"
 FRESH_WEIGHT_MODELLED = "plant_fresh_weight_regression_analysis_gram"
@@ -69,7 +72,7 @@ def open_text(path: Path):
     encoding actually used is returned alongside the handle so the report can say which one it
     was rather than leaving it implicit.
     """
-    raw = path.read_bytes()
+    raw = safedata.bytes(path)
     for encoding in ("utf-8-sig", "cp1252", "latin-1"):
         try:
             return io.StringIO(raw.decode(encoding)), encoding
@@ -278,7 +281,7 @@ def main() -> int:
     climate_summary: dict = {}
     for name in ("inside", "outside", "PAR"):
         path = RAW / "03_Climate" / f"{name}.csv"
-        if not path.exists():
+        if not safedata.exists(path):
             continue
         handle, encoding = open_text(path)
         rows = list(csv.DictReader(handle))
@@ -335,7 +338,7 @@ def main() -> int:
         "derivedFreshWeightRowsExcluded": len(derived),
         "climate": climate_summary,
     }
-    REPORT.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    safedata.dump(report, REPORT)
     print(f"join: {join['pairsMatched']} target-date pairs verified, "
           f"prefix violations={join['prefixRuleCheck']['violations'] if join['prefixRuleCheck'] else 'n/a'}")
     print("harvest FW:", {k: (v["n"], v["meanG"]) for k, v in summary.items()})

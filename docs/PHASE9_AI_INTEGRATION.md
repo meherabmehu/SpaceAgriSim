@@ -132,7 +132,7 @@ Gate: canvas size must match exactly; at most 2 % of pixels may differ beyond a
 channel delta of 16 (a tolerance that exists because text rasterisation differs
 between machines, not because a layout change would be forgiven).
 
-Measured result (`ml/evaluation/phase9_visual_regression.json`):
+Measured result (`ml/evaluation/phase9_visual_regression`):
 
 | Capture | Differing pixels |
 | --- | --- |

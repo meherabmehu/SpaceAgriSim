@@ -57,6 +57,6 @@ PASS  water-evidence-*.png (×3)        0.000% differing   within tolerance
 PASS  predictions-*.png (×3)           0.000% differing   within tolerance
 PASS  benchmarks-*.png (×3)            0.000% differing   within tolerance
 
-wrote ml/evaluation/phase9_visual_regression.json
+wrote ml/evaluation/phase9_visual_regression
 18/18 PASS, exit 0
 ```
