@@ -14,13 +14,13 @@ any card is stale.
 
 | Model | Complete | Training data | Code reference | Artifact hash | Verdict |
 |---|---|---|---|---|---|
-| `lettuce-earth-growth-v1` | 15/15 | committed-file (verified) | `aa7e9af9a511` | `37a822bfff18` | fails-independent-check |
-| `lettuce-earth-growth-v2` | 15/15 | committed-file (verified) | `aa7e9af9a511` | `1dc8057a0511` | fails-independent-check |
-| `lettuce-earth-growth-v3` | 15/15 | committed-file (verified) | `aa7e9af9a511` | `e57e0490d5c3` | fails-independent-check |
-| `mizuna-microbial-relative-load-v2` | 15/15 | committed-file (verified) | `aa7e9af9a511` | `489cafe7b5d9` | passes-independent-check |
-| `radiation-exposure-osd46-v1` | 15/15 | recorded-checksum (verified) | `aa7e9af9a511` | `08c1009fb184` | no-independent-check |
-| `radiation-quality-osd46-v1` | 15/15 | recorded-checksum (verified) | `aa7e9af9a511` | `16a7b0f0b2ee` | no-independent-check |
-| `tomato-flight-response-v1` | 15/15 | reconstructed-derived (verified) | `aa7e9af9a511` | `674de9f1cc06` | no-independent-check |
+| `lettuce-earth-growth-v1` | 15/15 | committed-file (verified) | `0e1ab21773f5` | `37a822bfff18` | fails-independent-check |
+| `lettuce-earth-growth-v2` | 15/15 | committed-file (verified) | `0e1ab21773f5` | `1dc8057a0511` | fails-independent-check |
+| `lettuce-earth-growth-v3` | 15/15 | committed-file (verified) | `0e1ab21773f5` | `e57e0490d5c3` | fails-independent-check |
+| `mizuna-microbial-relative-load-v2` | 15/15 | committed-file (verified) | `0e1ab21773f5` | `489cafe7b5d9` | passes-independent-check |
+| `radiation-exposure-osd46-v1` | 15/15 | recorded-checksum (verified) | `0e1ab21773f5` | `08c1009fb184` | no-independent-check |
+| `radiation-quality-osd46-v1` | 15/15 | recorded-checksum (verified) | `0e1ab21773f5` | `16a7b0f0b2ee` | no-independent-check |
+| `tomato-flight-response-v1` | 15/15 | reconstructed-derived (verified) | `0e1ab21773f5` | `674de9f1cc06` | no-independent-check |
 
 ## Artifact hash preservation
 
@@ -52,7 +52,7 @@ any card is stale.
 
   SHA-256 of data/processed/lettuce_earth.csv exactly as committed, which is the table train_lettuce.py writes and every lettuce trainer reads. Covers 1648 plant rows x 7 columns; the file is deterministic because the transform from the WUR workbook is fixed in the training script.
 
-**Code.** `ml/training/train_lettuce.py` at `aa7e9af9a5118337946c3f577577e5efba4ec37d` (present in commit: yes; unchanged since: yes)
+**Code.** `ml/training/train_lettuce.py` at `0e1ab21773f58d87a37575cd3b8820007012672a` (present in commit: yes; unchanged since: yes)
 
 **Split.** Nested leave-one-experiment-out cross-validation (4 outer, 3 inner folds). Grouped by experiment (4 groups).
 
@@ -90,7 +90,7 @@ any card is stale.
 
   SHA-256 of data/processed/lettuce_earth.csv exactly as committed. v2 reads the same table v1 writes, so the hash is shared with v1 and v3 by construction and not by copying; v3's artifact independently records the same value.
 
-**Code.** `ml/training/train_lettuce_v2.py` at `aa7e9af9a5118337946c3f577577e5efba4ec37d` (present in commit: yes; unchanged since: yes)
+**Code.** `ml/training/train_lettuce_v2.py` at `0e1ab21773f58d87a37575cd3b8820007012672a` (present in commit: yes; unchanged since: yes)
 
 **Split.** Nested leave-one-experiment-out cross-validation (4 outer, 3 inner folds). Grouped by experiment (4 groups).
 
@@ -128,7 +128,7 @@ any card is stale.
 
   SHA-256 of data/processed/lettuce_earth.csv. This value is corroborated rather than merely asserted: the v3 artifact records the same digest in its own trainingDataSha256 field, written by the training run.
 
-**Code.** `ml/training/train_lettuce_v3.py` at `aa7e9af9a5118337946c3f577577e5efba4ec37d` (present in commit: yes; unchanged since: yes)
+**Code.** `ml/training/train_lettuce_v3.py` at `0e1ab21773f58d87a37575cd3b8820007012672a` (present in commit: yes; unchanged since: yes)
 
 **Split.** Leave-one-experiment-out, 4 folds. Grouped by experiment (4 groups).
 
@@ -165,7 +165,7 @@ any card is stale.
 
   SHA-256 of data/processed/mizuna_microbial_load.csv exactly as committed. Covers 123 leaf-tissue measurements across 35 biological groups; the table is produced from the committed OSD-780 records by scripts/preprocess_osd780.py.
 
-**Code.** `ml/training/train_microbial_v2.py` at `aa7e9af9a5118337946c3f577577e5efba4ec37d` (present in commit: yes; unchanged since: yes)
+**Code.** `ml/training/train_microbial_v2.py` at `0e1ab21773f58d87a37575cd3b8820007012672a` (present in commit: yes; unchanged since: yes)
 
 **Split.** Leave-one-campaign-out transfer, with group-level cross-conformal calibration. Grouped by biological group (plant/pillow) (35 groups).
 
@@ -203,7 +203,7 @@ any card is stale.
 
   SHA-256 of the NASA OSDR OSD-46 v6 normalised expression matrix: 22,810 probesets x 44 samples, 23,794,742 bytes. The file is deliberately not committed (it is a 24 MB re-acquirable download, excluded by .gitignore policy); its digest is committed in data/metadata/phase9_nasa_datasets and the artifact recorded the same digest at training time.
 
-**Code.** `ml/training/train_radiation_osd46.py` at `aa7e9af9a5118337946c3f577577e5efba4ec37d` (present in commit: yes; unchanged since: yes)
+**Code.** `ml/training/train_radiation_osd46.py` at `0e1ab21773f58d87a37575cd3b8820007012672a` (present in commit: yes; unchanged since: yes)
 
 **Split.** Leave-one-biological-group-out cross-validation over 22 groups. Grouped by biological group (22 groups).
 
@@ -238,7 +238,7 @@ any card is stale.
 
   SHA-256 of the NASA OSDR OSD-46 v6 normalised expression matrix, 22,810 probesets x 44 samples. Not committed by policy; the digest is committed in data/metadata/phase9_nasa_datasets and recorded in the artifact.
 
-**Code.** `ml/training/train_radiation_osd46.py` at `aa7e9af9a5118337946c3f577577e5efba4ec37d` (present in commit: yes; unchanged since: yes)
+**Code.** `ml/training/train_radiation_osd46.py` at `0e1ab21773f58d87a37575cd3b8820007012672a` (present in commit: yes; unchanged since: yes)
 
 **Split.** Leave-one-biological-group-out cross-validation over 22 groups. Grouped by biological group (22 groups).
 
@@ -275,7 +275,7 @@ any card is stale.
 
   SHA-256 of the derived log1p(CPM) matrix the trainer reads: 36 samples x 33,562 genes, 29,705,842 bytes, produced by scripts/preprocess_datasets.py from the OSD-767 STAR counts. The parquet is not committed, so the digest was obtained by reconstruction from the checked upstream file, and a second, version-independent digest over the same matrix serialised as CSV is recorded alongside it because parquet byte layout is a property of the pyarrow version rather than of the data.
 
-**Code.** `ml/training/train_models.py` at `aa7e9af9a5118337946c3f577577e5efba4ec37d` (present in commit: yes; unchanged since: yes)
+**Code.** `ml/training/train_models.py` at `0e1ab21773f58d87a37575cd3b8820007012672a` (present in commit: yes; unchanged since: yes)
 
 **Split.** Nested stratified group cross-validation (4 outer, 3 inner folds). Grouped by plant (both tissues of a plant stay together) (21 groups).
 

@@ -75,6 +75,5 @@ DATA = {'schema': 'spaceagrisim.screenshot_manifest/1',
                'docs/screenshots/water-evidence-desktop.png': 'c08aa0a119f290e01bd24aa81b7753bfc4e2a38745cb8458aacbae763dc4ceaa',
                'docs/screenshots/water-evidence-mobile.png': 'cce2383a85c35610fbd801871c856213090b52dc958b621bc4e331f2ae6bb21a',
                'docs/screenshots/water-evidence-tablet.png': '57e76908a7e2db307011a01e9647c068bc0bdae93a30f3ec6965ff0ca4287c21'},
- 'removed': {'docs/screenshots/phase33/chamber-view-desktop.png': {'identicalTo': 'docs/screenshots/digital-twin.png',
-                                                                   'sha256': '85a425a574224d846949f24e639ae56b0f12a09f83eb705ff95e70200fae8211'}},
- 'savedBytes': 176756}
+ 'removed': {},
+ 'savedBytes': 0}

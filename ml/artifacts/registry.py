@@ -1,7 +1,7 @@
 """Data record. Generated - the generator is named inside the record itself."""
 
 DATA = {'schemaVersion': 1,
- 'trainedAt': '2026-11-12T21:33:25.687651+00:00',
+ 'trainedAt': '2026-11-12T21:46:47.683967+00:00',
  'environment': {'python': '3.13.18', 'numpy': '2.3.5', 'pandas': '2.2.3', 'sklearn': '1.6.1'},
  'models': [{'id': 'lettuce-earth-growth-v1',
              'artifact': 'ml/artifacts/lettuce-earth-growth-v1.py',

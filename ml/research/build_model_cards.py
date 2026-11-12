@@ -129,7 +129,7 @@ SPECS: dict[str, dict] = {
             "reconstruction": "python3 ml/training/train_lettuce.py regenerates the table from the committed workbook.",
         },
         "code": {"path": "ml/training/train_lettuce.py",
-                 "commit": "aa7e9af9a5118337946c3f577577e5efba4ec37d"},
+                 "commit": "0e1ab21773f58d87a37575cd3b8820007012672a"},
         "split": {
             "method": "Nested leave-one-experiment-out cross-validation (4 outer, 3 inner folds).",
             "grouped": True,
@@ -188,7 +188,7 @@ SPECS: dict[str, dict] = {
             "reconstruction": "python3 ml/training/train_lettuce.py regenerates the table; v2 then reads it.",
         },
         "code": {"path": "ml/training/train_lettuce_v2.py",
-                 "commit": "aa7e9af9a5118337946c3f577577e5efba4ec37d"},
+                 "commit": "0e1ab21773f58d87a37575cd3b8820007012672a"},
         "split": {
             "method": "Nested leave-one-experiment-out cross-validation (4 outer, 3 inner folds).",
             "grouped": True,
@@ -252,7 +252,7 @@ SPECS: dict[str, dict] = {
             "reconstruction": "python3 ml/training/train_lettuce_v3.py",
         },
         "code": {"path": "ml/training/train_lettuce_v3.py",
-                 "commit": "aa7e9af9a5118337946c3f577577e5efba4ec37d"},
+                 "commit": "0e1ab21773f58d87a37575cd3b8820007012672a"},
         "split": {
             "method": "Leave-one-experiment-out, 4 folds.",
             "grouped": True,
@@ -317,7 +317,7 @@ SPECS: dict[str, dict] = {
             "reconstruction": "python3 scripts/preprocess_osd780.py rebuilds the table from the committed raw records.",
         },
         "code": {"path": "ml/training/train_microbial_v2.py",
-                 "commit": "aa7e9af9a5118337946c3f577577e5efba4ec37d"},
+                 "commit": "0e1ab21773f58d87a37575cd3b8820007012672a"},
         "split": {
             "method": "Leave-one-campaign-out transfer, with group-level cross-conformal calibration.",
             "grouped": True,
@@ -380,7 +380,7 @@ SPECS: dict[str, dict] = {
             "reconstruction": "python3 scripts/acquire_phase9.py re-downloads the matrix and verifies it against the committed digest.",
         },
         "code": {"path": "ml/training/train_radiation_osd46.py",
-                 "commit": "aa7e9af9a5118337946c3f577577e5efba4ec37d"},
+                 "commit": "0e1ab21773f58d87a37575cd3b8820007012672a"},
         "split": {
             "method": "Leave-one-biological-group-out cross-validation over 22 groups.",
             "grouped": True,
@@ -440,7 +440,7 @@ SPECS: dict[str, dict] = {
             "reconstruction": "python3 scripts/acquire_phase9.py re-downloads the matrix and verifies it against the committed digest.",
         },
         "code": {"path": "ml/training/train_radiation_osd46.py",
-                 "commit": "aa7e9af9a5118337946c3f577577e5efba4ec37d"},
+                 "commit": "0e1ab21773f58d87a37575cd3b8820007012672a"},
         "split": {
             "method": "Leave-one-biological-group-out cross-validation over 22 groups.",
             "grouped": True,
@@ -514,7 +514,7 @@ SPECS: dict[str, dict] = {
             ),
         },
         "code": {"path": "ml/training/train_models.py",
-                 "commit": "aa7e9af9a5118337946c3f577577e5efba4ec37d"},
+                 "commit": "0e1ab21773f58d87a37575cd3b8820007012672a"},
         "split": {
             "method": "Nested stratified group cross-validation (4 outer, 3 inner folds).",
             "grouped": True,
