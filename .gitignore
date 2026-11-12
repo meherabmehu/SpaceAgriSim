@@ -70,3 +70,4 @@ data/raw/OSD-767/
 
 # Local CI/scratch database used by the test workflow
 .ci/
+data/raw/zenodo_3957208/*.tar
