@@ -1,0 +1,1553 @@
+variable,treatment,observation,value,unit
+Length of longest leaf,Control,1,135.0,mm
+Length of longest leaf,Control,2,176.0,mm
+Length of longest leaf,Control,3,138.0,mm
+Length of longest leaf,Control,4,139.0,mm
+Length of longest leaf,Control,5,145.0,mm
+Length of longest leaf,Control,6,145.0,mm
+Length of longest leaf,Control,7,179.0,mm
+Length of longest leaf,Control,8,155.0,mm
+Length of longest leaf,Control,9,163.0,mm
+Length of longest leaf,Control,10,153.0,mm
+Length of longest leaf,Control,11,166.0,mm
+Length of longest leaf,Control,12,149.0,mm
+Length of longest leaf,Control,13,166.0,mm
+Length of longest leaf,Control,14,161.0,mm
+Length of longest leaf,Control,15,181.0,mm
+Length of longest leaf,Control,16,144.0,mm
+Length of longest leaf,Control,17,142.0,mm
+Length of longest leaf,Control,18,168.0,mm
+Length of longest leaf,Control,19,138.0,mm
+Length of longest leaf,Control,20,154.0,mm
+Length of longest leaf,Control,21,166.0,mm
+Length of longest leaf,Control,22,139.0,mm
+Length of longest leaf,Control,23,163.0,mm
+Length of longest leaf,Control,24,147.0,mm
+Length of longest leaf,Control,25,174.0,mm
+Length of longest leaf,Control,26,164.0,mm
+Length of longest leaf,Control,27,155.0,mm
+Length of longest leaf,Control,28,132.0,mm
+Length of longest leaf,Control,29,143.0,mm
+Length of longest leaf,Control,30,166.0,mm
+Length of longest leaf,Control,31,139.0,mm
+Length of longest leaf,Control,32,146.0,mm
+Length of longest leaf,Control,33,166.0,mm
+Length of longest leaf,Control,34,146.0,mm
+Length of longest leaf,Control,35,174.0,mm
+Length of longest leaf,Control,36,166.0,mm
+Length of longest leaf,Control,37,149.0,mm
+Length of longest leaf,Control,38,166.0,mm
+Length of longest leaf,Control,39,141.0,mm
+Length of longest leaf,Control,40,157.0,mm
+Length of longest leaf,Control,41,164.0,mm
+Length of longest leaf,Control,42,140.0,mm
+Length of longest leaf,Control,43,150.0,mm
+Length of longest leaf,Control,44,149.0,mm
+Length of longest leaf,Control,45,141.0,mm
+Length of longest leaf,Control,46,172.0,mm
+Length of longest leaf,Control,47,153.0,mm
+Length of longest leaf,Control,48,141.0,mm
+Length of longest leaf,Control,49,131.0,mm
+Length of longest leaf,Control,50,143.0,mm
+Length of longest leaf,Control,51,134.0,mm
+Length of longest leaf,Control,52,173.0,mm
+Length of longest leaf,Control,53,138.0,mm
+Length of longest leaf,Control,54,150.0,mm
+Length of longest leaf,Control,55,130.0,mm
+Length of longest leaf,Control,56,149.0,mm
+Length of longest leaf,Control,57,150.0,mm
+Length of longest leaf,Control,58,133.0,mm
+Length of longest leaf,Control,59,164.0,mm
+Length of longest leaf,Control,60,145.0,mm
+Length of longest leaf,T1,1,176.0,mm
+Length of longest leaf,T1,2,178.0,mm
+Length of longest leaf,T1,3,164.0,mm
+Length of longest leaf,T1,4,151.0,mm
+Length of longest leaf,T1,5,165.0,mm
+Length of longest leaf,T1,6,176.0,mm
+Length of longest leaf,T1,7,170.0,mm
+Length of longest leaf,T1,8,171.0,mm
+Length of longest leaf,T1,9,157.0,mm
+Length of longest leaf,T1,10,146.0,mm
+Length of longest leaf,T1,11,189.0,mm
+Length of longest leaf,T1,12,188.0,mm
+Length of longest leaf,T1,13,179.0,mm
+Length of longest leaf,T1,14,175.0,mm
+Length of longest leaf,T1,15,189.0,mm
+Length of longest leaf,T1,16,170.0,mm
+Length of longest leaf,T1,17,164.0,mm
+Length of longest leaf,T1,18,135.0,mm
+Length of longest leaf,T1,19,146.0,mm
+Length of longest leaf,T1,20,160.0,mm
+Length of longest leaf,T1,21,162.0,mm
+Length of longest leaf,T1,22,157.0,mm
+Length of longest leaf,T1,23,190.0,mm
+Length of longest leaf,T1,24,180.0,mm
+Length of longest leaf,T1,25,168.0,mm
+Length of longest leaf,T1,26,200.0,mm
+Length of longest leaf,T1,27,152.0,mm
+Length of longest leaf,T1,28,195.0,mm
+Length of longest leaf,T1,29,173.0,mm
+Length of longest leaf,T1,30,170.0,mm
+Length of longest leaf,T1,31,200.0,mm
+Length of longest leaf,T1,32,159.0,mm
+Length of longest leaf,T1,33,152.0,mm
+Length of longest leaf,T1,34,169.0,mm
+Length of longest leaf,T1,35,154.0,mm
+Length of longest leaf,T1,36,170.0,mm
+Length of longest leaf,T1,37,182.0,mm
+Length of longest leaf,T1,38,170.0,mm
+Length of longest leaf,T1,39,173.0,mm
+Length of longest leaf,T1,40,137.0,mm
+Length of longest leaf,T1,41,156.0,mm
+Length of longest leaf,T1,42,145.0,mm
+Length of longest leaf,T1,43,176.0,mm
+Length of longest leaf,T1,44,178.0,mm
+Length of longest leaf,T1,45,182.0,mm
+Length of longest leaf,T1,46,178.0,mm
+Length of longest leaf,T1,47,166.0,mm
+Length of longest leaf,T1,48,170.0,mm
+Length of longest leaf,T2,1,170.0,mm
+Length of longest leaf,T2,2,165.0,mm
+Length of longest leaf,T2,3,163.0,mm
+Length of longest leaf,T2,4,177.0,mm
+Length of longest leaf,T2,5,173.0,mm
+Length of longest leaf,T2,6,139.0,mm
+Length of longest leaf,T2,7,164.0,mm
+Length of longest leaf,T2,8,167.0,mm
+Length of longest leaf,T2,9,165.0,mm
+Length of longest leaf,T2,10,160.0,mm
+Length of longest leaf,T2,11,150.0,mm
+Length of longest leaf,T2,12,149.0,mm
+Length of longest leaf,T2,13,160.0,mm
+Length of longest leaf,T2,14,164.0,mm
+Length of longest leaf,T2,15,161.0,mm
+Length of longest leaf,T2,16,170.0,mm
+Length of longest leaf,T2,17,160.0,mm
+Length of longest leaf,T2,18,164.0,mm
+Length of longest leaf,T2,19,152.0,mm
+Length of longest leaf,T2,20,148.0,mm
+Length of longest leaf,T2,21,153.0,mm
+Length of longest leaf,T2,22,157.0,mm
+Length of longest leaf,T2,23,168.0,mm
+Length of longest leaf,T2,24,171.0,mm
+Length of longest leaf,T2,25,145.0,mm
+Length of longest leaf,T2,26,165.0,mm
+Length of longest leaf,T2,27,156.0,mm
+Length of longest leaf,T2,28,152.0,mm
+Length of longest leaf,T2,29,149.0,mm
+Length of longest leaf,T2,30,149.0,mm
+Length of longest leaf,T2,31,157.0,mm
+Length of longest leaf,T2,32,167.0,mm
+Length of longest leaf,T2,33,154.0,mm
+Length of longest leaf,T2,34,141.0,mm
+Length of longest leaf,T2,35,149.0,mm
+Length of longest leaf,T2,36,152.0,mm
+Length of longest leaf,T2,37,174.0,mm
+Length of longest leaf,T2,38,167.0,mm
+Length of longest leaf,T2,39,156.0,mm
+Length of longest leaf,T2,40,164.0,mm
+Length of longest leaf,T2,41,178.0,mm
+Length of longest leaf,T2,42,157.0,mm
+Length of longest leaf,T2,43,166.0,mm
+Length of longest leaf,T2,44,169.0,mm
+Length of longest leaf,T2,45,173.0,mm
+Length of longest leaf,T2,46,167.0,mm
+Length of longest leaf,T2,47,169.0,mm
+Length of longest leaf,T2,48,177.0,mm
+Length of longest leaf,T2,49,152.0,mm
+Length of longest leaf,T2,50,176.0,mm
+Length of longest leaf,T2,51,170.0,mm
+Length of longest leaf,T2,52,162.0,mm
+Length of longest leaf,T2,53,164.0,mm
+Length of longest leaf,T2,54,168.0,mm
+Length of longest leaf,T2,55,157.0,mm
+Length of longest leaf,T2,56,139.0,mm
+Length of longest leaf,T2,57,174.0,mm
+Length of longest leaf,T2,58,147.0,mm
+Length of longest leaf,T2,59,169.0,mm
+Length of longest leaf,T2,60,161.0,mm
+Length of longest leaf,T2,61,170.0,mm
+Length of longest leaf,T2,62,151.0,mm
+Length of longest leaf,T2,63,152.0,mm
+Length of longest leaf,T2,64,143.0,mm
+Length of longest leaf,T3,1,120.0,mm
+Length of longest leaf,T3,2,166.0,mm
+Length of longest leaf,T3,3,157.0,mm
+Length of longest leaf,T3,4,169.0,mm
+Length of longest leaf,T3,5,170.0,mm
+Length of longest leaf,T3,6,149.0,mm
+Length of longest leaf,T3,7,145.0,mm
+Length of longest leaf,T3,8,149.0,mm
+Length of longest leaf,T3,9,134.0,mm
+Length of longest leaf,T3,10,170.0,mm
+Length of longest leaf,T3,11,152.0,mm
+Length of longest leaf,T3,12,148.0,mm
+Length of longest leaf,T3,13,156.0,mm
+Length of longest leaf,T3,14,144.0,mm
+Length of longest leaf,T3,15,160.0,mm
+Length of longest leaf,T3,16,152.0,mm
+Length of longest leaf,T3,17,150.0,mm
+Length of longest leaf,T3,18,154.0,mm
+Length of longest leaf,T3,19,148.0,mm
+Length of longest leaf,T3,20,156.0,mm
+Length of longest leaf,T3,21,93.0,mm
+Length of longest leaf,T3,22,110.0,mm
+Length of longest leaf,T3,23,107.0,mm
+Length of longest leaf,T3,24,101.0,mm
+Length of longest leaf,T3,25,133.0,mm
+Length of longest leaf,T3,26,132.0,mm
+Length of longest leaf,T3,27,115.0,mm
+Length of longest leaf,T3,28,136.0,mm
+Length of longest leaf,T3,29,134.0,mm
+Length of longest leaf,T3,30,98.0,mm
+Length of longest leaf,T3,31,105.0,mm
+Length of longest leaf,T3,32,161.0,mm
+Length of longest leaf,T3,33,247.0,mm
+Length of longest leaf,T3,34,157.0,mm
+Length of longest leaf,T3,35,166.0,mm
+Length of longest leaf,T3,36,145.0,mm
+Length of longest leaf,T3,37,196.0,mm
+Length of longest leaf,T3,38,176.0,mm
+Length of longest leaf,T3,39,180.0,mm
+Length of longest leaf,T3,40,254.0,mm
+Length of longest leaf,T3,41,128.0,mm
+Length of longest leaf,T3,42,165.0,mm
+Length of longest leaf,T3,43,148.0,mm
+Length of longest leaf,T3,44,140.0,mm
+Length of longest leaf,T3,45,107.0,mm
+Length of longest leaf,T3,46,150.0,mm
+Length of longest leaf,T3,47,135.0,mm
+Length of longest leaf,T3,48,155.0,mm
+Length of longest leaf,T3,49,162.0,mm
+Length of longest leaf,T3,50,135.0,mm
+Length of longest leaf,T3,51,129.0,mm
+Length of longest leaf,T3,52,204.0,mm
+Length of longest leaf,T3,53,114.0,mm
+Length of longest leaf,T3,54,152.0,mm
+Length of longest leaf,T3,55,83.0,mm
+Length of longest leaf,T3,56,225.0,mm
+Length of longest leaf,T3,57,243.0,mm
+Length of longest leaf,T3,58,168.0,mm
+Length of longest leaf,T3,59,204.0,mm
+Length of longest leaf,T3,60,152.0,mm
+Length of longest leaf,T3,61,130.0,mm
+Length of longest leaf,T3,62,146.0,mm
+Length of longest leaf,T3,63,145.0,mm
+Length of longest leaf,T3,64,136.0,mm
+Length of longest leaf,T3,65,167.0,mm
+Length of longest leaf,T3,66,159.0,mm
+Length of longest leaf,T3,67,159.0,mm
+Length of longest leaf,T3,68,136.0,mm
+Length of longest leaf,T3,69,105.0,mm
+Length of longest leaf,T3,70,130.0,mm
+Length of longest leaf,T3,71,124.0,mm
+Length of longest leaf,T3,72,183.0,mm
+Length of longest leaf,T3,73,104.0,mm
+Length of longest leaf,T3,74,263.0,mm
+Length of longest leaf,T3,75,143.0,mm
+Length of longest leaf,T3,76,212.0,mm
+Length of longest leaf,T3,77,169.0,mm
+Length of longest leaf,T3,78,165.0,mm
+Length of longest leaf,T3,79,99.0,mm
+Length of longest leaf,T3,80,227.0,mm
+Width of widest leaf,Control,1,111.0,mm
+Width of widest leaf,Control,2,143.0,mm
+Width of widest leaf,Control,3,112.0,mm
+Width of widest leaf,Control,4,120.0,mm
+Width of widest leaf,Control,5,112.0,mm
+Width of widest leaf,Control,6,123.0,mm
+Width of widest leaf,Control,7,124.0,mm
+Width of widest leaf,Control,8,119.0,mm
+Width of widest leaf,Control,9,128.0,mm
+Width of widest leaf,Control,10,123.0,mm
+Width of widest leaf,Control,11,124.0,mm
+Width of widest leaf,Control,12,114.0,mm
+Width of widest leaf,Control,13,134.0,mm
+Width of widest leaf,Control,14,134.0,mm
+Width of widest leaf,Control,15,124.0,mm
+Width of widest leaf,Control,16,124.0,mm
+Width of widest leaf,Control,17,117.0,mm
+Width of widest leaf,Control,18,134.0,mm
+Width of widest leaf,Control,19,119.0,mm
+Width of widest leaf,Control,20,114.0,mm
+Width of widest leaf,Control,21,121.0,mm
+Width of widest leaf,Control,22,103.0,mm
+Width of widest leaf,Control,23,113.0,mm
+Width of widest leaf,Control,24,119.0,mm
+Width of widest leaf,Control,25,134.0,mm
+Width of widest leaf,Control,26,123.0,mm
+Width of widest leaf,Control,27,104.0,mm
+Width of widest leaf,Control,28,103.0,mm
+Width of widest leaf,Control,29,104.0,mm
+Width of widest leaf,Control,30,121.0,mm
+Width of widest leaf,Control,31,104.0,mm
+Width of widest leaf,Control,32,109.0,mm
+Width of widest leaf,Control,33,119.0,mm
+Width of widest leaf,Control,34,133.0,mm
+Width of widest leaf,Control,35,132.0,mm
+Width of widest leaf,Control,36,138.0,mm
+Width of widest leaf,Control,37,117.0,mm
+Width of widest leaf,Control,38,126.0,mm
+Width of widest leaf,Control,39,104.0,mm
+Width of widest leaf,Control,40,117.0,mm
+Width of widest leaf,Control,41,133.0,mm
+Width of widest leaf,Control,42,86.0,mm
+Width of widest leaf,Control,43,138.0,mm
+Width of widest leaf,Control,44,117.0,mm
+Width of widest leaf,Control,45,123.0,mm
+Width of widest leaf,Control,46,133.0,mm
+Width of widest leaf,Control,47,121.0,mm
+Width of widest leaf,Control,48,117.0,mm
+Width of widest leaf,Control,49,121.0,mm
+Width of widest leaf,Control,50,130.0,mm
+Width of widest leaf,Control,51,114.0,mm
+Width of widest leaf,Control,52,119.0,mm
+Width of widest leaf,Control,53,111.0,mm
+Width of widest leaf,Control,54,121.0,mm
+Width of widest leaf,Control,55,110.0,mm
+Width of widest leaf,Control,56,117.0,mm
+Width of widest leaf,Control,57,112.0,mm
+Width of widest leaf,Control,58,115.0,mm
+Width of widest leaf,Control,59,126.0,mm
+Width of widest leaf,Control,60,115.0,mm
+Width of widest leaf,T1,1,134.0,mm
+Width of widest leaf,T1,2,115.0,mm
+Width of widest leaf,T1,3,114.0,mm
+Width of widest leaf,T1,4,120.0,mm
+Width of widest leaf,T1,5,130.0,mm
+Width of widest leaf,T1,6,113.0,mm
+Width of widest leaf,T1,7,147.0,mm
+Width of widest leaf,T1,8,118.0,mm
+Width of widest leaf,T1,9,116.0,mm
+Width of widest leaf,T1,10,146.0,mm
+Width of widest leaf,T1,11,130.0,mm
+Width of widest leaf,T1,12,138.0,mm
+Width of widest leaf,T1,13,131.0,mm
+Width of widest leaf,T1,14,127.0,mm
+Width of widest leaf,T1,15,130.0,mm
+Width of widest leaf,T1,16,132.0,mm
+Width of widest leaf,T1,17,138.0,mm
+Width of widest leaf,T1,18,80.0,mm
+Width of widest leaf,T1,19,130.0,mm
+Width of widest leaf,T1,20,120.0,mm
+Width of widest leaf,T1,21,115.0,mm
+Width of widest leaf,T1,22,122.0,mm
+Width of widest leaf,T1,23,136.0,mm
+Width of widest leaf,T1,24,113.0,mm
+Width of widest leaf,T1,25,125.0,mm
+Width of widest leaf,T1,26,136.0,mm
+Width of widest leaf,T1,27,106.0,mm
+Width of widest leaf,T1,28,149.0,mm
+Width of widest leaf,T1,29,119.0,mm
+Width of widest leaf,T1,30,115.0,mm
+Width of widest leaf,T1,31,149.0,mm
+Width of widest leaf,T1,32,123.0,mm
+Width of widest leaf,T1,33,126.0,mm
+Width of widest leaf,T1,34,111.0,mm
+Width of widest leaf,T1,35,110.0,mm
+Width of widest leaf,T1,36,112.0,mm
+Width of widest leaf,T1,37,145.0,mm
+Width of widest leaf,T1,38,120.0,mm
+Width of widest leaf,T1,39,135.0,mm
+Width of widest leaf,T1,40,107.0,mm
+Width of widest leaf,T1,41,143.0,mm
+Width of widest leaf,T1,42,103.0,mm
+Width of widest leaf,T1,43,120.0,mm
+Width of widest leaf,T1,44,130.0,mm
+Width of widest leaf,T1,45,123.0,mm
+Width of widest leaf,T1,46,118.0,mm
+Width of widest leaf,T1,47,115.0,mm
+Width of widest leaf,T1,48,120.0,mm
+Width of widest leaf,T2,1,128.0,mm
+Width of widest leaf,T2,2,134.0,mm
+Width of widest leaf,T2,3,123.0,mm
+Width of widest leaf,T2,4,123.0,mm
+Width of widest leaf,T2,5,120.0,mm
+Width of widest leaf,T2,6,98.0,mm
+Width of widest leaf,T2,7,159.0,mm
+Width of widest leaf,T2,8,108.0,mm
+Width of widest leaf,T2,9,109.0,mm
+Width of widest leaf,T2,10,123.0,mm
+Width of widest leaf,T2,11,130.0,mm
+Width of widest leaf,T2,12,128.0,mm
+Width of widest leaf,T2,13,123.0,mm
+Width of widest leaf,T2,14,146.0,mm
+Width of widest leaf,T2,15,124.0,mm
+Width of widest leaf,T2,16,134.0,mm
+Width of widest leaf,T2,17,128.0,mm
+Width of widest leaf,T2,18,119.0,mm
+Width of widest leaf,T2,19,123.0,mm
+Width of widest leaf,T2,20,123.0,mm
+Width of widest leaf,T2,21,120.0,mm
+Width of widest leaf,T2,22,98.0,mm
+Width of widest leaf,T2,23,159.0,mm
+Width of widest leaf,T2,24,108.0,mm
+Width of widest leaf,T2,25,109.0,mm
+Width of widest leaf,T2,26,123.0,mm
+Width of widest leaf,T2,27,130.0,mm
+Width of widest leaf,T2,28,128.0,mm
+Width of widest leaf,T2,29,118.0,mm
+Width of widest leaf,T2,30,146.0,mm
+Width of widest leaf,T2,31,126.0,mm
+Width of widest leaf,T2,32,134.0,mm
+Width of widest leaf,T2,33,128.0,mm
+Width of widest leaf,T2,34,134.0,mm
+Width of widest leaf,T2,35,123.0,mm
+Width of widest leaf,T2,36,133.0,mm
+Width of widest leaf,T2,37,120.0,mm
+Width of widest leaf,T2,38,98.0,mm
+Width of widest leaf,T2,39,159.0,mm
+Width of widest leaf,T2,40,108.0,mm
+Width of widest leaf,T2,41,109.0,mm
+Width of widest leaf,T2,42,134.0,mm
+Width of widest leaf,T2,43,130.0,mm
+Width of widest leaf,T2,44,128.0,mm
+Width of widest leaf,T2,45,123.0,mm
+Width of widest leaf,T2,46,146.0,mm
+Width of widest leaf,T2,47,113.0,mm
+Width of widest leaf,T2,48,134.0,mm
+Width of widest leaf,T2,49,128.0,mm
+Width of widest leaf,T2,50,134.0,mm
+Width of widest leaf,T2,51,126.0,mm
+Width of widest leaf,T2,52,123.0,mm
+Width of widest leaf,T2,53,120.0,mm
+Width of widest leaf,T2,54,98.0,mm
+Width of widest leaf,T2,55,159.0,mm
+Width of widest leaf,T2,56,108.0,mm
+Width of widest leaf,T2,57,109.0,mm
+Width of widest leaf,T2,58,134.0,mm
+Width of widest leaf,T2,59,130.0,mm
+Width of widest leaf,T2,60,128.0,mm
+Width of widest leaf,T2,61,123.0,mm
+Width of widest leaf,T2,62,146.0,mm
+Width of widest leaf,T2,63,124.0,mm
+Width of widest leaf,T2,64,134.0,mm
+Width of widest leaf,T3,1,114.0,mm
+Width of widest leaf,T3,2,116.0,mm
+Width of widest leaf,T3,3,117.0,mm
+Width of widest leaf,T3,4,113.0,mm
+Width of widest leaf,T3,5,128.0,mm
+Width of widest leaf,T3,6,119.0,mm
+Width of widest leaf,T3,7,115.0,mm
+Width of widest leaf,T3,8,115.0,mm
+Width of widest leaf,T3,9,115.0,mm
+Width of widest leaf,T3,10,123.0,mm
+Width of widest leaf,T3,11,120.0,mm
+Width of widest leaf,T3,12,126.0,mm
+Width of widest leaf,T3,13,110.0,mm
+Width of widest leaf,T3,14,136.0,mm
+Width of widest leaf,T3,15,124.0,mm
+Width of widest leaf,T3,16,126.0,mm
+Width of widest leaf,T3,17,122.0,mm
+Width of widest leaf,T3,18,120.0,mm
+Width of widest leaf,T3,19,80.0,mm
+Width of widest leaf,T3,20,140.0,mm
+Width of widest leaf,T3,21,85.0,mm
+Width of widest leaf,T3,22,100.0,mm
+Width of widest leaf,T3,23,104.0,mm
+Width of widest leaf,T3,24,100.0,mm
+Width of widest leaf,T3,25,120.0,mm
+Width of widest leaf,T3,26,116.0,mm
+Width of widest leaf,T3,27,99.0,mm
+Width of widest leaf,T3,28,107.0,mm
+Width of widest leaf,T3,29,105.0,mm
+Width of widest leaf,T3,30,111.0,mm
+Width of widest leaf,T3,31,93.0,mm
+Width of widest leaf,T3,32,142.0,mm
+Width of widest leaf,T3,33,182.0,mm
+Width of widest leaf,T3,34,126.0,mm
+Width of widest leaf,T3,35,131.0,mm
+Width of widest leaf,T3,36,115.0,mm
+Width of widest leaf,T3,37,151.0,mm
+Width of widest leaf,T3,38,138.0,mm
+Width of widest leaf,T3,39,140.0,mm
+Width of widest leaf,T3,40,187.0,mm
+Width of widest leaf,T3,41,105.0,mm
+Width of widest leaf,T3,42,120.0,mm
+Width of widest leaf,T3,43,115.0,mm
+Width of widest leaf,T3,44,111.0,mm
+Width of widest leaf,T3,45,93.0,mm
+Width of widest leaf,T3,46,159.0,mm
+Width of widest leaf,T3,47,109.0,mm
+Width of widest leaf,T3,48,118.0,mm
+Width of widest leaf,T3,49,134.0,mm
+Width of widest leaf,T3,50,121.0,mm
+Width of widest leaf,T3,51,108.0,mm
+Width of widest leaf,T3,52,156.0,mm
+Width of widest leaf,T3,53,99.0,mm
+Width of widest leaf,T3,54,138.0,mm
+Width of widest leaf,T3,55,79.0,mm
+Width of widest leaf,T3,56,169.0,mm
+Width of widest leaf,T3,57,180.0,mm
+Width of widest leaf,T3,58,130.0,mm
+Width of widest leaf,T3,59,156.0,mm
+Width of widest leaf,T3,60,123.0,mm
+Width of widest leaf,T3,61,108.0,mm
+Width of widest leaf,T3,62,117.0,mm
+Width of widest leaf,T3,63,132.0,mm
+Width of widest leaf,T3,64,153.0,mm
+Width of widest leaf,T3,65,141.0,mm
+Width of widest leaf,T3,66,112.0,mm
+Width of widest leaf,T3,67,110.0,mm
+Width of widest leaf,T3,68,119.0,mm
+Width of widest leaf,T3,69,96.0,mm
+Width of widest leaf,T3,70,105.0,mm
+Width of widest leaf,T3,71,105.0,mm
+Width of widest leaf,T3,72,142.0,mm
+Width of widest leaf,T3,73,92.0,mm
+Width of widest leaf,T3,74,136.0,mm
+Width of widest leaf,T3,75,117.0,mm
+Width of widest leaf,T3,76,160.0,mm
+Width of widest leaf,T3,77,134.0,mm
+Width of widest leaf,T3,78,131.0,mm
+Width of widest leaf,T3,79,89.0,mm
+Width of widest leaf,T3,80,170.0,mm
+Leaf area,Control,1,1006.979,mm²
+Leaf area,Control,2,1159.342,mm²
+Leaf area,Control,3,1057.005,mm²
+Leaf area,Control,4,1036.063,mm²
+Leaf area,Control,5,1344.294,mm²
+Leaf area,Control,6,1146.5,mm²
+Leaf area,Control,7,1132.801,mm²
+Leaf area,Control,8,1374.049,mm²
+Leaf area,Control,9,1061.678,mm²
+Leaf area,Control,10,1243.35,mm²
+Leaf area,T1,1,1290.474,mm²
+Leaf area,T1,2,1383.418,mm²
+Leaf area,T1,3,1287.768,mm²
+Leaf area,T1,4,1414.122,mm²
+Leaf area,T1,5,1411.222,mm²
+Leaf area,T1,6,1425.776,mm²
+Leaf area,T1,7,1328.079,mm²
+Leaf area,T1,8,1212.88,mm²
+Leaf area,T1,9,1426.546,mm²
+Leaf area,T1,10,1228.141,mm²
+Leaf area,T2,1,1671.528333,mm²
+Leaf area,T2,2,1090.121667,mm²
+Leaf area,T2,3,1362.041667,mm²
+Leaf area,T2,4,1175.638333,mm²
+Leaf area,T2,5,1251.663889,mm²
+Leaf area,T2,6,1238.243333,mm²
+Leaf area,T2,7,1239.33,mm²
+Leaf area,T2,8,1345.101667,mm²
+Leaf area,T2,9,1329.707222,mm²
+Leaf area,T2,10,1658.612222,mm²
+Leaf area,T3,1,1518.992,mm²
+Leaf area,T3,2,1323.681,mm²
+Leaf area,T3,3,1342.923,mm²
+Leaf area,T3,4,1346.815,mm²
+Leaf area,T3,5,1571.23,mm²
+Leaf area,T3,6,1574.344,mm²
+Leaf area,T3,7,1374.245,mm²
+Leaf area,T3,8,1104.64,mm²
+Leaf area,T3,9,1300.632,mm²
+Leaf area,T3,10,1110.257,mm²
+Rosette width at widest point,Control,1,300.0,mm
+Rosette width at widest point,Control,2,312.0,mm
+Rosette width at widest point,Control,3,298.0,mm
+Rosette width at widest point,Control,4,278.0,mm
+Rosette width at widest point,Control,5,287.0,mm
+Rosette width at widest point,Control,6,267.0,mm
+Rosette width at widest point,Control,7,240.0,mm
+Rosette width at widest point,Control,8,276.0,mm
+Rosette width at widest point,Control,9,313.0,mm
+Rosette width at widest point,Control,10,332.0,mm
+Rosette width at widest point,Control,11,278.0,mm
+Rosette width at widest point,Control,12,274.0,mm
+Rosette width at widest point,Control,13,278.0,mm
+Rosette width at widest point,Control,14,323.0,mm
+Rosette width at widest point,Control,15,325.0,mm
+Rosette width at widest point,Control,16,304.0,mm
+Rosette width at widest point,Control,17,301.0,mm
+Rosette width at widest point,Control,18,312.0,mm
+Rosette width at widest point,Control,19,286.0,mm
+Rosette width at widest point,Control,20,287.0,mm
+Rosette width at widest point,Control,21,278.0,mm
+Rosette width at widest point,Control,22,286.0,mm
+Rosette width at widest point,Control,23,321.0,mm
+Rosette width at widest point,Control,24,276.0,mm
+Rosette width at widest point,Control,25,302.0,mm
+Rosette width at widest point,Control,26,289.0,mm
+Rosette width at widest point,Control,27,306.0,mm
+Rosette width at widest point,Control,28,279.0,mm
+Rosette width at widest point,Control,29,287.0,mm
+Rosette width at widest point,Control,30,275.0,mm
+Rosette width at widest point,Control,31,257.0,mm
+Rosette width at widest point,Control,32,309.0,mm
+Rosette width at widest point,Control,33,276.0,mm
+Rosette width at widest point,Control,34,313.0,mm
+Rosette width at widest point,Control,35,356.0,mm
+Rosette width at widest point,Control,36,276.0,mm
+Rosette width at widest point,Control,37,264.0,mm
+Rosette width at widest point,Control,38,279.0,mm
+Rosette width at widest point,Control,39,260.0,mm
+Rosette width at widest point,Control,40,265.0,mm
+Rosette width at widest point,Control,41,308.0,mm
+Rosette width at widest point,Control,42,240.0,mm
+Rosette width at widest point,Control,43,287.0,mm
+Rosette width at widest point,Control,44,288.0,mm
+Rosette width at widest point,Control,45,314.0,mm
+Rosette width at widest point,Control,46,312.0,mm
+Rosette width at widest point,Control,47,297.0,mm
+Rosette width at widest point,Control,48,276.0,mm
+Rosette width at widest point,Control,49,278.0,mm
+Rosette width at widest point,Control,50,265.0,mm
+Rosette width at widest point,Control,51,321.0,mm
+Rosette width at widest point,Control,52,276.0,mm
+Rosette width at widest point,Control,53,315.0,mm
+Rosette width at widest point,Control,54,314.0,mm
+Rosette width at widest point,Control,55,251.0,mm
+Rosette width at widest point,Control,56,265.0,mm
+Rosette width at widest point,Control,57,276.0,mm
+Rosette width at widest point,Control,58,331.0,mm
+Rosette width at widest point,Control,59,335.0,mm
+Rosette width at widest point,Control,60,312.0,mm
+Rosette width at widest point,T1,1,337.0,mm
+Rosette width at widest point,T1,2,325.0,mm
+Rosette width at widest point,T1,3,303.0,mm
+Rosette width at widest point,T1,4,292.0,mm
+Rosette width at widest point,T1,5,292.0,mm
+Rosette width at widest point,T1,6,315.0,mm
+Rosette width at widest point,T1,7,434.0,mm
+Rosette width at widest point,T1,8,335.0,mm
+Rosette width at widest point,T1,9,307.0,mm
+Rosette width at widest point,T1,10,294.0,mm
+Rosette width at widest point,T1,11,348.0,mm
+Rosette width at widest point,T1,12,344.0,mm
+Rosette width at widest point,T1,13,343.0,mm
+Rosette width at widest point,T1,14,370.0,mm
+Rosette width at widest point,T1,15,352.0,mm
+Rosette width at widest point,T1,16,329.0,mm
+Rosette width at widest point,T1,17,308.0,mm
+Rosette width at widest point,T1,18,260.0,mm
+Rosette width at widest point,T1,19,265.0,mm
+Rosette width at widest point,T1,20,314.0,mm
+Rosette width at widest point,T1,21,297.0,mm
+Rosette width at widest point,T1,22,296.0,mm
+Rosette width at widest point,T1,23,333.0,mm
+Rosette width at widest point,T1,24,312.0,mm
+Rosette width at widest point,T1,25,330.0,mm
+Rosette width at widest point,T1,26,347.0,mm
+Rosette width at widest point,T1,27,279.0,mm
+Rosette width at widest point,T1,28,359.0,mm
+Rosette width at widest point,T1,29,331.0,mm
+Rosette width at widest point,T1,30,294.0,mm
+Rosette width at widest point,T1,31,398.0,mm
+Rosette width at widest point,T1,32,295.0,mm
+Rosette width at widest point,T1,33,318.0,mm
+Rosette width at widest point,T1,34,325.0,mm
+Rosette width at widest point,T1,35,306.0,mm
+Rosette width at widest point,T1,36,299.0,mm
+Rosette width at widest point,T1,37,336.0,mm
+Rosette width at widest point,T1,38,331.0,mm
+Rosette width at widest point,T1,39,337.0,mm
+Rosette width at widest point,T1,40,257.0,mm
+Rosette width at widest point,T1,41,267.0,mm
+Rosette width at widest point,T1,42,279.0,mm
+Rosette width at widest point,T1,43,363.0,mm
+Rosette width at widest point,T1,44,367.0,mm
+Rosette width at widest point,T1,45,373.0,mm
+Rosette width at widest point,T1,46,310.0,mm
+Rosette width at widest point,T1,47,330.0,mm
+Rosette width at widest point,T1,48,334.0,mm
+Rosette width at widest point,T2,1,334.0,mm
+Rosette width at widest point,T2,2,323.0,mm
+Rosette width at widest point,T2,3,343.0,mm
+Rosette width at widest point,T2,4,337.0,mm
+Rosette width at widest point,T2,5,325.0,mm
+Rosette width at widest point,T2,6,301.0,mm
+Rosette width at widest point,T2,7,320.0,mm
+Rosette width at widest point,T2,8,309.0,mm
+Rosette width at widest point,T2,9,290.0,mm
+Rosette width at widest point,T2,10,348.0,mm
+Rosette width at widest point,T2,11,309.0,mm
+Rosette width at widest point,T2,12,308.0,mm
+Rosette width at widest point,T2,13,305.0,mm
+Rosette width at widest point,T2,14,300.0,mm
+Rosette width at widest point,T2,15,315.0,mm
+Rosette width at widest point,T2,16,330.0,mm
+Rosette width at widest point,T2,17,334.0,mm
+Rosette width at widest point,T2,18,330.0,mm
+Rosette width at widest point,T2,19,343.0,mm
+Rosette width at widest point,T2,20,337.0,mm
+Rosette width at widest point,T2,21,325.0,mm
+Rosette width at widest point,T2,22,301.0,mm
+Rosette width at widest point,T2,23,320.0,mm
+Rosette width at widest point,T2,24,309.0,mm
+Rosette width at widest point,T2,25,290.0,mm
+Rosette width at widest point,T2,26,348.0,mm
+Rosette width at widest point,T2,27,309.0,mm
+Rosette width at widest point,T2,28,308.0,mm
+Rosette width at widest point,T2,29,333.0,mm
+Rosette width at widest point,T2,30,300.0,mm
+Rosette width at widest point,T2,31,301.0,mm
+Rosette width at widest point,T2,32,330.0,mm
+Rosette width at widest point,T2,33,334.0,mm
+Rosette width at widest point,T2,34,323.0,mm
+Rosette width at widest point,T2,35,343.0,mm
+Rosette width at widest point,T2,36,347.0,mm
+Rosette width at widest point,T2,37,325.0,mm
+Rosette width at widest point,T2,38,301.0,mm
+Rosette width at widest point,T2,39,320.0,mm
+Rosette width at widest point,T2,40,309.0,mm
+Rosette width at widest point,T2,41,290.0,mm
+Rosette width at widest point,T2,42,332.0,mm
+Rosette width at widest point,T2,43,309.0,mm
+Rosette width at widest point,T2,44,308.0,mm
+Rosette width at widest point,T2,45,305.0,mm
+Rosette width at widest point,T2,46,300.0,mm
+Rosette width at widest point,T2,47,332.0,mm
+Rosette width at widest point,T2,48,330.0,mm
+Rosette width at widest point,T2,49,334.0,mm
+Rosette width at widest point,T2,50,323.0,mm
+Rosette width at widest point,T2,51,298.0,mm
+Rosette width at widest point,T2,52,337.0,mm
+Rosette width at widest point,T2,53,325.0,mm
+Rosette width at widest point,T2,54,301.0,mm
+Rosette width at widest point,T2,55,320.0,mm
+Rosette width at widest point,T2,56,309.0,mm
+Rosette width at widest point,T2,57,290.0,mm
+Rosette width at widest point,T2,58,360.0,mm
+Rosette width at widest point,T2,59,309.0,mm
+Rosette width at widest point,T2,60,308.0,mm
+Rosette width at widest point,T2,61,305.0,mm
+Rosette width at widest point,T2,62,300.0,mm
+Rosette width at widest point,T2,63,315.0,mm
+Rosette width at widest point,T2,64,330.0,mm
+Rosette width at widest point,T3,1,270.0,mm
+Rosette width at widest point,T3,2,333.0,mm
+Rosette width at widest point,T3,3,340.0,mm
+Rosette width at widest point,T3,4,329.0,mm
+Rosette width at widest point,T3,5,336.0,mm
+Rosette width at widest point,T3,6,348.0,mm
+Rosette width at widest point,T3,7,275.0,mm
+Rosette width at widest point,T3,8,298.0,mm
+Rosette width at widest point,T3,9,274.0,mm
+Rosette width at widest point,T3,10,320.0,mm
+Rosette width at widest point,T3,11,315.0,mm
+Rosette width at widest point,T3,12,275.0,mm
+Rosette width at widest point,T3,13,345.0,mm
+Rosette width at widest point,T3,14,300.0,mm
+Rosette width at widest point,T3,15,320.0,mm
+Rosette width at widest point,T3,16,321.0,mm
+Rosette width at widest point,T3,17,310.0,mm
+Rosette width at widest point,T3,18,328.0,mm
+Rosette width at widest point,T3,19,331.0,mm
+Rosette width at widest point,T3,20,315.0,mm
+Rosette width at widest point,T3,21,225.0,mm
+Rosette width at widest point,T3,22,235.0,mm
+Rosette width at widest point,T3,23,234.0,mm
+Rosette width at widest point,T3,24,230.0,mm
+Rosette width at widest point,T3,25,297.0,mm
+Rosette width at widest point,T3,26,270.0,mm
+Rosette width at widest point,T3,27,276.0,mm
+Rosette width at widest point,T3,28,266.0,mm
+Rosette width at widest point,T3,29,269.0,mm
+Rosette width at widest point,T3,30,267.0,mm
+Rosette width at widest point,T3,31,239.0,mm
+Rosette width at widest point,T3,32,328.0,mm
+Rosette width at widest point,T3,33,465.0,mm
+Rosette width at widest point,T3,34,323.0,mm
+Rosette width at widest point,T3,35,336.0,mm
+Rosette width at widest point,T3,36,338.0,mm
+Rosette width at widest point,T3,37,384.0,mm
+Rosette width at widest point,T3,38,352.0,mm
+Rosette width at widest point,T3,39,359.0,mm
+Rosette width at widest point,T3,40,477.0,mm
+Rosette width at widest point,T3,41,287.0,mm
+Rosette width at widest point,T3,42,378.0,mm
+Rosette width at widest point,T3,43,290.0,mm
+Rosette width at widest point,T3,44,282.0,mm
+Rosette width at widest point,T3,45,237.0,mm
+Rosette width at widest point,T3,46,292.0,mm
+Rosette width at widest point,T3,47,285.0,mm
+Rosette width at widest point,T3,48,300.0,mm
+Rosette width at widest point,T3,49,351.0,mm
+Rosette width at widest point,T3,50,301.0,mm
+Rosette width at widest point,T3,51,277.0,mm
+Rosette width at widest point,T3,52,397.0,mm
+Rosette width at widest point,T3,53,253.0,mm
+Rosette width at widest point,T3,54,327.0,mm
+Rosette width at widest point,T3,55,204.0,mm
+Rosette width at widest point,T3,56,430.0,mm
+Rosette width at widest point,T3,57,459.0,mm
+Rosette width at widest point,T3,58,352.0,mm
+Rosette width at widest point,T3,59,397.0,mm
+Rosette width at widest point,T3,60,315.0,mm
+Rosette width at widest point,T3,61,286.0,mm
+Rosette width at widest point,T3,62,306.0,mm
+Rosette width at widest point,T3,63,330.0,mm
+Rosette width at widest point,T3,64,295.0,mm
+Rosette width at widest point,T3,65,353.0,mm
+Rosette width at widest point,T3,66,310.0,mm
+Rosette width at widest point,T3,67,320.0,mm
+Rosette width at widest point,T3,68,280.0,mm
+Rosette width at widest point,T3,69,267.0,mm
+Rosette width at widest point,T3,70,290.0,mm
+Rosette width at widest point,T3,71,268.0,mm
+Rosette width at widest point,T3,72,363.0,mm
+Rosette width at widest point,T3,73,237.0,mm
+Rosette width at widest point,T3,74,380.0,mm
+Rosette width at widest point,T3,75,300.0,mm
+Rosette width at widest point,T3,76,409.0,mm
+Rosette width at widest point,T3,77,341.0,mm
+Rosette width at widest point,T3,78,334.0,mm
+Rosette width at widest point,T3,79,229.0,mm
+Rosette width at widest point,T3,80,433.0,mm
+Leaf number,Control,1,14.0,count
+Leaf number,Control,2,21.0,count
+Leaf number,Control,3,16.0,count
+Leaf number,Control,4,16.0,count
+Leaf number,Control,5,18.0,count
+Leaf number,Control,6,19.0,count
+Leaf number,Control,7,18.0,count
+Leaf number,Control,8,16.0,count
+Leaf number,Control,9,20.0,count
+Leaf number,Control,10,22.0,count
+Leaf number,Control,11,17.0,count
+Leaf number,Control,12,18.0,count
+Leaf number,Control,13,17.0,count
+Leaf number,Control,14,19.0,count
+Leaf number,Control,15,27.0,count
+Leaf number,Control,16,18.0,count
+Leaf number,Control,17,14.0,count
+Leaf number,Control,18,21.0,count
+Leaf number,Control,19,18.0,count
+Leaf number,Control,20,16.0,count
+Leaf number,Control,21,18.0,count
+Leaf number,Control,22,19.0,count
+Leaf number,Control,23,18.0,count
+Leaf number,Control,24,16.0,count
+Leaf number,Control,25,19.0,count
+Leaf number,Control,26,14.0,count
+Leaf number,Control,27,21.0,count
+Leaf number,Control,28,16.0,count
+Leaf number,Control,29,16.0,count
+Leaf number,Control,30,18.0,count
+Leaf number,Control,31,19.0,count
+Leaf number,Control,32,18.0,count
+Leaf number,Control,33,16.0,count
+Leaf number,Control,34,20.0,count
+Leaf number,Control,35,19.0,count
+Leaf number,Control,36,17.0,count
+Leaf number,Control,37,18.0,count
+Leaf number,Control,38,17.0,count
+Leaf number,Control,39,20.0,count
+Leaf number,Control,40,15.0,count
+Leaf number,Control,41,20.0,count
+Leaf number,Control,42,16.0,count
+Leaf number,Control,43,17.0,count
+Leaf number,Control,44,18.0,count
+Leaf number,Control,45,14.0,count
+Leaf number,Control,46,21.0,count
+Leaf number,Control,47,16.0,count
+Leaf number,Control,48,17.0,count
+Leaf number,Control,49,18.0,count
+Leaf number,Control,50,19.0,count
+Leaf number,Control,51,18.0,count
+Leaf number,Control,52,16.0,count
+Leaf number,Control,53,20.0,count
+Leaf number,Control,54,22.0,count
+Leaf number,Control,55,13.0,count
+Leaf number,Control,56,18.0,count
+Leaf number,Control,57,17.0,count
+Leaf number,Control,58,19.0,count
+Leaf number,Control,59,27.0,count
+Leaf number,Control,60,18.0,count
+Leaf number,T1,1,18.0,count
+Leaf number,T1,2,19.0,count
+Leaf number,T1,3,19.0,count
+Leaf number,T1,4,19.0,count
+Leaf number,T1,5,18.0,count
+Leaf number,T1,6,19.0,count
+Leaf number,T1,7,20.0,count
+Leaf number,T1,8,22.0,count
+Leaf number,T1,9,13.0,count
+Leaf number,T1,10,19.0,count
+Leaf number,T1,11,22.0,count
+Leaf number,T1,12,24.0,count
+Leaf number,T1,13,21.0,count
+Leaf number,T1,14,22.0,count
+Leaf number,T1,15,24.0,count
+Leaf number,T1,16,19.0,count
+Leaf number,T1,17,22.0,count
+Leaf number,T1,18,17.0,count
+Leaf number,T1,19,18.0,count
+Leaf number,T1,20,20.0,count
+Leaf number,T1,21,20.0,count
+Leaf number,T1,22,17.0,count
+Leaf number,T1,23,23.0,count
+Leaf number,T1,24,14.0,count
+Leaf number,T1,25,21.0,count
+Leaf number,T1,26,22.0,count
+Leaf number,T1,27,17.0,count
+Leaf number,T1,28,19.0,count
+Leaf number,T1,29,21.0,count
+Leaf number,T1,30,17.0,count
+Leaf number,T1,31,23.0,count
+Leaf number,T1,32,20.0,count
+Leaf number,T1,33,22.0,count
+Leaf number,T1,34,20.0,count
+Leaf number,T1,35,17.0,count
+Leaf number,T1,36,15.0,count
+Leaf number,T1,37,16.0,count
+Leaf number,T1,38,18.0,count
+Leaf number,T1,39,21.0,count
+Leaf number,T1,40,15.0,count
+Leaf number,T1,41,15.0,count
+Leaf number,T1,42,17.0,count
+Leaf number,T1,43,22.0,count
+Leaf number,T1,44,22.0,count
+Leaf number,T1,45,21.0,count
+Leaf number,T1,46,15.0,count
+Leaf number,T1,47,17.0,count
+Leaf number,T1,48,18.0,count
+Leaf number,T2,1,19.0,count
+Leaf number,T2,2,22.0,count
+Leaf number,T2,3,21.0,count
+Leaf number,T2,4,29.0,count
+Leaf number,T2,5,24.0,count
+Leaf number,T2,6,14.0,count
+Leaf number,T2,7,20.0,count
+Leaf number,T2,8,22.0,count
+Leaf number,T2,9,22.0,count
+Leaf number,T2,10,29.0,count
+Leaf number,T2,11,21.0,count
+Leaf number,T2,12,24.0,count
+Leaf number,T2,13,22.0,count
+Leaf number,T2,14,20.0,count
+Leaf number,T2,15,25.0,count
+Leaf number,T2,16,25.0,count
+Leaf number,T2,17,19.0,count
+Leaf number,T2,18,25.0,count
+Leaf number,T2,19,21.0,count
+Leaf number,T2,20,29.0,count
+Leaf number,T2,21,24.0,count
+Leaf number,T2,22,14.0,count
+Leaf number,T2,23,20.0,count
+Leaf number,T2,24,22.0,count
+Leaf number,T2,25,22.0,count
+Leaf number,T2,26,29.0,count
+Leaf number,T2,27,21.0,count
+Leaf number,T2,28,24.0,count
+Leaf number,T2,29,24.0,count
+Leaf number,T2,30,20.0,count
+Leaf number,T2,31,21.0,count
+Leaf number,T2,32,25.0,count
+Leaf number,T2,33,19.0,count
+Leaf number,T2,34,22.0,count
+Leaf number,T2,35,21.0,count
+Leaf number,T2,36,24.0,count
+Leaf number,T2,37,24.0,count
+Leaf number,T2,38,14.0,count
+Leaf number,T2,39,20.0,count
+Leaf number,T2,40,22.0,count
+Leaf number,T2,41,22.0,count
+Leaf number,T2,42,22.0,count
+Leaf number,T2,43,21.0,count
+Leaf number,T2,44,24.0,count
+Leaf number,T2,45,22.0,count
+Leaf number,T2,46,20.0,count
+Leaf number,T2,47,23.0,count
+Leaf number,T2,48,25.0,count
+Leaf number,T2,49,19.0,count
+Leaf number,T2,50,22.0,count
+Leaf number,T2,51,25.0,count
+Leaf number,T2,52,29.0,count
+Leaf number,T2,53,24.0,count
+Leaf number,T2,54,14.0,count
+Leaf number,T2,55,20.0,count
+Leaf number,T2,56,22.0,count
+Leaf number,T2,57,22.0,count
+Leaf number,T2,58,25.0,count
+Leaf number,T2,59,21.0,count
+Leaf number,T2,60,24.0,count
+Leaf number,T2,61,22.0,count
+Leaf number,T2,62,20.0,count
+Leaf number,T2,63,25.0,count
+Leaf number,T2,64,25.0,count
+Leaf number,T3,1,18.0,count
+Leaf number,T3,2,21.0,count
+Leaf number,T3,3,21.0,count
+Leaf number,T3,4,19.0,count
+Leaf number,T3,5,22.0,count
+Leaf number,T3,6,22.0,count
+Leaf number,T3,7,19.0,count
+Leaf number,T3,8,16.0,count
+Leaf number,T3,9,23.0,count
+Leaf number,T3,10,21.0,count
+Leaf number,T3,11,20.0,count
+Leaf number,T3,12,18.0,count
+Leaf number,T3,13,19.0,count
+Leaf number,T3,14,21.0,count
+Leaf number,T3,15,19.0,count
+Leaf number,T3,16,21.0,count
+Leaf number,T3,17,22.0,count
+Leaf number,T3,18,19.0,count
+Leaf number,T3,19,23.0,count
+Leaf number,T3,20,23.0,count
+Leaf number,T3,21,15.0,count
+Leaf number,T3,22,18.0,count
+Leaf number,T3,23,18.0,count
+Leaf number,T3,24,17.0,count
+Leaf number,T3,25,23.0,count
+Leaf number,T3,26,22.0,count
+Leaf number,T3,27,17.0,count
+Leaf number,T3,28,16.0,count
+Leaf number,T3,29,18.0,count
+Leaf number,T3,30,15.0,count
+Leaf number,T3,31,16.0,count
+Leaf number,T3,32,23.0,count
+Leaf number,T3,33,25.0,count
+Leaf number,T3,34,21.0,count
+Leaf number,T3,35,22.0,count
+Leaf number,T3,36,26.0,count
+Leaf number,T3,37,25.0,count
+Leaf number,T3,38,23.0,count
+Leaf number,T3,39,23.0,count
+Leaf number,T3,40,17.0,count
+Leaf number,T3,41,16.0,count
+Leaf number,T3,42,23.0,count
+Leaf number,T3,43,20.0,count
+Leaf number,T3,44,22.0,count
+Leaf number,T3,45,18.0,count
+Leaf number,T3,46,19.0,count
+Leaf number,T3,47,19.0,count
+Leaf number,T3,48,21.0,count
+Leaf number,T3,49,23.0,count
+Leaf number,T3,50,18.0,count
+Leaf number,T3,51,18.0,count
+Leaf number,T3,52,26.0,count
+Leaf number,T3,53,16.0,count
+Leaf number,T3,54,26.0,count
+Leaf number,T3,55,16.0,count
+Leaf number,T3,56,28.0,count
+Leaf number,T3,57,30.0,count
+Leaf number,T3,58,22.0,count
+Leaf number,T3,59,26.0,count
+Leaf number,T3,60,22.0,count
+Leaf number,T3,61,18.0,count
+Leaf number,T3,62,19.0,count
+Leaf number,T3,63,22.0,count
+Leaf number,T3,64,19.0,count
+Leaf number,T3,65,19.0,count
+Leaf number,T3,66,23.0,count
+Leaf number,T3,67,19.0,count
+Leaf number,T3,68,19.0,count
+Leaf number,T3,69,19.0,count
+Leaf number,T3,70,17.0,count
+Leaf number,T3,71,17.0,count
+Leaf number,T3,72,24.0,count
+Leaf number,T3,73,16.0,count
+Leaf number,T3,74,19.0,count
+Leaf number,T3,75,19.0,count
+Leaf number,T3,76,27.0,count
+Leaf number,T3,77,22.0,count
+Leaf number,T3,78,22.0,count
+Leaf number,T3,79,16.0,count
+Leaf number,T3,80,28.0,count
+Fresh weight,Control,1,34.3,g
+Fresh weight,Control,2,66.8,g
+Fresh weight,Control,3,32.0,g
+Fresh weight,Control,4,48.4,g
+Fresh weight,Control,5,56.1,g
+Fresh weight,Control,6,43.7,g
+Fresh weight,Control,7,71.1,g
+Fresh weight,Control,8,29.4,g
+Fresh weight,Control,9,70.4,g
+Fresh weight,Control,10,76.8,g
+Fresh weight,Control,11,47.9,g
+Fresh weight,Control,12,40.0,g
+Fresh weight,Control,13,69.8,g
+Fresh weight,Control,14,77.7,g
+Fresh weight,Control,15,106.3,g
+Fresh weight,Control,16,46.1,g
+Fresh weight,Control,17,35.2,g
+Fresh weight,Control,18,50.9,g
+Fresh weight,Control,19,38.7,g
+Fresh weight,Control,20,34.2,g
+Fresh weight,Control,21,49.4,g
+Fresh weight,Control,22,22.5,g
+Fresh weight,Control,23,38.7,g
+Fresh weight,Control,24,29.4,g
+Fresh weight,Control,25,43.4,g
+Fresh weight,Control,26,78.4,g
+Fresh weight,Control,27,65.4,g
+Fresh weight,Control,28,28.5,g
+Fresh weight,Control,29,47.0,g
+Fresh weight,Control,30,59.4,g
+Fresh weight,Control,31,42.3,g
+Fresh weight,Control,32,29.6,g
+Fresh weight,Control,33,49.2,g
+Fresh weight,Control,34,57.4,g
+Fresh weight,Control,35,74.6,g
+Fresh weight,Control,36,49.1,g
+Fresh weight,Control,37,50.9,g
+Fresh weight,Control,38,68.6,g
+Fresh weight,Control,39,35.5,g
+Fresh weight,Control,40,45.6,g
+Fresh weight,Control,41,10.4,g
+Fresh weight,Control,42,17.7,g
+Fresh weight,Control,43,11.5,g
+Fresh weight,Control,44,8.0,g
+Fresh weight,Control,45,39.1,g
+Fresh weight,Control,46,54.7,g
+Fresh weight,Control,47,60.0,g
+Fresh weight,Control,48,41.0,g
+Fresh weight,Control,49,51.7,g
+Fresh weight,Control,50,34.1,g
+Fresh weight,Control,51,58.0,g
+Fresh weight,Control,52,51.2,g
+Fresh weight,Control,53,19.5,g
+Fresh weight,Control,54,18.4,g
+Fresh weight,Control,55,17.4,g
+Fresh weight,Control,56,20.1,g
+Fresh weight,Control,57,18.8,g
+Fresh weight,Control,58,48.5,g
+Fresh weight,Control,59,26.3,g
+Fresh weight,Control,60,16.0,g
+Fresh weight,T1,1,40.4,g
+Fresh weight,T1,2,47.0,g
+Fresh weight,T1,3,47.5,g
+Fresh weight,T1,4,41.4,g
+Fresh weight,T1,5,43.0,g
+Fresh weight,T1,6,40.9,g
+Fresh weight,T1,7,73.6,g
+Fresh weight,T1,8,53.1,g
+Fresh weight,T1,9,32.8,g
+Fresh weight,T1,10,51.8,g
+Fresh weight,T1,11,58.6,g
+Fresh weight,T1,12,62.5,g
+Fresh weight,T1,13,55.9,g
+Fresh weight,T1,14,63.5,g
+Fresh weight,T1,15,67.9,g
+Fresh weight,T1,16,53.7,g
+Fresh weight,T1,17,57.1,g
+Fresh weight,T1,18,19.3,g
+Fresh weight,T1,19,54.0,g
+Fresh weight,T1,20,45.0,g
+Fresh weight,T1,21,48.7,g
+Fresh weight,T1,22,32.6,g
+Fresh weight,T1,23,63.5,g
+Fresh weight,T1,24,40.3,g
+Fresh weight,T1,25,49.1,g
+Fresh weight,T1,26,58.0,g
+Fresh weight,T1,27,29.6,g
+Fresh weight,T1,28,61.1,g
+Fresh weight,T1,29,61.9,g
+Fresh weight,T1,30,35.6,g
+Fresh weight,T1,31,83.3,g
+Fresh weight,T1,32,40.9,g
+Fresh weight,T1,33,57.2,g
+Fresh weight,T1,34,46.2,g
+Fresh weight,T1,35,35.6,g
+Fresh weight,T1,36,33.9,g
+Fresh weight,T1,37,48.7,g
+Fresh weight,T1,38,52.6,g
+Fresh weight,T1,39,57.3,g
+Fresh weight,T1,40,25.2,g
+Fresh weight,T1,41,31.1,g
+Fresh weight,T1,42,29.7,g
+Fresh weight,T1,43,61.4,g
+Fresh weight,T1,44,70.2,g
+Fresh weight,T1,45,56.3,g
+Fresh weight,T1,46,27.5,g
+Fresh weight,T1,47,39.2,g
+Fresh weight,T1,48,42.2,g
+Fresh weight,T2,1,63.3,g
+Fresh weight,T2,2,56.8,g
+Fresh weight,T2,3,45.5,g
+Fresh weight,T2,4,70.2,g
+Fresh weight,T2,5,58.5,g
+Fresh weight,T2,6,19.9,g
+Fresh weight,T2,7,50.6,g
+Fresh weight,T2,8,47.4,g
+Fresh weight,T2,9,44.4,g
+Fresh weight,T2,10,86.7,g
+Fresh weight,T2,11,69.3,g
+Fresh weight,T2,12,44.4,g
+Fresh weight,T2,13,42.2,g
+Fresh weight,T2,14,54.0,g
+Fresh weight,T2,15,53.3,g
+Fresh weight,T2,16,61.4,g
+Fresh weight,T2,17,68.4,g
+Fresh weight,T2,18,51.0,g
+Fresh weight,T2,19,61.6,g
+Fresh weight,T2,20,76.2,g
+Fresh weight,T2,21,35.0,g
+Fresh weight,T2,22,43.1,g
+Fresh weight,T2,23,51.8,g
+Fresh weight,T2,24,56.7,g
+Fresh weight,T2,25,24.8,g
+Fresh weight,T2,26,55.2,g
+Fresh weight,T2,27,34.2,g
+Fresh weight,T2,28,59.8,g
+Fresh weight,T2,29,44.8,g
+Fresh weight,T2,30,42.6,g
+Fresh weight,T2,31,52.2,g
+Fresh weight,T2,32,47.2,g
+Fresh weight,T2,33,59.3,g
+Fresh weight,T2,34,30.5,g
+Fresh weight,T2,35,68.0,g
+Fresh weight,T2,36,48.2,g
+Fresh weight,T2,37,70.1,g
+Fresh weight,T2,38,62.6,g
+Fresh weight,T2,39,36.8,g
+Fresh weight,T2,40,51.9,g
+Fresh weight,T2,41,62.7,g
+Fresh weight,T2,42,57.9,g
+Fresh weight,T2,43,65.4,g
+Fresh weight,T2,44,52.4,g
+Fresh weight,T2,45,55.2,g
+Fresh weight,T2,46,52.9,g
+Fresh weight,T2,47,53.2,g
+Fresh weight,T2,48,63.9,g
+Fresh weight,T2,49,52.0,g
+Fresh weight,T2,50,50.2,g
+Fresh weight,T2,51,51.8,g
+Fresh weight,T2,52,38.0,g
+Fresh weight,T2,53,61.0,g
+Fresh weight,T2,54,46.8,g
+Fresh weight,T2,55,43.6,g
+Fresh weight,T2,56,29.5,g
+Fresh weight,T2,57,62.6,g
+Fresh weight,T2,58,76.7,g
+Fresh weight,T2,59,52.9,g
+Fresh weight,T2,60,46.7,g
+Fresh weight,T2,61,61.9,g
+Fresh weight,T2,62,41.0,g
+Fresh weight,T2,63,44.4,g
+Fresh weight,T2,64,20.9,g
+Fresh weight,T3,1,31.6,g
+Fresh weight,T3,2,51.2,g
+Fresh weight,T3,3,37.8,g
+Fresh weight,T3,4,48.6,g
+Fresh weight,T3,5,50.0,g
+Fresh weight,T3,6,50.8,g
+Fresh weight,T3,7,39.3,g
+Fresh weight,T3,8,32.0,g
+Fresh weight,T3,9,43.6,g
+Fresh weight,T3,10,56.6,g
+Fresh weight,T3,11,43.55,g
+Fresh weight,T3,12,50.6,g
+Fresh weight,T3,13,50.3,g
+Fresh weight,T3,14,55.9,g
+Fresh weight,T3,15,48.4,g
+Fresh weight,T3,16,49.2,g
+Fresh weight,T3,17,38.5,g
+Fresh weight,T3,18,40.2,g
+Fresh weight,T3,19,41.5,g
+Fresh weight,T3,20,48.7,g
+Fresh weight,T3,21,18.2,g
+Fresh weight,T3,22,25.2,g
+Fresh weight,T3,23,24.9,g
+Fresh weight,T3,24,17.9,g
+Fresh weight,T3,25,42.3,g
+Fresh weight,T3,26,36.2,g
+Fresh weight,T3,27,25.3,g
+Fresh weight,T3,28,30.8,g
+Fresh weight,T3,29,23.1,g
+Fresh weight,T3,30,30.3,g
+Fresh weight,T3,31,49.2,g
+Fresh weight,T3,32,44.5,g
+Fresh weight,T3,33,74.2,g
+Fresh weight,T3,34,58.4,g
+Fresh weight,T3,35,59.8,g
+Fresh weight,T3,36,47.4,g
+Fresh weight,T3,37,65.2,g
+Fresh weight,T3,38,61.7,g
+Fresh weight,T3,39,62.4,g
+Fresh weight,T3,40,75.5,g
+Fresh weight,T3,41,24.2,g
+Fresh weight,T3,42,42.0,g
+Fresh weight,T3,43,39.6,g
+Fresh weight,T3,44,40.9,g
+Fresh weight,T3,45,22.3,g
+Fresh weight,T3,46,45.1,g
+Fresh weight,T3,47,31.5,g
+Fresh weight,T3,48,39.5,g
+Fresh weight,T3,49,53.2,g
+Fresh weight,T3,50,40.1,g
+Fresh weight,T3,51,53.4,g
+Fresh weight,T3,52,66.6,g
+Fresh weight,T3,53,50.7,g
+Fresh weight,T3,54,53.4,g
+Fresh weight,T3,55,45.2,g
+Fresh weight,T3,56,70.3,g
+Fresh weight,T3,57,73.5,g
+Fresh weight,T3,58,46.3,g
+Fresh weight,T3,59,66.6,g
+Fresh weight,T3,60,47.0,g
+Fresh weight,T3,61,29.1,g
+Fresh weight,T3,62,41.7,g
+Fresh weight,T3,63,40.1,g
+Fresh weight,T3,64,54.4,g
+Fresh weight,T3,65,45.8,g
+Fresh weight,T3,66,49.2,g
+Fresh weight,T3,67,44.7,g
+Fresh weight,T3,68,39.8,g
+Fresh weight,T3,69,30.0,g
+Fresh weight,T3,70,30.8,g
+Fresh weight,T3,71,52.4,g
+Fresh weight,T3,72,62.8,g
+Fresh weight,T3,73,48.8,g
+Fresh weight,T3,74,40.0,g
+Fresh weight,T3,75,55.9,g
+Fresh weight,T3,76,68.0,g
+Fresh weight,T3,77,60.5,g
+Fresh weight,T3,78,59.7,g
+Fresh weight,T3,79,48.0,g
+Fresh weight,T3,80,70.6,g
+Dry weight,Control,1,1.8,g
+Dry weight,Control,2,3.38,g
+Dry weight,Control,3,1.69,g
+Dry weight,Control,4,2.49,g
+Dry weight,Control,5,2.86,g
+Dry weight,Control,6,2.26,g
+Dry weight,Control,7,3.58,g
+Dry weight,Control,8,1.57,g
+Dry weight,Control,9,3.55,g
+Dry weight,Control,10,3.86,g
+Dry weight,Control,11,2.46,g
+Dry weight,Control,12,2.08,g
+Dry weight,Control,13,2.52,g
+Dry weight,Control,14,2.9,g
+Dry weight,Control,15,5.29,g
+Dry weight,Control,16,2.37,g
+Dry weight,Control,17,1.85,g
+Dry weight,Control,18,2.61,g
+Dry weight,Control,19,2.02,g
+Dry weight,Control,20,1.8,g
+Dry weight,Control,21,2.53,g
+Dry weight,Control,22,1.23,g
+Dry weight,Control,23,2.02,g
+Dry weight,Control,24,1.57,g
+Dry weight,Control,25,2.24,g
+Dry weight,Control,26,3.94,g
+Dry weight,Control,27,3.31,g
+Dry weight,Control,28,1.52,g
+Dry weight,Control,29,2.42,g
+Dry weight,Control,30,2.02,g
+Dry weight,Control,31,2.19,g
+Dry weight,Control,32,1.58,g
+Dry weight,Control,33,2.52,g
+Dry weight,Control,34,2.92,g
+Dry weight,Control,35,2.75,g
+Dry weight,Control,36,2.52,g
+Dry weight,Control,37,2.61,g
+Dry weight,Control,38,2.46,g
+Dry weight,Control,39,1.86,g
+Dry weight,Control,40,2.35,g
+Dry weight,Control,41,0.65,g
+Dry weight,Control,42,1.0,g
+Dry weight,Control,43,0.7,g
+Dry weight,Control,44,0.53,g
+Dry weight,Control,45,2.04,g
+Dry weight,Control,46,2.79,g
+Dry weight,Control,47,2.05,g
+Dry weight,Control,48,2.13,g
+Dry weight,Control,49,2.65,g
+Dry weight,Control,50,1.79,g
+Dry weight,Control,51,1.95,g
+Dry weight,Control,52,2.62,g
+Dry weight,Control,53,1.09,g
+Dry weight,Control,54,1.03,g
+Dry weight,Control,55,0.99,g
+Dry weight,Control,56,1.12,g
+Dry weight,Control,57,1.05,g
+Dry weight,Control,58,2.49,g
+Dry weight,Control,59,1.42,g
+Dry weight,Control,60,0.92,g
+Dry weight,T1,1,2.5,g
+Dry weight,T1,2,2.44,g
+Dry weight,T1,3,2.48,g
+Dry weight,T1,4,2.03,g
+Dry weight,T1,5,2.44,g
+Dry weight,T1,6,2.06,g
+Dry weight,T1,7,3.46,g
+Dry weight,T1,8,2.49,g
+Dry weight,T1,9,1.68,g
+Dry weight,T1,10,2.56,g
+Dry weight,T1,11,3.05,g
+Dry weight,T1,12,3.07,g
+Dry weight,T1,13,2.7,g
+Dry weight,T1,14,2.89,g
+Dry weight,T1,15,3.11,g
+Dry weight,T1,16,2.34,g
+Dry weight,T1,17,3.02,g
+Dry weight,T1,18,1.04,g
+Dry weight,T1,19,2.39,g
+Dry weight,T1,20,2.2,g
+Dry weight,T1,21,2.4,g
+Dry weight,T1,22,1.67,g
+Dry weight,T1,23,3.12,g
+Dry weight,T1,24,1.88,g
+Dry weight,T1,25,2.31,g
+Dry weight,T1,26,2.84,g
+Dry weight,T1,27,1.5,g
+Dry weight,T1,28,2.8,g
+Dry weight,T1,29,2.84,g
+Dry weight,T1,30,2.83,g
+Dry weight,T1,31,3.73,g
+Dry weight,T1,32,1.75,g
+Dry weight,T1,33,2.85,g
+Dry weight,T1,34,2.3,g
+Dry weight,T1,35,1.84,g
+Dry weight,T1,36,1.68,g
+Dry weight,T1,37,2.3,g
+Dry weight,T1,38,2.6,g
+Dry weight,T1,39,2.66,g
+Dry weight,T1,40,1.38,g
+Dry weight,T1,41,1.52,g
+Dry weight,T1,42,1.57,g
+Dry weight,T1,43,2.91,g
+Dry weight,T1,44,3.1,g
+Dry weight,T1,45,2.7,g
+Dry weight,T1,46,1.4,g
+Dry weight,T1,47,2.01,g
+Dry weight,T1,48,2.02,g
+Dry weight,T2,1,3.06,g
+Dry weight,T2,2,2.75,g
+Dry weight,T2,3,2.2,g
+Dry weight,T2,4,3.4,g
+Dry weight,T2,5,2.83,g
+Dry weight,T2,6,0.96,g
+Dry weight,T2,7,2.45,g
+Dry weight,T2,8,2.29,g
+Dry weight,T2,9,2.15,g
+Dry weight,T2,10,4.19,g
+Dry weight,T2,11,3.35,g
+Dry weight,T2,12,2.15,g
+Dry weight,T2,13,2.04,g
+Dry weight,T2,14,2.61,g
+Dry weight,T2,15,2.58,g
+Dry weight,T2,16,2.97,g
+Dry weight,T2,17,3.31,g
+Dry weight,T2,18,2.47,g
+Dry weight,T2,19,2.98,g
+Dry weight,T2,20,3.69,g
+Dry weight,T2,21,1.69,g
+Dry weight,T2,22,2.08,g
+Dry weight,T2,23,2.51,g
+Dry weight,T2,24,2.74,g
+Dry weight,T2,25,1.2,g
+Dry weight,T2,26,2.67,g
+Dry weight,T2,27,1.65,g
+Dry weight,T2,28,2.89,g
+Dry weight,T2,29,2.17,g
+Dry weight,T2,30,2.06,g
+Dry weight,T2,31,2.52,g
+Dry weight,T2,32,2.28,g
+Dry weight,T2,33,2.87,g
+Dry weight,T2,34,1.48,g
+Dry weight,T2,35,3.29,g
+Dry weight,T2,36,2.33,g
+Dry weight,T2,37,3.39,g
+Dry weight,T2,38,3.03,g
+Dry weight,T2,39,1.78,g
+Dry weight,T2,40,2.51,g
+Dry weight,T2,41,3.03,g
+Dry weight,T2,42,2.8,g
+Dry weight,T2,43,3.16,g
+Dry weight,T2,44,2.53,g
+Dry weight,T2,45,2.67,g
+Dry weight,T2,46,2.56,g
+Dry weight,T2,47,2.57,g
+Dry weight,T2,48,3.09,g
+Dry weight,T2,49,2.51,g
+Dry weight,T2,50,2.43,g
+Dry weight,T2,51,2.51,g
+Dry weight,T2,52,1.84,g
+Dry weight,T2,53,2.95,g
+Dry weight,T2,54,2.26,g
+Dry weight,T2,55,2.11,g
+Dry weight,T2,56,1.43,g
+Dry weight,T2,57,3.03,g
+Dry weight,T2,58,3.71,g
+Dry weight,T2,59,2.56,g
+Dry weight,T2,60,2.26,g
+Dry weight,T2,61,2.99,g
+Dry weight,T2,62,1.98,g
+Dry weight,T2,63,2.15,g
+Dry weight,T2,64,1.01,g
+Dry weight,T3,1,1.65,g
+Dry weight,T3,2,2.68,g
+Dry weight,T3,3,1.98,g
+Dry weight,T3,4,2.54,g
+Dry weight,T3,5,2.61,g
+Dry weight,T3,6,2.66,g
+Dry weight,T3,7,2.05,g
+Dry weight,T3,8,1.67,g
+Dry weight,T3,9,2.28,g
+Dry weight,T3,10,2.96,g
+Dry weight,T3,11,2.65,g
+Dry weight,T3,12,2.54,g
+Dry weight,T3,13,2.42,g
+Dry weight,T3,14,2.45,g
+Dry weight,T3,15,2.35,g
+Dry weight,T3,16,2.54,g
+Dry weight,T3,17,2.31,g
+Dry weight,T3,18,2.35,g
+Dry weight,T3,19,2.41,g
+Dry weight,T3,20,2.21,g
+Dry weight,T3,21,0.95,g
+Dry weight,T3,22,1.32,g
+Dry weight,T3,23,1.3,g
+Dry weight,T3,24,0.94,g
+Dry weight,T3,25,2.21,g
+Dry weight,T3,26,1.89,g
+Dry weight,T3,27,1.32,g
+Dry weight,T3,28,1.61,g
+Dry weight,T3,29,1.21,g
+Dry weight,T3,30,1.58,g
+Dry weight,T3,31,2.57,g
+Dry weight,T3,32,2.33,g
+Dry weight,T3,33,3.88,g
+Dry weight,T3,34,3.05,g
+Dry weight,T3,35,3.13,g
+Dry weight,T3,36,2.48,g
+Dry weight,T3,37,3.41,g
+Dry weight,T3,38,3.22,g
+Dry weight,T3,39,3.26,g
+Dry weight,T3,40,3.94,g
+Dry weight,T3,41,1.26,g
+Dry weight,T3,42,2.2,g
+Dry weight,T3,43,2.07,g
+Dry weight,T3,44,2.14,g
+Dry weight,T3,45,1.17,g
+Dry weight,T3,46,2.36,g
+Dry weight,T3,47,1.65,g
+Dry weight,T3,48,2.06,g
+Dry weight,T3,49,2.78,g
+Dry weight,T3,50,2.1,g
+Dry weight,T3,51,2.79,g
+Dry weight,T3,52,3.48,g
+Dry weight,T3,53,2.65,g
+Dry weight,T3,54,2.79,g
+Dry weight,T3,55,2.36,g
+Dry weight,T3,56,3.67,g
+Dry weight,T3,57,3.84,g
+Dry weight,T3,58,2.42,g
+Dry weight,T3,59,3.48,g
+Dry weight,T3,60,2.41,g
+Dry weight,T3,61,1.52,g
+Dry weight,T3,62,2.18,g
+Dry weight,T3,63,2.1,g
+Dry weight,T3,64,2.84,g
+Dry weight,T3,65,2.39,g
+Dry weight,T3,66,2.57,g
+Dry weight,T3,67,2.34,g
+Dry weight,T3,68,2.08,g
+Dry weight,T3,69,1.57,g
+Dry weight,T3,70,1.61,g
+Dry weight,T3,71,2.74,g
+Dry weight,T3,72,3.28,g
+Dry weight,T3,73,2.55,g
+Dry weight,T3,74,2.09,g
+Dry weight,T3,75,2.92,g
+Dry weight,T3,76,3.55,g
+Dry weight,T3,77,3.16,g
+Dry weight,T3,78,3.12,g
+Dry weight,T3,79,2.51,g
+Dry weight,T3,80,3.69,g

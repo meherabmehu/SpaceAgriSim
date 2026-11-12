@@ -1,0 +1,133 @@
+{
+  "schema": "spaceagrisim.phase37.acquisition/1",
+  "acquiredAt": "2026-11-12T09:35:19.690999+00:00",
+  "records": {
+    "zenodo-green-light-lettuce": {
+      "recordId": 20394352,
+      "doi": "10.5281/zenodo.20394352",
+      "title": "Optimising Spectral Composition in Hydroponic Lettuce Cultivation: The Role of Green Light, Open Data",
+      "license": "cc-by-4.0",
+      "licenseUrl": null,
+      "publicationDate": "2026-05-26",
+      "role": "primary",
+      "answersGap": "led-spectrum-response",
+      "retrievedFrom": "https://zenodo.org/api/records/20394352",
+      "files": [
+        {
+          "name": "green_light_lettuce_open_data (1).xlsx",
+          "storedAs": "data/raw/zenodo_20394352/green_light_lettuce_open_data_1_.xlsx",
+          "publisherChecksum": "md5:bb6ca334ca7e223089dc6c5faf253444",
+          "bytes": 94162,
+          "sha256": "cb79481841d520cdf741dff2a0857127817284a068fcc6f809cee8039f3b6f4c",
+          "md5": "bb6ca334ca7e223089dc6c5faf253444",
+          "checksumVerified": true
+        }
+      ]
+    },
+    "zenodo-nutrient-dosing": {
+      "recordId": 17794636,
+      "doi": "10.5281/zenodo.17794636",
+      "title": "Raw data: Temporal variation of nutrient ratios within hydroponic nutrient solutions",
+      "license": "cc-by-4.0",
+      "licenseUrl": null,
+      "publicationDate": "2025-12-02",
+      "role": "primary",
+      "answersGap": "nutrient-balance",
+      "retrievedFrom": "https://zenodo.org/api/records/17794636",
+      "files": [
+        {
+          "name": "Raw data Dosing Experiment.xlsx",
+          "storedAs": "data/raw/zenodo_17794636/Raw_data_Dosing_Experiment.xlsx",
+          "publisherChecksum": "md5:b59a320899a60d158019a2db23d492db",
+          "bytes": 52889,
+          "sha256": "da7ce5d7da119706a197bcb71809f49965702bc4fcd03a3135cdf729e8d01165",
+          "md5": "b59a320899a60d158019a2db23d492db",
+          "checksumVerified": true
+        }
+      ]
+    },
+    "zenodo-nutrient-dosing-duplicate-deposit": {
+      "recordId": 18804397,
+      "doi": "10.5281/zenodo.18804397",
+      "title": "Raw data: Temporal variation of nutrient ratios within hydroponic nutrient solutions study. Food and Energy Security, Wiley",
+      "license": "cc-by-4.0",
+      "licenseUrl": null,
+      "publicationDate": "2026-02-27",
+      "role": "duplicate-check",
+      "answersGap": null,
+      "retrievedFrom": "https://zenodo.org/api/records/18804397",
+      "files": [
+        {
+          "name": "Raw data - Temporal variation of nutrient ratios within hydroponic nutrient solutions.xlsx",
+          "storedAs": "data/raw/zenodo_18804397/Raw_data_-_Temporal_variation_of_nutrient_ratios_within_hydroponic_nutrient_solutions.xlsx",
+          "publisherChecksum": "md5:4aacaa7bb912bae5b9473178b305ef8b",
+          "bytes": 55099,
+          "sha256": "dce870a45dc8f11d23c717b94c2bc9614d7fb9c114c864239fd39fd07181df1a",
+          "md5": "4aacaa7bb912bae5b9473178b305ef8b",
+          "checksumVerified": true
+        }
+      ]
+    }
+  },
+  "failures": [],
+  "duplicateCheck": {
+    "sharedSheets": [
+      "Control",
+      "Destructive harvest",
+      "Econimic analysis",
+      "Treatment 1",
+      "Treatment 2"
+    ],
+    "identicalSheets": [
+      "Control",
+      "Destructive harvest",
+      "Econimic analysis",
+      "Treatment 1",
+      "Treatment 2"
+    ],
+    "onlyInPrimary": [],
+    "onlyInDuplicate": [],
+    "identicalFraction": 1.0,
+    "countsAsSecondCampaign": false,
+    "note": "Compared cell by cell against the primary deposit. Sheets that are identical are one experiment described twice, not two experiments; only a sheet that differs could be independent evidence, and none does."
+  },
+  "rejected": [
+    {
+      "key": "zenodo-edeniss-2020-telemetry",
+      "recordId": 11485183,
+      "doi": "10.5281/zenodo.11485183",
+      "title": "EDEN ISS 2020 Telemetry Dataset",
+      "license": "cc-by-4.0",
+      "publisherChecksum": "md5:a16658d87da5f3d99cbd1c8e60f743e3",
+      "checksumVerified": true,
+      "wasConsideredFor": "mission-energy",
+      "sensorCensus": {
+        "temperature": 59,
+        "pressure": 11,
+        "co2": 4,
+        "relativeHumidity": 4,
+        "electricalConductivity": 4,
+        "ph": 4,
+        "par": 3,
+        "valveState": 3,
+        "tankLevel": 2,
+        "volume": 2,
+        "vpd": 1,
+        "power": 0,
+        "current": 0,
+        "voltage": 0,
+        "energy": 0
+      },
+      "reason": "A full year of 5-minute telemetry from a real space-analogue greenhouse, and not one power, current, voltage or energy channel. A gap defined as power draw per fixture, thermal load and resupply mass cannot be answered from it.",
+      "retained": false
+    }
+  ],
+  "summary": {
+    "records": 3,
+    "files": 3,
+    "failures": 0,
+    "allChecksumsVerified": true,
+    "rejected": 1,
+    "rejectedRetained": 0
+  }
+}
