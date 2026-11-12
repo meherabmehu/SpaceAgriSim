@@ -45,6 +45,17 @@ export default defineConfig({
       },
     },
   },
+  // Unit tests (`npm run test:unit`) run in jsdom through Vitest, which reads this same config.
+  // They exist because a React hook's lifecycle - which response may commit, what an abort looks
+  // like, what happens on unmount - is decided in the microtask queue, and no browser-level suite
+  // can schedule that order. The browser suite still covers the rendered result.
+  test: {
+    environment: 'jsdom',
+    include: ['src/**/*.test.{js,jsx}'],
+    // Nothing in this suite is allowed to be slow; a timeout here means a hung promise, not a
+    // heavy test.
+    testTimeout: 5000,
+  },
   build: {
     rollupOptions: {
       output: {

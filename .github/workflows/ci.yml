@@ -157,6 +157,11 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
+      # jsdom unit tests for the resource hook's lifecycle. The browser suite renders the same
+      # panels, but it cannot schedule the microtask order in which a superseded response resolves
+      # before the abort that follows it - which is the defect these tests exist to prevent from
+      # coming back.
+      - run: npm run test:unit
       # `build:check` runs the production build *and* the bundle guard (no import cycles, no
       # oversized chunk, initial request within the 240 kB budget). A plain `build` would let a
       # regression past as long as it compiled.
