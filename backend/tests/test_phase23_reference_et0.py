@@ -410,7 +410,7 @@ def test_reference_et0_is_classified_as_a_mechanistic_calculation():
 
 # --------------------------------------------------------------------------- catalogue + audit
 def test_catalogue_counts_match_the_documented_class_counts():
-    """30 since Phase 30 acquired two more measured datasets (both class A, both served).
+    """34 since Phase 36 acquired four more measured datasets and imported a fifth.
 
     Each of the five was downloaded, hashed against the publisher's own checksum and preprocessed
     before it entered the catalogue; none was added to raise a count. The class assignments are
@@ -420,14 +420,23 @@ def test_catalogue_counts_match_the_documented_class_counts():
     trial to A once a workflow served it. Phase 30 added the controlled-environment wheat series
     and the lettuce light-use-efficiency compilation, both class A: the first is served as a
     measured comparison, the second was used to evaluate - and fail - the harvest model.
+
+    Phase 36 added four class-A entries - POWER hourly, the Agroscope weighable lysimeter, the
+    TERENO eddy-covariance record and IoT4Lettuce - and promoted NEX-GDDP-CMIP6 from D to A once
+    it was actually imported for the six sites. Every one of the four was acquired with a
+    publisher checksum verified or a member-level SHA-256 recorded, and each drives a committed
+    artefact under data/research/phase36/. The count is still asserted exactly, because the point
+    of this test is that the number in the catalogue is not allowed to drift away from the
+    number of entries that can be justified one by one.
     """
     payload = json.loads((ROOT / "data" / "research" / "dataset_catalog.json").read_text())
-    assert len(payload["datasets"]) == 30
+    assert len(payload["datasets"]) == 34
     counts = {}
     for dataset in payload["datasets"]:
         counts[dataset["usabilityClass"]] = counts.get(dataset["usabilityClass"], 0) + 1
-    # Phase 30 added two class-A acquisitions; no existing class moved.
-    assert counts == {"A": 5, "B": 6, "C": 9, "D": 4, "E": 5, "F": 1}
+    # Phase 36 added four class-A acquisitions and moved NEX-GDDP-CMIP6 from D to A; no other
+    # class moved, so the shape of the catalogue is unchanged at B, C, E and F.
+    assert counts == {"A": 10, "B": 6, "C": 9, "D": 3, "E": 5, "F": 1}
 
 
 def test_only_the_imported_datasets_have_an_open_commercial_licence():
