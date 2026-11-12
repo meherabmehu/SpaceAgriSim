@@ -9,7 +9,13 @@ jobs:
   backend:
     runs-on: ubuntu-latest
     steps:
+      # Full history: the model-card tests verify that each card's pinned commit actually
+      # contains the script it names, and `git cat-file <old-sha>:<path>` fails with exit 128 in a
+      # depth-1 clone. That is a checkout-configuration failure, not a test failure, so the fix is
+      # here rather than a skip in the test.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -59,7 +65,13 @@ jobs:
       SPACEAGRISIM_TEST_POSTGRES_URL: 'postgresql+psycopg://spaceagrisim:ci-only-test-password@127.0.0.1:5432/spaceagrisim_test'
       PYTHONPATH: backend
     steps:
+      # Full history: the model-card tests verify that each card's pinned commit actually
+      # contains the script it names, and `git cat-file <old-sha>:<path>` fails with exit 128 in a
+      # depth-1 clone. That is a checkout-configuration failure, not a test failure, so the fix is
+      # here rather than a skip in the test.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -112,7 +124,13 @@ jobs:
   science:
     runs-on: ubuntu-latest
     steps:
+      # Full history: the model-card tests verify that each card's pinned commit actually
+      # contains the script it names, and `git cat-file <old-sha>:<path>` fails with exit 128 in a
+      # depth-1 clone. That is a checkout-configuration failure, not a test failure, so the fix is
+      # here rather than a skip in the test.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'

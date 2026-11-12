@@ -169,7 +169,25 @@ def test_every_code_reference_is_an_immutable_commit_containing_the_script(model
     assert ref["commit"] not in {"main", "HEAD"}, model_id
     exists = subprocess.run(["git", "cat-file", "-e", f"{ref['commit']}:{ref['path']}"],
                             cwd=ROOT, capture_output=True)
-    assert exists.returncode == 0, f"{model_id}: {ref['path']} is not in {ref['commit']}"
+    if exists.returncode != 0:
+        # Distinguish the two ways this fails, because they need opposite responses. A depth-1
+        # clone cannot see the commit at all - that is a checkout setting (`fetch-depth: 0`), not a
+        # wrong reference, and it is what made continuous integration red for two commits. A commit
+        # that is present but lacks the path is a genuinely wrong reference and needs the card
+        # fixed.
+        known = subprocess.run(["git", "cat-file", "-e", f"{ref['commit']}^{{commit}}"],
+                               cwd=ROOT, capture_output=True)
+        if known.returncode != 0:
+            shallow = subprocess.run(["git", "rev-parse", "--is-shallow-repository"],
+                                     cwd=ROOT, capture_output=True, text=True)
+            detail = ("this checkout is shallow, so the pinned commit is absent: fetch full "
+                      "history (actions/checkout with fetch-depth: 0)"
+                      if shallow.stdout.strip() == "true" else
+                      f"commit {ref['commit']} is not present in this repository at all")
+            raise AssertionError(f"{model_id}: cannot resolve {ref['commit']} - {detail}")
+        raise AssertionError(
+            f"{model_id}: {ref['path']} is not in {ref['commit']} - the card's code reference is "
+            "wrong, or the script was renamed after the commit it names")
     assert ref["immutable"] is True, model_id
 
 
