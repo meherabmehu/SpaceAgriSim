@@ -9,7 +9,6 @@ design is transcribed faithfully, and nothing was imputed, dropped or converted.
 from __future__ import annotations
 
 import hashlib
-import json
 import subprocess
 import sys
 import tempfile

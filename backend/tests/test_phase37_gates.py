@@ -20,7 +20,6 @@ They are deliberately about the store rather than about the gate script: a test 
 from __future__ import annotations
 
 import hashlib
-import json
 import subprocess
 import sys
 from pathlib import Path

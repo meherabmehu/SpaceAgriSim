@@ -30,7 +30,6 @@ question it answers is whether the gradient exists in the transcriptome at all.
 from __future__ import annotations
 import sys
 
-import json
 from pathlib import Path
 
 import numpy as np

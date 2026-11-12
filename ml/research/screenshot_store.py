@@ -11,7 +11,6 @@ that were recorded or returns None.
 from __future__ import annotations
 import sys
 
-import json
 from functools import lru_cache
 from pathlib import Path
 

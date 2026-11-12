@@ -13,7 +13,6 @@ Run: python ml/training/benchmark_models.py
 """
 from __future__ import annotations
 
-import json
 import sys
 from pathlib import Path
 

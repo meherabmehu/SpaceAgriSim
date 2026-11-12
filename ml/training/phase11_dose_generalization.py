@@ -38,7 +38,6 @@ detecting time, and every fold keeps all three dose levels.
 from __future__ import annotations
 import sys
 
-import json
 from pathlib import Path
 
 import numpy as np

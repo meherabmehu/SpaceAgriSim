@@ -24,7 +24,6 @@ import sys
 
 import argparse
 import hashlib
-import json
 import re
 import urllib.error
 import urllib.request

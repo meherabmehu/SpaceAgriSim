@@ -137,8 +137,9 @@ def test_no_source_file_names_a_json_record_to_read():
                 continue
             if any(p.search(line) for p in EXEMPT_PATTERNS):
                 continue
-            if rel in (Path("docs/NO_JSON_POLICY.md"), Path("backend/tests/test_zero_json_policy.py")):
-                continue                   # the test and the policy document state the rule
+            if rel in (Path("docs/NO_JSON_POLICY.md"), Path("backend/tests/test_zero_json_policy.py"),
+                       Path("docs/JSON_ELIMINATION_REPORT.md")):
+                continue                   # the documents that state the rule and its record
             if "NO_JSON_POLICY" in line or "no-JSON" in line or "no_json" in line:
                 continue                   # a reference to the policy
             if rel == Path("safedata/__init__.py"):

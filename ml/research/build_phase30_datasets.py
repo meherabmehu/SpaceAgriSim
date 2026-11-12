@@ -34,7 +34,6 @@ import sys
 import argparse
 import csv
 import hashlib
-import json
 import re
 import statistics
 from datetime import datetime, timezone

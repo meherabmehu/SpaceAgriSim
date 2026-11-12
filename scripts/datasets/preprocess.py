@@ -20,7 +20,6 @@ import safedata
 
 import argparse
 import datetime as _dt
-import json
 import math
 import re
 import sys

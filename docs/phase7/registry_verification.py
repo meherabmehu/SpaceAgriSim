@@ -1,6 +1,6 @@
 """Data record. Generated - the generator is named inside the record itself."""
 
-DATA = {'generatedAt': '2026-11-12T21:46:50.167569+00:00',
+DATA = {'generatedAt': '2026-11-12T22:26:58.787774+00:00',
  'phase': 7,
  'registrySchemaVersion': 1,
  'modelCount': 9,

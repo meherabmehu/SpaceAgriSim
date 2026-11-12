@@ -26,7 +26,6 @@ The artifact records every number, including the gate it fails. Nothing here pro
 from __future__ import annotations
 
 import hashlib
-import json
 import math
 import sys
 from datetime import datetime, timezone

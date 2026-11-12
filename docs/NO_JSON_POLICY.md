@@ -10,7 +10,7 @@ Two files are exempt, and only two: `frontend/package.json` and `frontend/packag
 They are the npm toolchain's own manifest format. `npm ci` exits with `ENOENT` without them and
 `vite` cannot resolve a dependency graph without them, so no alternative exists short of
 abandoning the frontend build. They hold no project data, no configuration this project chose,
-and no scientific record. Everything else - 186 files - was converted or removed.
+and no scientific record. Everything else - 188 files - was converted or removed.
 
 ## What a record is stored as now
 

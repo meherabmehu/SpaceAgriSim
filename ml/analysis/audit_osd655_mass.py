@@ -25,7 +25,6 @@ Run: python ml/analysis/audit_osd655_mass.py
 """
 import sys
 import csv
-import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]

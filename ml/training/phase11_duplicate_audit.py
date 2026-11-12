@@ -29,7 +29,6 @@ import sys
 
 import csv
 import io
-import json
 import re
 import urllib.request
 import zipfile

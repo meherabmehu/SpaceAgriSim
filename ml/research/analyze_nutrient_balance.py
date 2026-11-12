@@ -33,7 +33,6 @@ import sys
 
 import csv
 import datetime as dt
-import json
 import statistics
 from datetime import datetime, timezone
 from pathlib import Path

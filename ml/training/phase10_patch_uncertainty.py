@@ -15,7 +15,6 @@ Nothing here tunes a radius to hit a coverage number. The method is fixed by
 from __future__ import annotations
 
 import hashlib
-import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path

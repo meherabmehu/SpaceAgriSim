@@ -25,7 +25,6 @@ import safedata
 import argparse
 import csv
 import datetime as _dt
-import json
 import math
 import re
 from dataclasses import dataclass, field

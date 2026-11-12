@@ -22,7 +22,6 @@ import argparse
 import csv
 import datetime as _dt
 import itertools
-import json
 import math
 import statistics
 import sys

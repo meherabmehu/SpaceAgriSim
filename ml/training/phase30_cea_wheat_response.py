@@ -33,7 +33,6 @@ import sys
 
 import csv
 import hashlib
-import json
 import math
 import statistics
 from datetime import datetime, timezone

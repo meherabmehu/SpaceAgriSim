@@ -31,7 +31,6 @@ from __future__ import annotations
 import sys
 
 import csv
-import json
 import random
 import statistics
 from datetime import datetime, timezone

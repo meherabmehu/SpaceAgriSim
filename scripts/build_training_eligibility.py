@@ -19,7 +19,6 @@ Run: python scripts/build_training_eligibility.py
 """
 from __future__ import annotations
 
-import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path

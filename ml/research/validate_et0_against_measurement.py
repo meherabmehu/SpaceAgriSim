@@ -28,7 +28,6 @@ computed is reported as unavailable, never as zero.
 from __future__ import annotations
 
 import csv
-import json
 import math
 import statistics
 import sys

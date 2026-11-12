@@ -29,7 +29,6 @@ roughly one array, so a marginal win is noise wearing a number.
 
 from __future__ import annotations
 
-import json
 import sys
 from pathlib import Path
 

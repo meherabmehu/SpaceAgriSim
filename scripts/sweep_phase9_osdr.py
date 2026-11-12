@@ -16,7 +16,6 @@ Run: python scripts/sweep_phase9_osdr.py [--start 1] [--end 900]
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 import urllib.error
 import urllib.request

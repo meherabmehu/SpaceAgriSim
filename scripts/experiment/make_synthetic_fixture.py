@@ -19,7 +19,6 @@ import argparse
 import copy
 import csv
 import datetime as _dt
-import json
 from pathlib import Path
 
 FIXTURE_DIR = Path(__file__).resolve().parent / "fixtures"

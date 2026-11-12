@@ -21,7 +21,6 @@ import sys
 
 import csv
 import io
-import json
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path

@@ -33,7 +33,6 @@ import sys
 import csv
 import hashlib
 import io
-import json
 import re
 import urllib.request
 import zipfile

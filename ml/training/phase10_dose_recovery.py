@@ -29,7 +29,6 @@ credit the model for detecting the timepoint.
 from __future__ import annotations
 import sys
 
-import json
 from pathlib import Path
 
 import numpy as np

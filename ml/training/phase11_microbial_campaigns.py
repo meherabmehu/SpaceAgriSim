@@ -32,7 +32,6 @@ so the prediction interval is the honest form of the claim.
 from __future__ import annotations
 import sys
 
-import json
 from pathlib import Path
 
 import numpy as np

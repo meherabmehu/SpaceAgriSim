@@ -35,7 +35,6 @@ Run:    python ml/research/phase32_radiation_calibration.py
 """
 from __future__ import annotations
 
-import json
 import sys
 from pathlib import Path
 

@@ -26,7 +26,6 @@ explicitly or listed as a known gap.
 from __future__ import annotations
 
 import hashlib
-import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path

@@ -26,7 +26,6 @@ Run: python scripts/acquire_phase10_osd314.py
 from __future__ import annotations
 
 import hashlib
-import json
 import sys
 import urllib.error
 import urllib.request

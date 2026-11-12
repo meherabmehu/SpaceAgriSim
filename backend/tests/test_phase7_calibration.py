@@ -13,7 +13,6 @@ point: the change becomes a reviewed act with a diff, not a side effect.
 """
 from __future__ import annotations
 
-import json
 import sys
 from pathlib import Path
 

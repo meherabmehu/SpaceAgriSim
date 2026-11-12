@@ -22,7 +22,6 @@ from __future__ import annotations
 import sys
 
 import csv
-import json
 import statistics
 from collections import defaultdict
 from datetime import datetime, timezone

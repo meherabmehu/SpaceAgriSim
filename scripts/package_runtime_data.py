@@ -3,7 +3,6 @@ import sys as _sys, pathlib as _pathlib   # the repository root holds safedata/
 _sys.path.insert(0, str(_pathlib.Path(__file__).resolve().parents[1]))
 import safedata
 import hashlib
-import json
 import shutil
 from pathlib import Path
 
