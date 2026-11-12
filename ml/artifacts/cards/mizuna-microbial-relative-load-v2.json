@@ -89,9 +89,27 @@
       {
         "path": "data/raw/OSD-780",
         "role": "NASA OSDR source records, committed under data/raw/OSD-780",
-        "sha256": "per-file digests recorded in data/metadata/osd780_checksums.json",
-        "hashVerifiedAtBuild": false,
-        "hashSource": "recorded upstream digest"
+        "files": [
+          {
+            "name": "LSDS-128_Plate Count_Aerobic_Plate_Count_TRANSFORMED.csv",
+            "bytes": 11708,
+            "sha256": "229a0d93fff866257bc431fb1d069011232750d4e09cd1883a5e4e56177e2a55"
+          },
+          {
+            "name": "LSDS-128_Plate Count_Yeast_Mold_Plate_Count_Transformed.csv",
+            "bytes": 9106,
+            "sha256": "0170d2fbc1daaaea629c7b7a33c3c28a001991c40550eb24cf96da1dc90c8b1b"
+          },
+          {
+            "name": "OSD-780_dictionary_DataDictionary_OSD-780.csv",
+            "bytes": 1012,
+            "sha256": "4ea878d266ad1f1388ba34646c08ec6667fd995623ae2750d996b166b7735c96"
+          }
+        ],
+        "manifestSha256": "bf79fa61763095c5f115f3aaf35b2cdf85f78011bdffc213f042f67b6c659756",
+        "fileCount": 3,
+        "hashBasis": "Per-file SHA-256 computed from the committed files under this path, plus a manifest digest over the sorted 'name sha256' lines.",
+        "hashVerifiedAtBuild": true
       }
     ],
     "sha256": "9dfffb0eddc011cd593ce11b63f5dfeeb8594e8fc8d9466df9e61eed207509c0",

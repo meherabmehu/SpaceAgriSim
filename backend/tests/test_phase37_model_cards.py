@@ -282,13 +282,64 @@ def test_every_dataset_reference_resolves(model_id):
 
 @pytest.mark.parametrize("model_id", SERVED)
 def test_every_supporting_input_that_claims_a_computed_hash_has_one(model_id):
+    import hashlib
+
     for item in card(model_id)["trainingData"]["supportingInputs"]:
         assert item["path"], model_id
         if item.get("hashVerifiedAtBuild") is True:
-            assert item["sha256"] and len(item["sha256"]) == 64, item["path"]
+            if item.get("files"):
+                # A directory of committed records: every per-file digest is recomputed from disk
+                # and the manifest digest is rebuilt from them, so the claim is checked rather than
+                # believed.
+                base = ROOT / item["path"]
+                assert base.is_dir(), item["path"]
+                assert item.get("fileCount") == len(item["files"]), item["path"]
+                lines = []
+                for row in item["files"]:
+                    file = base / row["name"]
+                    assert file.is_file(), f"{item['path']}: {row['name']} is missing"
+                    actual = hashlib.sha256(file.read_bytes()).hexdigest()
+                    assert actual == row["sha256"], f"{item['path']}: {row['name']} changed"
+                    assert row["bytes"] == file.stat().st_size, f"{item['path']}: {row['name']} size"
+                    lines.append(f"{row['name']} {row['sha256']}")
+                expected = hashlib.sha256("\n".join(lines).encode("utf-8")).hexdigest()
+                assert item["manifestSha256"] == expected, item["path"]
+            else:
+                assert item["sha256"] and len(item["sha256"]) == 64, item["path"]
         else:
             # Not computed here: the card must say where the digest came from instead.
             assert item.get("sha256") or item.get("hashSource"), item["path"]
+
+
+@pytest.mark.parametrize("model_id", SERVED)
+def test_no_card_cites_a_manifest_that_does_not_exist(model_id):
+    """The defect this test exists for: the mizuna card pointed at
+    data/metadata/osd780_checksums.json, which was never created, so a provenance claim resolved to
+    nothing while reading like provenance. Any repo path a card names must exist."""
+    import re
+
+    payload = card(model_id)
+    data = payload["trainingData"]
+    blob = json.dumps(payload)
+    cited = set(re.findall(r"data/[A-Za-z0-9_./-]+\.(?:json|csv|xlsx|txt)", blob))
+    # Three inputs are deliberately not committed: multi-megabyte NASA matrices that the repository
+    # refuses to carry, whose digests are pinned in a committed manifest instead. Those are declared
+    # as such on the card, and the declaration is what makes their absence legitimate rather than a
+    # broken reference. Everything else a card names must exist.
+    declared_uncommitted = {data["primaryInput"]} if data.get("status") in {
+        "recorded-checksum", "reconstructed-derived"} else set()
+    declared_uncommitted |= {item["path"] for item in data.get("supportingInputs") or []
+                             if item.get("hashVerifiedAtBuild") is False}
+    missing = [path for path in cited
+               if not (ROOT / path).exists() and path not in declared_uncommitted]
+    assert not missing, f"{model_id} cites paths that do not exist: {missing}"
+
+
+@pytest.mark.parametrize("model_id", SERVED)
+def test_no_card_points_at_a_declared_directory_that_is_absent(model_id):
+    for item in card(model_id)["trainingData"]["supportingInputs"]:
+        if item.get("files") is not None or item.get("fileCount"):
+            assert (ROOT / item["path"]).is_dir(), item["path"]
 
 
 # --------------------------------------------------------------------------- no promotion

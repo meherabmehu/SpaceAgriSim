@@ -304,7 +304,7 @@ SPECS: dict[str, dict] = {
             "supportingInputs": [
                 {"path": "data/raw/OSD-780",
                  "role": "NASA OSDR source records, committed under data/raw/OSD-780",
-                 "hash": "per-file digests recorded in data/metadata/osd780_checksums.json"},
+                 "hash": "directory"},
             ],
             "catalogueRef": "osdr-plant-experiments",
             "studyAccession": "OSD-780",
@@ -654,6 +654,32 @@ def training_data_block(model_id: str, spec: dict, artifact: dict) -> dict:
             else:
                 entry["sha256"] = None
                 entry["hashVerifiedAtBuild"] = False
+        elif item.get("hash") == "directory":
+            # A supporting input can be a *directory* of committed source records. Hashing the
+            # directory as an opaque blob would be meaningless, and pointing at a manifest that
+            # does not exist is worse than saying nothing - that is exactly what this branch did
+            # for OSD-780, citing data/metadata/osd780_checksums.json, which was never created.
+            # So the digests are computed here, per file, and a manifest digest over the sorted
+            # (name, sha256) pairs makes the set itself checkable in one value.
+            p = ROOT / item["path"]
+            files = sorted(f for f in p.rglob("*") if f.is_file()) if p.is_dir() else []
+            if files:
+                entry["files"] = [
+                    {"name": str(f.relative_to(p)), "bytes": f.stat().st_size,
+                     "sha256": sha256_file(f)}
+                    for f in files
+                ]
+                manifest = "\n".join(f"{row['name']} {row['sha256']}" for row in entry["files"])
+                entry["manifestSha256"] = hashlib.sha256(manifest.encode("utf-8")).hexdigest()
+                entry["fileCount"] = len(entry["files"])
+                entry["hashBasis"] = (
+                    "Per-file SHA-256 computed from the committed files under this path, plus a "
+                    "manifest digest over the sorted 'name sha256' lines."
+                )
+                entry["hashVerifiedAtBuild"] = True
+            else:
+                entry["hashVerifiedAtBuild"] = False
+                entry["hashSource"] = "declared directory is absent from the checkout"
         else:
             entry["sha256"] = item.get("hash")
             entry["hashVerifiedAtBuild"] = False
