@@ -46,11 +46,21 @@ backend/.venv/Scripts/python -m pytest -q backend/tests
 cd frontend
 npm run lint
 npm run typecheck
-npm run build
-npm run test:e2e
+npm run test:unit     # jsdom: request lifecycles, hooks, error states
+npm run build:check   # production build + bundle graph and size budget
+npm run test:e2e      # Playwright: three viewports against the production build
 ```
 
-The full verification record is in [docs/TEST_REPORT.md](docs/TEST_REPORT.md). For container and hosted deployment, see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+The backend suite runs on SQLite by default; `SPACEAGRISIM_TEST_POSTGRES_URL` runs the same suite
+against a real PostgreSQL server, where the PostgreSQL-only persistence tests execute instead of
+skipping.
+
+The current verification record — every gate, its exact command and its result — is
+[docs/FINAL_PROJECT_COMPLETION_REPORT.md](docs/FINAL_PROJECT_COMPLETION_REPORT.md). Earlier phase
+reports (for example [docs/TEST_REPORT.md](docs/TEST_REPORT.md) and
+[docs/FINAL_QUALITY_GATES.md](docs/FINAL_QUALITY_GATES.md)) record the numbers measured at the time
+they were written and are kept as history rather than updated. For container and hosted deployment,
+see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ## Data and attribution
 
@@ -58,6 +68,7 @@ NASA study records point to their official OSDR sources; the product is not endo
 
 ## Documentation
 
+- [Final completion report](docs/FINAL_PROJECT_COMPLETION_REPORT.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [API documentation](docs/API_DOCUMENTATION.md)
 - [NASA dataset inventory](docs/NASA_DATASET_INVENTORY.md)
