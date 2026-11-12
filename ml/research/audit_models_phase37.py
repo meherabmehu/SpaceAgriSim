@@ -27,6 +27,11 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "backend"))
+
+# The completion documents written by build_model_cards.py. They live beside the checksummed
+# artifacts rather than inside them, so this audit can report on them without the artifact hashes
+# moving - which is the whole reason they exist as a separate layer.
+CARD_DIR = ROOT / "ml" / "artifacts" / "cards"
 REGISTRY = ROOT / "ml" / "artifacts" / "registry.json"
 EVIDENCE = ROOT / "ml" / "evaluation" / "phase37_model_evidence.json"
 
@@ -234,6 +239,9 @@ def main() -> int:
         groups = artifact.get("groups")
         group_note = json.dumps(leakage)
 
+        card_path = CARD_DIR / f"{mid}.json"
+        completion = json.loads(card_path.read_text()) if card_path.is_file() else {}
+
         prev = previous.get(mid, {})
         models[mid] = {
             "artifactSha256": on_disk,
@@ -270,6 +278,19 @@ def main() -> int:
             "newEvidenceTest": domain_test(mid, artifact),
             "retrained": False,
             "thresholdsChanged": False,
+            "completionCard": {
+                "present": bool(completion),
+                "path": (f"ml/artifacts/cards/{mid}.json" if completion else None),
+                "complete": (completion.get("completeness") or {}).get("allComplete"),
+                "checks": f"{(completion.get('completeness') or {}).get('complete')}/"
+                          f"{(completion.get('completeness') or {}).get('total')}",
+                "trainingDataStatus": (completion.get("trainingData") or {}).get("status"),
+                "trainingDataSha256": (completion.get("trainingData") or {}).get("sha256"),
+                "codeCommit": (completion.get("code") or {}).get("commit"),
+                "codeImmutable": (completion.get("code") or {}).get("immutable"),
+                "artifactHashPreserved": (completion.get("artifact") or {}).get("hashPreserved"),
+                "exceptions": completion.get("exceptions") or [],
+            },
             "reproductionScript": REPRODUCTION.get(mid),
             "reproductionScriptExists": bool(REPRODUCTION.get(mid)
                                             and (ROOT / REPRODUCTION[mid]).is_file()),
@@ -324,6 +345,14 @@ def main() -> int:
         "withBaseline": sum(1 for r in models.values() if r["baselineMetrics"]),
         "reproductionScriptResolvable": sum(1 for r in models.values()
                                             if r["reproductionScriptExists"]),
+        "completionCardsPresent": sum(1 for r in models.values()
+                                      if r["completionCard"]["present"]),
+        "completionCardsComplete": sum(1 for r in models.values()
+                                       if r["completionCard"]["complete"]),
+        "completionCardsWithTrainingDataHash": sum(
+            1 for r in models.values() if r["completionCard"]["trainingDataSha256"]),
+        "completionCardsWithImmutableCode": sum(
+            1 for r in models.values() if r["completionCard"]["codeImmutable"]),
         "embedTrainingDataHash": sum(1 for r in models.values()
                                      if r["embedsTrainingDataHash"]),
     }
@@ -354,11 +383,16 @@ def main() -> int:
     print(f"scored on new evidence               {counts['scored']} "
           f"(not tested: {counts['notTestedByNewEvidence']})")
     print(f"artifact hashes verified             {counts['artifactHashesVerified']}/{counts['served']}")
-    print(f"complete cards / domains / uncertainty / grouped splits / baselines  "
+    print(f"artifacts complete in themselves / domains / uncertainty / grouped / baselines  "
           f"{counts['cardsComplete']} / {counts['domainsDeclared']} / {counts['withUncertainty']} / "
           f"{counts['groupedSplits']} / {counts['withBaseline']}")
     print(f"reproduction script resolvable / embeds training-data hash             "
           f"{counts['reproductionScriptResolvable']} / {counts['embedTrainingDataHash']}")
+    print(f"completion cards present / complete                                  "
+          f"{counts['completionCardsPresent']} / {counts['completionCardsComplete']}")
+    print(f"   with training-data digest / immutable code                        "
+          f"{counts['completionCardsWithTrainingDataHash']} / "
+          f"{counts['completionCardsWithImmutableCode']}")
     print(f"decision grade before -> after       {counts['decisionGradeBefore']} -> "
           f"{counts['decisionGradeAfter']}")
     print(f"report -> {EVIDENCE.relative_to(ROOT)}")

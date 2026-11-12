@@ -1,0 +1,181 @@
+{
+  "schema": "spaceagrisim.model_card/1",
+  "modelId": "lettuce-earth-growth-v1",
+  "version": "1.0.0",
+  "generatedBy": "ml/research/build_model_cards.py",
+  "generatedOn": "2026-11-12",
+  "artifact": {
+    "path": "ml/artifacts/lettuce-earth-growth-v1.json",
+    "sha256": "3d5fdaeab4165df6efcb0887c18f5ab2da65b71056aa521400946a4edbf0879c",
+    "registrySha256": "3d5fdaeab4165df6efcb0887c18f5ab2da65b71056aa521400946a4edbf0879c",
+    "hashPreserved": true,
+    "modifiedByThisCompletion": false,
+    "note": "The artifact is the model card the platform publishes and is checksum-addressed. This completion document is stored beside it and never inside it, so every previously published hash remains valid."
+  },
+  "identity": {
+    "name": "Lettuce Earth growth \u00b7 WUR random forest",
+    "status": "trained-exploratory",
+    "task": "Earth-only fresh shoot mass regression",
+    "organism": "lettuce",
+    "supersedes": null,
+    "servesAlongside": null
+  },
+  "purpose": "Predict fresh shoot mass per lettuce plant from thermal time, air and root-zone temperature and incident PPFD, for a controlled-environment lettuce crop.",
+  "intendedUse": "Exploring how a change in temperature or light moves per-plant fresh mass inside a plant-factory envelope, and producing a number a researcher can compare against their own measurement.",
+  "notIntendedFor": [
+    "Operational or mission planning: the model fails its own independent check (41.6 % MAPE against a 30 % criterion fixed before the measurement).",
+    "Crops, cultivars or light regimes outside the declared domain; the model refuses rather than extrapolating.",
+    "Any claim about spaceflight performance. The training data are terrestrial."
+  ],
+  "features": [
+    {
+      "name": "daysAfterTransplant",
+      "unit": "days"
+    },
+    {
+      "name": "airTemperature",
+      "unit": "degrees Celsius"
+    },
+    {
+      "name": "rootTemperature",
+      "unit": "degrees Celsius"
+    },
+    {
+      "name": "ppfd",
+      "unit": "micromol photons m-2 s-1 (400-700 nm)"
+    }
+  ],
+  "featureCount": 4,
+  "domain": {
+    "daysAfterTransplant": {
+      "min": 2.0,
+      "max": 29.0
+    },
+    "airTemperature": {
+      "min": 20.0,
+      "max": 32.0
+    },
+    "rootTemperature": {
+      "min": 20.0,
+      "max": 32.0
+    },
+    "ppfd": {
+      "min": 200.0,
+      "max": 750.0
+    }
+  },
+  "trainingData": {
+    "status": "committed-file",
+    "primaryInput": "data/processed/lettuce_earth.csv",
+    "hashBasis": "SHA-256 of data/processed/lettuce_earth.csv exactly as committed, which is the table train_lettuce.py writes and every lettuce trainer reads. Covers 1648 plant rows x 7 columns; the file is deterministic because the transform from the WUR workbook is fixed in the training script.",
+    "catalogueRef": null,
+    "archiveRef": "data/raw/WUR-lettuce/original_dataset_lettuce.xlsx",
+    "studyAccession": "WUR-lettuce (doi:10.4121/5a7472f0-8a67-4ec0-84c9-9d032990d654)",
+    "sourceStudy": "WUR-lettuce",
+    "sourceUrl": "https://doi.org/10.4121/5a7472f0-8a67-4ec0-84c9-9d032990d654.v1",
+    "licence": "see sourceUrl",
+    "retrievable": true,
+    "reconstruction": "python3 ml/training/train_lettuce.py regenerates the table from the committed workbook.",
+    "manifest": null,
+    "supportingInputs": [
+      {
+        "path": "data/raw/WUR-lettuce/original_dataset_lettuce.xlsx",
+        "role": "upstream source workbook, committed",
+        "sha256": "dd947d6a0859a2ec1e2457da8130416e3b7cf950468ae78339fa2849b00fafe6",
+        "hashVerifiedAtBuild": true
+      }
+    ],
+    "sha256": "0b6072cc4ff65ef6bcc9fd33481d96c76b710945b81e4452a78dd605349feb43",
+    "hashVerifiedAtBuild": true
+  },
+  "code": {
+    "path": "ml/training/train_lettuce.py",
+    "commit": "4982b84fbb2c880935f92ae2a5283e81d84e1764",
+    "commitContainsPath": true,
+    "sha256AtCommit": "a106872473d6c96bd3fe7417ce9c6ebcc1aeb6b35f6a28b54cae9b29d943f402",
+    "sha256OnDisk": "a106872473d6c96bd3fe7417ce9c6ebcc1aeb6b35f6a28b54cae9b29d943f402",
+    "unchangedSinceCommit": true,
+    "immutable": true,
+    "resolveWith": "git show 4982b84fbb2c880935f92ae2a5283e81d84e1764:ml/training/train_lettuce.py"
+  },
+  "split": {
+    "method": "Nested leave-one-experiment-out cross-validation (4 outer, 3 inner folds).",
+    "grouped": true,
+    "groupUnit": "experiment",
+    "groups": 4,
+    "note": "All plants and treatments from an experiment remain in the same fold, so the score measures transfer to an unseen experiment rather than to an unseen row."
+  },
+  "metrics": {
+    "MAE": 38.93942129910151,
+    "RMSE": 71.73248433299133,
+    "R2": 0.8119836421675193
+  },
+  "baseline": {
+    "metrics": {
+      "MAE": 125.82608582930726,
+      "RMSE": 169.85514939756476,
+      "R2": -0.054195908898403866
+    },
+    "outperformsBaseline": null
+  },
+  "uncertainty": {
+    "kind": "prediction-interval",
+    "statement": "90 % cross-conformal (CV+) interval, radius 112.94 g/plant, measured held-out coverage 0.939 over 4 calibration groups. The artifact records its own caveat: the interval describes this dataset's spread and is not a guarantee for a new greenhouse.",
+    "artifactKind": "90% cross-conformal (CV+) interval, measured held-out coverage 0.939",
+    "outOfFoldCoverage": 0.9393,
+    "radius": 112.943259,
+    "nominalCoverage": 0.9,
+    "calibrationGroups": 4,
+    "crossCampaignCoverage": true
+  },
+  "limitations": [
+    "Not NASA or spaceflight data.",
+    "Tip-burn-related treatment omissions create selection bias.",
+    "Plant identifiers are reused across experiments; split by whole experiment.",
+    "Only Batavia Othilie lettuce on Earth; not calibrated for partial gravity or radiation.",
+    "No inference for water stress, nutrient stress, CO2 response, other cultivars, or different photoperiods.",
+    "Measured domain is 2\u201329 days after transplant, air/root 20\u201332 C, PPFD 200\u2013750 \u00b5mol/m\u00b2/s; treatment grid is sparse.",
+    "Environmental combinations omitted for tip burn are unsupported even inside marginal ranges.",
+    "Fresh shoot mass per plant is not edible harvest per square meter; no planting-density conversion is assumed."
+  ],
+  "outOfDomainBehaviour": {
+    "refuses": true,
+    "mechanism": "The artifact's `domain` block is enforced before scoring; a request outside it is refused with the field and range named rather than extrapolated, and a transcriptomic model rejects a partial expression vector instead of zero-filling."
+  },
+  "evidence": {
+    "verdict": "fails-independent-check",
+    "classification": "FAILS-INDEPENDENT-CHECK",
+    "decisionGrade": false,
+    "promotedByThisCompletion": false,
+    "retrainedByThisCompletion": false,
+    "thresholdsChangedByThisCompletion": false,
+    "evidenceRecord": "ml/evaluation/phase37_model_evidence.json"
+  },
+  "samples": 1648,
+  "groups": 4,
+  "seed": 42,
+  "exceptions": [],
+  "completeness": {
+    "checks": {
+      "identifier": true,
+      "purpose": true,
+      "intendedUse": true,
+      "notIntendedFor": true,
+      "features": true,
+      "domain": true,
+      "trainingData": true,
+      "codeReference": true,
+      "artifactHash": true,
+      "split": true,
+      "metrics": true,
+      "baseline": true,
+      "uncertainty": true,
+      "limitations": true,
+      "evidence": true
+    },
+    "complete": 15,
+    "total": 15,
+    "allComplete": true,
+    "exceptions": []
+  }
+}
