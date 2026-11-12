@@ -56,7 +56,10 @@ against a real PostgreSQL server, where the PostgreSQL-only persistence tests ex
 skipping.
 
 The current verification record — every gate, its exact command and its result — is
-[docs/FINAL_PROJECT_COMPLETION_REPORT.md](docs/FINAL_PROJECT_COMPLETION_REPORT.md). Earlier phase
+[docs/FINAL_PROJECT_COMPLETION_REPORT.md](docs/FINAL_PROJECT_COMPLETION_REPORT.md), which also
+records the fourteen documented data gaps, their status after this pass (3 closed by data, 2 closed
+by withdrawing a capability, 5 partially closed, 4 open) and the searches behind each one. Earlier
+phase
 reports (for example [docs/TEST_REPORT.md](docs/TEST_REPORT.md) and
 [docs/FINAL_QUALITY_GATES.md](docs/FINAL_QUALITY_GATES.md)) record the numbers measured at the time
 they were written and are kept as history rather than updated. For container and hosted deployment,
@@ -69,6 +72,8 @@ NASA study records point to their official OSDR sources; the product is not endo
 ## Documentation
 
 - [Final completion report](docs/FINAL_PROJECT_COMPLETION_REPORT.md)
+- [Dataset catalogue](data/research/DATASET_CATALOG.md) · [gap matrix](docs/DATASET_GAP_MATRIX.md)
+- [Archived reports](docs/archive/README.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [API documentation](docs/API_DOCUMENTATION.md)
 - [NASA dataset inventory](docs/NASA_DATASET_INVENTORY.md)

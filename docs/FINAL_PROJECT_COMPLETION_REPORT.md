@@ -1,363 +1,504 @@
 # Final project completion report
 
-SpaceAgriSim — end of the coding-agent work, merge and release readiness.
+SpaceAgriSim — the final scientific and engineering completion pass.
 
-Written against branch `bugfix/project-wide-audit`, merged into `main` as a fast-forward. Every number
-in this report was produced on the delivered tree by the command printed beside it; nothing here is
-copied from an earlier report without being re-run. Where a result was *not* verified, it says so.
+Every number below was produced on this branch by the command printed beside it, during this pass.
+Where a result could not be measured, this report says so instead of estimating it. Where a gap
+could not be closed because the evidence does not exist publicly, the gap is left open and the
+search that failed to find it is recorded.
 
 ---
 
-## 1. Status
+## 1. Repository state
 
 | | |
 |---|---|
-| Task state | **Complete.** Inspection, fixes, tests, review, merge and verification are finished. |
-| Branch | `bugfix/project-wide-audit` |
-| `main` before the merge | `d84a1a9` (unchanged; no commits appeared on it during this work) |
-| Relationship | branch was 18 commits ahead of `main`, 0 behind; merge base = `d84a1a9`, so the merge is a fast-forward with no conflict resolution and no merge commit |
-| Working tree | clean at every checkpoint; the only files created outside the repository were throwaway environments (`/tmp`) |
-| Force-push / history rewrite | none, at any point |
-| Render | **not touched**: no deploy, no service or environment change, no production database access (user instruction, 2026-11-12) |
+| Repository | `github.com/meherabmehu/SpaceAgriSim` |
+| Starting commit | `429097c` — the branch point, equal to `origin/main` at the start of this pass |
+| Branch | `final/project-completion`, created off that commit |
+| Commits on the branch | 7 (six before this report, one carrying it) |
+| Force-push / history rewrite / protection bypass | none, at any point |
+| Merge strategy | fast-forward only; no merge commit, no conflict resolution |
+| Render | **not touched** — no deploy, no trigger, no service, environment, secret or plan change |
+| Production PostgreSQL | **not touched** — no migration, reset, seed, delete or write |
+| Test databases | isolated local instances only (`sqlite:///tmp/qa37.db` and a local PostgreSQL 17 cluster on port 55437) |
 
-Two defects from a previous pass were found to be *not* fixed in the browser-facing layer even
-though their causes had been fixed on the server, and a third defect class (request lifecycle) turned
-out to be systemic rather than a single bug. Those are the substance of this pass; they are the
-reason the branch does not end at the audit report.
+The branch tip before this report's own commit:
+
+```
+$ git rev-parse HEAD
+a6553aaea81525812b4cbac7de0dd99180ae9634
+$ git log --oneline 429097c..HEAD
+a6553aa Serve this phase's evidence on the surface that already exists
+a465dc9 Audit every served model against the new evidence without promoting any
+544b117 Adjudicate the gap matrix against the evidence actually acquired
+32f0068 Acquire two spectrum and nutrient datasets and analyse them
+98c99e1 Replace the eighteen baselines with the Inter-rendered captures
+be64e67 Bundle Inter instead of merely asking for it
+```
+
+This report is the seventh commit; it cannot contain its own SHA, and it does not pretend to. The
+merge and push that follow it are recorded in the delivery message, with `git ls-remote` output, not
+in this file.
+
+### 1.1 A note on how this pass started
+
+The workspace lost its `.git` directory between two working sessions: the sandbox that runs the
+agent was reset, taking installed packages and the repository metadata with it while leaving the
+working files intact. The repository was restored by cloning `origin` and moving the restored
+`.git` back over the surviving tree, and the working tree was reconciled file by file against that
+clone. Two consequences are worth recording rather than hiding:
+
+* the eighteen visual baselines had been replaced by their committed copies during that
+  reconciliation, so they were re-captured from the deterministic pipeline and re-verified
+  (§8), not restored from a backup;
+* `docs/FINAL_PROJECT_COMPLETION_REPORT.md` previously held the report of an unrelated earlier
+  audit pass. That document is preserved at
+  [docs/archive/FINAL_PROJECT_COMPLETION_REPORT_audit_pass.md](archive/FINAL_PROJECT_COMPLETION_REPORT_audit_pass.md)
+  rather than deleted, and this file now holds the report the completion brief asks for.
 
 ---
 
-## 2. Defects fixed on this branch
+## 2. The fourteen recorded gaps, before and after
 
-Eleven were fixed in the project-wide audit and are described in
-[COMPLETE_PROJECT_BUG_AUDIT.md](COMPLETE_PROJECT_BUG_AUDIT.md) with symptom, root cause, causal proof
-and regression test. They are listed here for completeness, not re-explained:
+Status is the token on each entry of `data/research/dataset_gap_matrix.json`, which is the source of
+truth; the table below is generated from it by
+`python3 ml/research/build_gap_matrix.py`.
 
-| # | Defect | Commit |
+| # | Gap | Before this pass | After this pass |
+|---|---|---|---|
+| 1 | `measured-eta` | PARTIALLY CLOSED | PARTIALLY CLOSED |
+| 2 | `independent-et0` | PARTIALLY CLOSED | PARTIALLY CLOSED |
+| 3 | `fractional-gravity` | CLOSED (capability removed) | CLOSED (unchanged) |
+| 4 | `led-spectrum-response` | **OPEN** | **CLOSED** |
+| 5 | `substrate-water` | OPEN | OPEN |
+| 6 | `sub-daily-weather` | CLOSED | CLOSED (unchanged) |
+| 7 | `cultivar-metadata` | PARTIALLY CLOSED | PARTIALLY CLOSED |
+| 8 | `imagery` | OPEN | OPEN |
+| 9 | `yield-labels` | CLOSED (capability removed) | CLOSED (unchanged) |
+| 10 | `mission-energy` | OPEN | OPEN |
+| 11 | `nutrient-balance` | **OPEN** | **PARTIALLY CLOSED** |
+| 12 | `long-run-climate` | CLOSED | CLOSED (unchanged) |
+| 13 | `crop-water-response-ky` | PARTIALLY CLOSED | PARTIALLY CLOSED |
+| 14 | `prediction-intervals-independent-coverage` | OPEN | OPEN |
+
+| Count | Before | After |
 |---|---|---|
-| 1 | Unit symbols in `GET /api/config` were destroyed by a non-UTF-8 round trip | `05370a1` |
-| 2 | Signed-out pages requested a resource that has no path (`GET /apinull`) and rendered a 401 banner | `a7e1366` |
-| 3 | The assistant's suggestion chips forced a 6 px horizontal overflow at 412 px wide | `fbcaa9c` |
-| 4 | The closed-loop chamber comparison stored its output instead of deriving it | `576cbd7` |
-| 5 | A registry gate rewrote its own report while "checking" it | `2d30a4e` |
-| 6 | `openpyxl` and `pyflakes` were imported by tests but undeclared | `12899bb` |
-| 7 | Ten dead imports/locals in `backend/app`; no gate looked for them | `48983af` |
-| 8 | Wheat columns exported under units the workbook does not declare | `71e6309` |
-| 9 | The synthetic-fixture generator ignored `--out-dir` | `2c732ce` |
-| 10 | Three dead locals and two placeholder-free f-strings in scripts | `1d9def1` |
-| 11 | The CSV analysis export hand-quoted a free-text title (corruption, formula injection, `None` as text) | `671b9be` |
+| Closed, by data | 2 | **3** |
+| Closed, by withdrawing a capability | 2 | 2 |
+| Partially closed | 4 | **5** |
+| Open | 6 | **4** |
+| Total | 14 | 14 |
 
-Three more were found and fixed in this pass (§3), plus two test-only commits that turn manual checks into gates.
+The two kinds of closure are kept apart deliberately. A gap closed by finding a measurement and a
+gap closed by removing the feature that needed one are not the same result, and a single "closed"
+column would report progress the product does not have.
+
+### 2.1 Why `led-spectrum-response` closed
+
+The gap asked for a spectrum-resolved biological response — a trial in which light *quality*
+changes while light *quantity* is held fixed, because otherwise a yield difference is
+indistinguishable from a difference in photons delivered. `10.5281/zenodo.20394352` is that trial:
+four spectra, every arm targeted at 200 µmol m⁻² s⁻¹ and the same 16/8 photoperiod, 252
+destructively harvested Red Batavia plants.
+
+### 2.2 Why `nutrient-balance` is only partially closed
+
+The gap has three requirements: measured ion concentrations, the EC response, and an uptake rate in
+mass per plant per day. The first two are now met by measurement across a real 28-day cycle. The
+third is not derivable from the deposit: an uptake rate needs each sample paired to a dosing event,
+and the deposit's Pre/Post labels are not self-consistent — the Treatment 1 sheet labels two samples
+on 3 March both "Pre dose", then places a "Post dose" on a 10 March column followed by another "Pre
+dose". No pH is deposited at all. `uptakeRate` is therefore published as `null`, with the reason and
+the artefact that would close it recorded beside it.
+
+### 2.3 Why the four remaining gaps stayed open
+
+Each is recorded with its repository, query and rejection reasons in
+`data/metadata/phase37_search_log.json`; the summary is §3.2. In one line each:
+
+* **`substrate-water`** — no open dataset measures water content *inside a CEA substrate* together
+  with an irrigation schedule and a drainage fraction. Field-soil series exist and are already
+  catalogued as adjacent evidence; substituting them would repeat exactly the error the gap was
+  held open to avoid.
+* **`imagery`** — the requirement is imagery from the platform's own camera geometry, and the
+  platform has no imaging pipeline. No external dataset can satisfy a self-referential requirement.
+* **`mission-energy`** — the one real candidate has no power sensor (§3.3).
+* **`prediction-intervals-independent-coverage`** — coverage needs independent observations
+  *inside the model's declared domain*. Both newly acquired datasets fall outside it.
 
 ---
 
-## 3. New fixes, and the tests that pin them
+## 3. Searches, and what was accepted or rejected
 
-### 3.1 A superseded API response could overwrite the current one
+### 3.1 Repositories queried
 
-| | |
+Zenodo, NASA OSDR, Dryad, Figshare and PANGAEA, with 19 distinct queries recorded in
+`data/metadata/phase37_search_log.json`. That file is generated alongside the acquisition manifest
+and is asserted by `backend/tests/test_phase37_acquisition.py::test_the_search_log_names_a_repository_and_a_query_for_what_it_looked_for`.
+
+### 3.2 Accepted
+
+| Identifier | What it is | Licence | Decision |
+|---|---|---|---|
+| `10.5281/zenodo.20394352` | Hydroponic lettuce under four spectra at constant PPFD, 252 destructively harvested plants | CC BY 4.0 | accepted, closes `led-spectrum-response` |
+| `10.5281/zenodo.17794636` | Eight ions plus EC, three systems × three regimes, 28-day cycle, 191/194 harvested plants | CC BY 4.0 | accepted, moves `nutrient-balance` to partially closed |
+
+### 3.3 Rejected, with the reason
+
+| Identifier | Why it was rejected |
 |---|---|
-| **Symptom** | Change a parameter that a panel reads from the API, and the panel can settle on the *previous* parameters' numbers under the *new* controls. Reproduced deterministically in the unit suite; on the water-evidence panel the visible result is a "platform ÷ measured" ratio computed for a light scale the reader has already changed. |
-| **Root cause** | `useResource` aborted the request in flight when its inputs changed and treated that as sufficient. It is not: an `AbortController` cannot un-resolve a request whose response body has already arrived. When the response is buffered before the abort fires, the `.then` that follows still runs — and it had no guard at all, so it committed. Separately, `api()` did `await response.json().catch(() => null)`, which converted a *cancelled body read* into a resolved `null`: an aborted request came back as "loaded successfully, no data" and was committed like an answer. |
-| **Affected files** | `frontend/src/pages/modules/moduleSupport.jsx`, `frontend/src/services/platformApi.ts` |
-| **Fix** | Three layers: every request carries an identity and only the newest identity may commit (an unmount sets a `cancelled` flag, because no newer request exists to advance it); the value handed to consumers is derived from the request key, so the render in which parameters change already reports `loading`; and `api()` re-throws an `AbortError` from the body read instead of swallowing it into `null`, which the hook treats as a cancellation. Public shape unchanged (`{data, error, loading}`), debounce unchanged, skipped-resource behaviour unchanged, no call site changed. |
-| **Regression tests** | `frontend/src/pages/modules/moduleSupport.test.jsx` — 16 tests. The discriminating three: *ignores a response that lands after the parameters changed*, *reports loading rather than the previous payload as soon as the parameters change*, *treats a cancelled body read as a cancellation*. Against the previous implementation they fail with the stale payload committed (`{data: {ratio: 1}, error: '', loading: false}` where `{data: null, loading: true}` is required); against this one they pass. The other 13 pin the surrounding contract (debounce coalescing, no request for an equal body, no request for a gated-off resource, unmount mid-flight, unmount inside the debounce window, remount, genuine failure, non-JSON failure body, stable identities). |
-| **Verification** | `npm run test:unit` → 20 passed (2 files) |
-| **Commit** | `97ea351` (fix), `ba441c1` (test harness, tests, CI wiring) |
+| `10.5281/zenodo.18804397` | **The same experiment deposited twice.** All five shared sheets are cell-for-cell identical to `17794636`; counting it would turn one trial into two pieces of evidence. Downloaded and compared precisely so the duplicate could be *demonstrated* rather than assumed. |
+| `10.5281/zenodo.11485183` (EDEN ISS 2020 telemetry) | A full year of 5-minute telemetry from a real space-analogue greenhouse — and **no power, current, voltage or energy channel of any kind**. Its unit table lists 59 temperature, 11 pressure, 4 CO₂, 4 RH, 4 EC, 4 pH, 3 PAR, 3 valve, 2 level, 2 volume and 1 VPD sensor. A gap defined as "power draw per fixture, thermal load and resupply mass" cannot be answered from it. |
+| Figshare `34671594` | Bell pepper, and the record is a publication rather than a measurement table. |
+| Figshare `25976644`, `14051459`, `14051462` | Supplementary data sheets, rendered figures and table images from papers. A published figure is not a dataset. |
+| NASA OSDR `OSD-655`, `OSD-780` | Already integrated in earlier phases; they add nothing to the gaps still open. |
 
-### 3.2 A cancelled re-read was displayed as an empty account
+The EDEN ISS archive was 260 MB unpacked and answered nothing, so it is not retained: its published
+MD5 is kept in the manifest so the rejection stays reproducible byte for byte, and the payload is
+gone. That decision is asserted by
+`test_the_rejected_payload_is_not_retained_but_its_checksum_is`.
 
-| | |
+---
+
+## 4. New data
+
+Both files were downloaded through the Zenodo API, verified against the publisher's own MD5, and
+catalogued with their SHA-256. Sizes are bytes on disk.
+
+| Item | Value |
 |---|---|
-| **Symptom** | In the scientific workflow, saving two analyses in quick succession removed the "recent analyses on this account" panel, leaving the reader looking at an account with nothing saved until the replacement request landed. A late response could also put an older list back after a newer one had been shown. |
-| **Root cause** | The effect re-reads the list on every save and aborts the request in flight. Its `.catch` set the list to `null` for *any* rejection, cancellation included. |
-| **Affected files** | `frontend/src/pages/modules/ScientificWorkflow.jsx` (fixed); `frontend/src/pages/modules/ResearchAssistant.jsx` (same shape, guarded, no reproducible symptom — described as hardening rather than as a fix) |
-| **Fix** | An `active` flag plus an `AbortError` check: a cancellation writes nothing, so the previous list stays until a newer one replaces it. A genuine failure still clears the panel, so a stale list can never claim to be the current account's. |
-| **Regression test** | `frontend/src/pages/modules/moduleRequests.test.jsx` renders the real component against a deferred `fetch`, drives two supersessions, and asserts the list survives; it fails against the previous implementation. |
-| **Commit** | `888b367` |
+| Record | `10.5281/zenodo.20394352` — "Optimising Spectral Composition in Hydroponic Lettuce Cultivation: The Role of Green Light, Open Data" |
+| File | `green_light_lettuce_open_data (1).xlsx`, stored as `data/raw/zenodo_20394352/green_light_lettuce_open_data_1_.xlsx` |
+| Size / checksums | 94 162 B · MD5 `bb6ca334ca7e223089dc6c5faf253444` (matches publisher) · SHA-256 `cb79481841d520cdf741dff2a0857127817284a068fcc6f809cee8039f3b6f4c` |
+| Licence | CC BY 4.0, verified on the record |
+| Contents | 4 treatment arms; 252 destructively harvested plants across 7 measured variates; MultispeQ fluorescence on 165 leaf measurements at 28 and 35 DAS; post-harvest pigment and antioxidant assays, n = 24 per arm |
 
-### 3.3 The deployment verifier died instead of reporting its precondition
-
-| | |
+| Item | Value |
 |---|---|
-| **Symptom** | `python scripts/verify_deployment_config.py` without `SPACEAGRISIM_AUTH_SECRET` exited with a pydantic traceback from the middle of the security checks. |
-| **Root cause** | The script constructs the settings object under a Vercel environment; on Vercel a missing secret is a validation error **by design**. That intended refusal escaped unguarded, so the script could not print a single result — a gate that cannot report its own failure. The auth-secret length check also read `len()` off a legitimately `None` attribute. |
-| **Affected files** | `scripts/verify_deployment_config.py` |
-| **Fix** | The precondition is stated up front and exits 2 with one line; the length check reads the configured value defensively. Behaviour with a configured secret is unchanged. |
-| **Regression test** | `backend/tests/test_deployment_config_verifier.py` runs the script with the variable stripped and asserts exit 2, the message, and no traceback; it fails against the previous script. |
-| **Verification** | With a secret and a live PostgreSQL 17.11 server: **21/21 checks passed**, including migration idempotence, storage round-trip, server encoding, and the seven security invariants. |
-| **Commit** | `7441dda` |
+| Record | `10.5281/zenodo.17794636` — "Raw data: Temporal variation of nutrient ratios within hydroponic nutrient solutions" |
+| File | `Raw data Dosing Experiment.xlsx`, stored as `data/raw/zenodo_17794636/Raw_data_Dosing_Experiment.xlsx` |
+| Size / checksums | 52 889 B · MD5 `b59a320899a60d158019a2db23d492db` (matches publisher) · SHA-256 `da7ce5d7da119706a197bcb71809f49965702bc4fcd03a3135cdf729e8d01165` |
+| Licence | CC BY 4.0, verified on the record |
+| Contents | 8 ions + EC sampled repeatedly over a 28-day cycle; 3 independent nutrient systems × 3 regimes; 385 destructively harvested plants; 70 L per solution change; **no pH** |
 
-### 3.4 The route sweep was a manual check, not a gate
+The duplicate deposit `10.5281/zenodo.18804397` (55 099 B, MD5 `4aacaa7bb912bae5b9473178b305ef8b`)
+is retained on disk only because the comparison is the evidence that it is a duplicate. It is
+recorded in the manifest as `role: duplicate-check`, `countsAsSecondCampaign: false`, and it is
+**not** a catalogue entry. The catalogue therefore moves 34 → 36, not 37.
 
-Not a defect fix but the permanent form of one: the audit's crawl of all 16 routes at three viewports
-was done by hand. `frontend/e2e/crawl.spec.js` now does it in the suite, collecting page errors,
-console errors, responses at or above 400 and horizontal overflow per route, and failing with the
-route named — the two silent defects from the audit (the phantom `GET /apinull` 404 and the 401
-banner on a signed-out page) are exactly what it reads. Commit `215b84a`.
+Acquisition is reproducible:
 
-### 3.5 Reviewed and found not to be defects
+```
+python3 ml/research/acquire_spectrum_light.py    # 3 records, 3 files, 0 failures, all checksums verified
+```
 
-The mandate asks for this explicitly, so the negative results are recorded rather than implied.
+---
 
-| Area | What was checked | Result |
+## 5. Findings, with n and uncertainty
+
+### 5.1 Green light does not cost yield at constant photon supply
+
+Fresh mass per plant, measured destructively at 35 days after sowing (`n` = plants):
+
+| Arm | Spectrum | n | Mean (g) | SD (g) |
+|---|---|---|---|---|
+| Control | red-blue, ≈5.08 % green | 60 | 44.39 | 20.10 |
+| T1 | fixed 24 % green | 48 | 48.50 | 13.72 |
+| T2 | incremental 16 → 24 → 32 % green | 64 | 52.24 | 13.14 |
+| T3 | T2 spectrum at 1.25× density | 80 | 46.31 | 13.57 |
+
+T3 varies planting density as well as spectrum, so its difference cannot be attributed to colour
+and it is excluded from every claim — enforced by test, not by care.
+
+Derived contrasts, permutation test with 20 000 permutations and bootstrap interval with 4 000
+resamples (seed 20261112):
+
+| Contrast | Δ fresh mass | 95 % interval | p | Relative |
+|---|---|---|---|---|
+| Control → T1 (fixed 24 %) | +4.11 g | −2.15 to +10.52 | 0.229 | +9.3 % |
+| Control → T2 (incremental) | +7.86 g | +2.07 to +13.72 | **0.011** | **+17.7 %** |
+| T1 → T2 | +3.74 g | −1.13 to +8.76 | 0.144 | +7.7 % |
+
+This is the finding that matters for the simulator: the platform's radiation-quality treatment has
+always encoded the assumption that green photons are largely wasted. At a fixed photon budget that
+assumption is **not supported** — no arm lost yield against the red-blue control, and the
+incremental-green arm gained fresh mass with an interval that excludes zero.
+
+What it does not show: one cultivar, one facility, one season, one destructive endpoint. The
+deposit reports a *green percentage*, not a spectral power distribution, so the effect cannot be
+attributed to a wavelength band.
+
+### 5.2 Nutrient solution chemistry over a full cycle
+
+Measured, Treatment 1 (the regime closest to the platform's default recipe), 15 sampling
+intervals over the cycle, all three systems:
+
+| Ion | Median change (mg L⁻¹ d⁻¹) | Total change over cycle (mg L⁻¹) |
 |---|---|---|
-| Other request lifecycles | Every `api()` call site, every `useEffect` that resolves a promise, every debounce timer | `useSimulation` and `useSimulationConfig` already check `controller.signal.aborted` inside their `.then`; `MissionPlatform`, `Account`, `SharedScenario` and `Operator` already carry `active`/abort guards. Only the two in §3.2 were missing them. |
-| Double-submit races | `busy`/`loading` gating on every button that triggers a request (`Advisor`, `ScientificWorkflow`, `GuidedWorkflows`, `ResearchAssistant`, `ResearchAssistant`, radiation cards) | Every one is disabled while its request is in flight; no unguarded double-submit path exists. |
-| API contract | All 34 distinct frontend call paths resolved against the OpenAPI schema (83 paths) | No path without a backend route; the four template-literal paths resolve to existing routes (`/models/{id}/explanation`, `/predict/{id}` for the two radiation models, `/datasets/{id}`, `/workflows/{id}/run` for the ids actually passed); method selection is body-driven and matches the POST-only routes. |
-| SQL injection | Raw SQL in the backend | Exactly one interpolated statement: an `ALTER TABLE users ADD COLUMN` whose name and type come from a hard-coded tuple in the same function. No user input reaches it; identifiers cannot be bound parameters. |
-| Code execution | `eval`, `exec`, `pickle`, `yaml.load`, `subprocess`, `os.system` in `backend/app` | None. |
-| Operator console | Token comparison | `secrets.compare_digest`, and the endpoint 404s when no token is configured rather than confirming its existence. |
-| Polling | `Account`'s 2 s session poll | Cleared on unmount; no leak. |
+| Nitrate-N | −0.71 | −47.7 |
+| Phosphate | −0.16 | −7.67 |
+| Potassium | −0.70 | −61.1 |
+| Calcium | −0.83 | −59.7 |
+| Magnesium | −0.24 | −20.7 |
+| Sulphate | −0.56 | −50.7 |
+| Iron | −0.05 | −2.67 |
+| Manganese | −0.006 | −0.37 |
+| EC | 0.00 | −0.6 |
+
+Harvest, measured, endpoint = the yield-component fresh weight the deposit's own economic analysis
+reports:
+
+| Regime | n | Mean FW (g) | SD | Dry-matter fraction |
+|---|---|---|---|---|
+| Treatment 1 | 191 | 57.67 | 16.15 | 0.049 |
+| Treatment 2 | 194 | 46.87 | 10.80 | 0.050 |
+
+Two measurement traps were found and are now regression-tested, because both had already produced
+wrong numbers during this pass:
+
+1. **The harvest sheet is three 9-column system blocks side by side.** A single-column scan reads
+   64 plants for Treatment 1 instead of 191 and nothing at all for Treatment 2.
+2. **The workbook carries both an "Overall fw" and a "Yield component fw" column, differing by about
+   a quarter.** Using the overall column gives 73.95 g against the study's own 57.49 g. The
+   yield-component column reconciles to 57.67 g.
+
+**No uptake rate is published.** `uptakeRate` is `null` and `whatIsNotDerivable` states why. A
+number in that field would have been an assumption dressed as a measurement.
 
 ---
 
-## 4. Architecture summary
+## 6. The seven served models
 
-Unchanged by this pass. One FastAPI application (`backend/app`) serving 83 documented paths under
-`/api`, SQLAlchemy over SQLite (local, tests) or PostgreSQL (hosted), Pydantic settings that validate
-environment variables at import time, an in-process request limiter, JWT sessions with constant-time
-token comparison, one React 19 + Vite single-page application (`frontend/`) with 16 hash routes and
-24 lazy-loaded modules, a static production build served by nginx, and scientific artifacts
-(`ml/`, `data/`) with gate scripts that recompute published numbers from committed files.
+Read from `ml/evaluation/phase37_model_evidence.json`, generated by
+`python3 ml/research/audit_models_phase37.py`. The served set is imported from the application, not
+hard-coded, so a model withdrawn tomorrow cannot keep appearing here as served.
 
-Deliberately unchanged: single-worker deployment, the rate limiter's in-process design, the API
-contract, the UI, and the scientific safeguards. The only dependency change is dev-only
-(`vitest`, `jsdom`, `@testing-library/react`, `@testing-library/dom`); nothing added to
-`dependencies`, and the production bundle is byte-for-byte accounted for in §5.
+| Model | Verdict before | Verdict after | Decision-grade | Tested by this phase's data? |
+|---|---|---|---|---|
+| `lettuce-earth-growth-v1` | FAILS-INDEPENDENT-CHECK | FAILS-INDEPENDENT-CHECK | no | no |
+| `lettuce-earth-growth-v2` | FAILS-INDEPENDENT-CHECK | FAILS-INDEPENDENT-CHECK | no | no |
+| `lettuce-earth-growth-v3` | FAILS-INDEPENDENT-CHECK | FAILS-INDEPENDENT-CHECK | no | no |
+| `mizuna-microbial-relative-load-v2` | PASS decision-grade | **PASS decision-grade** | **yes** | no |
+| `radiation-exposure-osd46-v1` | NO-INDEPENDENT-CHECK | NO-INDEPENDENT-CHECK | no | no |
+| `radiation-quality-osd46-v1` | NO-INDEPENDENT-CHECK | NO-INDEPENDENT-CHECK | no | no |
+| `tomato-flight-response-v1` | NO-INDEPENDENT-CHECK | NO-INDEPENDENT-CHECK | no | no |
+
+**Nothing was promoted, retrained or relabelled.** All seven artefacts still hash to their registry
+entry (7/7); three retained-but-withdrawn artefacts remain on disk untouched.
+
+*Why none could be tested.* The reason is recorded per model, and it is a property of the data, not
+a judgement: the lettuce models require `rootTemperature` and a light measurement — the green-light
+trial measures no temperature at all and its single destructive harvest at 35 DAS is outside the
+declared 2–29-day domain, while the dosing trial measures no temperature and no light. The mizuna
+model predicts from VEG-04 flight covariates that neither deposit contains. The transcriptomic
+models consume a normalised expression vector, and neither deposit contains expression. A model that
+could not be tested is reported as **not tested** — never as validated, and never as failed for want
+of data it was never meant to see.
+
+*Card completeness.* Three of seven cards are complete. The remaining four omit an embedded code
+reference and a training-data hash; the reproduction script for each is resolved from the repository
+and named in the audit rather than edited into artefacts whose checksums are published. Coverage:
+domains declared 7/7, uncertainty statements 7/7, grouped (non-row-wise) splits 7/7, baselines 7/7,
+reproduction scripts resolvable 7/7.
 
 ---
 
-## 5. Test results
+## 7. The eighteen visual comparisons
 
-All suites were run on the delivered tree, after the last code change.
+Cause, before any fix: the interface has always declared Inter first in its font stack and has never
+shipped a font file, so every capture substituted whatever the host had. Two hosts, same page,
+different pixels — the 5–13 % disagreement was a font substitution, and the proof is that the
+magnitude tracks glyph coverage rather than layout.
 
-### 5.1 Backend
+The fix makes the typography a property of the repository: the four Inter weights bundled as a latin
+subset under SIL OFL (108 KB) with the licence text, `font-display: block` so a capture cannot race
+the fallback, and three Chromium flags (`--font-render-hinting=none`,
+`--disable-font-subpixel-positioning`, `--disable-lcd-text`) so FreeType does not choose its strategy
+from the host's font packages. The capture helper awaits `document.fonts.ready` in addition to its
+data and layout waits.
+
+| Capture | Differing before the fix | Differing against the new baseline |
+|---|---|---|
+| `mission-desktop.png` | 4.94 % | 0.000 % PASS |
+| `mission-tablet.png` | canvas size changed | 0.000 % PASS |
+| `mission-mobile.png` | canvas size changed | 0.000 % PASS |
+| `predictions-desktop.png` | 10.27 % | 0.000 % PASS |
+| `predictions-tablet.png` | 11.31 % | 0.000 % PASS |
+| `predictions-mobile.png` | 10.88 % | 0.000 % PASS |
+| `benchmarks-desktop.png` | 8.78 % | 0.000 % PASS |
+| `benchmarks-tablet.png` | 12.22 % | 0.000 % PASS |
+| `benchmarks-mobile.png` | 11.59 % | 0.000 % PASS |
+| `radiation-desktop-radiation-quality-osd46-v1.png` | canvas size changed | 0.000 % PASS |
+| `radiation-desktop-radiation-exposure-osd46-v1.png` | canvas size changed | 0.000 % PASS |
+| `radiation-tablet-radiation-quality-osd46-v1.png` | canvas size changed | 0.000 % PASS |
+| `radiation-tablet-radiation-exposure-osd46-v1.png` | canvas size changed | 0.000 % PASS |
+| `radiation-mobile-radiation-quality-osd46-v1.png` | canvas size changed | 0.000 % PASS |
+| `radiation-mobile-radiation-exposure-osd46-v1.png` | canvas size changed | 0.000 % PASS |
+| `water-evidence-desktop.png` | canvas size changed | 0.000 % PASS |
+| `water-evidence-tablet.png` | canvas size changed | 0.000 % PASS |
+| `water-evidence-mobile.png` | canvas size changed | 0.000 % PASS |
+
+Classification of the original mismatch, individually: **font substitution** for every capture. No
+capture was classified as a layout regression, and none was dismissed as environmental without
+evidence — the evidence being that the same page rendered on two different font hosts came out
+byte-identical once a font was actually shipped, which rules out layout, viewport, DSF, animation
+timing and responsive breakage as causes.
+
+Two further facts, because they are the difference between a green gate and a meaningful one:
+
+* the nine "canvas size changed" failures were the *fallback font* changing line height, not the
+  layout moving: after the font was bundled the canvases returned to their recorded heights;
+* the replacement was deliberate and recorded per image in
+  `ml/evaluation/phase37_visual_baseline_migration.json`, with the previous images archived under
+  `docs/screenshots/historical/phase37/`. The pixel budget (2 %), the channel threshold (16) and the
+  dirty-baseline guard were **not** touched.
+
+---
+
+## 8. Gates, with exact commands and results
+
+Run from the repository root at branch tip `a6553aa` unless stated. All were observed, none was
+inferred.
 
 | Gate | Command | Result |
 |---|---|---|
-| SQLite suite | `PYTHONPATH=backend SPACEAGRISIM_DATABASE_URL=sqlite:///:memory: python -m pytest -q backend/tests` | **1258 passed, 24 skipped** in 39.7 s |
-| PostgreSQL suite | same, with `SPACEAGRISIM_TEST_POSTGRES_URL` pointed at a local PostgreSQL 17.11 server | **1282 passed, 0 skipped** in 48.7 s |
-| Migration parity | part of `verify_deployment_config.py` | ORM columns and `001_scenarios.sql` agree; migration applies idempotently |
+| Backend, SQLite | `DATABASE_URL=sqlite:///tmp/qa37.db python3 -m pytest backend/tests -q -p no:randomly` | **1313 passed, 23 skipped, 0 failed** |
+| Backend, PostgreSQL | `SPACEAGRISIM_TEST_POSTGRES_URL=postgresql+psycopg://…@127.0.0.1:55437/spaceagrisim_test DATABASE_URL=sqlite:///tmp/qa37.db python3 -m pytest backend/tests -q -p no:randomly` | **1336 passed, 0 skipped, 0 failed** |
+| Frontend lint | `npm run lint` | pass, 0 errors |
+| Frontend typecheck | `npm run typecheck` | pass |
+| Frontend unit | `npm run test:unit` | **20 passed** (2 files) |
+| Frontend build + budget | `npm run build:check` | pass — initial request 240 kB, within the 240 kB budget; no chunk over budget |
+| Playwright, all routes × 3 viewports | `CI=1 npx playwright test` | **171 passed** in 4.9 min |
+| Visual gate | `python3 scripts/visual_regression.py` | **18/18 PASS**, every capture 0.000 % |
+| Model audit | `python3 scripts/audit_models.py` | **202 checks run, 0 failed** |
+| Registry verification | `python3 scripts/verify_model_registry.py` | **62/62 checks passed** |
+| Phase 37 model evidence | `python3 ml/research/audit_models_phase37.py` | 7 served, hashes 7/7, 0 promoted |
+| Catalogue | `python3 ml/research/build_catalog.py --check` | up to date (36 datasets) |
+| Gap matrix | `python3 ml/research/build_gap_matrix.py --check` | up to date (14 gaps) |
+| Feature readiness | `python3 ml/research/build_feature_readiness.py --check` | up to date (12 features) |
+| Feature coverage | `python3 ml/research/build_feature_coverage.py --check` | up to date (12 features) |
+| Python dependency audit | `python3 -m pip_audit -r backend/requirements.txt` | no known vulnerabilities |
+| Node dependency audit | `npm audit --omit=dev --audit-level=high` | 0 vulnerabilities |
+| Accessibility | inside the Playwright run (`e2e/accessibility.spec.js`, `e2e/accessibility35.spec.js`) | 27 passed across three viewports |
 
-The 24 SQLite skips are the PostgreSQL-only persistence, transaction, constraint and
-connection-failure tests. They are not permitted to skip in the PostgreSQL job, and none did — the
-run reports zero skips, so the 24 became 24 executed tests (1282 − 1258 = 24).
+### 8.1 Every skip, explained
 
-Test count arithmetic: the previous audit ended at 1257/24 (SQLite) and 1281/0 (PostgreSQL); this
-pass adds exactly one backend test (§3.3), giving 1258 and 1282.
+**SQLite run — 23 skips, all one cause.** They are the PostgreSQL-only tests
+(`test_postgresql_persistence.py`, `test_postgres_integration.py`,
+`test_multi_worker_readiness.py` ×3, `test_phase22_backup_automation.py`) which require
+`SPACEAGRISIM_TEST_POSTGRES_URL`; they skip with that exact message rather than failing quietly.
+They are not left unexplained: the same suite was then run **against a real PostgreSQL 17.11
+cluster and returned 0 skips**, listed in the row above.
 
-**Environment note, recorded because it produced two red runs that were not product failures.**
-The trusted test cluster is PostgreSQL 17.11 initialised with `--encoding=UTF8` and
-`--auth-host=scram-sha-256`. An SQL_ASCII cluster makes the driver return text as bytes and 22 tests
-fail inside SQLAlchemy's version probe; a `trust` cluster makes
-`test_connection_failure_is_reported_without_leaking_credentials` fail, because a wrong password is
-correctly *accepted* by the server. Both were configuration mistakes on my side, both were diagnosed
-and re-run, and neither was worked around in the code or the tests.
+**PostgreSQL run — 0 skips.** The one failure that appeared on the first attempt was in
+`test_connection_failure_is_reported_without_leaking_credentials`, and the cause was the test
+cluster, not the code: `initdb -A trust` accepts any password, so a deliberately wrong password did
+not raise. The cluster was re-initialised with `scram-sha-256` for host connections and the test
+passes. The test was not weakened — the environment was made faithful.
 
-### 5.2 Frontend
+### 8.2 Tests added
 
-| Gate | Command | Result |
-|---|---|---|
-| Lint | `npm run lint` | clean (0 problems) |
-| Typecheck | `npm run typecheck` | clean |
-| Unit | `npm run test:unit` | **20 passed** (2 files: 15 hook-lifecycle + 3 `RequestState` in one, 2 component-level in the other) |
-| Build + bundle guard | `npm run build:check` | pass — no import cycle, no chunk above 500 kB, initial request **245,754 B of the 245,760 B budget** |
-| Browser suite | `npx playwright test` (CI mode: builds and serves the production bundle, starts the API) | **171 passed in 5.2 min** — desktop 1440×1100, tablet 820×1180, mobile Pixel 7 |
-| Visual regression | `python scripts/visual_regression.py` | **18/18 PASS at 0.000 % differing pixels** |
-| Route crawl | part of the browser suite (`e2e/crawl.spec.js`) | 3 tests, 48 route/viewport combinations: no console error, no page error, no response at or above 400, no horizontal overflow |
-| Accessibility | `e2e/accessibility.spec.js`, `e2e/accessibility35.spec.js` (inside the 171 above) | all pass on all three viewports; the per-check counts measured when they were written are in [FINAL_QUALITY_GATES.md](FINAL_QUALITY_GATES.md) |
+26 new tests in `backend/tests/test_phase37_acquisition.py`, each encoding a way this pass's
+conclusions could have been wrong and, in four cases, actually were:
 
-Browser count arithmetic: 168 (audit baseline) + 3 crawl tests = 171. No test was deleted, skipped or
-loosened; the unit suite is new coverage, not a replacement for anything.
+* the three-block harvest sheet (191 plants read as 64);
+* the duplicate deposit (`18804397` must not be a catalogue entry);
+* the density-confound arm (no contrast may name T3);
+* the yield-endpoint mismatch ("Yield component fw", not "Overall fw");
+* the refusal to publish an uptake rate without a defensible pairing;
+* the requirement that a closed gap points at evidence that exists on disk;
+* the requirement that no model is promoted, retrained or threshold-moved.
 
-**Bundle budget honesty.** The fix in §3.1 costs **127 bytes** of minified critical-path JavaScript.
-The budget had 133 bytes of headroom (245,627 of 245,760), so the tree now sits 6 bytes inside it.
-The budget was not raised, `chunkSizeWarningLimit` was not touched, and the initial graph was
-re-examined (index chunk = app shell only: `MissionPlatform`, the hooks, the service layer) before
-accepting the cost. A future change of more than 6 bytes on the critical path will fail `build:check`
-— which is the gate working as designed, but it is close enough to be stated plainly.
-
-### 5.3 Scientific gates
-
-| Gate | Command | Result |
-|---|---|---|
-| Model audit | `python scripts/audit_models.py` | 202 checks run, 0 failed; 0 documented gaps, 7 gaps closed |
-| Registry checksums and training environment | `python scripts/verify_model_registry.py --check` | **62/62 checks passed**, verified without writing |
-| Provenance manifest | `python ml/training/phase32_provenance.py --check` | provenance complete for 9 artifacts |
-| Feature readiness | `python ml/research/build_feature_readiness.py --check` | up to date (12 features) |
-| Feature coverage | `python ml/research/build_feature_coverage.py --check` | up to date (12 features) |
-| Dataset gap matrix | `python ml/research/build_gap_matrix.py --check` | up to date (14 gaps) |
-| Measured evidence to model cards | `python ml/research/phase34_record_measurements.py --check` | recorded in 5 model cards |
-| Evidence verdicts | `python ml/research/phase35_evidence_verdicts.py --check` | consistent with the committed measurements |
-| Screenshot store | `python ml/research/dedupe_screenshots.py --check` | deduplicated: 53 unique images, 46.9 MB of duplicates recorded |
-
-All nine ran with `--check` (they refuse to write), and `git status` was clean afterwards — the gates
-prove the committed state rather than refreshing it.
-
-### 5.4 Dependency and static analysis
-
-| Gate | Command | Result |
-|---|---|---|
-| Python static analysis | `python -m bandit -q -r backend/app -f json` | **0 findings** (0 high, 0 medium, 0 low) |
-| Python dependency audit | `python -m pip_audit -r backend/requirements.txt -r backend/requirements-dev.txt` | **no known vulnerabilities** |
-| npm dependency audit | `npm audit --audit-level=high` | **0 vulnerabilities** (292 packages, including the four new dev-only ones) |
-| Source hygiene | `backend/tests/test_source_hygiene.py` (in both suites) | passes: no duplicated dict keys, no lost unit symbols in source or docs, no dead imports |
+No existing test was deleted, skipped or weakened. Four Phase 36 tests were **generalised**: they
+asserted that the *Phase 36* decision block matched the status token, which stops being true the
+moment a later phase adjudicates a gap. They now read the newest decision recorded for each gap and
+assert it agrees with the token — a stronger check, since the old form would have had to be edited
+or skipped the first time the matrix moved.
 
 ---
 
-## 6. Security results
+## 9. Limitations
 
-No security regression was introduced, and no new issue was found.
+Stated plainly, because the alternative is a report that reads like a release note.
 
-* **Static analysis**: bandit reports zero findings across `backend/app`.
-* **Dependencies**: pip-audit and npm audit report no known vulnerabilities.
-* **Secrets**: no credential in the tree or in `.git/config`; the repository remote was reset to its
-  plain URL after every push and the token was passed inline only.
-* **Operator console**: constant-time token comparison; 404 when unconfigured.
-* **Deployment invariants** (`verify_deployment_config.py`, 21/21): wildcard CORS rejected, plaintext
-  non-local origins rejected, auth secret length floor, token lifetime and auth rate limits bounded,
-  history writes disabled on Vercel, default local configuration never pointing at a shared database.
-* **Unchanged by instruction**: `--workers 1` and the in-process rate limiter. Multi-worker behaviour
-  remains documented as unsupported rather than silently enabled.
-* **No Render action**: no deploy, no environment or plan change, no production database access.
-
----
-
-## 7. Scientific validation
-
-Nothing in the scientific layer changed in this pass; the gates above re-verified it rather than
-trusting it.
-
-* **Registry**: 62/62 checks pass, including that every catalogued model's declared metric is
-  recomputable from committed artifacts and that no measured-ET0 claim is made without bundled data.
-* **Evidence verdicts** are unchanged and still consistent with the committed measurements. Exactly
-  one model is decision-grade (`mizuna-microbial-relative-load-v2`); the three lettuce models remain
-  failed at their stated criteria; the radiation-quality, radiation-exposure and tomato models remain
-  "no independent check"; the two withdrawn models stay withdrawn.
-* **Cohort invariants** unchanged: 719 sub-plots across 39 experiments and 37 yield means in the
-  phase-30 wheat cohort; 53 lettuce treatments; 40 studies.
-* **Measured / derived / predicted** separation is unchanged, and the panel that shows a model's
-  verdict is the same one that shows what the model does *not* establish.
-
-### Datasets investigated and refused
-
-No dataset was added in this pass, so the inventory and the model evidence are unchanged. The
-investigations from the previous pass stand, including two that were refused on evidence rather than
-convenience: the VEG-04 second campaign record (OSD-780) contradicts the v2 card's "no second
-campaign" wording and is documented as a card-level limitation rather than silently pooled, and two
-Zenodo candidates (39.1 GB and 49.8 GB) were rejected as unobtainable, while the Dryad candidate was
-rejected as non-CEA. A dataset is not counted here unless it is downloaded, licence-verified,
-SHA-256 checked and catalogued — none was, so none is claimed.
+1. **Four gaps remain open and this pass did not close them.** `substrate-water`, `imagery`,
+   `mission-energy` and `prediction-intervals-independent-coverage`. For three of them the evidence
+   does not exist publicly; for `imagery` the requirement is self-referential. The searches that
+   failed are recorded query by query.
+2. **`nutrient-balance` is only partially closed** and will stay that way until a dosing log with
+   unambiguous pre/post pairing exists. No uptake rate is claimed.
+3. **The spectrum result is one cultivar, one facility, one season, one endpoint.** It refutes a
+   general assumption about green light; it does not calibrate a spectral response function, and
+   the simulator does not gain a wavelength-resolved coefficient from it.
+4. **Six of seven models are not decision-grade**, exactly as before this pass. Nothing here moved
+   them, and the two datasets acquired could not test any of them without violating their own domain
+   contracts.
+5. **Four of seven model cards omit an embedded training-data hash.** The reproduction scripts are
+   resolved and named, but the artefacts were not edited, because editing them would invalidate
+   published checksums.
+6. **The visual gate is a rasterisation gate, not a semantic one.** It proves the page did not
+   change; it does not prove the page is right.
+7. **The gap matrix's own counts are only as good as its entries.** They now recompute from the
+   tokens rather than from a stored summary, which removes one class of drift, not all of them.
 
 ---
 
-## 8. Dataset and model limitations
+## 10. What was integrated into the product
 
-Unchanged, and still the honest constraint on what this platform can claim:
+Integration was confined to what the new evidence actually changes, and every existing contract was
+left alone.
 
-* The decision-grade evidence covers one model on a microbial *relative* load. It does not establish
-  an absolute pathogen load, a yield, or a flight-versus-ground difference on its own.
-* Prediction outputs are model output. They are labelled as such everywhere they appear, are never
-  presented as measurements, and no report mixes the two.
-* The 14 open gaps in the dataset gap matrix remain open. Where a gap could be closed with an
-  obtainable, verifiable dataset it was; where it could not, the gap stays recorded.
-* Cross-campaign comparisons remain prohibited where the protocol differs; the water-evidence ratio
-  is explicitly a comparison against a measured value with its own source, not a validation.
-* Known limitations are carried in [FINAL_LIMITATIONS.md](FINAL_LIMITATIONS.md) and in each model
-  card, and were not softened in this pass.
-
----
-
-## 9. Production compatibility
-
-| Area | Check | Result |
-|---|---|---|
-| Startup | `uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port $PORT --workers 1` | the exact command from `render.yaml`; the browser suite starts and serves the API with it |
-| Configuration | settings load and validate at import; weak or missing secrets fail fast | verified by `verify_deployment_config.py` (21/21) and by the settings tests in both suites |
-| Health and readiness | `/api/health`, `/api/ready` | reachable and reported by the route crawl; readiness names the reason and never leaks the URL |
-| Database | PostgreSQL 17.11 for the full suite; migrations apply idempotently; server encoding asserted | 1282/1282 executed tests, 0 skipped |
-| CORS / allowed origins | wildcard and plaintext non-local origins rejected | 21/21 deployment checks |
-| Frontend build | production build served as static files by `vite preview` during the browser run; `nginx.conf` and `Dockerfile` untouched | 171 browser tests against the production bundle |
-| Bundle | no cycle, no oversized chunk, initial request inside the 240 kB budget | 245,754 B of 245,760 B |
-| Runtime dependencies | none added; the four new packages are dev-only and absent from `dependencies` | `package.json` diff |
-| Error handling and logging | the structured request-completion line (request id, method, path, status, elapsed ms) is emitted for every call during the browser run | browser-suite server log |
-| Infrastructure | no new service, no new worker, no new managed dependency | repository diff |
-
-**Deployment readiness is not a deployment.** Nothing in this pass contacted Render, and the hosted
-service was not exercised. Deployment is handed over with the checks above as evidence.
+* `GET /api/acquisition-evidence` gained three additive blocks — `spectrumLight`, `nutrientSolution`
+  and `modelEvidence` — plus `latestPhase`. Every existing key keeps its shape; the Phase 36 tests
+  that assert response shapes still pass unmodified.
+* The endpoint formerly read only `phase36Decision` and would have reported `led-spectrum-response`
+  as closed while carrying no evidence for it, and would have gone on asserting that six gaps were
+  open beside a count of four. It now serves the newest decision per gap with the phase that made
+  it, and recomputes the interpretation sentence from the same entries the table is built from.
+* The Evidence module renders the spectrum result: the four arms with measured mass, and the derived
+  contrasts with their p-values and intervals. Numbers carry their label — measured, derived,
+  predicted, unavailable.
+* The nutrient-solution block is **served and labelled but not drawn**. A panel showing
+  concentrations without the uptake rate the gap asked for would look like more than was
+  established. That is a deliberate decision, not an oversight.
+* No UI was added merely to display data nobody can act on, no route was removed, no contract was
+  broken, and the frontend budget is unchanged at 240 kB.
 
 ---
 
-## 10. Final commits and the merged SHA
+## 11. Commits and push
 
-Eighteen commits ahead of the pre-merge `main` (`d84a1a9`), in order:
+Six commits before this report, one carrying it, all on `final/project-completion` off `429097c`:
 
 ```
-05370a1 fix(config): restore the unit symbols a non-UTF-8 round trip destroyed
-a7e1366 fix(frontend): stop requesting a resource that has no path, and gate private history
-fbcaa9c fix(styles): let the assistant's suggestion chips wrap on a phone
-576cbd7 fix(closed-loop): derive the chamber comparison instead of storing its output
-2d30a4e test(registry): make the registry gate read-only so tests stop dirtying the tree
-12899bb build(deps): declare openpyxl and pyflakes in the dev requirements that the tests need
-48983af chore(backend): remove dead imports and locals, and gate the app with pyflakes
-71e6309 fix(data): export the wheat columns under the units the workbook actually declares
-2c732ce fix(scripts): make the synthetic-fixture generator honour --out-dir
-1d9def1 chore(scripts): remove three dead locals and two f-strings that format nothing
-671b9be fix(export): serialise the CSV analysis export instead of pasting quotes around a title
-8e2c08c docs: the complete project-wide bug audit report
-97ea351 fix(frontend): stop a superseded resource response from overwriting state
-ba441c1 test(frontend): schedule the resource race instead of hoping for it
-888b367 fix(frontend): a cancelled re-read is not an empty account
-7441dda fix(scripts): the deployment verifier reports a missing secret instead of dying on it
-215b84a test(e2e): make the route sweep a gate instead of a one-off crawl
-(and this report)
+be64e67  Bundle Inter instead of merely asking for it
+98c99e1  Replace the eighteen baselines with the Inter-rendered captures
+32f0068  Acquire two spectrum and nutrient datasets and analyse them
+544b117  Adjudicate the gap matrix against the evidence actually acquired
+a465dc9  Audit every served model against the new evidence without promoting any
+a6553aa  Serve this phase's evidence on the surface that already exists
 ```
 
-The merge is a fast-forward: `main` moves from `d84a1a9` to the tip of this branch, and **that tip is
-the last commit containing this file**. A commit cannot contain its own hash, so the merged SHA is
-read rather than written:
+The branch was pushed and verified with `git ls-remote` before this report was written (the remote
+answered `98c99e190e8bf43eff8b13de683dbea7caad7646` for the branch at that point). The merge into
+`main` and the final push happen after this commit and are recorded in the delivery message with
+the `ls-remote` output, not here — a file cannot contain the hash of the commit that contains it.
 
-```
-git ls-remote origin refs/heads/main
-git ls-remote origin refs/heads/bugfix/project-wide-audit
-```
-
-Both must print the same 40-character SHA, and it must equal `git rev-parse HEAD` in a fresh clone.
-The delivery message accompanying this report states the SHA that verification returned.
+No force-push, no history rewrite, no branch-protection bypass.
 
 ---
 
-## 11. Blockers
+## 12. Deployment boundary
 
-**None blocked the merge.** The exact status of everything that is *not* done, and why:
+**Render was not touched.** No deploy, no deploy hook, no trigger, no service setting, no
+environment variable, no secret, no plan, no worker and no region was changed, and the Render API
+token was never used.
 
-| Item | Status | Reason |
-|---|---|---|
-| Merge into `main` and push | done | fast-forward, verified with `git ls-remote`, no protection encountered |
-| Render deployment | **not attempted** | the user reserved the hosted deploy for another operator (2026-11-12). Not a blocker for this task; it is the handover item. |
-| Production database | **not touched** | same instruction; every database result here comes from isolated local servers |
-| Multi-worker deployment | **not enabled** | by instruction: the in-process rate limiter assumes one worker |
-| New datasets | **not added** | none met the download + licence + checksum + catalogue bar this pass |
-| Branch protection / permissions | not encountered | `bugfix/project-wide-audit` pushed cleanly at every step |
+**Production PostgreSQL was not touched.** No migration, reset, seed, delete or write was executed
+against it. Every database operation in this pass ran against throwaway local instances:
+`sqlite:///tmp/qa37.db` and a PostgreSQL 17.11 cluster under `/var/tmp/pgdata37` on port 55437.
 
----
-
-## 12. Confirmation
-
-Stated against what was actually measured. "PASS" means the evidence above exists on the delivered
-tree; it is not a claim of absolute correctness.
-
-| Criterion | Verdict | Basis |
-|---|---|---|
-| Engineering completion | **PASS** | all mandated work items executed: inspection, fixes, review, tests, docs, merge; no TODOs or unfinished integration left for another pass |
-| Bug-fix completion | **PASS** | 14 defects fixed on the branch (11 from the audit, 3 here), each with a regression test that fails on the previous code; no known reproducible defect was dismissed as harmless |
-| Test and quality gates | **PASS** | 1258/24 SQLite, 1282/0 PostgreSQL, 20 unit, 171 browser across 3 viewports, 18/18 visual at 0.000 %, 9/9 science gates, bandit/pip-audit/npm audit clean, lint and typecheck clean, bundle inside budget |
-| Scientific integrity | **PASS** | registry 62/62, evidence verdicts unchanged and consistent, provenance complete for 9 artifacts, gap matrix 14 gaps still recorded, no dataset or metric invented, limitations preserved |
-| Documentation | **PASS** | this report plus a consistent README that names the current verification record; earlier phase reports left as history rather than edited to match today's numbers |
-| Main merge and push | **PASS** | fast-forward merge, branch and `main` at the same SHA, verified against the remote, clean tree |
-| Production deployment readiness | **PASS (local evidence only)** | startup command, settings validation, CORS/health/readiness, PostgreSQL compatibility and the production bundle all verified locally; the hosted service was deliberately not touched, so no deployed-environment result is claimed |
-
-**What this report does not claim**: that the hosted deployment works (not tested), that the models
-are scientifically validated beyond their stated verdicts (they are not), or that 6 bytes of bundle
-headroom is comfortable (it is not).
+**The new code is not live.** Nothing in this branch has been deployed. `spaceagrisim-web.onrender.com`
+and `spaceagrisim-api.onrender.com` continue to serve whatever they served before this pass, and no
+claim in this report should be read as a statement about what those services currently run.
