@@ -1,6 +1,6 @@
 # SpaceAgriSim Dataset Gap Matrix
 
-Generated from `data/research/dataset_gap_matrix.json` on 2026-11-10 by `ml/research/build_gap_matrix.py`. Edit the JSON, not this file.
+Generated from `data/research/dataset_gap_matrix.json` on 2026-11-12 by `ml/research/build_gap_matrix.py`. Edit the JSON, not this file.
 
 Every capability SpaceAgriSim claims or is asked about, matched against the data that would actually be needed to support it. A gap here is a statement about evidence, not a to-do list: several will stay open on purpose because the data does not exist at any price.
 
@@ -16,24 +16,31 @@ A few are closed by decision rather than by data - the capability was removed in
 | **major** | the claim is supportable only with a stated limitation that a user would notice | 6 |
 | **minor** | the claim is supportable; this would improve accuracy or resolution | 5 |
 
+## Status after Phase 36
+
+Closure is counted three ways, because they are not the same thing. **2** gaps closed by data, **2** closed by removing the capability rather than finding a dataset, **4** partially closed, **6** still open.
+
+Counts are of the 14 recorded gaps. 'Closed by decision' means a capability was removed rather than a dataset found; those two are not counted as data closures.
+
+
 ## Matrix
 
 | # | Capability | What is needed | Severity | Gap type | Status |
 |---|---|---|---|---|---|
-| 1 | Predicted crop water use in litres per plant per day | Measured evapotranspiration or sap-flow/lysimeter water use for the modelled crops at plant scale | **blocking** | partially-addressed | open and blocking on its original terms, with its first measured evidence bench. The comparison artefact (ml/evaluation/phase26_measured_et_validation.json) shows the seasonal shape is broadly right (Spearman 0.7909 across 11 measurement days) while the level cannot be identified: on a pot-surface denominator the platform's flux is 0.247x the measurement, on a canopy-area denominator it is 2.7x. Because the study publishes neither pot diameter nor spacing, the sign of the discrepancy depends on an assumption, and no constant was changed. |
-| 2 | The claim that the ET0 target is itself correct | A weather or ET0 source that does not share MERRA-2 lineage with POWER, and a measured latent-heat series to convert mutual agreement into physical truth | **major** | partially-addressed | open, partially addressed: disagreement now decomposed into formulation (0.273 mm/d), forcing (0.519) and implementation (+0.009) - the residual is weather, not code - but every leg is either a reanalysis or a temperature-only point method, so nothing here is field validation of the ET0 magnitude |
-| 3 | Effect of Mars or lunar gravity on crop growth | Yield or growth measurements at gravity levels other than 1 g, with the same cultivar and protocol as the terrestrial baseline | **blocking** | no-data | closed by decision, not by data: Phase 30 removed the fractional-gravity input, factor, control, API field and tests. The gap is permanent - no open dataset measures crop yield or biomass across fractional gravity, ISS graded-gravity work measures gene expression and morphology, and a ground clinostat or reorientation is not partial gravity - so the capability was withdrawn rather than left as a placeholder coefficient. |
-| 4 | Response to specific LED spectra and photoperiods | Biomass or yield response surfaces across spectra, PPFD and photoperiod for each supported crop | **major** | insufficient | open for the predictive surface, served for two measured comparisons: the light-stress workflow compares four spectral regimes at one PPFD and photoperiod, and Phase 30 added a controlled-environment panel over the wheat series (PPFD, photoperiod, CO2, air temperature bands with measured grain yield). A response surface was fitted to that series and failed its sealed holdout (297.46 % MAPE against the 30 % criterion), so no predictive light, CO2 or temperature control is offered. |
-| 5 | Root-zone water status in a hydroponic or substrate system | Substrate water content, irrigation schedule and drainage fraction at high temporal resolution | **major** | no-data | open |
-| 6 | Heat-stress and VPD excursion claims | Hourly temperature, humidity and radiation at the site | **minor** | too-coarse | open |
-| 7 | Cultivar-specific growth parameters | Cultivar identity and calibrated growth parameters per cultivar | **major** | insufficient | open |
-| 8 | Plant health or growth stage from imagery | Labelled canopy imagery from the platform's own camera geometry | **minor** | no-data | open and deliberately not addressed |
-| 9 | Predicted harvest mass per plant | Measured harvest mass with the same covariates the model uses | **blocking** | insufficient | closed by decision, not by data: Phase 30 removed operational harvest forecasting. A leave-one-study-out evaluation over 40 published lettuce studies returned 310.17 % MAPE against the unchanged 30 % criterion, and the best out-of-fold candidate was the mean baseline, so no model in this repository can forecast harvest mass. The measured-versus-model parity record is retained |
-| 10 | Energy and mass cost of a described mission | Power draw per fixture, thermal load and resupply mass figures for real flight hardware | **minor** | no-data | open and out of scope |
-| 11 | Nutrient solution management | Ion concentrations, uptake rates and EC/pH response per crop | **minor** | no-data | open and out of scope |
-| 12 | Siting for a future climate rather than the observed recent past | Downscaled climate projections at the candidate sites | **minor** | no-data | open |
-| 13 | Yield loss from crop water deficit (crop-specific Ky) | Measured yield at two or more water-supply levels for the same crop and cultivar, with enough levels to fit a Ky slope and an independent study to validate it | **major** | no-data | open |
-| 14 | Calibrated prediction intervals with measured coverage | Enough independent evaluation points to estimate coverage per crop and per experiment group without reusing the selection data | **major** | insufficient | open |
+| 1 | Predicted crop water use in litres per plant per day | Measured evapotranspiration or sap-flow/lysimeter water use for the modelled crops at plant scale | **blocking** | partially-addressed | PARTIALLY CLOSED |
+| 2 | The claim that the ET0 target is itself correct | A weather or ET0 source that does not share MERRA-2 lineage with POWER, and a measured latent-heat series to convert mutual agreement into physical truth | **major** | partially-addressed | PARTIALLY CLOSED |
+| 3 | Effect of Mars or lunar gravity on crop growth | Yield or growth measurements at gravity levels other than 1 g, with the same cultivar and protocol as the terrestrial baseline | **blocking** | no-data | CLOSED |
+| 4 | Response to specific LED spectra and photoperiods | Biomass or yield response surfaces across spectra, PPFD and photoperiod for each supported crop | **major** | insufficient | OPEN |
+| 5 | Root-zone water status in a hydroponic or substrate system | Substrate water content, irrigation schedule and drainage fraction at high temporal resolution | **major** | no-data | OPEN |
+| 6 | Heat-stress and VPD excursion claims | Hourly temperature, humidity and radiation at the site | **minor** | too-coarse | CLOSED |
+| 7 | Cultivar-specific growth parameters | Cultivar identity and calibrated growth parameters per cultivar | **major** | insufficient | PARTIALLY CLOSED |
+| 8 | Plant health or growth stage from imagery | Labelled canopy imagery from the platform's own camera geometry | **minor** | no-data | OPEN |
+| 9 | Predicted harvest mass per plant | Measured harvest mass with the same covariates the model uses | **blocking** | insufficient | CLOSED |
+| 10 | Energy and mass cost of a described mission | Power draw per fixture, thermal load and resupply mass figures for real flight hardware | **minor** | no-data | OPEN |
+| 11 | Nutrient solution management | Ion concentrations, uptake rates and EC/pH response per crop | **minor** | no-data | OPEN |
+| 12 | Siting for a future climate rather than the observed recent past | Downscaled climate projections at the candidate sites | **minor** | no-data | CLOSED |
+| 13 | Yield loss from crop water deficit (crop-specific Ky) | Measured yield at two or more water-supply levels for the same crop and cultivar, with enough levels to fit a Ky slope and an independent study to validate it | **major** | no-data | PARTIALLY CLOSED |
+| 14 | Calibrated prediction intervals with measured coverage | Enough independent evaluation points to estimate coverage per crop and per experiment group without reusing the selection data | **major** | insufficient | OPEN |
 
 ## Detail
 
@@ -44,7 +51,10 @@ A few are closed by decision rather than by data - the capability was removed in
 - **Gap type:** partially-addressed
 - **Severity:** blocking - a claim in the product cannot be supported at all without this
 - **How it could be closed:** A lysimeter or gravimetric water-use trial in the target growth system. No open dataset measures per-plant water use in a controlled-environment facility for lettuce or mizuna; this is a measurement to commission, not a download. New ingestion apparatus does not change the status: a validator can reject a bad measurement, it cannot create one.
-- **Current status:** open and blocking on its original terms, with its first measured evidence bench. The comparison artefact (ml/evaluation/phase26_measured_et_validation.json) shows the seasonal shape is broadly right (Spearman 0.7909 across 11 measurement days) while the level cannot be identified: on a pot-surface denominator the platform's flux is 0.247x the measurement, on a canopy-area denominator it is 2.7x. Because the study publishes neither pot diameter nor spacing, the sign of the discrepancy depends on an assumption, and no constant was changed.
+- **Current status:** PARTIALLY CLOSED - Two independent measured water-use records were acquired, checksum-verified and reduced: six weighable lysimeters at Zurich-Reckenholz measured daily actual ET for 1,096 days (6,576 lysimeter-days, CC-BY-4.0), and an eddy-covariance tower at Graswang/Fendt measured latent heat with measured forcing (6,608 hours). Neither crop is lettuce, so the original requirement - measured ET *for the modelled crops* - remains unmet. What changed is that the level of ET is no longer unanchored: measured ET divided by modelled ET0 has a median of 0.958 on active days, inside the factor-of-two band that a gross level error would breach.
+- **Phase 36 decision:** PARTIALLY CLOSED - Two independent measured water-use records were acquired, checksum-verified and reduced: six weighable lysimeters at Zurich-Reckenholz measured daily actual ET for 1,096 days (6,576 lysimeter-days, CC-BY-4.0), and an eddy-covariance tower at Graswang/Fendt measured latent heat with measured forcing (6,608 hours). Neither crop is lettuce, so the original requirement - measured ET *for the modelled crops* - remains unmet. What changed is that the level of ET is no longer unanchored: measured ET divided by modelled ET0 has a median of 0.958 on active days, inside the factor-of-two band that a gross level error would breach.
+    - evidence: `data/research/phase36/et0_measurement_validation.json`
+- **Remaining work:** A lysimeter or gravimetric water-use trial in lettuce or mizuna inside a controlled environment. No open dataset provides one; it remains a measurement to commission.
 
 ### The claim that the ET0 target is itself correct  `independent-et0`
 
@@ -53,7 +63,10 @@ A few are closed by decision rather than by data - the capability was removed in
 - **Gap type:** partially-addressed
 - **Severity:** major - the claim is supportable only with a stated limitation that a user would notice
 - **How it could be closed:** Still needs (a) a Copernicus CDS token for the ERA5-Land hourly radiation and wind fields, which the credential-free delivery does not expose, and (b) a measured latent-heat series (eddy covariance or lysimeter) at at least one site, because reanalyses agreeing cannot establish absolute correctness.
-- **Current status:** open, partially addressed: disagreement now decomposed into formulation (0.273 mm/d), forcing (0.519) and implementation (+0.009) - the residual is weather, not code - but every leg is either a reanalysis or a temperature-only point method, so nothing here is field validation of the ET0 magnitude
+- **Current status:** PARTIALLY CLOSED - The half that was missing - a measured latent-heat series - now exists. FAO-56 evaluated on measured available energy, temperature, vapour pressure and wind reproduces eddy-covariance latent heat over 536 site-days at r = 0.971 and RMSE 0.83 mm/day, with measured/modelled median 0.816, which is the value expected of a meadow rather than of the reference grass sward the equation defines. Provider agreement is now backed by an absolute check of the formulation.
+- **Phase 36 decision:** PARTIALLY CLOSED - The half that was missing - a measured latent-heat series - now exists. FAO-56 evaluated on measured available energy, temperature, vapour pressure and wind reproduces eddy-covariance latent heat over 536 site-days at r = 0.971 and RMSE 0.83 mm/day, with measured/modelled median 0.816, which is the value expected of a meadow rather than of the reference grass sward the equation defines. Provider agreement is now backed by an absolute check of the formulation.
+    - evidence: `data/research/phase36/et0_measurement_validation.json`
+- **Remaining work:** The measurement sites are not the six siting sites, so site-level absolute correctness still rests on reanalysis, and the 0.519 mm/day ERA5-POWER forcing difference is unchanged.
 
 ### Effect of Mars or lunar gravity on crop growth  `fractional-gravity`
 
@@ -62,9 +75,11 @@ A few are closed by decision rather than by data - the capability was removed in
 - **Gap type:** no-data
 - **Severity:** blocking - a claim in the product cannot be supported at all without this
 - **How it could be closed:** None available. Orbital and Mars-surface experiments produce too few replicates and too few cultivars to fit a response function; the honest position is that gravity response is a qualitative modifier with a stated uncertainty, never a trained coefficient.
-- **Current status:** closed by decision, not by data: Phase 30 removed the fractional-gravity input, factor, control, API field and tests. The gap is permanent - no open dataset measures crop yield or biomass across fractional gravity, ISS graded-gravity work measures gene expression and morphology, and a ground clinostat or reorientation is not partial gravity - so the capability was withdrawn rather than left as a placeholder coefficient.
+- **Current status:** CLOSED - Unchanged. The Phase 30 decision removed the gravity input, the API field and the tests; Phase 36 did not evaluate a new candidate and does not claim one exists.
 - **Phase 30 decision:** B - removed completely - the 15 %-at-0 g growth penalty, the gravity input field, the gravity presets, the gravity impact step and every test that asserted them
 - **Residual capability:** None. /api/simulate rejects a request carrying a gravity field and names this decision; the simulator has no gravity term at all.
+- **Phase 36 decision:** CLOSED - Unchanged. The Phase 30 decision removed the gravity input, the API field and the tests; Phase 36 did not evaluate a new candidate and does not claim one exists.
+- **Remaining work:** None. The capability is removed, not deferred.
 
 ### Response to specific LED spectra and photoperiods  `led-spectrum-response`
 
@@ -73,9 +88,11 @@ A few are closed by decision rather than by data - the capability was removed in
 - **Gap type:** insufficient
 - **Severity:** major - the claim is supportable only with a stated limitation that a user would notice
 - **How it could be closed:** The published CEA literature is large but fragmented: hundreds of small papers, no shared protocol, rarely any raw data. A meta-analysis with study-level random effects is the realistic route, and it needs a person reading papers, not an API.
-- **Current status:** open for the predictive surface, served for two measured comparisons: the light-stress workflow compares four spectral regimes at one PPFD and photoperiod, and Phase 30 added a controlled-environment panel over the wheat series (PPFD, photoperiod, CO2, air temperature bands with measured grain yield). A response surface was fitted to that series and failed its sealed holdout (297.46 % MAPE against the 30 % criterion), so no predictive light, CO2 or temperature control is offered.
+- **Current status:** OPEN - No LED spectrum biological-response dataset was acquired in this phase. The two measured comparisons already served are unchanged, and the predictive surface stays removed.
 - **Phase 30 decision:** A (evidence found) for the measured comparison, B (removed) for the predictive response surface - added GET/POST /api/workflows/light-stress/controlled-environment; the attempted response surface is recorded in ml/evaluation/phase30_cea_wheat_response.json and is not served
 - **Residual capability:** Measured band summaries with between-experiment intervals, a descriptive DLI association, and no significance test across bands.
+- **Phase 36 decision:** OPEN - No LED spectrum biological-response dataset was acquired in this phase. The two measured comparisons already served are unchanged, and the predictive surface stays removed.
+- **Remaining work:** A spectrum-resolved LED trial reporting a biological response at constant PPFD with independent replication.
 
 ### Root-zone water status in a hydroponic or substrate system  `substrate-water`
 
@@ -84,7 +101,10 @@ A few are closed by decision rather than by data - the capability was removed in
 - **Gap type:** no-data
 - **Severity:** major - the claim is supportable only with a stated limitation that a user would notice
 - **How it could be closed:** Instrument the target system; there is no open dataset. SMAP would only be relevant if the platform modelled an open-field deployment.
-- **Current status:** open; the simulator models a water balance from demand, not from substrate state, and says so
+- **Current status:** OPEN - A four-depth daily root-zone water-content series (10/30/60/90 cm, 68,550 observations, 2013-2016) with tensiometer and soil temperature was acquired from the Agroscope lysimeters. It is field soil in monoliths, not a controlled-environment growing substrate, and no irrigation schedule or drainage fraction accompanies it, so the requirement is not met. Recorded as adjacent evidence, not as closure.
+- **Phase 36 decision:** OPEN - A four-depth daily root-zone water-content series (10/30/60/90 cm, 68,550 observations, 2013-2016) with tensiometer and soil temperature was acquired from the Agroscope lysimeters. It is field soil in monoliths, not a controlled-environment growing substrate, and no irrigation schedule or drainage fraction accompanies it, so the requirement is not met. Recorded as adjacent evidence, not as closure.
+    - evidence: `data/research/phase36/et0_measurement_validation.json`
+- **Remaining work:** A substrate water-content and drainage series from a CEA facility. Still no open source.
 
 ### Heat-stress and VPD excursion claims  `sub-daily-weather`
 
@@ -93,7 +113,11 @@ A few are closed by decision rather than by data - the capability was removed in
 - **Gap type:** too-coarse
 - **Severity:** minor - the claim is supportable; this would improve accuracy or resolution
 - **How it could be closed:** POWER hourly endpoint (same API, same access) or ERA5-Land hourly. Partly closable today, but the ET0 validation in this phase deliberately stayed daily to match the reference formulation.
-- **Current status:** open; no heat-stress claim is made that depends on intra-day timing
+- **Current status:** CLOSED - POWER hourly acquired for all six sites: 52,560 hourly records, seven parameters, zero missing values. The provider's units are read from each response and asserted - irradiance arrives in MJ/hr, not W/m2, and the first ingestion read it as W/m2 and was wrong by a factor of 278 - and timestamps are kept in the provider's local-standard-time basis rather than relabelled. The platform can now express exposure, not just level: Tucson spends 3,227 hours a year above 2.5 kPa VPD and Wageningen none, a contrast invisible in a daily mean.
+- **Phase 36 decision:** CLOSED - POWER hourly acquired for all six sites: 52,560 hourly records, seven parameters, zero missing values. The provider's units are read from each response and asserted - irradiance arrives in MJ/hr, not W/m2, and the first ingestion read it as W/m2 and was wrong by a factor of 278 - and timestamps are kept in the provider's local-standard-time basis rather than relabelled. The platform can now express exposure, not just level: Tucson spends 3,227 hours a year above 2.5 kPa VPD and Wageningen none, a contrast invisible in a daily mean.
+    - evidence: `data/research/phase36/hourly_environment.json`
+    - evidence: `data/metadata/power_hourly_manifest.json`
+- **Remaining work:** None for the gap as stated. Coverage is 2023; the acquisition script takes --start/--end.
 
 ### Cultivar-specific growth parameters  `cultivar-metadata`
 
@@ -102,7 +126,10 @@ A few are closed by decision rather than by data - the capability was removed in
 - **Gap type:** insufficient
 - **Severity:** major - the claim is supportable only with a stated limitation that a user would notice
 - **How it could be closed:** Cultivar trials in the target system. Breeder or seed-company data would be the natural source and is commercially restricted in practice.
-- **Current status:** open; the product exposes one parameter set per crop and does not offer a cultivar selector
+- **Current status:** PARTIALLY CLOSED - The first measured cultivar contrast in this repository: Grand Rapid and Lollo Rossa under identical nitrogen and irrigation treatments, n = 15 each, reached 41.9 g and 23.1 g harvest fresh weight - ratio 1.82, permutation p below 1 in 20,000, bootstrap 95 % interval 11.9 to 25.8 g. The mapping between the record's two published tables was verified by matching measured leaf number, height and diameter on all 45 plants, not inferred from identifier text.
+- **Phase 36 decision:** PARTIALLY CLOSED - The first measured cultivar contrast in this repository: Grand Rapid and Lollo Rossa under identical nitrogen and irrigation treatments, n = 15 each, reached 41.9 g and 23.1 g harvest fresh weight - ratio 1.82, permutation p below 1 in 20,000, bootstrap 95 % interval 11.9 to 25.8 g. The mapping between the record's two published tables was verified by matching measured leaf number, height and diameter on all 45 plants, not inferred from identifier text.
+    - evidence: `data/research/phase36/iot4lettuce_water_cultivar.json`
+- **Remaining work:** The product still serves one parameter set per crop. One season and one experiment cannot calibrate a cultivar dimension, and no second cultivar trial was found.
 
 ### Plant health or growth stage from imagery  `imagery`
 
@@ -111,7 +138,9 @@ A few are closed by decision rather than by data - the capability was removed in
 - **Gap type:** no-data
 - **Severity:** minor - the claim is supportable; this would improve accuracy or resolution
 - **How it could be closed:** No imaging pipeline exists, so nothing is blocked today. If one is added, GWHD is the right labelled source for detection and PlantVillage is the wrong one for anything field-realistic.
-- **Current status:** open and deliberately not addressed; recorded so a future contributor does not train a lab-disease classifier and call it a capability
+- **Current status:** OPEN - The IoT4Lettuce archive was inspected and contains 5,245 images with segmentation and detection annotations of lettuce canopies in a controlled environment. Only the twelve measurement tables were acquired; the imagery was not, because the platform makes no canopy-imagery claim. The resource is recorded so it is not searched for again.
+- **Phase 36 decision:** OPEN - The IoT4Lettuce archive was inspected and contains 5,245 images with segmentation and detection annotations of lettuce canopies in a controlled environment. Only the twelve measurement tables were acquired; the imagery was not, because the platform makes no canopy-imagery claim. The resource is recorded so it is not searched for again.
+- **Remaining work:** Acquiring the annotated imagery is a decision about whether the product should make a canopy claim, not a data gap.
 
 ### Predicted harvest mass per plant  `yield-labels`
 
@@ -120,9 +149,12 @@ A few are closed by decision rather than by data - the capability was removed in
 - **Gap type:** insufficient
 - **Severity:** blocking - a claim in the product cannot be supported at all without this
 - **How it could be closed:** More measured harvests with recorded light, temperature and duration. Until then the model's MAPE (41.7 %) is the honest number and the acceptance criterion is not met.
-- **Current status:** closed by decision, not by data: Phase 30 removed operational harvest forecasting. A leave-one-study-out evaluation over 40 published lettuce studies returned 310.17 % MAPE against the unchanged 30 % criterion, and the best out-of-fold candidate was the mean baseline, so no model in this repository can forecast harvest mass. The measured-versus-model parity record is retained; no prediction is served.
+- **Current status:** CLOSED - 45 measured harvest fresh weights for lettuce were acquired in this phase. They are too few and too single-campaign to reinstate a removed capability, and reinstatement is out of scope. The Phase 30 decision stands.
 - **Phase 30 decision:** B - removed completely - POST /api/workflows/harvest-prediction/run (now 410), the workflow catalogue entry (now status unavailable), the harvest UI tab, and every test that asserted a served prediction
 - **Residual capability:** Measured-versus-predicted parity (GET .../parity) and the decision record (GET .../capability) remain readable.
+- **Phase 36 decision:** CLOSED - 45 measured harvest fresh weights for lettuce were acquired in this phase. They are too few and too single-campaign to reinstate a removed capability, and reinstatement is out of scope. The Phase 30 decision stands.
+    - evidence: `data/research/phase36/iot4lettuce_water_cultivar.json`
+- **Remaining work:** None. Harvest forecasting was removed by decision.
 
 ### Energy and mass cost of a described mission  `mission-energy`
 
@@ -131,7 +163,9 @@ A few are closed by decision rather than by data - the capability was removed in
 - **Gap type:** no-data
 - **Severity:** minor - the claim is supportable; this would improve accuracy or resolution
 - **How it could be closed:** Out of scope for the current product; would need hardware specifications from a mission integrator.
-- **Current status:** open and out of scope; no energy claim is made anywhere in the API
+- **Current status:** OPEN - No mission energy dataset was acquired. No energy claim is made anywhere in the product, so the gap has no consequence.
+- **Phase 36 decision:** OPEN - No mission energy dataset was acquired. No energy claim is made anywhere in the product, so the gap has no consequence.
+- **Remaining work:** Out of scope.
 
 ### Nutrient solution management  `nutrient-balance`
 
@@ -140,7 +174,9 @@ A few are closed by decision rather than by data - the capability was removed in
 - **Gap type:** no-data
 - **Severity:** minor - the claim is supportable; this would improve accuracy or resolution
 - **How it could be closed:** Out of scope. Would be a separate model with its own data requirement.
-- **Current status:** open and out of scope
+- **Current status:** OPEN - The IoT4Lettuce record provides three nitrogen concentrations and per-plant SPAD readings. That is a treatment contrast, not a nutrient balance, and no nutrient-balance dataset was acquired.
+- **Phase 36 decision:** OPEN - The IoT4Lettuce record provides three nitrogen concentrations and per-plant SPAD readings. That is a treatment contrast, not a nutrient balance, and no nutrient-balance dataset was acquired.
+- **Remaining work:** Out of scope.
 
 ### Siting for a future climate rather than the observed recent past  `long-run-climate`
 
@@ -149,7 +185,11 @@ A few are closed by decision rather than by data - the capability was removed in
 - **Gap type:** no-data
 - **Severity:** minor - the claim is supportable; this would improve accuracy or resolution
 - **How it could be closed:** NASA NEX-GDDP-CMIP6 is the standard product and is open; it was outside this phase's scope because the reference ET0 study needed observed weather, not projections.
-- **Current status:** open; the product makes no future-climate claim
+- **Current status:** CLOSED - NEX-GDDP-CMIP6 (ACCESS-CM2, r1i1p1f1, SSP2-4.5) acquired at all six sites: 50 daily objects streamed, SHA-256 checksummed and reduced to point series, with units asserted per variable - temperature is Kelvin and precipitation a kg m-2 s-1 flux, and both were converted explicitly - and no fill values at any site. 2000-2004 against 2045-2049 yields a per-site delta in temperature, VPD, DLI, heat-stress days and precipitation.
+- **Phase 36 decision:** CLOSED - NEX-GDDP-CMIP6 (ACCESS-CM2, r1i1p1f1, SSP2-4.5) acquired at all six sites: 50 daily objects streamed, SHA-256 checksummed and reduced to point series, with units asserted per variable - temperature is Kelvin and precipitation a kg m-2 s-1 flux, and both were converted explicitly - and no fill values at any site. 2000-2004 against 2045-2049 yields a per-site delta in temperature, VPD, DLI, heat-stress days and precipitation.
+    - evidence: `data/research/phase36/projected_climate.json`
+    - evidence: `data/metadata/nex_gddp_acquisition_manifest.json`
+- **Remaining work:** Single model and single scenario: the inter-model spread is the uncertainty and it is not characterised. The report states this wherever the numbers are used.
 
 ### Yield loss from crop water deficit (crop-specific Ky)  `crop-water-response-ky`
 
@@ -158,9 +198,12 @@ A few are closed by decision rather than by data - the capability was removed in
 - **Gap type:** no-data
 - **Severity:** major - the claim is supportable only with a stated limitation that a user would notice
 - **How it could be closed:** A controlled deficit-irrigation experiment per crop with at least four water levels and a measured harvest. Ky must never be transferred between crops, so one experiment closes one cell of the matrix.
-- **Current status:** open; the FAO-56 water balance and the irrigation schedule remain, and no yield-loss claim is made anywhere in the platform
+- **Current status:** PARTIALLY CLOSED - A real two-level deficit experiment for lettuce now exists in the record: 50 % and 75 % replacement of the water lost between irrigations, with destructive harvest mass per plant. The yield difference is not distinguishable from zero (42.7 vs 41.9 g, n = 15 each, permutation p = 0.84, bootstrap 95 % interval -7.9 to +6.2 g). Under the design's nominal water-use ratio of 0.667 that implies a Ky near zero (-0.06; -0.19 under a 0.90 ratio), so the experiment bounds lettuce Ky as small over this range rather than producing a positive slope.
 - **Phase 30 decision:** B - no yield-loss claim retained - no deficit-yield model was built and no Ky value is exposed; the water workflow continues to report demand, deficit and irrigation scheduling only
 - **Residual capability:** Reference ET0, crop demand, deficit accounting and irrigation scheduling, all labelled as computed rather than measured.
+- **Phase 36 decision:** PARTIALLY CLOSED - A real two-level deficit experiment for lettuce now exists in the record: 50 % and 75 % replacement of the water lost between irrigations, with destructive harvest mass per plant. The yield difference is not distinguishable from zero (42.7 vs 41.9 g, n = 15 each, permutation p = 0.84, bootstrap 95 % interval -7.9 to +6.2 g). Under the design's nominal water-use ratio of 0.667 that implies a Ky near zero (-0.06; -0.19 under a 0.90 ratio), so the experiment bounds lettuce Ky as small over this range rather than producing a positive slope.
+    - evidence: `data/research/phase36/iot4lettuce_water_cultivar.json`
+- **Remaining work:** No per-treatment ETa was measured, so the water-use axis is a design assumption and not a measurement; one experiment, one cultivar and two levels cannot both fit and validate a Ky slope.
 
 ### Calibrated prediction intervals with measured coverage  `prediction-intervals-independent-coverage`
 
@@ -169,7 +212,7 @@ A few are closed by decision rather than by data - the capability was removed in
 - **Gap type:** insufficient
 - **Severity:** major - the claim is supportable only with a stated limitation that a user would notice
 - **How it could be closed:** More independent experiments, or an external evaluation set with documented protocol. Neither exists for the crops served here.
-- **Current status:** open; intervals are reported as descriptive and no coverage is advertised. The removed harvest workflow's interval spanned a factor of 29, which is a measured statement about how little the data supports. Phase 34 measured the question instead of leaving it open-ended: every served interval was held against a campaign no fit saw, two of five models covered none of it, and the cards now state their own coverage instead of implying it. The interval is still descriptive and no coverage guarantee is offered.
+- **Current status:** OPEN - Unchanged. The new independent campaign cannot measure interval coverage: its only measured mass is at 42 days after transplant, outside the models' declared 2-29 day domain, at chamber temperatures of 13.1-41.8 C against a declared 20-32 C domain, and root temperature was not measured. Scoring it would have required violating the models' own domain contract.
 - **Phase 30 decision:** documented, not closed - train/selection/holdout separation was enforced and recorded in both Phase 30 artifacts; the harvest workflow was removed rather than given a wider interval
 - **Residual capability:** Descriptive intervals on measured group means.
 - **Phase 34 decision:** measured, not closed - The coverage question was answered by measurement rather than by more data: each served 90 % interval was held against a campaign no fit saw, and the mizuna conformal radius was calibrated on one flight campaign and evaluated on the other in both directions. Evidence: ml/evaluation/phase34_cross_campaign_coverage.json.
@@ -179,6 +222,9 @@ A few are closed by decision rather than by data - the capability was removed in
     - `mizuna-microbial-load-v1`: 107 of 123 samples covered across both directions, pooled 0.8699 (nominal 0.90)
     - `mizuna-microbial-relative-load-v2`: 110 of 123 covered, pooled 0.8943 (nominal 0.90)
 - **Why this is still open:** Coverage of six correlated greenhouse means is not a coverage guarantee, two flight campaigns do not estimate a campaign-offset distribution, and two of the five models fail the check outright. The interval stays descriptive; the cards now state the measurement instead of leaving the scope unstated.
+- **Phase 36 decision:** OPEN - Unchanged. The new independent campaign cannot measure interval coverage: its only measured mass is at 42 days after transplant, outside the models' declared 2-29 day domain, at chamber temperatures of 13.1-41.8 C against a declared 20-32 C domain, and root temperature was not measured. Scoring it would have required violating the models' own domain contract.
+    - evidence: `ml/evaluation/phase36_model_reevaluation.json`
+- **Remaining work:** More independent experiments inside the declared domain.
 
 ## The two that matter most
 

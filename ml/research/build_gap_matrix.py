@@ -55,6 +55,10 @@ def decision_lines(gap: dict) -> list[str]:
         results = entry.get("results") or {}
         for model_id, outcome in results.items():
             lines.append(f"    - `{model_id}`: {outcome}")
+        for artefact in entry.get("evidence") or []:
+            lines.append(f"    - evidence: `{artefact}`")
+        if entry.get("remainingWork"):
+            lines.append(f"- **Remaining work:** {entry['remainingWork']}")
         if entry.get("whyNotClosed"):
             lines.append(f"- **Why this is still open:** {entry['whyNotClosed']}")
         elif entry.get("residualCapability"):
@@ -63,8 +67,15 @@ def decision_lines(gap: dict) -> list[str]:
 
 
 def short_status(gap: dict) -> str:
-    """The matrix column keeps the first clause; the detail section keeps the whole sentence."""
-    return gap["currentStatus"].split(";")[0].strip()
+    """The matrix column keeps the status token; the detail section keeps the whole sentence.
+
+    Status tokens are CLOSED / PARTIALLY CLOSED / OPEN. Older entries predate the token field and
+    fall back to the first clause of their status sentence, so the column never becomes a
+    paragraph.
+    """
+    if gap.get("statusToken"):
+        return gap["statusToken"]
+    return gap["currentStatus"].split(";")[0].split(" - ")[0].strip()
 
 
 def render(matrix: dict) -> str:
@@ -99,6 +110,23 @@ def render(matrix: dict) -> str:
     ]
     for severity in SEVERITIES:
         lines.append(f"| **{severity}** | {meaning[severity]} | {counts[severity]} |")
+
+    phase36 = matrix.get("phase36") or {}
+    if phase36:
+        counts36 = phase36["counts"]
+        lines += [
+            "",
+            "## Status after Phase 36",
+            "",
+            "Closure is counted three ways, because they are not the same thing. "
+            f"**{counts36['closedByData']}** gaps closed by data, "
+            f"**{counts36['closedByDecision']}** closed by removing the capability rather than "
+            f"finding a dataset, **{counts36['partiallyClosed']}** partially closed, "
+            f"**{counts36['open']}** still open.",
+            "",
+            phase36.get("note", ""),
+            "",
+        ]
 
     lines += [
         "",

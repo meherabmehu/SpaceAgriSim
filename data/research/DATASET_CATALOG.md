@@ -4,16 +4,16 @@ Generated from `data/research/dataset_catalog.json` on 2026-11-09 by `ml/researc
 
 Every dataset the project has evaluated, with the licence evidence behind its class. The class answers one question: could this support a claim the product makes, under the licence it is actually distributed with?
 
-**30 datasets evaluated.** A: 5, B: 6, C: 9, D: 4, E: 5, F: 1.
+**34 datasets evaluated.** A: 10, B: 6, C: 9, D: 3, E: 5, F: 1.
 
 ## Classes
 
 | Class | Meaning | Datasets |
 |---|---|---|
-| **A** | acquired and used in this repository | 5 |
+| **A** | acquired and used in this repository | 10 |
 | **B** | usable after preprocessing - open licence, relevant variables, usable scale | 6 |
 | **C** | external validation only - wrong task, sensor or size for training | 9 |
-| **D** | scientific reference only - open and correct, but cannot validate this product | 4 |
+| **D** | scientific reference only - open and correct, but cannot validate this product | 3 |
 | **E** | needs an agreement or a licence decision before use | 5 |
 | **F** | not suitable - the licence prohibits the intended use | 1 |
 
@@ -21,7 +21,7 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 
 | Grade | Meaning | Datasets |
 |---|---|---|
-| verified | the terms were read for this entry | 16 |
+| verified | the terms were read for this entry | 20 |
 | documented-secondary | a credible registry or dataset card states it | 10 |
 | unverified | believed open, not checked; must be checked before use | 4 |
 
@@ -50,7 +50,11 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 | [PlantCLEF 2021 plant identification challenge data](#plantclef2021) | **E** | research-use terms; redistribution restricted; per-image provenance varies | not permitted without agreement | no |
 | [FAOSTAT crop production and yield statistics](#faostat) | **D** | CC BY 4.0 | permitted with attribution | no |
 | [Present-day and future Koppen-Geiger climate classification (Beck et al. 2018)](#koppen-geiger-beck) | **D** | CC BY 4.0 | permitted with attribution | no |
-| [NASA NEX-GDDP-CMIP6 statistically downscaled climate projections](#nasa-nex-gddp-cmip6) | **D** | open (NASA NEX); model-specific citation requested | permitted | no |
+| [NASA NEX-GDDP-CMIP6 statistically downscaled climate projections](#nasa-nex-gddp-cmip6) | **A** | open (NASA NEX); model-specific citation requested | permitted | yes |
+| [NASA POWER hourly agroclimatology (community AG)](#nasa-power-hourly) | **A** | NASA open data: no restrictions on use, access or download; citation requested | permitted | yes |
+| [Agroscope weighable-lysimeter water balance, Zurich-Reckenholz](#zenodo-agroscope-lysimeter-2026) | **A** | CC BY 4.0 | permitted with attribution | yes |
+| [TERENO Graswang/Fendt eddy-covariance and lysimeter fluxes](#zenodo-tereno-graswang-fendt) | **A** | CC BY 4.0 | permitted with attribution | yes |
+| [IoT4Lettuce - multimodal phenotyping of hydroponic lettuce under variable fertigation](#zenodo-iot4lettuce) | **A** | CC BY 4.0 | permitted with attribution | yes |
 | [PlantWild in-the-wild plant image dataset](#plantwild) | **F** | CC BY-NC-ND 4.0 - non-commercial, no derivatives | not permitted (non-commercial, no derivatives) | no |
 | [Greenhouse lettuce pot experiment with gravimetric evapotranspiration (Schroeder et al. 2021)](#zenodo-schroder-2021-lettuce-pot) | **A** | CC BY 4.0 | permitted with attribution | yes |
 | [Green-light spectral composition trial in hydroponic lettuce](#zenodo-greenlight-2024-lettuce) | **A** | CC BY 4.0 | permitted with attribution | yes |
@@ -400,8 +404,8 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 
 ### NASA NEX-GDDP-CMIP6 statistically downscaled climate projections  `nasa-nex-gddp-cmip6`
 
-- **Class:** D - scientific reference only - open and correct, but cannot validate this product
-- **Why this class:** The right product for a future-climate siting claim, which the platform does not make. Validating an observed-weather ET0 study against projections would be a category error.
+- **Class:** A - acquired and used in this repository
+- **Why this class:** Acquired in Phase 36 for the six sites (ACCESS-CM2, SSP2-4.5, 2000-2004 against 2045-2049) and used for the projected-environment analysis. It remains the wrong product for validating an observed-weather ET0 study, which is why the two uses are kept apart.
 - **Publisher:** NASA Earth Exchange (NEX)
 - **URL:** https://www.nccs.nasa.gov/services/data-collections/land-based-products/nex-gddp-cmip6
 - **Format:** NetCDF, 0.25 deg
@@ -411,8 +415,72 @@ Every dataset the project has evaluated, with the licence evidence behind its cl
 - **Licence:** open (NASA NEX); model-specific citation requested
 - **Licence evidence:** documented-secondary (https://www.nccs.nasa.gov/services/data-collections/land-based-products/nex-gddp-cmip6)
 - **Commercial use:** permitted
-- **Imported:** no - out of scope for an observed-weather study
+- **Imported:** yes - point series in data/processed/nex_gddp via ml/research/acquire_nex_gddp.py
 - **Caveat:** Downscaled model output: uncertainty is the spread across models, not one file.
+
+### NASA POWER hourly agroclimatology (community AG)  `nasa-power-hourly`
+
+- **Class:** A - acquired and used in this repository
+- **Why this class:** Acquired for all six sites and used: the diurnal-cycle analysis, the VPD exposure counts and the DLI come from it. The provider's published units are asserted in the ingestion, because the hourly irradiance arrives in MJ/hr and not W/m2.
+- **Publisher:** NASA Langley Research Center, POWER Project
+- **URL:** https://power.larc.nasa.gov/docs/services/api/temporal/hourly/
+- **Format:** JSON via REST point API
+- **Coverage:** six reference sites, 2023, hourly (8,760 values per parameter per site)
+- **Variables:** T2M, RH2M, T2MDEW, WS2M, PS, ALLSKY_SFC_SW_DWN, PRECTOTCORR
+- **Units:** degC; %; m s^-1; kPa; MJ hr^-1 (converted to W m^-2); mm hr^-1
+- **Licence:** NASA open data: no restrictions on use, access or download; citation requested
+- **Licence evidence:** verified (https://registry.opendata.aws/nasa-power/)
+- **Commercial use:** permitted
+- **Imported:** yes - data/raw/nasa_power_hourly/*.json via ml/research/acquire_power_hourly.py
+- **Caveat:** Local standard time, as the provider states; not relabelled as UTC. MERRA-2 lineage, so it cannot validate a MERRA-2-derived ET0.
+
+### Agroscope weighable-lysimeter water balance, Zurich-Reckenholz  `zenodo-agroscope-lysimeter-2026`
+
+- **Class:** A - acquired and used in this repository
+- **Why this class:** Acquired, checksum-verified against the publisher and used as the measured ET level test. A weighable lysimeter is a direct mass-balance measurement, so nothing in the series comes from MERRA-2.
+- **Publisher:** Agroscope (Holzkamper, Spiess, Prasuhn), Zenodo
+- **URL:** https://doi.org/10.5281/zenodo.20825203
+- **Format:** CSV and ZIP, semicolon-delimited with units rows
+- **Coverage:** six weighable lysimeters, 2013-08-01 to 2016-07-31, daily
+- **Variables:** actual ET (mm/day), FDR volumetric water content at 10/30/60/90 cm, soil water tension, soil temperature, seepage nitrate load
+- **Units:** mm d^-1; vol %; hPa; degC; kg N ha^-1
+- **Licence:** CC BY 4.0
+- **Licence evidence:** verified (https://creativecommons.org/licenses/by/4.0/)
+- **Commercial use:** permitted with attribution
+- **Imported:** yes - data/raw/zenodo_20825203 via ml/research/acquire_zenodo_lysimeter.py
+- **Caveat:** Field soil in monoliths under a tillage trial, not a controlled-environment substrate; the crop rotation is not lettuce.
+
+### TERENO Graswang/Fendt eddy-covariance and lysimeter fluxes  `zenodo-tereno-graswang-fendt`
+
+- **Class:** A - acquired and used in this repository
+- **Why this class:** Acquired and used as the absolute test of the ET0 formulation: with measured available energy and measured vapour pressure the equation can be compared against measured latent heat without any reanalysis in the path.
+- **Publisher:** Mauder et al., TERENO, Zenodo
+- **URL:** https://doi.org/10.5281/zenodo.3957208
+- **Format:** XLSX workbooks inside a TAR
+- **Coverage:** two pre-alpine grassland sites, 2013 and 2014, daytime observations
+- **Variables:** latent heat flux, sensible heat flux, available energy (Rn-G), air temperature, vapour pressure, wind speed, aerodynamic resistance
+- **Units:** W m^-2; degC; hPa; m s^-1; s m^-1
+- **Licence:** CC BY 4.0
+- **Licence evidence:** verified (https://creativecommons.org/licenses/by/4.0/)
+- **Commercial use:** permitted with attribution
+- **Imported:** yes - data/raw/zenodo_3957208 via ml/research/acquire_zenodo_lysimeter.py
+- **Caveat:** Grassland, not a crop; one workbook (2013 Graswang) is unusable because it has no wind column.
+
+### IoT4Lettuce - multimodal phenotyping of hydroponic lettuce under variable fertigation  `zenodo-iot4lettuce`
+
+- **Class:** A - acquired and used in this repository
+- **Why this class:** Acquired and used for the cultivar contrast and the deficit-irrigation yield response. Only 12 of 20,679 members were transferred (297 kB of measurement tables from a 39.1 GB archive), by range request.
+- **Publisher:** Rodrigues et al., Zenodo
+- **URL:** https://doi.org/10.5281/zenodo.20759414
+- **Format:** 39.1 GB ZIP; measurement tables acquired by HTTP range request
+- **Coverage:** 45 plants, 2 cultivars, 3 nitrogen levels, 2 irrigation rates, 42-day cycle, 2024
+- **Variables:** destructive harvest fresh weight, leaf number, diameter, height, SPAD, greenhouse temperature and humidity, PAR
+- **Units:** g; cm; dimensionless; degC; %; umol m^-2 s^-1
+- **Licence:** CC BY 4.0
+- **Licence evidence:** verified (https://creativecommons.org/licenses/by/4.0/)
+- **Commercial use:** permitted with attribution
+- **Imported:** yes - data/raw/zenodo_20759414 via ml/research/acquire_iot4lettuce.py
+- **Caveat:** The archive's published MD5 covers the whole 39 GB object and is therefore unverified; member-level SHA-256 are recorded instead. The design is unbalanced - the 50 % irrigation rate was applied to one cultivar only.
 
 ### PlantWild in-the-wild plant image dataset  `plantwild`
 

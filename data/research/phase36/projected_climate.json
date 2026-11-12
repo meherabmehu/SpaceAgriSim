@@ -1,0 +1,280 @@
+{
+  "generatedAt": "2026-11-12T07:01:03.985369+00:00",
+  "generatedBy": "ml/research/analyze_projected_climate.py",
+  "source": {
+    "product": "NASA NEX-GDDP-CMIP6",
+    "model": "ACCESS-CM2",
+    "member": "r1i1p1f1",
+    "scenario": "SSP2-4.5",
+    "windows": {
+      "baseline": "2000-2004",
+      "midCentury": "2045-2049"
+    },
+    "gridResolution": "0.25 degree"
+  },
+  "evidenceLabel": {
+    "measured": "none - these are model projections, not observations",
+    "predicted": "ACCESS-CM2 SSP2-4.5 daily fields, statistically downscaled by NEX",
+    "derived": "window means, threshold-day counts, VPD and DLI computed from the fields"
+  },
+  "limitations": [
+    "single GCM: no inter-model spread is characterised",
+    "single scenario: SSP2-4.5 only",
+    "grid-cell values at 0.25 degree, not site observations",
+    "DLI from rsds uses the PAR fraction and photon conversion conventions, which describe solar spectrum, not a lamp"
+  ],
+  "sites": {
+    "wageningen_nl": {
+      "status": "COMPUTED",
+      "gridCell": {
+        "requestedLat": 51.97,
+        "requestedLon": 5.67,
+        "cellLat": 51.875,
+        "cellLon": 5.625,
+        "cellLonDegreesEast": 5.625
+      },
+      "fillValuesInSource": 0,
+      "baseline": {
+        "days": 1827,
+        "meanTasC": 10.011,
+        "meanTasmaxC": 14.217,
+        "daysAbove30C": 13,
+        "daysAbove35C": 0,
+        "meanVpdKpa": 0.2573,
+        "meanDliMolM2D": 30.293,
+        "annualPrecipMm": 757.9,
+        "daysMeasured": 1827
+      },
+      "midCentury": {
+        "days": 1826,
+        "meanTasC": 12.089,
+        "meanTasmaxC": 16.543,
+        "daysAbove30C": 67,
+        "daysAbove35C": 5,
+        "meanVpdKpa": 0.344,
+        "meanDliMolM2D": 31.685,
+        "annualPrecipMm": 783.5,
+        "daysMeasured": 1826
+      },
+      "delta": {
+        "meanTasC": 2.078,
+        "meanTasmaxC": 2.326,
+        "meanVpdKpa": 0.087,
+        "meanDliMolM2D": 1.392,
+        "annualPrecipMm": 25.6,
+        "daysAbove30C": 54,
+        "daysAbove35C": 5
+      }
+    },
+    "tucson_us": {
+      "status": "COMPUTED",
+      "gridCell": {
+        "requestedLat": 32.28,
+        "requestedLon": -110.95,
+        "cellLat": 32.375,
+        "cellLon": 249.125,
+        "cellLonDegreesEast": -110.875
+      },
+      "fillValuesInSource": 0,
+      "baseline": {
+        "days": 1827,
+        "meanTasC": 18.896,
+        "meanTasmaxC": 26.698,
+        "daysAbove30C": 743,
+        "daysAbove35C": 324,
+        "meanVpdKpa": 1.6146,
+        "meanDliMolM2D": 46.887,
+        "annualPrecipMm": 447.3,
+        "daysMeasured": 1827
+      },
+      "midCentury": {
+        "days": 1826,
+        "meanTasC": 20.795,
+        "meanTasmaxC": 28.575,
+        "daysAbove30C": 860,
+        "daysAbove35C": 547,
+        "meanVpdKpa": 1.8469,
+        "meanDliMolM2D": 47.149,
+        "annualPrecipMm": 478.5,
+        "daysMeasured": 1826
+      },
+      "delta": {
+        "meanTasC": 1.899,
+        "meanTasmaxC": 1.877,
+        "meanVpdKpa": 0.232,
+        "meanDliMolM2D": 0.262,
+        "annualPrecipMm": 31.2,
+        "daysAbove30C": 117,
+        "daysAbove35C": 223
+      }
+    },
+    "singapore_sg": {
+      "status": "COMPUTED",
+      "gridCell": {
+        "requestedLat": 1.35,
+        "requestedLon": 103.82,
+        "cellLat": 1.375,
+        "cellLon": 103.875,
+        "cellLonDegreesEast": 103.875
+      },
+      "fillValuesInSource": 0,
+      "baseline": {
+        "days": 1827,
+        "meanTasC": 27.979,
+        "meanTasmaxC": 31.841,
+        "daysAbove30C": 1765,
+        "daysAbove35C": 1,
+        "meanVpdKpa": 0.3988,
+        "meanDliMolM2D": 38.328,
+        "annualPrecipMm": 2279.7,
+        "daysMeasured": 1827
+      },
+      "midCentury": {
+        "days": 1826,
+        "meanTasC": 29.295,
+        "meanTasmaxC": 33.105,
+        "daysAbove30C": 1826,
+        "daysAbove35C": 49,
+        "meanVpdKpa": 0.4211,
+        "meanDliMolM2D": 38.255,
+        "annualPrecipMm": 2504.4,
+        "daysMeasured": 1826
+      },
+      "delta": {
+        "meanTasC": 1.316,
+        "meanTasmaxC": 1.264,
+        "meanVpdKpa": 0.022,
+        "meanDliMolM2D": -0.073,
+        "annualPrecipMm": 224.7,
+        "daysAbove30C": 61,
+        "daysAbove35C": 48
+      }
+    },
+    "dhaka_bd": {
+      "status": "COMPUTED",
+      "gridCell": {
+        "requestedLat": 23.81,
+        "requestedLon": 90.41,
+        "cellLat": 23.875,
+        "cellLon": 90.375,
+        "cellLonDegreesEast": 90.375
+      },
+      "fillValuesInSource": 0,
+      "baseline": {
+        "days": 1827,
+        "meanTasC": 25.835,
+        "meanTasmaxC": 30.179,
+        "daysAbove30C": 1163,
+        "daysAbove35C": 46,
+        "meanVpdKpa": 0.7147,
+        "meanDliMolM2D": 40.209,
+        "annualPrecipMm": 2199.8,
+        "daysMeasured": 1827
+      },
+      "midCentury": {
+        "days": 1826,
+        "meanTasC": 27.102,
+        "meanTasmaxC": 31.253,
+        "daysAbove30C": 1306,
+        "daysAbove35C": 109,
+        "meanVpdKpa": 0.7805,
+        "meanDliMolM2D": 38.767,
+        "annualPrecipMm": 2517.2,
+        "daysMeasured": 1826
+      },
+      "delta": {
+        "meanTasC": 1.267,
+        "meanTasmaxC": 1.074,
+        "meanVpdKpa": 0.066,
+        "meanDliMolM2D": -1.442,
+        "annualPrecipMm": 317.4,
+        "daysAbove30C": 143,
+        "daysAbove35C": 63
+      }
+    },
+    "reykjavik_is": {
+      "status": "COMPUTED",
+      "gridCell": {
+        "requestedLat": 64.13,
+        "requestedLon": -21.9,
+        "cellLat": 64.125,
+        "cellLon": 338.125,
+        "cellLonDegreesEast": -21.875
+      },
+      "fillValuesInSource": 0,
+      "baseline": {
+        "days": 1827,
+        "meanTasC": 4.876,
+        "meanTasmaxC": 6.095,
+        "daysAbove30C": 0,
+        "daysAbove35C": 0,
+        "meanVpdKpa": 0.1317,
+        "meanDliMolM2D": 21.306,
+        "annualPrecipMm": 986.5,
+        "daysMeasured": 1827
+      },
+      "midCentury": {
+        "days": 1826,
+        "meanTasC": 5.804,
+        "meanTasmaxC": 6.943,
+        "daysAbove30C": 0,
+        "daysAbove35C": 0,
+        "meanVpdKpa": 0.1301,
+        "meanDliMolM2D": 21.642,
+        "annualPrecipMm": 904.3,
+        "daysMeasured": 1826
+      },
+      "delta": {
+        "meanTasC": 0.928,
+        "meanTasmaxC": 0.848,
+        "meanVpdKpa": -0.002,
+        "meanDliMolM2D": 0.336,
+        "annualPrecipMm": -82.2,
+        "daysAbove30C": 0,
+        "daysAbove35C": 0
+      }
+    },
+    "nairobi_ke": {
+      "status": "COMPUTED",
+      "gridCell": {
+        "requestedLat": -1.29,
+        "requestedLon": 36.82,
+        "cellLat": -1.375,
+        "cellLon": 36.875,
+        "cellLonDegreesEast": 36.875
+      },
+      "fillValuesInSource": 0,
+      "baseline": {
+        "days": 1827,
+        "meanTasC": 20.497,
+        "meanTasmaxC": 26.307,
+        "daysAbove30C": 195,
+        "daysAbove35C": 4,
+        "meanVpdKpa": 0.677,
+        "meanDliMolM2D": 45.812,
+        "annualPrecipMm": 903.2,
+        "daysMeasured": 1827
+      },
+      "midCentury": {
+        "days": 1826,
+        "meanTasC": 22.195,
+        "meanTasmaxC": 27.78,
+        "daysAbove30C": 373,
+        "daysAbove35C": 35,
+        "meanVpdKpa": 0.7227,
+        "meanDliMolM2D": 46.203,
+        "annualPrecipMm": 1076.2,
+        "daysMeasured": 1826
+      },
+      "delta": {
+        "meanTasC": 1.698,
+        "meanTasmaxC": 1.473,
+        "meanVpdKpa": 0.046,
+        "meanDliMolM2D": 0.391,
+        "annualPrecipMm": 173.0,
+        "daysAbove30C": 178,
+        "daysAbove35C": 31
+      }
+    }
+  }
+}

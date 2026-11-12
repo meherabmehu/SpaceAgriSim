@@ -1,0 +1,213 @@
+{
+  "generatedAt": "2026-11-12T07:16:32.046076+00:00",
+  "generatedBy": "ml/research/phase36_model_reevaluation.py",
+  "policy": {
+    "retraining": "none",
+    "thresholds": "unchanged",
+    "testSetTuning": "none",
+    "splitUnit": "whole campaign, never individual rows"
+  },
+  "newEvidence": {
+    "iot4lettuce": "data/research/phase36/iot4lettuce_water_cultivar.json",
+    "et0MeasurementValidation": "data/research/phase36/et0_measurement_validation.json"
+  },
+  "models": {
+    "lettuce-earth-growth-v1": {
+      "artifactSha256": "3d5fdaeab4165df6efcb0887c18f5ab2da65b71056aa521400946a4edbf0879c",
+      "artifactUnchanged": true,
+      "verdictBefore": "fails-independent-check",
+      "decisionGradeBefore": false,
+      "retrained": false,
+      "thresholdsChanged": false,
+      "outcome": "DOMAIN-REFUSED",
+      "independentCampaign": "IoT4Lettuce, Zenodo 10.5281/zenodo.20759414",
+      "campaignDomain": {
+        "airTemperatureC": {
+          "min": 13.08,
+          "max": 41.8,
+          "n": 1638
+        },
+        "rootTemperature": "not measured in this campaign",
+        "measuredMassDaysAfterTransplant": 42,
+        "daysAfterTransplantBasis": "the destructive harvest on 2024-10-03 is the only measured fresh weight; the campaign record runs 2024-08-22 to 2024-10-03, 42 days, and no earlier fresh weight is a measurement - the 270 daily values in the export are produced by a regression analysis",
+        "dli": "not computable from the published PAR log (19 days, irregular sampling)"
+      },
+      "declaredDomain": {
+        "daysAfterTransplant": {
+          "min": 2.0,
+          "max": 29.0
+        },
+        "airTemperature": {
+          "min": 20.0,
+          "max": 32.0
+        },
+        "rootTemperature": {
+          "min": 20.0,
+          "max": 32.0
+        },
+        "ppfd": {
+          "min": 200.0,
+          "max": 750.0
+        }
+      },
+      "violations": [
+        "airTemperature 13.08-41.8 degC outside declared 20.0-32.0",
+        "rootTemperature is a required feature and is not measured",
+        "only measured mass is at 42 days after transplant, declared domain 2.0-29.0"
+      ],
+      "whyNoPrediction": "the model's own domain contract forbids a prediction here; forcing one would produce a number the card says is invalid",
+      "verdictAfter": "fails-independent-check",
+      "decisionGradeAfter": false
+    },
+    "lettuce-earth-growth-v2": {
+      "artifactSha256": "a753f4c3a7d3960a4bc09782374252e55bfade10070e568528e9d8f2fd67057b",
+      "artifactUnchanged": true,
+      "verdictBefore": "fails-independent-check",
+      "decisionGradeBefore": false,
+      "retrained": false,
+      "thresholdsChanged": false,
+      "outcome": "DOMAIN-REFUSED",
+      "independentCampaign": "IoT4Lettuce, Zenodo 10.5281/zenodo.20759414",
+      "campaignDomain": {
+        "airTemperatureC": {
+          "min": 13.08,
+          "max": 41.8,
+          "n": 1638
+        },
+        "rootTemperature": "not measured in this campaign",
+        "measuredMassDaysAfterTransplant": 42,
+        "daysAfterTransplantBasis": "the destructive harvest on 2024-10-03 is the only measured fresh weight; the campaign record runs 2024-08-22 to 2024-10-03, 42 days, and no earlier fresh weight is a measurement - the 270 daily values in the export are produced by a regression analysis",
+        "dli": "not computable from the published PAR log (19 days, irregular sampling)"
+      },
+      "declaredDomain": {
+        "daysAfterTransplant": {
+          "min": 2.0,
+          "max": 29.0
+        },
+        "airTemperature": {
+          "min": 20.0,
+          "max": 32.0
+        },
+        "rootTemperature": {
+          "min": 20.0,
+          "max": 32.0
+        },
+        "ppfd": {
+          "min": 200.0,
+          "max": 750.0
+        }
+      },
+      "violations": [
+        "airTemperature 13.08-41.8 degC outside declared 20.0-32.0",
+        "rootTemperature is a required feature and is not measured",
+        "only measured mass is at 42 days after transplant, declared domain 2.0-29.0"
+      ],
+      "whyNoPrediction": "the model's own domain contract forbids a prediction here; forcing one would produce a number the card says is invalid",
+      "verdictAfter": "fails-independent-check",
+      "decisionGradeAfter": false
+    },
+    "lettuce-earth-growth-v3": {
+      "artifactSha256": "9b3277df28587250f92f2dbca85efc0f0cfe58b9eac2594239711f284905b640",
+      "artifactUnchanged": true,
+      "verdictBefore": "fails-independent-check",
+      "decisionGradeBefore": false,
+      "retrained": false,
+      "thresholdsChanged": false,
+      "outcome": "DOMAIN-REFUSED",
+      "independentCampaign": "IoT4Lettuce, Zenodo 10.5281/zenodo.20759414",
+      "campaignDomain": {
+        "airTemperatureC": {
+          "min": 13.08,
+          "max": 41.8,
+          "n": 1638
+        },
+        "rootTemperature": "not measured in this campaign",
+        "measuredMassDaysAfterTransplant": 42,
+        "daysAfterTransplantBasis": "the destructive harvest on 2024-10-03 is the only measured fresh weight; the campaign record runs 2024-08-22 to 2024-10-03, 42 days, and no earlier fresh weight is a measurement - the 270 daily values in the export are produced by a regression analysis",
+        "dli": "not computable from the published PAR log (19 days, irregular sampling)"
+      },
+      "declaredDomain": {
+        "daysAfterTransplant": {
+          "min": 2.0,
+          "max": 29.0
+        },
+        "airTemperature": {
+          "min": 20.0,
+          "max": 32.0
+        },
+        "rootTemperature": {
+          "min": 20.0,
+          "max": 32.0
+        },
+        "dailyLightIntegral": {
+          "min": 11.5,
+          "max": 34.5
+        }
+      },
+      "violations": [
+        "airTemperature 13.08-41.8 degC outside declared 20.0-32.0",
+        "rootTemperature is a required feature and is not measured",
+        "only measured mass is at 42 days after transplant, declared domain 2.0-29.0"
+      ],
+      "whyNoPrediction": "the model's own domain contract forbids a prediction here; forcing one would produce a number the card says is invalid",
+      "verdictAfter": "fails-independent-check",
+      "decisionGradeAfter": false
+    },
+    "mizuna-microbial-relative-load-v2": {
+      "artifactSha256": "94eeffc2396840f25232afd312ef23d08f0dd0a497a80bc8a1287b14d8888f30",
+      "artifactUnchanged": true,
+      "verdictBefore": "passes-independent-check",
+      "decisionGradeBefore": true,
+      "retrained": false,
+      "thresholdsChanged": false,
+      "outcome": "NO-NEW-EVIDENCE",
+      "reason": "this acquisition contains no measurement of the crop, system or variable this model represents",
+      "verdictAfter": "passes-independent-check",
+      "decisionGradeAfter": true
+    },
+    "radiation-quality-osd46-v1": {
+      "artifactSha256": "711cd7df1b4a050fa70119d9679d58f2a292cf369185c459848be6d454c78897",
+      "artifactUnchanged": true,
+      "verdictBefore": "no-independent-check",
+      "decisionGradeBefore": false,
+      "retrained": false,
+      "thresholdsChanged": false,
+      "outcome": "NO-NEW-EVIDENCE",
+      "reason": "this acquisition contains no measurement of the crop, system or variable this model represents",
+      "verdictAfter": "no-independent-check",
+      "decisionGradeAfter": false
+    },
+    "radiation-exposure-osd46-v1": {
+      "artifactSha256": "b3d2bd1dae4a2ad51d4b5ade89dda41b970ad6901516cf34c57f63cb5b1a5b9b",
+      "artifactUnchanged": true,
+      "verdictBefore": "no-independent-check",
+      "decisionGradeBefore": false,
+      "retrained": false,
+      "thresholdsChanged": false,
+      "outcome": "NO-NEW-EVIDENCE",
+      "reason": "this acquisition contains no measurement of the crop, system or variable this model represents",
+      "verdictAfter": "no-independent-check",
+      "decisionGradeAfter": false
+    },
+    "tomato-flight-response-v1": {
+      "artifactSha256": "61edbc4850797734a66feb3b6e3d0387b2fd59ad2b46f41c85dc74d024c4dd66",
+      "artifactUnchanged": true,
+      "verdictBefore": "no-independent-check",
+      "decisionGradeBefore": false,
+      "retrained": false,
+      "thresholdsChanged": false,
+      "outcome": "NO-NEW-EVIDENCE",
+      "reason": "this acquisition contains no measurement of the crop, system or variable this model represents",
+      "verdictAfter": "no-independent-check",
+      "decisionGradeAfter": false
+    }
+  },
+  "counts": {
+    "served": 7,
+    "scored": 0,
+    "domainRefused": 3,
+    "noNewEvidence": 4,
+    "decisionGradeBefore": 1,
+    "decisionGradeAfter": 1
+  }
+}

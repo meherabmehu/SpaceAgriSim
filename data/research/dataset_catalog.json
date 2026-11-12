@@ -14,6 +14,11 @@
   "byClass": {
    "A": [
     "nasa-power-daily",
+    "nasa-nex-gddp-cmip6",
+    "nasa-power-hourly",
+    "zenodo-agroscope-lysimeter-2026",
+    "zenodo-tereno-graswang-fendt",
+    "zenodo-iot4lettuce",
     "zenodo-schroder-2021-lettuce-pot",
     "zenodo-greenlight-2024-lettuce",
     "zenodo-cea-wheat-apogee",
@@ -48,7 +53,6 @@
    "D": [
     "faostat",
     "koppen-geiger-beck",
-    "nasa-nex-gddp-cmip6",
     "zenodo-marri-2021-gasexchange"
    ],
    "F": [
@@ -56,7 +60,7 @@
    ]
   },
   "byLicenseEvidence": {
-   "verified": 16,
+   "verified": 20,
    "documented-secondary": 10,
    "unverified": 4
   }
@@ -581,11 +585,115 @@
    "licenseUrl": "https://www.nccs.nasa.gov/services/data-collections/land-based-products/nex-gddp-cmip6",
    "licenseEvidence": "documented-secondary",
    "commercialUse": "permitted",
-   "usabilityClass": "D",
-   "classReason": "The right product for a future-climate siting claim, which the platform does not make. Validating an observed-weather ET0 study against projections would be a category error.",
-   "imported": false,
-   "importNote": "out of scope for an observed-weather study",
+   "usabilityClass": "A",
+   "classReason": "Acquired in Phase 36 for the six sites (ACCESS-CM2, SSP2-4.5, 2000-2004 against 2045-2049) and used for the projected-environment analysis. It remains the wrong product for validating an observed-weather ET0 study, which is why the two uses are kept apart.",
+   "imported": true,
+   "importNote": "point series in data/processed/nex_gddp via ml/research/acquire_nex_gddp.py",
    "caveat": "Downscaled model output: uncertainty is the spread across models, not one file."
+  },
+  {
+   "id": "nasa-power-hourly",
+   "name": "NASA POWER hourly agroclimatology (community AG)",
+   "publisher": "NASA Langley Research Center, POWER Project",
+   "url": "https://power.larc.nasa.gov/docs/services/api/temporal/hourly/",
+   "format": "JSON via REST point API",
+   "coverage": "six reference sites, 2023, hourly (8,760 values per parameter per site)",
+   "variables": [
+    "T2M",
+    "RH2M",
+    "T2MDEW",
+    "WS2M",
+    "PS",
+    "ALLSKY_SFC_SW_DWN",
+    "PRECTOTCORR"
+   ],
+   "units": "degC; %; m s^-1; kPa; MJ hr^-1 (converted to W m^-2); mm hr^-1",
+   "license": "NASA open data: no restrictions on use, access or download; citation requested",
+   "licenseUrl": "https://registry.opendata.aws/nasa-power/",
+   "licenseEvidence": "verified",
+   "commercialUse": "permitted",
+   "usabilityClass": "A",
+   "classReason": "Acquired for all six sites and used: the diurnal-cycle analysis, the VPD exposure counts and the DLI come from it. The provider's published units are asserted in the ingestion, because the hourly irradiance arrives in MJ/hr and not W/m2.",
+   "imported": true,
+   "importNote": "data/raw/nasa_power_hourly/*.json via ml/research/acquire_power_hourly.py",
+   "caveat": "Local standard time, as the provider states; not relabelled as UTC. MERRA-2 lineage, so it cannot validate a MERRA-2-derived ET0."
+  },
+  {
+   "id": "zenodo-agroscope-lysimeter-2026",
+   "name": "Agroscope weighable-lysimeter water balance, Zurich-Reckenholz",
+   "publisher": "Agroscope (Holzkamper, Spiess, Prasuhn), Zenodo",
+   "url": "https://doi.org/10.5281/zenodo.20825203",
+   "format": "CSV and ZIP, semicolon-delimited with units rows",
+   "coverage": "six weighable lysimeters, 2013-08-01 to 2016-07-31, daily",
+   "variables": [
+    "actual ET (mm/day)",
+    "FDR volumetric water content at 10/30/60/90 cm",
+    "soil water tension",
+    "soil temperature",
+    "seepage nitrate load"
+   ],
+   "units": "mm d^-1; vol %; hPa; degC; kg N ha^-1",
+   "license": "CC BY 4.0",
+   "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "licenseEvidence": "verified",
+   "commercialUse": "permitted with attribution",
+   "usabilityClass": "A",
+   "classReason": "Acquired, checksum-verified against the publisher and used as the measured ET level test. A weighable lysimeter is a direct mass-balance measurement, so nothing in the series comes from MERRA-2.",
+   "imported": true,
+   "importNote": "data/raw/zenodo_20825203 via ml/research/acquire_zenodo_lysimeter.py",
+   "caveat": "Field soil in monoliths under a tillage trial, not a controlled-environment substrate; the crop rotation is not lettuce."
+  },
+  {
+   "id": "zenodo-tereno-graswang-fendt",
+   "name": "TERENO Graswang/Fendt eddy-covariance and lysimeter fluxes",
+   "publisher": "Mauder et al., TERENO, Zenodo",
+   "url": "https://doi.org/10.5281/zenodo.3957208",
+   "format": "XLSX workbooks inside a TAR",
+   "coverage": "two pre-alpine grassland sites, 2013 and 2014, daytime observations",
+   "variables": [
+    "latent heat flux",
+    "sensible heat flux",
+    "available energy (Rn-G)",
+    "air temperature",
+    "vapour pressure",
+    "wind speed",
+    "aerodynamic resistance"
+   ],
+   "units": "W m^-2; degC; hPa; m s^-1; s m^-1",
+   "license": "CC BY 4.0",
+   "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "licenseEvidence": "verified",
+   "commercialUse": "permitted with attribution",
+   "usabilityClass": "A",
+   "classReason": "Acquired and used as the absolute test of the ET0 formulation: with measured available energy and measured vapour pressure the equation can be compared against measured latent heat without any reanalysis in the path.",
+   "imported": true,
+   "importNote": "data/raw/zenodo_3957208 via ml/research/acquire_zenodo_lysimeter.py",
+   "caveat": "Grassland, not a crop; one workbook (2013 Graswang) is unusable because it has no wind column."
+  },
+  {
+   "id": "zenodo-iot4lettuce",
+   "name": "IoT4Lettuce - multimodal phenotyping of hydroponic lettuce under variable fertigation",
+   "publisher": "Rodrigues et al., Zenodo",
+   "url": "https://doi.org/10.5281/zenodo.20759414",
+   "format": "39.1 GB ZIP; measurement tables acquired by HTTP range request",
+   "coverage": "45 plants, 2 cultivars, 3 nitrogen levels, 2 irrigation rates, 42-day cycle, 2024",
+   "variables": [
+    "destructive harvest fresh weight",
+    "leaf number, diameter, height",
+    "SPAD",
+    "greenhouse temperature and humidity",
+    "PAR"
+   ],
+   "units": "g; cm; dimensionless; degC; %; umol m^-2 s^-1",
+   "license": "CC BY 4.0",
+   "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "licenseEvidence": "verified",
+   "commercialUse": "permitted with attribution",
+   "usabilityClass": "A",
+   "classReason": "Acquired and used for the cultivar contrast and the deficit-irrigation yield response. Only 12 of 20,679 members were transferred (297 kB of measurement tables from a 39.1 GB archive), by range request.",
+   "imported": true,
+   "importNote": "data/raw/zenodo_20759414 via ml/research/acquire_iot4lettuce.py",
+   "caveat": "The archive's published MD5 covers the whole 39 GB object and is therefore unverified; member-level SHA-256 are recorded instead. The design is unbalanced - the 50 % irrigation rate was applied to one cultivar only."
   },
   {
    "id": "plantwild",
