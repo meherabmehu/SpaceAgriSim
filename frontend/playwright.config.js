@@ -10,6 +10,19 @@ export default defineConfig({
     baseURL: "http://127.0.0.1:5173",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
+    // Rasterisation, pinned. The visual gate compares pixels, and FreeType picks its hinting and
+    // subpixel strategy partly from what fontconfig finds installed, so the same page photographed
+    // on a host with only DejaVu and on a host with Noto and Liberation came out 0.1-4 % different
+    // with identical glyph outlines. These flags make the rendering a property of the browser
+    // build rather than of the machine's font packages, which is the only way a pixel comparison
+    // can mean "the page did not change".
+    launchOptions: {
+      args: [
+        "--font-render-hinting=none",
+        "--disable-font-subpixel-positioning",
+        "--disable-lcd-text",
+      ],
+    },
   },
   projects: [
     {

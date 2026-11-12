@@ -1,0 +1,255 @@
+{
+  "schema": "spaceagrisim.visual_baseline_migration/1",
+  "reason": "The interface has always declared Inter first in its font stack and shipped no font file, so every machine substituted a fallback (DejaVu Sans on a bare container, Liberation Sans or Noto Sans where installed). The four weights are now bundled as a latin subset under SIL OFL, and rasterisation is pinned, which makes the rendered page a property of the repository. The replaced images are archived under historical/phase37.",
+  "captures": [
+    {
+      "capture": "mission-desktop",
+      "previousSize": [
+        1440,
+        1649
+      ],
+      "newSize": [
+        1440,
+        1649
+      ],
+      "replaced": true,
+      "changedPixelRatio": 0.04937
+    },
+    {
+      "capture": "mission-tablet",
+      "previousSize": [
+        820,
+        2468
+      ],
+      "newSize": [
+        820,
+        2469
+      ],
+      "replaced": true,
+      "changedPixelRatio": null,
+      "sizeChanged": true
+    },
+    {
+      "capture": "mission-mobile",
+      "previousSize": [
+        1082,
+        6641
+      ],
+      "newSize": [
+        1082,
+        6618
+      ],
+      "replaced": true,
+      "changedPixelRatio": null,
+      "sizeChanged": true
+    },
+    {
+      "capture": "radiation-desktop-radiation-quality-osd46-v1",
+      "previousSize": [
+        1104,
+        674
+      ],
+      "newSize": [
+        1104,
+        647
+      ],
+      "replaced": true,
+      "changedPixelRatio": null,
+      "sizeChanged": true
+    },
+    {
+      "capture": "radiation-desktop-radiation-exposure-osd46-v1",
+      "previousSize": [
+        1104,
+        674
+      ],
+      "newSize": [
+        1104,
+        647
+      ],
+      "replaced": true,
+      "changedPixelRatio": null,
+      "sizeChanged": true
+    },
+    {
+      "capture": "radiation-tablet-radiation-quality-osd46-v1",
+      "previousSize": [
+        580,
+        809
+      ],
+      "newSize": [
+        580,
+        731
+      ],
+      "replaced": true,
+      "changedPixelRatio": null,
+      "sizeChanged": true
+    },
+    {
+      "capture": "radiation-tablet-radiation-exposure-osd46-v1",
+      "previousSize": [
+        580,
+        777
+      ],
+      "newSize": [
+        580,
+        750
+      ],
+      "replaced": true,
+      "changedPixelRatio": null,
+      "sizeChanged": true
+    },
+    {
+      "capture": "radiation-mobile-radiation-quality-osd46-v1",
+      "previousSize": [
+        992,
+        2628
+      ],
+      "newSize": [
+        992,
+        2494
+      ],
+      "replaced": true,
+      "changedPixelRatio": null,
+      "sizeChanged": true
+    },
+    {
+      "capture": "radiation-mobile-radiation-exposure-osd46-v1",
+      "previousSize": [
+        992,
+        2596
+      ],
+      "newSize": [
+        992,
+        2528
+      ],
+      "replaced": true,
+      "changedPixelRatio": null,
+      "sizeChanged": true
+    },
+    {
+      "capture": "water-evidence-desktop",
+      "previousSize": [
+        1440,
+        2287
+      ],
+      "newSize": [
+        1440,
+        2230
+      ],
+      "replaced": true,
+      "changedPixelRatio": null,
+      "sizeChanged": true
+    },
+    {
+      "capture": "water-evidence-tablet",
+      "previousSize": [
+        820,
+        3268
+      ],
+      "newSize": [
+        820,
+        3244
+      ],
+      "replaced": true,
+      "changedPixelRatio": null,
+      "sizeChanged": true
+    },
+    {
+      "capture": "water-evidence-mobile",
+      "previousSize": [
+        1082,
+        10222
+      ],
+      "newSize": [
+        1082,
+        10059
+      ],
+      "replaced": true,
+      "changedPixelRatio": null,
+      "sizeChanged": true
+    },
+    {
+      "capture": "predictions-desktop",
+      "previousSize": [
+        1440,
+        1100
+      ],
+      "newSize": [
+        1440,
+        1100
+      ],
+      "replaced": true,
+      "changedPixelRatio": 0.102727
+    },
+    {
+      "capture": "predictions-tablet",
+      "previousSize": [
+        820,
+        1180
+      ],
+      "newSize": [
+        820,
+        1180
+      ],
+      "replaced": true,
+      "changedPixelRatio": 0.113126
+    },
+    {
+      "capture": "predictions-mobile",
+      "previousSize": [
+        1082,
+        2202
+      ],
+      "newSize": [
+        1082,
+        2202
+      ],
+      "replaced": true,
+      "changedPixelRatio": 0.108815
+    },
+    {
+      "capture": "benchmarks-desktop",
+      "previousSize": [
+        1440,
+        1100
+      ],
+      "newSize": [
+        1440,
+        1100
+      ],
+      "replaced": true,
+      "changedPixelRatio": 0.0878
+    },
+    {
+      "capture": "benchmarks-tablet",
+      "previousSize": [
+        820,
+        1180
+      ],
+      "newSize": [
+        820,
+        1180
+      ],
+      "replaced": true,
+      "changedPixelRatio": 0.122223
+    },
+    {
+      "capture": "benchmarks-mobile",
+      "previousSize": [
+        1082,
+        2202
+      ],
+      "newSize": [
+        1082,
+        2202
+      ],
+      "replaced": true,
+      "changedPixelRatio": 0.115874
+    }
+  ],
+  "fontStack": "Inter (bundled, latin subset) first in --font-sans and in platform.css; every non-ASCII glyph the interface renders is inside the subset",
+  "rasterisation": "Chromium launched with --font-render-hinting=none, --disable-font-subpixel-positioning and --disable-lcd-text, so FreeType does not choose its strategy from the host's font packages",
+  "archivedTo": "docs/screenshots/historical/phase37",
+  "note": "The previous baselines were captured while the application asked for Inter and shipped no font file, so each machine substituted its own fallback. They are kept, not deleted: they are the record of how the interface looked when the typography was whatever the host happened to have."
+}

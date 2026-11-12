@@ -114,6 +114,13 @@ def main() -> int:
                               "other baseline untouched. A whole-suite refresh would "
                               "silently accept an unrelated layout change, so refreshing "
                               "one card should not require re-blessing the dashboard."))
+    parser.add_argument("--migrate", action="store_true",
+                        help=("replace every baseline, recording the migration: the replaced "
+                              "images are archived under docs/screenshots/historical/ and a "
+                              "machine-readable record is written beside the gate report. "
+                              "Requires --reason."))
+    parser.add_argument("--reason", default="",
+                        help="why the baselines are being migrated; recorded in the migration file")
     parser.add_argument("--fresh-dir", default=str(FRESH),
                         help=("directory holding the freshly captured screenshots; "
                               "defaults to the Playwright output tree so the "
@@ -133,6 +140,12 @@ def main() -> int:
     names = list(ALL_CAPTURES)
     if args.refresh and args.refresh_only:
         parser.error("--refresh and --refresh-only are alternatives")
+    if args.migrate and (args.refresh or args.refresh_only):
+        parser.error("--migrate replaces every baseline and is not combined with the others")
+    if args.migrate and not args.reason.strip():
+        # A migration is a claim that the difference is explained. Requiring the explanation in the
+        # command keeps it in the record instead of in a commit message nobody reads later.
+        parser.error("--migrate requires --reason \"why the baselines are being replaced\"")
     if args.refresh or args.refresh_only:
         wanted = set(ALL_CAPTURES) if args.refresh else {
             part.strip() for part in args.refresh_only.split(",") if part.strip()}
@@ -144,6 +157,52 @@ def main() -> int:
             target.parent.mkdir(parents=True, exist_ok=True)
             Image.open(fresh_dir / f"{name}.png").save(target)
         print(f"refreshed {len(wanted)} baselines: {sorted(wanted)}")
+    if args.migrate:
+        archive = SCREENSHOTS / "historical" / "phase37"
+        archive.mkdir(parents=True, exist_ok=True)
+        records = []
+        for name in ALL_CAPTURES:
+            old = SCREENSHOTS / f"{name}.png"
+            new = fresh_dir / f"{name}.png"
+            before = Image.open(old).convert("RGB") if old.is_file() else None
+            after = Image.open(new).convert("RGB")
+            entry = {
+                "capture": name,
+                "previousSize": list(before.size) if before else None,
+                "newSize": list(after.size),
+                "replaced": before is not None,
+            }
+            if before is not None and before.size == after.size:
+                delta = np.abs(np.asarray(before, dtype=np.int16)
+                               - np.asarray(after, dtype=np.int16)).max(axis=2)
+                entry["changedPixelRatio"] = round(float((delta > CHANNEL_THRESHOLD).mean()), 6)
+            elif before is not None:
+                entry["changedPixelRatio"] = None
+                entry["sizeChanged"] = True
+            if before is not None:
+                before.save(archive / f"{name}.png")
+            after.save(old)
+            records.append(entry)
+        record = {
+            "schema": "spaceagrisim.visual_baseline_migration/1",
+            "reason": args.reason,
+            "captures": records,
+            "fontStack": ("Inter (bundled, latin subset) first in --font-sans and in platform.css; "
+                          "every non-ASCII glyph the interface renders is inside the subset"),
+            "rasterisation": ("Chromium launched with --font-render-hinting=none, "
+                              "--disable-font-subpixel-positioning and --disable-lcd-text, so "
+                              "FreeType does not choose its strategy from the host's font packages"),
+            "archivedTo": str(archive.relative_to(ROOT)),
+            "note": ("The previous baselines were captured while the application asked for Inter and "
+                     "shipped no font file, so each machine substituted its own fallback. They are "
+                     "kept, not deleted: they are the record of how the interface looked when the "
+                     "typography was whatever the host happened to have."),
+        }
+        (REPORT.parent / "phase37_visual_baseline_migration.json").write_text(
+            json.dumps(record, indent=2) + "\n")
+        print(f"migrated {len(records)} baselines; previous images archived to {archive}")
+        new_baselines = []
+
     new_baselines = [name for name in ALL_CAPTURES
                      if not (SCREENSHOTS / f"{name}.png").is_file()]
 
@@ -164,7 +223,7 @@ def main() -> int:
         print("         A comparison against a modified baseline proves nothing.")
         print("         Commit the baseline change deliberately, or restore it with")
         print("         git checkout -- docs/screenshots")
-        if not (args.refresh or args.refresh_only):
+        if not (args.refresh or args.refresh_only or args.migrate):
             return 2
 
     results = [compare(SCREENSHOTS / f"{name}.png", fresh_dir / f"{name}.png")

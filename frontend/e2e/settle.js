@@ -9,6 +9,11 @@
 export async function settleForCapture(page) {
   await page.evaluate(() => document.activeElement?.blur?.());
   await page.mouse.move(0, 0);
+  // Wait for the webfont to be resolved. Before Phase 37 the page asked for Inter and shipped
+  // nothing, so each machine painted a different fallback and the gate compared two different
+  // typographic systems; even with the font bundled, a capture taken mid-swap would photograph
+  // whichever face had loaded by then. `fonts.ready` is the state, not a guess.
+  await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(300);
 }
 

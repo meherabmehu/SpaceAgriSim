@@ -2,6 +2,55 @@
 @import "./platform.css";
 
 /*
+ * Self-hosted Inter - the font the design already asks for.
+ *
+ * `platform.css` has always named Inter first in its stack, but nothing shipped Inter, so every
+ * machine silently rendered a different fallback: DejaVu Sans on a bare container, Liberation Sans
+ * where it is installed, Segoe UI on Windows, Roboto on Android. That is not a cosmetic detail. Text
+ * metrics change the height of every page, and the visual-regression gate compares canvas size
+ * exactly, so the same commit produced a 128-pixel height difference between two machines and an
+ * 18/18 gate failure that had nothing to do with any code change.
+ *
+ * Bundling the font makes the rendered page a property of the repository again. The files are the
+ * latin subset of Inter 3.19 (SIL Open Font License 1.1, full text in Inter-LICENSE.txt beside them),
+ * 108 kB total for the four weights the interface uses, so the first paint does not wait on a
+ * third-party font host and the CSP keeps no external font origin.
+ *
+ * `font-display: block` rather than `swap` is deliberate: a swap period would let the page paint in
+ * the fallback and reflow, which is exactly the non-determinism this removes. A capture that waits
+ * for `document.fonts.ready` therefore photographs the same glyphs everywhere.
+ */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url("../assets/fonts/Inter-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 500;
+  font-display: block;
+  src: url("../assets/fonts/Inter-Medium.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 600;
+  font-display: block;
+  src: url("../assets/fonts/Inter-SemiBold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url("../assets/fonts/Inter-Bold.woff2") format("woff2");
+}
+
+
+/*
  * Design tokens for the mission-control look.
  *
  * Tailwind v4 reads these @theme values and exposes them as utility classes
@@ -14,7 +63,7 @@
  *   co2 / o2            atmosphere series
  */
 @theme {
-  --font-sans: ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
 
   --color-space-950: #04070f;

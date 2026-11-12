@@ -23,7 +23,7 @@
   background:
     radial-gradient(ellipse at 90% 0%, #14253155, transparent 50%), #080f16;
   color: var(--ink);
-  font-family: Inter, "Segoe UI", sans-serif;
+  font-family: "Inter", "Segoe UI", sans-serif;
   font-size: 14px;
   line-height: 1.5;
 }
@@ -2048,8 +2048,12 @@
   list-style: none;
 }
 .evidence-note summary::-webkit-details-marker { display: none; }
-.evidence-note summary::before { content: "▸ "; color: #5f7b86; }
-.evidence-note[open] summary::before { content: "▾ "; }
+/* U+25B6 / U+25BC rather than the small variants U+25B8 / U+25BE: Inter does not carry the small
+   triangles, so they fell through to whatever emoji or symbol font the machine had and rendered as
+   a different glyph on every host. These are in the bundled face, so the disclosure marker is now
+   part of the typography the repository controls. */
+.evidence-note summary::before { content: "▶ "; font-size: 0.75em; color: #5f7b86; }
+.evidence-note[open] summary::before { content: "▼ "; }
 .evidence-note ul { margin: 10px 0 0 18px; line-height: 1.75; }
 .evidence-note li { margin-bottom: 6px; }
 
