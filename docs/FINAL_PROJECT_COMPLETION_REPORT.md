@@ -921,7 +921,8 @@ says the reference is wrong. Verified in a clean depth-1 clone.
 
 **Verification is the CI run itself, not a local claim.** The last commit on this branch that changes
 code is `54398c3`, and run `43266438602` covers it; every commit after that one edits only this
-document, and each was pushed and watched to green as well. Run `43246367901` on `52d9374` was the
+document or the visual-regression record it reports, and each was pushed and watched to green as
+well. Run `43246367901` on `52d9374` was the
 first green run of the series:
 
 | Job | Result |
