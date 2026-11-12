@@ -58,7 +58,7 @@
       "changedPixels": 0,
       "totalPixels": 7160676,
       "changedPixelRatio": 0.0,
-      "maxChannelDelta": 1,
+      "maxChannelDelta": 0,
       "passed": true,
       "reason": "within tolerance"
     },

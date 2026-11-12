@@ -359,11 +359,13 @@ Two further facts, because they are the difference between a green gate and a me
 
 * the nine "canvas size changed" failures were the *fallback font* changing line height, not the
   layout moving: after the font was bundled the canvases returned to their recorded heights;
-* seventeen of the eighteen captures compare byte-identical. `mission-mobile.png` carries exactly
-  one pixel whose largest channel delta is 1 out of 255 — below the channel threshold of 16, so it
-  is not counted as a changed pixel and the capture reports 0.000 %. It is recorded here rather
-  than rounded away: the gate's claim is zero changed pixels at a stated threshold, not bitwise
-  identity, and this report should not say more than the gate measured;
+* the captures compare as either byte-identical or as one pixel away from it, and which one varies
+  by run. In the run this part of the report records, all eighteen are **byte-identical**
+  (`maxChannelDelta` 0 everywhere). An earlier run produced `mission-mobile.png` with exactly one
+  pixel whose largest channel delta was 1 out of 255 — below the channel threshold of 16, so not
+  counted as a changed pixel and still 0.000 %. Both are stated because the gate's claim is *zero
+  changed pixels at a stated threshold*, not bitwise identity, and this report should not claim
+  more than the gate measured;
 * the replacement was deliberate and recorded per image in
   `ml/evaluation/phase37_visual_baseline_migration.json`, with the previous images archived under
   `docs/screenshots/historical/phase37/`. The pixel budget (2 %), the channel threshold (16) and the
@@ -977,6 +979,7 @@ document. Every result below was observed; none is carried over from an earlier 
 | Python dependency audit | `python3 -m pip_audit -r backend/requirements.txt -r backend/requirements-dev.txt` | no known vulnerabilities |
 | Static analysis | `python3 -m bandit -q -r backend/app` | exit 0 (no findings) |
 | Node dependency audit | `npm audit --audit-level=high` | 0 vulnerabilities |
+| Playwright, per project | `CI=1 npx playwright test --project=desktop|tablet|mobile` | **57 + 57 + 57 = 171 passed**, 0 failed |
 | **Continuous integration (GitHub Actions)** | workflow run `43246367901` on commit `52d9374`, queried through the GitHub API | **success — all five jobs green** (`backend`, `postgres`, `science`, `frontend`, `browser`) |
 
 The science job was also checked for the property that matters as much as passing: after running
@@ -1000,6 +1003,34 @@ errors out; and `pg_hba.conf` was set to `scram-sha-256` for host connections be
 be rejected. Both were environment corrections — no test was modified, skipped or weakened to get
 past them. The credential test was then run alone to confirm it executes and passes rather than
 being silently skipped.
+
+### 23.2 The one thing that does not reproduce cleanly here, and why
+
+Run as a single process over all three viewports, the browser suite intermittently fails one test on
+this host: `guided-workflows.spec.js › water demand workflow runs from the page and matches the API`
+on mobile, with `page.screenshot: Protocol error (Page.captureScreenshot): Unable to capture
+screenshot` after hanging for the full 45-second test timeout. It failed that way in three
+consecutive single-process runs and passed every time it was given room:
+
+| How it was run | Result |
+|---|---|
+| All three projects in one process, 1.9 GB host | 170 passed, **1 failed** (the capture error above) |
+| That one test alone, mobile | **1 passed in 17.0 s** |
+| Whole mobile project alone | **57 passed** |
+| Whole desktop project alone | **57 passed** |
+| Whole tablet project alone | **57 passed** |
+| `CI=1 npx playwright test` on GitHub's runner, commit `52d9374` | **success** (CI run `43246367901`, browser job) |
+
+The failure is in Chromium's screenshot syscall, not in an assertion: the page rendered, the error
+list was empty, and the panel content had already been asserted. The host reports 1.9 GB of RAM and
+two cores with a load average that reached 14.8 during these runs; the same suite in the same commit
+passed as a single process twice earlier in the day when the machine was quieter, and it passes on
+GitHub's runner. So the honest statement is: **171 of 171 tests pass**, they pass together on
+adequate hardware, and they pass here only when the three projects are not sharing one browser
+process on a starved machine.
+
+No test was skipped, retried, relaxed or excluded to reach that number, and no retry setting was
+added to the configuration to paper over it.
 
 ## 24. Files and commits added by this pass
 
