@@ -771,3 +771,244 @@ in this session (`testonly`).
 **The new code is not live.** `spaceagrisim-web.onrender.com` and `spaceagrisim-api.onrender.com`
 continue to serve whatever they served before this pass. Nothing here should be read as a statement
 about what those services currently run.
+
+# Part III — repository integrity, full gate replay and model-card verification
+
+The pass that follows Part II. It added no model, closed no gap, changed no scientific verdict and
+replaced no baseline. It verified the remote state from scratch, re-ran every gate the repository
+actually has on the tree it was handed, and found — in two cases — that the previous pass had left
+the repository red.
+
+## 20. Repository state
+
+| | |
+|---|---|
+| Repository URL | `https://github.com/meherabmehu/SpaceAgriSim.git` |
+| Starting commit of this pass | `c192e951e88967fe085bb4cb26395d8de7364a61` |
+| Starting `origin/main` | `c192e951e88967fe085bb4cb26395d8de7364a61` — identical |
+| Starting `origin/final/project-completion` | `c192e951e88967fe085bb4cb26395d8de7364a61` — identical |
+| Divergence | none: 0 ahead, 0 behind on either ref |
+| Branches on the remote | 25, all fetched; none rewritten or deleted |
+| Tags on the remote | none |
+| Force-push / history rewrite / protection bypass | none, at any point |
+| Working tree | clean at the start and at the end |
+
+The starting SHA in the completion brief was `f42ecfb`. That commit is real but it is **three
+commits stale**: `f42ecfb` → `0388ad2` (commit-count correction) → `db3c976` (model cards) →
+`c192e95` (Part II report). The remote was inspected with `git ls-remote` rather than trusted from
+the brief, and this part reports against what the remote actually holds.
+
+This pass again began without repository metadata: the sandbox that runs the agent was reset a
+third time, taking `.git`, the installed Python packages, `node_modules` and PostgreSQL with it
+while leaving the working files. The remote was cloned, and the surviving tree was compared against
+the clone file by file before anything was replaced. Every difference was a file the snapshot does
+not carry — large tracked binaries and the two newest commits — and no file existed locally that
+was not in the clone, so the tree was replaced with the verified remote state rather than patched.
+Nothing was lost and nothing local was discarded, because there was nothing local to discard.
+
+## 21. Two gates were red at the starting commit
+
+Both were found by reading `.github/workflows/ci.yml` and running every step by hand, not by
+guessing at what the test suite covers. Both were introduced by Phase 37 work and neither was
+visible from any local test.
+
+### 21.1 The screenshot store was not deduplicated — CI gate failing
+
+`python ml/research/dedupe_screenshots.py --check` **exited 1** at `c192e95`, and it is a step in
+the CI *science* job, so the branch was red on a gate that had not been re-run since the change that
+broke it.
+
+Two causes, both from the visual-baseline migration:
+
+* all twenty-four previous baselines were archived under `docs/screenshots/historical/phase37/`,
+  but only eighteen of them were actually replaced by the migration. For the six that were not, the
+  archived copy is byte-for-byte the live baseline, so the archive added six redundant files;
+* `docs/screenshots/phase33/chamber-view-desktop.png` was a leftover in the working tree that the
+  migration swept into a commit — and `docs/screenshots/MANIFEST.json` has recorded that path as
+  *removed-for-being-identical-to* `digital-twin.png` since Phase 33. Committing the file back
+  contradicted the manifest that exists to record exactly that equality.
+
+Fixed with the repository's own tool rather than by hand, because the tool records the equality it
+deletes: it chooses a canonical path per unique image, removes the redundant copies and writes the
+shared SHA-256 into `MANIFEST.json`, which the Phase 34 and 35 drift scripts resolve through. No
+image was lost — the canonical file holds the same bytes, and the archive still contains all
+eighteen images that were genuinely replaced. The store is now 71 unique images with zero
+duplication and `--check` exits 0.
+
+### 21.2 The gate had no local test — the defect behind the defect
+
+The reason this could sit red is that only CI ran `dedupe_screenshots.py`. It is now covered by
+seven tests in `backend/tests/test_phase37_gates.py` that assert the store's invariants directly
+rather than shelling out to the gate: no two screenshots are byte-identical, the gate exits zero, a
+path the manifest records as removed is absent from disk, every canonical path still hashes to its
+recorded digest, every removal names a twin that exists, all eighteen replaced baselines are
+archived, and no archived image equals the live one. Verified by reintroducing the exact offending
+file: three of the seven fail, and pass again when it is removed.
+
+### 21.3 A model card cited a manifest that has never existed
+
+The mizuna card declared its supporting inputs verified by "per-file digests recorded in
+`data/metadata/osd780_checksums.json`". That file is not in the repository and never has been. The
+claim read as provenance and resolved to nothing.
+
+Two defects underneath the symptom: the card generator could hash a single file but not a directory
+of committed records, so a directory had nowhere to go but a hand-written string; and the digest
+test looked only at the top-level `trainingData` block, never at `supportingInputs`, so it could not
+have caught the reference.
+
+The generator now hashes directories — per-file SHA-256 for every committed file, plus a manifest
+digest over the sorted `name sha256` lines so the set is checkable in one value. OSD-780's three
+records are now hashed from the bytes on disk and `hashVerifiedAtBuild` is true because it was
+computed here. A new test asserts that **no card cites a repository path that does not exist**, with
+an explicit allowance for the three inputs that are deliberately uncommitted (the OSD-46 and
+OSD-767 matrices), because those are declared as such and pinned in a manifest instead. Verified by
+reintroducing the old string: the test fails naming the exact path, and passes when removed.
+
+## 22. Model cards: 7/7, audited rather than asserted
+
+Seven served models, one card each at `ml/artifacts/cards/<id>.json`, generated by
+`python3 ml/research/build_model_cards.py`. Each card carries fifteen obligations, and every one was
+re-derived here from the artifact, the registry and the files on disk rather than read from the
+card's own `completeness` block.
+
+| Model | Card | Obligations | Artifact SHA-256 = registry = disk | Code ref resolves at its commit | Training-data provenance | Exceptions |
+|---|---|---|---|---|---|---|
+| `lettuce-earth-growth-v1` | ✅ | 15/15 | `3d5fdaea…` ✅ | `4982b84f` ✅ | committed-file, `0b6072cc…`, recomputed from disk ✅ | none |
+| `lettuce-earth-growth-v2` | ✅ | 15/15 | `a753f4c3…` ✅ | `266c200d` ✅ | committed-file, `0b6072cc…` ✅ | none |
+| `lettuce-earth-growth-v3` | ✅ | 15/15 | `9b3277df…` ✅ | `941174fb` ✅ | committed-file, `0b6072cc…` ✅ | none |
+| `mizuna-microbial-relative-load-v2` | ✅ | 15/15 | `94eeffc2…` ✅ | `91884518` ✅ | committed-file, `9dfffb0e…` ✅ + 3 OSD-780 records hashed per file | none |
+| `radiation-exposure-osd46-v1` | ✅ | 15/15 | `b3d2bd1d…` ✅ | `1f3c9437` ✅ | recorded-checksum, `f15c4179…` pinned in `phase9_nasa_datasets.json` ✅ | matrix not committed (by policy) |
+| `radiation-quality-osd46-v1` | ✅ | 15/15 | `711cd7df…` ✅ | `1f3c9437` ✅ | recorded-checksum, `f15c4179…` ✅ | matrix not committed (by policy) |
+| `tomato-flight-response-v1` | ✅ | 15/15 | `61edbc48…` ✅ | `3d79cf2e` ✅ | reconstructed-derived, `88b33584…` from checked upstream `87c18a8b…` ✅ | upstream matrix not committed |
+
+Three distinct provenance cases are recorded rather than flattened into one word:
+
+* **committed-file** — the training table is in the repository and its digest is recomputed from
+  the bytes at test time. The three lettuce models share one table because they train on the same
+  WUR plants, and that digest was independently corroborated: `lettuce-earth-growth-v3`'s artifact
+  recorded `0b6072cc…` at training time.
+* **recorded-checksum** — a multi-megabyte NASA matrix that the repository deliberately does not
+  carry. The digest is read from a committed manifest and cross-checked against the value the
+  artifact itself recorded, so two independent records must agree.
+* **reconstructed-derived** — a parquet the trainer reads that is not committed; the digest comes
+  from reconstruction under the pinned pyarrow version, with a version-independent digest over the
+  same matrix recorded alongside it because parquet byte layout is a property of the library rather
+  than of the data.
+
+### 22.1 What remains genuinely unverifiable
+
+Stated plainly, because a 7/7 that hid these would be a false report:
+
+1. **The OSD-46 and OSD-767 matrices cannot be re-hashed in this checkout.** They are not committed.
+   Their digests are pinned in committed manifests and cross-checked against the artifacts'
+   recorded values, but nobody can recompute them without downloading the source again.
+2. **`tomato-flight-response-v1`'s parquet digest cannot be recomputed without a 4.5 MB download and
+   the exact pyarrow build.** The card says so and records the reconstruction command.
+3. **Two code references are historical.** `1f3c9437` (OSD-46 trainers) and `3d79cf2e` (tomato) are
+   the commits where those scripts were introduced; the files are unchanged since, which the tests
+   verify by hashing the blob at that commit and comparing it to the working copy. They are immutable
+   references, not branch names.
+4. **Six of seven models are not decision-grade, exactly as before.** Metadata completion promotes
+   nothing — asserted by test, not by intention.
+
+## 23. Quality gates, replayed on this tree
+
+All run at commit `880e8caa8f55572346804559cec8e4f68ec06589` — the last code commit before this
+document. Every result below was observed; none is carried over from an earlier pass.
+
+| Gate | Command | Result |
+|---|---|---|
+| Backend, SQLite | `DATABASE_URL=sqlite:////tmp/spaceagrisim_final_qa.db python3 -m pytest backend/tests -q -p no:randomly` | **1434 passed, 23 skipped** |
+| Backend, PostgreSQL 17.11 | same with `SPACEAGRISIM_TEST_POSTGRES_URL=postgresql+psycopg://…@127.0.0.1:55437/spaceagrisim_final` | **1457 passed, 0 skipped** |
+| CI PostgreSQL subset | the six persistence/workspace/backup modules, `-rs` | **87 passed, 0 skipped** |
+| CI "no skips permitted" form | full suite piped to `grep -q skipped` | no skip found, gate passes |
+| Frontend lint | `npm run lint` | pass |
+| Frontend typecheck | `npm run typecheck` | pass |
+| Frontend unit | `npm run test:unit` | **20 passed** |
+| Frontend build + budget | `npm run build:check` | pass — initial request 240 kB, within budget |
+| Playwright (3 viewports) | `CI=1 npx playwright test` | **171 passed** |
+| Visual regression | `python3 scripts/visual_regression.py` | **18 / 18 PASS**, 0 FAIL |
+| Model audit | `python3 scripts/audit_models.py` | **202 checks, 0 failed** |
+| Registry checksums | `python3 scripts/verify_model_registry.py --check` | 62/62, no write |
+| Provenance manifest | `python3 ml/training/phase32_provenance.py --check` | complete for 9 artifacts |
+| Feature readiness | `python3 ml/research/build_feature_readiness.py --check` | up to date (12) |
+| Feature coverage | `python3 ml/research/build_feature_coverage.py --check` | up to date (12) |
+| Gap matrix | `python3 ml/research/build_gap_matrix.py --check` | up to date (14 gaps) |
+| Catalogue | `python3 ml/research/build_catalog.py --check` | up to date (36 datasets) |
+| Phase 34 measurements | `python3 ml/research/phase34_record_measurements.py --check` | 5 model cards consistent |
+| Evidence verdicts | `python3 ml/research/phase35_evidence_verdicts.py --check` | consistent |
+| Screenshot store | `python3 ml/research/dedupe_screenshots.py --check` | deduplicated, 71 unique, exit 0 |
+| Model cards | `python3 ml/research/build_model_cards.py --check` | 7 cards, 7 complete |
+| Phase 37 model evidence | `python3 ml/research/audit_models_phase37.py` | 7 served, 7/7 hashes, 0 promoted |
+| Python dependency audit | `python3 -m pip_audit -r backend/requirements.txt -r backend/requirements-dev.txt` | no known vulnerabilities |
+| Static analysis | `python3 -m bandit -q -r backend/app` | exit 0 (no findings) |
+| Node dependency audit | `npm audit --audit-level=high` | 0 vulnerabilities |
+
+The science job was also checked for the property that matters as much as passing: after running
+every one of those scripts, `git status --porcelain` was empty. The gates verify the committed
+state, they do not rewrite it. One exception is worth recording — `scripts/verify_model_registry.py`
+run *bare* rewrites `docs/phase7/registry_verification.json` with a new `generatedAt`, which the
+repository already guards with a test asserting the `--check` form leaves the file untouched.
+
+### 23.1 Every skip, explained
+
+**23 skips in the SQLite run, one cause.** They are the PostgreSQL-only tests
+(`test_postgresql_persistence.py` ×19, `test_postgres_integration.py` ×1,
+`test_multi_worker_readiness.py` ×3), each skipped with the message naming
+`SPACEAGRISIM_TEST_POSTGRES_URL`. They are not left hanging: the same suite ran against a real
+PostgreSQL 17.11 cluster with **0 skips**, and the count reconciles exactly (1434 + 23 = 1457).
+
+**0 skips in the PostgreSQL run.** The cluster was initialised with `--encoding=UTF8 --locale=C.UTF-8`
+because a `SQL_ASCII` cluster makes SQLAlchemy's server-version probe return bytes and the whole run
+errors out; and `pg_hba.conf` was set to `scram-sha-256` for host connections because
+`test_connection_failure_is_reported_without_leaking_credentials` needs a wrong password to actually
+be rejected. Both were environment corrections — no test was modified, skipped or weakened to get
+past them. The credential test was then run alone to confirm it executes and passes rather than
+being silently skipped.
+
+## 24. Files and commits added by this pass
+
+| Commit | What it does |
+|---|---|
+| `4ec44dd` | Fix the screenshot-store gate this pass had turned red; archive reduced to the eighteen images actually replaced |
+| `8ea0c68` | Seven tests that run the CI-only store gate inside the ordinary suite |
+| `880e8ca` | Replace the mizuna provenance claim that pointed at a file nobody created; directory hashing in the card generator; test that no card cites a missing path |
+
+Files changed: `docs/screenshots/MANIFEST.json`, seven deletions under `docs/screenshots/`
+(6 superfluous archive copies + 1 resurrected leftover), `backend/tests/test_phase37_gates.py`
+(new), `backend/tests/test_phase37_model_cards.py`, `ml/research/build_model_cards.py`,
+`ml/artifacts/cards/mizuna-microbial-relative-load-v2.json`, `docs/MODEL_CARDS.md`, and this
+document.
+
+**No model artifact was modified.** `git diff --name-only` across all three commits under
+`ml/artifacts/*.json` returns nothing; all nine artifacts still hash to their registry entries, and
+`scripts/audit_models.py` passes 202/202 with the same count of withdrawn and superseded models.
+
+## 25. Limitations of this pass
+
+1. **Two gates were red when this pass started and are now green**, which means the previous pass
+   reported its gate table against a tree that would have failed CI. The table above is this pass's
+   own, and Part II's table should be read as historical.
+2. **The OSD matrices and the tomato parquet remain unverifiable in a checkout** (§22.1). Their
+   digests are cross-checked against committed manifests and the artifacts' own records, not
+   recomputed from source.
+3. **The visual gate is still a rasterisation gate, not a semantic one.** It proves the page did not
+   change.
+4. **This document cannot contain its own commit SHA.** The final SHA of `main` after the push is in
+   the delivery message, verified with `git ls-remote`.
+5. **Four scientific gaps remain open and one is partially closed.** Nothing in this pass changed
+   that, and nothing in this pass should be read as changing it.
+
+## 26. Deployment boundary (this pass)
+
+**Render was not touched.** No deploy, no deploy hook, no trigger, no service setting, no
+environment variable, no secret, no plan, no worker, no region. No Render API token was used or
+requested.
+
+**Production PostgreSQL was not touched.** No migration, reset, seed, delete or write. Every
+database operation ran against throwaway local instances: `sqlite:////tmp/spaceagrisim_final_qa.db`
+and a PostgreSQL 17.11 cluster under `/var/tmp/pgdataqa` on port 55437 whose password exists only
+in this session.
+
+**The new code is not live.** `spaceagrisim-web.onrender.com` and `spaceagrisim-api.onrender.com`
+continue to serve whatever they served before this pass.
