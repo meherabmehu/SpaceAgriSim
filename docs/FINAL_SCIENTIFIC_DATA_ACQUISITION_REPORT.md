@@ -23,9 +23,14 @@ tree hashed identically to `f6f6da1` afterwards.
 
 ## 2. Final commit
 
-**`394fc06cb52ceb048cfbb8702dcf795dcdf78ec9`** on `main`, reached by a fast-forward merge of
-`final/scientific-data-completion` and confirmed on the remote with
-`git ls-remote origin refs/heads/main`, which returned the same SHA.
+The work was merged into `main` at **`ffa45c9ff29f7be39d0dfba7b88986644c163ec4`** by a
+fast-forward of `final/scientific-data-completion`, and confirmed on the remote with
+`git ls-remote origin refs/heads/main`.
+
+A document cannot contain the hash of the commit that contains it, so the hash above is the merge
+point, not necessarily the tip. Every commit after it is a correction to this report and its
+records. To get the delivering commit, run `git log -1 --format=%H main` on a fresh clone; the
+figures in this report do not depend on which of those commits carries it.
 
 Seven commits, each one thing:
 
