@@ -421,12 +421,18 @@ inferred.
 
 ### 8.1 Every skip, explained
 
-**SQLite run — 23 skips, all one cause, in three files.** They are the PostgreSQL-only tests
+**SQLite run — 23 skips here, all one cause, in three files.** They are the PostgreSQL-only tests
 (`test_postgresql_persistence.py` ×19, `test_multi_worker_readiness.py` ×3,
 `test_postgres_integration.py` ×1), which require `SPACEAGRISIM_TEST_POSTGRES_URL`. They skip by
 name, with a message that says so, rather than failing quietly. They are not left unexplained: the
 same suite was then run **against a real PostgreSQL 17.11 cluster and returned 0 skips**, listed in
 the row above.
+
+A fourth file joins that group only when the PostgreSQL *client* binaries are absent:
+`test_phase22_backup_automation.py::test_postgres_dump_verification_rejects_an_unreadable_archive`
+probes for `pg_restore` and skips with `pg_restore is not installed in this environment` if it cannot
+find it, making the count **24** on a machine without `postgresql-client`. §23.1 records both counts
+and the condition that selects between them.
 
 **PostgreSQL run — 0 skips.** The one failure that appeared on the first attempt was in
 `test_connection_failure_is_reported_without_leaking_credentials`, and the cause was the test
@@ -1032,6 +1038,22 @@ One cause, but not one string — an earlier revision of §8.1 said "that exact 
 wrong about its own evidence. They are not left hanging: the same suite ran against a real
 PostgreSQL 17.11 cluster with **0 skips**, and the count reconciles exactly (1434 + 23 = 1457).
 
+**There is a twenty-fourth skip on a machine without PostgreSQL client tools**, and it is worth
+stating because this report got it wrong once in each direction. On a clean checkout with the Python
+dependencies but no `psql`/`pg_dump`/`pg_restore` on `PATH`, the same command produces **1433 passed,
+24 skipped**, and the extra skip is declared inside the test:
+
+| File | Skips there | Message |
+|---|---|---|
+| `test_phase22_backup_automation.py` | +1 | `pg_restore is not installed in this environment` |
+
+That test (`test_postgres_dump_verification_rejects_an_unreadable_archive`) probes for `pg_restore`
+and skips only when the binary is absent, because it cannot otherwise prove that an unreadable archive
+is rejected. Installing `postgresql-client` turns it into a pass and the count back to 1434/23, which
+was observed here. So the original §8.1 listing — which named this file — was right for a machine
+without client tools, and the revision that dropped it was right for one with them. Both are now
+written down with the condition attached, because a skip count without its environment is not a fact.
+
 **0 skips in the PostgreSQL run.** The cluster was initialised with `--encoding=UTF8 --locale=C.UTF-8`
 because a `SQL_ASCII` cluster makes SQLAlchemy's server-version probe return bytes and the whole run
 errors out; and `pg_hba.conf` was set to `scram-sha-256` for host connections because
@@ -1090,6 +1112,34 @@ as a measurement rather than a suspicion.
 No test was skipped, retried, relaxed or excluded to reach 171, no `retries` value was set to paper
 over it, and nothing about the failure is hidden: the two tests still fail here whenever the machine
 is starved, and they are reported that way.
+
+### 23.3 The numbers are re-derivable from the remote alone
+
+Every backend number above was produced on a working tree that had accumulated dependencies over many
+sessions. To check that none of it depends on that accumulation, the committed tree was cloned fresh
+from the remote and the suite re-run with only the declared requirements installed. Each row is a
+different amount of environment, not a different code:
+
+| Environment | Command | Result |
+|---|---|---|
+| Fresh clone, `pip install -r backend/requirements-dev.txt`, no PostgreSQL binaries | `pytest backend/tests` (SQLite) | **1433 passed, 24 skipped** |
+| The same clone plus `postgresql-client` 17.11 | same | **1434 passed, 23 skipped** |
+| The same clone plus a freshly `initdb`-ed PostgreSQL 17.11 cluster (port 55438 for this run) | same, with `SPACEAGRISIM_TEST_POSTGRES_URL` | **1457 passed, 0 skipped** |
+| The same clone | all twelve science `--check` scripts | twelve times exit 0, `git status` empty afterwards |
+| The same clone, `npm ci` plus the browser runtime and its system libraries | `npm run lint`, `typecheck`, `test:unit`, `build:check` | pass, pass, **20 passed**, pass — initial request 240 kB |
+| The same clone | `CI=1 npx playwright test --project=desktop/tablet/mobile` | **57 + 57 + 57 = 171 passed**, 0 failed, 18 captures written |
+| The same clone | `python3 scripts/visual_regression.py` | **18/18 PASS**, 0 failed |
+
+The first two rows are the same test suite on the same code: the only difference is whether `pg_restore`
+exists, and it moves exactly one test between "skipped" and "passed". That is the cleanest evidence in
+this report that the skip accounting is real, and it is why §23.1 prints the message rather than only
+the count.
+
+Two prerequisites are not obvious from `npm ci` and cost a false start on the fresh clone: Chromium
+needs its system libraries (`libnspr4` and friends — `npx playwright install-deps chromium`), and
+without them every browser test fails at launch with `error while loading shared libraries`. That is
+an environment failure, it is loud rather than silent, and it is recorded here so the next person does
+not spend the same ten minutes on it.
 
 ## 24. Files and commits added by this pass
 
