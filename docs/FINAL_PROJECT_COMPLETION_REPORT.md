@@ -349,6 +349,11 @@ Two further facts, because they are the difference between a green gate and a me
 
 * the nine "canvas size changed" failures were the *fallback font* changing line height, not the
   layout moving: after the font was bundled the canvases returned to their recorded heights;
+* seventeen of the eighteen captures compare byte-identical. `mission-mobile.png` carries exactly
+  one pixel whose largest channel delta is 1 out of 255 — below the channel threshold of 16, so it
+  is not counted as a changed pixel and the capture reports 0.000 %. It is recorded here rather
+  than rounded away: the gate's claim is zero changed pixels at a stated threshold, not bitwise
+  identity, and this report should not say more than the gate measured;
 * the replacement was deliberate and recorded per image in
   `ml/evaluation/phase37_visual_baseline_migration.json`, with the previous images archived under
   `docs/screenshots/historical/phase37/`. The pixel budget (2 %), the channel threshold (16) and the
