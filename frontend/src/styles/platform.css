@@ -1500,6 +1500,22 @@
     height: 15px;
     width: 15px;
   }
+  /* Two export formats where there used to be one button. On a phone the pair keeps the original
+     footprint by stacking as icon buttons in the same column the single button occupied, so the
+     title beside them keeps exactly the width it had. */
+  .page-title > .export-actions {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    margin-top: 22px;
+  }
+  .page-title > .export-actions .secondary-button {
+    padding: 9px;
+    font-size: 0;
+  }
+  .page-title > .export-actions .secondary-button svg {
+    height: 15px;
+    width: 15px;
+  }
   .page-title .eyebrow {
     font-size: 9px;
     letter-spacing: 1.5px;

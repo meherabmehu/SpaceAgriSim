@@ -122,7 +122,9 @@ test("a saved analysis can be exported and the export says it is not a measureme
   await expect(page.getByText(/Saved as/)).toBeVisible();
 
   const download = page.waitForEvent("download");
-  await page.getByRole("button", { name: "CSV" }).click();
+  // Exact: the mission header now offers "Export mission (CSV)", and a substring match would
+  // resolve to both buttons. This assertion is about the saved analysis's own export.
+  await page.getByRole("button", { name: "CSV", exact: true }).click();
   const file = await download;
   expect(file.suggestedFilename()).toMatch(/\.csv$/);
 });

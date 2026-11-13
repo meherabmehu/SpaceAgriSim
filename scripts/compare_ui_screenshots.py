@@ -133,9 +133,13 @@ def diff_image(baseline_path: Path, current_path: Path) -> dict:
                                    if entry["structure"]["matches"] else "layout-difference")
         return entry
 
-    a = np.asarray(before, dtype=int)
-    b = np.asarray(after, dtype=int)
-    delta = np.abs(a - b).sum(axis=2)
+    # uint8, not int: a phone-height page is 1082 x 6618, and an int64 copy of two of those plus
+    # their difference is ~1 GB. The comparison is identical - the delta is taken in int16, which
+    # still cannot overflow (three channels differ by at most 765) - and the capture host does not
+    # have to hold four copies of the image to answer the question.
+    a = np.asarray(before, dtype=np.uint8)
+    b = np.asarray(after, dtype=np.uint8)
+    delta = np.abs(a.astype(np.int16) - b.astype(np.int16)).sum(axis=2)
     changed = delta > PIXEL_THRESHOLD
     entry["changedPixels"] = int(changed.sum())
     entry["changedPercent"] = round(100 * float(changed.mean()), 4)
@@ -159,7 +163,7 @@ def diff_image(baseline_path: Path, current_path: Path) -> dict:
     # Non-background content inside each band: if the content occupies the same
     # rows in both images, the difference is glyph-level, not structural.
     def content_rows(image: np.ndarray) -> list[int]:
-        luminance = image.sum(axis=2)
+        luminance = image.astype(np.int16).sum(axis=2)
         return sorted({int(r) for r in np.where(luminance.max(axis=1) > 120)[0]})
 
     common = content_rows(a[: min(a.shape[0], b.shape[0])])
