@@ -22,7 +22,8 @@
  *   3. the initial request (index.html + everything it statically imports) stays inside a small
  *      budget, so a regression in code-splitting fails here rather than in a user's browser.
  *
- * Usage: npm run build && node scripts/check-bundle.mjs
+ * Usage: node node_modules/vite/bin/vite.js build && node scripts/check-bundle.mjs
+ *        (or just `node scripts/npm.mjs build:check`, which does both)
  */
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, dirname } from 'node:path'

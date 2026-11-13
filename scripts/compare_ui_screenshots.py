@@ -71,7 +71,9 @@ def source_diff(baseline: str) -> dict:
 
 
 def capture() -> dict:
-    result = run(["npx", "playwright", "test"], ROOT / "frontend")
+    # The CLI is called through node because there is no package.json to give `npx` a local bin
+    # to resolve; this is the file `node_modules/.bin/playwright` links to.
+    result = run(["node", "node_modules/@playwright/test/cli.js", "test"], ROOT / "frontend")
     tail = [line for line in result.stdout.split("\n") if line.strip()][-1:]
     return {"exitCode": result.returncode, "summary": tail[0] if tail else "",
             "passed": result.returncode == 0}

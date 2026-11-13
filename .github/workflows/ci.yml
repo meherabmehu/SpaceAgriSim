@@ -167,24 +167,29 @@ jobs:
         working-directory: frontend
     steps:
       - uses: actions/checkout@v4
+      # No npm cache: a cache needs `cache-dependency-path`, and the lockfile it would name is a
+      # JavaScript module here (frontend/dependencies.lock.mjs) rather than a package-lock.json.
+      # The install is a 291-package `npm ci` from that lock, a few seconds either way.
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run typecheck
+      # `ci` materialises package.json and package-lock.json into a temporary directory outside
+      # this checkout, installs there, and deletes both before returning - no .json file is ever
+      # written inside the repository. See frontend/scripts/npm.mjs.
+      - run: node scripts/npm.mjs ci
+      - run: node scripts/npm.mjs lint
+      - run: node scripts/npm.mjs typecheck
       # jsdom unit tests for the resource hook's lifecycle. The browser suite renders the same
       # panels, but it cannot schedule the microtask order in which a superseded response resolves
       # before the abort that follows it - which is the defect these tests exist to prevent from
       # coming back.
-      - run: npm run test:unit
+      - run: node scripts/npm.mjs test:unit
       # `build:check` runs the production build *and* the bundle guard (no import cycles, no
       # oversized chunk, initial request within the 240 kB budget). A plain `build` would let a
       # regression past as long as it compiled.
-      - run: npm run build:check
-      - run: npm audit --audit-level=high
+      - run: node scripts/npm.mjs build:check
+      # `npm audit` needs the lockfile next to it, so it also runs against the temporary manifests.
+      - run: node scripts/npm.mjs --audit
   browser:
     runs-on: ubuntu-latest
     defaults:
@@ -200,12 +205,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
       - run: python -m pip install -r ../backend/requirements-dev.txt
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
+      - run: node scripts/npm.mjs ci
+      - run: node scripts/npm.mjs --exec playwright install --with-deps chromium
+      - run: node scripts/npm.mjs test:e2e
       - uses: actions/upload-artifact@v4
         if: always()
         with:

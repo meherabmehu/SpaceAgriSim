@@ -76,7 +76,10 @@ export default defineConfig({
       // Run against the production build rather than the dev server: it removes Vite's
       // on-demand transforms and HMR churn from the timing of every assertion, and it is the
       // bundle a user actually receives. `preview` carries the same `/api` proxy as `dev`.
-      command: "npm run build && npm run preview -- --host 127.0.0.1 --port 5173 --strictPort",
+      // The manifest is not in the tree (see scripts/npm.mjs), so this calls the binaries the
+      // prepared node_modules exposes instead of running through `npm run`.
+      command: "node node_modules/vite/bin/vite.js build"
+        + " && node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port 5173 --strictPort",
       url: "http://127.0.0.1:5173",
       reuseExistingServer: !process.env.CI,
       timeout: 60000,

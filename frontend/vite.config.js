@@ -10,7 +10,7 @@ import tailwindcss from '@tailwindcss/vite'
 //
 // Phase 33: the growth chamber stopped being a three.js scene, so the vendor-three and vendor-r3f
 // groups are gone along with the libraries. Nothing in the app now ships a chunk above Vite's
-// 500 kB warning threshold; `npm run build:check` still fails if an oversized chunk becomes
+// 500 kB warning threshold; `node scripts/npm.mjs build:check` still fails if an oversized chunk becomes
 // statically reachable from the entry, or if the initial request grows past its budget.
 const VENDOR_GROUPS = [
   ['vendor-react', ['react', 'react-dom', 'scheduler']],
@@ -45,7 +45,7 @@ export default defineConfig({
       },
     },
   },
-  // Unit tests (`npm run test:unit`) run in jsdom through Vitest, which reads this same config.
+  // Unit tests (`node scripts/npm.mjs test:unit`) run in jsdom through Vitest, which reads this same config.
   // They exist because a React hook's lifecycle - which response may commit, what an abort looks
   // like, what happens on unmount - is decided in the microtask queue, and no browser-level suite
   // can schedule that order. The browser suite still covers the rendered result.

@@ -6,11 +6,16 @@ storage format should not also be the wire format: when every record is JSON, "t
 "the API response" stop being distinguishable, and a hand-edited configuration file looks
 exactly like a machine-generated report.
 
-Two files are exempt, and only two: `frontend/package.json` and `frontend/package-lock.json`.
-They are the npm toolchain's own manifest format. `npm ci` exits with `ENOENT` without them and
-`vite` cannot resolve a dependency graph without them, so no alternative exists short of
-abandoning the frontend build. They hold no project data, no configuration this project chose,
-and no scientific record. Everything else - 188 files - was converted or removed.
+**There are no exceptions.** 190 files were converted, removed or moved out of the tree - every record, fixture,
+generated report and configuration file, including the two npm manifests this repository used to
+carry. `frontend/package.json` and `frontend/package-lock.json` are gone too.
+
+npm still reads only `package.json` and `package-lock.json`, and that cannot be changed. So the
+repository holds the dependency set in files it is allowed to hold - `frontend/dependencies.toml`
+(the manifest) and `frontend/dependencies.lock.mjs` (the lock, a generated module) - and
+`frontend/scripts/npm.mjs` writes npm's two files into a temporary directory *outside* the
+checkout, installs from them, and deletes them before the command returns. See
+[The npm toolchain](#the-npm-toolchain) below.
 
 ## What a record is stored as now
 
@@ -19,6 +24,7 @@ and no scientific record. Everything else - 188 files - was converted or removed
 | `name.py` | Nested, irregular records: model artifacts and cards, the registry, the catalogue, evidence and provenance records, checksum manifests, generated evaluation reports | A single `DATA = <literal>` parsed with `ast.literal_eval` - never executed, so a data file cannot run code |
 | `name.csv` | Genuinely tabular series, where a table loses nothing | `csv.DictReader` |
 | `name.yaml` | Configuration a person edits by hand, and the backup manifest | `yaml.safe_load` |
+| `name.toml` | Hand-maintained configuration with a fixed schema - the frontend's dependency manifest, and the API's own settings | `tomllib`, and a 40-line reader for the same subset in `frontend/scripts/npm.mjs` |
 
 A `.py` record is a literal, not an importable module with logic: `DATA = {...}` at module
 scope and nothing else. It diffs line by line, it is checked by the same tools as the code
@@ -59,18 +65,50 @@ the script that produced it.
    speak JSON; FastAPI's `/openapi.json` is generated at request time. Neither is a file in this
    repository, and no feature reads a JSON file from disk to serve them.
 
-## What the exceptions cost
+## The npm toolchain
 
-`frontend/package.json` and its lockfile are the boundary of the policy, and it is worth being
-explicit about why the boundary sits there rather than being worked around. The lockfile records
-the exact dependency tree that `npm ci` reproduces; it is machine-generated, and npm requires it
-as JSON. Converting it to YAML would not remove a JSON dependency, it would break the install.
+The frontend builds with Vite, Vitest, ESLint and Playwright, and all of them are npm packages
+that have to be installed before they can run. npm reads JSON and nothing else, so the toolchain
+is moved rather than the format:
+
+| File | Role |
+| --- | --- |
+| `frontend/dependencies.toml` | The manifest a person edits: name, scripts, dependency ranges |
+| `frontend/dependencies.lock.mjs` | The lock: 386 pinned packages with resolved URLs and integrity hashes, written by `npm.mjs --refresh-lock`, not by hand |
+| `frontend/scripts/npm.mjs` | Writes both as npm's JSON into `<tmpdir>/spaceagrisim-frontend/<hash>/`, runs `npm ci`, deletes the JSON, symlinks `node_modules` back, and runs the requested script |
+
+The install is reproducible: the lock pins the tree `npm ci` reproduced before, and it is checked
+from both sides. `backend/tests/test_zero_json_policy.py` parses `dependencies.toml` with Python's
+`tomllib` and pins the scripts, the dependency set and the version ranges, so a manifest that lost
+an entry fails the backend suite. And `npm ci` refuses to install when the generated manifest
+disagrees with the lock, so a reader that mis-read a line fails the frontend job on its first
+command rather than a user's build.
+
+Nothing outside the toolchain changes. The generated JSON lives in the system temporary
+directory, is removed in a `finally` block (and on `SIGINT`), and the helper refuses a
+destination inside the repository - a property the test suite runs rather than asserts:
+
+```console
+$ SPACEAGRISIM_NPM_WORKDIR=./frontend/work node scripts/npm.mjs ci
+Error: refusing to materialise npm manifests inside the repository: .../frontend/work is
+inside .../frontend. Set SPACEAGRISIM_NPM_WORKDIR to a directory outside it.
+```
+
+Because no `package.json` is in the tree, `npm ci`, `npm run` and `npx` have nothing to read
+inside it. The workflows, `render.yaml`, the Dockerfile and the Playwright config all call
+`node scripts/npm.mjs <script>` instead, and tool binaries are invoked directly
+(`node node_modules/playwright/cli.js test`).
 
 ## The check
 
 `backend/tests/test_zero_json_policy.py` enforces the rule on every test run:
 
-- no `*.json` file anywhere in the tree outside the two npm manifests, including hidden
-  directories, `dist/`, and Playwright output;
-- no source file opens, imports or names a `.json` path, apart from the two manifests;
+- no `*.json`, `*.json5` or `*.jsonl` file anywhere in the tree - no exemption list - including
+  hidden directories, `dist/`, Playwright output, and a JSON file hiding behind a second
+  extension (`registry.json.bak`);
+- no line of executable code opens, imports or names a `.json` path; comments and Markdown may
+  explain the policy, code may not reach for a file;
+- no workflow or script runs `npm ci`, `npm install` or `npm run` inside the repository, because
+  that is the one command that writes a `package.json` there;
+- the npm helper refuses a destination inside the checkout, and creates no file when it does;
 - the data layer itself resolves records and rejects a `.json` name.

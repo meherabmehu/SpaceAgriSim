@@ -59,7 +59,7 @@ services:
     plan: free
     repo: https://github.com/meherabmehu/SpaceAgriSim
     branch: main
-    buildCommand: cd frontend && npm ci && npm run build
+    buildCommand: cd frontend && node scripts/npm.mjs ci && node scripts/npm.mjs build
     staticPublishPath: ./frontend/dist
     autoDeployTrigger: 'commit'
     envVars:

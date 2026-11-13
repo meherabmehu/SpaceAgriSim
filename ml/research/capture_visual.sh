@@ -23,7 +23,8 @@ rm -rf test-results/screenshots
 # predates the feature. A non-zero exit is therefore recorded, not fatal: the captures are the
 # artefact this script exists to produce.
 set +e
-npx playwright test e2e/mission.spec.js e2e/radiation.spec.js e2e/water-evidence.spec.js e2e/screens.spec.js \
+# Called through node: the repository has no package.json, so `npx` has no local bin to resolve.
+node node_modules/@playwright/test/cli.js test e2e/mission.spec.js e2e/radiation.spec.js e2e/water-evidence.spec.js e2e/screens.spec.js \
   --reporter=line 2>&1 | tail -4
 echo "playwright exit: $?"
 set -e

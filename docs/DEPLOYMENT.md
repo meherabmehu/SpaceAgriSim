@@ -22,7 +22,9 @@ Docker copies tracked registry/processed/model artifacts. Raw research downloads
 1. Promote reviewed commits to `main` through normal review. Use a feature-branch Vercel preview for pre-merge verification; the root `vercel.py` deploys the Vite frontend and FastAPI service together.
 2. Create a Render Blueprint from the repository using `render.yaml`. Its API uses the repository root so `data/` and `ml/` resolve beside `backend/`.
 3. Supply `SPACEAGRISIM_DATABASE_URL` using PostgreSQL with a `postgresql+psycopg://` URL, `SPACEAGRISIM_AUTH_SECRET` as a unique 32+-character secret, and `SPACEAGRISIM_CORS_ORIGINS` as a JSON list of exact frontend origins. Set values through the hosting secret UI, never Git.
-4. Create a Vercel Vite project with root directory `frontend`, install command `npm ci`, build command `npm run build`, output `dist`, and build-time variable `VITE_API_BASE_URL=https://YOUR-API.onrender.com/api`.
+4. Create a Vercel Vite project with root directory `frontend`. The repository holds no `package.json`, so the install command is
+   `node scripts/npm.mjs ci` and the build command `node scripts/npm.mjs build` (that script materialises the npm manifests in a temporary
+   directory outside the checkout and removes them again). Output `dist`, build-time variable `VITE_API_BASE_URL=https://YOUR-API.onrender.com/api`.
 5. Redeploy the API after setting the exact resulting Vercel origin in CORS. Add explicitly chosen preview origins when needed; do not use wildcard credentialed origins.
 6. Check API health/readiness, actual simulation responses, dataset registry, model loading, scenario save/read and all report formats from the deployed frontend. Verify desktop and mobile operation.
 
@@ -45,7 +47,7 @@ The [Blueprint setup page](https://dashboard.render.com/blueprint/new?repo=https
 | `SPACEAGRISIM_DATABASE_URL` | SQLite locally or PostgreSQL through SQLAlchemy/psycopg |
 | `SPACEAGRISIM_AUTH_SECRET` | High-entropy signing secret for expiring account bearer tokens; required to be stable in hosted deployments |
 | `SPACEAGRISIM_AUTH_TOKEN_MINUTES` | Token lifetime; default 60 minutes |
-| `SPACEAGRISIM_CORS_ORIGINS` | JSON array of permitted browser origins |
+| `SPACEAGRISIM_CORS_ORIGINS` | Permitted browser origins, written as a JSON array in the variable's value (pydantic-settings parses list-valued settings that way). Not a file, and the only place a JSON literal still appears. |
 | `SPACEAGRISIM_MAX_HISTORY` | Bounded shared history size; default 200 |
 | `SPACEAGRISIM_HISTORY_WRITES_ENABLED` | Enables authenticated scenario writes; Blueprint disables writes until deployment access controls are configured |
 | `VITE_API_BASE_URL` | Public API base including `/api`; compiled into frontend, not a secret |

@@ -1,4 +1,12 @@
-{
+/**
+ * The dependency lock.
+ *
+ * npm reproduces an install from a package-lock, so the tree it encodes has to be preserved
+ * exactly: versions, resolved URLs and integrity hashes. That makes this a data record rather
+ * than a hand-edited file. `node scripts/npm.mjs --refresh-lock` regenerates it from a real
+ * npm resolution and rewrites this module.
+ */
+export const lockfile = {
   "name": "spaceagrisim-frontend",
   "version": "0.1.0",
   "lockfileVersion": 3,
@@ -5500,4 +5508,4 @@
       }
     }
   }
-}
+};

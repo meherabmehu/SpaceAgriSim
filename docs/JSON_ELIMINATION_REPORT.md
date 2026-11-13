@@ -12,12 +12,13 @@ follows from here on.
 | Rewritten as a Python data record (`.py`) | 183 |
 | Rewritten as a CSV table (`.csv`) | 3 |
 | Removed, with the capability it served | 2 |
-| Kept, because npm requires that exact format | 2 |
+| Moved out of the tree: npm's manifests, now a TOML manifest, a lock module and a helper | 2 |
 | **Total** | **190** |
 
-Of the 188 converted or removed records, 127 hold exactly the same values as the
-JSON they came from. The other 61 changed for one of three reasons, and each one is
-visible in the diff:
+Of the 190 records, 129 hold exactly the same values as the JSON they came from - the 188
+converted or removed ones, plus npm's two manifests, whose JSON is regenerated from the TOML and
+the lock module byte for byte and compared against the files they replaced. The other 61 changed
+for one of three reasons, and each one is visible in the diff:
 
 1. **A path field named the old encoding.** A record that said `ml/evaluation/phase34_cross_campaign_coverage.json` names the same record without a suffix now, because the file
    it points at is a `.py` module. This is the largest group.
@@ -259,8 +260,8 @@ records as stored.
 
 | File as it was | Now | Note |
 | --- | --- | --- |
-| `package-lock.json` | `package-lock.json` | npm toolchain manifest |
-| `package.json` | `package.json` | npm toolchain manifest |
+| `frontend/package-lock.json` | `frontend/dependencies.lock.mjs` | The dependency tree as a generated module - 386 pinned packages with resolved URLs and integrity hashes, written by `node scripts/npm.mjs --refresh-lock`. npm still receives a lockfile, materialised outside the checkout for the length of one `npm ci` and then deleted. |
+| `frontend/package.json` | `frontend/dependencies.toml` | The manifest as TOML - the same name, scripts, dependency set and version ranges, verified value for value against the manifest npm used to read before it was removed. `scripts/npm.mjs` reads it and writes npm's JSON into a temporary directory outside the repository. |
 | `tsconfig.json` | - | no alternative existed |
 
 ## `ml/artifacts/cards/`
@@ -413,9 +414,9 @@ protocol, not storage: no endpoint in this repository reads a `.json` file from 
 
 ## How the claim is enforced
 
-`backend/tests/test_zero_json_policy.py` runs with the rest of the suite (7 tests):
+`backend/tests/test_zero_json_policy.py` runs with the rest of the suite (10 tests):
 
-- no `*.json` file anywhere in the tree except the two npm manifests, hidden directories and
+- no `*.json` file anywhere in the tree, with no exemption list, hidden directories and
   build output included;
 - no source file opens, imports or points at a `.json` path;
 - the data layer refuses to resolve a `.json` name and does not list it as a storage shape;
@@ -428,12 +429,13 @@ A test is a stronger guarantee than a clean-up: the files cannot come back quiet
 
 | Gate | Command | Result |
 | --- | --- | --- |
-| Backend suite, SQLite | `pytest backend/tests` | 1440 passed, 24 skipped |
-| Backend suite, PostgreSQL 17.11 | same, against an isolated local database | 1441 passed, 23 skipped |
-| Science gates | the 13 `--check` scripts and `scripts/audit_models.py` | all exit 0 |
-| Frontend | `npm run lint`, `typecheck`, `test:unit`, `build:check` | 0 problems, 20 tests, 240 kB initial |
-| Browser suite | `npx playwright test` | 171 passed |
-| Visual regression | `scripts/compare_ui_screenshots.py` | `ui-unchanged`, 0 source changes |
+| Backend suite, SQLite | `pytest backend/tests` | 1444 passed, 23 skipped |
+| Backend suite, PostgreSQL 17.11 | same, against an isolated local database | 1467 passed, **0 skipped** |
+| Science gates | the 9 `--check` scripts and `scripts/audit_models.py` | all exit 0 |
+| Frontend | `node scripts/npm.mjs lint`, `typecheck`, `test:unit`, `build:check` | 0 problems, 20 tests, 240 kB initial, bundle guard passed |
+| Node dependency audit | `node scripts/npm.mjs --audit` | 0 vulnerabilities |
+| Browser suite | `node node_modules/@playwright/test/cli.js test` | 171 passed |
+| Visual regression | `scripts/compare_ui_screenshots.py --baseline 64f869e` | `ui-extended-layout-preserved`: all three viewports pixel-identical, 0.0 % changed, 0 px drift; the 6 changed files are the manifest, the lock and the helper, not the interface |
 | Reproducible demo | `scripts/demo_phase9.sh --fast --no-server` | 8/8 steps |
 | CI | GitHub Actions on this commit | 5/5 jobs green |
 

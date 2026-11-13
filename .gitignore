@@ -1,5 +1,8 @@
 # --- Node / frontend ---
 node_modules/
+# The same tree, symlinked in by frontend/scripts/npm.mjs. A symlink is a file, so the
+# pattern with a trailing slash does not match it.
+frontend/node_modules
 frontend/dist/
 frontend/build/
 frontend/.vite/

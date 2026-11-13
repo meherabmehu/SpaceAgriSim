@@ -33,9 +33,14 @@ In another terminal:
 
 ```powershell
 cd frontend
-npm install
-npm run dev
+node scripts/npm.mjs ci      # installs from dependencies.mjs / dependencies.lock.mjs
+node scripts/npm.mjs dev
 ```
+
+There is no `package.json` in this repository. The frontend's manifest and lock are JavaScript
+modules (`dependencies.mjs`, `dependencies.lock.mjs`); `scripts/npm.mjs` writes the two JSON files
+npm insists on into a temporary directory outside the checkout, installs from them, deletes them
+again, and then runs the requested script. `node scripts/npm.mjs --help` lists the commands.
 
 Open `http://localhost:5173`. The Vite dev server proxies `/api` to the backend.
 
@@ -44,11 +49,11 @@ Open `http://localhost:5173`. The Vite dev server proxies `/api` to the backend.
 ```powershell
 backend/.venv/Scripts/python -m pytest -q backend/tests
 cd frontend
-npm run lint
-npm run typecheck
-npm run test:unit     # jsdom: request lifecycles, hooks, error states
-npm run build:check   # production build + bundle graph and size budget
-npm run test:e2e      # Playwright: three viewports against the production build
+node scripts/npm.mjs lint
+node scripts/npm.mjs typecheck
+node scripts/npm.mjs test:unit     # jsdom: request lifecycles, hooks, error states
+node scripts/npm.mjs build:check   # production build + bundle graph and size budget
+node scripts/npm.mjs test:e2e      # Playwright: three viewports against the production build
 ```
 
 The backend suite runs on SQLite by default; `SPACEAGRISIM_TEST_POSTGRES_URL` runs the same suite

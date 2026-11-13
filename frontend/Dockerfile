@@ -1,9 +1,10 @@
 FROM node:24-alpine AS build
 WORKDIR /web
-COPY frontend/package.json frontend/package-lock.json ./
-RUN npm ci
+# No package.json is copied, because the repository does not hold one. scripts/npm.mjs writes the
+# manifests npm needs into /tmp/spaceagrisim-frontend (outside the copied source tree) and removes
+# them once `npm ci` returns.
 COPY frontend/ ./
-RUN npm run build
+RUN node scripts/npm.mjs ci && node scripts/npm.mjs build
 
 FROM nginx:stable-alpine
 COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
