@@ -28,6 +28,10 @@ scenarios = Table("scenarios", metadata,
     # Nullable only to retain access to legacy local demonstration rows. New
     # API-created rows always receive an authenticated owner's id.
     Column("owner_id", String(36), nullable=True, index=True),
+    # A guided-workflow save records what the user was reading, not only a habitat configuration:
+    # the workflow, the factor and band, and the measured summary that was on screen. Nullable
+    # because a plain Mission Control save has no such context and legacy rows predate the column.
+    Column("context", Text, nullable=True),
 )
 users = Table("users", metadata,
     Column("id", String(36), primary_key=True),
@@ -236,6 +240,7 @@ def _initialise_schema(engine) -> None:
 def _apply_schema(engine) -> None:
     metadata.create_all(engine)
     _migrate_scenarios_owner(engine)
+    _migrate_scenarios_context(engine)
     _migrate_users_columns(engine)
 
 
@@ -257,6 +262,20 @@ def _migrate_scenarios_owner(engine) -> None:
     with engine.begin() as connection:
         connection.execute(text(
             "CREATE INDEX IF NOT EXISTS ix_scenarios_owner_id ON scenarios (owner_id)"))
+
+
+def _migrate_scenarios_context(engine) -> None:
+    """Add the guided-workflow context column to a database created before it.
+
+    Additive and idempotent, like the owner migration beside it: existing rows keep working with a
+    NULL context, and nothing is rewritten. The column is nullable on purpose - a scenario saved
+    from Mission Control carries a habitat configuration and no workflow, and that is a complete
+    record, not an incomplete one.
+    """
+    columns = {column["name"] for column in inspect(engine).get_columns("scenarios")}
+    if "context" not in columns:
+        with engine.begin() as connection:
+            connection.execute(text("ALTER TABLE scenarios ADD COLUMN context TEXT"))
 
 
 def _migrate_users_columns(engine) -> None:
@@ -563,10 +582,38 @@ def delete_scenario(owner_id: str, scenario_id: str) -> bool:
     return True
 
 
-def save_scenario(name: str, configuration: str, owner_id: str | None = None):
+def find_duplicate_scenario(owner_id: str, name: str, configuration: str,
+                            context: str | None) -> str | None:
+    """The id of an identical save this owner already has, or None.
+
+    "Save" is easy to press twice - on a slow connection, on a phone that re-sends a form, or
+    because the first response scrolled past - and two presses send the identical body. That body is
+    one record, so the second save returns the first id instead of writing a duplicate.
+
+    The name is part of the identity on purpose: two scenarios that share a configuration but are
+    named differently ("baseline", "with the CO2 raised") are two things the user meant to keep, and
+    refusing the second would be losing data to a rule meant to prevent a double-click. Only a
+    request identical in name, configuration and workflow context is a repeat.
+    """
+    if not owner_id:
+        raise ValueError("owner_id is required")
+    statement = (select(scenarios.c.id)
+                 .where((scenarios.c.owner_id == owner_id)
+                        & (scenarios.c.name == name)
+                        & (scenarios.c.configuration == configuration)))
+    statement = (statement.where(scenarios.c.context.is_(None)) if context is None
+                 else statement.where(scenarios.c.context == context))
+    with database().connect() as connection:
+        row = connection.execute(statement.limit(1)).first()
+    return row[0] if row else None
+
+
+def save_scenario(name: str, configuration: str, owner_id: str | None = None,
+                  context: str | None = None):
     row = {"id": str(uuid4()), "name": name,
            "created_at": datetime.now(timezone.utc).isoformat(),
-           "configuration": configuration, "model_version": "assumptions-2.0", "owner_id": owner_id}
+           "configuration": configuration, "model_version": "assumptions-2.0",
+           "owner_id": owner_id, "context": context}
     with database().begin() as connection:
         connection.execute(scenarios.insert().values(**row))
         # Retention trims the owner's own history. Trimming globally would delete the oldest rows

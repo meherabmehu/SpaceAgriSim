@@ -2,11 +2,13 @@ import { useCallback, useMemo, useState } from "react";
 import {
   AlertTriangle,
   CheckCircle2,
+  Download,
   Droplets,
   FlaskConical,
   Leaf,
   Play,
   Plus,
+  Save,
   ShieldCheck,
   Trash2,
 } from "lucide-react";
@@ -607,16 +609,30 @@ export function WaterDemandWorkflow() {
  * failed its sealed holdout, so this panel reports measured group summaries - mean yield per band
  * with a between-experiment interval - and states that it is not a response function.
  */
-export function CeaEvidenceWorkflow() {
+export function CeaEvidenceWorkflow({ session = null, params = null }) {
   const capability = useResource("/workflows/light-stress/controlled-environment/capability");
   const [selection, setSelection] = useState({ factor: "co2Ppm", band: "ambient" });
   const [state, setState] = useState({ data: null, error: "", loading: false });
+  // Export and save are separate requests with separate outcomes, so each keeps its own state: a
+  // failed export must not clear a successful save message, and neither may run twice at once.
+  const [exporting, setExporting] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [outcome, setOutcome] = useState(null);
 
-  const bands = capability.data?.fields?.[1]?.options || {};
   const factorOptions = capability.data?.fields?.[0]?.options || [];
-  const bandOptions = bands[selection.factor] || [];
+  // Band labels come from the server, which derives them from the same bounds it filters on. The
+  // page used to print the raw ids ("ambient", "enriched") because the capability shipped ids only,
+  // and every hand-written label in the frontend had to be kept in step with a predicate in Python -
+  // two places to disagree, and one of them was already wrong about a boundary.
+  const bandLabels = capability.data?.fields?.[1]?.labels || {};
+  const bandOptions = Object.keys(bandLabels[selection.factor] || {});
+  const counts = useMemo(() => {
+    const factor = (capability.data?.factors || []).find((item) => item.publicName === selection.factor);
+    return Object.fromEntries((factor?.bands || []).map((band) => [band.id, band.experiments]));
+  }, [capability.data, selection.factor]);
 
   const run = async () => {
+    setOutcome(null);
     setState({ data: null, error: "", loading: true });
     try {
       const payload = await api("/workflows/light-stress/controlled-environment/run", {
@@ -629,6 +645,90 @@ export function CeaEvidenceWorkflow() {
   };
 
   const result = state.data;
+  const group = result?.groups?.[0] || null;
+  const measured = group?.measured || null;
+
+  const exportBand = async (format) => {
+    if (!result || exporting) return;
+    setExporting(format);
+    setOutcome(null);
+    try {
+      const { postForFile } = await import("../../services/downloads.ts");
+      const { filename } = await postForFile(
+        "/workflows/light-stress/controlled-environment/export",
+        { selections: [selection], format },
+        `spaceagrisim-cea-${selection.factor}-${selection.band}.${format}`,
+      );
+      setOutcome({ tone: "ok", message: `Exported ${filename}.` });
+    } catch (error) {
+      setOutcome({ tone: "error", message: `Export failed: ${error.message}` });
+    } finally {
+      setExporting("");
+    }
+  };
+
+  const saveBand = async () => {
+    if (!result || !group || saving) return;
+    if (!params) {
+      setOutcome({
+        tone: "error",
+        message: "The mission configuration has not loaded, so there is nothing to store beside this band yet.",
+      });
+      return;
+    }
+    if (!session) {
+      setOutcome({
+        tone: "info",
+        message: "Sign in to save this measured band to your account. Reading the evidence needs no account.",
+      });
+      return;
+    }
+    setSaving(true);
+    setOutcome(null);
+    try {
+      // The habitat configuration stored beside the measurement is the mission currently loaded in
+      // the workspace: a scenario is "these mission settings, and this band of evidence". Neither
+      // half is invented here - both come from what the page is showing.
+      const saved = await api("/scenarios", {
+        name: `CEA wheat · ${selection.factor} · ${group.label}`,
+        configuration: params,
+        context: {
+          workflow: "cea-evidence",
+          factor: selection.factor,
+          band: selection.band,
+          bandLabel: group.label,
+          measured: group.measured,
+          dataset: {
+            id: capability.data?.dataset?.id,
+            doi: capability.data?.dataset?.doi,
+            license: capability.data?.dataset?.license,
+          },
+          evidenceClass: result.evidenceClass,
+        },
+      });
+      setOutcome({ tone: "ok", message: `Saved to your account as ${saved.id}.`, scenarioId: saved.id });
+    } catch (error) {
+      if (error?.scenarioId)
+        setOutcome({
+          tone: "info",
+          message: `This measured band is already saved as ${error.scenarioId}.`,
+          scenarioId: error.scenarioId,
+        });
+      else setOutcome({ tone: "error", message: `Not saved: ${error.message}` });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const ciCell = (summary) => {
+    if (!summary) return "—";
+    if (summary.ciStatus === "reported")
+      return `${number(summary.meanCiLow, 3)} – ${number(summary.meanCiHigh, 3)}`;
+    // No interval is printed when the sample cannot support one. The old table printed the normal
+    // approximation at n = 2, which put a negative lower bound on a yield that cannot be negative
+    // and claimed a precision two experiments cannot establish.
+    return summary.ciNote || "not reported";
+  };
 
   return (
     <div className="workflow-panel" aria-label="Controlled-environment wheat evidence">
@@ -658,7 +758,11 @@ export function CeaEvidenceWorkflow() {
                   value={selection.factor}
                   onChange={(event) => {
                     const factor = event.target.value;
-                    setSelection({ factor, band: bands[factor][0] });
+                    setSelection({ factor, band: Object.keys(bandLabels[factor] || {})[0] });
+                    // The table below belongs to the previous selection; leaving it on screen
+                    // beside new controls is a results panel for a factor the user no longer chose.
+                    setState({ data: null, error: "", loading: false });
+                    setOutcome(null);
                   }}
                 >
                   {factorOptions.map((name) => <option key={name} value={name}>{name}</option>)}
@@ -669,9 +773,18 @@ export function CeaEvidenceWorkflow() {
                 <select
                   id="cea-band"
                   value={selection.band}
-                  onChange={(event) => setSelection({ ...selection, band: event.target.value })}
+                  onChange={(event) => {
+                    setSelection({ ...selection, band: event.target.value });
+                    setState({ data: null, error: "", loading: false });
+                    setOutcome(null);
+                  }}
                 >
-                  {bandOptions.map((name) => <option key={name} value={name}>{name}</option>)}
+                  {bandOptions.map((id) => (
+                    <option key={id} value={id}>
+                      {bandLabels[selection.factor][id]}
+                      {typeof counts[id] === "number" ? ` · ${counts[id]} experiments` : ""}
+                    </option>
+                  ))}
                 </select>
               </label>
             </div>
@@ -708,37 +821,62 @@ export function CeaEvidenceWorkflow() {
               label="OUTPUT"
               action={<Pill tone="ok">measured observation</Pill>}
             >
-              <div className="data-table-wrap">
-                <table className="data-table">
-                  <caption className="sr-only">Measured grain yield for the selected band</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Band</th>
-                      <th scope="col">Experiments</th>
-                      <th scope="col">Mean (kg/m2)</th>
-                      <th scope="col">95 % interval on the mean</th>
-                      <th scope="col">Median</th>
-                      <th scope="col">Range</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {result.groups.map((group) => (
-                      <tr key={`${group.factor}-${group.band}`}>
-                        <th scope="row">{group.label}</th>
-                        <td>{group.measured.n}</td>
-                        <td>{number(group.measured.mean, 3)}</td>
-                        <td>
-                          {number(group.measured.meanCiLow, 3)} – {number(group.measured.meanCiHigh, 3)}
-                        </td>
-                        <td>{number(group.measured.median, 3)}</td>
-                        <td>
-                          {number(group.measured.min, 3)} – {number(group.measured.max, 3)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              {group?.empty ? (
+                // An empty band is a real answer, not a rendering failure: say so, and say what the
+                // panel will not do about it.
+                <div className="notice" role="status">
+                  No experiment in this dataset falls in{" "}
+                  <strong>{group.label}</strong>. The panel reports measured groups only; it does not
+                  interpolate a value for a band the data never covered.
+                </div>
+              ) : (
+                <>
+                  <div className="data-table-wrap">
+                    <table className="data-table">
+                      <caption className="sr-only">Measured grain yield for the selected band</caption>
+                      <thead>
+                        <tr>
+                          <th scope="col">Band</th>
+                          <th scope="col">Experiments</th>
+                          <th scope="col">Mean (kg/m2)</th>
+                          <th scope="col">95 % interval on the mean</th>
+                          <th scope="col">Median</th>
+                          <th scope="col">Range</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {result.groups.map((row) => (
+                          <tr key={`${row.factor}-${row.band}`}>
+                            <th scope="row">{row.label}</th>
+                            <td>{row.measured?.n ?? 0}</td>
+                            <td>{row.measured ? number(row.measured.mean, 3) : "—"}</td>
+                            <td>{ciCell(row.measured)}</td>
+                            <td>{row.measured ? number(row.measured.median, 3) : "—"}</td>
+                            <td>
+                              {row.measured
+                                ? `${number(row.measured.min, 3)} – ${number(row.measured.max, 3)}`
+                                : "—"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  {measured?.ciCaveat ? (
+                    <p className="fine">{measured.ciCaveat}</p>
+                  ) : null}
+                  <p className="fine">
+                    The interval is {Math.round(
+                      (capability.data.statistics?.confidenceLevel ?? 0.95) * 100,
+                    )}{" "}
+                    % Student-t over the experiments in the band (
+                    {capability.data.statistics?.interval}), and it is reported only from{" "}
+                    {capability.data.statistics?.minExperimentsForInterval} experiments upward. Below
+                    that the table prints the count and declines the interval, because two points do
+                    not establish a spread.
+                  </p>
+                </>
+              )}
               <p className="fine">
                 Daily light integral against measured yield across all experiments: Pearson{" "}
                 {number(result.dliRelationship.pearson, 3)}, Spearman{" "}
@@ -746,6 +884,48 @@ export function CeaEvidenceWorkflow() {
               </p>
               <p className="fine">{result.method.noTest}</p>
               <Limitations items={result.limitations} />
+
+              <div className="module-actions">
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={() => exportBand("csv")}
+                  disabled={Boolean(exporting) || !group || group.empty}
+                  aria-busy={exporting === "csv"}
+                >
+                  <Download size={15} /> {exporting === "csv" ? "Exporting…" : "Export band (CSV)"}
+                </button>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={() => exportBand("pdf")}
+                  disabled={Boolean(exporting) || !group || group.empty}
+                  aria-busy={exporting === "pdf"}
+                >
+                  <Download size={15} /> {exporting === "pdf" ? "Exporting…" : "Export band (PDF)"}
+                </button>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={saveBand}
+                  disabled={saving || !group || group.empty}
+                  aria-busy={saving}
+                >
+                  <Save size={15} /> {saving ? "Saving…" : "Save this measured band"}
+                </button>
+              </div>
+              {outcome ? (
+                <p
+                  className={`save-status save-status-${outcome.tone}`}
+                  role={outcome.tone === "error" ? "alert" : "status"}
+                  aria-live="polite"
+                >
+                  {outcome.message}
+                  {outcome.scenarioId ? (
+                    <> <a href="#account">Open saved scenarios</a></>
+                  ) : null}
+                </p>
+              ) : null}
               <JsonDetails data={result} />
             </Card>
           ) : null}
@@ -1153,7 +1333,7 @@ export function LightStressWorkflow() {
 
 /* ------------------------------------------------------------------------- page */
 
-export function GuidedWorkflows() {
+export function GuidedWorkflows({ session = null, params = null } = {}) {
   const [tab, setTab] = useState("water");
   return (
     <div className="module-stack">
@@ -1198,7 +1378,7 @@ export function GuidedWorkflows() {
 
       {tab === "water" ? <WaterDemandWorkflow /> : null}
       {tab === "light" ? <LightStressWorkflow /> : null}
-      {tab === "cea" ? <CeaEvidenceWorkflow /> : null}
+      {tab === "cea" ? <CeaEvidenceWorkflow session={session} params={params} /> : null}
     </div>
   );
 }

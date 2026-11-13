@@ -146,9 +146,14 @@ test("deterministic advisor, constrained optimization, exports and fallback", as
   await page.getByRole("button", { name: "Create account", exact: true }).click();
   await expect(page.getByText(/Your scenarios are private/)).toBeVisible();
   await page.getByRole("button", { name: "Save scenario", exact: true }).click();
+  // The confirmation states the identifier the database assigned, and it is rendered beside the
+  // button rather than in the notice at the top of the page.
   await expect(
-    page.getByText("Scenario saved to mission history."),
+    page.locator(".save-status").filter({ hasText: /Saved to your account as / }),
   ).toBeVisible();
+  await expect(page.locator(".save-status").first()).toContainText(
+    /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/,
+  );
   await ready(page, "greenhouse");
   const viewToggle = page.getByRole("switch");
   if ((await viewToggle.getAttribute("aria-checked")) === "true")

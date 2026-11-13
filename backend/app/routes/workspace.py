@@ -6,7 +6,7 @@ import io
 import json
 import logging
 from itertools import product
-from typing import Literal
+from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
@@ -119,10 +119,35 @@ def optimize(request: SimulationRequest):
             "limitations":LIMITATIONS+["Discrete candidate frontier, not a global optimum. Recommendation prioritizes yield; light input is not a modeled power demand."]}
 
 
+class WorkflowContext(BaseModel):
+    """What a guided-workflow save was looking at, stored beside the habitat configuration.
+
+    A scenario saved from Mission Control is a habitat configuration and nothing else. A scenario
+    saved from the guided workflows also has to remember *which measured group* the user was
+    reading, or reopening it reproduces the habitat and loses the evidence. The fields are the ones
+    the workflow returns, kept verbatim: the factor and band ids the API accepts, the label the user
+    saw, the group summary that was on screen, and the dataset it came from. Nothing here is
+    recomputed on read - it is a record of a view, and re-deriving it later would silently rewrite
+    history if the bands ever changed.
+    """
+    model_config = ConfigDict(extra="forbid")
+    workflow: Literal["water-demand", "light-stress", "cea-evidence"]
+    factor: str | None = Field(default=None, max_length=64)
+    band: str | None = Field(default=None, max_length=64)
+    bandLabel: str | None = Field(default=None, max_length=120)
+    # The measured summary exactly as returned: n, mean, median, sd, range, and the interval when
+    # the sample supported one. Kept as a free-form object because the summary's keys are the
+    # workflow's, and duplicating that schema here would be a second place for it to drift.
+    measured: dict[str, Any] | None = None
+    dataset: dict[str, Any] | None = None
+    evidenceClass: str | None = Field(default=None, max_length=64)
+
+
 class SaveScenario(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str = Field(min_length=1,max_length=100,pattern=r".*\S.*")
     configuration: SimulationRequest
+    context: WorkflowContext | None = None
 
 
 @router.get("/scenarios")
@@ -134,6 +159,7 @@ def scenarios(user: dict = Depends(current_user)):
         raise HTTPException(503,"Scenario history unavailable; check database configuration") from exc
     for row in rows:
         row["configuration"] = json.loads(row["configuration"])
+        row["context"] = json.loads(row["context"]) if row.get("context") else None
     return {"scenarios":rows,"scope":"private account scenario history"}
 
 
@@ -153,6 +179,7 @@ def get_scenario(scenario_id: str, user: dict = Depends(current_user)):
         # 404 rather than 403 for another account's id: the API must not be an existence oracle.
         raise HTTPException(404, "Scenario not found")
     row["configuration"] = json.loads(row["configuration"])
+    row["context"] = json.loads(row["context"]) if row.get("context") else None
     return row
 
 
@@ -183,6 +210,7 @@ def update_scenario(scenario_id: str, request: UpdateScenario,
         raise HTTPException(404, "Scenario not found")
     storage.record_activity(user["id"], "scenario-updated")
     row["configuration"] = json.loads(row["configuration"])
+    row["context"] = json.loads(row["context"]) if row.get("context") else None
     return row
 
 
@@ -206,14 +234,34 @@ def delete_scenario(scenario_id: str, user: dict = Depends(current_user)):
 
 @router.post("/scenarios",status_code=201)
 def save_scenario(request: SaveScenario, user: dict = Depends(current_user)):
+    """Persist one scenario for the signed-in account, and return the stored row.
+
+    The response body is the record the database now holds - id, name, created_at, configuration
+    and context - so a client can display the real identifier instead of assuming a save worked.
+    A byte-identical repeat of a save the account already has returns the existing id (409) rather
+    than writing a second row: a double-clicked button is one scenario, not two.
+    """
     if not settings.history_writes_enabled:
         raise HTTPException(403,"Shared history writes are disabled by the operator")
+    configuration = request.configuration.model_dump_json()
+    context = request.context.model_dump_json() if request.context is not None else None
     try:
-        row = storage.save_scenario(request.name.strip(), request.configuration.model_dump_json(), user["id"])
+        existing = storage.find_duplicate_scenario(
+            user["id"], request.name.strip(), configuration, context)
+        if existing is not None:
+            raise HTTPException(409, detail={
+                "message": "An identical scenario is already saved for this account",
+                "scenarioId": existing,
+                "duplicate": True,
+            })
+        row = storage.save_scenario(request.name.strip(), configuration, user["id"], context)
+    except HTTPException:
+        raise
     except Exception as exc:
         logger.exception("Scenario save unavailable")
         raise HTTPException(503,"Scenario history unavailable; check database configuration") from exc
     row["configuration"] = json.loads(row["configuration"])
+    row["context"] = json.loads(row["context"]) if row.get("context") else None
     return row
 
 

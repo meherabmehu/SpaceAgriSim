@@ -34,7 +34,7 @@ import {
 import { useSimulationConfig } from "../hooks/useSimulationConfig.js";
 import { useSimulationParams } from "../hooks/useSimulationParams.js";
 import { useSimulation } from "../hooks/useSimulation.js";
-import { api, downloadReport } from "../services/platformApi.ts";
+import { api } from "../services/platformApi.ts";
 import { authenticate, clearSession, logout, readSession } from "../services/auth.ts";
 import { confirmVerification, requestPasswordReset, resetPassword } from "../services/accountApi.ts";
 import PlatformModules from "./PlatformModules.jsx";
@@ -86,6 +86,15 @@ export default function MissionPlatform() {
   const [mobile, setMobile] = useState(false);
   const world = Object.keys(WORLDS).find(name => WORLDS[name].radiation === params.radiation) || 'Custom';
   const [notice, setNotice] = useState("");
+  // Export and save each get their own busy flag so a second press cannot start a second request
+  // while the first is in flight, and so the button can say what it is doing.
+  const [exporting, setExporting] = useState("");
+  const [saving, setSaving] = useState(false);
+  // The result of the last save, kept beside the button that produced it. The page-wide notice sits
+  // at the top of the content area, and the save button is in the footer: pressing Save scrolled to
+  // the bottom wrote a message 1600 px above the viewport, which is why the action looked like it did
+  // nothing. Anything about a save is reported here, where the user is looking.
+  const [saveStatus, setSaveStatus] = useState(null);
   const [registry, setRegistry] = useState(null);
   const [models, setModels] = useState(null);
   const [registryError, setRegistryError] = useState("");
@@ -139,27 +148,59 @@ export default function MissionPlatform() {
     );
   };
   const exportReport = async (format) => {
+    if (exporting) return;
+    setExporting(format);
     try {
-      await downloadReport(format, params);
-      setNotice(`${format.toUpperCase()} report downloaded.`);
+      // Loaded on demand: the download helpers are only needed once the user asks for a file, and
+      // the entry bundle has no room for code nobody has used yet.
+      const { downloadReport } = await import("../services/downloads.ts");
+      // The name comes back from the server: it encodes the configuration and the date the file
+      // actually contains, which a client-side template cannot know.
+      const { filename } = await downloadReport(format, params);
+      setNotice(`${format.toUpperCase()} report downloaded as ${filename}.`);
     } catch (err) {
-      setNotice(err.message);
+      setNotice(`Export failed: ${err.message}`);
+    } finally {
+      setExporting("");
     }
   };
   const saveScenario = async () => {
+    if (saving) return;
     if (!session) {
+      setSaveStatus({
+        tone: "info",
+        message: "Sign in to save this scenario to your account. Saving is private to you; the simulator itself needs no account.",
+      });
       setAuthMode("login");
-      setNotice("Sign in to save a private scenario.");
       return;
     }
+    setSaving(true);
+    setSaveStatus({ tone: "info", message: "Saving…" });
     try {
-      await api("/scenarios", {
+      const saved = await api("/scenarios", {
         name: `${world} · ${params.crop} · ${params.simulationDays}d`,
         configuration: params,
       });
-      setNotice("Scenario saved to mission history.");
+      setSaveStatus({
+        tone: "ok",
+        message: `Saved to your account as ${saved.id}.`,
+        scenarioId: saved.id,
+      });
     } catch (err) {
-      setNotice(err.message);
+      // A duplicate is not a failure: the account already holds this exact scenario, and the
+      // server returns its id. Saying "failed" for that would deny a save that exists.
+      const existing = err?.scenarioId;
+      if (existing) {
+        setSaveStatus({
+          tone: "info",
+          message: `This exact scenario is already saved as ${existing}.`,
+          scenarioId: existing,
+        });
+      } else {
+        setSaveStatus({ tone: "error", message: `Not saved: ${err.message}` });
+      }
+    } finally {
+      setSaving(false);
     }
   };
   const title = page.startsWith("shared/")
@@ -312,14 +353,29 @@ export default function MissionPlatform() {
                   : "Explore the evidence. Configure your mission. Understand every estimate."}
               </p>
             </div>
-            <button
-              className="secondary-button"
-              onClick={() => exportReport("json")}
-              disabled={!result || isLoading || !!error}
-            >
-              <ArrowDownToLine size={16} />
-              Export mission
-            </button>
+            <div className="export-actions">
+              {/* Two formats, both rendered by the server: a PDF for reading and a CSV for the
+                  spreadsheet. The JSON export that used to be the only option was hard to read and
+                  named itself on the client; it is no longer offered. */}
+              <button
+                className="secondary-button"
+                onClick={() => exportReport("pdf")}
+                disabled={!result || isLoading || !!error || Boolean(exporting)}
+                aria-busy={exporting === "pdf"}
+              >
+                <ArrowDownToLine size={16} />
+                {exporting === "pdf" ? "Exporting…" : "Export mission (PDF)"}
+              </button>
+              <button
+                className="secondary-button"
+                onClick={() => exportReport("csv")}
+                disabled={!result || isLoading || !!error || Boolean(exporting)}
+                aria-busy={exporting === "csv"}
+              >
+                <ArrowDownToLine size={16} />
+                {exporting === "csv" ? "Exporting…" : "Export mission (CSV)"}
+              </button>
+            </div>
           </div>
           {notice && (
             <div className="notice" role="status">
@@ -669,9 +725,27 @@ export default function MissionPlatform() {
             <span>
               Research simulation · Not validated for spacecraft operations
             </span>
+            {saveStatus && (
+              <p
+                className={`save-status save-status-${saveStatus.tone}`}
+                role={saveStatus.tone === "error" ? "alert" : "status"}
+                aria-live="polite"
+              >
+                {saveStatus.message}
+                {saveStatus.scenarioId && (
+                  <>
+                    {" "}
+                    <a href="#account" onClick={() => navigate("account")}>
+                      Open saved scenarios
+                    </a>
+                  </>
+                )}
+              </p>
+            )}
             <button
               onClick={saveScenario}
-              disabled={!result || isLoading || !!error || configStatus !== "live" || config.capabilities?.historyWritesEnabled === false}
+              aria-busy={saving}
+              disabled={saving || !result || isLoading || !!error || configStatus !== "live" || config.capabilities?.historyWritesEnabled === false}
               title={
                 configStatus !== "live"
                   ? "The API configuration has not loaded, so scenario saving is unavailable."
@@ -680,11 +754,13 @@ export default function MissionPlatform() {
                     : "Save current configuration to shared history"
               }
             >
-              {configStatus !== "live"
-                ? "Saving unavailable"
-                : config.capabilities?.historyWritesEnabled === false
-                  ? "History read only"
-                  : "Save scenario"}
+              {saving
+                ? "Saving…"
+                : configStatus !== "live"
+                  ? "Saving unavailable"
+                  : config.capabilities?.historyWritesEnabled === false
+                    ? "History read only"
+                    : "Save scenario"}
               <ChevronRight size={13} />
             </button>
           </footer>

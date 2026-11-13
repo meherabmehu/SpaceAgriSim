@@ -2424,3 +2424,40 @@
   background: rgba(74, 222, 128, 0.1);
   color: #cdf0da;
 }
+
+/* Two export formats sit where one button used to. They wrap rather than overflow at phone width,
+   because the header is the first thing a narrow screen truncates. */
+.export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* A save's outcome, printed beside the button that started it. The footer is at the bottom of a
+   long page, so the page-wide notice at the top is not where a user who just pressed Save is
+   looking. */
+.save-status {
+  flex: 1 1 100%;
+  margin: 0 0 4px;
+  font-size: 11px;
+  line-height: 1.5;
+  /* The identifier is a UUID: it must wrap on a phone instead of widening the footer. */
+  overflow-wrap: anywhere;
+}
+.save-status-ok,
+.save-status-info {
+  color: #9bb7b0;
+}
+.save-status-error {
+  color: #f0a8a0;
+}
+.save-status a {
+  color: #b0eed0;
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .platform-footer {
+    flex-wrap: wrap;
+  }
+}

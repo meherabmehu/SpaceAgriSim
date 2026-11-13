@@ -62,25 +62,24 @@ export async function api<T = Record<string, unknown>>(
   if (!response.ok) {
     const detail = typeof payload?.detail === "string" ? payload.detail : "";
     const message = typeof payload?.message === "string" ? payload.message : "";
-    throw new Error(detail || message || `API request failed (${response.status})`);
+    // A structured detail (an object with `message`/`scenarioId`) is what a duplicate save
+    // returns. It is attached to the error rather than flattened into a sentence, so a caller can
+    // act on it - "this already exists, here is its id" is a different outcome from "it failed".
+    const structured = payload?.detail;
+    const structuredMessage =
+      structured && typeof structured === "object" && "message" in structured
+        ? String((structured as { message?: unknown }).message ?? "")
+        : "";
+    const error = new Error(detail || message || structuredMessage || `API request failed (${response.status})`) as Error & {
+      status?: number;
+      scenarioId?: string;
+    };
+    error.status = response.status;
+    if (structured && typeof structured === "object" && "scenarioId" in structured) {
+      const id = (structured as { scenarioId?: unknown }).scenarioId;
+      if (typeof id === "string") error.scenarioId = id;
+    }
+    throw error;
   }
   return payload as T;
 }
-export async function downloadReport(
-  format: "json" | "csv" | "pdf",
-  params: MissionParameters,
-) {
-  const response = await fetch(`${base}/reports/${format}`, {
-    method: "POST",
-    headers: { ...authorizationHeader(), "Content-Type": "application/json" },
-    body: JSON.stringify(params),
-  });
-  if (!response.ok) throw new Error(`Report failed (${response.status})`);
-  const url = URL.createObjectURL(await response.blob());
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `spaceagrisim-mission.${format}`;
-  link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-

@@ -250,8 +250,25 @@ export function Account({ onRequireSignIn }) {
                   <strong>{scenario.name}</strong>
                   <p className="muted">
                     {scenario.configuration?.crop} · {number(scenario.configuration?.simulationDays)} day
-                    run · saved {new Date(scenario.createdAt).toLocaleDateString()}
+                    run · saved{" "}
+                    {/* The API returns `created_at`; reading `createdAt` printed "Invalid Date" on
+                        every saved scenario. */}
+                    {scenario.created_at ? new Date(scenario.created_at).toLocaleDateString() : "unknown"}
+                    {scenario.id ? ` · id ${scenario.id}` : ""}
                   </p>
+                  {scenario.context ? (
+                    <p className="muted">
+                      Guided workflow record: {scenario.context.workflow}
+                      {scenario.context.factor ? ` · ${scenario.context.factor}` : ""}
+                      {scenario.context.bandLabel ? ` · ${scenario.context.bandLabel}` : ""}
+                      {scenario.context.measured?.n != null
+                        ? ` · n = ${number(scenario.context.measured.n)}`
+                        : ""}
+                      {scenario.context.measured?.mean != null
+                        ? ` · mean ${number(scenario.context.measured.mean, 3)} kg/m2`
+                        : ""}
+                    </p>
+                  ) : null}
                   {shareLinks[scenario.id] && (
                     <p className="share-url">
                       <code>{shareLinks[scenario.id].url}</code>

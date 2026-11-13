@@ -17,10 +17,13 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, ConfigDict, Field
+from fastapi import APIRouter, HTTPException, Response
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from app.workflows import cea_evidence, light_stress, units, water_demand
+from app.models.simulation import SimulationRequest
+from app.workflows import cea_evidence
+from app.workflows import cea_export as cea_export_module
+from app.workflows import light_stress, units, water_demand
 
 router = APIRouter(tags=["workflows"], prefix="/workflows")
 
@@ -74,10 +77,35 @@ class CeaSelection(BaseModel):
     band: Literal["low", "mid", "high", "short", "standard", "long", "ambient", "enriched",
                   "cool", "warm"]
 
+    @model_validator(mode="after")
+    def _band_belongs_to_the_factor(self):
+        """A band id from a different factor is not a valid pair, and must not answer 200.
+
+        `co2Ppm` has no `low` band. Both names are legal on their own, so the Literal types cannot
+        catch the mismatch: the pair passed validation, the service skipped it, and the endpoint
+        answered `200` with an empty group list - which a client cannot tell apart from a real band
+        holding no experiments. The pairing is checked here so the request fails as what it is.
+        """
+        allowed = cea_evidence.band_ids(self.factor)
+        if self.band not in allowed:
+            raise ValueError(f"band {self.band!r} does not exist for {self.factor!r}; "
+                             f"bands for this factor: {', '.join(allowed)}")
+        return self
+
 
 class CeaRunRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     selections: list[CeaSelection] = Field(min_length=1, max_length=6)
+
+
+class CeaExportRequest(BaseModel):
+    """The same selection, plus what to render it as and the mission being looked at."""
+    model_config = ConfigDict(extra="forbid")
+    selections: list[CeaSelection] = Field(min_length=1, max_length=6)
+    format: Literal["csv", "pdf"] = "csv"
+    # Optional: the Mission Control configuration the user was comparing against, recorded in the
+    # file so an export is self-describing. It is never simulated here - the file says so.
+    configuration: SimulationRequest | None = None
 
 
 @router.get("")
@@ -183,4 +211,31 @@ def cea_capability() -> dict[str, Any]:
 @router.post("/light-stress/controlled-environment/run")
 def cea_run(request: CeaRunRequest) -> dict[str, Any]:
     selections = [item.model_dump() for item in request.selections]
-    return cea_evidence.run(selections)
+    try:
+        return cea_evidence.run(selections)
+    except ValueError as error:
+        # An unknown factor or band is a client mistake with a known set of answers, so it is a 422
+        # that names them - not a 200 carrying an empty group that reads like a real empty band.
+        raise HTTPException(status_code=422, detail=str(error)) from error
+
+
+@router.post("/light-stress/controlled-environment/export")
+def cea_export(request: CeaExportRequest) -> Response:
+    """The selected measured group as a downloadable file.
+
+    CSV by default because it opens anywhere and diffs; PDF for a file that needs no tool. Both are
+    rendered from `cea_evidence.run`, the same call the JSON endpoint makes, so the file and the
+    screen cannot disagree.
+    """
+    selections = [item.model_dump() for item in request.selections]
+    try:
+        payload, media_type, filename = cea_export_module.build(
+            selections, request.format,
+            request.configuration.model_dump() if request.configuration else None)
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+    headers = {"Content-Disposition": f'attachment; filename="{filename}"',
+               "Cache-Control": "no-store"}
+    if isinstance(payload, bytes):
+        return Response(payload, media_type=media_type, headers=headers)
+    return Response(payload, media_type=media_type, headers=headers)
